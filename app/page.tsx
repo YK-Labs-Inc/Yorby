@@ -4,7 +4,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { useSearchParams } from "next/navigation";
 import { signUpToWaitlist } from "./actions";
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 
 export default function Home() {
   const [state, formAction, pending] = useActionState(signUpToWaitlist, {
@@ -28,35 +28,37 @@ export default function Home() {
   }
 
   return (
-    <main className="flex-1 flex flex-col gap-6 px-4">
-      <h1 className="text-4xl font-bold tracking-tight text-center">
-        Perfect Your Next Interview
-      </h1>
-      <p className="text-lg text-foreground/60 text-center">
-        Get AI-powered interview prep to ace your next job interview.
-      </p>
-      <form className="flex flex-col gap-2 text-center" action={formAction}>
-        <p className="text-lg text-foreground/60">
-          Join the waitlist to get notified when we launch.
+    <Suspense>
+      <main className="flex-1 flex flex-col gap-6 px-4">
+        <h1 className="text-4xl font-bold tracking-tight text-center">
+          Perfect Your Next Interview
+        </h1>
+        <p className="text-lg text-foreground/60 text-center">
+          Get AI-powered interview prep to ace your next job interview.
         </p>
-        <p className="text-sm text-foreground/60">
-          You will receive a 50% discount when we launch.
-        </p>
-        <Input
-          name="email"
-          placeholder="Enter your email"
-          type="email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <SubmitButton disabled={pending || !email}>
-          {pending ? "Submitting..." : "Get Notified When We Launch"}
-        </SubmitButton>
-        {state.status === "error" && (
-          <p className="text-sm text-red-500">
-            Error signing up. Please try again.
+        <form className="flex flex-col gap-2 text-center" action={formAction}>
+          <p className="text-lg text-foreground/60">
+            Join the waitlist to get notified when we launch.
           </p>
-        )}
-      </form>
-    </main>
+          <p className="text-sm text-foreground/60">
+            You will receive a 50% discount when we launch.
+          </p>
+          <Input
+            name="email"
+            placeholder="Enter your email"
+            type="email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <SubmitButton disabled={pending || !email}>
+            {pending ? "Submitting..." : "Get Notified When We Launch"}
+          </SubmitButton>
+          {state.status === "error" && (
+            <p className="text-sm text-red-500">
+              Error signing up. Please try again.
+            </p>
+          )}
+        </form>
+      </main>
+    </Suspense>
   );
 }
