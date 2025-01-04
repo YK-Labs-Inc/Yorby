@@ -1,24 +1,19 @@
+"use client";
+
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { signUpToWaitlist } from "./actions";
+import { useActionState, useState } from "react";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const signUpToWaitlist = async (formData: FormData) => {
-    "use server";
-    const supabase = await createClient();
-    const email = formData.get("email") as string;
-    const { error } = await supabase.from("email_waitlist").insert({ email });
-    if (error) {
-      throw error;
-    }
-    redirect("/?signed_up=true");
-  };
-  const signedUp = (await searchParams).signed_up === "true";
+export default function Home() {
+  const [state, formAction, pending] = useActionState(signUpToWaitlist, {
+    status: "",
+  });
+  const [email, setEmail] = useState("");
+
+  const searchParams = useSearchParams();
+  const signedUp = searchParams.get("signed_up") === "true";
   if (signedUp) {
     return (
       <main className="flex-1 flex flex-col gap-6 px-4">
@@ -40,18 +35,27 @@ export default async function Home({
       <p className="text-lg text-foreground/60 text-center">
         Get AI-powered interview prep to ace your next job interview.
       </p>
-      <form
-        className="flex flex-col gap-2 text-center"
-        action={signUpToWaitlist}
-      >
+      <form className="flex flex-col gap-2 text-center" action={formAction}>
         <p className="text-lg text-foreground/60">
           Join the waitlist to get notified when we launch.
         </p>
         <p className="text-sm text-foreground/60">
           You will receive a 50% discount when we launch.
         </p>
-        <Input name="email" placeholder="Enter your email" type="email" />
-        <SubmitButton>Get Notified When We Launch</SubmitButton>
+        <Input
+          name="email"
+          placeholder="Enter your email"
+          type="email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <SubmitButton disabled={pending || !email}>
+          {pending ? "Submitting..." : "Get Notified When We Launch"}
+        </SubmitButton>
+        {state.status === "error" && (
+          <p className="text-sm text-red-500">
+            Error signing up. Please try again.
+          </p>
+        )}
       </form>
     </main>
   );
