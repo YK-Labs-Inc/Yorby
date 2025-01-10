@@ -4,7 +4,6 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { createClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 export default async function ResetPassword(props: {
