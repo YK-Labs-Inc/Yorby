@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { H1 } from "@/components/typography";
+import { createJob } from "./actions";
 
 interface FormData {
   jobTitle: string;
@@ -29,6 +30,9 @@ export default function JobCreationComponent() {
     coverLetter: null,
     miscDocuments: [],
   });
+  const [isPending, startTransition] = useTransition();
+
+  const submitAction = async () => {};
 
   const handleTextChange =
     (field: keyof FormData) =>
@@ -60,6 +64,34 @@ export default function JobCreationComponent() {
   const handleSubmit = async () => {
     // Placeholder for server action
     console.log("Submitting form data:", formData);
+    const jobCreationFormData = new FormData();
+    jobCreationFormData.append("jobTitle", formData.jobTitle);
+    jobCreationFormData.append("jobDescription", formData.jobDescription);
+    jobCreationFormData.append("companyName", formData.companyName);
+    jobCreationFormData.append(
+      "companyDescription",
+      formData.companyDescription
+    );
+    jobCreationFormData.append("resume", formData.resume as Blob);
+    jobCreationFormData.append("coverLetter", formData.coverLetter as Blob);
+    formData.miscDocuments.forEach((file) => {
+      jobCreationFormData.append("miscDocuments", file as Blob);
+    });
+    startTransition(async () => {
+      const { error } = await createJob({
+        jobTitle: formData.jobTitle,
+        jobDescription: formData.jobDescription,
+        companyName: formData.companyName,
+        companyDescription: formData.companyDescription,
+        resume: formData.resume,
+        coverLetter: formData.coverLetter,
+        miscDocuments: formData.miscDocuments,
+        captchaToken: "",
+      });
+      if (error) {
+        console.error(error);
+      }
+    });
   };
 
   const handleNext = () => {
@@ -72,7 +104,7 @@ export default function JobCreationComponent() {
 
   return (
     <div className="px-4 sm:px-6">
-      <H1 className="mb-4">Perfect Your Next Interview</H1>
+      <H1 className="w-full text-center mb-8">Perfect Your Next Interview</H1>
 
       <div className="mb-8">
         <Progress value={step === 1 ? 50 : 100} className="h-2" />
@@ -197,7 +229,9 @@ export default function JobCreationComponent() {
                 <Button variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button onClick={handleSubmit}>Submit</Button>
+                <Button disabled={isPending} onClick={handleSubmit}>
+                  Submit
+                </Button>
               </div>
             </div>
           )}
