@@ -9,6 +9,100 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_job_files: {
+        Row: {
+          created_at: string
+          custom_job_id: string
+          display_name: string
+          file_path: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_job_id: string
+          display_name: string
+          file_path: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          custom_job_id?: string
+          display_name?: string
+          file_path?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_files_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_job_questions: {
+        Row: {
+          answer_guidelines: string
+          created_at: string
+          custom_job_id: string
+          id: string
+          question: string
+        }
+        Insert: {
+          answer_guidelines: string
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          question: string
+        }
+        Update: {
+          answer_guidelines?: string
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_questions_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_jobs: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          job_description: string
+          job_title: string
+          user_id: string
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description: string
+          job_title: string
+          user_id: string
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description?: string
+          job_title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_waitlist: {
         Row: {
           created_at: string
