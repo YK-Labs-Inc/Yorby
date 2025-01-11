@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { H1 } from "@/components/typography";
-import { createJob } from "./actions";
+import { createJob } from "./landing2/actions";
 
 interface FormData {
   jobTitle: string;
@@ -103,7 +103,7 @@ export default function JobCreationComponent() {
   };
 
   return (
-    <div className="px-4 sm:px-6">
+    <div className="px-4 sm:px-6 w-full max-w-[1080px]">
       <H1 className="w-full text-center mb-8">Perfect Your Next Interview</H1>
 
       <div className="mb-8">
