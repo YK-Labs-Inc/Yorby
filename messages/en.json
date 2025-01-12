@@ -63,7 +63,17 @@
     "answerGuidelines": "Answer Guidelines",
     "buttons": {
       "submit": "Submit Answer",
-      "rewrite": "Rewrite Answer"
-    }
+      "rewrite": "Rewrite Answer",
+      "submitting": "Submitting and grading your answer..."
+    },
+    "feedbackLabel": "Feedback",
+    "noFeedback": "Great answer! No improvements needed 🙂",
+    "pros": "Pros",
+    "cons": "Cons",
+    "noPros": "No pros identified for this answer.",
+    "noCons": "No cons identified for this answer."
+  },
+  "errors": {
+    "pleaseTryAgain": "Sorry, something went wrong. Please try again."
   }
 }

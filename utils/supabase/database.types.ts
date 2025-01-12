@@ -50,6 +50,35 @@ export type Database = {
           },
         ]
       }
+      custom_job_question_submissions: {
+        Row: {
+          answer: string
+          created_at: string
+          custom_job_question_id: string
+          id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          custom_job_question_id: string
+          id?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          custom_job_question_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_question_submissions_custom_job_question_id_fkey"
+            columns: ["custom_job_question_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_questions: {
         Row: {
           answer_guidelines: string

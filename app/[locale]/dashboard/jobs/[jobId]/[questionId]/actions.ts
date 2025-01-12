@@ -1,0 +1,330 @@
+"use server";
+
+import { Tables } from "@/utils/supabase/database.types";
+import {
+  createSupabaseServerClient,
+  downloadFile,
+} from "@/utils/supabase/server";
+import { UploadResponse } from "@/utils/types";
+import { SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
+import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
+
+export const submitAnswer = async (prevState: any, formData: FormData) => {
+  const jobId = formData.get("jobId") as string;
+  const questionId = formData.get("questionId") as string;
+  const answer = formData.get("answer") as string;
+  const trackingProperties: Record<string, any> = {
+    jobId,
+    questionId,
+    answer,
+    function: "submitAnswer",
+  };
+  const t = await getTranslations("errors");
+  const logger = new Logger().with(trackingProperties);
+  let errorMessage = "";
+  let data: { pros: string[]; cons: string[] } | null = null;
+  try {
+    logger.info("Submitting answer");
+    data = await processAnswer(jobId, questionId, answer);
+    trackingProperties.data = data;
+  } catch (error: unknown) {
+    logger.error("Error writing answer to database", { error });
+    errorMessage = t("pleaseTryAgain");
+  } finally {
+    await logger.flush();
+  }
+  logger.info("Answer submitted", { data });
+  return { data, error: errorMessage };
+};
+
+const processAnswer = async (
+  jobId: string,
+  questionId: string,
+  answer: string
+) => {
+  const logger = new Logger().with({
+    jobId: jobId,
+    questionId: questionId,
+    answer: answer,
+    function: "processAnswer",
+  });
+  logger.info("Writing answer to database");
+  await writeAnswerToDatabase(jobId, questionId, answer);
+  logger.info("Generating feedback");
+  return await generateFeedback(jobId, questionId, answer);
+};
+
+const writeAnswerToDatabase = async (
+  jobId: string,
+  questionId: string,
+  answer: string
+) => {
+  const logger = new Logger().with({
+    jobId: jobId,
+    questionId: questionId,
+    answer: answer,
+    function: "writeAnswerToDatabase",
+  });
+  const supabase = await createSupabaseServerClient();
+
+  const { error } = await supabase
+    .from("custom_job_question_submissions")
+    .insert({
+      answer: answer,
+      custom_job_question_id: questionId,
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  logger.info("Answer written to database");
+};
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+
+const generateFeedback = async (
+  jobId: string,
+  questionId: string,
+  answer: string
+) => {
+  const trackingProperties = {
+    questionId,
+    answer,
+    function: "generateFeedback",
+  };
+  const logger = new Logger().with(trackingProperties);
+  const job = await fetchJob(jobId);
+  const { question, answer_guidelines } = await fetchQuestion(questionId);
+  const files = await getAllFiles(jobId);
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          pros: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.STRING,
+            },
+          },
+          cons: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.STRING,
+            },
+          },
+        },
+        required: ["pros", "cons"],
+      },
+    },
+  });
+
+  const result = await model.generateContent([
+    `
+    You are an expert job interviewer for a given job title and job description that I will provide you.
+
+    As an expert job interviewer, you will provide feedback on the candidate's answer to the question.
+
+    I will provide you with the job title, job description, an optional company name and optional company description,
+    the question, the question's answer guidelines, the candidate's answer, and potentially some files that that contain details
+    about the candidate's previous work experience.
+
+    You will provide feedback on the candidate's answer and provide a list of pros and cons.
+
+    You will provide your feedback in the following format:
+
+    {
+      "pros": string[],
+      "cons": string[]
+    }
+
+    For each con, provide a reason why the candidate's answer is not good and also provide actionable steps on how to improve the candidate's
+    answer.
+    If possible, use the candidate's previous work experience files to rewrite their answer and address the con that you provided. 
+
+    Do not force yourself to provide feedback on the candidate's answer if you do not have any feedback to provide.
+
+    If the answer is so good without any cons, you can provide an empty cons array and an empty pros array.
+
+    Otherwise, provide a list of pros and cons.
+
+    ## Job Title
+    ${job.job_title}
+
+    ## Job Description
+    ${job.job_description}
+
+    ${job.company_name ? `## Company Name\n${job.company_name}` : ""}
+
+    ${job.company_description ? `## Company Description\n${job.company_description}` : ""}
+
+    ## Question
+    ${question}
+
+    ## Answer Guidelines
+    ${answer_guidelines}
+
+    ## Answer
+    ${answer}
+    `,
+    ...files,
+  ]);
+  const response = result.response.text();
+  const { pros, cons } = JSON.parse(response) as {
+    pros: string[];
+    cons: string[];
+  };
+  logger.info("Feedback generated", { pros, cons });
+  return {
+    pros,
+    cons,
+  };
+};
+
+const fetchJob = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+const fetchQuestion = async (questionId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_questions")
+    .select("*")
+    .eq("id", questionId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+const fetchCustomJobFiles = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_files")
+    .select("*")
+    .eq("custom_job_id", jobId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+const getAllFiles = async (jobId: string) => {
+  const customJobFiles = await fetchCustomJobFiles(jobId);
+  const fileStatuses = await Promise.all(customJobFiles.map(checkFileExists));
+  return await Promise.all(
+    fileStatuses.map(async ({ file, status }) => {
+      if (!status) {
+        const uploadResponse = await processMissingFile({ file });
+        return {
+          fileData: {
+            fileUri: uploadResponse.file.uri,
+            mimeType: uploadResponse.file.mimeType,
+          },
+        };
+      }
+      return {
+        fileData: {
+          fileUri: file.google_file_uri,
+          mimeType: file.mime_type,
+        },
+      };
+    })
+  );
+};
+
+const checkFileExists = async (file: Tables<"custom_job_files">) => {
+  try {
+    const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
+    await fileManager.getFile(file.google_file_name);
+    return { file, status: true };
+  } catch {
+    return { file, status: false };
+  }
+};
+
+const processMissingFile = async ({
+  file,
+}: {
+  file: Tables<"custom_job_files">;
+}) => {
+  const { display_name, file_path } = file;
+  const data = await downloadFile({
+    filePath: file_path,
+    bucket: "meeting-copilot-files",
+  });
+  const uploadResponse = await uploadFileToGemini({
+    file: data,
+    displayName: display_name,
+  });
+  await updateFileInDatabase({
+    uploadResponse,
+    fileId: file.id,
+  });
+  return uploadResponse;
+};
+
+const updateFileInDatabase = async ({
+  uploadResponse,
+  fileId,
+}: {
+  uploadResponse: UploadResponse;
+  fileId: string;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("custom_job_files")
+    .update({
+      google_file_uri: uploadResponse.file.uri,
+      google_file_name: uploadResponse.file.name,
+    })
+    .eq("id", fileId);
+  if (error) {
+    throw error;
+  }
+};
+
+const uploadFileToGemini = async ({
+  file,
+  displayName,
+}: {
+  file: Blob;
+  displayName: string;
+}) => {
+  const formData = new FormData();
+  const metadata = {
+    file: { mimeType: file.type, displayName: displayName },
+  };
+  formData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" })
+  );
+  formData.append("file", file);
+  const res2 = await fetch(
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${GEMINI_API_KEY}`,
+    { method: "post", body: formData }
+  );
+  const geminiUploadResponse = (await res2.json()) as UploadResponse;
+  return geminiUploadResponse;
+};
