@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
 
 export const createJob = async ({
@@ -29,8 +30,10 @@ export const createJob = async ({
     jobDescription,
     companyName,
     companyDescription,
+    function: "createJob",
   };
-  console.log("Starting to create job", trackingProperties);
+  const logger = new Logger().with(trackingProperties);
+  logger.info("Starting to create job");
   let userId = "";
   try {
     const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
@@ -54,7 +57,8 @@ export const createJob = async ({
       userId = loggedInUserId;
     }
   } catch (error) {
-    console.error(error);
+    logger.error("Error creating job", { error });
+    await logger.flush();
     return {
       error:
         "Sorry, something went wrong. Please refresh the page and try again.",
@@ -71,24 +75,27 @@ export const createJob = async ({
 
   const geminiUploadResponses = await Promise.all([
     resume
-      ? uploadFileToGemini({
+      ? processFile({
           file: resume,
           displayName: "Resume",
           customJobId,
+          userId,
         })
       : null,
     coverLetter
-      ? uploadFileToGemini({
+      ? processFile({
           file: coverLetter,
           displayName: "Cover Letter",
           customJobId,
+          userId,
         })
       : null,
     ...miscDocuments.map((file, index) =>
-      uploadFileToGemini({
+      processFile({
         file,
         displayName: `Miscellaenous file #${index + 1}`,
         customJobId,
+        userId,
       })
     ),
   ]);
@@ -158,14 +165,51 @@ interface UploadResponse {
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
-const uploadFileToGemini = async ({
+const processFile = async ({
   file,
   displayName,
   customJobId,
+  userId,
 }: {
   file: File;
   displayName: string;
   customJobId: string;
+  userId: string;
+}) => {
+  const filePath = await uploadFileToSupabase({ file, customJobId, userId });
+  return await uploadFileToGemini({ file, displayName, customJobId, filePath });
+};
+
+const uploadFileToSupabase = async ({
+  file,
+  customJobId,
+  userId,
+}: {
+  file: File;
+  customJobId: string;
+  userId: string;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const filePath = `${userId}/${customJobId}/${new Date().getTime()}.${file.name.split(".").pop()}`;
+  const { error } = await supabase.storage
+    .from("custom_job_files")
+    .upload(filePath, file);
+  if (error) {
+    throw error;
+  }
+  return filePath;
+};
+
+const uploadFileToGemini = async ({
+  file,
+  displayName,
+  customJobId,
+  filePath,
+}: {
+  file: File;
+  displayName: string;
+  customJobId: string;
+  filePath: string;
 }) => {
   const blob = new Blob([file], { type: file.type });
   const formData = new FormData();
@@ -182,18 +226,22 @@ const uploadFileToGemini = async ({
     { method: "post", body: formData }
   );
   const geminiUploadResponse = (await res2.json()) as UploadResponse;
-  await writeToDb(geminiUploadResponse, customJobId);
+  await writeToDb(geminiUploadResponse, customJobId, filePath);
   return geminiUploadResponse;
 };
 
 const writeToDb = async (
   uploadResponse: UploadResponse,
-  customJobId: string
+  customJobId: string,
+  filePath: string
 ) => {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("custom_job_files").insert({
     display_name: uploadResponse.file.displayName,
-    file_path: uploadResponse.file.uri,
+    file_path: filePath,
+    google_file_name: uploadResponse.file.name,
+    google_file_uri: uploadResponse.file.uri,
+    mime_type: uploadResponse.file.mimeType,
     custom_job_id: customJobId,
   });
   if (error) {
