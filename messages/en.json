@@ -55,5 +55,15 @@
       },
       "error": "Error signing up. Please try again."
     }
+  },
+  "interviewQuestion": {
+    "questionLabel": "Question",
+    "answerLabel": "Your Answer",
+    "answerPlaceholder": "Type your response here...",
+    "answerGuidelines": "Answer Guidelines",
+    "buttons": {
+      "submit": "Submit Answer",
+      "rewrite": "Rewrite Answer"
+    }
   }
 }

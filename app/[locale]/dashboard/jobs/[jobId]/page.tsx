@@ -42,13 +42,15 @@ export default async function JobPage({
         {job.custom_job_questions.map((question: any, index: number) => (
           <Link
             key={question.id}
-            href={`/dashboard/jobs/${jobId}/questions/${question.id}`}
+            href={`/dashboard/jobs/${jobId}/${question.id}`}
             className={`rounded p-4 transition-colors flex items-center gap-3
               ${
                 index % 2 === 0
                   ? "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/20 dark:hover:bg-gray-800/30"
                   : "bg-white hover:bg-gray-100 dark:bg-gray-800/10 dark:hover:bg-gray-800/20"
               }`}
+            rel="noopener noreferrer"
+            target="_blank"
           >
             <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
               {(index + 1).toString().padStart(2, "0")}
