@@ -9,6 +9,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
+import { AxiomWebVitals } from "next-axiom";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -53,6 +54,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <AxiomWebVitals />
             <main>
               {children}
               <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
