@@ -28,3 +28,20 @@ export const createSupabaseServerClient = async () => {
     }
   );
 };
+
+export const downloadFile = async ({
+  filePath,
+  bucket,
+}: {
+  filePath: string;
+  bucket: string;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .download(filePath);
+  if (error) {
+    throw error;
+  }
+  return data;
+};

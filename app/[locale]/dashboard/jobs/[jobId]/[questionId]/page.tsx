@@ -8,6 +8,7 @@ import { SubmitButton } from "@/components/submit-button";
 import AnswerGuideline from "./AnswerGuideline";
 import { ArrowLeft, ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import AnswerForm from "./AnswerForm";
 
 const fetchQuestion = async (jobId: string, questionId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -41,36 +42,7 @@ export default async function Page({
         <ArrowLeft className="h-8 w-8 mr-2" />
       </Link>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("questionLabel")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p>{question.question}</p>
-
-          <Separator />
-
-          <form action="" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="answer">{t("answerLabel")}</Label>
-              <Textarea
-                id="answer"
-                name="answer"
-                rows={8}
-                placeholder={t("answerPlaceholder")}
-              />
-            </div>
-
-            <div className="flex gap-4">
-              <SubmitButton>{t("buttons.submit")}</SubmitButton>
-              <SubmitButton variant="secondary" type="button">
-                {t("buttons.rewrite")}
-              </SubmitButton>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
+      <AnswerForm jobId={jobId} question={question} />
       <AnswerGuideline question={question} />
     </div>
   );

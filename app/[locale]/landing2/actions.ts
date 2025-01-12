@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { UploadResponse } from "@/utils/types";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
@@ -147,21 +148,6 @@ const createCustomJob = async ({
   }
   return data.id;
 };
-
-interface UploadResponse {
-  file: {
-    name: string;
-    displayName: string;
-    sizeBytes: string;
-    createTime: string;
-    updateTime: string;
-    expirationTime: string;
-    sha256Hash: string;
-    uri: string;
-    state: string;
-    mimeType: string;
-  };
-}
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
