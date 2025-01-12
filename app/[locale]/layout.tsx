@@ -1,15 +1,13 @@
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import Link from "next/link";
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { NextIntlClientProvider } from "next-intl";
+import { IntlProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
 import { AxiomWebVitals } from "next-axiom";
+import { PHProvider } from "./providers";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -47,23 +45,25 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground">
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AxiomWebVitals />
-            <main>
-              {children}
-              <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                <p>© 2025 YK Labs. All rights reserved.</p>
-                <ThemeSwitcher />
-              </footer>
-            </main>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <PHProvider>
+          <IntlProvider locale={locale} messages={messages}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AxiomWebVitals />
+              <main>
+                {children}
+                <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+                  <p>© 2025 YK Labs. All rights reserved.</p>
+                  <ThemeSwitcher />
+                </footer>
+              </main>
+            </ThemeProvider>
+          </IntlProvider>
+        </PHProvider>
       </body>
     </html>
   );
