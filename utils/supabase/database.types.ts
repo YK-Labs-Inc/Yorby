@@ -15,21 +15,30 @@ export type Database = {
           custom_job_id: string
           display_name: string
           file_path: string
+          google_file_name: string
+          google_file_uri: string
           id: string
+          mime_type: string
         }
         Insert: {
           created_at?: string
           custom_job_id: string
           display_name: string
           file_path: string
+          google_file_name: string
+          google_file_uri: string
           id?: string
+          mime_type: string
         }
         Update: {
           created_at?: string
           custom_job_id?: string
           display_name?: string
           file_path?: string
+          google_file_name?: string
+          google_file_uri?: string
           id?: string
+          mime_type?: string
         }
         Relationships: [
           {

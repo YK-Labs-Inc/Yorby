@@ -2,12 +2,11 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { IntlProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
 import { AxiomWebVitals } from "next-axiom";
-import { PHProvider } from "./providers";
+import { IntlProvider, PHProvider } from "./providers";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -26,11 +25,12 @@ const geistSans = Geist({
 
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
+  const locale = (await params).locale;
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
@@ -46,7 +46,12 @@ export default async function RootLayout({
     >
       <body className="bg-background text-foreground">
         <PHProvider>
-          <IntlProvider locale={locale} messages={messages}>
+          <IntlProvider
+            locale={locale}
+            messages={messages}
+            now={new Date()}
+            timeZone="UTC"
+          >
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
