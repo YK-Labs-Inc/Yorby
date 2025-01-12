@@ -6,8 +6,10 @@ import { signUpToWaitlist } from "./actions";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
+import { useTranslations } from "next-intl";
 
 const WaitlistComponent = () => {
+  const t = useTranslations("waitlist");
   const [state, formAction, pending] = useActionState(signUpToWaitlist, {
     status: "",
   });
@@ -15,14 +17,15 @@ const WaitlistComponent = () => {
 
   const searchParams = useSearchParams();
   const signedUp = searchParams.get("signed_up") === "true";
+
   if (signedUp) {
     return (
       <main className="flex flex-col gap-6 px-4">
         <h1 className="text-4xl font-bold tracking-tight text-center">
-          Thanks for Signing Up!
+          {t("thankYou.title")}
         </h1>
         <p className="text-lg text-foreground/60 text-center">
-          We'll notify you when we launch with your exclusive 50% discount.
+          {t("thankYou.message")}
         </p>
       </main>
     );
@@ -31,31 +34,27 @@ const WaitlistComponent = () => {
   return (
     <main className="flex flex-col gap-6 px-4">
       <h1 className="text-4xl font-bold tracking-tight text-center">
-        Perfect Your Next Interview
+        {t("title")}
       </h1>
-      <p className="text-lg text-foreground/60 text-center">
-        Get AI-powered interview prep to ace your next job interview.
-      </p>
+      <p className="text-lg text-foreground/60 text-center">{t("subtitle")}</p>
       <form className="flex flex-col gap-2 text-center" action={formAction}>
-        <p className="text-lg text-foreground/60">
-          Join the waitlist to get notified when we launch.
-        </p>
+        <p className="text-lg text-foreground/60">{t("form.description")}</p>
         <p className="text-sm text-foreground/60">
-          You will receive a 50% discount when we launch.
+          {t("form.discountMessage")}
         </p>
         <Input
           name="email"
-          placeholder="Enter your email"
+          placeholder={t("form.emailPlaceholder")}
           type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
         <SubmitButton disabled={pending || !email}>
-          {pending ? "Submitting..." : "Get Notified When We Launch"}
+          {pending
+            ? t("form.submitButton.pending")
+            : t("form.submitButton.default")}
         </SubmitButton>
         {state.status === "error" && (
-          <p className="text-sm text-red-500">
-            Error signing up. Please try again.
-          </p>
+          <p className="text-sm text-red-500">{t("form.error")}</p>
         )}
       </form>
     </main>

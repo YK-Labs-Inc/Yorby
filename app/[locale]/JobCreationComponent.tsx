@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { H1 } from "@/components/typography";
 import { createJob } from "./landing2/actions";
+import { useTranslations } from "next-intl";
 
 interface FormData {
   jobTitle: string;
@@ -20,6 +21,7 @@ interface FormData {
 }
 
 export default function JobCreationComponent() {
+  const t = useTranslations("jobCreation");
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
@@ -104,13 +106,15 @@ export default function JobCreationComponent() {
 
   return (
     <div className="px-4 sm:px-6 w-full max-w-[1080px]">
-      <H1 className="w-full text-center mb-8">Perfect Your Next Interview</H1>
+      <H1 className="w-full text-center mb-8">{t("title")}</H1>
 
       <div className="mb-8">
         <Progress value={step === 1 ? 50 : 100} className="h-2" />
         <p className="text-sm text-muted-foreground mt-2">
-          Step {step} of 2:{" "}
-          {step === 1 ? "Job Information" : "Documents Upload"}
+          {t("stepProgress", {
+            step,
+            stepTitle: t(`steps.${step}`),
+          })}
         </p>
       </div>
 
@@ -120,10 +124,10 @@ export default function JobCreationComponent() {
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Job Title <span className="text-red-500">*</span>
+                  {t("jobTitle.label")} <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  placeholder="Enter job title"
+                  placeholder={t("jobTitle.placeholder")}
                   value={formData.jobTitle}
                   onChange={handleTextChange("jobTitle")}
                 />
@@ -131,10 +135,11 @@ export default function JobCreationComponent() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Job Description <span className="text-red-500">*</span>
+                  {t("jobDescription.label")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Textarea
-                  placeholder="Paste the job description here"
+                  placeholder={t("jobDescription.placeholder")}
                   value={formData.jobDescription}
                   onChange={handleTextChange("jobDescription")}
                   className="min-h-[200px]"
@@ -143,10 +148,10 @@ export default function JobCreationComponent() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Company Name (Optional)
+                  {t("companyName.label")}
                 </label>
                 <Input
-                  placeholder="Enter company name"
+                  placeholder={t("companyName.placeholder")}
                   value={formData.companyName}
                   onChange={handleTextChange("companyName")}
                 />
@@ -154,10 +159,10 @@ export default function JobCreationComponent() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Company Description (Optional)
+                  {t("companyDescription.label")}
                 </label>
                 <Textarea
-                  placeholder="Enter company description"
+                  placeholder={t("companyDescription.placeholder")}
                   value={formData.companyDescription}
                   onChange={handleTextChange("companyDescription")}
                 />
@@ -170,7 +175,7 @@ export default function JobCreationComponent() {
                     !formData.jobTitle.trim() || !formData.jobDescription.trim()
                   }
                 >
-                  Next Step
+                  {t("buttons.next")}
                 </Button>
               </div>
             </div>
@@ -178,7 +183,7 @@ export default function JobCreationComponent() {
             <div className="space-y-6">
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Resume (Optional)
+                  {t("resume.label")}
                 </label>
                 <Input
                   type="file"
@@ -191,7 +196,7 @@ export default function JobCreationComponent() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Cover Letter (Optional)
+                  {t("coverLetter.label")}
                 </label>
                 <Input
                   type="file"
@@ -208,7 +213,7 @@ export default function JobCreationComponent() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Additional Documents (Optional)
+                  {t("additionalDocs.label")}
                 </label>
                 <Input
                   type="file"
@@ -220,17 +225,19 @@ export default function JobCreationComponent() {
                 />
                 {formData.miscDocuments.length > 0 && (
                   <div className="mt-2 text-sm text-muted-foreground">
-                    {formData.miscDocuments.length} files selected
+                    {t("additionalDocs.filesSelected", {
+                      count: formData.miscDocuments.length,
+                    })}
                   </div>
                 )}
               </div>
 
               <div className="flex justify-between">
                 <Button variant="outline" onClick={handleBack}>
-                  Back
+                  {t("buttons.back")}
                 </Button>
                 <Button disabled={isPending} onClick={handleSubmit}>
-                  Submit
+                  {t("buttons.submit")}
                 </Button>
               </div>
             </div>

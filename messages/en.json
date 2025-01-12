@@ -1,0 +1,59 @@
+{
+  "jobCreation": {
+    "title": "Perfect Your Next Interview",
+    "stepProgress": "Step {step} of 2: {stepTitle}",
+    "steps": {
+      "1": "Job Information",
+      "2": "Documents Upload"
+    },
+    "jobTitle": {
+      "label": "Job Title",
+      "placeholder": "Enter job title"
+    },
+    "jobDescription": {
+      "label": "Job Description",
+      "placeholder": "Paste the job description here"
+    },
+    "companyName": {
+      "label": "Company Name (Optional)",
+      "placeholder": "Enter company name"
+    },
+    "companyDescription": {
+      "label": "Company Description (Optional)",
+      "placeholder": "Enter company description"
+    },
+    "resume": {
+      "label": "Resume (Optional)"
+    },
+    "coverLetter": {
+      "label": "Cover Letter (Optional)"
+    },
+    "additionalDocs": {
+      "label": "Additional Documents (Optional)",
+      "filesSelected": "{count} files selected"
+    },
+    "buttons": {
+      "next": "Next Step",
+      "back": "Back",
+      "submit": "Submit"
+    }
+  },
+  "waitlist": {
+    "title": "Perfect Your Next Interview",
+    "subtitle": "Get AI-powered interview prep to ace your next job interview.",
+    "thankYou": {
+      "title": "Thanks for Signing Up!",
+      "message": "We'll notify you when we launch with your exclusive 50% discount."
+    },
+    "form": {
+      "description": "Join the waitlist to get notified when we launch.",
+      "discountMessage": "You will receive a 50% discount when we launch.",
+      "emailPlaceholder": "Enter your email",
+      "submitButton": {
+        "default": "Get Notified When We Launch",
+        "pending": "Submitting..."
+      },
+      "error": "Error signing up. Please try again."
+    }
+  }
+}
