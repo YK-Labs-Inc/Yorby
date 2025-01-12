@@ -4,7 +4,7 @@ import { SidebarMenuButton } from "../ui/sidebar";
 
 import { usePathname } from "next/navigation";
 import { SidebarMenuItem } from "../ui/sidebar";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 const SidebarMenuItemClient = ({ job }: { job: any }) => {
   const pathname = usePathname();

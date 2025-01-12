@@ -1,6 +1,6 @@
-import { H1, H2, H4, P } from "@/components/typography";
+import { H1 } from "@/components/typography";
+import { Link } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import Link from "next/link";
 
 const fetchJob = async (jobId: string) => {
   const supabase = await createSupabaseServerClient();
