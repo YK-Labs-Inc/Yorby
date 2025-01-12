@@ -1,5 +1,5 @@
 import JobCreationComponent from "./JobCreationComponent";
-import WaitlistPage from "./WaitlistComponent";
+import WaitlistComponent from "./WaitlistComponent";
 
 export default async function Home({
   searchParams,
@@ -9,7 +9,7 @@ export default async function Home({
   const isDev = (await searchParams).dev === "true";
   return (
     <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
-      {isDev ? <JobCreationComponent /> : <WaitlistPage />}
+      {isDev ? <JobCreationComponent /> : <WaitlistComponent />}
     </div>
   );
 }

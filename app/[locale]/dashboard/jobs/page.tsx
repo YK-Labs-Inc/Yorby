@@ -1,4 +1,4 @@
-import JobCreationComponent from "@/app/JobCreationComponent";
+import JobCreationComponent from "@/app/[locale]/JobCreationComponent";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 

@@ -23,6 +23,8 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "next": "latest",
+    "next-axiom": "^1.9.1",
+    "next-intl": "^3.26.3",
     "next-themes": "^0.4.3",
     "prettier": "^3.3.3",
     "react": "19.0.0",
