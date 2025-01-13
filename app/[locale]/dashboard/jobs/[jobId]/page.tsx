@@ -1,12 +1,17 @@
 import { H1 } from "@/components/typography";
 import { Link } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { CheckCircle } from "lucide-react";
 
 const fetchJob = async (jobId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_jobs")
-    .select("*, custom_job_questions(*)")
+    .select(
+      `*, 
+      custom_job_questions(*, 
+        custom_job_question_submissions(*))`
+    )
     .eq("id", jobId)
     .single();
   if (error) {
@@ -58,6 +63,9 @@ export default async function JobPage({
             <span className="font-medium text-gray-900 dark:text-gray-200">
               {question.question}
             </span>
+            {question.custom_job_question_submissions?.length > 0 && (
+              <CheckCircle className="ml-auto h-5 w-5 text-green-500 dark:text-green-400" />
+            )}
           </Link>
         ))}
       </div>

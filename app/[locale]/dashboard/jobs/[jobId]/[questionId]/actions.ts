@@ -11,6 +11,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -25,19 +26,18 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   const t = await getTranslations("errors");
   const logger = new Logger().with(trackingProperties);
   let errorMessage = "";
-  let data: { pros: string[]; cons: string[] } | null = null;
   try {
     logger.info("Submitting answer");
-    data = await processAnswer(jobId, questionId, answer);
-    trackingProperties.data = data;
+    await processAnswer(jobId, questionId, answer);
   } catch (error: unknown) {
     logger.error("Error writing answer to database", { error });
     errorMessage = t("pleaseTryAgain");
   } finally {
     await logger.flush();
   }
-  logger.info("Answer submitted", { data });
-  return { data, error: errorMessage };
+  logger.info("Answer submitted");
+  revalidatePath(`/dashboard/jobs/${jobId}/${questionId}`);
+  return { error: errorMessage };
 };
 
 const processAnswer = async (
@@ -51,16 +51,17 @@ const processAnswer = async (
     answer: answer,
     function: "processAnswer",
   });
-  logger.info("Writing answer to database");
-  await writeAnswerToDatabase(jobId, questionId, answer);
-  logger.info("Generating feedback");
-  return await generateFeedback(jobId, questionId, answer);
+  const feedback = await generateFeedback(jobId, questionId, answer);
+  logger.info("Feedback generated", { feedback });
+  await writeAnswerToDatabase(jobId, questionId, answer, feedback);
+  logger.info("Wrote answer to database");
 };
 
 const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
-  answer: string
+  answer: string,
+  feedback: { pros: string[]; cons: string[] }
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -75,6 +76,7 @@ const writeAnswerToDatabase = async (
     .insert({
       answer: answer,
       custom_job_question_id: questionId,
+      feedback: feedback,
     });
 
   if (error) {
