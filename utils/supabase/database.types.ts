@@ -55,18 +55,21 @@ export type Database = {
           answer: string
           created_at: string
           custom_job_question_id: string
+          feedback: Json
           id: string
         }
         Insert: {
           answer: string
           created_at?: string
           custom_job_question_id: string
+          feedback: Json
           id?: string
         }
         Update: {
           answer?: string
           created_at?: string
           custom_job_question_id?: string
+          feedback?: Json
           id?: string
         }
         Relationships: [

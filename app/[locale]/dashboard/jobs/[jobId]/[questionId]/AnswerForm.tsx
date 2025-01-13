@@ -13,26 +13,24 @@ import { submitAnswer } from "./actions";
 export default function AnswerForm({
   question,
   jobId,
+  submissions,
 }: {
   question: Tables<"custom_job_questions">;
   jobId: string;
+  submissions: Tables<"custom_job_question_submissions">[];
 }) {
-  const [feedback, setFeedback] = useState<{
-    pros: string[];
-    cons: string[];
-  } | null>(null);
   const t = useTranslations("interviewQuestion");
   const [state, action, isPending] = useActionState(submitAnswer, {
-    data: null,
     error: "",
   });
+  const feedback =
+    submissions.length > 0
+      ? (submissions[0].feedback as { pros: string[]; cons: string[] })
+      : null;
 
   useEffect(() => {
     if (state.error) {
       alert(state.error);
-    }
-    if (state.data) {
-      setFeedback(state.data);
     }
   }, [state]);
 
