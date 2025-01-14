@@ -58,6 +58,7 @@
   },
   "interviewQuestion": {
     "questionLabel": "Question",
+    "submissionsLabel": "Submissions",
     "answerLabel": "Your Answer",
     "answerPlaceholder": "Type your response here...",
     "answerGuidelines": "Answer Guidelines",
@@ -71,7 +72,11 @@
     "pros": "Pros",
     "cons": "Cons",
     "noPros": "No pros identified for this answer.",
-    "noCons": "No cons identified for this answer."
+    "noCons": "No cons identified for this answer.",
+    "noSubmissions": "You haven't submitted any answers yet.",
+    "submissionDate": "Submitted on {date}",
+    "viewSubmission": "View Submission",
+    "backToQuestion": "Back to Question"
   },
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again."
