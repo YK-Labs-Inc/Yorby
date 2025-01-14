@@ -42,7 +42,6 @@ export default async function Page({
         question={question}
         submissions={question.custom_job_question_submissions}
       />
-      <AnswerGuideline question={question} />
     </div>
   );
 }
