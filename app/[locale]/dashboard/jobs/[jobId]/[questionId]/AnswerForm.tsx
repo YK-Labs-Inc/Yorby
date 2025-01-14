@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
 import { useActionState, useEffect, useState } from "react";
-import { submitAnswer } from "./actions";
+import { submitAnswer, generateAnswer } from "./actions";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { AIButton } from "@/components/ai-button";
 import AnswerGuideline from "./AnswerGuideline";
 
 const formatDate = (date: Date) => {
@@ -36,9 +37,14 @@ export default function AnswerForm({
   const params = useSearchParams();
   const submissionId = params.get("submissionId");
   const t = useTranslations("interviewQuestion");
-  const [state, action, isPending] = useActionState(submitAnswer, {
-    error: "",
-  });
+  const [submitAnswerState, submitAnswerAction, isSubmitAnswerPending] =
+    useActionState(submitAnswer, {
+      error: "",
+    });
+  const [generateAnswerState, generateAnswerAction, isGenerateAnswerPending] =
+    useActionState(generateAnswer, {
+      error: "",
+    });
   const [currentSubmission, setCurrentSubmission] =
     useState<Tables<"custom_job_question_submissions"> | null>(
       submissions.length > 0
@@ -54,10 +60,10 @@ export default function AnswerForm({
   const [view, setView] = useState<"question" | "submissions">("question");
 
   useEffect(() => {
-    if (state.error) {
-      alert(state.error);
+    if (submitAnswerState.error || generateAnswerState.error) {
+      alert(submitAnswerState.error || generateAnswerState.error);
     }
-  }, [state]);
+  }, [submitAnswerState, generateAnswerState]);
 
   const handleSubmissionSelect = (submissionId: string) => {
     const submission = submissions.find((s) => s.id === submissionId);
@@ -91,29 +97,70 @@ export default function AnswerForm({
             <>
               <p>{question.question}</p>
               <Separator />
-              <form action={action} className="space-y-4">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="answer">{t("answerLabel")}</Label>
-                  <Textarea
-                    id="answer"
-                    name="answer"
-                    rows={8}
-                    placeholder={t("answerPlaceholder")}
-                    defaultValue={currentSubmission?.answer}
-                  />
+                  <div className="flex gap-4 items-center w-full justify-between">
+                    <Label htmlFor="answer">{t("answerLabel")}</Label>
+                    <form action={generateAnswerAction}>
+                      <input
+                        type="hidden"
+                        name="questionId"
+                        value={question.id}
+                      />
+                      <input type="hidden" name="jobId" value={jobId} />
+                      <AIButton
+                        type="submit"
+                        pending={
+                          isGenerateAnswerPending || isSubmitAnswerPending
+                        }
+                        pendingText={t("buttons.generatingAnswer")}
+                        variant="outline"
+                      >
+                        {t("buttons.generateAnswer")}
+                      </AIButton>
+                    </form>
+                  </div>
+                  <form action={submitAnswerAction}>
+                    <div className="relative">
+                      <Textarea
+                        id="answer"
+                        name="answer"
+                        rows={8}
+                        placeholder={t("answerPlaceholder")}
+                        defaultValue={currentSubmission?.answer}
+                        className={
+                          isGenerateAnswerPending || isSubmitAnswerPending
+                            ? "opacity-50"
+                            : ""
+                        }
+                      />
+                      {isGenerateAnswerPending && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                          <div className="animate-pulse text-muted-foreground">
+                            {t("buttons.generatingAnswer")}...
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <input type="hidden" name="jobId" value={jobId} />
+                    <input
+                      type="hidden"
+                      name="questionId"
+                      value={question.id}
+                    />
+                    <SubmitButton
+                      className="mt-4"
+                      disabled={
+                        isGenerateAnswerPending || isSubmitAnswerPending
+                      }
+                      pendingText={t("buttons.submitting")}
+                      type="submit"
+                    >
+                      {t("buttons.submit")}
+                    </SubmitButton>
+                  </form>
                 </div>
-                <input type="hidden" name="jobId" value={jobId} />
-                <input type="hidden" name="questionId" value={question.id} />
-                <div className="flex gap-4">
-                  <SubmitButton
-                    disabled={isPending}
-                    pendingText={t("buttons.submitting")}
-                    type="submit"
-                  >
-                    {t("buttons.submit")}
-                  </SubmitButton>
-                </div>
-              </form>
+              </div>
             </>
           ) : (
             <div className="space-y-4">

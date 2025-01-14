@@ -8,12 +8,14 @@ const fetchQuestion = async (questionId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_job_questions")
-    .select(
-      `*, 
-      custom_job_question_submissions(*)`
-    )
+    .select(`*, custom_job_question_submissions(*)`)
     .eq("id", questionId)
+    .order("created_at", {
+      ascending: false,
+      referencedTable: "custom_job_question_submissions",
+    })
     .single();
+
   if (error) {
     throw error;
   }
