@@ -12,6 +12,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -40,6 +41,101 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   return { error: errorMessage };
 };
 
+export const generateAnswer = async (prevState: any, formData: FormData) => {
+  const jobId = formData.get("jobId") as string;
+  const questionId = formData.get("questionId") as string;
+  const logger = new Logger().with({
+    jobId: jobId,
+    questionId: questionId,
+    function: "generateAnswer",
+  });
+  logger.info("Generating answer");
+  let response = "";
+  let errorMessage = "";
+  try {
+    const job = await fetchJob(jobId);
+    const { question, answer_guidelines } = await fetchQuestion(questionId);
+    const files = await getAllFiles(jobId);
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-pro",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            answer: {
+              type: SchemaType.STRING,
+            },
+          },
+          required: ["answer"],
+        },
+      },
+    });
+
+    const result = await model.generateContent([
+      `
+    You are an expert job interviewer for a given job title and job description that I will provide you.
+
+    As an expert job interviewer, you will provide a response to the question that I will provide you.
+
+    I will provide you with a job title, job description, an optional company name and optional company description,
+    the question, the question's answer guidelines, and potentially some files that that contain details
+    about the candidate's previous work experience.
+
+    You will provide a response to the question in the following format:
+
+    {
+      "answer": string
+    }
+
+    If the user is unqualified for the job, feel free to stretch the truth and make the user seem qualified for the job.
+    It is okay to make up information about the user's experience if it is not provided in the files. Do this within reason to
+    make the user seem qualified for the job without being completely unrealistic. If you do make up information, make sure to
+    provide a disclaimer at the end of your response that you made up the information to make the user seem qualified for the job.
+    An appropriate di
+
+
+
+
+    ## Job Title
+    ${job.job_title}
+
+    ## Job Description
+    ${job.job_description}
+
+    ${job.company_name ? `## Company Name\n${job.company_name}` : ""}
+
+    ${job.company_description ? `## Company Description\n${job.company_description}` : ""}
+
+    ## Question
+    ${question}
+
+    ## Answer Guidelines
+    ${answer_guidelines}
+    `,
+      ...files,
+    ]);
+    const llmResponse = result.response.text();
+    const { answer } = JSON.parse(llmResponse) as {
+      answer: string;
+    };
+    response = answer;
+    logger.info("Answer generated", { answer });
+    await logger.flush();
+  } catch (error: unknown) {
+    logger.error("Error generating answer", { error });
+    await logger.flush();
+    errorMessage = "Sorry, something went wrong. Please try again.";
+    return { error: errorMessage };
+  }
+
+  const submission = await writeAnswerToDatabase(jobId, questionId, response);
+  redirect(
+    `/dashboard/jobs/${jobId}/${questionId}?submissionId=${submission.id}`
+  );
+};
+
 const processAnswer = async (
   jobId: string,
   questionId: string,
@@ -61,7 +157,7 @@ const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
   answer: string,
-  feedback: { pros: string[]; cons: string[] }
+  feedback?: { pros: string[]; cons: string[] }
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -71,19 +167,22 @@ const writeAnswerToDatabase = async (
   });
   const supabase = await createSupabaseServerClient();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("custom_job_question_submissions")
     .insert({
       answer: answer,
       custom_job_question_id: questionId,
       feedback: feedback,
-    });
+    })
+    .select()
+    .single();
 
   if (error) {
     throw error;
   }
 
   logger.info("Answer written to database");
+  return data;
 };
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
@@ -274,7 +373,7 @@ const processMissingFile = async ({
   const { display_name, file_path } = file;
   const data = await downloadFile({
     filePath: file_path,
-    bucket: "meeting-copilot-files",
+    bucket: "custom_job_files",
   });
   const uploadResponse = await uploadFileToGemini({
     file: data,

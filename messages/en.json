@@ -65,7 +65,9 @@
     "buttons": {
       "submit": "Submit Answer",
       "rewrite": "Rewrite Answer",
-      "submitting": "Submitting and grading your answer..."
+      "submitting": "Submitting and grading your answer...",
+      "generateAnswer": "Generate Answer",
+      "generatingAnswer": "Generating answer..."
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",

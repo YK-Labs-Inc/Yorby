@@ -34,8 +34,6 @@ export default function JobCreationComponent() {
   });
   const [isPending, startTransition] = useTransition();
 
-  const submitAction = async () => {};
-
   const handleTextChange =
     (field: keyof FormData) =>
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -64,8 +62,6 @@ export default function JobCreationComponent() {
     };
 
   const handleSubmit = async () => {
-    // Placeholder for server action
-    console.log("Submitting form data:", formData);
     const jobCreationFormData = new FormData();
     jobCreationFormData.append("jobTitle", formData.jobTitle);
     jobCreationFormData.append("jobDescription", formData.jobDescription);
