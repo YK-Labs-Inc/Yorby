@@ -80,6 +80,13 @@
     "viewSubmission": "View Submission",
     "backToQuestion": "Back to Question"
   },
+  "mockInterview": {
+    "title": "Mock Interviews",
+    "noInterviews": "You haven't done any mock interviews yet.",
+    "startNewInterview": "Start New Mock Interview",
+    "previousInterviews": "Previous Mock Interviews",
+    "interviewDate": "Interview on {date}"
+  },
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again."
   }
