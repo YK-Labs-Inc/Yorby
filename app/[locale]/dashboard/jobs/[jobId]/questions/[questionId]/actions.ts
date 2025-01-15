@@ -331,7 +331,7 @@ const fetchCustomJobFiles = async (jobId: string) => {
   return data;
 };
 
-const getAllFiles = async (jobId: string) => {
+export const getAllFiles = async (jobId: string) => {
   const customJobFiles = await fetchCustomJobFiles(jobId);
   const fileStatuses = await Promise.all(customJobFiles.map(checkFileExists));
   return await Promise.all(

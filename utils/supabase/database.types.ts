@@ -56,24 +56,27 @@ export type Database = {
           custom_job_id: string
           feedback: Json | null
           id: string
-          recording_file_path: string
-          transcript: string
+          interview_prompt: string
+          recording_file_path: string | null
+          transcript: string | null
         }
         Insert: {
           created_at?: string
           custom_job_id: string
           feedback?: Json | null
           id?: string
-          recording_file_path: string
-          transcript: string
+          interview_prompt: string
+          recording_file_path?: string | null
+          transcript?: string | null
         }
         Update: {
           created_at?: string
           custom_job_id?: string
           feedback?: Json | null
           id?: string
-          recording_file_path?: string
-          transcript?: string
+          interview_prompt?: string
+          recording_file_path?: string | null
+          transcript?: string | null
         }
         Relationships: [
           {
