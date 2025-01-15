@@ -50,6 +50,44 @@ export type Database = {
           },
         ]
       }
+      custom_job_mock_interviews: {
+        Row: {
+          created_at: string
+          custom_job_id: string
+          feedback: Json | null
+          id: string
+          interview_prompt: string
+          recording_file_path: string | null
+          transcript: string | null
+        }
+        Insert: {
+          created_at?: string
+          custom_job_id: string
+          feedback?: Json | null
+          id?: string
+          interview_prompt: string
+          recording_file_path?: string | null
+          transcript?: string | null
+        }
+        Update: {
+          created_at?: string
+          custom_job_id?: string
+          feedback?: Json | null
+          id?: string
+          interview_prompt?: string
+          recording_file_path?: string | null
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_mock_interviews_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_question_submissions: {
         Row: {
           answer: string

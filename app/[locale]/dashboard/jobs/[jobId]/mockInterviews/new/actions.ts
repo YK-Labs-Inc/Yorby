@@ -1,0 +1,116 @@
+"use server";
+
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
+
+export const startMockInterview = async (
+  prevState: any,
+  formData: FormData
+) => {
+  let logger = new Logger();
+  try {
+    const jobId = formData.get("jobId") as string;
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+    logger = logger.with({
+      jobId,
+    });
+
+    const supabase = await createSupabaseServerClient();
+
+    const { data: customJob, error: jobError } = await supabase
+      .from("custom_jobs")
+      .select("*")
+      .eq("id", jobId)
+      .single();
+
+    if (jobError || !customJob) {
+      throw new Error("Failed to fetch job details");
+    }
+
+    const { data: jobQuestions, error: questionError } = await supabase
+      .from("custom_job_questions")
+      .select("*")
+      .eq("custom_job_id", jobId);
+
+    if (questionError || !jobQuestions || jobQuestions.length === 0) {
+      throw new Error("Failed to fetch job questions");
+    }
+
+    // Randomly select 6 questions from the job questions
+    const selectedQuestions = jobQuestions
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 6);
+
+    // Update the prompt with the selected questions
+    const questionsPrompt = selectedQuestions
+      .map((q, index) => `Question ${index + 1}: ${q.question}`)
+      .join("\n");
+
+    const prompt = `You are an experienced interviewer for ${customJob.company_name ?? "a company"}. 
+You are conducting a job interview for the position of ${customJob.job_title}.
+
+Company Context:
+${customJob.company_description}
+
+Job Description:
+${customJob.job_description}
+
+Instructions:
+1. Act as a professional interviewer from ${customJob.company_name ?? "a company"}.
+2. Start by introducing yourself and the company briefly.
+3. Ask relevant technical and behavioral questions based on the job description.
+4. Evaluate the candidate's responses and provide constructive feedback.
+5. Keep the conversation natural and professional.
+6. Ask one question at a time and wait for the candidate's response.
+7. Maintain the role of the interviewer throughout the conversation.
+
+Please begin the interview by introducing yourself and asking your first question.
+
+Conduct your interview with the following set of questions:
+
+${questionsPrompt}
+
+Do your best to ask all of these questions, but if the candidate's responses lead you to
+ask any additional questions, feel free to ask them. It is important for the interview
+to be as natural as possible and to follow the flow of the conversation.
+
+Ask natural follow up questions based on the candidate's responses that will fit the premise
+of the job description at the company.
+
+Once you ask ${selectedQuestions.length} questions, end the interview.
+
+Thank the candidate for their time and tell them that the interview has ended. 
+`;
+
+    const { data: mockInterview, error: createError } = await supabase
+      .from("custom_job_mock_interviews")
+      .insert({
+        custom_job_id: jobId,
+        interview_prompt: prompt,
+      })
+      .select()
+      .single();
+
+    if (createError) {
+      throw createError;
+    }
+    if (!mockInterview) {
+      throw new Error("Failed to create mock interview");
+    }
+
+    return { success: true, mockInterviewId: mockInterview.id, error: null };
+  } catch (error: any) {
+    logger.error("Error starting mock interview:", {
+      error: error.message,
+    });
+    const translations = await getTranslations("errors");
+    return {
+      success: false,
+      error: translations("pleaseTryAgain"),
+      mockInterviewId: null,
+    };
+  }
+};

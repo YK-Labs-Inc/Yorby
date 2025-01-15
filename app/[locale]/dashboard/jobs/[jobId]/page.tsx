@@ -1,7 +1,9 @@
 import { H1 } from "@/components/typography";
 import { Link } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { CheckCircle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PracticeQuestions from "./PracticeQuestions";
+import MockInterview from "./MockInterview";
 
 const fetchJob = async (jobId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -27,11 +29,14 @@ const fetchJob = async (jobId: string) => {
 
 export default async function JobPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ jobId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const jobId = (await params).jobId;
   const job = await fetchJob(jobId);
+  const view = ((await searchParams)?.view as string) || "practice";
 
   return (
     <div className="w-full flex flex-col my-8 mx-4 gap-6">
@@ -43,32 +48,26 @@ export default async function JobPage({
         Practice Interview Questions{" "}
       </H1>
 
-      <div className="flex flex-col gap-4">
-        {job.custom_job_questions.map((question: any, index: number) => (
-          <Link
-            key={question.id}
-            href={`/dashboard/jobs/${jobId}/${question.id}`}
-            className={`rounded p-4 transition-colors flex items-center gap-3
-              ${
-                index % 2 === 0
-                  ? "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/20 dark:hover:bg-gray-800/30"
-                  : "bg-white hover:bg-gray-100 dark:bg-gray-800/10 dark:hover:bg-gray-800/20"
-              }`}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
-              {(index + 1).toString().padStart(2, "0")}
-            </span>
-            <span className="font-medium text-gray-900 dark:text-gray-200">
-              {question.question}
-            </span>
-            {question.custom_job_question_submissions?.length > 0 && (
-              <CheckCircle className="ml-auto h-5 w-5 text-green-500 dark:text-green-400" />
-            )}
+      <Tabs value={view} className="w-full">
+        <TabsList>
+          <Link href={`?view=practice`} className="w-full">
+            <TabsTrigger value="practice" className="w-full">
+              Practice Questions
+            </TabsTrigger>
           </Link>
-        ))}
-      </div>
+          <Link href={`?view=mock`} className="w-full">
+            <TabsTrigger value="mock" className="w-full">
+              Mock Interview
+            </TabsTrigger>
+          </Link>
+        </TabsList>
+      </Tabs>
+
+      {view === "practice" && (
+        <PracticeQuestions jobId={jobId} questions={job.custom_job_questions} />
+      )}
+
+      {view === "mock" && <MockInterview jobId={jobId} />}
     </div>
   );
 }
