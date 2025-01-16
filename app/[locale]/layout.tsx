@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
 import { AxiomWebVitals } from "next-axiom";
 import { IntlProvider, PHProvider } from "./providers";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -34,6 +36,10 @@ export default async function RootLayout({
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -59,13 +65,15 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <AxiomWebVitals />
-              <main>
-                {children}
-                <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                  <p>© 2025 YK Labs. All rights reserved.</p>
-                  <ThemeSwitcher />
-                </footer>
-              </main>
+              <AxiomLoggingProvider user={user}>
+                <main>
+                  {children}
+                  <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+                    <p>© 2025 YK Labs. All rights reserved.</p>
+                    <ThemeSwitcher />
+                  </footer>
+                </main>
+              </AxiomLoggingProvider>
             </ThemeProvider>
           </IntlProvider>
         </PHProvider>
