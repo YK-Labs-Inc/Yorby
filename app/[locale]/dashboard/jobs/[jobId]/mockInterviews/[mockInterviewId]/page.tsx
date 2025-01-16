@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { startMockInterview } from "../../actions";
 import InterviewSetup from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/InterviewSetupComponent";
 import ActiveInterview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/ActiveInterviewComponent";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 interface MediaDevice {
   deviceId: string;
   label: string;
@@ -29,6 +30,7 @@ export default function NewMockInterviewPage({
   const [isRecording, setIsRecording] = useState(false);
   const [testRecording, setTestRecording] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const { logError } = useAxiomLogging();
 
   useEffect(() => {
     // Get available media devices
@@ -65,8 +67,8 @@ export default function NewMockInterviewPage({
         if (audios.length > 0) setSelectedAudio(audios[0].deviceId);
         if (audioOutputs.length > 0)
           setSelectedAudioOutput(audioOutputs[0].deviceId);
-      } catch (error) {
-        console.error("Error accessing media devices:", error);
+      } catch (error: any) {
+        logError("Error accessing media devices:", { error: error.message });
       }
     }
 
@@ -93,8 +95,8 @@ export default function NewMockInterviewPage({
           });
 
           setStream(newStream);
-        } catch (error) {
-          console.error("Error setting up media stream:", error);
+        } catch (error: any) {
+          logError("Error setting up media stream:", { error: error.message });
         }
       }
     }
@@ -149,8 +151,8 @@ export default function NewMockInterviewPage({
     if ("setSinkId" in audioElement) {
       try {
         await audioElement.setSinkId(selectedAudioOutput);
-      } catch (err) {
-        console.error("Error setting audio output device:", err);
+      } catch (err: any) {
+        logError("Error setting audio output device:", { error: err.message });
       }
     }
 
@@ -173,7 +175,7 @@ export default function NewMockInterviewPage({
         try {
           await audioElement.setSinkId(selectedAudioOutput);
         } catch (err) {
-          console.error("Error setting audio output device:", err);
+          logError("Error setting audio output device:", { error: err });
         }
       }
 
@@ -182,8 +184,8 @@ export default function NewMockInterviewPage({
       };
 
       await audioElement.play();
-    } catch (error) {
-      console.error("Error testing audio output:", error);
+    } catch (error: any) {
+      logError("Error testing audio output:", { error: error.message });
       setIsTestingOutput(false);
     }
   };

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
@@ -41,6 +42,7 @@ export default function ActiveInterview({
   const videoRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const videoChunksRef = useRef<Blob[]>([]);
+  const { logError } = useAxiomLogging();
 
   useEffect(() => {
     if (stream && messages.length > 0 && videoRef.current) {
@@ -148,8 +150,8 @@ export default function ActiveInterview({
 
       await audio.play();
       setIsPlaying(true);
-    } catch (error) {
-      console.error("Error in interview:", error);
+    } catch (error: any) {
+      logError("Error in interview:", { error: error.message });
     } finally {
       setIsProcessing(false);
     }
@@ -210,15 +212,15 @@ export default function ActiveInterview({
           if (transcription) {
             await sendMessage({ message: transcription });
           }
-        } catch (error) {
-          console.error("Error processing recording:", error);
+        } catch (error: any) {
+          logError("Error processing recording:", { error: error.message });
         }
       };
 
       audioRecorder.start();
       setIsAnsweringQuestion(true);
-    } catch (error) {
-      console.error("Error starting audio recording:", error);
+    } catch (error: any) {
+      logError("Error starting audio recording:", { error: error.message });
     }
   };
 
