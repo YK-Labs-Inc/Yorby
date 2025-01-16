@@ -58,6 +58,7 @@ export type Database = {
           id: string
           interview_prompt: string
           recording_file_path: string | null
+          status: Database["public"]["Enums"]["interview_status"]
           transcript: string | null
         }
         Insert: {
@@ -67,6 +68,7 @@ export type Database = {
           id?: string
           interview_prompt: string
           recording_file_path?: string | null
+          status: Database["public"]["Enums"]["interview_status"]
           transcript?: string | null
         }
         Update: {
@@ -76,6 +78,7 @@ export type Database = {
           id?: string
           interview_prompt?: string
           recording_file_path?: string | null
+          status?: Database["public"]["Enums"]["interview_status"]
           transcript?: string | null
         }
         Relationships: [
@@ -200,6 +203,38 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_interview_messages: {
+        Row: {
+          created_at: string
+          id: string
+          mock_interview_id: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mock_interview_id: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mock_interview_id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_messages_mock_interview_id_fkey"
+            columns: ["mock_interview_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -208,7 +243,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      interview_status: "in_progress" | "complete"
+      message_role: "user" | "model"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -1,0 +1,379 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ChatMessage } from "@/app/[locale]/api/chat/route";
+import { useTranslations } from "next-intl";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface ActiveInterviewProps {
+  mockInterviewId: string;
+  stream: MediaStream | null;
+}
+
+export default function ActiveInterview({
+  mockInterviewId,
+  stream,
+}: ActiveInterviewProps) {
+  const t = useTranslations("mockInterview.active");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
+    null
+  );
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
+  const [isAnsweringQuestion, setIsAnsweringQuestion] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState("1");
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [firstQuestionAudioIsInitialized, setFirstQuestionAudioIsInitialized] =
+    useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const audioRecorderRef = useRef<MediaRecorder | null>(null);
+  const videoRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const videoChunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    if (stream && messages.length > 0 && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, messages]);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, []);
+  // useEffect above and below is a workaround because something is causing
+  // component to unmout and causing interviewinitialization to happen twice
+  useEffect(() => {
+    if (isInitialized) {
+      sendMessage({ message: "begin the interview", isInitialMessage: true });
+    }
+  }, [isInitialized]);
+
+  const handlePlaybackSpeedChange = (value: string) => {
+    setPlaybackSpeed(value);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = parseFloat(value);
+    }
+  };
+
+  const sendMessage = async ({
+    message,
+    isInitialMessage = false,
+  }: {
+    message: string;
+    isInitialMessage?: boolean;
+  }) => {
+    try {
+      if (!isInitialMessage) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", parts: [{ text: message }] },
+        ]);
+      }
+      setIsProcessing(true);
+
+      // Send message to chat endpoint
+      const chatResponse = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message,
+          mockInterviewId,
+          history: messages,
+          isInitialMessage,
+        }),
+      });
+
+      if (!chatResponse.ok) {
+        throw new Error("Failed to send message");
+      }
+
+      const { response: aiResponse } = await chatResponse.json();
+
+      // Add messages to history
+      const newAiMessage: ChatMessage = {
+        role: "model",
+        parts: [{ text: aiResponse }],
+      };
+      setMessages((prev) => [...prev, newAiMessage]);
+
+      // Convert AI response to speech
+      const ttsResponse = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: aiResponse,
+        }),
+      });
+
+      if (!ttsResponse.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      if (isInitialMessage) {
+        setFirstQuestionAudioIsInitialized(true);
+      }
+
+      // Create audio blob from response
+      const audioBlob = await ttsResponse.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create and play audio
+      if (currentAudio) {
+        currentAudio.pause();
+        URL.revokeObjectURL(currentAudio.src);
+      }
+
+      const audio = new Audio(audioUrl);
+      audio.onended = () => setIsPlaying(false);
+      audio.playbackRate = parseFloat(playbackSpeed);
+      setCurrentAudio(audio);
+      audioRef.current = audio;
+
+      await audio.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error("Error in interview:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const replayLastResponse = () => {
+    if (audioRef.current && !isPlaying) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const startAudioRecording = async () => {
+    try {
+      if (!stream) {
+        throw new Error("No media stream available");
+      }
+
+      // Stop any currently playing audio
+      if (currentAudio && isPlaying) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        setIsPlaying(false);
+      }
+
+      const audioStream = new MediaStream(stream.getAudioTracks());
+      const audioRecorder = new MediaRecorder(audioStream);
+      audioRecorderRef.current = audioRecorder;
+      audioChunksRef.current = [];
+
+      audioRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      audioRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/webm",
+        });
+        const formData = new FormData();
+        formData.append("audio", audioBlob);
+
+        try {
+          const response = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error("Transcription failed");
+          }
+
+          const { transcription } = (await response.json()) as {
+            transcription: string;
+          };
+          if (transcription) {
+            await sendMessage({ message: transcription });
+          }
+        } catch (error) {
+          console.error("Error processing recording:", error);
+        }
+      };
+
+      audioRecorder.start();
+      setIsAnsweringQuestion(true);
+    } catch (error) {
+      console.error("Error starting audio recording:", error);
+    }
+  };
+
+  const stopAudioRecording = () => {
+    if (audioRecorderRef.current && isAnsweringQuestion) {
+      audioRecorderRef.current.stop();
+      setIsAnsweringQuestion(false);
+    }
+  };
+
+  const startVideoRecording = () => {
+    if (!stream) {
+      throw new Error("No media stream available");
+    }
+
+    // TODO: Add support for optional video stream if user wants pure audio
+    const videoAndAudioRecorder = new MediaRecorder(stream);
+    videoRecorderRef.current = videoAndAudioRecorder;
+    videoChunksRef.current = [];
+    videoRecorderRef.current.start();
+
+    videoAndAudioRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        videoChunksRef.current.push(e.data);
+      }
+    };
+
+    videoAndAudioRecorder.onstop = async () => {
+      const videoBlob = new Blob(videoChunksRef.current, {
+        type: "video/webm",
+      });
+      // When interview ends, upload entire video and audio and process
+      // it ro be reviewed by the user
+    };
+
+    setIsVideoRecording(true);
+  };
+
+  const stopVideoRecording = () => {
+    if (videoRecorderRef.current && isVideoRecording) {
+      videoRecorderRef.current.stop();
+      setIsVideoRecording(false);
+    }
+  };
+
+  if (!firstQuestionAudioIsInitialized) {
+    return (
+      <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4  border-t-transparent rounded-full animate-spin" />
+          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
+            {t("loading.title")}
+          </h2>
+
+          <p className="text-gray-500 dark:text-gray-400">
+            {t("loading.description")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
+      <div className="flex justify-between items-center gap-6">
+        {/* Video Feed */}
+        <div className="flex flex-col gap-4 w-1/2">
+          <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={
+                isAnsweringQuestion ? stopAudioRecording : startAudioRecording
+              }
+              disabled={isProcessing || isVideoRecording}
+              variant={isAnsweringQuestion ? "destructive" : "default"}
+              className="flex-1"
+            >
+              {isAnsweringQuestion ? (
+                <>
+                  <MicOff className="w-4 h-4 mr-2" />
+                  {t("stopAnswering")}
+                </>
+              ) : (
+                <>
+                  <Mic className="w-4 h-4 mr-2" />
+                  {t("answerQuestion")}
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Chat Interface */}
+        <div className="flex flex-col gap-4 w-1/2">
+          <div className="flex-1 overflow-auto space-y-4 min-h-[300px] max-h-[500px] bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    msg.role === "user"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 dark:bg-gray-800"
+                  }`}
+                >
+                  {msg.parts[0].text}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Controls */}
+          <div className="flex gap-2 items-center">
+            <Button
+              onClick={replayLastResponse}
+              disabled={!currentAudio || isPlaying || isProcessing}
+              variant="outline"
+            >
+              {t("replayButton")}
+            </Button>
+            <Select
+              value={playbackSpeed}
+              onValueChange={handlePlaybackSpeedChange}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Speed" />
+              </SelectTrigger>
+              <SelectContent>
+                {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
+                  <SelectItem key={speed} value={speed.toString()}>
+                    {speed}x
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      {isVideoRecording && (
+        <Button onClick={stopVideoRecording} variant="destructive">
+          {t("endInterview")}
+        </Button>
+      )}
+    </div>
+  );
+}

@@ -3,14 +3,16 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 export const startMockInterview = async (
   prevState: any,
   formData: FormData
 ) => {
   let logger = new Logger();
+  let mockInterviewId = "";
+  const jobId = formData.get("jobId") as string;
   try {
-    const jobId = formData.get("jobId") as string;
     if (!jobId) {
       throw new Error("Job ID is required");
     }
@@ -90,6 +92,7 @@ Thank the candidate for their time and tell them that the interview has ended.
       .insert({
         custom_job_id: jobId,
         interview_prompt: prompt,
+        status: "in_progress",
       })
       .select()
       .single();
@@ -100,17 +103,16 @@ Thank the candidate for their time and tell them that the interview has ended.
     if (!mockInterview) {
       throw new Error("Failed to create mock interview");
     }
-
-    return { success: true, mockInterviewId: mockInterview.id, error: null };
+    mockInterviewId = mockInterview.id;
   } catch (error: any) {
     logger.error("Error starting mock interview:", {
       error: error.message,
     });
     const translations = await getTranslations("errors");
     return {
-      success: false,
       error: translations("pleaseTryAgain"),
-      mockInterviewId: null,
     };
   }
+
+  redirect(`/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}`);
 };

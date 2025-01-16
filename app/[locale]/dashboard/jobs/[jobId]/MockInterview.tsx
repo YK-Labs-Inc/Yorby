@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { formatDate } from "@/utils/utils";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
+import { startMockInterview } from "./actions";
+import CreateMockInterviewButton from "./CreateMockInterviewButton";
 
 interface MockInterviewProps {
   jobId: string;
@@ -34,9 +36,7 @@ export default async function MockInterview({ jobId }: MockInterviewProps) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">{t("title")}</h2>
-        <Link href={`/dashboard/jobs/${jobId}/mockInterviews/new`}>
-          <Button>{t("startNewInterview")}</Button>
-        </Link>
+        <CreateMockInterviewButton jobId={jobId} />
       </div>
 
       {mockInterviews.length === 0 ? (
@@ -52,7 +52,7 @@ export default async function MockInterview({ jobId }: MockInterviewProps) {
             {mockInterviews.map((interview) => (
               <Link
                 key={interview.id}
-                href={`/dashboard/jobs/${jobId}/${interview.id}`}
+                href={`/dashboard/jobs/${jobId}/mockInterviews/${interview.id}`}
                 className="flex items-center justify-between p-4 bg-white dark:bg-gray-800/10 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors"
               >
                 <div className="flex flex-col">

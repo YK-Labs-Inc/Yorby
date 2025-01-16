@@ -96,7 +96,10 @@
       "microphone": {
         "label": "Microphone (Input)",
         "select": "Select microphone",
-        "test": "Test Microphone"
+        "test": "Test Microphone",
+        "testRecording": "Test Recording",
+        "stopRecording": "Stop Recording",
+        "playRecording": "Play Test Recording"
       },
       "speakers": {
         "label": "Speakers (Output)",
@@ -105,6 +108,16 @@
         "testing": "Playing..."
       },
       "startButton": "Start Interview"
+    },
+    "active": {
+      "replayButton": "Replay Last Response",
+      "answerQuestion": "Record Answer",
+      "stopAnswering": "Stop",
+      "endInterview": "End Interview",
+      "loading": {
+        "title": "Starting Interview",
+        "description": "Please wait while we set up your interview session..."
+      }
     }
   },
   "errors": {
