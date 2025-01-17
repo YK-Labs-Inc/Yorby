@@ -60,12 +60,10 @@ async function fetchMockInterviewData(mockInterviewId: string) {
 export default async function MockInterviewReviewPage({
   params,
 }: {
-  params: { jobId: string; mockInterviewId: string };
+  params: Promise<{ mockInterviewId: string }>;
 }) {
-  const { jobId, mockInterviewId } = params;
-
+  const mockInterviewId = (await params).mockInterviewId;
   const data = await fetchMockInterviewData(mockInterviewId);
-
   return (
     <div className="container mx-auto py-6">
       <MockInterviewReviewClientComponent
