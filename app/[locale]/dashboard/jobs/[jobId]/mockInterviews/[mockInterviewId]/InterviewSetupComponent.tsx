@@ -19,7 +19,6 @@ interface InterviewSetupProps {
   stream: MediaStream | null;
   isTestingOutput: boolean;
   isRecording: boolean;
-  hasTestRecording: boolean;
   jobId: string;
   startInterviewAction: (formData: FormData) => void;
   onVideoChange: (deviceId: string) => void;
@@ -40,7 +39,6 @@ export default function InterviewSetup({
   stream,
   isTestingOutput,
   isRecording,
-  hasTestRecording,
   jobId,
   startInterviewAction,
   onVideoChange,

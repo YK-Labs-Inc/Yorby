@@ -205,7 +205,6 @@ export default function MockInterviewClientComponent({
         stream={stream}
         isTestingOutput={isTestingOutput}
         isRecording={isRecording}
-        hasTestRecording={!!testRecording}
         jobId={jobId}
         startInterviewAction={() => setHasStartedInterview(true)}
         onVideoChange={setSelectedVideo}
@@ -221,8 +220,10 @@ export default function MockInterviewClientComponent({
   return (
     <ActiveInterview
       mockInterviewId={mockInterviewId}
-      stream={stream}
       messageHistory={messageHistory}
+      jobId={jobId}
+      selectedAudioOutputId={selectedAudioOutput}
+      stream={stream}
     />
   );
 }

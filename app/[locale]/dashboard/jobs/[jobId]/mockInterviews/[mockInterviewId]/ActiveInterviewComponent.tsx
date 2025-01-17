@@ -14,17 +14,25 @@ import {
 } from "@/components/ui/select";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
+import EndInterviewModal from "./EndInterviewModal";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { useSession } from "@/context/UserContext";
+import { useUser } from "@/context/UserContext";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
   stream: MediaStream | null;
   messageHistory: Tables<"mock_interview_messages">[];
+  jobId: string;
+  selectedAudioOutputId: string;
 }
 
 export default function ActiveInterview({
   mockInterviewId,
   stream,
   messageHistory,
+  jobId,
+  selectedAudioOutputId,
 }: ActiveInterviewProps) {
   const t = useTranslations("mockInterview.active");
   const [messages, setMessages] = useState<ChatMessage[]>(
@@ -42,7 +50,7 @@ export default function ActiveInterview({
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [isInitialized, setIsInitialized] = useState(false);
   const [firstQuestionAudioIsInitialized, setFirstQuestionAudioIsInitialized] =
-    useState(false);
+    useState(messageHistory.length > 0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRecorderRef = useRef<MediaRecorder | null>(null);
@@ -51,6 +59,10 @@ export default function ActiveInterview({
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showEndModal, setShowEndModal] = useState(false);
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const user = useUser();
+  const session = useSession();
 
   useEffect(() => {
     if (isInitialized && stream && messages.length > 0 && videoRef.current) {
@@ -194,6 +206,7 @@ export default function ActiveInterview({
       audioChunksRef.current = [];
 
       audioRecorder.ondataavailable = (e) => {
+        console.log("audio chunk", e.data);
         if (e.data.size > 0) {
           audioChunksRef.current.push(e.data);
         }
@@ -244,26 +257,25 @@ export default function ActiveInterview({
     if (!stream) {
       throw new Error("No media stream available");
     }
-
-    // TODO: Add support for optional video stream if user wants pure audio
-    const videoAndAudioRecorder = new MediaRecorder(stream);
+    const videoAndAudioStream = new MediaStream([
+      ...stream.getVideoTracks(),
+      ...stream.getAudioTracks(),
+    ]);
+    const videoAndAudioRecorder = new MediaRecorder(videoAndAudioStream);
     videoRecorderRef.current = videoAndAudioRecorder;
     videoChunksRef.current = [];
-    videoRecorderRef.current.start();
-
     videoAndAudioRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         videoChunksRef.current.push(e.data);
       }
     };
-
     videoAndAudioRecorder.onstop = async () => {
       const videoBlob = new Blob(videoChunksRef.current, {
         type: "video/webm",
       });
-      // When interview ends, upload entire video and audio and process
-      // it ro be reviewed by the user
+      setRecordingBlob(videoBlob);
     };
+    videoAndAudioRecorder.start();
   };
 
   const stopVideoRecording = () => {
@@ -281,6 +293,7 @@ export default function ActiveInterview({
   const endInterview = () => {
     stopVideoRecording();
     stopAudioRecording();
+    setShowEndModal(true);
   };
 
   const scrollToBottom = () => {
@@ -290,6 +303,10 @@ export default function ActiveInterview({
   useEffect(() => {
     scrollToBottom();
   }, [messages, isAnsweringQuestion, isProcessing]);
+
+  if (!user || !session) {
+    return null;
+  }
 
   if (!firstQuestionAudioIsInitialized) {
     return (
@@ -418,6 +435,17 @@ export default function ActiveInterview({
       <Button onClick={endInterview} variant="destructive">
         {t("endInterview")}
       </Button>
+      {recordingBlob && (
+        <EndInterviewModal
+          isOpen={showEndModal}
+          onClose={() => setShowEndModal(false)}
+          videoBlob={recordingBlob}
+          mockInterviewId={mockInterviewId}
+          userId={user.id}
+          accessToken={session.access_token}
+          jobId={jobId}
+        />
+      )}
     </div>
   );
 }

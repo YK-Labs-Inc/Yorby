@@ -8,5 +8,10 @@
         "source": "/ingest/:path(.*)",
         "destination": "https://us.i.posthog.com/:path*"
       }
-    ]
-  }
+    ],
+    "functions": {
+      "app/api/**/*": {
+      "maxDuration": 300
+      }
+    }
+}
