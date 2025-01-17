@@ -119,6 +119,16 @@
         "title": "Starting Interview",
         "description": "Please wait while we set up your interview session..."
       }
+    },
+    "endModal": {
+      "title": "End Interview",
+      "confirmMessage": "Are you sure you want to end the interview? This will save and process your recording.",
+      "uploading": "Uploading recording",
+      "processing": "Processing recording",
+      "processingMessage": "This may take a few minutes...",
+      "emailAlert": "We'll send you an email when your interview is ready to review",
+      "confirmButton": "End Interview",
+      "cancelButton": "Continue Interview"
     }
   },
   "errors": {

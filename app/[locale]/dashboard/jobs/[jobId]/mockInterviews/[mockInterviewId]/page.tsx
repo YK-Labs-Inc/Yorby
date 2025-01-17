@@ -9,7 +9,7 @@ const fetchMockInterviewPreviousMessageHistroy = async (
     .from("mock_interview_messages")
     .select("*")
     .eq("mock_interview_id", mockInterviewId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
   if (error) {
     throw error;
   }

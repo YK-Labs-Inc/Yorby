@@ -50,36 +50,83 @@ export type Database = {
           },
         ]
       }
+      custom_job_mock_interview_feedback: {
+        Row: {
+          cons: string[]
+          created_at: string
+          id: string
+          input_token_count: number
+          job_fit_analysis: string
+          job_fit_percentage: number
+          key_improvements: string[]
+          mock_interview_id: string | null
+          output_token_count: number
+          overview: string
+          pros: string[]
+          score: number
+        }
+        Insert: {
+          cons: string[]
+          created_at?: string
+          id?: string
+          input_token_count: number
+          job_fit_analysis: string
+          job_fit_percentage: number
+          key_improvements: string[]
+          mock_interview_id?: string | null
+          output_token_count: number
+          overview: string
+          pros: string[]
+          score: number
+        }
+        Update: {
+          cons?: string[]
+          created_at?: string
+          id?: string
+          input_token_count?: number
+          job_fit_analysis?: string
+          job_fit_percentage?: number
+          key_improvements?: string[]
+          mock_interview_id?: string | null
+          output_token_count?: number
+          overview?: string
+          pros?: string[]
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_mock_interview_feedback_mock_interview_id_fkey"
+            columns: ["mock_interview_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_mock_interviews: {
         Row: {
           created_at: string
           custom_job_id: string
-          feedback: Json | null
           id: string
           interview_prompt: string
           recording_file_path: string | null
           status: Database["public"]["Enums"]["interview_status"]
-          transcript: string | null
         }
         Insert: {
           created_at?: string
           custom_job_id: string
-          feedback?: Json | null
           id?: string
           interview_prompt: string
           recording_file_path?: string | null
           status: Database["public"]["Enums"]["interview_status"]
-          transcript?: string | null
         }
         Update: {
           created_at?: string
           custom_job_id?: string
-          feedback?: Json | null
           id?: string
           interview_prompt?: string
           recording_file_path?: string | null
           status?: Database["public"]["Enums"]["interview_status"]
-          transcript?: string | null
         }
         Relationships: [
           {
@@ -228,6 +275,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "mock_interview_messages_mock_interview_id_fkey"
+            columns: ["mock_interview_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_interview_question_feedback: {
+        Row: {
+          answer: string
+          cons: string[]
+          created_at: string
+          id: string
+          mock_interview_id: string
+          pros: string[]
+          question: string
+          score: number
+        }
+        Insert: {
+          answer: string
+          cons: string[]
+          created_at?: string
+          id?: string
+          mock_interview_id: string
+          pros: string[]
+          question: string
+          score: number
+        }
+        Update: {
+          answer?: string
+          cons?: string[]
+          created_at?: string
+          id?: string
+          mock_interview_id?: string
+          pros?: string[]
+          question?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_question_feedback_mock_interview_id_fkey"
             columns: ["mock_interview_id"]
             isOneToOne: false
             referencedRelation: "custom_job_mock_interviews"
