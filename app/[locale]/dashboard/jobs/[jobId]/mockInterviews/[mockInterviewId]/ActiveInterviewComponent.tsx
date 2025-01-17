@@ -289,7 +289,7 @@ export default function ActiveInterview({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isAnsweringQuestion, isProcessing]);
 
   if (!firstQuestionAudioIsInitialized) {
     return (
