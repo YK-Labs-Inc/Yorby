@@ -115,7 +115,7 @@ export const createJob = async ({
     companyDescription,
   });
 
-  redirect(`/custom-jobs/${customJobId}`);
+  redirect(`/dashboard/jobs/${customJobId}`);
 };
 
 const createCustomJob = async ({

@@ -13,24 +13,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { Tables } from "@/utils/supabase/database.types";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
   stream: MediaStream | null;
+  messageHistory: Tables<"mock_interview_messages">[];
 }
 
 export default function ActiveInterview({
   mockInterviewId,
   stream,
+  messageHistory,
 }: ActiveInterviewProps) {
   const t = useTranslations("mockInterview.active");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(
+    messageHistory.map((message) => ({
+      role: message.role,
+      parts: [{ text: message.text }],
+    }))
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
     null
   );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [isAnsweringQuestion, setIsAnsweringQuestion] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [isInitialized, setIsInitialized] = useState(false);
@@ -43,12 +50,13 @@ export default function ActiveInterview({
   const audioChunksRef = useRef<Blob[]>([]);
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (stream && messages.length > 0 && videoRef.current) {
+    if (isInitialized && stream && messages.length > 0 && videoRef.current) {
       videoRef.current.srcObject = stream;
     }
-  }, [stream, messages]);
+  }, [stream, messages, isInitialized]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -58,8 +66,10 @@ export default function ActiveInterview({
   // useEffect above and below is a workaround because something is causing
   // component to unmout and causing interviewinitialization to happen twice
   useEffect(() => {
-    if (isInitialized) {
+    if (isInitialized && messages.length === 0) {
       sendMessage({ message: "begin the interview", isInitialMessage: true });
+    } else {
+      setFirstQuestionAudioIsInitialized(true);
     }
   }, [isInitialized]);
 
@@ -79,6 +89,7 @@ export default function ActiveInterview({
   }) => {
     try {
       if (!isInitialMessage) {
+        setIsAnsweringQuestion(false);
         setMessages((prev) => [
           ...prev,
           { role: "user", parts: [{ text: message }] },
@@ -111,7 +122,6 @@ export default function ActiveInterview({
         role: "model",
         parts: [{ text: aiResponse }],
       };
-      setMessages((prev) => [...prev, newAiMessage]);
 
       // Convert AI response to speech
       const ttsResponse = await fetch("/api/tts", {
@@ -147,7 +157,7 @@ export default function ActiveInterview({
       audio.playbackRate = parseFloat(playbackSpeed);
       setCurrentAudio(audio);
       audioRef.current = audio;
-
+      setMessages((prev) => [...prev, newAiMessage]);
       await audio.play();
       setIsPlaying(true);
     } catch (error: any) {
@@ -227,7 +237,6 @@ export default function ActiveInterview({
   const stopAudioRecording = () => {
     if (audioRecorderRef.current && isAnsweringQuestion) {
       audioRecorderRef.current.stop();
-      setIsAnsweringQuestion(false);
     }
   };
 
@@ -255,16 +264,32 @@ export default function ActiveInterview({
       // When interview ends, upload entire video and audio and process
       // it ro be reviewed by the user
     };
-
-    setIsVideoRecording(true);
   };
 
   const stopVideoRecording = () => {
-    if (videoRecorderRef.current && isVideoRecording) {
+    if (videoRecorderRef.current) {
       videoRecorderRef.current.stop();
-      setIsVideoRecording(false);
     }
   };
+
+  useEffect(() => {
+    if (firstQuestionAudioIsInitialized) {
+      startVideoRecording();
+    }
+  }, [firstQuestionAudioIsInitialized]);
+
+  const endInterview = () => {
+    stopVideoRecording();
+    stopAudioRecording();
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   if (!firstQuestionAudioIsInitialized) {
     return (
@@ -302,7 +327,7 @@ export default function ActiveInterview({
               onClick={
                 isAnsweringQuestion ? stopAudioRecording : startAudioRecording
               }
-              disabled={isProcessing || isVideoRecording}
+              disabled={isProcessing}
               variant={isAnsweringQuestion ? "destructive" : "default"}
               className="flex-1"
             >
@@ -342,6 +367,25 @@ export default function ActiveInterview({
                 </div>
               </div>
             ))}
+            {isAnsweringQuestion && (
+              <div className="flex justify-end">
+                <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-blue-500/50">
+                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
+                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0.2s_infinite]" />
+                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0.4s_infinite]" />
+                </div>
+              </div>
+            )}
+            {isProcessing && !isAnsweringQuestion && (
+              <div className="flex justify-start">
+                <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-gray-200/50 dark:bg-gray-800/50">
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0.2s_infinite]" />
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0.4s_infinite]" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Controls */}
@@ -371,11 +415,9 @@ export default function ActiveInterview({
           </div>
         </div>
       </div>
-      {isVideoRecording && (
-        <Button onClick={stopVideoRecording} variant="destructive">
-          {t("endInterview")}
-        </Button>
-      )}
+      <Button onClick={endInterview} variant="destructive">
+        {t("endInterview")}
+      </Button>
     </div>
   );
 }

@@ -183,11 +183,15 @@ export default function JobCreationComponent() {
                 </label>
                 <Input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf"
                   onChange={handleFileChange("resume")}
                   className="cursor-pointer"
-                  key={formData.resume ? formData.resume.name : "resume"}
                 />
+                {formData.resume && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    {formData.resume.name}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -199,12 +203,12 @@ export default function JobCreationComponent() {
                   accept=".pdf,.doc,.docx"
                   onChange={handleFileChange("coverLetter")}
                   className="cursor-pointer"
-                  key={
-                    formData.coverLetter
-                      ? formData.coverLetter.name
-                      : "coverLetter"
-                  }
                 />
+                {formData.coverLetter && (
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    {formData.coverLetter.name}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -217,7 +221,6 @@ export default function JobCreationComponent() {
                   onChange={handleFileChange("miscDocuments")}
                   multiple
                   className="cursor-pointer"
-                  key={formData.miscDocuments.length}
                 />
                 {formData.miscDocuments.length > 0 && (
                   <div className="mt-2 text-sm text-muted-foreground">
