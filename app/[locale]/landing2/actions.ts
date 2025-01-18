@@ -140,6 +140,7 @@ const createCustomJob = async ({
       company_name: companyName,
       company_description: companyDescription,
       user_id: userId,
+      status: "locked",
     })
     .select()
     .single();

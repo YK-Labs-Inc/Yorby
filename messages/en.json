@@ -136,5 +136,44 @@
   },
   "sidebar": {
     "addJob": "Create New Job"
+  },
+  "upgrade": {
+    "locked": {
+      "title": "Unlock the Full Interview Preparation Experience",
+      "description": "Get unlimited AI-generated practice questions, personalized mock interviews, and tailored answer suggestions based on your experience. Level up your interview game today.",
+      "button": "Upgrade Now"
+    },
+    "modal": {
+      "title": "Upgrade to Premium",
+      "features": {
+        "title": "Premium Features",
+        "unlimitedQuestions": "Generate unlimited practice questions",
+        "mockInterviews": "Practice with AI-powered mock interviews",
+        "personalizedAnswers": "Get personalized answer suggestions",
+        "aiAnalysis": "Detailed AI analysis of your responses",
+        "unlimitedJobs": "Track unlimited job applications"
+      },
+      "pricing": {
+        "monthly": {
+          "title": "Monthly",
+          "price": "$X/month",
+          "description": "Full access to all premium features"
+        },
+        "yearly": {
+          "title": "Yearly",
+          "price": "$X/year",
+          "description": "Save X% with annual billing"
+        }
+      },
+      "buttons": {
+        "subscribe": "Subscribe Now",
+        "cancel": "Cancel"
+      }
+    },
+    "success": {
+      "title": "Welcome to Premium!",
+      "description": "You now have full access to all premium features.",
+      "button": "Get Started"
+    }
   }
 }

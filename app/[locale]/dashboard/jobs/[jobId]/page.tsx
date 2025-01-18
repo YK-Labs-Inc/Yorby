@@ -15,9 +15,16 @@ const fetchJob = async (jobId: string) => {
         custom_job_question_submissions(*))`
     )
     .eq("id", jobId)
+    .order("created_at", { ascending: false })
     .single();
   if (error) {
     throw error;
+  }
+  if (data.status === "locked") {
+    return {
+      ...data,
+      custom_job_questions: data.custom_job_questions.slice(0, 1),
+    };
   }
   return {
     ...data,
@@ -67,7 +74,11 @@ export default async function JobPage({
       </Tabs>
 
       {view === "practice" && (
-        <PracticeQuestions jobId={jobId} questions={job.custom_job_questions} />
+        <PracticeQuestions
+          jobId={jobId}
+          questions={job.custom_job_questions}
+          isLocked={job.status === "locked"}
+        />
       )}
 
       {view === "mock" && <MockInterview jobId={jobId} filter={filter} />}

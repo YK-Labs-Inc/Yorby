@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_job_credits: {
+        Row: {
+          created_at: string
+          id: string
+          number_of_credits: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          number_of_credits: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          number_of_credits?: number
+        }
+        Relationships: []
+      }
       custom_job_files: {
         Row: {
           created_at: string
@@ -210,6 +228,7 @@ export type Database = {
           id: string
           job_description: string
           job_title: string
+          status: Database["public"]["Enums"]["custom_job_access"]
           user_id: string
         }
         Insert: {
@@ -219,6 +238,7 @@ export type Database = {
           id?: string
           job_description: string
           job_title: string
+          status: Database["public"]["Enums"]["custom_job_access"]
           user_id: string
         }
         Update: {
@@ -228,6 +248,7 @@ export type Database = {
           id?: string
           job_description?: string
           job_title?: string
+          status?: Database["public"]["Enums"]["custom_job_access"]
           user_id?: string
         }
         Relationships: []
@@ -331,6 +352,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      custom_job_access: "locked" | "unlocked"
       interview_status: "in_progress" | "complete"
       message_role: "user" | "model"
     }
