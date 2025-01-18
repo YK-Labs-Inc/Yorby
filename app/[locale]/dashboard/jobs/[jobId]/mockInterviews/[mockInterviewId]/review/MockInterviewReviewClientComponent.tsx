@@ -149,22 +149,26 @@ export default function MockInterviewReviewClientComponent({
             General feedback and recommendations
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-semibold mb-2">Overview</h3>
-            <p className="text-muted-foreground">{feedback.overview}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Job Fit Analysis</h3>
-            <p className="text-muted-foreground">{feedback.job_fit_analysis}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Key Improvements</h3>
-            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
-              {feedback.key_improvements.map((improvement, i) => (
-                <li key={i}>{improvement}</li>
-              ))}
-            </ul>
+        <CardContent className="h-[300px] overflow-y-auto">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">Overview</h3>
+              <p className="text-muted-foreground">{feedback.overview}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Job Fit Analysis</h3>
+              <p className="text-muted-foreground">
+                {feedback.job_fit_analysis}
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Key Improvements</h3>
+              <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                {feedback.key_improvements.map((improvement, i) => (
+                  <li key={i}>{improvement}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </CardContent>
       </Card>
