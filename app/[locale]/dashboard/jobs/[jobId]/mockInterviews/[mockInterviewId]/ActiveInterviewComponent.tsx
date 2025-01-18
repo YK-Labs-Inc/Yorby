@@ -41,7 +41,9 @@ export default function ActiveInterview({
       parts: [{ text: message.text }],
     }))
   );
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessingAIResponse, setsProcessingAIResponse] = useState(false);
+  const [isProcessingUserResponse, setsProcessingUserResponse] =
+    useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
     null
   );
@@ -63,12 +65,6 @@ export default function ActiveInterview({
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const user = useUser();
   const session = useSession();
-
-  useEffect(() => {
-    if (isInitialized && stream && messages.length > 0 && videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream, messages, isInitialized]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -101,13 +97,13 @@ export default function ActiveInterview({
   }) => {
     try {
       if (!isInitialMessage) {
-        setIsAnsweringQuestion(false);
+        setsProcessingUserResponse(false);
         setMessages((prev) => [
           ...prev,
           { role: "user", parts: [{ text: message }] },
         ]);
       }
-      setIsProcessing(true);
+      setsProcessingAIResponse(true);
 
       // Send message to chat endpoint
       const chatResponse = await fetch("/api/chat", {
@@ -175,7 +171,7 @@ export default function ActiveInterview({
     } catch (error: any) {
       logError("Error in interview:", { error: error.message });
     } finally {
-      setIsProcessing(false);
+      setsProcessingAIResponse(false);
     }
   };
 
@@ -213,6 +209,8 @@ export default function ActiveInterview({
       };
 
       audioRecorder.onstop = async () => {
+        setIsAnsweringQuestion(false);
+        setsProcessingUserResponse(true);
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/webm",
         });
@@ -250,6 +248,7 @@ export default function ActiveInterview({
   const stopAudioRecording = () => {
     if (audioRecorderRef.current && isAnsweringQuestion) {
       audioRecorderRef.current.stop();
+      setIsAnsweringQuestion(false);
     }
   };
 
@@ -257,11 +256,10 @@ export default function ActiveInterview({
     if (!stream) {
       throw new Error("No media stream available");
     }
-    const videoAndAudioStream = new MediaStream([
-      ...stream.getVideoTracks(),
-      ...stream.getAudioTracks(),
-    ]);
-    const videoAndAudioRecorder = new MediaRecorder(videoAndAudioStream);
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+    const videoAndAudioRecorder = new MediaRecorder(stream);
     videoRecorderRef.current = videoAndAudioRecorder;
     videoChunksRef.current = [];
     videoAndAudioRecorder.ondataavailable = (e) => {
@@ -290,10 +288,16 @@ export default function ActiveInterview({
     }
   }, [firstQuestionAudioIsInitialized]);
 
+  const pauseAudioPlayback = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
   const endInterview = () => {
     stopVideoRecording();
-    stopAudioRecording();
-    setShowEndModal(true);
+    pauseAudioPlayback();
   };
 
   const scrollToBottom = () => {
@@ -302,7 +306,7 @@ export default function ActiveInterview({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isAnsweringQuestion, isProcessing]);
+  }, [messages, isAnsweringQuestion, isProcessingAIResponse]);
 
   if (!user || !session) {
     return null;
@@ -344,7 +348,7 @@ export default function ActiveInterview({
               onClick={
                 isAnsweringQuestion ? stopAudioRecording : startAudioRecording
               }
-              disabled={isProcessing}
+              disabled={isProcessingAIResponse || isProcessingUserResponse}
               variant={isAnsweringQuestion ? "destructive" : "default"}
               className="flex-1"
             >
@@ -384,7 +388,7 @@ export default function ActiveInterview({
                 </div>
               </div>
             ))}
-            {isAnsweringQuestion && (
+            {isProcessingUserResponse && (
               <div className="flex justify-end">
                 <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-blue-500/50">
                   <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
@@ -393,7 +397,7 @@ export default function ActiveInterview({
                 </div>
               </div>
             )}
-            {isProcessing && !isAnsweringQuestion && (
+            {isProcessingAIResponse && !isProcessingUserResponse && (
               <div className="flex justify-start">
                 <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-gray-200/50 dark:bg-gray-800/50">
                   <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
@@ -409,7 +413,7 @@ export default function ActiveInterview({
           <div className="flex gap-2 items-center">
             <Button
               onClick={replayLastResponse}
-              disabled={!currentAudio || isPlaying || isProcessing}
+              disabled={!currentAudio || isPlaying || isProcessingAIResponse}
               variant="outline"
             >
               {t("replayButton")}
@@ -432,20 +436,19 @@ export default function ActiveInterview({
           </div>
         </div>
       </div>
-      <Button onClick={endInterview} variant="destructive">
+      <Button onClick={() => setShowEndModal(true)} variant="destructive">
         {t("endInterview")}
       </Button>
-      {recordingBlob && (
-        <EndInterviewModal
-          isOpen={showEndModal}
-          onClose={() => setShowEndModal(false)}
-          videoBlob={recordingBlob}
-          mockInterviewId={mockInterviewId}
-          userId={user.id}
-          accessToken={session.access_token}
-          jobId={jobId}
-        />
-      )}
+      <EndInterviewModal
+        isOpen={showEndModal}
+        onClose={() => setShowEndModal(false)}
+        videoBlob={recordingBlob}
+        mockInterviewId={mockInterviewId}
+        userId={user.id}
+        accessToken={session.access_token}
+        jobId={jobId}
+        endInterview={endInterview}
+      />
     </div>
   );
 }
