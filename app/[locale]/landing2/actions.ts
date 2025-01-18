@@ -4,27 +4,18 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { UploadResponse } from "@/utils/types";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
-export const createJob = async ({
-  jobTitle,
-  jobDescription,
-  companyName,
-  companyDescription,
-  resume,
-  coverLetter,
-  miscDocuments,
-  captchaToken,
-}: {
-  jobTitle: string;
-  jobDescription: string;
-  resume: File | null;
-  coverLetter: File | null;
-  miscDocuments: File[];
-  companyName?: string;
-  companyDescription?: string;
-  captchaToken?: string;
-}) => {
+export const createJob = async (prevState: any, formData: FormData) => {
+  const jobTitle = formData.get("jobTitle") as string;
+  const jobDescription = formData.get("jobDescription") as string;
+  const companyName = formData.get("companyName") as string;
+  const companyDescription = formData.get("companyDescription") as string;
+  const resume = formData.get("resume") as File;
+  const coverLetter = formData.get("coverLetter") as File;
+  const miscDocuments = formData.getAll("miscDocuments") as File[];
+
   const supabase = await createSupabaseServerClient();
   const trackingProperties = {
     jobTitle,
@@ -36,6 +27,7 @@ export const createJob = async ({
   const logger = new Logger().with(trackingProperties);
   logger.info("Starting to create job");
   let userId = "";
+  let customJobId = "";
   try {
     const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
     if (!loggedInUserId) {
@@ -57,63 +49,62 @@ export const createJob = async ({
     } else {
       userId = loggedInUserId;
     }
+    customJobId = await createCustomJob({
+      jobTitle,
+      jobDescription,
+      companyName,
+      companyDescription,
+      userId,
+    });
+
+    const geminiUploadResponses = await Promise.all([
+      resume
+        ? processFile({
+            file: resume,
+            displayName: "Resume",
+            customJobId,
+            userId,
+          })
+        : null,
+      coverLetter
+        ? processFile({
+            file: coverLetter,
+            displayName: "Cover Letter",
+            customJobId,
+            userId,
+          })
+        : null,
+      ...miscDocuments.map((file, index) =>
+        processFile({
+          file,
+          displayName: `Miscellaenous file #${index + 1}`,
+          customJobId,
+          userId,
+        })
+      ),
+    ]);
+
+    await generateCustomJobQuestions({
+      customJobId,
+      files: geminiUploadResponses
+        .filter((response) => response !== null)
+        .map((response) => ({
+          uri: response.file.uri,
+          mimeType: response.file.mimeType,
+        })),
+      jobTitle,
+      jobDescription,
+      companyName,
+      companyDescription,
+    });
   } catch (error) {
     logger.error("Error creating job", { error });
     await logger.flush();
+    const t = await getTranslations("errors");
     return {
-      error:
-        "Sorry, something went wrong. Please refresh the page and try again.",
+      error: t("pleaseTryAgain"),
     };
   }
-
-  const customJobId = await createCustomJob({
-    jobTitle,
-    jobDescription,
-    companyName,
-    companyDescription,
-    userId,
-  });
-
-  const geminiUploadResponses = await Promise.all([
-    resume
-      ? processFile({
-          file: resume,
-          displayName: "Resume",
-          customJobId,
-          userId,
-        })
-      : null,
-    coverLetter
-      ? processFile({
-          file: coverLetter,
-          displayName: "Cover Letter",
-          customJobId,
-          userId,
-        })
-      : null,
-    ...miscDocuments.map((file, index) =>
-      processFile({
-        file,
-        displayName: `Miscellaenous file #${index + 1}`,
-        customJobId,
-        userId,
-      })
-    ),
-  ]);
-
-  await generateCustomJobQuestions({
-    customJobId,
-    files: geminiUploadResponses
-      .filter((response) => response !== null)
-      .map((response) => ({
-        uri: response.file.uri,
-        mimeType: response.file.mimeType,
-      })),
-    jobTitle,
-    jobDescription,
-    companyName,
-    companyDescription,
-  });
 
   redirect(`/dashboard/jobs/${customJobId}`);
 };

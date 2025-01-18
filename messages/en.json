@@ -133,5 +133,8 @@
   },
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again."
+  },
+  "sidebar": {
+    "addJob": "Create New Job"
   }
 }
