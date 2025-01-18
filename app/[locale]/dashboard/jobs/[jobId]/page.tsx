@@ -37,6 +37,9 @@ export default async function JobPage({
   const jobId = (await params).jobId;
   const job = await fetchJob(jobId);
   const view = ((await searchParams)?.view as string) || "practice";
+  const filter =
+    ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
+    "all";
 
   return (
     <div className="w-full flex flex-col my-8 mx-4 gap-6">
@@ -67,7 +70,7 @@ export default async function JobPage({
         <PracticeQuestions jobId={jobId} questions={job.custom_job_questions} />
       )}
 
-      {view === "mock" && <MockInterview jobId={jobId} />}
+      {view === "mock" && <MockInterview jobId={jobId} filter={filter} />}
     </div>
   );
 }
