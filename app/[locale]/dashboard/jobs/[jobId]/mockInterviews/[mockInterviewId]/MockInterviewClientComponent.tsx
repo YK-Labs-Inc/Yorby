@@ -40,7 +40,13 @@ export default function MockInterviewClientComponent({
     async function getDevices() {
       try {
         // Request permission to access devices
-        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const initialStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        // Stop the initial stream since we'll create a new one with selected devices
+        initialStream.getTracks().forEach((track) => track.stop());
+
         const devices = await navigator.mediaDevices.enumerateDevices();
 
         const videos = devices
@@ -77,14 +83,20 @@ export default function MockInterviewClientComponent({
 
     getDevices();
 
+    // Cleanup function for component unmount
     return () => {
       if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        setStream(null);
       }
     };
   }, []);
 
   useEffect(() => {
+    let currentStream: MediaStream | null = null;
+
     async function setupStream() {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -96,7 +108,7 @@ export default function MockInterviewClientComponent({
             video: { deviceId: selectedVideo },
             audio: { deviceId: selectedAudio },
           });
-
+          currentStream = newStream;
           setStream(newStream);
         } catch (error: any) {
           logError("Error setting up media stream:", { error: error.message });
@@ -105,6 +117,22 @@ export default function MockInterviewClientComponent({
     }
 
     setupStream();
+
+    // Cleanup function to stop all tracks when component unmounts
+    // or when selectedVideo/selectedAudio changes
+    return () => {
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
+        setStream(null);
+      }
+    };
   }, [selectedVideo, selectedAudio]);
 
   const startTestRecording = () => {
