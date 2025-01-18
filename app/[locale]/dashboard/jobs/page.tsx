@@ -1,4 +1,5 @@
 import JobCreationComponent from "@/app/[locale]/JobCreationComponent";
+import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -20,13 +21,23 @@ const fetchJobs = async () => {
   }
   return data;
 };
-export default async function JobsPage() {
-  const jobs = await fetchJobs();
+export default async function JobsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const newJob = (await searchParams).newJob === "true";
+  if (!newJob) {
+  }
+  let jobs: Tables<"custom_jobs">[] = [];
+  if (!newJob) {
+    jobs = await fetchJobs();
+  }
   if (jobs.length > 0) {
     redirect(`/dashboard/jobs/${jobs[0].id}`);
   }
   return (
-    <div className="w-full flex justify-center items-center">
+    <div className="w-full flex justify-center items-center p-8">
       <JobCreationComponent />
     </div>
   );
