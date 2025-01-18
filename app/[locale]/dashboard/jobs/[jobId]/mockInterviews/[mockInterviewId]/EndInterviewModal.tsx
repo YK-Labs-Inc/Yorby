@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -14,15 +13,17 @@ import { useTranslations } from "next-intl";
 import { uploadFile } from "@/utils/storage";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 interface EndInterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  videoBlob: Blob;
+  videoBlob: Blob | null;
   mockInterviewId: string;
   userId: string;
   accessToken: string;
   jobId: string;
+  endInterview: () => void;
 }
 
 export default function EndInterviewModal({
@@ -33,6 +34,7 @@ export default function EndInterviewModal({
   userId,
   accessToken,
   jobId,
+  endInterview,
 }: EndInterviewModalProps) {
   const t = useTranslations("mockInterview.endModal");
   const errorT = useTranslations("errors");
@@ -41,23 +43,51 @@ export default function EndInterviewModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const { logError, logInfo } = useAxiomLogging();
   const router = useRouter();
+  console.log("videoBlob", videoBlob);
 
-  const handleUpload = async () => {
+  const handleEndInterview = () => {
+    endInterview();
+  };
+
+  useEffect(() => {
+    if (!videoBlob) {
+      return;
+    }
+    console.log("videoBlob", videoBlob);
+    handleUpload(videoBlob);
+  }, [videoBlob]);
+
+  const handleUpload = async (videoBlob: Blob) => {
     try {
       setIsUploading(true);
       const file = new File([videoBlob], `${mockInterviewId}.webm`, {
         type: "video/webm",
       });
+      const filePath = `${userId}/mockInterviews/${mockInterviewId}`;
 
       await uploadFile({
         bucketName: "mock_interviews",
-        filePath: `${userId}/mockInterviews/${mockInterviewId}`,
+        filePath,
         file,
         setProgress: setUploadProgress,
         onComplete: async () => {
-          setIsUploading(false);
-          setIsProcessing(true);
-          await processInterview();
+          const supabase = createSupabaseBrowserClient();
+          await supabase
+            .from("custom_job_mock_interviews")
+            .update({
+              recording_file_path: filePath,
+            })
+            .eq("id", mockInterviewId)
+            .then(({ error }) => {
+              if (error) {
+                logError("Error updating mock interview", {
+                  error: error.message,
+                });
+              }
+              setIsUploading(false);
+              setIsProcessing(true);
+              processInterview();
+            });
         },
         accessToken,
         logError,
@@ -138,7 +168,7 @@ export default function EndInterviewModal({
             <Button variant="outline" onClick={onClose}>
               {t("cancelButton")}
             </Button>
-            <Button onClick={handleUpload}>{t("confirmButton")}</Button>
+            <Button onClick={handleEndInterview}>{t("confirmButton")}</Button>
           </DialogFooter>
         )}
       </DialogContent>
