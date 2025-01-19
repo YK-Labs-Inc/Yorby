@@ -175,5 +175,45 @@
       "description": "You now have full access to all premium features.",
       "button": "Get Started"
     }
+  },
+  "purchase": {
+    "title": "Get Interview Credits",
+    "subtitle": "Choose the plan that works best for you",
+    "description": "Generate unlimited practice interview questions, get feedback on your answers, and practice with AI-powered mock interviews to perfect your interview skills",
+    "products": {
+      "oneCredit": {
+        "title": "Single Interview",
+        "description": "Perfect for trying out our mock interview system",
+        "highlight": "1 Credit"
+      },
+      "fiveCredits": {
+        "title": "Interview Pack",
+        "description": "Great for practicing multiple interviews",
+        "highlight": "5 Credits"
+      },
+      "tenCredits": {
+        "title": "Pro Pack",
+        "description": "Best value for serious preparation",
+        "highlight": "10 Credits"
+      },
+      "unlimited": {
+        "title": "Unlimited Annual",
+        "description": "For professionals and frequent job seekers",
+        "highlight": "Unlimited Credits"
+      }
+    },
+    "cta": {
+      "select": "Select Plan",
+      "processing": "Processing...",
+      "mostPopular": "Most Popular"
+    },
+    "pricing": {
+      "perInterview": "per interview",
+      "savings": "Save {savings}% vs. single interviews",
+      "loading": "Loading pricing information...",
+      "yearSuffix": "/year",
+      "subscription": "Annual subscription",
+      "oneTime": "One-time purchase"
+    }
   }
 }
