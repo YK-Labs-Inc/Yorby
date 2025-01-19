@@ -132,7 +132,8 @@
     }
   },
   "errors": {
-    "pleaseTryAgain": "Sorry, something went wrong. Please try again."
+    "pleaseTryAgain": "Sorry, something went wrong. Please try again.",
+    "userNotFound": "User not found — please sign in  again."
   },
   "sidebar": {
     "addJob": "Create New Job",
@@ -143,8 +144,10 @@
   "upgrade": {
     "locked": {
       "title": "Unlock the Full Interview Preparation Experience",
-      "description": "Get unlimited AI-generated practice questions, personalized mock interviews, and tailored answer suggestions based on your experience. Level up your interview game today.",
-      "button": "Upgrade Now"
+      "description": "Get more credits to unlock unlimited AI-generated practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
+      "button": "Unlock Full Interview Prep Access",
+      "insufficientCredits": "You don't have enough credits to unlock this interview prep experience.",
+      "unlocking": "Unlocking..."
     },
     "modal": {
       "title": "Upgrade to Premium",

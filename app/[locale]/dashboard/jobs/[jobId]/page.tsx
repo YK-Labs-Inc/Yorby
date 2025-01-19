@@ -39,6 +39,19 @@ const fetchJob = async (jobId: string) => {
   };
 };
 
+const fetchUserCredits = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_credits")
+    .select("number_of_credits")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data?.number_of_credits || 0;
+};
+
 export default async function JobPage({
   params,
   searchParams,
@@ -48,6 +61,7 @@ export default async function JobPage({
 }) {
   const jobId = (await params).jobId;
   const job = await fetchJob(jobId);
+  const userCredits = await fetchUserCredits(job.user_id);
   const view = ((await searchParams)?.view as string) || "practice";
   const filter =
     ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
@@ -125,9 +139,17 @@ export default async function JobPage({
               jobId={jobId}
               questions={job.custom_job_questions}
               isLocked={job.status === "locked"}
+              userCredits={userCredits}
             />
           )}
-          {view === "mock" && <MockInterview jobId={jobId} filter={filter} />}
+          {view === "mock" && (
+            <MockInterview
+              jobId={jobId}
+              filter={filter}
+              userCredits={userCredits}
+              isLocked={job.status === "locked"}
+            />
+          )}
         </>
       )}
     </div>

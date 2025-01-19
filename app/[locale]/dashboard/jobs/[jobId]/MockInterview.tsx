@@ -1,19 +1,19 @@
 "use server";
 
-import { Button } from "@/components/ui/button";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { useTranslations } from "next-intl";
 import { formatDate } from "@/utils/utils";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { startMockInterview } from "./actions";
 import CreateMockInterviewButton from "./CreateMockInterviewButton";
 import { CheckCircle, Clock } from "lucide-react";
 import InterviewFilter from "./InterviewFilter";
+import LockedJobComponent from "./LockedJobComponent";
 
 interface MockInterviewProps {
   filter: "all" | "complete" | "in_progress" | null;
   jobId: string;
+  userCredits: number;
+  isLocked: boolean;
 }
 
 async function fetchMockInterviews(jobId: string) {
@@ -34,6 +34,8 @@ async function fetchMockInterviews(jobId: string) {
 export default async function MockInterview({
   filter,
   jobId,
+  userCredits,
+  isLocked,
 }: MockInterviewProps) {
   const t = await getTranslations("mockInterview");
   const allMockInterviews = await fetchMockInterviews(jobId);
@@ -43,6 +45,10 @@ export default async function MockInterview({
     if (filter === "in_progress") return interview.status !== "complete";
     return true;
   });
+
+  if (isLocked) {
+    return <LockedJobComponent jobId={jobId} userCredits={userCredits} />;
+  }
 
   return (
     <div className="flex flex-col gap-6 w-full">

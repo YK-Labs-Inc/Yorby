@@ -5,6 +5,7 @@ import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/utils/utils";
+import { revalidatePath } from "next/cache";
 
 export const startMockInterview = async (
   prevState: any,
@@ -138,4 +139,68 @@ export const linkAnonymousAccount = async (formData: FormData) => {
   }
 
   return encodedRedirect("success", "/dashboard/jobs", t("success"));
+};
+
+export const unlockJob = async (prevState: any, formData: FormData) => {
+  const translations = await getTranslations("errors");
+  const numberOfCredits = parseInt(formData.get("numberOfCredits") as string);
+  const jobId = formData.get("jobId") as string;
+  const logger = new Logger().with({
+    jobId,
+    numberOfCredits,
+  });
+  const supabase = await createSupabaseServerClient();
+  const user = await supabase.auth.getUser();
+  if (!user) {
+    logger.error("User not found");
+    await logger.flush();
+    return {
+      error: translations("userNotFound"),
+    };
+  }
+  const userId = user.data.user?.id;
+  if (!userId) {
+    logger.error("User ID not found");
+    await logger.flush();
+    return {
+      error: translations("userNotFound"),
+    };
+  }
+  const { error } = await supabase
+    .from("custom_jobs")
+    .update({
+      status: "unlocked",
+    })
+    .eq("id", jobId);
+
+  if (error) {
+    logger.error("Error unlocking job", {
+      error: error.message,
+    });
+    await logger.flush();
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
+  logger.info("Unlocked job");
+
+  const { error: decrementTokenError } = await supabase
+    .from("custom_job_credits")
+    .update({
+      number_of_credits: numberOfCredits - 1,
+    })
+    .eq("id", userId);
+
+  if (decrementTokenError) {
+    logger.error("Error decrementing token", {
+      error: decrementTokenError.message,
+    });
+    await logger.flush();
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
+  logger.info("Decremented user credit count");
+
+  revalidatePath(`/dashboard/jobs/${jobId}`);
 };
