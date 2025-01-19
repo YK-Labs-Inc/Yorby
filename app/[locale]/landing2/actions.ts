@@ -39,14 +39,11 @@ export const createJob = async ({
   try {
     const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
     if (!loggedInUserId) {
-      const { data, error } = await supabase.auth
-        .signInAnonymously
-        //   {
-        //   options: {
-        //     captchaToken,
-        //   },
-        // }
-        ();
+      const { data, error } = await supabase.auth.signInAnonymously({
+        options: {
+          captchaToken,
+        },
+      });
       if (error) {
         throw error;
       }
