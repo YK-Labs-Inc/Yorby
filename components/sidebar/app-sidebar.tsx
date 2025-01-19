@@ -68,9 +68,11 @@ export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <p className="text-sm text-muted-foreground px-4">
-          {t("numberOfCredits", { numberOfCredits })}
-        </p>
+        {user && (
+          <p className="text-sm text-muted-foreground px-4">
+            {t("numberOfCredits", { numberOfCredits })}
+          </p>
+        )}
         {user?.email ? <UserMenu email={user.email} /> : null}
         {!user && (
           <div>

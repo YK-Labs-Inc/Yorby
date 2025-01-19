@@ -9,6 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { H1 } from "@/components/typography";
 import { createJob } from "./landing2/actions";
 import { useTranslations } from "next-intl";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface FormData {
   jobTitle: string;
@@ -18,6 +20,7 @@ interface FormData {
   resume: File | null;
   coverLetter: File | null;
   miscDocuments: File[];
+  captchaToken: string;
 }
 
 export default function JobCreationComponent() {
@@ -31,8 +34,10 @@ export default function JobCreationComponent() {
     resume: null,
     coverLetter: null,
     miscDocuments: [],
+    captchaToken: "",
   });
   const [isPending, startTransition] = useTransition();
+  const { logError } = useAxiomLogging();
 
   const handleTextChange =
     (field: keyof FormData) =>
@@ -62,19 +67,6 @@ export default function JobCreationComponent() {
     };
 
   const handleSubmit = async () => {
-    const jobCreationFormData = new FormData();
-    jobCreationFormData.append("jobTitle", formData.jobTitle);
-    jobCreationFormData.append("jobDescription", formData.jobDescription);
-    jobCreationFormData.append("companyName", formData.companyName);
-    jobCreationFormData.append(
-      "companyDescription",
-      formData.companyDescription
-    );
-    jobCreationFormData.append("resume", formData.resume as Blob);
-    jobCreationFormData.append("coverLetter", formData.coverLetter as Blob);
-    formData.miscDocuments.forEach((file) => {
-      jobCreationFormData.append("miscDocuments", file as Blob);
-    });
     startTransition(async () => {
       const { error } = await createJob({
         jobTitle: formData.jobTitle,
@@ -84,10 +76,10 @@ export default function JobCreationComponent() {
         resume: formData.resume,
         coverLetter: formData.coverLetter,
         miscDocuments: formData.miscDocuments,
-        captchaToken: "",
+        captchaToken: formData.captchaToken,
       });
       if (error) {
-        console.error(error);
+        logError(error);
       }
     });
   };
@@ -235,10 +227,19 @@ export default function JobCreationComponent() {
                 <Button variant="outline" onClick={handleBack}>
                   {t("buttons.back")}
                 </Button>
-                <Button disabled={isPending} onClick={handleSubmit}>
+                <Button
+                  disabled={isPending || !formData.captchaToken}
+                  onClick={handleSubmit}
+                >
                   {t("buttons.submit")}
                 </Button>
               </div>
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={(token) => {
+                  setFormData((prev) => ({ ...prev, captchaToken: token }));
+                }}
+              />
             </div>
           )}
         </CardContent>
