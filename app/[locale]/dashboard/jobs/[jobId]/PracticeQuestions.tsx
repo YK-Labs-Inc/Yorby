@@ -1,10 +1,8 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { CheckCircle, Lock } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import LockedJobComponent from "./LockedJobComponent";
+import { CheckCircle } from "lucide-react";
 
 interface Question {
   id: string;
@@ -16,15 +14,15 @@ interface PracticeQuestionsProps {
   jobId: string;
   questions: Question[];
   isLocked: boolean;
+  userCredits: number;
 }
 
 export default function PracticeQuestions({
   jobId,
   questions,
   isLocked,
+  userCredits,
 }: PracticeQuestionsProps) {
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const t = useTranslations("upgrade");
   const firstQuestion = questions[0];
   const remainingQuestions = questions.slice(1);
 
@@ -49,24 +47,7 @@ export default function PracticeQuestions({
       </Link>
 
       {isLocked ? (
-        <div className="relative mt-4 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-800 p-8">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="rounded-full bg-gray-100 dark:bg-gray-800/30 p-3">
-              <Lock className="h-6 w-6 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {t("locked.title")}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-              {t("locked.description")}
-            </p>
-            <Link href="/purchase">
-              <Button size="lg" className="mt-2">
-                {t("locked.button")}
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <LockedJobComponent jobId={jobId} userCredits={userCredits} />
       ) : (
         remainingQuestions.map((question, index) => (
           <Link

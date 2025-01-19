@@ -115,7 +115,7 @@ export default async function PurchasePage({
                   </div>
                 </div>
 
-                <form action={createCheckoutSession} method="POST">
+                <form action={createCheckoutSession}>
                   <input
                     type="hidden"
                     name="priceId"
