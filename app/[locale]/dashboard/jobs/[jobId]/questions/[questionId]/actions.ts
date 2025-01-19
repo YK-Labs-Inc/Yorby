@@ -37,7 +37,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
     await logger.flush();
   }
   logger.info("Answer submitted");
-  revalidatePath(`/dashboard/jobs/${jobId}/${questionId}`);
+  revalidatePath(`/dashboard/jobs/${jobId}/question/${questionId}`);
   return { error: errorMessage };
 };
 

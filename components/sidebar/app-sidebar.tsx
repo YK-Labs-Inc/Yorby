@@ -17,9 +17,10 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 
 interface AppSidebarProps {
   numberOfCredits: number;
@@ -32,7 +33,15 @@ export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
   const pathname = usePathname();
   const hideSidebar = pathname === "/en" && searchParams.get("dev") !== "true";
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [logoSrc, setLogoSrc] = useState("/assets/dark-logo.png");
   const t = useTranslations("sidebar");
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    setLogoSrc(
+      theme === "light" ? "/assets/dark-logo.png" : "/assets/light-logo.png"
+    );
+  }, [theme]);
 
   if (hideSidebar) {
     return null;
@@ -41,7 +50,10 @@ export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <H3>Perfect Interview</H3>
+        <div className="flex items-center">
+          <img src={logoSrc} alt="Perfect Interview" className="w-8 h-8 mr-2" />
+          <H3>Perfect Interview</H3>
+        </div>
         {user && (
           <Button>
             <Link
