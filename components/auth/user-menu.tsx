@@ -28,7 +28,7 @@ export function UserMenu({ email }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 w-full justify-between px-3"
+          className="flex items-center gap-2 w-full justify-between"
         >
           <span className="truncate">{email}</span>
           <Settings className="h-4 w-4" />
@@ -42,7 +42,7 @@ export function UserMenu({ email }: UserMenuProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="flex items-center justify-between px-2 py-1.5">
-          <span className="text-sm text-muted-foreground">Appearance</span>
+          <span className="text-sm">Appearance</span>
           <ThemeSwitcher />
         </div>
         <DropdownMenuSeparator />

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,9 +20,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
-  const searchParams = useSearchParams();
-  const message = searchParams.get("message");
-
+  const pathname = usePathname();
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -42,10 +40,11 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
               required
             />
           </div>
+          <input type="hidden" name="redirectTo" value={pathname} />
           <SubmitButton pendingText="Sending magic link..." type="submit">
             Send Magic Link
           </SubmitButton>
-          {message && <FormMessage message={{ message }} />}
+          <FormMessage />
         </form>
       </DialogContent>
     </Dialog>

@@ -19,15 +19,24 @@ import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface AppSidebarProps {
+  numberOfCredits: number;
   jobs: any[];
   user: User | null;
 }
 
-export function AppSidebar({ jobs, user }: AppSidebarProps) {
+export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const hideSidebar = pathname === "/en" && searchParams.get("dev") !== "true";
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const t = useTranslations("sidebar");
+
+  if (hideSidebar) {
+    return null;
+  }
 
   return (
     <Sidebar>
@@ -46,7 +55,7 @@ export function AppSidebar({ jobs, user }: AppSidebarProps) {
         )}
       </SidebarHeader>
       <SidebarContent>
-        {user ? (
+        {user && (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -56,25 +65,27 @@ export function AppSidebar({ jobs, user }: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ) : (
-          <div className="p-4">
+        )}
+      </SidebarContent>
+      <SidebarFooter>
+        <p className="text-sm text-muted-foreground px-4">
+          {t("numberOfCredits", { numberOfCredits })}
+        </p>
+        {user?.email ? <UserMenu email={user.email} /> : null}
+        {!user && (
+          <div>
             <p className="text-sm text-muted-foreground mb-4">
-              Sign in to start practicing for your interviews
+              {t("signInToStart")}
             </p>
             <Button
               onClick={() => setIsAuthOpen(true)}
               className="w-full"
               size="lg"
             >
-              Sign In
+              {t("signIn")}
             </Button>
           </div>
         )}
-      </SidebarContent>
-      <SidebarFooter>
-        <div className="px-3 py-2">
-          {user?.email ? <UserMenu email={user.email} /> : null}
-        </div>
       </SidebarFooter>
       <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </Sidebar>
