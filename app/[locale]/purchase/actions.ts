@@ -142,9 +142,17 @@ export async function createCheckoutSession(formData: FormData) {
           quantity: 1,
         },
       ],
-      success_url: `${origin}/purchse_confirmation`,
+      success_url: `${origin}/purchase_confirmation`,
       cancel_url: `${origin}/purchase`,
       metadata,
+      subscription_data: isSubscription
+        ? {
+            metadata: {
+              userId: user.id,
+              userEmail: email,
+            },
+          }
+        : undefined,
     });
     if (session.url) {
       sessionUrl = session.url;
