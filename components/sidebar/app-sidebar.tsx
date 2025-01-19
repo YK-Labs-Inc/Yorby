@@ -50,10 +50,10 @@ export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center">
+        <Link href="/" className="flex items-center">
           <img src={logoSrc} alt="Perfect Interview" className="w-8 h-8 mr-2" />
           <H3>Perfect Interview</H3>
-        </div>
+        </Link>
         {user && (
           <Button>
             <Link
