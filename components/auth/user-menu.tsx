@@ -28,7 +28,7 @@ export function UserMenu({ email }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex items-center gap-2 w-full justify-between px-3"
+          className="flex items-center gap-2 w-full justify-between"
         >
           <span className="truncate">{email}</span>
           <Settings className="h-4 w-4" />

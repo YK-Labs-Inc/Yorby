@@ -3,7 +3,6 @@
 import { Link } from "@/i18n/routing";
 import { CheckCircle, Lock } from "lucide-react";
 import { useState } from "react";
-import { UpgradeModal } from "@/components/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
@@ -61,13 +60,11 @@ export default function PracticeQuestions({
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
               {t("locked.description")}
             </p>
-            <Button
-              size="lg"
-              onClick={() => setShowUpgradeModal(true)}
-              className="mt-2"
-            >
-              {t("locked.button")}
-            </Button>
+            <Link href="/purchase">
+              <Button size="lg" className="mt-2">
+                {t("locked.button")}
+              </Button>
+            </Link>
           </div>
         </div>
       ) : (
@@ -96,11 +93,6 @@ export default function PracticeQuestions({
           </Link>
         ))
       )}
-
-      <UpgradeModal
-        open={showUpgradeModal}
-        onOpenChange={setShowUpgradeModal}
-      />
     </div>
   );
 }

@@ -22,11 +22,12 @@ import { User } from "@supabase/supabase-js";
 import { usePathname, useSearchParams } from "next/navigation";
 
 interface AppSidebarProps {
+  numberOfCredits: number;
   jobs: any[];
   user: User | null;
 }
 
-export function AppSidebar({ jobs, user }: AppSidebarProps) {
+export function AppSidebar({ jobs, numberOfCredits, user }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const hideSidebar = pathname === "/en" && searchParams.get("dev") !== "true";
@@ -67,23 +68,24 @@ export function AppSidebar({ jobs, user }: AppSidebarProps) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <div>
-          {user?.email ? <UserMenu email={user.email} /> : null}
-          {!user && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t("signInToStart")}
-              </p>
-              <Button
-                onClick={() => setIsAuthOpen(true)}
-                className="w-full"
-                size="lg"
-              >
-                {t("signIn")}
-              </Button>
-            </div>
-          )}
-        </div>
+        <p className="text-sm text-muted-foreground px-4">
+          {t("numberOfCredits", { numberOfCredits })}
+        </p>
+        {user?.email ? <UserMenu email={user.email} /> : null}
+        {!user && (
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("signInToStart")}
+            </p>
+            <Button
+              onClick={() => setIsAuthOpen(true)}
+              className="w-full"
+              size="lg"
+            >
+              {t("signIn")}
+            </Button>
+          </div>
+        )}
       </SidebarFooter>
       <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />
     </Sidebar>

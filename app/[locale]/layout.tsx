@@ -37,6 +37,19 @@ const fetchJobs = async () => {
   return data;
 };
 
+const fetchNumberOfCredits = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_credits")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data?.number_of_credits || 0;
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -56,6 +69,10 @@ export default async function RootLayout({
     data: { session },
   } = await supabase.auth.getSession();
   const jobs = await fetchJobs();
+  let numberOfCredits = 0;
+  if (user) {
+    numberOfCredits = await fetchNumberOfCredits(user.id);
+  }
 
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -84,7 +101,11 @@ export default async function RootLayout({
                 <AxiomWebVitals />
                 <AxiomLoggingProvider user={user}>
                   <SidebarProvider>
-                    <AppSidebar jobs={jobs} user={user} />
+                    <AppSidebar
+                      jobs={jobs}
+                      numberOfCredits={numberOfCredits}
+                      user={user}
+                    />
                     <SidebarTrigger />
                     <main className="w-full">
                       <FormMessage />

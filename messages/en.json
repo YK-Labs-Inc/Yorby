@@ -137,7 +137,8 @@
   "sidebar": {
     "addJob": "Create New Job",
     "signInToStart": "Sign in to save your custom interview prep",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "numberOfCredits": "Credits: {numberOfCredits}"
   },
   "upgrade": {
     "locked": {
