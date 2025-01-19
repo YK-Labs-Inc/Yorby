@@ -215,5 +215,24 @@
       "subscription": "Annual subscription",
       "oneTime": "One-time purchase"
     }
+  },
+  "accountLinking": {
+    "title": "Link Your Account",
+    "description": "To view your practice interview questions, please link your account to an email address.",
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Choose a password"
+      },
+      "submit": "Link Account"
+    },
+    "errors": {
+      "emailRequired": "Email and password are required",
+      "success": "Please check your email to verify your account"
+    }
   }
 }

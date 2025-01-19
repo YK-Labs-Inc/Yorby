@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { encodedRedirect } from "@/utils/utils";
 
 export const startMockInterview = async (
   prevState: any,
@@ -115,4 +116,26 @@ Thank the candidate for their time and tell them that the interview has ended.
   }
 
   redirect(`/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}`);
+};
+
+export const linkAnonymousAccount = async (formData: FormData) => {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("accountLinking.errors");
+
+  if (!email || !password) {
+    return encodedRedirect("error", "/dashboard/jobs", t("emailRequired"));
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    email,
+    password,
+  });
+
+  if (error) {
+    return encodedRedirect("error", "/dashboard/jobs", error.message);
+  }
+
+  return encodedRedirect("success", "/dashboard/jobs", t("success"));
 };
