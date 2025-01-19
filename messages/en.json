@@ -144,7 +144,7 @@
   "upgrade": {
     "locked": {
       "title": "Unlock the Full Interview Preparation Experience",
-      "description": "Get more credits to unlock unlimited AI-generated practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
+      "description": "Get more credits to unlock unlimited practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
       "button": "Unlock Full Interview Prep Access",
       "insufficientCredits": "You don't have enough credits to unlock this interview prep experience.",
       "unlocking": "Unlocking..."

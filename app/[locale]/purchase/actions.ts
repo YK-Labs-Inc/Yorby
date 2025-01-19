@@ -145,6 +145,7 @@ export async function createCheckoutSession(formData: FormData) {
       success_url: `${origin}/purchase_confirmation`,
       cancel_url: `${origin}/purchase`,
       metadata,
+      allow_promotion_codes: true,
       subscription_data: isSubscription
         ? {
             metadata: {
