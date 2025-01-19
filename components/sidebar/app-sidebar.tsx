@@ -19,6 +19,7 @@ import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface AppSidebarProps {
   jobs: any[];
@@ -26,8 +27,15 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ jobs, user }: AppSidebarProps) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const hideSidebar = pathname === "/en" && searchParams.get("dev") !== "true";
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const t = useTranslations("sidebar");
+
+  if (hideSidebar) {
+    return null;
+  }
 
   return (
     <Sidebar>
@@ -46,7 +54,7 @@ export function AppSidebar({ jobs, user }: AppSidebarProps) {
         )}
       </SidebarHeader>
       <SidebarContent>
-        {user ? (
+        {user && (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -56,24 +64,25 @@ export function AppSidebar({ jobs, user }: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ) : (
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Sign in to start practicing for your interviews
-            </p>
-            <Button
-              onClick={() => setIsAuthOpen(true)}
-              className="w-full"
-              size="lg"
-            >
-              Sign In
-            </Button>
-          </div>
         )}
       </SidebarContent>
       <SidebarFooter>
-        <div className="px-3 py-2">
+        <div>
           {user?.email ? <UserMenu email={user.email} /> : null}
+          {!user && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-4">
+                {t("signInToStart")}
+              </p>
+              <Button
+                onClick={() => setIsAuthOpen(true)}
+                className="w-full"
+                size="lg"
+              >
+                {t("signIn")}
+              </Button>
+            </div>
+          )}
         </div>
       </SidebarFooter>
       <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />

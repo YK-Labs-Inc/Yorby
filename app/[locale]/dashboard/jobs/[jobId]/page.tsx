@@ -4,7 +4,6 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PracticeQuestions from "./PracticeQuestions";
 import MockInterview from "./MockInterview";
-import { FormMessage, Message } from "@/components/form-message";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
@@ -53,7 +52,6 @@ export default async function JobPage({
   const filter =
     ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
     "all";
-  const message = (await searchParams) as Message;
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -64,7 +62,7 @@ export default async function JobPage({
   const t = await getTranslations("accountLinking");
 
   return (
-    <div className="w-full flex flex-col my-8 mx-4 gap-6">
+    <div className="w-full flex flex-col justify-center items-center p-8 gap-6">
       <H1>
         {job.job_title
           .split(" ")
@@ -117,7 +115,6 @@ export default async function JobPage({
               <SubmitButton formAction={linkAnonymousAccount}>
                 {t("form.submit")}
               </SubmitButton>
-              <FormMessage message={message} />
             </form>
           </div>
         </div>

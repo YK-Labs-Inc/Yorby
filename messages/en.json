@@ -135,7 +135,9 @@
     "pleaseTryAgain": "Sorry, something went wrong. Please try again."
   },
   "sidebar": {
-    "addJob": "Create New Job"
+    "addJob": "Create New Job",
+    "signInToStart": "Sign in to save your custom interview prep",
+    "signIn": "Sign in"
   },
   "upgrade": {
     "locked": {

@@ -30,7 +30,7 @@ export default function PracticeQuestions({
   const remainingQuestions = questions.slice(1);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full">
       <Link
         key={firstQuestion.id}
         href={`/dashboard/jobs/${jobId}/questions/${firstQuestion.id}`}

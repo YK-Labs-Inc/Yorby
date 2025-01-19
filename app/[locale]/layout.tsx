@@ -9,7 +9,9 @@ import { IntlProvider, PHProvider } from "./providers";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
-import Footer from "./Footer";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { FormMessage } from "@/components/form-message";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -25,6 +27,15 @@ const geistSans = Geist({
   display: "swap",
   subsets: ["latin"],
 });
+
+const fetchJobs = async () => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("custom_jobs").select("*");
+  if (error) {
+    throw error;
+  }
+  return data;
+};
 
 export default async function RootLayout({
   children,
@@ -44,6 +55,7 @@ export default async function RootLayout({
   const {
     data: { session },
   } = await supabase.auth.getSession();
+  const jobs = await fetchJobs();
 
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -71,8 +83,14 @@ export default async function RootLayout({
               <UserProvider user={user} session={session}>
                 <AxiomWebVitals />
                 <AxiomLoggingProvider user={user}>
-                  <main>{children}</main>
-                  <Footer locale={locale} />
+                  <SidebarProvider>
+                    <AppSidebar jobs={jobs} user={user} />
+                    <SidebarTrigger />
+                    <main className="w-full">
+                      <FormMessage />
+                      {children}
+                    </main>
+                  </SidebarProvider>
                 </AxiomLoggingProvider>
               </UserProvider>
             </ThemeProvider>

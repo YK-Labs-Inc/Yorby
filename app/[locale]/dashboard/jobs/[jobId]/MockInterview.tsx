@@ -45,7 +45,7 @@ export default async function MockInterview({
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-semibold">{t("title")}</h2>
