@@ -47,7 +47,11 @@ export default async function MockInterview({
   });
 
   if (isLocked) {
-    return <LockedJobComponent jobId={jobId} userCredits={userCredits} />;
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <LockedJobComponent jobId={jobId} userCredits={userCredits} />
+      </div>
+    );
   }
 
   return (
