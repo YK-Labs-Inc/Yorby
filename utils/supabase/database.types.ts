@@ -344,6 +344,24 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          stripe_customer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          stripe_customer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
