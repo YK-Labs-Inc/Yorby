@@ -59,7 +59,6 @@ export default async function JobPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  console.log(user);
   const isAnonymous = user?.is_anonymous;
 
   const t = await getTranslations("accountLinking");
