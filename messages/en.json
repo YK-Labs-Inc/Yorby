@@ -8,7 +8,33 @@
     "job3": "Marketing",
     "everyone": "Any Job In The World",
     "enterJobDescription": "Enter A Job Description Here",
-    "featureHighlightTitle": "What Do You Get With Perfect Interview?"
+    "featureHighlightTitle": "What Do You Get With Perfect Interview?",
+    "features": {
+      "practiceQuestions": {
+        "title": "Unlimited Practice Questions",
+        "description": "Generate unlimited practice interview questions based off of any job description and your resume so that the questions are custom to the job and your personal experience"
+      },
+      "feedback": {
+        "title": "Instant Feedback",
+        "description": "Get feedback on your answers to practice interview questions"
+      },
+      "aiAnswers": {
+        "title": "AI-Powered Answers",
+        "description": "Too lazy? Generate answers to practice interview questions based off of your previous work history"
+      },
+      "mockInterviews": {
+        "title": "Realistic Mock Interviews",
+        "description": "Realistic mock interview experience by making you chat back and forth with an AI interviewer to replicate a real life interview scenario"
+      },
+      "performance": {
+        "title": "Performance Analysis",
+        "description": "Get a detailed breakdown on your mock interview performance"
+      },
+      "pricing": {
+        "title": "No Subscription Required",
+        "description": "No subscription required, just pay for what you need"
+      }
+    }
   },
   "jobCreation": {
     "title": "Create Practice Interview Questions",
