@@ -57,7 +57,7 @@ export default function FeatureHighlight() {
   return (
     <div className="w-full max-w-[1080px] mx-auto px-4 py-4">
       <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4">
+        <h2 className="text-4xl md:text-5xl font-bold mb-4 dark:text-white">
           {t("featureHighlightTitle")}
         </h2>
       </div>
@@ -66,16 +66,16 @@ export default function FeatureHighlight() {
         {features.map((feature) => (
           <Card
             key={feature.id}
-            className="overflow-hidden bg-white rounded-3xl border shadow-sm hover:shadow-lg transition-shadow flex flex-col justify-between"
+            className="overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow flex flex-col justify-between"
           >
             <div className="p-8">
               <div className="mb-6">
                 <span className="text-4xl">{feature.icon}</span>
               </div>
-              <h3 className="text-2xl font-bold mb-4">
+              <h3 className="text-2xl font-bold mb-4 dark:text-white">
                 {t(`features.${feature.id}.title`)}
               </h3>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-muted-foreground dark:text-gray-300 leading-relaxed">
                 {t(`features.${feature.id}.description`)}
               </p>
             </div>
