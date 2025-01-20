@@ -130,7 +130,7 @@ export default function JobCreationComponent() {
                   placeholder={t("jobDescription.placeholder")}
                   value={formData.jobDescription}
                   onChange={handleTextChange("jobDescription")}
-                  className="min-h-[200px]"
+                  className="h-[80px]"
                 />
               </div>
 
@@ -150,6 +150,7 @@ export default function JobCreationComponent() {
                   {t("companyDescription.label")}
                 </label>
                 <Textarea
+                  className="h-[80px]"
                   placeholder={t("companyDescription.placeholder")}
                   value={formData.companyDescription}
                   onChange={handleTextChange("companyDescription")}

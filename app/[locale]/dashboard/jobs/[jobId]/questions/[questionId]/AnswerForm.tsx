@@ -110,9 +110,10 @@ export default function AnswerForm({
                       <input type="hidden" name="jobId" value={jobId} />
                       <AIButton
                         type="submit"
-                        pending={
+                        disabled={
                           isGenerateAnswerPending || isSubmitAnswerPending
                         }
+                        pending={isGenerateAnswerPending}
                         pendingText={t("buttons.generatingAnswer")}
                         variant="outline"
                       >
