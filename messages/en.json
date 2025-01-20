@@ -283,5 +283,16 @@
       "emailRequired": "Email and password are required",
       "success": "Please check your email to verify your account"
     }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "Does Perfect Interview Generate Questions Based On My Past Experience?",
+    "a1": "Yes! Perfect Interview generates questions based on your past experience, resume, and target job position. The questions are tailored to your personal experience and the job you're applying for.",
+    "q2": "Is there a limit to how many questions I can generate?",
+    "a2": "We currently set an upper limit of 200 practice questions per job. If you need more, please contact us and we can increase this limit for you.",
+    "q3": "What types of jobs does Perfect Interview support?",
+    "a3": "Perfect Interivew supports every single job in the world. As long as you upload the job description, we will be able to generate unlimtied practice questions for you.",
+    "q4": "Is there a limit to how many mock interviews I can do?",
+    "a4": "There is no limit to how many mock interviews you can do. Each mock interview is unique and tailored to the job you're applying for."
   }
 }
