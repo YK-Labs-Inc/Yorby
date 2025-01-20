@@ -37,7 +37,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
     await logger.flush();
   }
   logger.info("Answer submitted");
-  revalidatePath(`/dashboard/jobs/${jobId}/question/${questionId}`);
+  revalidatePath(`/dashboard/jobs/${jobId}/questions/${questionId}`);
   return { error: errorMessage };
 };
 
@@ -130,9 +130,12 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     return { error: errorMessage };
   }
 
-  const submission = await writeAnswerToDatabase(jobId, questionId, response);
+  const submission = await writeAnswerToDatabase(jobId, questionId, response, {
+    pros: [],
+    cons: [],
+  });
   redirect(
-    `/dashboard/jobs/${jobId}/${questionId}?submissionId=${submission.id}`
+    `/dashboard/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`
   );
 };
 
@@ -157,7 +160,7 @@ const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
   answer: string,
-  feedback?: { pros: string[]; cons: string[] }
+  feedback: { pros: string[]; cons: string[] }
 ) => {
   const logger = new Logger().with({
     jobId: jobId,

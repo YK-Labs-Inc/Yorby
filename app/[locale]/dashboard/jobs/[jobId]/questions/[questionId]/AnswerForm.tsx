@@ -72,16 +72,6 @@ export default function AnswerForm({
     router.push(`?submissionId=${submissionId}`);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === "Enter" || e.key === "NumpadEnter")
-    ) {
-      e.preventDefault();
-      e.currentTarget.form?.requestSubmit();
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -144,7 +134,6 @@ export default function AnswerForm({
                             ? "opacity-50"
                             : ""
                         }
-                        onKeyDown={handleKeyDown}
                       />
                       {isGenerateAnswerPending && (
                         <div className="absolute inset-0 flex items-center justify-center bg-background/50">
@@ -184,7 +173,7 @@ export default function AnswerForm({
                 submissions.map((submission) => (
                   <button
                     key={submission.id}
-                    className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                    className="p-4 border rounded-lg hover:bg-accent transition-colors w-full"
                     onClick={() => handleSubmissionSelect(submission.id)}
                   >
                     <div className="flex justify-between items-center">
@@ -204,14 +193,14 @@ export default function AnswerForm({
           )}
         </CardContent>
       </Card>
-      {view === "question" && (
+      {feedback && view === "question" && (
         <>
           <Card>
             <CardHeader>
               <CardTitle>{t("feedbackLabel")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {!feedback ? (
+              {feedback.pros.length === 0 && feedback.cons.length === 0 ? (
                 <p>{t("noFeedback")}</p>
               ) : (
                 <div className="grid grid-cols-2 gap-8">
