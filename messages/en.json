@@ -182,7 +182,8 @@
     "addJob": "Create New Job",
     "signInToStart": "Sign in to save your custom interview prep",
     "signIn": "Sign in",
-    "numberOfCredits": "Credits: {numberOfCredits}"
+    "numberOfCredits": "Credits: {numberOfCredits}",
+    "buyMoreCredits": "Buy More Credits"
   },
   "upgrade": {
     "locked": {

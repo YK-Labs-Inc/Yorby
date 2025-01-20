@@ -10,7 +10,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "./actions";
 import { getTranslations } from "next-intl/server";
 
-const fetchJob = async (jobId: string) => {
+const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_jobs")
@@ -25,7 +25,7 @@ const fetchJob = async (jobId: string) => {
   if (error) {
     throw error;
   }
-  if (data.status === "locked") {
+  if (data.status === "locked" && !hasSubscription) {
     return {
       ...data,
       custom_job_questions: data.custom_job_questions.slice(0, 1),
@@ -52,6 +52,19 @@ const fetchUserCredits = async (userId: string) => {
   return data?.number_of_credits || 0;
 };
 
+const fetchHasSubscription = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data !== null;
+};
+
 export default async function JobPage({
   params,
   searchParams,
@@ -59,19 +72,19 @@ export default async function JobPage({
   params: Promise<{ jobId: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const jobId = (await params).jobId;
-  const job = await fetchJob(jobId);
-  const userCredits = await fetchUserCredits(job.user_id);
-  const view = ((await searchParams)?.view as string) || "practice";
-  const filter =
-    ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
-    "all";
-
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const isAnonymous = user?.is_anonymous;
+  const jobId = (await params).jobId;
+  const hasSubscription = await fetchHasSubscription(user?.id || "");
+  const job = await fetchJob(jobId, hasSubscription);
+  const userCredits = await fetchUserCredits(job.user_id);
+  const view = ((await searchParams)?.view as string) || "practice";
+  const filter =
+    ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
+    "all";
 
   const t = await getTranslations("accountLinking");
 
@@ -138,7 +151,7 @@ export default async function JobPage({
             <PracticeQuestions
               jobId={jobId}
               questions={job.custom_job_questions}
-              isLocked={job.status === "locked"}
+              isLocked={job.status === "locked" && !hasSubscription}
               userCredits={userCredits}
             />
           )}
@@ -147,7 +160,7 @@ export default async function JobPage({
               jobId={jobId}
               filter={filter}
               userCredits={userCredits}
-              isLocked={job.status === "locked"}
+              isLocked={job.status === "locked" && !hasSubscription}
             />
           )}
         </>
