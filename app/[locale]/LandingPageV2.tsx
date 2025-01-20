@@ -4,6 +4,7 @@ import JobCreationComponent from "./JobCreationComponent";
 import { useTranslations } from "next-intl";
 import FeatureHighlight from "./components/FeatureHighlight";
 import Typewriter from "@/components/typewriter/react";
+import FAQ from "./components/FAQ";
 
 export default function LandingPageV2() {
   const t = useTranslations("landingPage");
@@ -48,6 +49,7 @@ export default function LandingPageV2() {
       <div className="relative w-full border-2 border-gray-300 rounded-lg p-4 shadow-lg">
         <JobCreationComponent />
       </div>
+      <FAQ />
     </div>
   );
 }
