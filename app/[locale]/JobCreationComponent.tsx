@@ -129,9 +129,6 @@ export default function JobCreationComponent() {
               <p className="text-sm text-muted-foreground">
                 {t("loading.redirect")}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {t("loading.emailNotification")}
-              </p>
             </div>
           </div>
         </DialogContent>

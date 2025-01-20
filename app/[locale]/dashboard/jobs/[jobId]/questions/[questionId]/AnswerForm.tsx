@@ -182,9 +182,10 @@ export default function AnswerForm({
                 </p>
               ) : (
                 submissions.map((submission) => (
-                  <div
+                  <button
                     key={submission.id}
                     className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                    onClick={() => handleSubmissionSelect(submission.id)}
                   >
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-muted-foreground">
@@ -192,30 +193,25 @@ export default function AnswerForm({
                           date: formatDate(new Date(submission.created_at)),
                         })}
                       </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSubmissionSelect(submission.id)}
-                      >
-                        {t("viewSubmission")}
-                      </Button>
                     </div>
-                    <p className="mt-2 line-clamp-3">{submission.answer}</p>
-                  </div>
+                    <p className="mt-2 line-clamp-3 text-left">
+                      {submission.answer}
+                    </p>
+                  </button>
                 ))
               )}
             </div>
           )}
         </CardContent>
       </Card>
-      {feedback && view === "question" && (
+      {view === "question" && (
         <>
           <Card>
             <CardHeader>
               <CardTitle>{t("feedbackLabel")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {feedback.pros.length === 0 && feedback.cons.length === 0 ? (
+              {!feedback ? (
                 <p>{t("noFeedback")}</p>
               ) : (
                 <div className="grid grid-cols-2 gap-8">

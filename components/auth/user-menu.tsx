@@ -13,7 +13,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface UserMenuProps {
   email: string;
