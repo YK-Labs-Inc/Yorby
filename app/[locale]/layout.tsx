@@ -13,14 +13,14 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { FormMessage } from "@/components/form-message";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
+const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
   : "http://localhost:3000";
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Perfect Interview",
-  description: "Perfect Your Next Interview With AI-Powered Interview Prep",
+  description: "Ace your next interview with AI-powered interview prep",
 };
 
 const geistSans = Geist({
