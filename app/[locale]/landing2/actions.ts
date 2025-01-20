@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { UploadResponse } from "@/utils/types";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 export const createJob = async ({
@@ -35,6 +36,7 @@ export const createJob = async ({
   };
   const logger = new Logger().with(trackingProperties);
   logger.info("Starting to create job");
+  const t = await getTranslations("errors");
   let userId = "";
   try {
     const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
@@ -58,8 +60,7 @@ export const createJob = async ({
     logger.error("Error creating job", { error });
     await logger.flush();
     return {
-      error:
-        "Sorry, something went wrong. Please refresh the page and try again.",
+      error: t("pleaseTryAgain"),
     };
   }
 

@@ -30,8 +30,8 @@ interface FormData {
 export default function JobCreationComponent() {
   const t = useTranslations("jobCreation");
   const [step, setStep] = useState(1);
-  const [showLoadingModal, setShowLoadingModal] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -73,7 +73,7 @@ export default function JobCreationComponent() {
     };
 
   const handleSubmit = async () => {
-    setError(null);
+    setError("");
     setShowLoadingModal(true);
     startTransition(async () => {
       const { error } = await createJob({
