@@ -37,7 +37,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (error) {
       logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?message=Failed to verify magic link. Please try again.`
+        `${origin}/sign-in?error=Failed to verify magic link. Please try again.`
       );
     }
   } else if (token && type === "signup" && email) {
@@ -51,7 +51,19 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (error) {
       logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?message=Invalid or expired code. Please try again.`
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
+      );
+    }
+  } else if (type === "email_change" && token) {
+    // Handle email change flow
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: token,
+      type: "email_change",
+    });
+    if (error) {
+      logger.error("Failed to verify email change", { error });
+      return NextResponse.redirect(
+        `${origin}/dashboard/jobs?error=Failed to update your email. Please try again.`
       );
     }
   }

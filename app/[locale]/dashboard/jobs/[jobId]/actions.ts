@@ -121,24 +121,31 @@ Thank the candidate for their time and tell them that the interview has ended.
 
 export const linkAnonymousAccount = async (formData: FormData) => {
   const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const jobId = formData.get("jobId") as string;
   const supabase = await createSupabaseServerClient();
-  const t = await getTranslations("accountLinking.errors");
+  const t = await getTranslations("accountLinking");
 
-  if (!email || !password) {
-    return encodedRedirect("error", "/dashboard/jobs", t("emailRequired"));
+  if (!email) {
+    return encodedRedirect(
+      "error",
+      `/dashboard/jobs/${jobId}`,
+      t("emailRequiredError")
+    );
   }
 
   const { error } = await supabase.auth.updateUser({
     email,
-    password,
   });
 
   if (error) {
-    return encodedRedirect("error", "/dashboard/jobs", error.message);
+    return encodedRedirect("error", `/dashboard/jobs/${jobId}`, error.message);
   }
 
-  return encodedRedirect("success", "/dashboard/jobs", t("success"));
+  return encodedRedirect(
+    "success",
+    `/dashboard/jobs/${jobId}`,
+    t("authSuccess")
+  );
 };
 
 export const unlockJob = async (prevState: any, formData: FormData) => {

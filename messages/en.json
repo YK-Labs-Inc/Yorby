@@ -280,10 +280,8 @@
       },
       "submit": "Link Account"
     },
-    "errors": {
-      "emailRequired": "Email and password are required",
-      "success": "Please check your email to verify your account"
-    }
+    "emailRequiredError": "Email is required",
+    "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration."
   },
   "faq": {
     "title": "Frequently Asked Questions",

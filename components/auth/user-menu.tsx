@@ -13,6 +13,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
+import { useRouter } from "next/router";
 
 interface UserMenuProps {
   email: string;
@@ -20,10 +21,11 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ email, hasSubscription }: UserMenuProps) {
+  const router = useRouter();
   const handleSignOut = async () => {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
-    window.location.reload();
+    router.push("/");
   };
   const [_, startTransition] = useTransition();
 
