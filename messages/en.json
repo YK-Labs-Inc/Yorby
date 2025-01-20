@@ -73,6 +73,12 @@
       "next": "Next Step",
       "back": "Back",
       "submit": "Submit"
+    },
+    "loading": {
+      "title": "Creating Your Interview Questions",
+      "description": "We're analyzing your job details and generating tailored interview questions. This may take a few minutes.",
+      "emailNotification": "We will also notify you by email once your questions are ready.",
+      "redirect": "We'll redirect you to your questions once they're ready."
     }
   },
   "waitlist": {
