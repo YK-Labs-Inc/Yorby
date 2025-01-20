@@ -72,6 +72,16 @@ export default function AnswerForm({
     router.push(`?submissionId=${submissionId}`);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (e.key === "Enter" || e.key === "NumpadEnter")
+    ) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -134,6 +144,7 @@ export default function AnswerForm({
                             ? "opacity-50"
                             : ""
                         }
+                        onKeyDown={handleKeyDown}
                       />
                       {isGenerateAnswerPending && (
                         <div className="absolute inset-0 flex items-center justify-center bg-background/50">
