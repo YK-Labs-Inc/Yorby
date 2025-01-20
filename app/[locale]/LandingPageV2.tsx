@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Typewriter from "typewriter-effect";
 import JobCreationComponent from "./JobCreationComponent";
 import { useTranslations } from "next-intl";
-import { RedoIcon, UndoIcon } from "lucide-react";
 import FeatureHighlight from "./components/FeatureHighlight";
+import Typewriter from "@/components/typewriter/react";
 
 export default function LandingPageV2() {
   const t = useTranslations("landingPage");
@@ -16,6 +14,7 @@ export default function LandingPageV2() {
           <span>{t("title")} </span>
           <span className="text-primary">
             <Typewriter
+              // @ts-ignore
               onInit={(typewriter) => {
                 typewriter
                   .typeString(t("job1"))

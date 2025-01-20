@@ -25,6 +25,7 @@
     "autoprefixer": "10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.468.0",
     "next": "^15.1.5",
     "next-axiom": "^1.9.1",
@@ -34,11 +35,12 @@
     "posthog-js": "^1.205.0",
     "posthog-node": "^4.3.2",
     "prettier": "^3.3.3",
+    "prop-types": "^15.8.1",
+    "raf": "^3.4.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "stripe": "^17.5.0",
-    "tus-js-client": "^4.3.1",
-    "@youraveragetechbro/typewriter-effect": "1.0.1"
+    "tus-js-client": "^4.3.1"
   },
   "devDependencies": {
     "@types/node": "22.10.2",
