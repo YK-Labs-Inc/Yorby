@@ -26,18 +26,22 @@ export default async function PurchasePage({
   const { products } = await getProducts();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
             {t("title")}
           </h1>
-          <p className="mt-4 text-xl text-gray-500">{t("subtitle")}</p>
-          <p className="mt-2 text-lg text-gray-600 mx-32">{t("description")}</p>
+          <p className="mt-4 text-xl text-gray-500 dark:text-gray-300">
+            {t("subtitle")}
+          </p>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 mx-32">
+            {t("description")}
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative my-4 text-center">
+          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-500 text-red-700 dark:text-red-400 px-4 py-3 rounded relative my-4 text-center">
             <p className="block sm:inline">
               {errorTranslations("pleaseTryAgain")}
             </p>
@@ -54,37 +58,37 @@ export default async function PurchasePage({
                 key={product.id}
                 className={`relative flex flex-col rounded-2xl ${
                   product.credits === 10
-                    ? "border-2 border-indigo-600"
-                    : "border border-gray-200"
-                } bg-white p-8 shadow-sm`}
+                    ? "border-2 border-indigo-600 dark:border-indigo-400"
+                    : "border border-gray-200 dark:border-gray-700"
+                } bg-white dark:bg-gray-800 p-8 shadow-sm`}
               >
                 {product.credits === 10 && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-4 py-1 text-sm font-semibold text-white">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 dark:bg-indigo-500 px-4 py-1 text-sm font-semibold text-white">
                     {t("cta.mostPopular")}
                   </div>
                 )}
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-900">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {t(`products.${productKey}.title`)}
                   </h3>
-                  <p className="mt-4 text-gray-500">
+                  <p className="mt-4 text-gray-500 dark:text-gray-400">
                     {t(`products.${productKey}.description`)}
                   </p>
                 </div>
 
                 <div className="mb-8">
-                  <div className="flex flex-col items-start text-gray-900">
+                  <div className="flex flex-col items-start text-gray-900 dark:text-white">
                     <div className="flex items-baseline">
                       <span className="text-4xl font-bold tracking-tight">
                         {formatPrice(product.totalPrice || 0)}
                       </span>
                       {isUnlimited && (
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                           {t("pricing.yearSuffix")}
                         </span>
                       )}
                     </div>
-                    <span className="mt-1 text-sm text-gray-500">
+                    <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       {isUnlimited
                         ? t("pricing.subscription")
                         : t("pricing.oneTime")}
@@ -92,12 +96,12 @@ export default async function PurchasePage({
                   </div>
                   {!isUnlimited && product.credits !== 1 && (
                     <>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                         {formatPrice(product.pricePerCredit || 0)}{" "}
                         {t("pricing.perInterview")}
                       </p>
                       {product.savings && product.savings > 0 && (
-                        <p className="mt-1 text-sm font-medium text-green-600">
+                        <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
                           {t("pricing.savings", {
                             savings: Math.round(product.savings),
                           })}
@@ -108,8 +112,8 @@ export default async function PurchasePage({
                 </div>
 
                 <div className="mb-8 flex-1">
-                  <div className="flex items-center justify-center rounded-lg bg-gray-50 px-4 py-3">
-                    <span className="text-sm font-medium text-gray-900">
+                  <div className="flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {t(`products.${productKey}.highlight`)}
                     </span>
                   </div>
@@ -130,8 +134,8 @@ export default async function PurchasePage({
                     type="submit"
                     className={`mt-8 block w-full rounded-md px-3 py-3 text-center text-sm font-semibold text-white ${
                       product.credits === 10
-                        ? "bg-indigo-600 hover:bg-indigo-700"
-                        : "bg-gray-800 hover:bg-gray-900"
+                        ? "bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                        : "bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600"
                     }`}
                   >
                     {t("cta.select")}

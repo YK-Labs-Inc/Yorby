@@ -50,6 +50,19 @@ const fetchNumberOfCredits = async (userId: string) => {
   return data?.number_of_credits || 0;
 };
 
+const fetchHasSubscription = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data !== null;
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -73,7 +86,8 @@ export default async function RootLayout({
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
   }
-
+  const hasSubscription = await fetchHasSubscription(user?.id || "");
+  console.log("hasSubscription", hasSubscription);
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
@@ -104,6 +118,7 @@ export default async function RootLayout({
                     <AppSidebar
                       jobs={jobs}
                       numberOfCredits={numberOfCredits}
+                      hasSubscription={hasSubscription}
                       user={user}
                     />
                     <SidebarTrigger />

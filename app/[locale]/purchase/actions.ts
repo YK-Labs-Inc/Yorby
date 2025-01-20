@@ -174,3 +174,50 @@ export async function createCheckoutSession(formData: FormData) {
   }
   redirect(sessionUrl);
 }
+
+export const redirectToStripeCustomerPortal = async () => {
+  const logger = new Logger();
+  logger.with({
+    function: "redirectToStripeCustomerPortal",
+  });
+  const supabase = await createSupabaseServerClient();
+  let sessionUrl = "";
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const userId = user?.id;
+    if (!userId) {
+      throw new Error("User not found");
+    }
+    logger.info("Starting function");
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+    const stripeCustomerId = subscription?.stripe_customer_id;
+    if (!stripeCustomerId) {
+      throw new Error("Stripe customer ID not found");
+    }
+    const session = await stripe.billingPortal.sessions.create({
+      customer: stripeCustomerId,
+      return_url: `${(await headers()).get("origin")}/dashboard/jobs`,
+    });
+    if (session.url) {
+      sessionUrl = session.url;
+    }
+    logger.info("Completed function");
+    await logger.flush();
+  } catch (error) {
+    logger.error("Error on endpoint", {
+      error: error instanceof Error ? error.message : JSON.stringify(error),
+      message: "Error creating stripe customer portal session",
+    });
+    await logger.flush();
+    throw error;
+  }
+  if (sessionUrl) {
+    redirect(sessionUrl);
+  }
+};

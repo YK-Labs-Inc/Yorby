@@ -11,16 +11,26 @@ import { Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { ThemeSwitcher } from "../theme-switcher";
+import { useTransition } from "react";
+import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
 
 interface UserMenuProps {
   email: string;
+  hasSubscription: boolean;
 }
 
-export function UserMenu({ email }: UserMenuProps) {
+export function UserMenu({ email, hasSubscription }: UserMenuProps) {
   const handleSignOut = async () => {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     window.location.reload();
+  };
+  const [_, startTransition] = useTransition();
+
+  const handleManageSubscription = () => {
+    startTransition(async () => {
+      await redirectToStripeCustomerPortal();
+    });
   };
 
   return (
@@ -35,12 +45,14 @@ export function UserMenu({ email }: UserMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem
-          onSelect={() => (window.location.href = "/subscription")}
-        >
-          Manage Subscription
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {hasSubscription && (
+          <>
+            <DropdownMenuItem onSelect={handleManageSubscription}>
+              Manage Subscription
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <div className="flex items-center justify-between px-2 py-1.5">
           <span className="text-sm">Appearance</span>
           <ThemeSwitcher />
