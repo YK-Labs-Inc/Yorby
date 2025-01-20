@@ -11,6 +11,10 @@ import { createJob } from "./landing2/actions";
 import { useTranslations } from "next-intl";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface FormData {
   jobTitle: string;
@@ -26,6 +30,8 @@ interface FormData {
 export default function JobCreationComponent() {
   const t = useTranslations("jobCreation");
   const [step, setStep] = useState(1);
+  const [showLoadingModal, setShowLoadingModal] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -67,6 +73,8 @@ export default function JobCreationComponent() {
     };
 
   const handleSubmit = async () => {
+    setError(null);
+    setShowLoadingModal(true);
     startTransition(async () => {
       const { error } = await createJob({
         jobTitle: formData.jobTitle,
@@ -79,6 +87,8 @@ export default function JobCreationComponent() {
         captchaToken: formData.captchaToken,
       });
       if (error) {
+        setShowLoadingModal(false);
+        setError(error);
         logError(error);
       }
     });
@@ -95,6 +105,37 @@ export default function JobCreationComponent() {
   return (
     <div className="px-4 sm:px-6 w-full max-w-[1080px]">
       <H1 className="w-full text-center mb-8">{t("title")}</H1>
+
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Loading Modal */}
+      <Dialog open={showLoadingModal} onOpenChange={setShowLoadingModal}>
+        <DialogTitle>{t("title")}</DialogTitle>
+        <DialogContent className="sm:max-w-[425px]">
+          <div className="flex flex-col items-center justify-center py-8 gap-6">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">{t("loading.title")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("loading.description")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("loading.redirect")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("loading.emailNotification")}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="mb-8">
         <Progress value={step === 1 ? 50 : 100} className="h-2" />
