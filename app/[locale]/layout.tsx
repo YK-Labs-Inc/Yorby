@@ -83,11 +83,11 @@ export default async function RootLayout({
   } = await supabase.auth.getSession();
   const jobs = await fetchJobs();
   let numberOfCredits = 0;
+  let hasSubscription = false;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
+    hasSubscription = await fetchHasSubscription(user.id);
   }
-  const hasSubscription = await fetchHasSubscription(user?.id || "");
-  console.log("hasSubscription", hasSubscription);
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
