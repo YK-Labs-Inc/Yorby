@@ -26,15 +26,14 @@ export default async function JobsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const errorMessage = (await searchParams).error as string;
   const newJob = (await searchParams).newJob === "true";
-  if (!newJob) {
-  }
   let jobs: Tables<"custom_jobs">[] = [];
   if (!newJob) {
     jobs = await fetchJobs();
   }
   if (jobs.length > 0) {
-    redirect(`/dashboard/jobs/${jobs[0].id}`);
+    redirect(`/dashboard/jobs/${jobs[0].id}?error=${errorMessage}`);
   }
   return (
     <div className="w-full flex justify-center items-center p-8">

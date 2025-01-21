@@ -72,6 +72,20 @@ export default function JobCreationComponent() {
       }
     };
 
+  const handleFileDelete = (
+    field: "resume" | "coverLetter" | "miscDocuments",
+    index?: number
+  ) => {
+    setFormData((prev) => {
+      if (field === "miscDocuments" && typeof index === "number") {
+        const newMiscDocuments = [...prev.miscDocuments];
+        newMiscDocuments.splice(index, 1);
+        return { ...prev, miscDocuments: newMiscDocuments };
+      }
+      return { ...prev, [field]: null };
+    });
+  };
+
   const handleSubmit = async () => {
     setError("");
     setShowLoadingModal(true);
@@ -128,9 +142,6 @@ export default function JobCreationComponent() {
               </p>
               <p className="text-sm text-muted-foreground">
                 {t("loading.redirect")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("loading.emailNotification")}
               </p>
             </div>
           </div>
@@ -222,8 +233,18 @@ export default function JobCreationComponent() {
                   className="cursor-pointer"
                 />
                 {formData.resume && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {formData.resume.name}
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {formData.resume.name}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => handleFileDelete("resume")}
+                    >
+                      ×
+                    </Button>
                   </div>
                 )}
               </div>
@@ -239,8 +260,18 @@ export default function JobCreationComponent() {
                   className="cursor-pointer"
                 />
                 {formData.coverLetter && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {formData.coverLetter.name}
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {formData.coverLetter.name}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => handleFileDelete("coverLetter")}
+                    >
+                      ×
+                    </Button>
                   </div>
                 )}
               </div>
@@ -257,10 +288,24 @@ export default function JobCreationComponent() {
                   className="cursor-pointer"
                 />
                 {formData.miscDocuments.length > 0 && (
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {t("additionalDocs.filesSelected", {
-                      count: formData.miscDocuments.length,
-                    })}
+                  <div className="mt-2 space-y-1">
+                    {formData.miscDocuments.map((file, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {file.name}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() =>
+                            handleFileDelete("miscDocuments", index)
+                          }
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

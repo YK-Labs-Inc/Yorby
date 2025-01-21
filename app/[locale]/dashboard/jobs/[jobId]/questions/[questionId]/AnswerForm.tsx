@@ -72,16 +72,6 @@ export default function AnswerForm({
     router.push(`?submissionId=${submissionId}`);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === "Enter" || e.key === "NumpadEnter")
-    ) {
-      e.preventDefault();
-      e.currentTarget.form?.requestSubmit();
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -144,7 +134,6 @@ export default function AnswerForm({
                             ? "opacity-50"
                             : ""
                         }
-                        onKeyDown={handleKeyDown}
                       />
                       {isGenerateAnswerPending && (
                         <div className="absolute inset-0 flex items-center justify-center bg-background/50">
@@ -182,9 +171,10 @@ export default function AnswerForm({
                 </p>
               ) : (
                 submissions.map((submission) => (
-                  <div
+                  <button
                     key={submission.id}
-                    className="p-4 border rounded-lg hover:bg-accent transition-colors"
+                    className="p-4 border rounded-lg hover:bg-accent transition-colors w-full"
+                    onClick={() => handleSubmissionSelect(submission.id)}
                   >
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-muted-foreground">
@@ -192,16 +182,11 @@ export default function AnswerForm({
                           date: formatDate(new Date(submission.created_at)),
                         })}
                       </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSubmissionSelect(submission.id)}
-                      >
-                        {t("viewSubmission")}
-                      </Button>
                     </div>
-                    <p className="mt-2 line-clamp-3">{submission.answer}</p>
-                  </div>
+                    <p className="mt-2 line-clamp-3 text-left">
+                      {submission.answer}
+                    </p>
+                  </button>
                 ))
               )}
             </div>

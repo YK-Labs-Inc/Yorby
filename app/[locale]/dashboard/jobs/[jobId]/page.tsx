@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "./actions";
 import { getTranslations } from "next-intl/server";
+import { FormMessage } from "@/components/form-message";
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -98,55 +99,42 @@ export default async function JobPage({
         Practice Interview Questions{" "}
       </H1>
 
-      <Tabs value={view} className="w-full">
-        <TabsList>
-          <Link href={`?view=practice`} className="w-full">
-            <TabsTrigger value="practice" className="w-full">
-              Practice Questions
-            </TabsTrigger>
-          </Link>
-          <Link href={`?view=mock`} className="w-full">
-            <TabsTrigger value="mock" className="w-full">
-              Mock Interview
-            </TabsTrigger>
-          </Link>
-        </TabsList>
-      </Tabs>
-
       {isAnonymous ? (
-        <div className="md mx-auto w-full bg-green-300">
+        <div className="md mx-auto w-full">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
             <h2 className="text-lg font-semibold mb-2">{t("title")}</h2>
             <p className="text-muted-foreground mb-6">{t("description")}</p>
-            <form className="space-y-4">
-              <div>
-                <Label htmlFor="email">{t("form.email.label")}</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder={t("form.email.placeholder")}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">{t("form.password.label")}</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder={t("form.password.placeholder")}
-                  required
-                />
-              </div>
-              <SubmitButton formAction={linkAnonymousAccount}>
-                {t("form.submit")}
-              </SubmitButton>
+            <form action={linkAnonymousAccount} className="space-y-4">
+              <Label htmlFor="email">{t("form.email.label")}</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder={t("form.email.placeholder")}
+                required
+              />
+              <input type="hidden" name="jobId" value={jobId} />
+              <SubmitButton>{t("form.submit")}</SubmitButton>
             </form>
           </div>
+          <FormMessage />
         </div>
       ) : (
         <>
+          <Tabs value={view} className="w-full">
+            <TabsList>
+              <Link href={`?view=practice`} className="w-full">
+                <TabsTrigger value="practice" className="w-full">
+                  Practice Questions
+                </TabsTrigger>
+              </Link>
+              <Link href={`?view=mock`} className="w-full">
+                <TabsTrigger value="mock" className="w-full">
+                  Mock Interview
+                </TabsTrigger>
+              </Link>
+            </TabsList>
+          </Tabs>
           {view === "practice" && (
             <PracticeQuestions
               jobId={jobId}

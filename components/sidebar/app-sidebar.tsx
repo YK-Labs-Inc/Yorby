@@ -86,9 +86,9 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        {user && !hasSubscription && (
+        {user && !user.is_anonymous && !hasSubscription && (
           <>
-            <p className="text-sm text-center text-muted-foreground px-4">
+            <p className="text-lg text-center font-bold px-4">
               {t("numberOfCredits", { numberOfCredits })}
             </p>
             <Link className="w-full" href="/purchase">

@@ -77,7 +77,6 @@
     "loading": {
       "title": "Creating Your Interview Questions",
       "description": "We're analyzing your job details and generating tailored interview questions. This may take a few minutes.",
-      "emailNotification": "We will also notify you by email once your questions are ready.",
       "redirect": "We'll redirect you to your questions once they're ready."
     }
   },
@@ -228,8 +227,7 @@
   },
   "purchase": {
     "title": "Get Interview Credits",
-    "subtitle": "Choose the plan that works best for you",
-    "description": "Generate unlimited practice interview questions, get feedback on your answers, and practice with AI-powered mock interviews to perfect your interview skills",
+    "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
     "products": {
       "oneCredit": {
         "title": "Single Interview",
@@ -280,10 +278,8 @@
       },
       "submit": "Link Account"
     },
-    "errors": {
-      "emailRequired": "Email and password are required",
-      "success": "Please check your email to verify your account"
-    }
+    "emailRequiredError": "Email is required",
+    "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration."
   },
   "faq": {
     "title": "Frequently Asked Questions",

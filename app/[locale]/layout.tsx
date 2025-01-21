@@ -122,10 +122,7 @@ export default async function RootLayout({
                       user={user}
                     />
                     <SidebarTrigger />
-                    <main className="w-full">
-                      <FormMessage />
-                      {children}
-                    </main>
+                    <main className="w-full">{children}</main>
                   </SidebarProvider>
                 </AxiomLoggingProvider>
               </UserProvider>

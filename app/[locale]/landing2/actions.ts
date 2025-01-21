@@ -33,11 +33,13 @@ export const createJob = async ({
     companyName,
     companyDescription,
     function: "createJob",
+    captchaToken,
   };
   const logger = new Logger().with(trackingProperties);
   logger.info("Starting to create job");
   const t = await getTranslations("errors");
   let userId = "";
+  let customJobId = "";
   try {
     const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
     if (!loggedInUserId) {
@@ -56,62 +58,61 @@ export const createJob = async ({
     } else {
       userId = loggedInUserId;
     }
-  } catch (error) {
-    logger.error("Error creating job", { error });
+    customJobId = await createCustomJob({
+      jobTitle,
+      jobDescription,
+      companyName,
+      companyDescription,
+      userId,
+    });
+
+    const geminiUploadResponses = await Promise.all([
+      resume
+        ? processFile({
+            file: resume,
+            displayName: "Resume",
+            customJobId,
+            userId,
+          })
+        : null,
+      coverLetter
+        ? processFile({
+            file: coverLetter,
+            displayName: "Cover Letter",
+            customJobId,
+            userId,
+          })
+        : null,
+      ...miscDocuments.map((file, index) =>
+        processFile({
+          file,
+          displayName: `Miscellaenous file #${index + 1}`,
+          customJobId,
+          userId,
+        })
+      ),
+    ]);
+
+    await generateCustomJobQuestions({
+      customJobId,
+      files: geminiUploadResponses
+        .filter((response) => response !== null)
+        .map((response) => ({
+          uri: response.file.uri,
+          mimeType: response.file.mimeType,
+        })),
+      jobTitle,
+      jobDescription,
+      companyName,
+      companyDescription,
+    });
+  } catch (error: any) {
+    logger.error("Error creating job", { error: error.message });
     await logger.flush();
     return {
       error: t("pleaseTryAgain"),
     };
   }
-
-  const customJobId = await createCustomJob({
-    jobTitle,
-    jobDescription,
-    companyName,
-    companyDescription,
-    userId,
-  });
-
-  const geminiUploadResponses = await Promise.all([
-    resume
-      ? processFile({
-          file: resume,
-          displayName: "Resume",
-          customJobId,
-          userId,
-        })
-      : null,
-    coverLetter
-      ? processFile({
-          file: coverLetter,
-          displayName: "Cover Letter",
-          customJobId,
-          userId,
-        })
-      : null,
-    ...miscDocuments.map((file, index) =>
-      processFile({
-        file,
-        displayName: `Miscellaenous file #${index + 1}`,
-        customJobId,
-        userId,
-      })
-    ),
-  ]);
-
-  await generateCustomJobQuestions({
-    customJobId,
-    files: geminiUploadResponses
-      .filter((response) => response !== null)
-      .map((response) => ({
-        uri: response.file.uri,
-        mimeType: response.file.mimeType,
-      })),
-    jobTitle,
-    jobDescription,
-    companyName,
-    companyDescription,
-  });
 
   redirect(`/dashboard/jobs/${customJobId}`);
 };

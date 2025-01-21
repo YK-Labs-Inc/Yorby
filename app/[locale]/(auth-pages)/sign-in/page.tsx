@@ -1,8 +1,8 @@
 import { signInWithOTP } from "@/app/[locale]/(auth-pages)/actions";
+import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "@/i18n/routing";
 
 export default async function Login() {
   return (
@@ -11,12 +11,6 @@ export default async function Login() {
       className="flex flex-col items-center justify-center w-full min-h-screen"
     >
       <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
       <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -32,6 +26,7 @@ export default async function Login() {
           We'll send you a magic link to your email. Click it to sign in
           instantly.
         </p>
+        <FormMessage />
       </div>
     </form>
   );
