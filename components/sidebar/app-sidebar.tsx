@@ -104,7 +104,7 @@ export function AppSidebar({
         ) : null}
         {!user && (
           <div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 text-center w-full">
               {t("signInToStart")}
             </p>
             <Button
