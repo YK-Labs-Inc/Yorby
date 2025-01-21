@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "./actions";
 import { getTranslations } from "next-intl/server";
-import { FormMessage } from "@/components/form-message";
+import { FormMessage, Message } from "@/components/form-message";
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -86,6 +86,17 @@ export default async function JobPage({
   const filter =
     ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
     "all";
+  const successMessage = (await searchParams)?.success as string | undefined;
+  const errorMessage = (await searchParams)?.error as string | undefined;
+  const message = (await searchParams)?.message as string | undefined;
+  let formMessage: Message | undefined;
+  if (successMessage) {
+    formMessage = { success: successMessage };
+  } else if (errorMessage) {
+    formMessage = { error: errorMessage };
+  } else if (message) {
+    formMessage = { message: message };
+  }
 
   const t = await getTranslations("accountLinking");
 
@@ -117,7 +128,7 @@ export default async function JobPage({
               <SubmitButton>{t("form.submit")}</SubmitButton>
             </form>
           </div>
-          <FormMessage />
+          {formMessage && <FormMessage message={formMessage} />}
         </div>
       ) : (
         <>
