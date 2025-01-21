@@ -133,9 +133,14 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.updateUser({
-    email,
-  });
+  const { error } = await supabase.auth.updateUser(
+    {
+      email,
+    },
+    {
+      emailRedirectTo: `/dashboard/jobs/${jobId}`,
+    }
+  );
 
   if (error) {
     return encodedRedirect("error", `/dashboard/jobs/${jobId}`, error.message);
