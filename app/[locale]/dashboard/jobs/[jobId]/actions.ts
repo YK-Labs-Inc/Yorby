@@ -142,7 +142,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       email,
     },
     {
-      emailRedirectTo: `/dashboard/jobs/${jobId}`,
+      emailRedirectTo: `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs/${jobId}`,
     }
   );
 

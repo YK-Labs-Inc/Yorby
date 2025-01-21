@@ -7,12 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState } from "react";
 import { submitAnswer, generateAnswer } from "./actions";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { AIButton } from "@/components/ai-button";
 import AnswerGuideline from "./AnswerGuideline";
+import { Link } from "@/i18n/routing";
+import { FormMessage, Message } from "@/components/form-message";
+import { useRef, useState } from "react";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -29,48 +31,48 @@ export default function AnswerForm({
   question,
   jobId,
   submissions,
+  submissionId,
 }: {
   question: Tables<"custom_job_questions">;
   jobId: string;
   submissions: Tables<"custom_job_question_submissions">[];
+  submissionId?: string;
 }) {
-  const params = useSearchParams();
-  const submissionId = params.get("submissionId");
   const t = useTranslations("interviewQuestion");
-  const [submitAnswerState, submitAnswerAction, isSubmitAnswerPending] =
-    useActionState(submitAnswer, {
-      error: "",
-    });
-  const [generateAnswerState, generateAnswerAction, isGenerateAnswerPending] =
-    useActionState(generateAnswer, {
-      error: "",
-    });
-  const [currentSubmission, setCurrentSubmission] =
-    useState<Tables<"custom_job_question_submissions"> | null>(
-      submissions.length > 0
-        ? (submissions.find((submission) => submission.id === submissionId) ??
-            submissions[0])
-        : null
-    );
+  const [_, submitAnswerAction, isSubmitAnswerPending] = useActionState(
+    submitAnswer,
+    null
+  );
+  const [__, generateAnswerAction, isGenerateAnswerPending] = useActionState(
+    generateAnswer,
+    null
+  );
+  let currentSubmission: Tables<"custom_job_question_submissions"> | null =
+    submissionId && submissions.length > 0
+      ? (submissions.find((submission) => submission.id === submissionId) ??
+        null)
+      : null;
+
+  const initialAnswer = useRef(currentSubmission?.answer || "");
+  const [currentAnswer, setCurrentAnswer] = useState(initialAnswer.current);
+  const hasAnswerChanged = currentAnswer !== initialAnswer.current;
+
   const feedback = currentSubmission?.feedback as {
     pros: string[];
     cons: string[];
-  };
-  const router = useRouter();
-  const [view, setView] = useState<"question" | "submissions">("question");
+  } | null;
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error") as string;
+  const view = searchParams.get("view") || "question";
+  let formMessage: Message | null = null;
+  if (error) {
+    formMessage = {
+      error,
+    };
+  }
 
-  useEffect(() => {
-    if (submitAnswerState.error || generateAnswerState.error) {
-      alert(submitAnswerState.error || generateAnswerState.error);
-    }
-  }, [submitAnswerState, generateAnswerState]);
-
-  const handleSubmissionSelect = (submissionId: string) => {
-    const submission = submissions.find((s) => s.id === submissionId);
-    setCurrentSubmission(submission || null);
-    setView("question");
-    router.push(`?submissionId=${submissionId}`);
-  };
+  const newViewParams = new URLSearchParams(searchParams);
+  newViewParams.set("view", view === "question" ? "submissions" : "question");
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,16 +82,14 @@ export default function AnswerForm({
             <CardTitle>
               {view === "question" ? t("questionLabel") : t("submissionsLabel")}
             </CardTitle>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                setView(view === "question" ? "submissions" : "question")
-              }
+            <Link
+              href={`/dashboard/jobs/${jobId}/questions/${question.id}?${newViewParams.toString()}`}
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
             >
               {view === "question"
                 ? t("submissionsLabel")
                 : t("backToQuestion")}
-            </Button>
+            </Link>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -129,6 +129,10 @@ export default function AnswerForm({
                         rows={8}
                         placeholder={t("answerPlaceholder")}
                         defaultValue={currentSubmission?.answer}
+                        onChange={(e) => setCurrentAnswer(e.target.value)}
+                        disabled={
+                          isSubmitAnswerPending || isGenerateAnswerPending
+                        }
                         className={
                           isGenerateAnswerPending || isSubmitAnswerPending
                             ? "opacity-50"
@@ -152,7 +156,9 @@ export default function AnswerForm({
                     <SubmitButton
                       className="mt-4"
                       disabled={
-                        isGenerateAnswerPending || isSubmitAnswerPending
+                        isGenerateAnswerPending ||
+                        isSubmitAnswerPending ||
+                        !hasAnswerChanged
                       }
                       pendingText={t("buttons.submitting")}
                       type="submit"
@@ -160,6 +166,7 @@ export default function AnswerForm({
                       {t("buttons.submit")}
                     </SubmitButton>
                   </form>
+                  {formMessage && <FormMessage message={formMessage} />}
                 </div>
               </div>
             </>
@@ -171,10 +178,10 @@ export default function AnswerForm({
                 </p>
               ) : (
                 submissions.map((submission) => (
-                  <button
+                  <Link
                     key={submission.id}
-                    className="p-4 border rounded-lg hover:bg-accent transition-colors w-full"
-                    onClick={() => handleSubmissionSelect(submission.id)}
+                    href={`/dashboard/jobs/${jobId}/questions/${question.id}?submissionId=${submission.id}`}
+                    className="block p-4 border rounded-lg hover:bg-accent transition-colors w-full text-left"
                   >
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-muted-foreground">
@@ -183,10 +190,8 @@ export default function AnswerForm({
                         })}
                       </p>
                     </div>
-                    <p className="mt-2 line-clamp-3 text-left">
-                      {submission.answer}
-                    </p>
-                  </button>
+                    <p className="mt-2 line-clamp-3">{submission.answer}</p>
+                  </Link>
                 ))
               )}
             </div>
@@ -230,7 +235,7 @@ export default function AnswerForm({
                           {t("noPros")}
                         </p>
                       ) : (
-                        feedback.pros.map((pro, index) => (
+                        feedback.pros.map((pro: string, index: number) => (
                           <div key={index} className="flex gap-2 items-start">
                             <span className="text-green-600 dark:text-green-400 mt-1">
                               •
@@ -269,7 +274,7 @@ export default function AnswerForm({
                           {t("noCons")}
                         </p>
                       ) : (
-                        feedback.cons.map((con, index) => (
+                        feedback.cons.map((con: string, index: number) => (
                           <div key={index} className="flex gap-2 items-start">
                             <span className="text-red-600 dark:text-red-400 mt-1">
                               •
