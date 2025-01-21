@@ -17,11 +17,7 @@ import { Loader2 } from "lucide-react";
 export function GenerateInterviewQuestionsButton({ jobId }: { jobId: string }) {
   const t = useTranslations("jobCreation");
   const jobPageT = useTranslations("jobPage");
-  const [state, action, pending] = useActionState(
-    generateMoreQuestions,
-    undefined
-  );
-  console.log(pending);
+  const [_, action, pending] = useActionState(generateMoreQuestions, undefined);
   return (
     <Dialog>
       <DialogTrigger asChild>
