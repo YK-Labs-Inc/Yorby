@@ -12,19 +12,19 @@ let nextConfig = {
       beforeFiles: [
         {
           source: "/blog",
-          destination: "https://montee.feather.blog/blog",
+          destination: "https://perfectinterview.feather.blog/blog",
         },
         {
           source: "/blog/:path*",
-          destination: "https://montee.feather.blog/blog/:path*",
+          destination: "https://perfectinterview.feather.blog/blog/:path*",
         },
         {
           source: "/_feather",
-          destination: "https://montee.feather.blog/_feather",
+          destination: "https://perfectinterview.feather.blog/_feather",
         },
         {
           source: "/_feather/:path*",
-          destination: "https://montee.feather.blog/_feather/:path*",
+          destination: "https://perfectinterview.feather.blog/_feather/:path*",
         },
       ],
     };
@@ -36,7 +36,7 @@ let nextConfig = {
         headers: [
           {
             key: "X-Forwarded-Host",
-            value: "www.montee.ai",
+            value: "www.perfectinterview.ai",
           },
         ],
       },
@@ -45,7 +45,7 @@ let nextConfig = {
         headers: [
           {
             key: "X-Forwarded-Host",
-            value: "www.montee.ai",
+            value: "www.perfectinterview.ai",
           },
         ],
       },
@@ -54,7 +54,7 @@ let nextConfig = {
         headers: [
           {
             key: "X-Forwarded-Host",
-            value: "www.montee.ai",
+            value: "www.perfectinterview.ai",
           },
         ],
       },
@@ -64,7 +64,7 @@ let nextConfig = {
         headers: [
           {
             key: "X-Forwarded-Host",
-            value: "www.montee.ai",
+            value: "www.perfectinterview.ai",
           },
         ],
       },
