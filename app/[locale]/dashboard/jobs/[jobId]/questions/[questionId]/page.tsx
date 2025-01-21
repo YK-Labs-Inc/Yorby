@@ -24,10 +24,13 @@ const fetchQuestion = async (questionId: string) => {
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ jobId: string; questionId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { jobId, questionId } = await params;
+  const { submissionId } = (await searchParams) as { submissionId?: string };
   const question = await fetchQuestion(questionId);
 
   return (
@@ -43,6 +46,7 @@ export default async function Page({
         jobId={jobId}
         question={question}
         submissions={question.custom_job_question_submissions}
+        submissionId={submissionId}
       />
     </div>
   );

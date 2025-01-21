@@ -56,6 +56,7 @@ export function AuthModal({ isOpen, onOpenChange }: AuthModalProps) {
           <input type="hidden" name="redirectTo" value={pathname} />
           <input type="hidden" name="captchaToken" value={captchaToken} />
           <SubmitButton
+            disabled={!captchaToken}
             className="mt-4"
             pendingText="Sending magic link..."
             type="submit"

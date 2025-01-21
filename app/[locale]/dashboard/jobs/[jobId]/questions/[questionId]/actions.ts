@@ -27,9 +27,10 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   const t = await getTranslations("errors");
   const logger = new Logger().with(trackingProperties);
   let errorMessage = "";
+  let submissionId = "";
   try {
     logger.info("Submitting answer");
-    await processAnswer(jobId, questionId, answer);
+    submissionId = await processAnswer(jobId, questionId, answer);
   } catch (error: unknown) {
     logger.error("Error writing answer to database", { error });
     errorMessage = t("pleaseTryAgain");
@@ -37,8 +38,16 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
     await logger.flush();
   }
   logger.info("Answer submitted");
+  await logger.flush();
   revalidatePath(`/dashboard/jobs/${jobId}/questions/${questionId}`);
-  return { error: errorMessage };
+  if (errorMessage) {
+    redirect(
+      `/dashboard/jobs/${jobId}/questions/${questionId}?error=${errorMessage}`
+    );
+  }
+  redirect(
+    `/dashboard/jobs/${jobId}/questions/${questionId}?submissionId=${submissionId}`
+  );
 };
 
 export const generateAnswer = async (prevState: any, formData: FormData) => {
@@ -126,14 +135,19 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
   } catch (error: unknown) {
     logger.error("Error generating answer", { error });
     await logger.flush();
-    errorMessage = "Sorry, something went wrong. Please try again.";
-    return { error: errorMessage };
+    const translation = await getTranslations("errors");
+    errorMessage = translation("pleaseTryAgain");
   }
 
   const submission = await writeAnswerToDatabase(jobId, questionId, response, {
     pros: [],
     cons: [],
   });
+  if (errorMessage) {
+    redirect(
+      `/dashboard/jobs/${jobId}/questions/${questionId}?error=${errorMessage}`
+    );
+  }
   redirect(
     `/dashboard/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`
   );
@@ -152,8 +166,14 @@ const processAnswer = async (
   });
   const feedback = await generateFeedback(jobId, questionId, answer);
   logger.info("Feedback generated", { feedback });
-  await writeAnswerToDatabase(jobId, questionId, answer, feedback);
+  const submission = await writeAnswerToDatabase(
+    jobId,
+    questionId,
+    answer,
+    feedback
+  );
   logger.info("Wrote answer to database");
+  return submission.id;
 };
 
 const writeAnswerToDatabase = async (

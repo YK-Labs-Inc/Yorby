@@ -109,11 +109,12 @@
     "answerPlaceholder": "Type your response here...",
     "answerGuidelines": "Answer Guidelines",
     "buttons": {
-      "submit": "Submit Answer",
+      "submit": "Submit",
       "rewrite": "Rewrite Answer",
-      "submitting": "Submitting and grading your answer...",
+      "submitting": "Submitting...",
       "generateAnswer": "Generate Answer",
-      "generatingAnswer": "Generating answer..."
+      "generatingAnswer": "Generating Answer...",
+      "noChanges": "No Changes"
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
@@ -191,7 +192,8 @@
   "upgrade": {
     "locked": {
       "title": "Unlock the Full Interview Preparation Experience",
-      "description": "Get more credits to unlock unlimited practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
+      "description": "Get access to unlimited practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
+      "mockDescription": "Get access to unlimited AI-powered mock interviews that simulate real interview scenarios. Practice with our advanced AI interviewer that adapts to your responses and provides instant feedback.",
       "button": "Unlock Full Interview Prep Access",
       "insufficientCredits": "You don't have enough credits to unlock this interview prep experience.",
       "unlocking": "Unlocking..."

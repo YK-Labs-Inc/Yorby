@@ -15,7 +15,6 @@ import {
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import EndInterviewModal from "./EndInterviewModal";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
 
@@ -161,6 +160,17 @@ export default function ActiveInterview({
       }
 
       const audio = new Audio(audioUrl);
+      // @ts-ignore - setSinkId exists but TypeScript doesn't know about it
+      if (audio.setSinkId && selectedAudioOutputId) {
+        try {
+          // @ts-ignore
+          await audio.setSinkId(selectedAudioOutputId);
+        } catch (error: any) {
+          logError("Error setting audio output device:", {
+            error: error.message,
+          });
+        }
+      }
       audio.onended = () => setIsPlaying(false);
       audio.playbackRate = parseFloat(playbackSpeed);
       setCurrentAudio(audio);
@@ -330,7 +340,12 @@ export default function ActiveInterview({
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
+    <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center relative">
+      <div className="absolute top-4 right-4">
+        <Button onClick={() => setShowEndModal(true)} variant="destructive">
+          {t("endInterview")}
+        </Button>
+      </div>
       <div className="flex justify-between items-center gap-6">
         {/* Video Feed */}
         <div className="flex flex-col gap-4 w-1/2">
@@ -436,9 +451,6 @@ export default function ActiveInterview({
           </div>
         </div>
       </div>
-      <Button onClick={() => setShowEndModal(true)} variant="destructive">
-        {t("endInterview")}
-      </Button>
       <EndInterviewModal
         isOpen={showEndModal}
         onClose={() => setShowEndModal(false)}

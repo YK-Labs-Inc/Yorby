@@ -114,22 +114,24 @@ export default async function JobPage({
 
       {isAnonymous ? (
         <div className="md mx-auto w-full">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <h2 className="text-lg font-semibold mb-2">{t("title")}</h2>
-            <p className="text-muted-foreground mb-6">{t("description")}</p>
-            <form action={linkAnonymousAccount} className="space-y-4">
-              <Label htmlFor="email">{t("form.email.label")}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder={t("form.email.placeholder")}
-                required
-              />
-              <input type="hidden" name="jobId" value={jobId} />
-              <SubmitButton>{t("form.submit")}</SubmitButton>
-            </form>
-          </div>
+          {(!formMessage || "error" in formMessage) && (
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-2">{t("title")}</h2>
+              <p className="text-muted-foreground mb-6">{t("description")}</p>
+              <form action={linkAnonymousAccount} className="space-y-4">
+                <Label htmlFor="email">{t("form.email.label")}</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder={t("form.email.placeholder")}
+                  required
+                />
+                <input type="hidden" name="jobId" value={jobId} />
+                <SubmitButton>{t("form.submit")}</SubmitButton>
+              </form>
+            </div>
+          )}
           {formMessage && <FormMessage message={formMessage} />}
         </div>
       ) : (
@@ -149,7 +151,9 @@ export default async function JobPage({
                 </Link>
               </TabsList>
             </Tabs>
-            <GenerateInterviewQuestionsButton jobId={jobId} />
+            {view === "practice" && (
+              <GenerateInterviewQuestionsButton jobId={jobId} />
+            )}
           </div>
           {view === "practice" && (
             <PracticeQuestions
