@@ -11,10 +11,16 @@ import { createJob } from "./landing2/actions";
 import { useTranslations } from "next-intl";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface FormData {
   jobTitle: string;
@@ -30,7 +36,6 @@ interface FormData {
 export default function JobCreationComponent() {
   const t = useTranslations("jobCreation");
   const [step, setStep] = useState(1);
-  const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
@@ -88,7 +93,6 @@ export default function JobCreationComponent() {
 
   const handleSubmit = async () => {
     setError("");
-    setShowLoadingModal(true);
     startTransition(async () => {
       const { error } = await createJob({
         jobTitle: formData.jobTitle,
@@ -101,7 +105,6 @@ export default function JobCreationComponent() {
         captchaToken: formData.captchaToken,
       });
       if (error) {
-        setShowLoadingModal(false);
         setError(error);
         logError(error);
       }
@@ -126,27 +129,6 @@ export default function JobCreationComponent() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      {/* Loading Modal */}
-      <Dialog open={showLoadingModal} onOpenChange={setShowLoadingModal}>
-        <DialogTitle>{t("title")}</DialogTitle>
-        <DialogContent className="sm:max-w-[425px]">
-          <div className="flex flex-col items-center justify-center py-8 gap-6">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">{t("loading.title")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t("loading.description")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("loading.redirect")}
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <div className="mb-8">
         <Progress value={step === 1 ? 50 : 100} className="h-2" />
@@ -314,12 +296,29 @@ export default function JobCreationComponent() {
                 <Button variant="outline" onClick={handleBack}>
                   {t("buttons.back")}
                 </Button>
-                <Button
-                  disabled={isPending || !formData.captchaToken}
-                  onClick={handleSubmit}
-                >
-                  {t("buttons.submit")}
-                </Button>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      disabled={isPending || !formData.captchaToken}
+                      onClick={handleSubmit}
+                    >
+                      {t("buttons.submit")}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>{t("loading.title")}</DialogTitle>
+                      <DialogDescription>
+                        {t("loading.description")}
+                      </DialogDescription>
+                      <p className="text-sm text-muted-foreground">
+                        {t("loading.redirect")}
+                      </p>
+                    </DialogHeader>
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </DialogContent>
+                </Dialog>
               </div>
               <Turnstile
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}

@@ -80,6 +80,10 @@
       "redirect": "We'll redirect you to your questions once they're ready."
     }
   },
+  "jobPage": {
+    "generateQuestions": "Generate More Questions",
+    "generatingQuestions": "Generating questions..."
+  },
   "waitlist": {
     "title": "Perfect Your Next Interview",
     "subtitle": "Get AI-powered interview prep to ace your next job interview.",

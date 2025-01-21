@@ -7,9 +7,11 @@ import MockInterview from "./MockInterview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
-import { linkAnonymousAccount } from "./actions";
+import { generateMoreQuestions, linkAnonymousAccount } from "./actions";
 import { getTranslations } from "next-intl/server";
 import { FormMessage, Message } from "@/components/form-message";
+import { AIButton } from "@/components/ai-button";
+import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -86,6 +88,7 @@ export default async function JobPage({
   const filter =
     ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
     "all";
+  const currentPage = parseInt((await searchParams)?.page as string) || 1;
   const successMessage = (await searchParams)?.success as string | undefined;
   const errorMessage = (await searchParams)?.error as string | undefined;
   const message = (await searchParams)?.message as string | undefined;
@@ -97,7 +100,6 @@ export default async function JobPage({
   } else if (message) {
     formMessage = { message: message };
   }
-
   const t = await getTranslations("accountLinking");
 
   return (
@@ -132,26 +134,30 @@ export default async function JobPage({
         </div>
       ) : (
         <>
-          <Tabs value={view} className="w-full">
-            <TabsList>
-              <Link href={`?view=practice`} className="w-full">
-                <TabsTrigger value="practice" className="w-full">
-                  Practice Questions
-                </TabsTrigger>
-              </Link>
-              <Link href={`?view=mock`} className="w-full">
-                <TabsTrigger value="mock" className="w-full">
-                  Mock Interview
-                </TabsTrigger>
-              </Link>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center justify-between w-full">
+            <Tabs value={view} className="w-full">
+              <TabsList>
+                <Link href={`?view=practice`} className="w-full">
+                  <TabsTrigger value="practice" className="w-full">
+                    Practice Questions
+                  </TabsTrigger>
+                </Link>
+                <Link href={`?view=mock`} className="w-full">
+                  <TabsTrigger value="mock" className="w-full">
+                    Mock Interview
+                  </TabsTrigger>
+                </Link>
+              </TabsList>
+            </Tabs>
+            <GenerateInterviewQuestionsButton jobId={jobId} />
+          </div>
           {view === "practice" && (
             <PracticeQuestions
               jobId={jobId}
               questions={job.custom_job_questions}
               isLocked={job.status === "locked" && !hasSubscription}
               userCredits={userCredits}
+              currentPage={currentPage}
             />
           )}
           {view === "mock" && (
