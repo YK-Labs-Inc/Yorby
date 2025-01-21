@@ -35,9 +35,11 @@ const mockQuestions = [
 export default function LockedJobComponent({
   jobId,
   userCredits,
+  view = "practice",
 }: {
   jobId: string;
   userCredits: number;
+  view: "practice" | "mock";
 }) {
   const t = useTranslations("upgrade");
   const [state, action, pending] = useActionState(unlockJob, null);
@@ -105,7 +107,11 @@ export default function LockedJobComponent({
               {t("locked.title")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-              {t("locked.description")}
+              {t(
+                view === "mock"
+                  ? "locked.mockDescription"
+                  : "locked.description"
+              )}
             </p>
             {userCredits > 0 ? (
               <form action={action}>

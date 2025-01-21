@@ -151,7 +151,9 @@ export default async function JobPage({
                 </Link>
               </TabsList>
             </Tabs>
-            <GenerateInterviewQuestionsButton jobId={jobId} />
+            {view === "practice" && (
+              <GenerateInterviewQuestionsButton jobId={jobId} />
+            )}
           </div>
           {view === "practice" && (
             <PracticeQuestions

@@ -57,7 +57,11 @@ export default function PracticeQuestions({
       )}
 
       {isLocked ? (
-        <LockedJobComponent jobId={jobId} userCredits={userCredits} />
+        <LockedJobComponent
+          jobId={jobId}
+          userCredits={userCredits}
+          view="practice"
+        />
       ) : (
         <>
           {currentQuestions.map((question, index) => (
