@@ -26,7 +26,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (!token) {
       logger.error("Invalid or expired code");
       return NextResponse.redirect(
-        `${origin}/sign-in?message=Invalid or expired code. Please try again.`
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
       );
     }
     // Handle magic link flow
@@ -69,9 +69,10 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   }
 
   if (redirectTo) {
+    logger.info("Redirecting to", { redirectTo });
     return NextResponse.redirect(`${origin}${redirectTo}`);
   }
 
-  // URL to redirect to after sign up process completes
+  logger.info("Redirecting to jobs dashboard");
   return NextResponse.redirect(`${origin}/dashboard/jobs`);
 });

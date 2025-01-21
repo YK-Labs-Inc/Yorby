@@ -1,10 +1,25 @@
 import { signInWithOTP } from "@/app/[locale]/(auth-pages)/actions";
-import { FormMessage } from "@/components/form-message";
+import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default async function Login() {
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const successMessage = (await searchParams)?.success as string | undefined;
+  const errorMessage = (await searchParams)?.error as string | undefined;
+  const message = (await searchParams)?.message as string | undefined;
+  let formMessage: Message | undefined;
+  if (successMessage) {
+    formMessage = { success: successMessage };
+  } else if (errorMessage) {
+    formMessage = { error: errorMessage };
+  } else if (message) {
+    formMessage = { message: message };
+  }
   return (
     <form
       action={signInWithOTP}
@@ -26,7 +41,7 @@ export default async function Login() {
           We'll send you a magic link to your email. Click it to sign in
           instantly.
         </p>
-        <FormMessage />
+        {formMessage && <FormMessage message={formMessage} />}
       </div>
     </form>
   );

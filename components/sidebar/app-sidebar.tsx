@@ -42,6 +42,14 @@ export function AppSidebar({
   const [logoSrc, setLogoSrc] = useState("/assets/dark-logo.png");
   const t = useTranslations("sidebar");
   const { theme } = useTheme();
+  const authError = searchParams.get("authError");
+  const authSuccess = searchParams.get("authSuccess");
+
+  useEffect(() => {
+    if (authError || authSuccess) {
+      setIsAuthOpen(true);
+    }
+  }, [authError, authSuccess]);
 
   useEffect(() => {
     setLogoSrc(
