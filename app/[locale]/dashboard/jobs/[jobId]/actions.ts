@@ -6,6 +6,10 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/utils/utils";
 import { revalidatePath } from "next/cache";
+import { getAllFiles } from "./questions/[questionId]/actions";
+import { SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { writeCustomJobQuestionsToDb } from "@/app/[locale]/landing2/actions";
 
 export const startMockInterview = async (
   prevState: any,
@@ -215,4 +219,162 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
   logger.info("Decremented user credit count");
 
   revalidatePath(`/dashboard/jobs/${jobId}`);
+};
+
+export const generateMoreQuestions = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const jobId = formData.get("jobId") as string;
+  const logger = new Logger().with({
+    jobId,
+  });
+  logger.info("Generating more questions");
+  const job = await fetchJob(jobId);
+  const files = await getAllFiles(jobId);
+
+  await generateMoreCustomJobQuestions({
+    customJobId: jobId,
+    files,
+    jobTitle: job.job_title,
+    jobDescription: job.job_description,
+    companyName: job.company_name,
+    companyDescription: job.company_description,
+  });
+  await logger.flush();
+  logger.info("Finished generating more questions");
+};
+
+const fetchJob = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data: job, error } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return job;
+};
+
+const fetchJobQuestions = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data: questions, error } = await supabase
+    .from("custom_job_questions")
+    .select("*")
+    .eq("custom_job_id", jobId);
+  if (error) {
+    throw error;
+  }
+  return questions;
+};
+
+const generateMoreCustomJobQuestions = async ({
+  customJobId,
+  files,
+  jobTitle,
+  jobDescription,
+  companyName,
+  companyDescription,
+}: {
+  customJobId: string;
+  files: {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[];
+  jobTitle: string;
+  jobDescription: string;
+  companyName: string | null;
+  companyDescription: string | null;
+}) => {
+  const existingQuestions = await fetchJobQuestions(customJobId);
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          questions: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                question: { type: SchemaType.STRING },
+                answerGuidelines: { type: SchemaType.STRING },
+              },
+              required: ["question", "answerGuidelines"],
+            },
+          },
+        },
+        required: ["questions"],
+      },
+    },
+  });
+
+  const result = await model.generateContent([
+    `
+    You are given a job title, job description, an optional company name and optional company desription. 
+    You are an expert job interviewer for the job title and description at the company with the given company description.
+
+    You might also be given a list of files that the candidate has uploaded which contains their previous work experience, education, and other relevant information.
+
+    You are also given a list of questions that the candidate has already answered.
+
+    Use all of this information to generate 20 additional job interview questions that will help you understand the candidate's skills and experience and their fit for the job 
+    that are also not in the list of questions that the candidate has already answered. This is important because you want to make sure that the candidate is able to practice with
+    questions that they have not seen before.
+
+    Include a variety of questions that will help you understand the candidate's skills and experience and their fit for the job such as behavioral questions, 
+    situational questions, technical questions, domain specific questions, past experience questions, and other questions that will help you understand the candidate's skills 
+    and experience and their fit for the job.
+
+    With each question, provide an answer guideline that determines whether the answer is correct or not.
+    
+    For open ended questions (such as behavioral questions or past experience questions), provide a list of criteria that the answer must meet to be considered correct.
+
+    For questions that have specific, correct answers (such as a calculation or technical question), make the answer guidelines be the correct answer.
+
+    Return your response in JSON format with the following schema:
+    {
+      "questions": [
+        {
+          "question": "string",
+          "answerGuidelines": "string"
+        }
+      ]
+    }
+
+
+    ## Job Title
+    ${jobTitle}
+
+    ## Job Description
+    ${jobDescription}
+
+    ## Company Name
+    ${companyName}
+
+    ## Company Description
+    ${companyDescription}
+
+    ## Existing Questions
+    ${existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")}
+    `,
+    ...files,
+  ]);
+  const response = result.response.text();
+  const { questions } = JSON.parse(response) as {
+    questions: { question: string; answerGuidelines: string }[];
+  };
+  await writeCustomJobQuestionsToDb({
+    customJobId,
+    questions,
+  });
+  revalidatePath(`/dashboard/jobs/${customJobId}`);
 };

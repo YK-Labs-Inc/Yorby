@@ -338,7 +338,7 @@ const generateCustomJobQuestions = async ({
   });
 };
 
-const writeCustomJobQuestionsToDb = async ({
+export const writeCustomJobQuestionsToDb = async ({
   customJobId,
   questions,
 }: {
