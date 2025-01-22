@@ -32,6 +32,10 @@ export default async function Page({
   const { jobId, questionId } = await params;
   const { submissionId } = (await searchParams) as { submissionId?: string };
   const question = await fetchQuestion(questionId);
+  const lastSubmission =
+    question.custom_job_question_submissions.length > 0
+      ? question.custom_job_question_submissions[0]
+      : null;
 
   return (
     <div className="max-w-[1080px] w-full mx-auto p-6 space-y-6">
@@ -46,7 +50,7 @@ export default async function Page({
         jobId={jobId}
         question={question}
         submissions={question.custom_job_question_submissions}
-        submissionId={submissionId}
+        submissionId={submissionId || lastSubmission?.id}
       />
     </div>
   );
