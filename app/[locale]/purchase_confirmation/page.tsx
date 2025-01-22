@@ -1,7 +1,5 @@
 import Stripe from "stripe";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
-import { getTranslations } from "next-intl/server";
 import RedirectMessage from "./RedirectMessage";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -11,10 +9,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export default async function PurchaseConfirmation({
   searchParams,
 }: {
-  searchParams: { session_id?: string };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const logger = new Logger();
-  const sessionId = searchParams.session_id;
+  const sessionId = (await searchParams).session_id as string;
 
   if (!sessionId) {
     return <RedirectMessage success={false} redirectPath="/dashboard/jobs" />;
