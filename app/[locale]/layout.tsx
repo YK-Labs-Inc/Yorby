@@ -11,6 +11,7 @@ import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import Chatwoot from "@/components/ChatwootWidget";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -121,7 +122,10 @@ export default async function RootLayout({
                       user={user}
                     />
                     <SidebarTrigger />
-                    <main className="w-full">{children}</main>
+                    <main className="w-full">
+                      {children}
+                      <Chatwoot />
+                    </main>
                   </SidebarProvider>
                 </AxiomLoggingProvider>
               </UserProvider>
