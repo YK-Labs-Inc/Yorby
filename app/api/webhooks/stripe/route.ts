@@ -62,7 +62,7 @@ async function handleSuccessfulPayment(
       const { data: existingCredits } = await supabase
         .from("custom_job_credits")
         .select("number_of_credits")
-        .eq("stripe_customer_id", userId)
+        .eq("id", userId)
         .single();
 
       if (existingCredits) {
