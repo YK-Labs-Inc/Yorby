@@ -19,6 +19,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     email,
     origin,
     redirectTo,
+    token,
     path: "/auth/callback",
   });
 
