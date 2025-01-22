@@ -34,21 +34,8 @@ export default async function PurchaseConfirmation({
       );
     }
 
-    // Get user from metadata
-    const userId = session.metadata?.userId;
-    if (!userId) {
-      logger.error("User ID not found in session metadata", { sessionId });
-      return (
-        <RedirectMessage
-          success={false}
-          redirectPath="/purchase?error=verification_failed"
-        />
-      );
-    }
-
     logger.info("Session verified successfully", {
       sessionId,
-      userId,
     });
 
     return <RedirectMessage success={true} redirectPath="/dashboard/jobs" />;
