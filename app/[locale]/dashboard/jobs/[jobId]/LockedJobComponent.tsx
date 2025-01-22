@@ -54,7 +54,7 @@ export default function LockedJobComponent({
   return (
     <>
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Need More Credits</DialogTitle>
             <DialogDescription className="space-y-3 pt-2">

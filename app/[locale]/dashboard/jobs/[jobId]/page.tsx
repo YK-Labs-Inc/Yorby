@@ -113,6 +113,7 @@ export default async function JobPage({
     formMessage = { message: message };
   }
   const t = await getTranslations("accountLinking");
+  const isLocked = job.status === "locked" && !hasSubscription;
 
   return (
     <div
@@ -178,7 +179,7 @@ export default async function JobPage({
                   </Link>
                 </TabsList>
               </Tabs>
-              {view === "practice" && (
+              {view === "practice" && !isLocked && (
                 <GenerateInterviewQuestionsButton jobId={jobId} />
               )}
             </div>
@@ -186,7 +187,7 @@ export default async function JobPage({
               <PracticeQuestions
                 jobId={jobId}
                 questions={job.custom_job_questions}
-                isLocked={job.status === "locked" && !hasSubscription}
+                isLocked={isLocked}
                 userCredits={userCredits}
                 currentPage={currentPage}
               />
@@ -196,7 +197,7 @@ export default async function JobPage({
                 jobId={jobId}
                 filter={filter}
                 userCredits={userCredits}
-                isLocked={job.status === "locked" && !hasSubscription}
+                isLocked={isLocked}
               />
             )}
           </div>
