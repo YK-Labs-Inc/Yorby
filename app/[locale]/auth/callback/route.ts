@@ -49,8 +49,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   } else if (token && type === "signup" && email) {
     logger.info("Handling user signup");
     const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
+      token_hash: token,
       type,
     });
 
