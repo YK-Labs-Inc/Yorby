@@ -112,26 +112,30 @@ const addUserToBrevo = async ({
   email: string;
   logger: Logger;
 }) => {
-  let apiInstance = new SibApiV3Sdk.ContactsApi();
-  const brevoApiKey = process.env.BREVO_API_KEY;
-  if (!brevoApiKey) {
-    throw new Error("BREVO_API_KEY is not set");
-  }
-  apiInstance.setApiKey(SibApiV3Sdk.ContactsApiApiKeys.apiKey, brevoApiKey);
+  try {
+    let apiInstance = new SibApiV3Sdk.ContactsApi();
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (!brevoApiKey) {
+      throw new Error("BREVO_API_KEY is not set");
+    }
+    apiInstance.setApiKey(SibApiV3Sdk.ContactsApiApiKeys.apiKey, brevoApiKey);
 
-  let createContact = new SibApiV3Sdk.CreateContact();
+    let createContact = new SibApiV3Sdk.CreateContact();
 
-  createContact.email = email;
-  createContact.listIds = [6];
+    createContact.email = email;
+    createContact.listIds = [6];
 
-  await apiInstance.createContact(createContact);
-  logger.info("Added contact to Brevo");
-  await trackServerEvent({
-    userId,
-    email,
-    eventName: "user_sign_up",
-    args: {
+    await apiInstance.createContact(createContact);
+    logger.info("Added contact to Brevo");
+    await trackServerEvent({
+      userId,
       email,
-    },
-  });
+      eventName: "user_sign_up",
+      args: {
+        email,
+      },
+    });
+  } catch (error: any) {
+    logger.error("Failed to add user to Brevo", { error });
+  }
 };
