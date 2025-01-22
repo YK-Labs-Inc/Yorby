@@ -3,6 +3,7 @@ import AnswerGuideline from "./AnswerGuideline";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import AnswerForm from "./AnswerForm";
+import { Tables } from "@/utils/supabase/database.types";
 
 const fetchQuestion = async (questionId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -36,6 +37,13 @@ export default async function Page({
     question.custom_job_question_submissions.length > 0
       ? question.custom_job_question_submissions[0]
       : null;
+  let currentSubmission: Tables<"custom_job_question_submissions"> | undefined =
+    submissionId
+      ? question.custom_job_question_submissions.find(
+          (submission) => submission.id === submissionId
+        )
+      : undefined;
+  console.log("hey currentSubmission", currentSubmission);
 
   return (
     <div className="max-w-[1080px] w-full mx-auto p-6 space-y-6">
@@ -50,7 +58,7 @@ export default async function Page({
         jobId={jobId}
         question={question}
         submissions={question.custom_job_question_submissions}
-        submissionId={submissionId || lastSubmission?.id}
+        currentSubmission={currentSubmission ?? lastSubmission}
       />
     </div>
   );

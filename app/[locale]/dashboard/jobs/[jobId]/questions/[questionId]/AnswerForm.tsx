@@ -14,9 +14,8 @@ import { AIButton } from "@/components/ai-button";
 import AnswerGuideline from "./AnswerGuideline";
 import { Link } from "@/i18n/routing";
 import { FormMessage, Message } from "@/components/form-message";
-import { useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import SpeechToTextModal from "./SpeechToTextModal";
-import { Button } from "@/components/ui/button";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -33,12 +32,12 @@ export default function AnswerForm({
   question,
   jobId,
   submissions,
-  submissionId,
+  currentSubmission,
 }: {
   question: Tables<"custom_job_questions">;
   jobId: string;
   submissions: Tables<"custom_job_question_submissions">[];
-  submissionId?: string;
+  currentSubmission: Tables<"custom_job_question_submissions"> | null;
 }) {
   const t = useTranslations("interviewQuestion");
   const [_, submitAnswerAction, isSubmitAnswerPending] = useActionState(
@@ -49,15 +48,13 @@ export default function AnswerForm({
     generateAnswer,
     null
   );
-  let currentSubmission: Tables<"custom_job_question_submissions"> | null =
-    submissionId && submissions.length > 0
-      ? (submissions.find((submission) => submission.id === submissionId) ??
-        null)
-      : null;
+  const initialAnswer = currentSubmission?.answer ?? "";
+  const [currentAnswer, setCurrentAnswer] = useState(initialAnswer);
+  const hasAnswerChanged = currentAnswer !== initialAnswer;
 
-  const initialAnswer = useRef(currentSubmission?.answer || "");
-  const [currentAnswer, setCurrentAnswer] = useState(initialAnswer.current);
-  const hasAnswerChanged = currentAnswer !== initialAnswer.current;
+  useEffect(() => {
+    setCurrentAnswer(initialAnswer);
+  }, [initialAnswer]);
 
   const feedback = currentSubmission?.feedback as {
     pros: string[];
