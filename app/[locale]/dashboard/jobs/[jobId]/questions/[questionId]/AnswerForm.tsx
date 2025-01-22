@@ -15,6 +15,8 @@ import AnswerGuideline from "./AnswerGuideline";
 import { Link } from "@/i18n/routing";
 import { FormMessage, Message } from "@/components/form-message";
 import { useRef, useState } from "react";
+import SpeechToTextModal from "./SpeechToTextModal";
+import { Button } from "@/components/ui/button";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -101,25 +103,35 @@ export default function AnswerForm({
                 <div className="space-y-2">
                   <div className="flex gap-4 items-center w-full justify-between">
                     <Label htmlFor="answer">{t("answerLabel")}</Label>
-                    <form action={generateAnswerAction}>
-                      <input
-                        type="hidden"
-                        name="questionId"
-                        value={question.id}
-                      />
-                      <input type="hidden" name="jobId" value={jobId} />
-                      <AIButton
-                        type="submit"
+                    <div className="flex gap-2">
+                      <SpeechToTextModal
                         disabled={
                           isGenerateAnswerPending || isSubmitAnswerPending
                         }
-                        pending={isGenerateAnswerPending}
-                        pendingText={t("buttons.generatingAnswer")}
-                        variant="outline"
-                      >
-                        {t("buttons.generateAnswer")}
-                      </AIButton>
-                    </form>
+                        onTranscriptionComplete={(text) => {
+                          setCurrentAnswer(text);
+                        }}
+                      />
+                      <form action={generateAnswerAction}>
+                        <input
+                          type="hidden"
+                          name="questionId"
+                          value={question.id}
+                        />
+                        <input type="hidden" name="jobId" value={jobId} />
+                        <AIButton
+                          type="submit"
+                          disabled={
+                            isGenerateAnswerPending || isSubmitAnswerPending
+                          }
+                          pending={isGenerateAnswerPending}
+                          pendingText={t("buttons.generatingAnswer")}
+                          variant="outline"
+                        >
+                          {t("buttons.generateAnswer")}
+                        </AIButton>
+                      </form>
+                    </div>
                   </div>
                   <form action={submitAnswerAction}>
                     <div className="relative">
@@ -128,7 +140,7 @@ export default function AnswerForm({
                         name="answer"
                         rows={8}
                         placeholder={t("answerPlaceholder")}
-                        defaultValue={currentSubmission?.answer}
+                        value={currentAnswer}
                         onChange={(e) => setCurrentAnswer(e.target.value)}
                         disabled={
                           isSubmitAnswerPending || isGenerateAnswerPending

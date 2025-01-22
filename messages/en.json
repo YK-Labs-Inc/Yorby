@@ -125,7 +125,19 @@
     "noSubmissions": "You haven't submitted any answers yet.",
     "submissionDate": "Submitted on {date}",
     "viewSubmission": "View Submission",
-    "backToQuestion": "Back to Question"
+    "backToQuestion": "Back to Question",
+    "speechToText": {
+      "title": "Speech to Text",
+      "description": "Record your answer using your microphone. Select your microphone and click the record button to start.",
+      "selectMicrophone": "Select Microphone",
+      "selectMicrophonePlaceholder": "Choose a microphone",
+      "startRecording": "Record Your Answer",
+      "stopRecording": "Stop Recording",
+      "processing": "Transcribing your recording...",
+      "testMicrophone": "Test Your Microphone",
+      "testRecording": "Record Test Audio",
+      "stopTestRecording": "Stop Test Recording"
+    }
   },
   "mockInterview": {
     "title": "Mock Interviews",
