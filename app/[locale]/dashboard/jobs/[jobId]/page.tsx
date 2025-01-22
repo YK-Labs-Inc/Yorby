@@ -7,11 +7,12 @@ import MockInterview from "./MockInterview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
-import { generateMoreQuestions, linkAnonymousAccount } from "./actions";
+import { linkAnonymousAccount } from "./actions";
 import { getTranslations } from "next-intl/server";
 import { FormMessage, Message } from "@/components/form-message";
-import { AIButton } from "@/components/ai-button";
 import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -104,13 +105,21 @@ export default async function JobPage({
 
   return (
     <div className="w-full flex flex-col justify-center items-center p-8 gap-6">
-      <H1>
-        {job.job_title
-          .split(" ")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")}{" "}
-        Practice Interview Questions{" "}
-      </H1>
+      <div className="w-full flex justify-between items-center">
+        <H1>
+          {job.job_title
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}{" "}
+          Practice Interview Questions{" "}
+        </H1>
+        <Link href={`/dashboard/jobs/${jobId}/files`}>
+          <Button variant="outline" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Manage Files
+          </Button>
+        </Link>
+      </div>
 
       {isAnonymous ? (
         <div className="md mx-auto w-full">
