@@ -243,6 +243,8 @@ export const generateMoreQuestions = async (
   });
   await logger.flush();
   logger.info("Finished generating more questions");
+  revalidatePath(`/dashboard/jobs/${jobId}`);
+  redirect(`/dashboard/jobs/${jobId}`);
 };
 
 const fetchJob = async (jobId: string) => {
