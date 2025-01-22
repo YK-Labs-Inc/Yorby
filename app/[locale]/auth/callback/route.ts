@@ -57,12 +57,29 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         `${origin}/sign-in?error=Invalid or expired code. Please try again.`
       );
     }
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    logger = logger.with({ userId: user?.id });
+    logger.info("Handling user signup");
+    if (user?.id && email) {
+      await addUserToBrevo({
+        userId: user.id,
+        email,
+        logger,
+      });
+    }
   } else if (type === "email_change" && token) {
     // Handle email change flow
     const { error } = await supabase.auth.verifyOtp({
       token_hash: token,
       type: "email_change",
     });
+    if (error) {
+      logger.error("Failed to verify email change", { error });
+      return NextResponse.redirect(
+        `${origin}/dashboard/jobs?error=Failed to update your email. Please try again.`
+      );
+    }
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;
     logger = logger.with({ userId: user?.id });
@@ -73,12 +90,6 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         email,
         logger,
       });
-    }
-    if (error) {
-      logger.error("Failed to verify email change", { error });
-      return NextResponse.redirect(
-        `${origin}/dashboard/jobs?error=Failed to update your email. Please try again.`
-      );
     }
   }
 
