@@ -293,7 +293,11 @@ export default function JobCreationComponent() {
               </div>
 
               <div className="flex justify-between">
-                <Button variant="outline" onClick={handleBack}>
+                <Button
+                  disabled={isPending}
+                  variant="outline"
+                  onClick={handleBack}
+                >
                   {t("buttons.back")}
                 </Button>
 
