@@ -19,7 +19,7 @@ import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
 interface AppSidebarProps {
@@ -36,8 +36,6 @@ export function AppSidebar({
   user,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const hideSidebar = pathname === "/en" && searchParams.get("dev") !== "true";
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [logoSrc, setLogoSrc] = useState("/assets/dark-logo.png");
   const t = useTranslations("sidebar");
@@ -56,10 +54,6 @@ export function AppSidebar({
       theme === "light" ? "/assets/dark-logo.png" : "/assets/light-logo.png"
     );
   }, [theme]);
-
-  if (hideSidebar) {
-    return null;
-  }
 
   return (
     <Sidebar>
