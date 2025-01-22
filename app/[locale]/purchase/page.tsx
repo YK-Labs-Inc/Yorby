@@ -79,15 +79,10 @@ export default async function PurchasePage({
                       <span className="text-4xl font-bold tracking-tight">
                         {formatPrice(product.totalPrice || 0)}
                       </span>
-                      {isUnlimited && (
-                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                          {t("pricing.yearSuffix")}
-                        </span>
-                      )}
                     </div>
                     <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       {isUnlimited
-                        ? t("pricing.subscription")
+                        ? t("pricing.quarterlySubscription")
                         : t("pricing.oneTime")}
                     </span>
                   </div>
@@ -105,6 +100,12 @@ export default async function PurchasePage({
                         </p>
                       )}
                     </>
+                  )}
+                  {isUnlimited && (
+                    <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
+                      {formatPrice((product.totalPrice || 0) / 3)}{" "}
+                      {t("pricing.perMonth")}
+                    </p>
                   )}
                 </div>
 
