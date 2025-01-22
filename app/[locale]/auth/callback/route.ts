@@ -12,9 +12,11 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   const token = requestUrl.searchParams.get("token_hash");
   const type = requestUrl.searchParams.get("type");
   const email = requestUrl.searchParams.get("email");
+  const code = requestUrl.searchParams.get("code");
   const origin = requestUrl.origin;
   const redirectTo = requestUrl.searchParams.get("redirect_to")?.toString();
   let logger = request.log.with({
+    code,
     type,
     email,
     origin,
@@ -26,13 +28,13 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   const supabase = await createSupabaseServerClient();
 
   if (type === "magiclink") {
+    logger.info("Handling magic link");
     if (!token) {
       logger.error("Invalid or expired code");
       return NextResponse.redirect(
         `${origin}/sign-in?error=Invalid or expired code. Please try again.`
       );
     }
-    logger.info("Handling magic link");
     // Handle magic link flow
     const { error } = await supabase.auth.verifyOtp({
       token_hash: token,
@@ -45,11 +47,11 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       );
     }
   } else if (token && type === "signup" && email) {
-    // Handle email OTP verification
+    logger.info("Handling user signup");
     const { error } = await supabase.auth.verifyOtp({
       email,
       token,
-      type: "magiclink",
+      type,
     });
 
     if (error) {
@@ -61,7 +63,6 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;
     logger = logger.with({ userId: user?.id });
-    logger.info("Handling user signup");
     if (user?.id && email) {
       await addUserToBrevo({
         userId: user.id,
