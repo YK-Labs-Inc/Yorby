@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChatMessage } from "@/app/[locale]/api/chat/route";
+import { ChatMessage } from "@/app/api/chat/route";
 import { useTranslations } from "next-intl";
 import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 import {

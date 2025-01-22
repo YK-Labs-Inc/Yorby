@@ -268,7 +268,12 @@
       "yearSuffix": "/year",
       "subscription": "Annual subscription",
       "oneTime": "One-time purchase"
-    }
+    },
+    "verifying_purchase": "Verifying your purchase...",
+    "purchase_success": "Purchase Successful! 🎉",
+    "purchase_failed": "Purchase Verification Failed",
+    "redirect_success_message": "You will be redirected to your dashboard in {seconds} seconds...",
+    "redirect_error_message": "Redirecting you back in {seconds} seconds..."
   },
   "accountLinking": {
     "title": "Link Your Account",

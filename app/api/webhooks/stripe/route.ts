@@ -153,6 +153,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
   });
 
   try {
+    logger.info("Received Stripe webhook");
     const body = await request.text();
     const headersList = await headers();
     const signature = headersList.get("stripe-signature");
