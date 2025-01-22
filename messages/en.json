@@ -191,7 +191,7 @@
   },
   "upgrade": {
     "locked": {
-      "title": "Unlock the Full Interview Preparation Experience",
+      "title": "Unlock The Full Interview Preparation Experience With 1 Credit",
       "description": "Get access to unlimited practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
       "mockDescription": "Get access to unlimited AI-powered mock interviews that simulate real interview scenarios. Practice with our advanced AI interviewer that adapts to your responses and provides instant feedback.",
       "button": "Unlock Full Interview Prep Access",
@@ -305,5 +305,9 @@
     "a3": "Perfect Interivew supports every single job in the world. As long as you upload the job description, we will be able to generate unlimtied practice questions for you.",
     "q4": "Is there a limit to how many mock interviews I can do?",
     "a4": "There is no limit to how many mock interviews you can do. Each mock interview is unique and tailored to the job you're applying for."
+  },
+  "mobileWarning": {
+    "title": "Desktop Only Experience",
+    "description": "PerfectInterview works best on desktop browsers. Please switch to a desktop device for the full interview experience."
   }
 }

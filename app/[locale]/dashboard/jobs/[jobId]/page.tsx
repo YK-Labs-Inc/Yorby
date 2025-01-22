@@ -12,7 +12,18 @@ import { getTranslations } from "next-intl/server";
 import { FormMessage, Message } from "@/components/form-message";
 import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText, Monitor } from "lucide-react";
+
+const MobileWarning = async () => {
+  const t = await getTranslations("mobileWarning");
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center gap-4 rounded-lg border bg-card text-card-foreground shadow-sm">
+      <Monitor className="h-12 w-12 text-muted-foreground" />
+      <h2 className="text-xl font-semibold">{t("title")}</h2>
+      <p className="text-muted-foreground">{t("description")}</p>
+    </div>
+  );
+};
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -104,8 +115,14 @@ export default async function JobPage({
   const t = await getTranslations("accountLinking");
 
   return (
-    <div className="w-full flex flex-col justify-center items-center p-8 gap-6">
-      <div className="w-full flex justify-between items-center">
+    <div
+      className={`w-full flex flex-col justify-center items-center p-8 gap-6 ${
+        isAnonymous ? "" : "h-full md:h-auto"
+      }`}
+    >
+      <div
+        className={`gap-6 w-full flex-col md:flex-row md:justify-between items-start md:items-center ${isAnonymous ? "flex" : "flex"}`}
+      >
         <H1>
           {job.job_title
             .split(" ")
@@ -145,42 +162,47 @@ export default async function JobPage({
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between w-full">
-            <Tabs value={view} className="w-full">
-              <TabsList>
-                <Link href={`?view=practice`} className="w-full">
-                  <TabsTrigger value="practice" className="w-full">
-                    Practice Questions
-                  </TabsTrigger>
-                </Link>
-                <Link href={`?view=mock`} className="w-full">
-                  <TabsTrigger value="mock" className="w-full">
-                    Mock Interview
-                  </TabsTrigger>
-                </Link>
-              </TabsList>
-            </Tabs>
+          <div className="hidden md:flex flex-col gap-6 w-full">
+            <div className="flex items-center justify-between w-full">
+              <Tabs value={view} className="w-full">
+                <TabsList>
+                  <Link href={`?view=practice`} className="w-full">
+                    <TabsTrigger value="practice" className="w-full">
+                      Practice Questions
+                    </TabsTrigger>
+                  </Link>
+                  <Link href={`?view=mock`} className="w-full">
+                    <TabsTrigger value="mock" className="w-full">
+                      Mock Interview
+                    </TabsTrigger>
+                  </Link>
+                </TabsList>
+              </Tabs>
+              {view === "practice" && (
+                <GenerateInterviewQuestionsButton jobId={jobId} />
+              )}
+            </div>
             {view === "practice" && (
-              <GenerateInterviewQuestionsButton jobId={jobId} />
+              <PracticeQuestions
+                jobId={jobId}
+                questions={job.custom_job_questions}
+                isLocked={job.status === "locked" && !hasSubscription}
+                userCredits={userCredits}
+                currentPage={currentPage}
+              />
+            )}
+            {view === "mock" && (
+              <MockInterview
+                jobId={jobId}
+                filter={filter}
+                userCredits={userCredits}
+                isLocked={job.status === "locked" && !hasSubscription}
+              />
             )}
           </div>
-          {view === "practice" && (
-            <PracticeQuestions
-              jobId={jobId}
-              questions={job.custom_job_questions}
-              isLocked={job.status === "locked" && !hasSubscription}
-              userCredits={userCredits}
-              currentPage={currentPage}
-            />
-          )}
-          {view === "mock" && (
-            <MockInterview
-              jobId={jobId}
-              filter={filter}
-              userCredits={userCredits}
-              isLocked={job.status === "locked" && !hasSubscription}
-            />
-          )}
+          <div className="md:hidden w-full flex flex-col justify-center items-center">
+            <MobileWarning />
+          </div>
         </>
       )}
     </div>

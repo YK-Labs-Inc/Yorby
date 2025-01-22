@@ -62,7 +62,6 @@ export default async function MockInterview({
     <div className="flex flex-col gap-6 w-full">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-semibold">{t("title")}</h2>
           <InterviewFilter jobId={jobId} currentFilter={filter} />
         </div>
         <CreateMockInterviewButton jobId={jobId} />
