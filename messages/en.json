@@ -262,7 +262,7 @@
       "mostPopular": "Most Popular"
     },
     "pricing": {
-      "perInterview": "per interview",
+      "perInterview": "per credit",
       "savings": "Save {savings}% vs. single interviews",
       "loading": "Loading pricing information...",
       "yearSuffix": "/year",
