@@ -78,6 +78,10 @@
       "title": "面接質問の作成",
       "description": "お仕事の詳細を分析し、あなたに合った面接質問を作成しています。数分かかる場合があります。",
       "redirect": "質問の準備ができ次第、リダイレクトします。"
+    },
+    "fileUpload": {
+      "pdfOnlyNotice": "注：すべての書類はPDF形式である必要があります。",
+      "pdfOnlyHelper": "PDFファイルのみ対応しています"
     }
   },
   "jobPage": {

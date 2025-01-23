@@ -78,6 +78,10 @@
       "title": "면접 질문 만들기",
       "description": "귀하의 직무 세부 정보를 분석하고 맞춤형 면접 질문을 생성하고 있습니다. 몇 분 정도 소요될 수 있습니다.",
       "redirect": "질문이 준비되면 해당 페이지로 이동합니다."
+    },
+    "fileUpload": {
+      "pdfOnlyNotice": "참고: 모든 문서는 PDF 형식이어야 합니다.",
+      "pdfOnlyHelper": "PDF 파일만 지원됩니다."
     }
   },
   "jobPage": {

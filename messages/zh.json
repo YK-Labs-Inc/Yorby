@@ -78,6 +78,10 @@
       "title": "创建你的面试问题",
       "description": "我们正在分析您的工作详情并生成定制的面试问题。这可能需要几分钟。",
       "redirect": "我们会将您重定向到您的问题，一旦它们准备就绪。"
+    },
+    "fileUpload": {
+      "pdfOnlyNotice": "注意：所有文件必须是PDF格式。",
+      "pdfOnlyHelper": "仅支持PDF文件"
     }
   },
   "jobPage": {

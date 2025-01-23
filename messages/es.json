@@ -78,6 +78,10 @@
       "title": "Creando Tus Preguntas de Entrevista",
       "description": "Estamos analizando los detalles de tu trabajo y generando preguntas de entrevista personalizadas. Esto puede tardar unos minutos.",
       "redirect": "Te redirigiremos a tus preguntas una vez que estén listas."
+    },
+    "fileUpload": {
+      "pdfOnlyNotice": "Nota: Todos los documentos deben estar en formato PDF.",
+      "pdfOnlyHelper": "Solo se admiten archivos PDF"
     }
   },
   "jobPage": {
