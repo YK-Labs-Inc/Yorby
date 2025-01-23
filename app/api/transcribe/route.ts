@@ -3,6 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { UploadResponse } from "@/utils/types";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 // Initialize Gemini
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
@@ -19,7 +21,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
   try {
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File;
-
+    const source = formData.get("source") as string;
     if (!audioFile) {
       return NextResponse.json(
         { error: "No audio file provided" },
@@ -87,6 +89,21 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     }
 
     logger.info("Transcription complete");
+
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.id) {
+      await trackServerEvent({
+        eventName: "transcription_generated",
+        userId: user.id,
+        args: {
+          source,
+          transcription,
+        },
+      });
+    }
     return NextResponse.json({ transcription });
   } catch (error: any) {
     logger.error("Transcription error:", { error: error.message });

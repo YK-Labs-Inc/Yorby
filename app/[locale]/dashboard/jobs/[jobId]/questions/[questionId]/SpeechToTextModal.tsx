@@ -176,6 +176,7 @@ export default function SpeechToTextModal({
         });
         const formData = new FormData();
         formData.append("audio", audioBlob);
+        formData.append("source", "practiceQuestion");
 
         try {
           const response = await fetch("/api/transcribe", {

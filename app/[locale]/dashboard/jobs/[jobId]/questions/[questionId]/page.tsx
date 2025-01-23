@@ -43,7 +43,6 @@ export default async function Page({
           (submission) => submission.id === submissionId
         )
       : undefined;
-  console.log("hey currentSubmission", currentSubmission);
 
   return (
     <div className="max-w-[1080px] w-full mx-auto p-6 space-y-6">

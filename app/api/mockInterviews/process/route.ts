@@ -9,6 +9,7 @@ import { getAllFiles } from "@/app/[locale]/dashboard/jobs/[jobId]/questions/[qu
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
 import { withAxiom } from "next-axiom";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -617,6 +618,14 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     if (mockInterviewUpdateError) {
       throw mockInterviewUpdateError;
     }
+
+    await trackServerEvent({
+      eventName: "mock_interview_completed",
+      userId: mockInterview.custom_jobs.user_id,
+      args: {
+        jobId: customJob.id,
+      },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -10,6 +10,7 @@ import { getAllFiles } from "./questions/[questionId]/actions";
 import { SchemaType } from "@google/generative-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { writeCustomJobQuestionsToDb } from "@/app/[locale]/landing2/actions";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 export const startMockInterview = async (
   prevState: any,
@@ -119,6 +120,19 @@ Thank the candidate for their time and tell them that the interview has ended.
       error: translations("pleaseTryAgain"),
     };
   }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.id) {
+    await trackServerEvent({
+      eventName: "mock_interview_created",
+      userId: user.id,
+      args: {
+        jobId,
+      },
+    });
+  }
 
   redirect(`/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}`);
 };
@@ -128,6 +142,10 @@ export const linkAnonymousAccount = async (formData: FormData) => {
   const jobId = formData.get("jobId") as string;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("accountLinking");
+  const logger = new Logger().with({
+    jobId,
+    email,
+  });
 
   if (!email) {
     return encodedRedirect(
@@ -147,7 +165,19 @@ export const linkAnonymousAccount = async (formData: FormData) => {
   );
 
   if (error) {
+    logger.error("Error linking anonymous account", {
+      error,
+    });
+    await logger.flush();
     return encodedRedirect("error", `/dashboard/jobs/${jobId}`, error.message);
+  }
+  const user = await supabase.auth.getUser();
+  if (user.data.user?.id) {
+    await trackServerEvent({
+      eventName: "anonymous_account_linked",
+      userId: user.data.user.id,
+      email,
+    });
   }
 
   return encodedRedirect(
@@ -217,7 +247,13 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
     };
   }
   logger.info("Decremented user credit count");
-
+  await trackServerEvent({
+    eventName: "job_unlocked",
+    userId,
+    args: {
+      jobId,
+    },
+  });
   revalidatePath(`/dashboard/jobs/${jobId}`);
 };
 
