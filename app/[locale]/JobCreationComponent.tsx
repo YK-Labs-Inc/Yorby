@@ -204,6 +204,9 @@ export default function JobCreationComponent() {
             </div>
           ) : (
             <div className="space-y-6">
+              <p className="text-sm text-muted-foreground mb-4">
+                {t("fileUpload.pdfOnlyNotice")}
+              </p>
               <div>
                 <label className="text-sm font-medium mb-2 block">
                   {t("resume.label")}
@@ -214,6 +217,9 @@ export default function JobCreationComponent() {
                   onChange={handleFileChange("resume")}
                   className="cursor-pointer"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("fileUpload.pdfOnlyHelper")}
+                </p>
                 {formData.resume && (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
@@ -237,10 +243,13 @@ export default function JobCreationComponent() {
                 </label>
                 <Input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf"
                   onChange={handleFileChange("coverLetter")}
                   className="cursor-pointer"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("fileUpload.pdfOnlyHelper")}
+                </p>
                 {formData.coverLetter && (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
@@ -264,11 +273,14 @@ export default function JobCreationComponent() {
                 </label>
                 <Input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf"
                   onChange={handleFileChange("miscDocuments")}
                   multiple
                   className="cursor-pointer"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("fileUpload.pdfOnlyHelper")}
+                </p>
                 {formData.miscDocuments.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {formData.miscDocuments.map((file, index) => (

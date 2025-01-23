@@ -78,6 +78,10 @@
       "title": "Créer vos questions d'entretien",
       "description": "Nous analysons les détails de votre poste et générons des questions d'entretien personnalisées. Cela peut prendre quelques minutes.",
       "redirect": "Nous vous redirigerons vers vos questions une fois qu'elles seront prêtes."
+    },
+    "fileUpload": {
+      "pdfOnlyNotice": "Remarque : Tous les documents doivent être au format PDF.",
+      "pdfOnlyHelper": "Seuls les fichiers PDF sont pris en charge"
     }
   },
   "jobPage": {

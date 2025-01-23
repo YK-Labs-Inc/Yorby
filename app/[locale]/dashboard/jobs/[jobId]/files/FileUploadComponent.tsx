@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslations } from "next-intl";
 
 interface Props {
   jobId: string;
@@ -35,6 +36,7 @@ export function FileUploadComponent({ jobId, existingFiles }: Props) {
   const [isUploadMode, setIsUploadMode] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { logError } = useAxiomLogging();
+  const t = useTranslations("jobCreation");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -112,13 +114,19 @@ export function FileUploadComponent({ jobId, existingFiles }: Props) {
 
           {isUploadMode && (
             <div className="rounded-lg border bg-muted/50 p-4 space-y-4">
+              <p className="text-sm text-muted-foreground mb-2">
+                {t("fileUpload.pdfOnlyNotice")}
+              </p>
               <Input
                 type="file"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 onChange={handleFileChange}
                 multiple
                 className="cursor-pointer"
               />
+              <p className="text-xs text-muted-foreground">
+                {t("fileUpload.pdfOnlyHelper")}
+              </p>
               {files.length > 0 && (
                 <div className="space-y-2">
                   {files.map((file, index) => (

@@ -69,6 +69,10 @@
       "label": "Additional Documents (Optional)",
       "filesSelected": "{count} files selected"
     },
+    "fileUpload": {
+      "pdfOnlyNotice": "Note: All documents must be in PDF format.",
+      "pdfOnlyHelper": "Only PDF files are supported"
+    },
     "buttons": {
       "next": "Next Step",
       "back": "Back",
