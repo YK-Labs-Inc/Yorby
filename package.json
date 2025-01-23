@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "translate": "node scripts/translate.js" 
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

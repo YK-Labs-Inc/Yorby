@@ -1,0 +1,325 @@
+{
+  "landingPage": {
+    "title": "面接準備",
+    "subtitle": "AIを活用した面接対策で、次の面接を成功させよう。",
+    "cta": "スタートガイド",
+    "job1": "売上",
+    "job2": "カスタマーサポート",
+    "job3": "マーケティング",
+    "everyone": "世界のどんな仕事でも",
+    "enterJobDescription": "ここに職務内容を入力してください",
+    "featureHighlightTitle": "完璧な面接で何が得られますか？",
+    "features": {
+      "practiceQuestions": {
+        "title": "練習問題が無制限",
+        "description": "職務内容とあなたの履歴書に基づいて、仕事とあなたの個人的な経験に合わせた無制限の面接練習問題を生成します"
+      },
+      "feedback": {
+        "title": "インスタントフィードバック",
+        "description": "練習の面接質問への回答に関するフィードバックを得る"
+      },
+      "aiAnswers": {
+        "title": "AI搭載の回答",
+        "description": "面倒くさがり？ 職務経歴に基づいて面接練習問題の回答を生成できます"
+      },
+      "mockInterviews": {
+        "title": "リアルな模擬面接",
+        "description": "AI面接官とチャット形式でやり取りすることで、現実の面接さながらの体験ができる、リアルな模擬面接"
+      },
+      "performance": {
+        "title": "パフォーマンス分析",
+        "description": "模擬面接のパフォーマンスに関する詳細な分析を入手しましょう"
+      },
+      "pricing": {
+        "title": "登録不要",
+        "description": "サブスクリプション不要、必要な分だけお支払いください"
+      }
+    }
+  },
+  "jobCreation": {
+    "title": "練習面接の質問を作成する",
+    "stepProgress": "ステップ{step}/2：{stepTitle}",
+    "steps": {
+      "1": "求人情報",
+      "2": "ドキュメントアップロード"
+    },
+    "jobTitle": {
+      "label": "職種",
+      "placeholder": "役職を入力してください"
+    },
+    "jobDescription": {
+      "label": "職務内容書",
+      "placeholder": "ここに職務内容を貼り付けてください"
+    },
+    "companyName": {
+      "label": "会社名（任意）",
+      "placeholder": "会社名を入力してください"
+    },
+    "companyDescription": {
+      "label": "会社概要（任意）",
+      "placeholder": "会社概要を入力してください"
+    },
+    "resume": {
+      "label": "履歴書（任意）"
+    },
+    "coverLetter": {
+      "label": "カバーレター（任意）"
+    },
+    "additionalDocs": {
+      "label": "追加書類（任意）",
+      "filesSelected": "{count}個のファイルが選択されました"
+    },
+    "buttons": {
+      "next": "次のステップ",
+      "back": "戻る",
+      "submit": "送信"
+    },
+    "loading": {
+      "title": "面接質問の作成",
+      "description": "お仕事の詳細を分析し、あなたに合った面接質問を作成しています。数分かかる場合があります。",
+      "redirect": "質問の準備ができ次第、リダイレクトします。"
+    }
+  },
+  "jobPage": {
+    "generateQuestions": "さらに質問を生成する",
+    "generatingQuestions": "質問を生成しています..."
+  },
+  "waitlist": {
+    "title": "次の面接を完璧に💯",
+    "subtitle": "AI搭載の面接対策で次の面接を成功させよう。",
+    "thankYou": {
+      "title": "ご登録ありがとうございます！",
+      "message": "限定50%割引でローンチした際にご連絡いたします。"
+    },
+    "form": {
+      "description": "ウェイティングリストにご登録いただくと、ローンチ時にお知らせが届きます。",
+      "discountMessage": "ローンチ時に50%割引になります。",
+      "emailPlaceholder": "メールアドレスを入力してください",
+      "submitButton": {
+        "default": "ローンチのお知らせを受け取る",
+        "pending": "送信中..."
+      },
+      "error": "サインアップ中にエラーが発生しました。もう一度お試しください。"
+    }
+  },
+  "interviewQuestion": {
+    "questionLabel": "質問",
+    "submissionsLabel": "提出物",
+    "answerLabel": "あなたの答え",
+    "answerPlaceholder": "ここにレスポンスを入力してください...",
+    "answerGuidelines": "回答ガイドライン",
+    "buttons": {
+      "submit": "送信",
+      "rewrite": "回答を書き直す",
+      "submitting": "送信中...",
+      "generateAnswer": "回答を生成する",
+      "generatingAnswer": "回答生成中...",
+      "noChanges": "変更なし"
+    },
+    "feedbackLabel": "フィードバック",
+    "noFeedback": "素晴らしい回答です！改善の必要はありません🙂",
+    "pros": "メリット",
+    "cons": "デメリット",
+    "noPros": "この回答に関するメリットは確認されていません。",
+    "noCons": "この回答に関する欠点は見つかりませんでした。",
+    "noSubmissions": "まだ回答を送信していません。",
+    "submissionDate": "{date}に提出",
+    "viewSubmission": "提出物を表示",
+    "backToQuestion": "質問に戻る",
+    "speechToText": {
+      "title": "音声テキスト変換",
+      "description": "マイクを使って回答を録音してください。マイクを選択し、録音ボタンをクリックして開始します。",
+      "selectMicrophone": "マイクを選択",
+      "selectMicrophonePlaceholder": "マイクを選んでください",
+      "startRecording": "回答を録音してください",
+      "stopRecording": "録画停止",
+      "processing": "録音を文字起こししています...",
+      "testMicrophone": "マイクテスト 🎤",
+      "testRecording": "録音テスト音声",
+      "stopTestRecording": "テスト録画停止"
+    }
+  },
+  "mockInterview": {
+    "title": "模擬面接",
+    "noInterviews": "まだ模擬面接をしていません。",
+    "startNewInterview": "新規模擬面接を開始",
+    "starting": "開始...",
+    "previousInterviews": "以前の模擬面接",
+    "interviewDate": "{date} 面接",
+    "setup": {
+      "title": "面接環境を整えましょう",
+      "camera": {
+        "enable": "カメラを有効にする",
+        "label": "カメラ",
+        "select": "カメラを選択"
+      },
+      "microphone": {
+        "label": "マイク（入力）",
+        "select": "マイクを選択",
+        "test": "テストマイク",
+        "testRecording": "テスト録画",
+        "stopRecording": "録画停止",
+        "playRecording": "プレイテスト録画"
+      },
+      "speakers": {
+        "label": "スピーカー（出力）",
+        "select": "スピーカーを選択",
+        "test": "テストスピーカー",
+        "testing": "プレイ中..."
+      },
+      "startButton": "面接開始"
+    },
+    "active": {
+      "replayButton": "最後の応答を再生",
+      "answerQuestion": "回答を記録する",
+      "stopAnswering": "止まれ",
+      "endInterview": "面接終了",
+      "loading": {
+        "title": "面接開始",
+        "description": "面接セッションを準備していますので、しばらくお待ちください..."
+      }
+    },
+    "endModal": {
+      "title": "面接終了",
+      "confirmMessage": "面接を終了しますか？録音が保存・処理されます。",
+      "uploading": "録音アップロード中",
+      "processing": "録音を処理しています",
+      "processingMessage": "少々お待ちください…",
+      "emailAlert": "面接の準備ができたらメールでお知らせします",
+      "confirmButton": "面接終了",
+      "cancelButton": "面接を続ける"
+    }
+  },
+  "errors": {
+    "pleaseTryAgain": "申し訳ありません。問題が発生しました。もう一度お試しください。",
+    "userNotFound": "ユーザーが見つかりません — もう一度サインインしてください。"
+  },
+  "sidebar": {
+    "addJob": "新規ジョブ作成",
+    "signInToStart": "カスタム面接準備を保存するには、サインインしてください",
+    "signIn": "サインイン",
+    "numberOfCredits": "クレジット: {numberOfCredits}",
+    "buyMoreCredits": "さらにクレジットを購入する"
+  },
+  "upgrade": {
+    "locked": {
+      "title": "1クレジットで完全な面接準備体験をアンロック",
+      "description": "無制限の練習問題、あなたに合わせた模擬面接、そしてあなたの経験に基づいた個別回答案にアクセスしましょう。",
+      "mockDescription": "AIを活用した無制限の模擬面接にアクセスし、実際の面接シナリオを体験しましょう。高度なAI面接官はあなたの回答に適応し、即時フィードバックを提供します。",
+      "button": "面接対策フルアクセスをアンロック",
+      "insufficientCredits": "この面接準備体験をアンロックするにはクレジットが足りません。",
+      "unlocking": "ロック解除中..."
+    },
+    "modal": {
+      "title": "プレミアムにアップグレード",
+      "features": {
+        "title": "プレミアム機能",
+        "unlimitedQuestions": "無制限の練習問題を生成する",
+        "mockInterviews": "AIを使った模擬面接の練習",
+        "personalizedAnswers": "パーソナライズされた回答候補を取得する",
+        "aiAnalysis": "あなたの回答の詳細なAI分析",
+        "unlimitedJobs": "求人応募の追跡が無制限"
+      },
+      "pricing": {
+        "monthly": {
+          "title": "毎月",
+          "price": "月額$X",
+          "description": "すべてのプレミアム機能へのフルアクセス"
+        },
+        "yearly": {
+          "title": "年間",
+          "price": "年間$X",
+          "description": "年額払いだとX%お得"
+        }
+      },
+      "buttons": {
+        "subscribe": "今すぐ登録",
+        "cancel": "キャンセル"
+      }
+    },
+    "success": {
+      "title": "Premiumへようこそ！",
+      "description": "すべてのプレミアム機能にアクセスできるようになりました。",
+      "button": "スタートガイド"
+    }
+  },
+  "purchase": {
+    "title": "面接クレジットを獲得",
+    "description": "1クレジットで、1つの職種につき無制限の練習面接の質問と無制限の模擬面接を作成できます。",
+    "products": {
+      "oneCredit": {
+        "title": "単一インタビュー",
+        "description": "模擬面接システムをお試しいただくのに最適です",
+        "highlight": "1クレジット"
+      },
+      "fiveCredits": {
+        "title": "面接パック",
+        "description": "複数の面接練習に最適です",
+        "highlight": "5クレジット"
+      },
+      "tenCredits": {
+        "title": "プロパック",
+        "description": "真剣な準備のための最高の価値",
+        "highlight": "10クレジット"
+      },
+      "unlimited": {
+        "title": "年間無制限",
+        "description": "プロフェッショナルと頻繁に求職する方向け",
+        "highlight": "クレジット無制限"
+      }
+    },
+    "cta": {
+      "select": "プランを選択",
+      "processing": "処理中...",
+      "mostPopular": "最も人気"
+    },
+    "pricing": {
+      "perInterview": "単位あたり",
+      "perMonth": "月額",
+      "savings": "単独インタビューと比べて{savings}%お得",
+      "loading": "価格情報をロードしています...",
+      "yearSuffix": "/年",
+      "quarterSuffix": "/クォーター",
+      "subscription": "年間購読",
+      "quarterlySubscription": "3ヶ月ごとに請求",
+      "oneTime": "一回限りの購入"
+    },
+    "verifying_purchase": "ご購入の確認中です...",
+    "purchase_success": "購入成功！🎉",
+    "purchase_failed": "購入確認に失敗しました",
+    "redirect_success_message": "{seconds}秒後にダッシュボードにリダイレクトされます...",
+    "redirect_error_message": "{seconds}秒後にリダイレクトします..."
+  },
+  "accountLinking": {
+    "title": "アカウントをリンクする",
+    "description": "練習面接の質問を見るには、アカウントをメールアドレスにリンクしてください。",
+    "form": {
+      "email": {
+        "label": "メール",
+        "placeholder": "メールアドレスを入力してください"
+      },
+      "password": {
+        "label": "パスワード",
+        "placeholder": "パスワードを選択してください"
+      },
+      "submit": "アカウント連携"
+    },
+    "emailRequiredError": "メールアドレスは必須です",
+    "authSuccess": "確認リンクをメールでお送りしました。受信トレイをご確認いただき、登録を完了してください。"
+  },
+  "faq": {
+    "title": "よくある質問",
+    "q1": "過去の経験に基づいてPerfect Interviewは質問を作成しますか？",
+    "a1": "はい！Perfect Interviewはあなたの過去の経験、履歴書、そして目標の職種に基づいて質問を生成します。質問はあなたの個人的な経験とあなたが応募している仕事に合わせて調整されています。",
+    "q2": "質問を生成できる数に制限はありますか？",
+    "a2": "現在、1つの求人につき練習問題は200問までの上限を設定しています。もっと必要な場合は、ご連絡いただければ上限を増やすことができます。",
+    "q3": "Perfect Interviewはどのような職種に対応していますか？",
+    "a3": "Perfect Interivewは世界のあらゆる仕事をサポートします。職務内容をアップロードしていただければ、無制限の練習問題を生成できます。",
+    "q4": "模擬面接は何回までできますか？",
+    "a4": "模擬面接は何回でも行えます。各模擬面接は、応募する仕事に合わせて個別に調整されます。"
+  },
+  "mobileWarning": {
+    "title": "デスクトップ限定エクスペリエンス",
+    "description": "PerfectInterviewはデスクトップブラウザで最適に動作します。完全なインタビュー体験を得るには、デスクトップデバイスに切り替えてください。"
+  }
+}

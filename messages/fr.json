@@ -1,0 +1,325 @@
+{
+  "landingPage": {
+    "title": "Préparation à l'entretien pour",
+    "subtitle": "Préparez-vous pour votre prochain entretien d'embauche avec une préparation optimisée par l'IA.",
+    "cta": "Commencer",
+    "job1": "Ventes",
+    "job2": "Support client",
+    "job3": "Marketing",
+    "everyone": "N'importe quel emploi au monde",
+    "enterJobDescription": "Saisir une description de poste ici",
+    "featureHighlightTitle": "Qu'obtenez-vous avec une entrevue parfaite ?",
+    "features": {
+      "practiceQuestions": {
+        "title": "Questions de pratique illimitées",
+        "description": "Générez un nombre illimité de questions d'entretien d'embauche basées sur n'importe quelle description de poste et votre CV afin que les questions soient personnalisées pour le poste et votre expérience personnelle"
+      },
+      "feedback": {
+        "title": "Retour instantané",
+        "description": "Obtenez des commentaires sur vos réponses aux questions d'entretien d'embauche"
+      },
+      "aiAnswers": {
+        "title": "Réponses optimisées par l'IA",
+        "description": "Trop paresseux ? Générez des réponses aux questions d'entretien en vous basant sur vos expériences professionnelles précédentes"
+      },
+      "mockInterviews": {
+        "title": "Simulations d'entretiens réalistes",
+        "description": "Expérience d'entretien fictif réaliste en discutant avec un intervieweur IA pour reproduire un scénario d'entretien réel"
+      },
+      "performance": {
+        "title": "Analyse des performances",
+        "description": "Obtenez une analyse détaillée de votre performance en simulation d'entretien"
+      },
+      "pricing": {
+        "title": "Aucun abonnement requis",
+        "description": "Aucun abonnement requis, payez seulement ce dont vous avez besoin"
+      }
+    }
+  },
+  "jobCreation": {
+    "title": "Créer des questions d'entretien d'entraînement",
+    "stepProgress": "Étape {step} de 2 : {stepTitle}",
+    "steps": {
+      "1": "Informations sur le poste",
+      "2": "Téléversement de documents"
+    },
+    "jobTitle": {
+      "label": "Intitulé du poste",
+      "placeholder": "Intitulé du poste"
+    },
+    "jobDescription": {
+      "label": "Description du poste",
+      "placeholder": "Coller la description du poste ici"
+    },
+    "companyName": {
+      "label": "Nom de l'entreprise (Facultatif)",
+      "placeholder": "Nom de l'entreprise"
+    },
+    "companyDescription": {
+      "label": "Description de l'entreprise (Facultatif)",
+      "placeholder": "Description de l'entreprise"
+    },
+    "resume": {
+      "label": "CV (Facultatif)"
+    },
+    "coverLetter": {
+      "label": "Lettre de motivation (Facultatif)"
+    },
+    "additionalDocs": {
+      "label": "Documents supplémentaires (Facultatif)",
+      "filesSelected": "{count} fichiers sélectionnés"
+    },
+    "buttons": {
+      "next": "Prochaine étape",
+      "back": "Retour",
+      "submit": "Soumettre"
+    },
+    "loading": {
+      "title": "Créer vos questions d'entretien",
+      "description": "Nous analysons les détails de votre poste et générons des questions d'entretien personnalisées. Cela peut prendre quelques minutes.",
+      "redirect": "Nous vous redirigerons vers vos questions une fois qu'elles seront prêtes."
+    }
+  },
+  "jobPage": {
+    "generateQuestions": "Générer plus de questions",
+    "generatingQuestions": "Générer des questions..."
+  },
+  "waitlist": {
+    "title": "Perfectionnez votre prochain entretien",
+    "subtitle": "Préparez-vous pour votre prochain entretien d'embauche grâce à une préparation optimisée par l'IA.",
+    "thankYou": {
+      "title": "Merci de vous être inscrit !",
+      "message": "Nous vous informerons du lancement avec votre réduction exclusive de 50 %."
+    },
+    "form": {
+      "description": "Inscrivez-vous sur la liste d'attente pour être informé du lancement.",
+      "discountMessage": "Vous recevrez une réduction de 50 % lors de notre lancement.",
+      "emailPlaceholder": "Entrez votre adresse e-mail",
+      "submitButton": {
+        "default": "Soyez notifié(e) lors de notre lancement",
+        "pending": "Envoi en cours..."
+      },
+      "error": "Erreur lors de l'inscription. Veuillez réessayer."
+    }
+  },
+  "interviewQuestion": {
+    "questionLabel": "Question",
+    "submissionsLabel": "Soumissions",
+    "answerLabel": "Votre réponse",
+    "answerPlaceholder": "Tapez votre réponse ici...",
+    "answerGuidelines": "Directives de réponse",
+    "buttons": {
+      "submit": "Soumettre",
+      "rewrite": "Réécrire la réponse",
+      "submitting": "Envoi en cours...",
+      "generateAnswer": "Générer une réponse",
+      "generatingAnswer": "Génération de la réponse...",
+      "noChanges": "Aucun changement"
+    },
+    "feedbackLabel": "Retour",
+    "noFeedback": "Super réponse ! Aucune amélioration nécessaire 🙂",
+    "pros": "Avantages",
+    "cons": "Inconvénients",
+    "noPros": "Aucun avantage identifié pour cette réponse.",
+    "noCons": "Aucun inconvénient identifié pour cette réponse.",
+    "noSubmissions": "Vous n'avez pas encore soumis de réponses.",
+    "submissionDate": "Soumis le {date}",
+    "viewSubmission": "Voir la soumission",
+    "backToQuestion": "Retour à la question",
+    "speechToText": {
+      "title": "Discours vers texte",
+      "description": "Enregistrez votre réponse à l'aide de votre microphone. Sélectionnez votre microphone et cliquez sur le bouton d'enregistrement pour commencer.",
+      "selectMicrophone": "Sélectionner Microphone",
+      "selectMicrophonePlaceholder": "Choisissez un microphone",
+      "startRecording": "Enregistrer votre réponse",
+      "stopRecording": "Arrêter l'enregistrement",
+      "processing": "Transcription de votre enregistrement...",
+      "testMicrophone": "Testez votre microphone",
+      "testRecording": "Enregistrer un test audio",
+      "stopTestRecording": "Arrêter l'enregistrement du test"
+    }
+  },
+  "mockInterview": {
+    "title": "Simulations d'entretiens",
+    "noInterviews": "Tu n'as pas encore fait d'entretiens blancs.",
+    "startNewInterview": "Commencer un nouvel entretien simulé",
+    "starting": "Démarrage...",
+    "previousInterviews": "Entretiens blancs précédents",
+    "interviewDate": "Entretien le {date}",
+    "setup": {
+      "title": "Configurer votre environnement d'entretien",
+      "camera": {
+        "enable": "Activer la caméra",
+        "label": "Caméra",
+        "select": "Sélectionner la caméra"
+      },
+      "microphone": {
+        "label": "Microphone (Entrée)",
+        "select": "Sélectionner le microphone",
+        "test": "Test Microphone",
+        "testRecording": "Enregistrement de test",
+        "stopRecording": "Arrêter l'enregistrement",
+        "playRecording": "Enregistrement de test de lecture"
+      },
+      "speakers": {
+        "label": "Haut-parleurs (Sortie)",
+        "select": "Sélectionner les haut-parleurs",
+        "test": "Haut-parleurs de test",
+        "testing": "Joue…"
+      },
+      "startButton": "Commencer l'entretien"
+    },
+    "active": {
+      "replayButton": "Rejouer la dernière réponse",
+      "answerQuestion": "Enregistrer la réponse",
+      "stopAnswering": "Stop",
+      "endInterview": "Fin de l'entretien",
+      "loading": {
+        "title": "Début de l'entretien",
+        "description": "Veuillez patienter pendant que nous préparons votre session d'entretien..."
+      }
+    },
+    "endModal": {
+      "title": "Fin de l'entretien",
+      "confirmMessage": "Êtes-vous sûr(e) de vouloir terminer l'entretien ? Cela enregistrera et traitera votre enregistrement.",
+      "uploading": "Téléchargement de l'enregistrement",
+      "processing": "Traitement de l'enregistrement",
+      "processingMessage": "Cela peut prendre quelques minutes...",
+      "emailAlert": "Nous vous enverrons un e-mail lorsque votre entretien sera prêt à être examiné.",
+      "confirmButton": "Fin de l'entretien",
+      "cancelButton": "Continuer l'entretien"
+    }
+  },
+  "errors": {
+    "pleaseTryAgain": "Désolé, une erreur s'est produite. Veuillez réessayer.",
+    "userNotFound": "Utilisateur non trouvé — veuillez vous reconnecter."
+  },
+  "sidebar": {
+    "addJob": "Créer un nouveau job",
+    "signInToStart": "Connectez-vous pour enregistrer votre préparation d'entretien personnalisée",
+    "signIn": "Se connecter",
+    "numberOfCredits": "Crédits : {numberOfCredits}",
+    "buyMoreCredits": "Acheter plus de crédits"
+  },
+  "upgrade": {
+    "locked": {
+      "title": "Débloquez l'expérience complète de préparation aux entretiens avec 1 crédit",
+      "description": "Accédez à un nombre illimité de questions pratiques, des simulations d'entretiens personnalisées et des suggestions de réponses adaptées à votre expérience.",
+      "mockDescription": "Accédez à un nombre illimité d'entretiens blancs basés sur l'IA simulant des scénarios d'entretien réels. Entraînez-vous avec notre intervieweur IA avancé qui s'adapte à vos réponses et fournit un retour instantané.",
+      "button": "Débloquez un accès complet à la préparation aux entrevues",
+      "insufficientCredits": "Vous n'avez pas assez de crédits pour débloquer cette expérience de préparation aux entretiens.",
+      "unlocking": "Déverrouillage..."
+    },
+    "modal": {
+      "title": "Passer à Premium",
+      "features": {
+        "title": "Fonctionnalités Premium",
+        "unlimitedQuestions": "Générer des questions pratiques illimitées",
+        "mockInterviews": "Simulations d'entretiens propulsées par l'IA",
+        "personalizedAnswers": "Obtenez des suggestions de réponses personnalisées",
+        "aiAnalysis": "Analyse IA détaillée de vos réponses",
+        "unlimitedJobs": "Suivi illimité des candidatures d'emploi"
+      },
+      "pricing": {
+        "monthly": {
+          "title": "Mensuel",
+          "price": "X $/mois",
+          "description": "Accès complet à toutes les fonctionnalités premium"
+        },
+        "yearly": {
+          "title": "Annuellement",
+          "price": "$X/an",
+          "description": "Économisez X % avec la facturation annuelle"
+        }
+      },
+      "buttons": {
+        "subscribe": "S'abonner maintenant",
+        "cancel": "Annuler"
+      }
+    },
+    "success": {
+      "title": "Bienvenue chez Premium !",
+      "description": "Vous avez maintenant un accès complet à toutes les fonctionnalités premium.",
+      "button": "Commencer"
+    }
+  },
+  "purchase": {
+    "title": "Obtenir des crédits d'entretien",
+    "description": "1 crédit vous permet de générer un nombre illimité de questions d'entretien et de simulations d'entretien pour un seul emploi.",
+    "products": {
+      "oneCredit": {
+        "title": "Entretien individuel",
+        "description": "Parfait pour essayer notre système d'entretien fictif",
+        "highlight": "1 Crédit"
+      },
+      "fiveCredits": {
+        "title": "Dossier d'entretien",
+        "description": "Super pour s'entraîner à plusieurs entretiens",
+        "highlight": "5 Crédits"
+      },
+      "tenCredits": {
+        "title": "Pack Pro",
+        "description": "Meilleur rapport qualité-prix pour une préparation sérieuse",
+        "highlight": "10 Crédits"
+      },
+      "unlimited": {
+        "title": "Illimité Annuel",
+        "description": "Pour les professionnels et les personnes recherchant fréquemment un emploi",
+        "highlight": "Crédits illimités"
+      }
+    },
+    "cta": {
+      "select": "Sélectionner un forfait",
+      "processing": "Traitement en cours...",
+      "mostPopular": "Les plus populaires"
+    },
+    "pricing": {
+      "perInterview": "par crédit",
+      "perMonth": "par mois",
+      "savings": "Économisez {savings}% par rapport aux entrevues individuelles",
+      "loading": "Chargement des informations sur les prix...",
+      "yearSuffix": "/an",
+      "quarterSuffix": "/trimestre",
+      "subscription": "Abonnement annuel",
+      "quarterlySubscription": "Facturé tous les 3 mois",
+      "oneTime": "Achat unique"
+    },
+    "verifying_purchase": "Vérification de votre achat...",
+    "purchase_success": "Achat réussi ! 🎉",
+    "purchase_failed": "Échec de la vérification d'achat",
+    "redirect_success_message": "Vous serez redirigé(e) vers votre tableau de bord dans {seconds} secondes...",
+    "redirect_error_message": "Redirection dans {seconds} secondes..."
+  },
+  "accountLinking": {
+    "title": "Lier votre compte",
+    "description": "Pour consulter vos questions d'entretien d'entraînement, veuillez lier votre compte à une adresse courriel.",
+    "form": {
+      "email": {
+        "label": "Courriel",
+        "placeholder": "Entrez votre adresse e-mail"
+      },
+      "password": {
+        "label": "Mot de passe",
+        "placeholder": "Choisissez un mot de passe"
+      },
+      "submit": "Lier un compte"
+    },
+    "emailRequiredError": "L'adresse e-mail est obligatoire",
+    "authSuccess": "Un lien de vérification a été envoyé à votre adresse e-mail. Veuillez consulter votre boîte de réception pour terminer votre inscription."
+  },
+  "faq": {
+    "title": "Foire Aux Questions",
+    "q1": "Perfect Interview génère-t-il des questions basées sur mon expérience passée ?",
+    "a1": "Oui ! Perfect Interview génère des questions basées sur votre expérience passée, votre CV et le poste que vous visez. Les questions sont adaptées à votre expérience personnelle et à l'emploi pour lequel vous postulez.",
+    "q2": "Y a-t-il une limite au nombre de questions que je peux générer ?",
+    "a2": "Nous fixons actuellement une limite supérieure de 200 questions pratiques par emploi. Si vous avez besoin de plus, veuillez nous contacter et nous pourrons augmenter cette limite pour vous.",
+    "q3": "Quels types d'emplois Perfect Interview prend-il en charge ?",
+    "a3": "Perfect Interivew prend en charge tous les emplois du monde. Tant que vous téléchargez la description du poste, nous pourrons générer un nombre illimité de questions d'entraînement pour vous.",
+    "q4": "Y a-t-il une limite au nombre d'entretiens simulés que je peux faire ?",
+    "a4": "Il n'y a pas de limite au nombre d'entretiens blancs que vous pouvez faire. Chaque entretien blanc est unique et adapté au poste auquel vous postulez."
+  },
+  "mobileWarning": {
+    "title": "Expérience Bureau Uniquement",
+    "description": "PerfectInterview fonctionne mieux sur les navigateurs d'ordinateurs. Veuillez passer à un ordinateur de bureau pour une expérience d'entretien complète."
+  }
+}

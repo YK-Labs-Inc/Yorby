@@ -25,6 +25,6 @@ export const config = {
     // Skip static files, API routes, sitemaps and blog
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap*.xml|blog|_feather|ingest|_axiom|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|m4a|mp4|mp3)$).*)",
     // Language paths remain unchanged
-    "/(en|zh|hi|es|bn|fr|pt|ru|id|de|ja|sw|mr|te|vi|ta|ko|it|th|pl|gu|uk|kn|ml|tl|ro|nl|ms|or|my|hu|cs|el|sv|bg|ne|sk|da|fi|no|hr|lt|km|mn|lo|et|sl|lv|sq|mk)/:path*",
+    "/(en|zh|es|fr|ko|jp)/:path*",
   ],
 };

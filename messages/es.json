@@ -1,0 +1,325 @@
+{
+  "landingPage": {
+    "title": "Preparación para la entrevista",
+    "subtitle": "Prepárate para tu próxima entrevista de trabajo con la ayuda de la IA.",
+    "cta": "Empezar",
+    "job1": "Ventas",
+    "job2": "Atención al Cliente",
+    "job3": "Mercadotecnia",
+    "everyone": "Cualquier Trabajo En El Mundo",
+    "enterJobDescription": "Ingrese una descripción del trabajo aquí",
+    "featureHighlightTitle": "¿Qué consigues con la entrevista perfecta?",
+    "features": {
+      "practiceQuestions": {
+        "title": "Preguntas de práctica ilimitadas",
+        "description": "Genera preguntas de práctica para entrevistas ilimitadas basadas en cualquier descripción de trabajo y tu currículum para que las preguntas sean personalizadas para el trabajo y tu experiencia personal"
+      },
+      "feedback": {
+        "title": "Retroalimentación instantánea",
+        "description": "Obtén comentarios sobre tus respuestas a preguntas de práctica para entrevistas"
+      },
+      "aiAnswers": {
+        "title": "Respuestas impulsadas por IA",
+        "description": "¿Demasiado perezoso? Genera respuestas a preguntas de práctica de entrevistas basándote en tu historial laboral previo"
+      },
+      "mockInterviews": {
+        "title": "Entrevistas de práctica realistas",
+        "description": "Experiencia de entrevista simulada realista al hacerte charlar de un lado a otro con un entrevistador de IA para replicar un escenario de entrevista de la vida real"
+      },
+      "performance": {
+        "title": "Análisis de rendimiento",
+        "description": "Obtén un desglose detallado de tu desempeño en la entrevista simulada"
+      },
+      "pricing": {
+        "title": "No se requiere suscripción",
+        "description": "Sin suscripción obligatoria, solo paga por lo que necesita"
+      }
+    }
+  },
+  "jobCreation": {
+    "title": "Crear Preguntas para Entrevista de Práctica",
+    "stepProgress": "Paso {step} de 2: {stepTitle}",
+    "steps": {
+      "1": "Información del trabajo",
+      "2": "Carga de documentos"
+    },
+    "jobTitle": {
+      "label": "Puesto de trabajo",
+      "placeholder": "Ingrese el puesto de trabajo"
+    },
+    "jobDescription": {
+      "label": "Descripción del puesto",
+      "placeholder": "Pega la descripción del trabajo aquí"
+    },
+    "companyName": {
+      "label": "Nombre de la empresa (Opcional)",
+      "placeholder": "Nombre de la empresa"
+    },
+    "companyDescription": {
+      "label": "Descripción de la empresa (Opcional)",
+      "placeholder": "Descripción de la empresa"
+    },
+    "resume": {
+      "label": "Currículum vítae (Opcional)"
+    },
+    "coverLetter": {
+      "label": "Carta de presentación (Opcional)"
+    },
+    "additionalDocs": {
+      "label": "Documentos adicionales (Opcionales)",
+      "filesSelected": "{count} archivos seleccionados"
+    },
+    "buttons": {
+      "next": "Siguiente paso",
+      "back": "Atrás",
+      "submit": "Enviar"
+    },
+    "loading": {
+      "title": "Creando Tus Preguntas de Entrevista",
+      "description": "Estamos analizando los detalles de tu trabajo y generando preguntas de entrevista personalizadas. Esto puede tardar unos minutos.",
+      "redirect": "Te redirigiremos a tus preguntas una vez que estén listas."
+    }
+  },
+  "jobPage": {
+    "generateQuestions": "Generar Más Preguntas",
+    "generatingQuestions": "Generando preguntas..."
+  },
+  "waitlist": {
+    "title": "Perfecciona tu próxima entrevista",
+    "subtitle": "Prepárate para tu próxima entrevista de trabajo con la ayuda de la IA.",
+    "thankYou": {
+      "title": "¡Gracias por registrarte!",
+      "message": "Te avisaremos cuando lancemos con tu descuento exclusivo del 50%."
+    },
+    "form": {
+      "description": "Únete a la lista de espera para recibir una notificación cuando lancemos.",
+      "discountMessage": "Recibirás un 50% de descuento cuando lancemos.",
+      "emailPlaceholder": "Introduce tu correo electrónico",
+      "submitButton": {
+        "default": "Recibe una notificación cuando lancemos",
+        "pending": "Enviando..."
+      },
+      "error": "Error al registrarse. Inténtelo de nuevo."
+    }
+  },
+  "interviewQuestion": {
+    "questionLabel": "Pregunta",
+    "submissionsLabel": "Envíos",
+    "answerLabel": "Tu respuesta",
+    "answerPlaceholder": "Escribe tu respuesta aquí...",
+    "answerGuidelines": "Pautas de respuesta",
+    "buttons": {
+      "submit": "Enviar",
+      "rewrite": "Reescribir la respuesta",
+      "submitting": "Enviando...",
+      "generateAnswer": "Generar Respuesta",
+      "generatingAnswer": "Generando respuesta...",
+      "noChanges": "Sin cambios"
+    },
+    "feedbackLabel": "Comentarios",
+    "noFeedback": "¡Gran respuesta! No necesita mejoras 🙂",
+    "pros": "Ventajas",
+    "cons": "Contras",
+    "noPros": "No se identificaron pros para esta respuesta.",
+    "noCons": "No se identificaron contras para esta respuesta.",
+    "noSubmissions": "Aún no has enviado ninguna respuesta.",
+    "submissionDate": "Enviado el {date}",
+    "viewSubmission": "Ver envío",
+    "backToQuestion": "Volver a la pregunta",
+    "speechToText": {
+      "title": "Voz a texto",
+      "description": "Graba tu respuesta usando tu micrófono. Selecciona tu micrófono y haz clic en el botón de grabar para comenzar.",
+      "selectMicrophone": "Seleccionar micrófono",
+      "selectMicrophonePlaceholder": "Elige un micrófono",
+      "startRecording": "Graba tu respuesta",
+      "stopRecording": "Detener grabación",
+      "processing": "Transcribiendo tu grabación...",
+      "testMicrophone": "Prueba tu micrófono",
+      "testRecording": "Grabar audio de prueba",
+      "stopTestRecording": "Detener grabación de prueba"
+    }
+  },
+  "mockInterview": {
+    "title": "Entrevistas simuladas",
+    "noInterviews": "Aún no has hecho ninguna entrevista de prueba.",
+    "startNewInterview": "Iniciar nueva entrevista simulada",
+    "starting": "Empezando...",
+    "previousInterviews": "Entrevistas de práctica anteriores",
+    "interviewDate": "Entrevista el {date}",
+    "setup": {
+      "title": "Configura tu entorno de entrevista",
+      "camera": {
+        "enable": "Habilitar cámara",
+        "label": "Cámara",
+        "select": "Seleccionar cámara"
+      },
+      "microphone": {
+        "label": "Micrófono (Entrada)",
+        "select": "Seleccionar micrófono",
+        "test": "Probar micrófono",
+        "testRecording": "Grabación de prueba",
+        "stopRecording": "Detener grabación",
+        "playRecording": "Prueba de Grabación de Juego"
+      },
+      "speakers": {
+        "label": "Altavoces (Salida)",
+        "select": "Seleccionar altavoces 🔊",
+        "test": "Altavoces de prueba",
+        "testing": "Jugando..."
+      },
+      "startButton": "Comenzar Entrevista"
+    },
+    "active": {
+      "replayButton": "Repetir la última respuesta",
+      "answerQuestion": "Grabar respuesta",
+      "stopAnswering": "Alto",
+      "endInterview": "Finalizar Entrevista",
+      "loading": {
+        "title": "Comenzando Entrevista",
+        "description": "Espere mientras configuramos su sesión de entrevista..."
+      }
+    },
+    "endModal": {
+      "title": "Finalizar Entrevista",
+      "confirmMessage": "¿Estás seguro de que quieres finalizar la entrevista? Esto guardará y procesará tu grabación.",
+      "uploading": "Subiendo grabación",
+      "processing": "Procesando grabación",
+      "processingMessage": "Esto puede tardar unos minutos...",
+      "emailAlert": "Te enviaremos un correo electrónico cuando tu entrevista esté lista para revisión.",
+      "confirmButton": "Finalizar Entrevista",
+      "cancelButton": "Continuar entrevista"
+    }
+  },
+  "errors": {
+    "pleaseTryAgain": "Lo siento, algo salió mal. Por favor, inténtalo de nuevo.",
+    "userNotFound": "Usuario no encontrado — por favor, inicia sesión de nuevo."
+  },
+  "sidebar": {
+    "addJob": "Crear nuevo trabajo",
+    "signInToStart": "Inicia sesión para guardar tu preparación de entrevista personalizada",
+    "signIn": "Iniciar sesión",
+    "numberOfCredits": "Créditos: {numberOfCredits}",
+    "buyMoreCredits": "Comprar más créditos"
+  },
+  "upgrade": {
+    "locked": {
+      "title": "Desbloquea la experiencia completa de preparación para entrevistas con 1 crédito",
+      "description": "Obtén acceso a preguntas de práctica ilimitadas, entrevistas simuladas personalizadas y sugerencias de respuestas adaptadas a tu experiencia.",
+      "mockDescription": "Obtén acceso a entrevistas simuladas ilimitadas con tecnología de IA que simulan escenarios de entrevistas reales. Practica con nuestro entrevistador de IA avanzado que se adapta a tus respuestas y proporciona comentarios instantáneos.",
+      "button": "Desbloquea acceso completo a la preparación de entrevistas",
+      "insufficientCredits": "No tienes suficientes créditos para desbloquear esta experiencia de preparación para entrevistas.",
+      "unlocking": "Desbloqueando..."
+    },
+    "modal": {
+      "title": "Actualiza a Premium",
+      "features": {
+        "title": "Funciones Premium",
+        "unlimitedQuestions": "Genera preguntas de práctica ilimitadas",
+        "mockInterviews": "Práctica con entrevistas simuladas impulsadas por IA",
+        "personalizedAnswers": "Obtén sugerencias de respuestas personalizadas",
+        "aiAnalysis": "Análisis detallado de IA de tus respuestas",
+        "unlimitedJobs": "Seguimiento de solicitudes de empleo ilimitadas"
+      },
+      "pricing": {
+        "monthly": {
+          "title": "Mensual",
+          "price": "$X/mes",
+          "description": "Acceso completo a todas las funciones premium"
+        },
+        "yearly": {
+          "title": "Anual",
+          "price": "$X/año",
+          "description": "Ahorra X% con facturación anual"
+        }
+      },
+      "buttons": {
+        "subscribe": "Suscribirse ahora",
+        "cancel": "Cancelar"
+      }
+    },
+    "success": {
+      "title": "¡Bienvenido a Premium!",
+      "description": "Ahora tienes acceso completo a todas las funciones premium.",
+      "button": "Empezar"
+    }
+  },
+  "purchase": {
+    "title": "Obtener Créditos de Entrevista",
+    "description": "1 crédito te permite generar preguntas de práctica para entrevistas ilimitadas y entrevistas simuladas ilimitadas para un solo trabajo.",
+    "products": {
+      "oneCredit": {
+        "title": "Entrevista individual",
+        "description": "Perfecto para probar nuestro sistema de entrevistas de prueba",
+        "highlight": "1 Crédito"
+      },
+      "fiveCredits": {
+        "title": "Paquete de entrevista",
+        "description": "Genial para practicar múltiples entrevistas",
+        "highlight": "5 Créditos"
+      },
+      "tenCredits": {
+        "title": "Paquete Pro",
+        "description": "La mejor opción para una preparación seria",
+        "highlight": "10 Créditos"
+      },
+      "unlimited": {
+        "title": "Anual Ilimitado",
+        "description": "Para profesionales y personas que buscan empleo con frecuencia",
+        "highlight": "Créditos ilimitados"
+      }
+    },
+    "cta": {
+      "select": "Seleccionar Plan",
+      "processing": "Procesando...",
+      "mostPopular": "Más Popular"
+    },
+    "pricing": {
+      "perInterview": "por crédito",
+      "perMonth": "al mes",
+      "savings": "Ahorra {savings}% vs. entrevistas individuales",
+      "loading": "Cargando información de precios...",
+      "yearSuffix": "/año",
+      "quarterSuffix": "/trimestre",
+      "subscription": "Suscripción anual",
+      "quarterlySubscription": "Facturado cada 3 meses",
+      "oneTime": "Compra única"
+    },
+    "verifying_purchase": "Verificando tu compra...",
+    "purchase_success": "¡Compra exitosa! 🎉",
+    "purchase_failed": "Verificación de compra fallida",
+    "redirect_success_message": "Serás redirigido a tu panel de control en {seconds} segundos...",
+    "redirect_error_message": "Redireccionando en {seconds} segundos..."
+  },
+  "accountLinking": {
+    "title": "Vincular tu cuenta",
+    "description": "Para ver las preguntas de tu entrevista de práctica, vincula tu cuenta a una dirección de correo electrónico.",
+    "form": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "Introduce tu correo electrónico"
+      },
+      "password": {
+        "label": "Contraseña",
+        "placeholder": "Elige una contraseña"
+      },
+      "submit": "Vincular cuenta"
+    },
+    "emailRequiredError": "Correo electrónico requerido",
+    "authSuccess": "Se ha enviado un enlace de verificación a tu correo electrónico. Revisa tu bandeja de entrada para completar tu registro."
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "q1": "¿Perfect Interview genera preguntas basadas en mi experiencia previa?",
+    "a1": "¡Sí! Perfect Interview genera preguntas basadas en tu experiencia previa, currículum y el puesto de trabajo objetivo. Las preguntas se adaptan a tu experiencia personal y al trabajo que estás solicitando.",
+    "q2": "¿Hay un límite en la cantidad de preguntas que puedo generar?",
+    "a2": "Actualmente establecemos un límite superior de 200 preguntas de práctica por trabajo. Si necesita más, contáctenos y podemos aumentar este límite para usted.",
+    "q3": "¿Qué tipos de trabajos admite Perfect Interview?",
+    "a3": "Perfect Interivew soporta todos los trabajos del mundo. Siempre y cuando subas la descripción del trabajo, podremos generar preguntas de práctica ilimitadas para ti.",
+    "q4": "¿Hay un límite de cuántas entrevistas simuladas puedo hacer?",
+    "a4": "No hay límite en la cantidad de entrevistas de práctica que puedes hacer. Cada entrevista de práctica es única y se adapta al trabajo que estás solicitando."
+  },
+  "mobileWarning": {
+    "title": "Experiencia solo para escritorio",
+    "description": "PerfectInterview funciona mejor en navegadores de escritorio. Cambia a un dispositivo de escritorio para disfrutar de la experiencia completa de la entrevista."
+  }
+}
