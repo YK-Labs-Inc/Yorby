@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -18,9 +19,10 @@ async function handleSuccessfulPayment(
   session: Stripe.Checkout.Session,
   logger: Logger
 ) {
+  const userId = session.metadata?.userId;
+  let productId = "";
   try {
     const supabase = await createAdminClient();
-    const userId = session.metadata?.userId;
     const isSubscription = session.metadata?.isSubscription === "true";
 
     if (!userId) {
@@ -48,7 +50,7 @@ async function handleSuccessfulPayment(
       const lineItems = await stripe.checkout.sessions.listLineItems(
         session.id
       );
-      const productId = lineItems.data[0]?.price?.product as string;
+      productId = lineItems.data[0]?.price?.product as string;
       const credits = CREDITS_MAP[productId];
 
       if (!credits) {
@@ -90,6 +92,15 @@ async function handleSuccessfulPayment(
   } catch (error) {
     logger.error("Error handling successful payment", { error });
   } finally {
+    if (userId) {
+      await trackServerEvent({
+        eventName: "purchase_completed",
+        userId,
+        args: {
+          priceId: productId,
+        },
+      });
+    }
     await logger.flush();
   }
 }

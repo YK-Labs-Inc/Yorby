@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 import MockInterviewReviewClientComponent from "./MockInterviewReviewClientComponent";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 async function fetchMockInterviewData(mockInterviewId: string) {
   const supabase = await createSupabaseServerClient();
@@ -64,6 +65,19 @@ export default async function MockInterviewReviewPage({
 }) {
   const mockInterviewId = (await params).mockInterviewId;
   const data = await fetchMockInterviewData(mockInterviewId);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.id) {
+    await trackServerEvent({
+      eventName: "mock_interview_reviewed",
+      userId: user.id,
+      args: {
+        mockInterviewId,
+      },
+    });
+  }
   return (
     <div className="container mx-auto py-6">
       <MockInterviewReviewClientComponent

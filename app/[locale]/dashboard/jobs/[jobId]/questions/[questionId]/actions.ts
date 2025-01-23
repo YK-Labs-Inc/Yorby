@@ -5,6 +5,7 @@ import {
   createSupabaseServerClient,
   downloadFile,
 } from "@/utils/supabase/server";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
 import { SchemaType } from "@google/generative-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -39,6 +40,21 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   }
   logger.info("Answer submitted");
   await logger.flush();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.id) {
+    await trackServerEvent({
+      eventName: "answer_submitted",
+      userId: user.id,
+      args: {
+        jobId,
+        questionId,
+        answer,
+      },
+    });
+  }
   revalidatePath(`/dashboard/jobs/${jobId}/questions/${questionId}`);
   if (errorMessage) {
     redirect(
@@ -143,6 +159,21 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     pros: [],
     cons: [],
   });
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user?.id) {
+    await trackServerEvent({
+      eventName: "answer_generated",
+      userId: user.id,
+      args: {
+        jobId,
+        questionId,
+      },
+    });
+  }
   if (errorMessage) {
     redirect(
       `/dashboard/jobs/${jobId}/questions/${questionId}?error=${errorMessage}`

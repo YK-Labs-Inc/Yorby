@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
@@ -113,6 +114,11 @@ export const createJob = async ({
       error: t("pleaseTryAgain"),
     };
   }
+  await trackServerEvent({
+    eventName: "job_created",
+    userId,
+    args: trackingProperties,
+  });
 
   redirect(`/dashboard/jobs/${customJobId}`);
 };

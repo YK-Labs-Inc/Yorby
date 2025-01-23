@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
@@ -103,13 +104,13 @@ export async function getProducts() {
 export async function createCheckoutSession(formData: FormData) {
   const priceId = formData.get("priceId") as string;
   const isSubscription = (formData.get("isSubscription") as string) === "true";
-  const t = await getTranslations("errors");
   let logger = new Logger().with({
     priceId,
     isSubscription,
   });
   let sessionUrl = "";
   let error = "";
+  let userId = "";
   const origin = (await headers()).get("origin");
   try {
     if (!priceId) {
@@ -126,6 +127,7 @@ export async function createCheckoutSession(formData: FormData) {
       await logger.flush();
       throw new Error("User not found");
     }
+    userId = user.id;
     const email = user.email;
     const metadata: { [key: string]: string } = {
       userId: user.id,
@@ -172,6 +174,13 @@ export async function createCheckoutSession(formData: FormData) {
   if (error) {
     redirect(`${origin}/purchase?error=true`);
   }
+  await trackServerEvent({
+    eventName: "purchase_started",
+    userId,
+    args: {
+      priceId,
+    },
+  });
   redirect(sessionUrl);
 }
 
