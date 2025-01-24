@@ -253,6 +253,65 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_job_questions: {
+        Row: {
+          answer_guidelines: string
+          created_at: string
+          custom_job_id: string
+          id: string
+          question: string
+        }
+        Insert: {
+          answer_guidelines: string
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          question: string
+        }
+        Update: {
+          answer_guidelines?: string
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_custom_job_questions_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "demo_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_jobs: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          job_description: string
+          job_title: string
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description: string
+          job_title: string
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description?: string
+          job_title?: string
+        }
+        Relationships: []
+      }
       email_waitlist: {
         Row: {
           created_at: string

@@ -123,7 +123,7 @@ export const createJob = async ({
   redirect(`/dashboard/jobs/${customJobId}`);
 };
 
-const createCustomJob = async ({
+export const createCustomJob = async ({
   jobTitle,
   jobDescription,
   companyName,
@@ -157,7 +157,7 @@ const createCustomJob = async ({
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
-const processFile = async ({
+export const processFile = async ({
   file,
   displayName,
   customJobId,
@@ -172,7 +172,7 @@ const processFile = async ({
   return await uploadFileToGemini({ file, displayName, customJobId, filePath });
 };
 
-const uploadFileToSupabase = async ({
+export const uploadFileToSupabase = async ({
   file,
   customJobId,
   userId,
@@ -192,7 +192,7 @@ const uploadFileToSupabase = async ({
   return filePath;
 };
 
-const uploadFileToGemini = async ({
+export const uploadFileToGemini = async ({
   file,
   displayName,
   customJobId,
@@ -222,7 +222,7 @@ const uploadFileToGemini = async ({
   return geminiUploadResponse;
 };
 
-const writeToDb = async (
+export const writeToDb = async (
   uploadResponse: UploadResponse,
   customJobId: string,
   filePath: string
@@ -241,7 +241,7 @@ const writeToDb = async (
   }
 };
 
-const generateCustomJobQuestions = async ({
+export const generateCustomJobQuestions = async ({
   customJobId,
   files,
   jobTitle,
