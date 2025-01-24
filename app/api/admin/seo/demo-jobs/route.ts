@@ -5,103 +5,217 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import { promises as fs } from "fs";
+import path from "path";
+
+// Use require for csv-parse as it doesn't have TypeScript types
+const { parse } = require("csv-parse/sync");
 
 export const maxDuration = 300;
 
+interface JobRecord {
+  jobTitle: string;
+  jobDescription: string;
+  companyName?: string;
+  companyDescription?: string;
+}
+
+interface ProcessingResult {
+  success: boolean;
+  error?: string;
+  message?: string;
+}
+
+// Helper function to process a batch of jobs
+const processBatch = async (batch: JobRecord[], logger: any) => {
+  const results = await Promise.all(
+    batch.map(async (job) => {
+      try {
+        const { jobTitle, jobDescription, companyName, companyDescription } =
+          job;
+
+        if (!jobTitle || !jobDescription) {
+          logger.info("Skipping job due to missing title or description", {
+            jobTitle,
+          });
+          return { success: false, error: "Missing title or description" };
+        }
+
+        // Normalize job title and clean company name
+        const [normalizedJobTitle, cleanedCompanyName] = await Promise.all([
+          normalizeJobTitle(jobTitle),
+          companyName ? cleanupText(companyName) : undefined,
+        ]);
+
+        logger.info("Normalized job title and cleaned company name", {
+          normalizedJobTitle,
+          cleanedCompanyName,
+        });
+
+        // Check existing entries in demo_jobs
+        const supabase = await createAdminClient();
+        const [genericJobResult, companySpecificJobResult] = await Promise.all([
+          supabase
+            .from("demo_jobs")
+            .select()
+            .eq("job_title", normalizedJobTitle)
+            .is("company_name", null)
+            .maybeSingle(),
+          cleanedCompanyName
+            ? supabase
+                .from("demo_jobs")
+                .select()
+                .eq("job_title", normalizedJobTitle)
+                .eq("company_name", cleanedCompanyName)
+                .maybeSingle()
+            : null,
+        ]);
+
+        const existingGenericJob = genericJobResult.data;
+        const existingCompanyJob = companySpecificJobResult?.data;
+
+        // Process jobs that don't exist
+        const tasks: Promise<void>[] = [];
+
+        if (!existingGenericJob) {
+          logger.info("Processing generic job", { normalizedJobTitle });
+          tasks.push(
+            generateDemoJobQuestions({
+              jobTitle: normalizedJobTitle,
+              jobDescription,
+            })
+          );
+        }
+
+        if (cleanedCompanyName && companyDescription && !existingCompanyJob) {
+          logger.info("Processing company-specific job", {
+            normalizedJobTitle,
+            cleanedCompanyName,
+          });
+          tasks.push(
+            generateDemoJobQuestions({
+              jobTitle: normalizedJobTitle,
+              jobDescription,
+              companyName: cleanedCompanyName,
+              companyDescription,
+            })
+          );
+        }
+
+        if (tasks.length > 0) {
+          await Promise.all(tasks);
+          return { success: true };
+        } else {
+          return { success: true, message: "Jobs already exist" };
+        }
+      } catch (e) {
+        const error = e instanceof Error ? e : new Error(String(e));
+        logger.error("Error processing job", { error: error.message });
+        return { success: false, error: error.message };
+      }
+    })
+  );
+
+  return results;
+};
+
 export const POST = withAxiom(async (req: AxiomRequest) => {
-  const {
-    jobTitle: rawJobTitle,
-    jobDescription,
-    companyName: rawCompanyName,
-    companyDescription,
-  } = await req.json();
   const logger = req.log.with({
     path: "/api/admin/seo/demo-jobs",
-    rawJobTitle,
-    rawCompanyName,
   });
 
-  if (!rawJobTitle && !jobDescription) {
-    logger.info("No job title or description provided");
-    return NextResponse.json({
-      message: "No job title or description provided",
+  try {
+    // Read and parse the CSV file
+    const csvPath = path.join(
+      process.cwd(),
+      "app/api/admin/seo/demo-jobs/jobs-to-process.csv"
+    );
+    const fileContent = await fs.readFile(csvPath, "utf-8");
+
+    // Parse CSV with header row mapping and type casting
+    const records = parse(fileContent, {
+      columns: true, // Use first row as headers
+      skip_empty_lines: true,
+      trim: true, // Trim whitespace from values
+      cast: true, // Automatically convert strings to appropriate types
+    }) as JobRecord[];
+
+    // Validate required fields
+    const invalidRecords = records.filter(
+      (record) => !record.jobTitle || !record.jobDescription
+    );
+
+    if (invalidRecords.length > 0) {
+      throw new Error(
+        `Found ${invalidRecords.length} records with missing required fields`
+      );
+    }
+
+    logger.info(`Found ${records.length} valid jobs to process`);
+
+    // Process in batches of 5
+    const BATCH_SIZE = 5;
+    const results: ProcessingResult[] = [];
+
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+      const batch = records.slice(i, i + BATCH_SIZE);
+      logger.info(
+        `Processing batch ${i / BATCH_SIZE + 1} of ${Math.ceil(
+          records.length / BATCH_SIZE
+        )}`,
+        {
+          batchSize: batch.length,
+          startIndex: i,
+        }
+      );
+
+      // Process current batch and wait for all jobs to complete (success or failure)
+      const batchPromises = batch.map((job) => processBatch([job], logger));
+      const batchResults = await Promise.allSettled(batchPromises);
+
+      // Process the results
+      batchResults.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          results.push(...result.value);
+        } else {
+          logger.error(`Failed to process job in batch ${i / BATCH_SIZE + 1}`, {
+            error: result.reason,
+            jobIndex: i + index,
+          });
+          results.push({
+            success: false,
+            error: `Batch processing failed: ${result.reason}`,
+          });
+        }
+      });
+
+      logger.info(`Completed batch ${i / BATCH_SIZE + 1}`);
+    }
+
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
+
+    logger.info("Finished processing all jobs", {
+      totalProcessed: results.length,
+      successCount,
+      failureCount,
     });
-  }
 
-  // Normalize job title and clean company name
-  const [normalizedJobTitle, cleanedCompanyName] = await Promise.all([
-    normalizeJobTitle(rawJobTitle),
-    rawCompanyName ? cleanupText(rawCompanyName) : undefined,
-  ]);
-
-  logger.info("Normalized job title and cleaned company name");
-
-  // Check existing entries in demo_jobs for both generic and company-specific cases
-  const supabase = await createAdminClient();
-  const [genericJobResult, companySpecificJobResult] = await Promise.all([
-    supabase
-      .from("demo_jobs")
-      .select()
-      .eq("job_title", normalizedJobTitle)
-      .is("company_name", null)
-      .maybeSingle(),
-    cleanedCompanyName
-      ? supabase
-          .from("demo_jobs")
-          .select()
-          .eq("job_title", normalizedJobTitle)
-          .eq("company_name", cleanedCompanyName)
-          .maybeSingle()
-      : null,
-  ]);
-
-  const existingGenericJob = genericJobResult.data;
-  const existingCompanyJob = companySpecificJobResult?.data;
-
-  // Prepare tasks to run in parallel
-  const tasks: Promise<void>[] = [];
-
-  // Add generic job task if it doesn't exist
-  if (!existingGenericJob) {
-    logger.info("Generic job doesn't exist, generating generic questions");
-    tasks.push(
-      generateDemoJobQuestions({
-        jobTitle: normalizedJobTitle,
-        jobDescription,
-      })
-    );
-  } else {
-    logger.info("Generic job already exists, skipping generic questions");
-  }
-
-  // Add company-specific task if company info is provided and demo job doesn't exist
-  if (cleanedCompanyName && !existingCompanyJob) {
-    logger.info(
-      "Company info is provided and company-specific job doesn't exist, generating company-specific questions"
-    );
-    tasks.push(
-      generateDemoJobQuestions({
-        jobTitle: normalizedJobTitle,
-        jobDescription,
-        companyName: cleanedCompanyName,
-        companyDescription,
-      })
-    );
-  } else if (existingCompanyJob) {
-    logger.info(
-      "Company-specific job already exists, skipping company-specific questions"
+    return NextResponse.json({
+      message: "Processing complete",
+      totalProcessed: results.length,
+      successCount,
+      failureCount,
+      results,
+    });
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    logger.error("Failed to process CSV file", { error: error.message });
+    return NextResponse.json(
+      { error: "Failed to process CSV file", details: error.message },
+      { status: 500 }
     );
   }
-
-  if (tasks.length === 0) {
-    return NextResponse.json({ message: "All jobs already exist" });
-  }
-
-  // Run all tasks in parallel
-  await Promise.all(tasks);
-
-  logger.info("Success");
-  return NextResponse.json({ message: "Success" });
 });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
@@ -284,7 +398,7 @@ const generateDemoJobQuestions = async ({
 
           await writeDemoJobToNotion({
             title,
-            slug: kebabCaseSlug,
+            slug: `${kebabCaseSlug}-practice-interview-questions`,
             metaDescription,
             metaTitle,
             blogIntro: metaDescription,
@@ -304,7 +418,7 @@ const generateDemoJobQuestions = async ({
 
           await writeDemoJobToNotion({
             title,
-            slug: kebabCaseSlug,
+            slug: `${kebabCaseSlug}-practice-interview-questions`,
             metaDescription,
             metaTitle,
             blogIntro: metaDescription,
