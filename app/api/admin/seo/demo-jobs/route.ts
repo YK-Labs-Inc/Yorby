@@ -142,7 +142,7 @@ const normalizeJobTitle = async (jobTitle: string) => {
   return normalizedTitle;
 };
 
-export const generateDemoJobQuestions = async ({
+const generateDemoJobQuestions = async ({
   jobTitle,
   jobDescription,
   companyName,
