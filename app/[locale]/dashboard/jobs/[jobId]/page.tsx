@@ -41,10 +41,7 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
     throw error;
   }
   if (data.status === "locked" && !hasSubscription) {
-    return {
-      ...data,
-      custom_job_questions: data.custom_job_questions.slice(0, 1),
-    };
+    return data;
   }
   return {
     ...data,
@@ -190,6 +187,7 @@ export default async function JobPage({
                 isLocked={isLocked}
                 userCredits={userCredits}
                 currentPage={currentPage}
+                numFreeQuestions={3}
               />
             )}
             {view === "mock" && (

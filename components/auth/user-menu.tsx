@@ -14,6 +14,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
 import { useRouter } from "next/navigation";
+import { handleSignOut } from "./actions";
 
 interface UserMenuProps {
   email: string;
@@ -22,11 +23,6 @@ interface UserMenuProps {
 
 export function UserMenu({ email, hasSubscription }: UserMenuProps) {
   const router = useRouter();
-  const handleSignOut = async () => {
-    const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    router.push("/");
-  };
   const [_, startTransition] = useTransition();
 
   const handleManageSubscription = () => {
@@ -60,7 +56,13 @@ export function UserMenu({ email, hasSubscription }: UserMenuProps) {
           <ThemeSwitcher />
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleSignOut}>Sign Out</DropdownMenuItem>
+        <form action={handleSignOut}>
+          <DropdownMenuItem asChild>
+            <Button variant="ghost" className="w-full" type="submit">
+              Sign Out
+            </Button>
+          </DropdownMenuItem>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   );

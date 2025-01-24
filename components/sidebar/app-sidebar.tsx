@@ -17,6 +17,7 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
+import { LinkAccountModal } from "../auth/link-account-modal";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
@@ -58,7 +59,7 @@ export function AppSidebar({
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/" className="flex items-center">
+        <Link href="/dashboard/jobs" className="flex items-center">
           <img src={logoSrc} alt="Perfect Interview" className="w-8 h-8 mr-2" />
           <H3>Perfect Interview</H3>
         </Link>
@@ -101,9 +102,10 @@ export function AppSidebar({
             </Link>
           </>
         )}
-        {user?.email ? (
+        {user && user.email && (
           <UserMenu email={user.email} hasSubscription={hasSubscription} />
-        ) : null}
+        )}{" "}
+        {user && user?.is_anonymous && <LinkAccountModal />}
         {!user && (
           <div>
             <p className="text-sm text-muted-foreground mb-4 text-center w-full">
