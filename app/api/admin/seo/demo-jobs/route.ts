@@ -538,7 +538,7 @@ const writeDemoJobToNotion = async ({
                 {
                   text: {
                     content:
-                      "Want to practice answering these questions? Try our AI-powered mock interviews that provided instant feedback on your answers.",
+                      "Want to practice answering these questions? Try our AI-powered mock interviews that provides instant feedback on your answers.\n\n",
                   },
                 },
                 {
