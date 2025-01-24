@@ -84,9 +84,9 @@
       "redirect": "We'll redirect you to your questions once they're ready."
     },
     "cloneDemoJob": {
-      "description": "Would you like to practice these interview questions? Click the button below to create your own copy of this job and start practicing!",
-      "button": "Duplicate These Interview Questions",
-      "loading": "Cloning your interview prep materials..."
+      "description": "Would you like to practice these interview questions? Click the button below to practice these questions with our AI-powered mock interviews!",
+      "button": "Practice These Interview Questions",
+      "loading": "Preparing your interview prep materials..."
     }
   },
   "jobPage": {
