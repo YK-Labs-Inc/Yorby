@@ -86,7 +86,7 @@
     "cloneDemoJob": {
       "description": "Would you like to practice these interview questions? Click the button below to practice these questions with our AI-powered mock interviews!",
       "button": "Practice These Interview Questions",
-      "loading": "Preparing your interview prep materials..."
+      "loading": "Preparing Your Interview Prep Materials..."
     }
   },
   "jobPage": {
