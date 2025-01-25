@@ -300,8 +300,8 @@
     "redirect_error_message": "Redirecting you back in {seconds} seconds..."
   },
   "accountLinking": {
-    "title": "Link Your Account",
-    "description": "To view your practice interview questions, please link your account to an email address.",
+    "title": "Sign Up To Save Your Interview Prep",
+    "description": "To save your interview prep progress, please create an account.",
     "form": {
       "email": {
         "label": "Email",
@@ -311,10 +311,11 @@
         "label": "Password",
         "placeholder": "Choose a password"
       },
-      "submit": "Link Account"
+      "submit": "Sign Up"
     },
     "emailRequiredError": "Email is required",
-    "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration."
+    "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration.",
+    "signUp": "Sign Up"
   },
   "faq": {
     "title": "Frequently Asked Questions",
