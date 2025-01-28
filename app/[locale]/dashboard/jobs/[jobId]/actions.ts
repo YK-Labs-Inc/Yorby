@@ -19,6 +19,7 @@ export const startMockInterview = async (
   let logger = new Logger();
   let mockInterviewId = "";
   const jobId = formData.get("jobId") as string;
+  const onboarding = formData.get("onboarding") as string;
   try {
     if (!jobId) {
       throw new Error("Job ID is required");
@@ -133,8 +134,11 @@ Thank the candidate for their time and tell them that the interview has ended.
       },
     });
   }
-
-  redirect(`/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}`);
+  redirect(
+    `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}${
+      onboarding === "true" ? "?onboarding=true" : ""
+    }`
+  );
 };
 
 export const linkAnonymousAccount = async (formData: FormData) => {

@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
+import { OnboardingChecklist } from "../onboarding/OnboardingChecklist";
 
 interface AppSidebarProps {
   numberOfCredits: number;
@@ -89,6 +90,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
+        {user && <OnboardingChecklist />}
         {user && !user.is_anonymous && !hasSubscription && (
           <>
             <p className="text-lg text-center font-bold px-4">
