@@ -25,11 +25,7 @@ export async function signInWithOTP(formData: FormData) {
   if (error) {
     logger.error("Failed to send magic link", { error });
     await logger.flush();
-    return encodedRedirect(
-      "authError",
-      redirectTo,
-      "Failed to send magic link. Please try again."
-    );
+    return encodedRedirect("authError", redirectTo, error.message);
   }
 
   return encodedRedirect(

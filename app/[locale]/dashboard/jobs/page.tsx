@@ -21,6 +21,7 @@ const fetchJobs = async () => {
   }
   return data;
 };
+
 export default async function JobsPage({
   searchParams,
 }: {
@@ -28,6 +29,7 @@ export default async function JobsPage({
 }) {
   const errorMessage = (await searchParams).error as string;
   const newJob = (await searchParams).newJob === "true";
+  const showOnboarding = (await searchParams).onboarding === "true";
   let jobs: Tables<"custom_jobs">[] = [];
   if (!newJob) {
     jobs = await fetchJobs();
@@ -37,7 +39,7 @@ export default async function JobsPage({
   }
   return (
     <div className="w-full flex justify-center items-center p-8">
-      <JobCreationComponent />
+      <JobCreationComponent showOnboarding={showOnboarding} />
     </div>
   );
 }

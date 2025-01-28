@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FormData {
@@ -33,10 +33,18 @@ interface FormData {
   captchaToken: string;
 }
 
-export default function JobCreationComponent() {
+interface Props {
+  showOnboarding?: boolean;
+}
+
+export default function JobCreationComponent({
+  showOnboarding = false,
+}: Props) {
   const t = useTranslations("jobCreation");
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string>("");
+  const [showOnboardingDialog, setShowOnboardingDialog] =
+    useState(showOnboarding);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -120,232 +128,274 @@ export default function JobCreationComponent() {
   };
 
   return (
-    <div className="px-4 sm:px-6 w-full max-w-[1080px]">
-      <H1 className="w-full text-center mb-8">{t("title")}</H1>
+    <>
+      <Dialog
+        open={showOnboardingDialog}
+        onOpenChange={setShowOnboardingDialog}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              {t("onboarding.title")}
+            </DialogTitle>
+            <DialogDescription className="text-lg pt-2">
+              {t("onboarding.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {[1, 2, 3].map((stepNum) => (
+              <div key={stepNum} className="flex gap-4 items-start">
+                <div className="mt-1">
+                  <CheckCircle2 className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-lg">
+                    {t(`onboarding.steps.${stepNum}.title`)}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {t(`onboarding.steps.${stepNum}.description`)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setShowOnboardingDialog(false)}>
+              {t("onboarding.button")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      <div className="px-4 sm:px-6 w-full max-w-[1080px]">
+        <H1 className="w-full text-center mb-8">{t("title")}</H1>
 
-      <div className="mb-8">
-        <Progress value={step === 1 ? 50 : 100} className="h-2" />
-        <p className="text-sm text-muted-foreground mt-2">
-          {t("stepProgress", {
-            step,
-            stepTitle: t(`steps.${step}`),
-          })}
-        </p>
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="mb-8">
+          <Progress value={step === 1 ? 50 : 100} className="h-2" />
+          <p className="text-sm text-muted-foreground mt-2">
+            {t("stepProgress", {
+              step,
+              stepTitle: t(`steps.${step}`),
+            })}
+          </p>
+        </div>
+
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            {step === 1 ? (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("jobTitle.label")}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    placeholder={t("jobTitle.placeholder")}
+                    value={formData.jobTitle}
+                    onChange={handleTextChange("jobTitle")}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("jobDescription.label")}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    placeholder={t("jobDescription.placeholder")}
+                    value={formData.jobDescription}
+                    onChange={handleTextChange("jobDescription")}
+                    className="h-[80px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("companyName.label")}
+                  </label>
+                  <Input
+                    placeholder={t("companyName.placeholder")}
+                    value={formData.companyName}
+                    onChange={handleTextChange("companyName")}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("companyDescription.label")}
+                  </label>
+                  <Textarea
+                    className="h-[80px]"
+                    placeholder={t("companyDescription.placeholder")}
+                    value={formData.companyDescription}
+                    onChange={handleTextChange("companyDescription")}
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleNext}
+                    disabled={
+                      !formData.jobTitle.trim() ||
+                      !formData.jobDescription.trim()
+                    }
+                  >
+                    {t("buttons.next")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t("fileUpload.pdfOnlyNotice")}
+                </p>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("resume.label")}
+                  </label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange("resume")}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("fileUpload.pdfOnlyHelper")}
+                  </p>
+                  {formData.resume && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {formData.resume.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => handleFileDelete("resume")}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("coverLetter.label")}
+                  </label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange("coverLetter")}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("fileUpload.pdfOnlyHelper")}
+                  </p>
+                  {formData.coverLetter && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {formData.coverLetter.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={() => handleFileDelete("coverLetter")}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    {t("additionalDocs.label")}
+                  </label>
+                  <Input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange("miscDocuments")}
+                    multiple
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("fileUpload.pdfOnlyHelper")}
+                  </p>
+                  {formData.miscDocuments.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {formData.miscDocuments.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            {file.name}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() =>
+                              handleFileDelete("miscDocuments", index)
+                            }
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between">
+                  <Button
+                    disabled={isPending}
+                    variant="outline"
+                    onClick={handleBack}
+                  >
+                    {t("buttons.back")}
+                  </Button>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        disabled={isPending || !formData.captchaToken}
+                        onClick={handleSubmit}
+                      >
+                        {t("buttons.submit")}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>{t("loading.title")}</DialogTitle>
+                        <DialogDescription>
+                          {t("loading.description")}
+                        </DialogDescription>
+                        <p className="text-sm text-muted-foreground">
+                          {t("loading.redirect")}
+                        </p>
+                      </DialogHeader>
+                      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => {
+                    setFormData((prev) => ({ ...prev, captchaToken: token }));
+                  }}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      <Card className="w-full">
-        <CardContent className="pt-6">
-          {step === 1 ? (
-            <div className="space-y-6">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("jobTitle.label")} <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  placeholder={t("jobTitle.placeholder")}
-                  value={formData.jobTitle}
-                  onChange={handleTextChange("jobTitle")}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("jobDescription.label")}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  placeholder={t("jobDescription.placeholder")}
-                  value={formData.jobDescription}
-                  onChange={handleTextChange("jobDescription")}
-                  className="h-[80px]"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("companyName.label")}
-                </label>
-                <Input
-                  placeholder={t("companyName.placeholder")}
-                  value={formData.companyName}
-                  onChange={handleTextChange("companyName")}
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("companyDescription.label")}
-                </label>
-                <Textarea
-                  className="h-[80px]"
-                  placeholder={t("companyDescription.placeholder")}
-                  value={formData.companyDescription}
-                  onChange={handleTextChange("companyDescription")}
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleNext}
-                  disabled={
-                    !formData.jobTitle.trim() || !formData.jobDescription.trim()
-                  }
-                >
-                  {t("buttons.next")}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <p className="text-sm text-muted-foreground mb-4">
-                {t("fileUpload.pdfOnlyNotice")}
-              </p>
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("resume.label")}
-                </label>
-                <Input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange("resume")}
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("fileUpload.pdfOnlyHelper")}
-                </p>
-                {formData.resume && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {formData.resume.name}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleFileDelete("resume")}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("coverLetter.label")}
-                </label>
-                <Input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange("coverLetter")}
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("fileUpload.pdfOnlyHelper")}
-                </p>
-                {formData.coverLetter && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {formData.coverLetter.name}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleFileDelete("coverLetter")}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("additionalDocs.label")}
-                </label>
-                <Input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange("miscDocuments")}
-                  multiple
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("fileUpload.pdfOnlyHelper")}
-                </p>
-                {formData.miscDocuments.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {formData.miscDocuments.map((file, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
-                          {file.name}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={() =>
-                            handleFileDelete("miscDocuments", index)
-                          }
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-between">
-                <Button
-                  disabled={isPending}
-                  variant="outline"
-                  onClick={handleBack}
-                >
-                  {t("buttons.back")}
-                </Button>
-
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      disabled={isPending || !formData.captchaToken}
-                      onClick={handleSubmit}
-                    >
-                      {t("buttons.submit")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>{t("loading.title")}</DialogTitle>
-                      <DialogDescription>
-                        {t("loading.description")}
-                      </DialogDescription>
-                      <p className="text-sm text-muted-foreground">
-                        {t("loading.redirect")}
-                      </p>
-                    </DialogHeader>
-                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) => {
-                  setFormData((prev) => ({ ...prev, captchaToken: token }));
-                }}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    </>
   );
 }

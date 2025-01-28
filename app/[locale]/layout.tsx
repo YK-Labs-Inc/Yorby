@@ -12,6 +12,8 @@ import { UserProvider } from "@/context/UserContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Chatwoot from "@/components/ChatwootWidget";
+import { OnboardingProvider } from "@/context/OnboardingContext";
+import { User } from "@supabase/supabase-js";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -63,6 +65,75 @@ const fetchHasSubscription = async (userId: string) => {
   return data !== null;
 };
 
+const fetchOnboardingState = async (user: User) => {
+  const supabase = await createSupabaseServerClient();
+  const userId = user.id;
+
+  const [
+    { data: jobs },
+    { data: submissions },
+    { data: generatedAnswers },
+    { data: mockInterviews },
+  ] = await Promise.all([
+    // Check if user has created any jobs
+    supabase
+      .from("custom_jobs")
+      .select("id")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    // Check if user has submitted any answers
+    supabase
+      .from("custom_job_question_submissions")
+      .select("")
+      .neq("feedback", JSON.stringify({ pros: [], cons: [] }))
+      .limit(1)
+      .maybeSingle(),
+    // Check if user has generated an answer
+    supabase
+      .from("custom_job_question_submissions")
+      .select("")
+      .eq("feedback", JSON.stringify({ pros: [], cons: [] }))
+      .limit(1)
+      .maybeSingle(),
+    // Check if user has completed any mock interviews
+    supabase
+      .from("custom_job_mock_interviews")
+      .select("id")
+      .eq("status", "complete")
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  let unansweredQuestionId = null;
+  if (!submissions) {
+    const { data: unansweredQuestion } = await supabase
+      .from("custom_job_questions")
+      .select("id")
+      .not(
+        "id",
+        "in",
+        supabase.from("custom_job_question_submissions").select("question_id")
+      )
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    unansweredQuestionId = unansweredQuestion?.id ?? null;
+  }
+
+  return {
+    first_custom_job_created: !!jobs,
+    first_answer_generated: !!generatedAnswers,
+    first_question_answered: !!submissions,
+    first_mock_interview_completed: !!mockInterviews,
+    connected_account_to_email: user.email !== undefined,
+    last_created_job_id: jobs?.id ?? null,
+    last_unanswered_question_id: unansweredQuestionId,
+  };
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -84,9 +155,11 @@ export default async function RootLayout({
   const jobs = await fetchJobs();
   let numberOfCredits = 0;
   let hasSubscription = false;
+  let onboardingState = null;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
+    onboardingState = await fetchOnboardingState(user);
   }
   // Providing all messages to the client
   // side is the easiest way to get started
@@ -115,17 +188,19 @@ export default async function RootLayout({
                 <AxiomWebVitals />
                 <AxiomLoggingProvider user={user}>
                   <SidebarProvider>
-                    <AppSidebar
-                      jobs={jobs}
-                      numberOfCredits={numberOfCredits}
-                      hasSubscription={hasSubscription}
-                      user={user}
-                    />
-                    <SidebarTrigger />
-                    <main className="w-full">
-                      {children}
-                      <Chatwoot />
-                    </main>
+                    <OnboardingProvider initialState={onboardingState}>
+                      <AppSidebar
+                        jobs={jobs}
+                        numberOfCredits={numberOfCredits}
+                        hasSubscription={hasSubscription}
+                        user={user}
+                      />
+                      <SidebarTrigger />
+                      <main className="w-full">
+                        {children}
+                        <Chatwoot />
+                      </main>
+                    </OnboardingProvider>
                   </SidebarProvider>
                 </AxiomLoggingProvider>
               </UserProvider>
