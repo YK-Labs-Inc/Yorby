@@ -95,7 +95,6 @@ const fetchOnboardingState = async (user: User) => {
     ]);
 
   let unansweredQuestionId = null;
-  console.log("hey submissions: ", submissions);
   if (!submissions || submissions.length === 0) {
     const { data: unansweredQuestion } = await supabase
       .from("custom_job_questions")
