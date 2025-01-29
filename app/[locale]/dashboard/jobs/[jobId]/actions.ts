@@ -20,46 +20,81 @@ export const startMockInterview = async (
   let mockInterviewId = "";
   const jobId = formData.get("jobId") as string;
   const onboarding = formData.get("onboarding") as string;
-  try {
-    if (!jobId) {
-      throw new Error("Job ID is required");
-    }
-    logger = logger.with({
-      jobId,
+  const isOnboarding = onboarding === "true";
+  if (!jobId) {
+    logger.error("Error starting mock interview:", {
+      error: "Job ID is required",
     });
+    const translations = await getTranslations("errors");
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
+  logger = logger.with({
+    jobId,
+  });
 
-    const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
-    const { data: customJob, error: jobError } = await supabase
-      .from("custom_jobs")
-      .select("*")
-      .eq("id", jobId)
-      .single();
+  if (isOnboarding) {
+    // Check for existing mock interviews
+    const { data: existingMockInterview } = await supabase
+      .from("custom_job_mock_interviews")
+      .select("id")
+      .eq("custom_job_id", jobId)
+      .maybeSingle();
 
-    if (jobError || !customJob) {
-      throw new Error("Failed to fetch job details");
+    if (existingMockInterview) {
+      redirect(
+        `/dashboard/jobs/${jobId}/mockInterviews/${existingMockInterview.id}${
+          isOnboarding ? "?onboarding=true" : ""
+        }`
+      );
     }
+  }
 
-    const { data: jobQuestions, error: questionError } = await supabase
-      .from("custom_job_questions")
-      .select("*")
-      .eq("custom_job_id", jobId);
+  const { data: customJob, error: jobError } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
 
-    if (questionError || !jobQuestions || jobQuestions.length === 0) {
-      throw new Error("Failed to fetch job questions");
-    }
+  if (jobError || !customJob) {
+    logger.error("Error fetching job details:", {
+      error: jobError?.message,
+    });
+    const translations = await getTranslations("errors");
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
 
-    // Randomly select 6 questions from the job questions
-    const selectedQuestions = jobQuestions
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 6);
+  const { data: jobQuestions, error: questionError } = await supabase
+    .from("custom_job_questions")
+    .select("*")
+    .eq("custom_job_id", jobId);
 
-    // Update the prompt with the selected questions
-    const questionsPrompt = selectedQuestions
-      .map((q, index) => `Question ${index + 1}: ${q.question}`)
-      .join("\n");
+  if (questionError || !jobQuestions || jobQuestions.length === 0) {
+    logger.error("Error fetching job questions:", {
+      error: questionError?.message,
+    });
+    const translations = await getTranslations("errors");
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
 
-    const prompt = `You are an experienced interviewer for ${customJob.company_name ?? "a company"}. 
+  // Randomly select 6 questions from the job questions
+  const selectedQuestions = jobQuestions
+    .sort(() => 0.5 - Math.random())
+    .slice(0, isOnboarding ? 2 : 6);
+
+  // Update the prompt with the selected questions
+  const questionsPrompt = selectedQuestions
+    .map((q, index) => `Question ${index + 1}: ${q.question}`)
+    .join("\n");
+
+  const prompt = `You are an experienced interviewer for ${customJob.company_name ?? "a company"}. 
 You are conducting a job interview for the position of ${customJob.job_title}.
 
 Company Context:
@@ -95,33 +130,33 @@ Once you ask ${selectedQuestions.length} questions, end the interview.
 Thank the candidate for their time and tell them that the interview has ended. 
 `;
 
-    const { data: mockInterview, error: createError } = await supabase
-      .from("custom_job_mock_interviews")
-      .insert({
-        custom_job_id: jobId,
-        interview_prompt: prompt,
-        status: "in_progress",
-      })
-      .select()
-      .single();
+  const { data: mockInterview, error: createError } = await supabase
+    .from("custom_job_mock_interviews")
+    .insert({
+      custom_job_id: jobId,
+      interview_prompt: prompt,
+      status: "in_progress",
+    })
+    .select()
+    .single();
 
-    if (createError) {
-      throw createError;
-    }
-    if (!mockInterview) {
-      throw new Error("Failed to create mock interview");
-    }
-    mockInterviewId = mockInterview.id;
-  } catch (error: any) {
-    logger.error("Error starting mock interview:", {
-      error: error.message,
+  if (createError) {
+    logger.error("Error creating mock interview:", {
+      error: createError.message,
     });
     const translations = await getTranslations("errors");
     return {
       error: translations("pleaseTryAgain"),
     };
   }
-  const supabase = await createSupabaseServerClient();
+  if (!mockInterview) {
+    logger.error("Failed to create mock interview");
+    const translations = await getTranslations("errors");
+    return {
+      error: translations("pleaseTryAgain"),
+    };
+  }
+  mockInterviewId = mockInterview.id;
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -136,7 +171,7 @@ Thank the candidate for their time and tell them that the interview has ended.
   }
   redirect(
     `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}${
-      onboarding === "true" ? "?onboarding=true" : ""
+      isOnboarding ? "?onboarding=true" : ""
     }`
   );
 };

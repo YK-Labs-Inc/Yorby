@@ -14,6 +14,7 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Chatwoot from "@/components/ChatwootWidget";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import { User } from "@supabase/supabase-js";
+import { Tables } from "@/utils/supabase/database.types";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -30,9 +31,12 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const fetchJobs = async () => {
+const fetchJobs = async (userId: string) => {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("custom_jobs").select("*");
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("user_id", userId);
   if (error) {
     throw error;
   }
@@ -111,11 +115,6 @@ const fetchOnboardingState = async (user: User) => {
     const { data: unansweredQuestion } = await supabase
       .from("custom_job_questions")
       .select("id")
-      .not(
-        "id",
-        "in",
-        supabase.from("custom_job_question_submissions").select("question_id")
-      )
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
@@ -152,7 +151,7 @@ export default async function RootLayout({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  const jobs = await fetchJobs();
+  let jobs: Tables<"custom_jobs">[] = [];
   let numberOfCredits = 0;
   let hasSubscription = false;
   let onboardingState = null;
@@ -160,6 +159,7 @@ export default async function RootLayout({
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
     onboardingState = await fetchOnboardingState(user);
+    jobs = await fetchJobs(user.id);
   }
   // Providing all messages to the client
   // side is the easiest way to get started

@@ -17,9 +17,11 @@ export function OnboardingChecklist() {
   const router = useRouter();
   const { logError } = useAxiomLogging();
   const [isPending, startTransition] = useTransition();
-  const enableNewUserOnboarding = useFeatureFlagEnabled(
-    "enable-new-user-onboarding"
-  );
+  // const enableNewUserOnboarding = useFeatureFlagEnabled(
+  //   "enable-new-user-onboarding"
+  // );
+
+  const enableNewUserOnboarding = true;
   const [startInterviewState, startInterviewAction, _] = useActionState(
     startMockInterview,
     {
@@ -119,7 +121,10 @@ function ChecklistItem({
         "flex items-center gap-2 transition-all duration-200 hover:bg-accent/50 p-2 rounded-md cursor-default group",
         !completed ? "hover:cursor-pointer" : ""
       )}
-      onClick={onClick}
+      onClick={() => {
+        if (disabled) return;
+        onClick();
+      }}
     >
       <div className="w-5 h-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
         {completed ? (
