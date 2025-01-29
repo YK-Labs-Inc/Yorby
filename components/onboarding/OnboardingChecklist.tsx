@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useActionState, useEffect, useTransition } from "react";
 import { startMockInterview } from "@/app/[locale]/dashboard/jobs/[jobId]/actions";
-import { useFeatureFlagEnabled } from "posthog-js/react";
+import { useFeatureFlagVariantKey } from "posthog-js/react";
 
 export function OnboardingChecklist() {
   const { onboardingState, isOnboardingComplete } = useOnboarding();
@@ -17,9 +17,9 @@ export function OnboardingChecklist() {
   const router = useRouter();
   const { logError } = useAxiomLogging();
   const [isPending, startTransition] = useTransition();
-  const enableNewUserOnboarding = useFeatureFlagEnabled(
-    "enable-new-user-onboarding"
-  );
+  // const enableNewUserOnboarding =
+  //   useFeatureFlagVariantKey("enable-new-user-onboarding") === "test";
+  const enableNewUserOnboarding = true;
 
   const [startInterviewState, startInterviewAction, _] = useActionState(
     startMockInterview,
@@ -117,11 +117,11 @@ function ChecklistItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 transition-all duration-200 hover:bg-accent/50 p-2 rounded-md cursor-default group",
-        !completed ? "hover:cursor-pointer" : ""
+        "flex items-center gap-2 transition-all duration-200 p-2 rounded-md cursor-default group",
+        !completed ? "hover:cursor-pointer hover:bg-accent/50" : ""
       )}
       onClick={() => {
-        if (disabled) return;
+        if (completed) return;
         onClick();
       }}
     >
