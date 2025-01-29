@@ -17,11 +17,10 @@ export function OnboardingChecklist() {
   const router = useRouter();
   const { logError } = useAxiomLogging();
   const [isPending, startTransition] = useTransition();
-  // const enableNewUserOnboarding = useFeatureFlagEnabled(
-  //   "enable-new-user-onboarding"
-  // );
+  const enableNewUserOnboarding = useFeatureFlagEnabled(
+    "enable-new-user-onboarding"
+  );
 
-  const enableNewUserOnboarding = true;
   const [startInterviewState, startInterviewAction, _] = useActionState(
     startMockInterview,
     {
