@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OnboardingDialog } from "./OnboardingDialog";
 import { GenerateAnswerOnboardingDialog } from "./GenerateAnswerOnboardingDialog";
 
@@ -18,6 +18,10 @@ export function OnboardingWrapper({
   const [showGenerateDialog, setShowGenerateDialog] = useState(
     showGenerateOnboarding
   );
+  useEffect(() => {
+    setShowAnswerDialog(showAnswerOnboarding);
+    setShowGenerateDialog(showGenerateOnboarding);
+  }, [showAnswerOnboarding, showGenerateOnboarding]);
 
   return (
     <>
