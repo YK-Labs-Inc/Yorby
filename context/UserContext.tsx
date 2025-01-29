@@ -25,9 +25,7 @@ export const UserProvider = ({
 }) => {
   useEffect(() => {
     if (user?.id) {
-      posthog.identify(user.id, {
-        properties: { email: user.email, userId: user.id },
-      });
+      posthog.identify(user.id, { email: user.email, userId: user.id });
     }
   }, [user]);
 
