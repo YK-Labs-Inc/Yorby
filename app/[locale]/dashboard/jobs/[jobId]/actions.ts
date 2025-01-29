@@ -87,7 +87,7 @@ export const startMockInterview = async (
   // Randomly select 6 questions from the job questions
   const selectedQuestions = jobQuestions
     .sort(() => 0.5 - Math.random())
-    .slice(0, isOnboarding ? 2 : 6);
+    .slice(0, isOnboarding ? 3 : 6);
 
   // Update the prompt with the selected questions
   const questionsPrompt = selectedQuestions
