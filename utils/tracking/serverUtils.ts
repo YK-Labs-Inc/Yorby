@@ -27,6 +27,7 @@ export const trackServerEvent = async ({
     distinctId: userId,
     event: eventName,
     properties: { email: emailAddress, userId, ...args },
+    sendFeatureFlags: true,
   });
   await posthog.shutdown();
 };
