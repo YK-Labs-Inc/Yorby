@@ -190,6 +190,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       });
 
       logger.info(`Completed batch ${i / BATCH_SIZE + 1}`);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     const successCount = results.filter((r) => r.success).length;
