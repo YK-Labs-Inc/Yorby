@@ -1,8 +1,8 @@
 export default async function InterviewCopilotSessionPage({
   params,
 }: {
-  params: Promise<{ sessionId: string }>;
+  params: Promise<{ interviewCopilotId: string }>;
 }) {
-  const { sessionId } = await params;
+  const { interviewCopilotId } = await params;
   return <div>InterviewCopilotSessionPage</div>;
 }

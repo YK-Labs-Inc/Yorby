@@ -142,7 +142,7 @@ export const createInterviewCopilot = async (
     await logger.flush();
     return { error: t("generic") };
   }
-  redirect(`/dashboard/interview-copilots/sessions/${copilotId}`);
+  redirect(`/dashboard/interview-copilots/${copilotId}`);
 };
 
 const generateJobTitle = async ({
