@@ -330,6 +330,89 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_copilot_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id: string
+          interview_copilot_id: string
+          mime_type: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id?: string
+          interview_copilot_id: string
+          mime_type: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          google_file_name?: string
+          google_file_uri?: string
+          id?: string
+          interview_copilot_id?: string
+          mime_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_copilot_files_interview_copilot_id_fkey"
+            columns: ["interview_copilot_id"]
+            isOneToOne: false
+            referencedRelation: "interview_copilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_copilots: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string
+          duration_ms: number
+          id: string
+          input_tokens_count: number
+          job_description: string | null
+          job_title: string | null
+          output_tokens_count: number
+          title: string
+          transcript: string
+          user_id: string
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          duration_ms: number
+          id?: string
+          input_tokens_count: number
+          job_description?: string | null
+          job_title?: string | null
+          output_tokens_count: number
+          title: string
+          transcript: string
+          user_id: string
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          duration_ms?: number
+          id?: string
+          input_tokens_count?: number
+          job_description?: string | null
+          job_title?: string | null
+          output_tokens_count?: number
+          title?: string
+          transcript?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mock_interview_messages: {
         Row: {
           created_at: string

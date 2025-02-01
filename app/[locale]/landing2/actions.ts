@@ -169,7 +169,13 @@ export const processFile = async ({
   userId: string;
 }) => {
   const filePath = await uploadFileToSupabase({ file, customJobId, userId });
-  return await uploadFileToGemini({ file, displayName, customJobId, filePath });
+  const blob = new Blob([file], { type: file.type });
+  const geminiUploadResponse = await uploadFileToGemini({
+    blob,
+    displayName,
+  });
+  await writeToDb(geminiUploadResponse, customJobId, filePath);
+  return geminiUploadResponse;
 };
 
 export const uploadFileToSupabase = async ({
@@ -193,20 +199,15 @@ export const uploadFileToSupabase = async ({
 };
 
 export const uploadFileToGemini = async ({
-  file,
+  blob,
   displayName,
-  customJobId,
-  filePath,
 }: {
-  file: File;
+  blob: Blob;
   displayName: string;
-  customJobId: string;
-  filePath: string;
 }) => {
-  const blob = new Blob([file], { type: file.type });
   const formData = new FormData();
   const metadata = {
-    file: { mimeType: file.type, displayName: displayName },
+    file: { mimeType: blob.type, displayName: displayName },
   };
   formData.append(
     "metadata",
@@ -218,7 +219,6 @@ export const uploadFileToGemini = async ({
     { method: "post", body: formData }
   );
   const geminiUploadResponse = (await res2.json()) as UploadResponse;
-  await writeToDb(geminiUploadResponse, customJobId, filePath);
   return geminiUploadResponse;
 };
 

@@ -404,5 +404,40 @@
       }
     },
     "loading": "Loading..."
+  },
+  "interviewCopilots": {
+    "title": "Interview Copilots",
+    "createNew": {
+      "title": "Create New Interview Copilot",
+      "jobTitle": {
+        "label": "Job Title (Optional)",
+        "placeholder": "Enter job title"
+      },
+      "jobDescription": {
+        "label": "Job Description (Optional)",
+        "placeholder": "Enter job description"
+      },
+      "companyName": {
+        "label": "Company Name (Optional)",
+        "placeholder": "Enter company name"
+      },
+      "companyDescription": {
+        "label": "Company Description (Optional)",
+        "placeholder": "Enter company description"
+      },
+      "documents": {
+        "label": "Upload Documents (Optional)",
+        "helper": "Upload your resume, cover letter, or any other relevant documents (must be a PDF file)"
+      },
+      "submit": "Create Interview Copilot",
+      "submitting": "Creating..."
+    },
+    "errors": {
+      "uploadFailed": "Failed to upload file",
+      "generic": "Something went wrong, please try again."
+    },
+    "jobTitle": {
+      "label": "Interview Copilot"
+    }
   }
 }
