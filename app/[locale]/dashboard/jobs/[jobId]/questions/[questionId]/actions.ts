@@ -1,5 +1,6 @@
 "use server";
 
+import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
@@ -430,7 +431,7 @@ const processMissingFile = async ({
     bucket: "custom_job_files",
   });
   const uploadResponse = await uploadFileToGemini({
-    file: data,
+    blob: data,
     displayName: display_name,
   });
   await updateFileInDatabase({
@@ -458,28 +459,4 @@ const updateFileInDatabase = async ({
   if (error) {
     throw error;
   }
-};
-
-const uploadFileToGemini = async ({
-  file,
-  displayName,
-}: {
-  file: Blob;
-  displayName: string;
-}) => {
-  const formData = new FormData();
-  const metadata = {
-    file: { mimeType: file.type, displayName: displayName },
-  };
-  formData.append(
-    "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" })
-  );
-  formData.append("file", file);
-  const res2 = await fetch(
-    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${GEMINI_API_KEY}`,
-    { method: "post", body: formData }
-  );
-  const geminiUploadResponse = (await res2.json()) as UploadResponse;
-  return geminiUploadResponse;
 };

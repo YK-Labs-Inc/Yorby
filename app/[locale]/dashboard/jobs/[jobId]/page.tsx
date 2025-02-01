@@ -13,6 +13,7 @@ import { FormMessage, Message } from "@/components/form-message";
 import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
 import { Button } from "@/components/ui/button";
 import { FileText, Monitor } from "lucide-react";
+import { redirect } from "next/navigation";
 
 const MobileWarning = async () => {
   const t = await getTranslations("mobileWarning");
@@ -88,6 +89,9 @@ export default async function JobPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
   const isAnonymous = user?.is_anonymous;
   const jobId = (await params).jobId;
   const hasSubscription = await fetchHasSubscription(user?.id || "");
