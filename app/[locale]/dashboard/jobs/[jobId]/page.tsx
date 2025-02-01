@@ -13,8 +13,6 @@ import { FormMessage, Message } from "@/components/form-message";
 import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
 import { Button } from "@/components/ui/button";
 import { FileText, Monitor } from "lucide-react";
-import InterviewCopilot from "./InterviewCopilot";
-import PostHogClient from "@/app/posthog";
 import { redirect } from "next/navigation";
 
 const MobileWarning = async () => {
