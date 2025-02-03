@@ -17,23 +17,25 @@ export default async function Login({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const t = await getTranslations("signUp");
-
+  const signUpT = await getTranslations("signUp");
+  const signInT = await getTranslations("signIn");
   // If user is already signed in, show the already signed in UI
   if (user) {
     return (
       <div className="container max-w-md mx-auto pt-20">
         <div className="space-y-6">
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">{t("alreadySignedIn.title")}</h1>
+            <h1 className="text-3xl font-bold">
+              {signUpT("alreadySignedIn.title")}
+            </h1>
             <p className="text-muted-foreground">
-              {t("alreadySignedIn.description")}
+              {signUpT("alreadySignedIn.description")}
             </p>
           </div>
           <div className="flex flex-col gap-4">
             <Button asChild className="w-full">
               <Link href="/dashboard/jobs">
-                {t("alreadySignedIn.buttons.dashboard")}
+                {signUpT("alreadySignedIn.buttons.dashboard")}
               </Link>
             </Button>
           </div>
@@ -58,27 +60,27 @@ export default async function Login({
     <div className="container max-w-md mx-auto pt-20">
       <form action={signInWithOTP} className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
+          <h1 className="text-3xl font-bold">{signInT("title")}</h1>
+          <p className="text-muted-foreground">{signInT("description")}</p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t("form.email.label")}</Label>
+            <Label htmlFor="email">{signInT("form.email.label")}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder={t("form.email.placeholder")}
+              placeholder={signInT("form.email.placeholder")}
               required
             />
           </div>
           <SubmitButton
-            pendingText={t("form.submitting")}
+            pendingText={signInT("form.submitting")}
             type="submit"
             className="w-full"
           >
-            {t("form.submit")}
+            {signInT("form.submit")}
           </SubmitButton>
           {formMessage && <FormMessage message={formMessage} />}
         </div>
