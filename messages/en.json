@@ -405,6 +405,18 @@
     },
     "loading": "Loading..."
   },
+  "signIn": {
+    "title": "Sign In",
+    "description": "We will send you a magic link to sign in to your account.",
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "submit": "Sign In",
+      "submitting": "Signing in..."
+    }
+  },
   "interviewCopilots": {
     "title": "Interview Copilots",
     "createNew": {
