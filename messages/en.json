@@ -450,6 +450,38 @@
     },
     "jobTitle": {
       "label": "Interview Copilot"
+    },
+    "deviceSelection": {
+      "title": "Select Device",
+      "sameDevice": {
+        "title": "Continue on this device",
+        "description": "Use your current device for the interview",
+        "pros": [
+          "Only requires one device",
+          "Simple setup process",
+          "Seamless audio + video integration"
+        ],
+        "cons": [
+          "Screen sharing may reveal the copilot",
+          "Limited to Chrome browser"
+        ]
+      },
+      "separateDevice": {
+        "title": "Continue on another device",
+        "description": "Use a different device for the interview",
+        "pros": [
+          "Completely undetectable during screen sharing",
+          "Works with any meeting platform"
+        ],
+        "cons": [
+          "Requires a second device"
+        ]
+      },
+      "modal": {
+        "title": "Device Options Comparison",
+        "learnMore": "Which Option is Right For You?",
+        "close": "Close"
+      }
     }
   }
 }

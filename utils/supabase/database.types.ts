@@ -379,6 +379,7 @@ export type Database = {
           job_description: string | null
           job_title: string | null
           output_tokens_count: number
+          status: Database["public"]["Enums"]["interview_status"]
           title: string
           transcript: string
           user_id: string
@@ -393,6 +394,7 @@ export type Database = {
           job_description?: string | null
           job_title?: string | null
           output_tokens_count: number
+          status: Database["public"]["Enums"]["interview_status"]
           title: string
           transcript: string
           user_id: string
@@ -407,6 +409,7 @@ export type Database = {
           job_description?: string | null
           job_title?: string | null
           output_tokens_count?: number
+          status?: Database["public"]["Enums"]["interview_status"]
           title?: string
           transcript?: string
           user_id?: string
@@ -513,6 +516,7 @@ export type Database = {
     }
     Enums: {
       custom_job_access: "locked" | "unlocked"
+      interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
       message_role: "user" | "model"
     }
