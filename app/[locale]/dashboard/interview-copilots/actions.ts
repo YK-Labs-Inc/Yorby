@@ -58,6 +58,7 @@ export const createInterviewCopilot = async (
         output_tokens_count: 0,
         transcript: "",
         title: title,
+        status: "in_progress",
       })
       .select()
       .single();
