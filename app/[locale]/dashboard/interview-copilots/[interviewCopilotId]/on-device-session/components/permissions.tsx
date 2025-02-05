@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mic, Video } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface PermissionsProps {
   onNext: () => void;
@@ -13,6 +14,7 @@ export function Permissions({ onNext }: PermissionsProps) {
   const t = useTranslations("interviewCopilots.devicePermissions");
   const [audioPermission, setAudioPermission] = useState<boolean>(false);
   const [videoPermission, setVideoPermission] = useState<boolean>(false);
+  const { logError } = useAxiomLogging();
 
   const requestAudioPermission = async () => {
     try {
@@ -20,7 +22,7 @@ export function Permissions({ onNext }: PermissionsProps) {
       stream.getTracks().forEach((track) => track.stop());
       setAudioPermission(true);
     } catch (error) {
-      console.error(t("errors.audio"), error);
+      logError(t("errors.audio"), { error });
     }
   };
 
@@ -30,7 +32,7 @@ export function Permissions({ onNext }: PermissionsProps) {
       stream.getTracks().forEach((track) => track.stop());
       setVideoPermission(true);
     } catch (error) {
-      console.error(t("errors.video"), error);
+      logError(t("errors.video"), { error });
     }
   };
 

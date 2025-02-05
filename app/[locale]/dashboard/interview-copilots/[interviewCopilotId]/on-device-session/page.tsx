@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import { AssemblyAI } from "assemblyai";
 import { Session } from "./components/session";
 
