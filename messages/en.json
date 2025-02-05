@@ -482,6 +482,65 @@
         "learnMore": "Which Option is Right For You?",
         "close": "Close"
       }
+    },
+    "devicePermissions": {
+      "title": "Device Permissions",
+      "subtitle": "Please allow access to your microphone and camera to continue",
+      "audio": {
+        "title": "Audio",
+        "description": "Allows the AI to give accurate feedback based on your conversation and materials",
+        "instruction": "Select \"Allow while visiting the site\" when prompted",
+        "request": "Request",
+        "granted": "Granted"
+      },
+      "video": {
+        "title": "Video",
+        "description": "Enabling the camera enhances the realism of mock interviews",
+        "instruction": "Select \"Allow while visiting the site\" when prompted",
+        "request": "Request",
+        "granted": "Granted"
+      },
+      "errors": {
+        "audio": "Error requesting audio permission",
+        "video": "Error requesting video permission"
+      },
+      "next": "Next"
+    },
+    "session": {
+      "error": {
+        "generic": "Sorry, something went wrong. Please try again."
+      },
+      "startCopilot": "Start Copilot",
+      "selectMeeting": {
+        "title": "Select your interview meeting room",
+        "button": "Select",
+        "instruction": "Once the interview starts, the interviewer's transcript will be displayed here.",
+        "connecting": "Connecting..."
+      },
+      "transcription": {
+        "title": "Interviewer Transcript",
+        "status": {
+          "ready": "Ready",
+          "transcribing": "Transcribing...",
+          "recording": "Recording"
+        }
+      },
+      "controls": {
+        "leave": "Leave",
+        "settings": "Settings",
+        "theme": "Toggle theme",
+        "autoScroll": "Auto Scroll"
+      },
+      "copilot": {
+        "title": "Interview Copilot",
+        "status": {
+          "ready": "Ready",
+          "thinking": "Thinking...",
+          "error": "Error"
+        },
+        "waitingMessage": "The Interview Copilot will answer the interviewer's questions here."
+      },
+      "stopRecording": "End Interview Copilot"
     }
   }
 }
