@@ -371,7 +371,7 @@ const generateMoreCustomJobQuestions = async ({
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
