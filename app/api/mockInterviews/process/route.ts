@@ -71,7 +71,7 @@ Provide a concise overview of the interview performance in 2-3 paragraphs at max
 to write more feedback if you don't have any.`;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -131,7 +131,7 @@ Do not force yourself to write more feedback if you don't have any. If there are
 Do not force yourself to think of a pro or a con if it is unnecessary.`;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -223,7 +223,7 @@ It is okay to have an empty strengths or any empty improvements field, however, 
 `;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -345,7 +345,7 @@ When writing your job fit analysis, do not force yourself to write more feedback
   `;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -400,7 +400,7 @@ ${transcript}
 Return a number between 0-100 representing the overall interview performance, considering communication skills, relevance of answers, and job fit.`;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -461,7 +461,7 @@ It is also okay to include multiple improvements if the candidate has multiple a
 `;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.0-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
