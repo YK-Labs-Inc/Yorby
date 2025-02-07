@@ -204,7 +204,6 @@ export function Session({
       });
 
       realtimeService.on("transcript", (transcript) => {
-        // console.log("transcript", transcript);
         if (transcript.message_type === "FinalTranscript") {
           const currentIndex = transcriptIndexRef.current;
           transcriptIndexRef.current += 1;
