@@ -22,8 +22,18 @@ async function generateAssemblyAIToken() {
   }
 }
 
-export default async function OnDeviceSessionPage() {
+export default async function OnDeviceSessionPage({
+  params,
+}: {
+  params: Promise<{ interviewCopilotId: string }>;
+}) {
+  const { interviewCopilotId } = await params;
   const temporaryToken = await generateAssemblyAIToken();
 
-  return <Session temporaryToken={temporaryToken} />;
+  return (
+    <Session
+      temporaryToken={temporaryToken}
+      interviewCopilotId={interviewCopilotId}
+    />
+  );
 }

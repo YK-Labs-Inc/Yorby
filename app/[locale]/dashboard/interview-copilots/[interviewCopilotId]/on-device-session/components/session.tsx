@@ -1,14 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MonitorUp, LogOut, StopCircle } from "lucide-react";
+import { MonitorUp, LogOut, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { RealtimeTranscriber } from "assemblyai";
+import { answerQuestion, detectQuestions } from "../actions";
 
-export function Session({ temporaryToken }: { temporaryToken: string }) {
+export function Session({
+  temporaryToken,
+  interviewCopilotId,
+}: {
+  temporaryToken: string;
+  interviewCopilotId: string;
+}) {
   const t = useTranslations("interviewCopilots.session");
   const [isSelectingMeeting, setIsSelectingMeeting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -18,6 +24,16 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
     useState(false);
   const [transcript, setTranscript] = useState<string[]>([]);
+  const [inputTokenCount, setInputTokenCount] = useState(0);
+  const [outputTokenCount, setOutputTokenCount] = useState(0);
+  const contextBufferAmount = 3;
+  const [questionsWithAnswers, setQuestionsWithAnswers] = useState<
+    {
+      question: string;
+      answer: string;
+    }[]
+  >([]);
+  const latestQuestionsWithAnswersRef = useRef(questionsWithAnswers);
   const [transcriptionSessionEnded, setTranscriptionSessionEnded] =
     useState(false);
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
@@ -27,8 +43,10 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
   const { logError } = useAxiomLogging();
   const socketRef = useRef<RealtimeTranscriber>(null);
   const transcriptIndexRef = useRef(0);
+  const latestTranscriptRef = useRef<string[]>(transcript);
   const audioContextRef = useRef<AudioContext | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   // Function to convert Float32Array to Int16Array
   const convertToInt16 = (float32Array: Float32Array): Int16Array => {
@@ -140,60 +158,53 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
 
         const audioStream = new MediaStream(stream.getAudioTracks());
 
-        // Create AudioContext with 16kHz sample rate
+        // Create AudioContext with correct sample rate for AssemblyAI
         const audioContext = new AudioContext({
-          sampleRate: 16000,
-          latencyHint: "balanced",
+          sampleRate: 16000, // Required sample rate
+          latencyHint: "interactive",
         });
         audioContextRef.current = audioContext;
 
         const source = audioContext.createMediaStreamSource(audioStream);
 
-        // Create ScriptProcessorNode for audio processing
-        const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
-        scriptProcessorRef.current = scriptProcessor;
+        // Using 8192 samples at 16kHz is about 512ms
+        // This is well within AssemblyAI's requirement of 100-2000ms
+        // and should provide better performance than smaller chunks
+        const BUFFER_SIZE = 8192;
 
-        // Buffer to accumulate audio data until we have enough for sending
-        let audioBufferQueue = new Int16Array(0);
+        // Create ScriptProcessor with valid buffer size
+        const processor = audioContext.createScriptProcessor(BUFFER_SIZE, 1, 1);
+        scriptProcessorRef.current = processor;
 
-        scriptProcessor.onaudioprocess = (audioProcessingEvent) => {
-          const inputBuffer = audioProcessingEvent.inputBuffer;
-          const inputData = inputBuffer.getChannelData(0);
+        processor.onaudioprocess = (e) => {
+          // Get input data from first (and only) channel
+          const inputData = e.inputBuffer.getChannelData(0);
 
-          // Convert to Int16Array
-          const int16Data = convertToInt16(inputData);
+          // Convert Float32 samples to Int16 samples
+          const pcm16Data = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            // Clamp samples to [-1, 1] range
+            const sample = Math.max(-1, Math.min(1, inputData[i]));
+            // Convert to 16-bit integer
+            pcm16Data[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+          }
 
-          // Add new data to the queue
-          const mergedBuffer = new Int16Array(
-            audioBufferQueue.length + int16Data.length
-          );
-          mergedBuffer.set(audioBufferQueue, 0);
-          mergedBuffer.set(int16Data, audioBufferQueue.length);
-          audioBufferQueue = mergedBuffer;
-
-          // Calculate how many samples make up 100ms at our sample rate
-          const samplesFor100ms = Math.floor(audioContext.sampleRate * 0.1);
-
-          // While we have enough data for a 100ms chunk
-          while (audioBufferQueue.length >= samplesFor100ms) {
-            // Take exactly 100ms worth of data
-            const chunk = audioBufferQueue.subarray(0, samplesFor100ms);
-
-            // Convert to buffer and send
-            const finalBuffer = new Uint8Array(chunk.buffer);
-            realtimeService.sendAudio(finalBuffer.buffer);
-
-            // Remove the sent chunk from the queue
-            audioBufferQueue = audioBufferQueue.subarray(samplesFor100ms);
+          try {
+            // Send the PCM16 buffer to AssemblyAI
+            // Each buffer is ~512ms of audio at 16kHz sample rate
+            realtimeService.sendAudio(pcm16Data.buffer);
+          } catch (error) {
+            console.error("Error sending audio data:", error);
           }
         };
 
         // Connect the audio pipeline
-        source.connect(scriptProcessor);
-        scriptProcessor.connect(audioContext.destination);
+        source.connect(processor);
+        processor.connect(audioContext.destination);
       });
 
       realtimeService.on("transcript", (transcript) => {
+        // console.log("transcript", transcript);
         if (transcript.message_type === "FinalTranscript") {
           const currentIndex = transcriptIndexRef.current;
           transcriptIndexRef.current += 1;
@@ -202,6 +213,7 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
             updated[currentIndex] = transcript.text;
             return updated;
           });
+          processTranscript(transcript.text);
         } else if (transcript.message_type === "PartialTranscript") {
           setTranscript((prev) => {
             const updated = [...prev];
@@ -246,10 +258,87 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
+
+    // Clean up media recorder
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
   };
 
   const onLeave = () => {
     console.log("Leaving session");
+  };
+
+  useEffect(() => {
+    latestTranscriptRef.current = transcript;
+  }, [transcript]);
+
+  useEffect(() => {
+    latestQuestionsWithAnswersRef.current = questionsWithAnswers;
+  }, [questionsWithAnswers]);
+
+  const processTranscript = async (transcript: string) => {
+    const questions = await detectQuestionsFromTranscript(transcript);
+    questions.forEach((question) => {
+      processQuestion(question);
+    });
+  };
+
+  const detectQuestionsFromTranscript = async (transcript: string) => {
+    let contextBuffer = "";
+    if (transcriptIndexRef.current > 0) {
+      const startIndex = Math.max(
+        0,
+        transcriptIndexRef.current - contextBufferAmount
+      );
+      if (startIndex !== transcriptIndexRef.current) {
+        const previousText = latestTranscriptRef.current
+          .slice(startIndex, transcriptIndexRef.current)
+          .join("\n");
+        contextBuffer = previousText + "\n";
+      }
+    }
+
+    const textToProcess = contextBuffer + transcript;
+    const data = new FormData();
+    data.append("transcript", textToProcess);
+    latestQuestionsWithAnswersRef.current.forEach((q) => {
+      data.append("existingQuestions", q.question);
+    });
+
+    const {
+      data: questions,
+      inputTokenCount,
+      outputTokenCount,
+    } = await detectQuestions(data);
+    setInputTokenCount((prev) => prev + inputTokenCount);
+    setOutputTokenCount((prev) => prev + outputTokenCount);
+    return questions;
+  };
+
+  const processQuestion = async (question: string) => {
+    setQuestionsWithAnswers((prev) => [...prev, { question, answer: "" }]);
+    const formData = new FormData();
+    formData.append("interviewCopilotId", interviewCopilotId);
+    formData.append("question", question);
+    const answerQuestionResponse = await answerQuestion(formData);
+    const {
+      data: answer,
+      inputTokenCount,
+      outputTokenCount,
+    } = answerQuestionResponse;
+    setInputTokenCount((prev) => prev + inputTokenCount);
+    setOutputTokenCount((prev) => prev + outputTokenCount);
+    if (answer) {
+      setQuestionsWithAnswers((prev) =>
+        prev.map((q) => (q.question === question ? { ...q, answer } : q))
+      );
+    } else {
+      setQuestionsWithAnswers((prev) =>
+        prev.filter((q) => q.question !== question)
+      );
+    }
   };
 
   return (
@@ -367,19 +456,25 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
               </div>
               <div
                 ref={transcriptRef}
-                className="flex-1 overflow-y-auto min-h-0"
+                className="flex-1 overflow-y-auto min-h-0 px-1"
               >
-                <div className="text-gray-500 text-sm space-y-2">
-                  {transcript.length > 0 ? (
-                    <div className="space-y-2">
+                <div className="text-gray-600 dark:text-gray-300 text-sm space-y-3">
+                  {isTranscribing ? (
+                    <div className="space-y-3">
                       {transcript.map((t, index) => (
-                        <div key={index} className="p-2 bg-gray-200 rounded-lg">
+                        <div
+                          key={index}
+                          className="p-3 bg-gray-50 dark:bg-gray-800 
+                            border border-gray-100 dark:border-gray-700 rounded-lg"
+                        >
                           {t}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    t("selectMeeting.instruction")
+                    <div className="text-center py-4">
+                      {t("selectMeeting.instruction")}
+                    </div>
                   )}
                 </div>
               </div>
@@ -393,10 +488,33 @@ export function Session({ temporaryToken }: { temporaryToken: string }) {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-medium">{t("copilot.title")}</h2>
             </div>
-            <div ref={copilotRef} className="flex-1 overflow-y-auto">
-              <div className="text-sm text-gray-600">
-                {t("copilot.waitingMessage")}
-              </div>
+            <div ref={copilotRef} className="flex-1 overflow-y-auto px-1">
+              {isTranscribing ? (
+                <div className="space-y-4">
+                  {questionsWithAnswers.map((q, index) => (
+                    <div
+                      key={index}
+                      className="p-4 bg-blue-50 dark:bg-gray-800
+                        border border-blue-100 dark:border-gray-700 rounded-lg"
+                    >
+                      <div className="font-medium text-xl text-gray-900 dark:text-white mb-2">
+                        {q.question}
+                      </div>
+                      {q.answer ? (
+                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {q.answer}
+                        </div>
+                      ) : (
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-600 dark:text-gray-300">
+                  {t("copilot.waitingMessage")}
+                </div>
+              )}
             </div>
           </div>
         </div>
