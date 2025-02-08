@@ -5,7 +5,6 @@ import { MonitorUp, LogOut, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { RealtimeTranscriber } from "assemblyai";
 import { answerQuestion, detectQuestions } from "../actions";
 import { useDeepgram } from "@/context/DeepgramContext";
 import {
@@ -45,12 +44,9 @@ export function Session({
   const transcriptRef = useRef<HTMLDivElement>(null);
   const copilotRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
-  const socketRef = useRef<RealtimeTranscriber>(null);
   const transcriptIndexRef = useRef(0);
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
   const keepAliveInterval = useRef<NodeJS.Timeout | null>(null);
@@ -143,7 +139,6 @@ export function Session({
       return;
     }
     try {
-      // setupAssemblyAIRealTimeTranscription(stream);
       setupDeepgramRealTimeTranscription();
     } catch (error) {
       logError("Error starting transcription:", { error });
@@ -259,66 +254,24 @@ export function Session({
   }, [connectionState]);
 
   const stopTranscription = () => {
-    if (socketRef.current) {
-      socketRef.current.close();
-      setIsTranscribing(false);
-    }
-
-    // Clean up audio processing
-    if (scriptProcessorRef.current) {
-      scriptProcessorRef.current.disconnect();
-      scriptProcessorRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
     // Clean up media recorder
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
-    }
-  };
-
-  const onLeave = () => {
-    // Close AssemblyAI transcription service
-    if (socketRef.current) {
-      socketRef.current.close();
-    }
-
-    // Clean up audio processing
-    if (scriptProcessorRef.current) {
-      scriptProcessorRef.current.disconnect();
-      scriptProcessorRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
     }
 
     // Close Deepgram transcription service
     if (connection) {
-      connection.finish();
+      connection.disconnect();
     }
 
-    // Clean up media recorder
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-    }
-
-    // Clean up stream
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
+  };
 
-    // Reset states
-    setIsTranscribing(false);
-    setLoadingTranscriptionService(false);
-    setTranscript([[]]);
+  const onLeave = () => {
+    stopTranscription();
   };
 
   useEffect(() => {
