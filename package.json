@@ -7,6 +7,7 @@
     "translate": "node scripts/translate.js"
   },
   "dependencies": {
+    "@deepgram/sdk": "^3.10.1",
     "@google/generative-ai": "^0.21.0",
     "@hcaptcha/react-hcaptcha": "^1.11.0",
     "@marsidev/react-turnstile": "^1.1.0",

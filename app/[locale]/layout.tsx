@@ -15,6 +15,7 @@ import Chatwoot from "@/components/ChatwootWidget";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import { User } from "@supabase/supabase-js";
 import { Tables } from "@/utils/supabase/database.types";
+import { DeepgramContextProvider } from "@/context/DeepgramContext";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -178,21 +179,23 @@ export default async function RootLayout({
               <UserProvider user={user} session={session}>
                 <AxiomWebVitals />
                 <AxiomLoggingProvider user={user}>
-                  <SidebarProvider>
-                    <OnboardingProvider initialState={onboardingState}>
-                      <AppSidebar
-                        jobs={jobs}
-                        numberOfCredits={numberOfCredits}
-                        hasSubscription={hasSubscription}
-                        user={user}
-                      />
-                      <SidebarTrigger />
-                      <main className="w-full">
-                        {children}
-                        <Chatwoot />
-                      </main>
-                    </OnboardingProvider>
-                  </SidebarProvider>
+                  <DeepgramContextProvider>
+                    <SidebarProvider>
+                      <OnboardingProvider initialState={onboardingState}>
+                        <AppSidebar
+                          jobs={jobs}
+                          numberOfCredits={numberOfCredits}
+                          hasSubscription={hasSubscription}
+                          user={user}
+                        />
+                        <SidebarTrigger />
+                        <main className="w-full">
+                          {children}
+                          <Chatwoot />
+                        </main>
+                      </OnboardingProvider>
+                    </SidebarProvider>
+                  </DeepgramContextProvider>
                 </AxiomLoggingProvider>
               </UserProvider>
             </ThemeProvider>
