@@ -5,14 +5,17 @@ import { MonitorUp, LogOut, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { RealtimeTranscriber } from "assemblyai";
 import { answerQuestion, detectQuestions } from "../actions";
+import { useDeepgram } from "@/context/DeepgramContext";
+import {
+  LiveTranscriptionEvent,
+  LiveTranscriptionEvents,
+  SOCKET_STATES,
+} from "@deepgram/sdk";
 
 export function Session({
-  temporaryToken,
   interviewCopilotId,
 }: {
-  temporaryToken: string;
   interviewCopilotId: string;
 }) {
   const t = useTranslations("interviewCopilots.session");
@@ -23,7 +26,7 @@ export function Session({
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
     useState(false);
-  const [transcript, setTranscript] = useState<string[]>([]);
+  const [transcript, setTranscript] = useState<string[][]>([[]]);
   const [inputTokenCount, setInputTokenCount] = useState(0);
   const [outputTokenCount, setOutputTokenCount] = useState(0);
   const contextBufferAmount = 3;
@@ -41,22 +44,12 @@ export function Session({
   const transcriptRef = useRef<HTMLDivElement>(null);
   const copilotRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
-  const socketRef = useRef<RealtimeTranscriber>(null);
   const transcriptIndexRef = useRef(0);
-  const latestTranscriptRef = useRef<string[]>(transcript);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const previousStartRef = useRef<number | null>(null);
+  const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-
-  // Function to convert Float32Array to Int16Array
-  const convertToInt16 = (float32Array: Float32Array): Int16Array => {
-    const int16Array = new Int16Array(float32Array.length);
-    for (let i = 0; i < float32Array.length; i++) {
-      const s = Math.max(-1, Math.min(1, float32Array[i]));
-      int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-    }
-    return int16Array;
-  };
+  const { connection, connectToDeepgram, connectionState } = useDeepgram();
+  const keepAliveInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-scroll effect for both panels
   useEffect(() => {
@@ -146,127 +139,139 @@ export function Session({
       return;
     }
     try {
-      const realtimeService = new RealtimeTranscriber({
-        token: temporaryToken,
-        sampleRate: 16000,
-        endUtteranceSilenceThreshold: 1000,
-      });
-
-      realtimeService.on("open", () => {
-        setLoadingTranscriptionService(false);
-        setIsTranscribing(true);
-
-        const audioStream = new MediaStream(stream.getAudioTracks());
-
-        // Create AudioContext with correct sample rate for AssemblyAI
-        const audioContext = new AudioContext({
-          sampleRate: 16000, // Required sample rate
-          latencyHint: "interactive",
-        });
-        audioContextRef.current = audioContext;
-
-        const source = audioContext.createMediaStreamSource(audioStream);
-
-        // Using 8192 samples at 16kHz is about 512ms
-        // This is well within AssemblyAI's requirement of 100-2000ms
-        // and should provide better performance than smaller chunks
-        const BUFFER_SIZE = 8192;
-
-        // Create ScriptProcessor with valid buffer size
-        const processor = audioContext.createScriptProcessor(BUFFER_SIZE, 1, 1);
-        scriptProcessorRef.current = processor;
-
-        processor.onaudioprocess = (e) => {
-          // Get input data from first (and only) channel
-          const inputData = e.inputBuffer.getChannelData(0);
-
-          // Convert Float32 samples to Int16 samples
-          const pcm16Data = new Int16Array(inputData.length);
-          for (let i = 0; i < inputData.length; i++) {
-            // Clamp samples to [-1, 1] range
-            const sample = Math.max(-1, Math.min(1, inputData[i]));
-            // Convert to 16-bit integer
-            pcm16Data[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-          }
-
-          try {
-            // Send the PCM16 buffer to AssemblyAI
-            // Each buffer is ~512ms of audio at 16kHz sample rate
-            realtimeService.sendAudio(pcm16Data.buffer);
-          } catch (error) {
-            console.error("Error sending audio data:", error);
-          }
-        };
-
-        // Connect the audio pipeline
-        source.connect(processor);
-        processor.connect(audioContext.destination);
-      });
-
-      realtimeService.on("transcript", (transcript) => {
-        if (transcript.message_type === "FinalTranscript") {
-          const currentIndex = transcriptIndexRef.current;
-          transcriptIndexRef.current += 1;
-          setTranscript((prev) => {
-            const updated = [...prev];
-            updated[currentIndex] = transcript.text;
-            return updated;
-          });
-          processTranscript(transcript.text);
-        } else if (transcript.message_type === "PartialTranscript") {
-          setTranscript((prev) => {
-            const updated = [...prev];
-            if (updated.length <= transcriptIndexRef.current) {
-              updated.push(""); // Ensure we have a slot for the current index
-            }
-            updated[transcriptIndexRef.current] = transcript.text;
-            return updated;
-          });
-        }
-      });
-
-      realtimeService.on("error", (error) => {
-        logError("AssemblyAI error", { error: error.message });
-      });
-
-      realtimeService.on("close", () => {
-        setTranscriptionSessionEnded(true);
-      });
-
-      realtimeService.connect();
-      socketRef.current = realtimeService;
+      setupDeepgramRealTimeTranscription();
     } catch (error) {
       logError("Error starting transcription:", { error });
       setIsTranscribing(false);
     }
   };
 
+  const setupDeepgramRealTimeTranscription = () => {
+    connectToDeepgram({
+      model: "nova-3",
+      interim_results: true,
+      smart_format: true,
+      filler_words: true,
+    });
+  };
+
+  useEffect(() => {
+    if (!connection) return;
+
+    const onData = (e: BlobEvent) => {
+      // iOS SAFARI FIX:
+      // Prevent packetZero from being sent. If sent at size 0, the connection will close.
+      if (e.data.size > 0) {
+        connection?.send(e.data);
+      }
+    };
+
+    const onTranscript = (data: LiveTranscriptionEvent) => {
+      const { speech_final: speechFinal, start } = data;
+      let transcriptText = data.channel.alternatives[0].transcript;
+
+      if (transcriptText !== "") {
+        setTranscript((prev) => {
+          const updated = [...prev];
+
+          // Ensure current paragraph exists
+          if (!updated[transcriptIndexRef.current]) {
+            updated[transcriptIndexRef.current] = [];
+          }
+
+          // Handle sentence updates within the current paragraph
+          if (previousStartRef.current !== start) {
+            // New start time means new sentence
+            updated[transcriptIndexRef.current].push(transcriptText);
+          } else {
+            // Same start time means update the last sentence
+            const currentParagraph = updated[transcriptIndexRef.current];
+            if (currentParagraph.length > 0) {
+              currentParagraph[currentParagraph.length - 1] = transcriptText;
+            } else {
+              currentParagraph.push(transcriptText);
+            }
+          }
+
+          previousStartRef.current = start;
+          return updated;
+        });
+
+        // Handle paragraph breaks
+        if (speechFinal) {
+          const transcriptIndex = transcriptIndexRef.current;
+          transcriptIndexRef.current += 1;
+          processTranscript(transcript[transcriptIndex]);
+          setTranscript((prev) => [...prev, []]);
+          previousStartRef.current = null; // Reset start time for new paragraph
+        }
+      }
+    };
+
+    if (stream && connectionState === SOCKET_STATES.open) {
+      setLoadingTranscriptionService(false);
+      setIsTranscribing(true);
+      const mediaRecorder = new MediaRecorder(
+        new MediaStream(stream.getAudioTracks())
+      );
+      mediaRecorder.addEventListener("dataavailable", onData);
+      mediaRecorder.start(500);
+      connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
+    }
+
+    return () => {
+      connection.removeListener(
+        LiveTranscriptionEvents.Transcript,
+        onTranscript
+      );
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current = null;
+      }
+    };
+  }, [connectionState, stream]);
+
+  useEffect(() => {
+    if (!connection) return;
+
+    if (connectionState === SOCKET_STATES.open) {
+      connection.keepAlive();
+
+      keepAliveInterval.current = setInterval(() => {
+        connection.keepAlive();
+      }, 10000);
+    } else {
+      if (keepAliveInterval.current) {
+        clearInterval(keepAliveInterval.current);
+      }
+    }
+
+    return () => {
+      if (keepAliveInterval.current) {
+        clearInterval(keepAliveInterval.current);
+      }
+    };
+  }, [connectionState]);
+
   const stopTranscription = () => {
-    if (socketRef.current) {
-      socketRef.current.close();
-      setIsTranscribing(false);
-    }
-
-    // Clean up audio processing
-    if (scriptProcessorRef.current) {
-      scriptProcessorRef.current.disconnect();
-      scriptProcessorRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
     // Clean up media recorder
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
     }
+
+    // Close Deepgram transcription service
+    if (connection) {
+      connection.disconnect();
+    }
+
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
   };
 
   const onLeave = () => {
-    console.log("Leaving session");
+    stopTranscription();
   };
 
   useEffect(() => {
@@ -277,29 +282,41 @@ export function Session({
     latestQuestionsWithAnswersRef.current = questionsWithAnswers;
   }, [questionsWithAnswers]);
 
-  const processTranscript = async (transcript: string) => {
+  const processTranscript = async (transcript: string[]) => {
     const questions = await detectQuestionsFromTranscript(transcript);
     questions.forEach((question) => {
       processQuestion(question);
     });
   };
 
-  const detectQuestionsFromTranscript = async (transcript: string) => {
+  const detectQuestionsFromTranscript = async (currentParagraph: string[]) => {
     let contextBuffer = "";
+
+    // Get previous paragraphs for context
     if (transcriptIndexRef.current > 0) {
       const startIndex = Math.max(
         0,
         transcriptIndexRef.current - contextBufferAmount
       );
-      if (startIndex !== transcriptIndexRef.current) {
-        const previousText = latestTranscriptRef.current
-          .slice(startIndex, transcriptIndexRef.current)
-          .join("\n");
-        contextBuffer = previousText + "\n";
+
+      // Get the previous paragraphs up to the context buffer amount
+      const previousParagraphs = latestTranscriptRef.current
+        .slice(startIndex, transcriptIndexRef.current)
+        .filter((paragraph) => paragraph.length > 0); // Only include non-empty paragraphs
+
+      if (previousParagraphs.length > 0) {
+        // Join sentences within each paragraph, then join paragraphs with newlines
+        contextBuffer =
+          previousParagraphs
+            .map((paragraph) => paragraph.join(" "))
+            .join("\n") + "\n";
       }
     }
 
-    const textToProcess = contextBuffer + transcript;
+    // Join current paragraph sentences with spaces
+    const currentText = currentParagraph.join(" ");
+    const textToProcess = contextBuffer + currentText;
+
     const data = new FormData();
     data.append("transcript", textToProcess);
     latestQuestionsWithAnswersRef.current.forEach((q) => {
@@ -460,15 +477,25 @@ export function Session({
                 <div className="text-gray-600 dark:text-gray-300 text-sm space-y-3">
                   {isTranscribing ? (
                     <div className="space-y-3">
-                      {transcript.map((t, index) => (
-                        <div
-                          key={index}
-                          className="p-3 bg-gray-50 dark:bg-gray-800 
-                            border border-gray-100 dark:border-gray-700 rounded-lg"
-                        >
-                          {t}
-                        </div>
-                      ))}
+                      {transcript.map(
+                        (sentences, paragraphIndex) =>
+                          sentences.length > 0 && (
+                            <div
+                              key={paragraphIndex}
+                              className="p-3 bg-gray-50 dark:bg-gray-800 
+                              border border-gray-100 dark:border-gray-700 rounded-lg"
+                            >
+                              {sentences.map((sentence, sentenceIndex) => (
+                                <span key={sentenceIndex}>
+                                  {sentence}
+                                  {sentenceIndex < sentences.length - 1
+                                    ? " "
+                                    : ""}
+                                </span>
+                              ))}
+                            </div>
+                          )
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-4">
