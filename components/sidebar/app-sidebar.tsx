@@ -12,7 +12,7 @@ import {
 import { H3 } from "../typography";
 import SidebarMenuItemClient from "./SideBarMenuItemClient";
 import { Button } from "../ui/button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, ChevronDown } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { AuthModal } from "../auth/auth-modal";
@@ -23,19 +23,30 @@ import { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import { OnboardingChecklist } from "../onboarding/OnboardingChecklist";
+import { Tables } from "@/utils/supabase/database.types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AppSidebarProps {
   numberOfCredits: number;
-  jobs: any[];
+  jobs: Tables<"custom_jobs">[];
+  interviewCopilots: Tables<"interview_copilots">[];
   user: User | null;
   hasSubscription: boolean;
+  isInterviewCopilotEnabled: boolean;
 }
 
 export function AppSidebar({
+  interviewCopilots,
   jobs,
   numberOfCredits,
   hasSubscription,
   user,
+  isInterviewCopilotEnabled,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -65,28 +76,90 @@ export function AppSidebar({
           <H3>Perfect Interview</H3>
         </Link>
         {user && (
-          <Button>
-            <Link
-              href={`/dashboard/jobs?newJob=true`}
-              className="flex items-center gap-2"
-            >
-              <p>{t("addJob")}</p>
-              <PlusIcon />
-            </Link>
-          </Button>
+          <>
+            {isInterviewCopilotEnabled ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full justify-between">
+                    <span className="flex items-center gap-2">
+                      <PlusIcon className="h-4 w-4" />
+                      {t("create")}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/jobs?newJob=true">
+                      {t("addJob")}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/interview-copilots">
+                      {t("createInterviewCopilot")}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button className="w-full">
+                <Link
+                  href={`/dashboard/jobs?newJob=true`}
+                  className="flex items-center gap-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>{t("addJob")}</span>
+                </Link>
+              </Button>
+            )}
+          </>
         )}
       </SidebarHeader>
       <SidebarContent>
         {user && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {jobs.map((job) => (
-                  <SidebarMenuItemClient key={job.id} job={job} />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <>
+            {/* Jobs Section */}
+            <SidebarGroup>
+              {isInterviewCopilotEnabled && (
+                <div className="px-4 py-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    {t("jobs")}
+                  </h4>
+                </div>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {jobs.map((job) => (
+                    <SidebarMenuItemClient key={job.id} job={job} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Interview Copilots Section */}
+            {isInterviewCopilotEnabled && (
+              <SidebarGroup className="mt-6">
+                <div className="px-4 py-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    {t("interviewCopilots")}
+                  </h4>
+                </div>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {interviewCopilots.map((copilot) => (
+                      <Link
+                        key={copilot.id}
+                        href={`/dashboard/interview-copilots/${copilot.id}/review`}
+                        className="flex items-center px-4 py-2 text-sm hover:bg-accent rounded-lg"
+                      >
+                        {copilot.title}
+                      </Link>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+          </>
         )}
       </SidebarContent>
       <SidebarFooter>
