@@ -16,6 +16,7 @@ import { OnboardingProvider } from "@/context/OnboardingContext";
 import { User } from "@supabase/supabase-js";
 import { Tables } from "@/utils/supabase/database.types";
 import { DeepgramContextProvider } from "@/context/DeepgramContext";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -125,6 +126,18 @@ const fetchOnboardingState = async (user: User) => {
   };
 };
 
+const fetchInterviewCopilots = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("interview_copilots")
+    .select("*")
+    .eq("user_id", userId);
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -143,18 +156,27 @@ export default async function RootLayout({
   const {
     data: { session },
   } = await supabase.auth.getSession();
+  let interviewCopilots: Tables<"interview_copilots">[] = [];
   let jobs: Tables<"custom_jobs">[] = [];
   let numberOfCredits = 0;
   let hasSubscription = false;
   let onboardingState = null;
+  let isInterviewCopilotEnabled = false;
+
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
     onboardingState = await fetchOnboardingState(user);
     jobs = await fetchJobs(user.id);
+    isInterviewCopilotEnabled = Boolean(
+      await posthog.isFeatureEnabled("enable-interview-copilot", user.id)
+    );
+
+    if (isInterviewCopilotEnabled) {
+      interviewCopilots = await fetchInterviewCopilots(user.id);
+    }
   }
-  // Providing all messages to the client
-  // side is the easiest way to get started
+
   const messages = await getMessages();
   return (
     <html
@@ -187,6 +209,8 @@ export default async function RootLayout({
                           numberOfCredits={numberOfCredits}
                           hasSubscription={hasSubscription}
                           user={user}
+                          interviewCopilots={interviewCopilots}
+                          isInterviewCopilotEnabled={isInterviewCopilotEnabled}
                         />
                         <SidebarTrigger />
                         <main className="w-full">

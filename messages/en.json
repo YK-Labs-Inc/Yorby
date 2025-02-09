@@ -251,7 +251,11 @@
     "signInToStart": "Sign in to save your custom interview prep",
     "signIn": "Sign in",
     "numberOfCredits": "Credits: {numberOfCredits}",
-    "buyMoreCredits": "Buy More Credits"
+    "buyMoreCredits": "Buy More Credits",
+    "jobs": "Jobs",
+    "interviewCopilots": "Interview Copilots",
+    "createInterviewCopilot": "Create New Copilot",
+    "create": "Create New"
   },
   "upgrade": {
     "locked": {
