@@ -120,11 +120,13 @@ export function AppSidebar({
           <>
             {/* Jobs Section */}
             <SidebarGroup>
-              <div className="px-4 py-2">
-                <h4 className="text-sm font-semibold text-muted-foreground">
-                  {t("jobs")}
-                </h4>
-              </div>
+              {isInterviewCopilotEnabled && (
+                <div className="px-4 py-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    {t("jobs")}
+                  </h4>
+                </div>
+              )}
               <SidebarGroupContent>
                 <SidebarMenu>
                   {jobs.map((job) => (
