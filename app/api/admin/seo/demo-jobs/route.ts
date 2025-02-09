@@ -603,19 +603,19 @@ const writeDemoJobToNotion = async ({
           numbered_list_item: {
             rich_text: [{ text: { content: answer } }],
           },
-        })),
-        {
-          object: "block" as const,
-          heading_3: {
-            rich_text: [{ text: { content: "Examples of Bad Answers" } }],
-          },
-        },
-        ...question.incorrectExampleAnswers.map((answer) => ({
-          object: "block" as const,
-          numbered_list_item: {
-            rich_text: [{ text: { content: answer } }],
-          },
         }))
+        // {
+        //   object: "block" as const,
+        //   heading_3: {
+        //     rich_text: [{ text: { content: "Examples of Bad Answers" } }],
+        //   },
+        // },
+        // ...question.incorrectExampleAnswers.map((answer) => ({
+        //   object: "block" as const,
+        //   numbered_list_item: {
+        //     rich_text: [{ text: { content: answer } }],
+        //   },
+        // }))
       );
 
       if (index !== questions.length - 1) {

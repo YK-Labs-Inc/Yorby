@@ -368,12 +368,45 @@ export type Database = {
           },
         ]
       }
+      interview_copilot_questions_and_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          interview_copilot_id: string
+          question: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          interview_copilot_id: string
+          question: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          interview_copilot_id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_copilot_questions_and_answe_interview_copilot_id_fkey"
+            columns: ["interview_copilot_id"]
+            isOneToOne: false
+            referencedRelation: "interview_copilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_copilots: {
         Row: {
           company_description: string | null
           company_name: string | null
           created_at: string
           duration_ms: number
+          file_path: string | null
           id: string
           input_tokens_count: number
           job_description: string | null
@@ -389,6 +422,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           duration_ms: number
+          file_path?: string | null
           id?: string
           input_tokens_count: number
           job_description?: string | null
@@ -404,6 +438,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           duration_ms?: number
+          file_path?: string | null
           id?: string
           input_tokens_count?: number
           job_description?: string | null
