@@ -12,6 +12,18 @@ import {
   LiveTranscriptionEvents,
   SOCKET_STATES,
 } from "@deepgram/sdk";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { uploadFile } from "@/utils/storage";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function Session({
   interviewCopilotId,
@@ -27,9 +39,9 @@ export function Session({
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
     useState(false);
   const [transcript, setTranscript] = useState<string[][]>([[]]);
-  const [inputTokenCount, setInputTokenCount] = useState(0);
-  const [outputTokenCount, setOutputTokenCount] = useState(0);
-  const contextBufferAmount = 3;
+  const inputTokenCountRef = useRef(0);
+  const outputTokenCountRef = useRef(0);
+  const contextBufferAmount = 2;
   const [questionsWithAnswers, setQuestionsWithAnswers] = useState<
     {
       question: string;
@@ -37,19 +49,21 @@ export function Session({
     }[]
   >([]);
   const latestQuestionsWithAnswersRef = useRef(questionsWithAnswers);
-  const [transcriptionSessionEnded, setTranscriptionSessionEnded] =
-    useState(false);
-  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const copilotRef = useRef<HTMLDivElement>(null);
-  const { logError } = useAxiomLogging();
+  const { logError, logInfo } = useAxiomLogging();
   const transcriptIndexRef = useRef(0);
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
   const keepAliveInterval = useRef<NodeJS.Timeout | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const router = useRouter();
 
   // Auto-scroll effect for both panels
   useEffect(() => {
@@ -201,7 +215,7 @@ export function Session({
         if (speechFinal) {
           const transcriptIndex = transcriptIndexRef.current;
           transcriptIndexRef.current += 1;
-          processTranscript(transcript[transcriptIndex]);
+          processTranscript(latestTranscriptRef.current[transcriptIndex]);
           setTranscript((prev) => [...prev, []]);
           previousStartRef.current = null; // Reset start time for new paragraph
         }
@@ -253,20 +267,158 @@ export function Session({
     };
   }, [connectionState]);
 
-  const stopTranscription = () => {
-    // Clean up media recorder
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
-    }
+  useEffect(() => {
+    if (!stream) return;
 
-    // Close Deepgram transcription service
-    if (connection) {
-      connection.disconnect();
-    }
+    const mediaRecorder = new MediaRecorder(stream);
 
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunksRef.current = [...recordedChunksRef.current, event.data];
+      }
+    };
+
+    mediaRecorder.onstop = async () => {
+      // Create and upload the recording
+      if (recordedChunksRef.current.length > 0) {
+        const blob = new Blob(recordedChunksRef.current, {
+          type: "video/webm",
+        });
+        await handleUpload(blob);
+      }
+    };
+    mediaRecorder.start(1000);
+    mediaRecorderRef.current = mediaRecorder;
+
+    return () => {
+      mediaRecorder.stop();
+    };
+  }, [stream]);
+
+  const handleUpload = async (videoBlob: Blob) => {
+    try {
+      setIsUploading(true);
+      const supabase = createSupabaseBrowserClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("No access token available");
+      }
+
+      const file = new File([videoBlob], `${interviewCopilotId}.webm`, {
+        type: "video/webm",
+      });
+      const filePath = `${session.user.id}/interview-copilots/${interviewCopilotId}`;
+
+      await uploadFile({
+        bucketName: "interview_copilot_recordings",
+        filePath,
+        file,
+        setProgress: setUploadProgress,
+        onComplete: async () => {
+          // Then update the interview data
+          await updateInterviewCopilotData(filePath);
+          setIsUploading(false);
+        },
+        accessToken: session.access_token,
+        logError,
+        logInfo,
+      });
+    } catch (error: any) {
+      logError("Error uploading interview recording", { error: error.message });
+      setIsUploading(false);
+    }
+  };
+
+  const updateInterviewCopilotData = async (filePath: string) => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error: filePathError } = await supabase
+        .from("interview_copilots")
+        .update({
+          file_path: filePath,
+        })
+        .eq("id", interviewCopilotId);
+
+      if (filePathError) {
+        logError("Error updating interview copilot file path", {
+          error: filePathError.message,
+        });
+      }
+      const now = new Date();
+      const formattedDate = now.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+
+      // First update the interview copilot main data
+      const { error: updateError } = await supabase
+        .from("interview_copilots")
+        .update({
+          input_tokens_count: inputTokenCountRef.current,
+          output_tokens_count: outputTokenCountRef.current,
+          title: `${formattedDate}`,
+          status: "complete",
+        })
+        .eq("id", interviewCopilotId);
+
+      if (updateError) {
+        logError("Error updating interview copilot data", {
+          error: updateError.message,
+        });
+        return;
+      }
+
+      // Then insert all questions and answers
+      const questionsAndAnswersToInsert =
+        latestQuestionsWithAnswersRef.current.map((qa) => ({
+          interview_copilot_id: interviewCopilotId,
+          question: qa.question,
+          answer: qa.answer,
+        }));
+
+      const { error: insertError } = await supabase
+        .from("interview_copilot_questions_and_answers")
+        .insert(questionsAndAnswersToInsert);
+
+      if (insertError) {
+        logError("Error inserting questions and answers", {
+          error: insertError.message,
+        });
+      }
+      router.push(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
+    } catch (error: any) {
+      logError("Error updating interview copilot data", {
+        error: error.message,
+      });
+    }
+  };
+
+  const stopTranscription = async () => {
+    try {
+      // Clean up media recorder
+      if (mediaRecorderRef.current) {
+        console.log("stopping media recorder");
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current = null;
+      }
+
+      // Close Deepgram transcription service
+      if (connection) {
+        connection.disconnect();
+      }
+
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    } catch (error: any) {
+      logError("Error stopping transcription", { error: error.message });
     }
   };
 
@@ -328,8 +480,8 @@ export function Session({
       inputTokenCount,
       outputTokenCount,
     } = await detectQuestions(data);
-    setInputTokenCount((prev) => prev + inputTokenCount);
-    setOutputTokenCount((prev) => prev + outputTokenCount);
+    inputTokenCountRef.current += inputTokenCount;
+    outputTokenCountRef.current += outputTokenCount;
     return questions;
   };
 
@@ -344,8 +496,8 @@ export function Session({
       inputTokenCount,
       outputTokenCount,
     } = answerQuestionResponse;
-    setInputTokenCount((prev) => prev + inputTokenCount);
-    setOutputTokenCount((prev) => prev + outputTokenCount);
+    inputTokenCountRef.current += inputTokenCount;
+    outputTokenCountRef.current += outputTokenCount;
     if (answer) {
       setQuestionsWithAnswers((prev) =>
         prev.map((q) => (q.question === question ? { ...q, answer } : q))
@@ -376,9 +528,50 @@ export function Session({
         </div>
         <div className="flex items-center gap-2">
           {isTranscribing ? (
-            <Button variant="destructive" onClick={stopTranscription}>
-              {t("stopRecording")}
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive">{t("stopRecording")}</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("endInterview")}</DialogTitle>
+                  <DialogDescription>
+                    {t("endInterviewConfirmation")}
+                  </DialogDescription>
+                </DialogHeader>
+                {isUploading && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      {t("uploading")} ({uploadProgress}%)
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <DialogFooter className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={isUploading}
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      stopTranscription();
+                    }}
+                    disabled={isUploading}
+                  >
+                    {t("confirm")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           ) : (
             <Button
               onClick={startTranscription}

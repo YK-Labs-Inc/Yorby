@@ -540,7 +540,12 @@
         },
         "waitingMessage": "The Interview Copilot will answer the interviewer's questions here."
       },
-      "stopRecording": "End Interview Copilot"
+      "stopRecording": "End Interview Copilot",
+      "endInterview": "End Interview",
+      "endInterviewConfirmation": "Are you sure you want to end this interview? This will save and process your recording.",
+      "uploading": "Uploading recording",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     }
   }
 }
