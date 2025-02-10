@@ -19,7 +19,7 @@ interface MockInterviewReviewClientComponentProps {
   messages: Tables<"mock_interview_messages">[];
   feedback: Tables<"custom_job_mock_interview_feedback">;
   questionFeedback: Tables<"mock_interview_question_feedback">[];
-  recordingUrl: string;
+  recordingUrl: string | null;
 }
 
 export default function MockInterviewReviewClientComponent({
@@ -68,24 +68,30 @@ export default function MockInterviewReviewClientComponent({
     <div className="grid grid-cols-12 gap-6">
       {/* Top Row: Video and Transcript */}
       <div className="col-span-12 grid grid-cols-12 gap-6">
-        {/* Video Recording */}
-        <Card className="col-span-12 lg:col-span-6">
-          <CardHeader>
-            <CardTitle>Interview Recording</CardTitle>
-            <CardDescription>Review your interview performance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <video
-              ref={videoRef}
-              src={recordingUrl}
-              controls
-              className="w-full rounded-lg aspect-video"
-            />
-          </CardContent>
-        </Card>
+        {/* Video Recording - Only show if recordingUrl exists */}
+        {recordingUrl && (
+          <Card className="col-span-12 lg:col-span-6">
+            <CardHeader>
+              <CardTitle>Interview Recording</CardTitle>
+              <CardDescription>
+                Review your interview performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <video
+                ref={videoRef}
+                src={recordingUrl}
+                controls
+                className="w-full rounded-lg aspect-video"
+              />
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Interview Transcript */}
-        <Card className="col-span-12 lg:col-span-6">
+        {/* Interview Transcript - Adjust width based on video presence */}
+        <Card
+          className={`col-span-12 ${recordingUrl ? "lg:col-span-6" : "lg:col-span-12"}`}
+        >
           <CardHeader>
             <CardTitle>Interview Transcript</CardTitle>
             <CardDescription>Complete interview conversation</CardDescription>

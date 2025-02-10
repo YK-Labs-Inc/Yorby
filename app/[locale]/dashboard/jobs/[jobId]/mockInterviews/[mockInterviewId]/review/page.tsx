@@ -44,17 +44,21 @@ async function fetchMockInterviewData(mockInterviewId: string) {
 
   if (questionFeedbackError) throw questionFeedbackError;
 
-  // Generate signed URL for the recording
-  const { data: signedUrl } = await supabase.storage
-    .from("mock_interviews")
-    .createSignedUrl(mockInterview.recording_file_path!, 60 * 60); // 1 hour expiry
+  // Generate signed URL for the recording only if recording_file_path exists
+  let signedUrl: string | null = null;
+  if (mockInterview.recording_file_path) {
+    const { data: urlData } = await supabase.storage
+      .from("mock_interviews")
+      .createSignedUrl(mockInterview.recording_file_path, 60 * 60); // 1 hour expiry
+    signedUrl = urlData?.signedUrl ?? null;
+  }
 
   return {
     mockInterview,
     messages,
     feedback,
     questionFeedback,
-    recordingUrl: signedUrl?.signedUrl,
+    recordingUrl: signedUrl,
   };
 }
 
@@ -85,7 +89,7 @@ export default async function MockInterviewReviewPage({
         messages={data.messages}
         feedback={data.feedback}
         questionFeedback={data.questionFeedback}
-        recordingUrl={data.recordingUrl ?? ""}
+        recordingUrl={data.recordingUrl}
       />
     </div>
   );
