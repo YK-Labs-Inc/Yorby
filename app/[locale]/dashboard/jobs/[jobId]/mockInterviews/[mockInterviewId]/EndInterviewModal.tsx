@@ -14,6 +14,7 @@ import { uploadFile } from "@/utils/storage";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EndInterviewModalProps {
   isOpen: boolean;
@@ -41,21 +42,20 @@ export default function EndInterviewModal({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shouldUploadVideo, setShouldUploadVideo] = useState(true);
   const { logError, logInfo } = useAxiomLogging();
   const router = useRouter();
-  console.log("videoBlob", videoBlob);
 
-  const handleEndInterview = () => {
+  const handleEndInterview = async () => {
     endInterview();
-  };
 
-  useEffect(() => {
-    if (!videoBlob) {
-      return;
+    if (shouldUploadVideo && videoBlob) {
+      await handleUpload(videoBlob);
+    } else {
+      setIsProcessing(true);
+      await processInterview();
     }
-    console.log("videoBlob", videoBlob);
-    handleUpload(videoBlob);
-  }, [videoBlob]);
+  };
 
   const handleUpload = async (videoBlob: Blob) => {
     try {
@@ -132,10 +132,25 @@ export default function EndInterviewModal({
           <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         {!isUploading && !isProcessing && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {t("confirmMessage")}
             </p>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="upload-video"
+                checked={shouldUploadVideo}
+                onCheckedChange={(checked) =>
+                  setShouldUploadVideo(checked as boolean)
+                }
+              />
+              <label
+                htmlFor="upload-video"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t("uploadVideoLabel")}
+              </label>
+            </div>
           </div>
         )}
         {isUploading && (

@@ -239,7 +239,8 @@
       "processingMessage": "This may take a few minutes...",
       "emailAlert": "We'll send you an email when your interview is ready to review",
       "confirmButton": "End Interview",
-      "cancelButton": "Continue Interview"
+      "cancelButton": "Continue Interview",
+      "uploadVideoLabel": "Upload interview recording for review"
     }
   },
   "errors": {
