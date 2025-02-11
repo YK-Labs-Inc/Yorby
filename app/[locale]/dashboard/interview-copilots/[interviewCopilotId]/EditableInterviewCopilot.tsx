@@ -257,7 +257,7 @@ export default function EditableInterviewCopilot({
                   <div className="flex items-center justify-between p-2 rounded-md border">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
-                      <span>{file.google_file_name}</span>
+                      <span>{file.file_path.split("/").pop()}</span>
                     </div>
                     <form action={deleteAction}>
                       <input
