@@ -65,28 +65,35 @@ export function Session({
   const [isUploading, setIsUploading] = useState(false);
   const recordedChunksRef = useRef<Blob[]>([]);
   const router = useRouter();
+  const [transcriptAutoScroll, setTranscriptAutoScroll] = useState(true);
+  const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
 
   // Auto-scroll effect for both panels
   useEffect(() => {
-    if (!autoScroll) return;
+    const scrollToBottom = (
+      element: HTMLDivElement | null,
+      shouldScroll: boolean
+    ) => {
+      if (!element || !shouldScroll) return;
 
-    const scrollToBottom = (element: HTMLDivElement | null) => {
-      if (element) {
-        const isAtBottom =
-          element.scrollHeight - element.clientHeight <=
-          element.scrollTop + 100;
-        if (isAtBottom) {
-          element.scrollTo({
-            top: element.scrollHeight,
-            behavior: "smooth",
-          });
-        }
+      const isAtBottom =
+        element.scrollHeight - element.clientHeight <= element.scrollTop + 100;
+      if (isAtBottom) {
+        element.scrollTo({
+          top: element.scrollHeight,
+          behavior: "smooth",
+        });
       }
     };
 
-    scrollToBottom(transcriptRef.current);
-    scrollToBottom(copilotRef.current);
-  }, [transcript, autoScroll]);
+    scrollToBottom(transcriptRef.current, transcriptAutoScroll);
+    scrollToBottom(copilotRef.current, copilotAutoScroll);
+  }, [
+    transcript,
+    questionsWithAnswers,
+    transcriptAutoScroll,
+    copilotAutoScroll,
+  ]);
 
   // Clean up stream on unmount
   useEffect(() => {
@@ -514,18 +521,33 @@ export function Session({
     <div className="flex h-screen flex-col">
       {/* Header */}
       <header className="flex items-center justify-between border-b px-6 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
-            {t("controls.autoScroll")}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className={autoScroll ? "bg-blue-50 text-blue-600" : ""}
-            onClick={() => setAutoScroll(!autoScroll)}
-          >
-            {autoScroll ? "On" : "Off"}
-          </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              {t("controls.transcriptAutoScroll")}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className={transcriptAutoScroll ? "bg-blue-50 text-blue-600" : ""}
+              onClick={() => setTranscriptAutoScroll(!transcriptAutoScroll)}
+            >
+              {transcriptAutoScroll ? "On" : "Off"}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              {t("controls.copilotAutoScroll")}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className={copilotAutoScroll ? "bg-blue-50 text-blue-600" : ""}
+              onClick={() => setCopilotAutoScroll(!copilotAutoScroll)}
+            >
+              {copilotAutoScroll ? "On" : "Off"}
+            </Button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {isTranscribing ? (
