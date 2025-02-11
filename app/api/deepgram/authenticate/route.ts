@@ -1,11 +1,16 @@
 import { DeepgramError, createClient } from "@deepgram/sdk";
 import { NextResponse, type NextRequest } from "next/server";
+import { withAxiom, AxiomRequest } from "next-axiom";
 
 export const revalidate = 0;
 
-export async function GET(request: NextRequest) {
+export const GET = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    path: "/api/deepgram/authenticate",
+  });
   // exit early so we don't request 70000000 keys while in devmode
   if (process.env.DEEPGRAM_ENV === "development") {
+    logger.info("Deepgram is in development mode, returning local key");
     return NextResponse.json({
       key: process.env.DEEPGRAM_API_KEY ?? "",
     });
@@ -19,12 +24,16 @@ export async function GET(request: NextRequest) {
     await deepgram.manage.getProjects();
 
   if (projectsError) {
+    logger.error("Error getting projects", { error: projectsError });
     return NextResponse.json(projectsError);
   }
 
   const project = projectsResult?.projects[0];
 
   if (!project) {
+    logger.error(
+      "Cannot find a Deepgram project. Please create a project first."
+    );
     return NextResponse.json(
       new DeepgramError(
         "Cannot find a Deepgram project. Please create a project first."
@@ -41,6 +50,7 @@ export async function GET(request: NextRequest) {
     });
 
   if (newKeyError) {
+    logger.error("Error creating new key", { error: newKeyError });
     return NextResponse.json(newKeyError);
   }
 
@@ -53,4 +63,4 @@ export async function GET(request: NextRequest) {
   response.headers.set("Expires", "0");
 
   return response;
-}
+});
