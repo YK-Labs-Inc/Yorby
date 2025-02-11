@@ -130,12 +130,12 @@ export default function InterviewCopilotReviewClientComponent({
                 value={index.toString()}
                 className="flex-grow overflow-y-auto"
               >
-                <div className="space-y-4">
-                  <div>
+                <div className="space-y-4 h-full">
+                  <div className="overflow-y-auto">
                     <h3 className="font-semibold mb-2">Question</h3>
                     <p className="text-muted-foreground">{qa.question}</p>
                   </div>
-                  <div>
+                  <div className="overflow-y-auto">
                     <h3 className="font-semibold mb-2">Your Answer</h3>
                     <p className="text-muted-foreground">{qa.answer}</p>
                   </div>
