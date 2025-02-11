@@ -30,7 +30,6 @@ async function fetchInterviewCopilotData(interviewCopilotId: string) {
     .createSignedUrl(interviewCopilot.file_path!, 60 * 60); // 1 hour expiry
 
   return {
-    interviewCopilot,
     questionsAndAnswers,
     recordingUrl: signedUrl?.signedUrl,
   };
@@ -43,12 +42,10 @@ export default async function ReviewPage({
 }) {
   const { interviewCopilotId } = await params;
   const data = await fetchInterviewCopilotData(interviewCopilotId);
-  console.log("data", data);
 
   return (
     <div className="container mx-auto py-6">
       <InterviewCopilotReviewClientComponent
-        interviewCopilot={data.interviewCopilot}
         questionsAndAnswers={data.questionsAndAnswers}
         recordingUrl={data.recordingUrl ?? ""}
       />
