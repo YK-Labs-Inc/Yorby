@@ -60,18 +60,6 @@ export default async function Page({
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
-
-        {/* Start Interview Button */}
-        <div className="flex justify-center">
-          <Link
-            href={`/dashboard/interview-copilots/${interviewCopilot.id}/on-device-session`}
-            className="inline-flex items-center"
-          >
-            <Button size="lg" className="px-8">
-              {t("session.startCopilot")}
-            </Button>
-          </Link>
-        </div>
       </div>
     </div>
   );

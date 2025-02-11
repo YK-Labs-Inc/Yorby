@@ -55,8 +55,16 @@ export const answerQuestion = async (data: FormData) => {
   });
   try {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
+    const { job_title, job_description, company_name, company_description } =
+      await getInterviewCopilot(interviewCopilotId);
     const result = await answerModel.generateContent([
-      answerQuestionPrompt(question),
+      answerQuestionPrompt({
+        question,
+        jobTitle: job_title,
+        jobDescription: job_description,
+        companyName: company_name,
+        companyDescription: company_description,
+      }),
       ...files,
     ]);
     const totalInputTokens =
@@ -140,6 +148,19 @@ export const detectQuestions = async (data: FormData) => {
   }
 };
 
+const getInterviewCopilot = async (interviewCopilotId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("interview_copilots")
+    .select("*")
+    .eq("id", interviewCopilotId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
 const questionDetectionPrompt = (
   transcript: string,
   existingQuestions: string[]
@@ -169,17 +190,29 @@ ${existingQuestions.join("\n")}
 ${transcript}
 `;
 
-const answerQuestionPrompt = (question: string) => `
-You are a candidate that is in the middle of a job interviewer. You are the best interviewee in the world. 
+const answerQuestionPrompt = ({
+  question,
+  jobTitle,
+  jobDescription,
+  companyName,
+  companyDescription,
+}: {
+  question: string;
+  jobTitle: string | null;
+  jobDescription: string | null;
+  companyName: string | null;
+  companyDescription: string | null;
+}) => `
+You are a candidate that is in the middle of a job interview. You are the best interviewee in the world.
 You are going to be provided with an interview question that you must answer.
-Answer the following question by following the steps below.
+Answer the question by following the steps below.
 
 # Steps
 
 1. **Read the Questions**:
   - Read the interview question and understand what it is asking and create a criteria of what would be a strong answer.
-  You might be provided optional information about the job title and the job description. If provided, use it to create
-  a criteria of what would be a strong answer.
+  You might be provided optional information about the job title and the job description and company name and company description.
+  If provided, use this additional information to create your criteria of what would be a strong answer.
 2. **Consult the user's work history to find relevant information**:
   - The user might upload their resume, cover letter, or other files that are relevant to the interview/their job history.
   If provided, read through the files and extract relevant information that can be used to answer the interview question.
@@ -189,14 +222,51 @@ Answer the following question by following the steps below.
   can read your response verbatim when answering the interview questions.
   - Answer as if you are the user and you are in the middle of an interview. This means you must not provide any answer templates
   (no brackets, no "candidate", no "user", etc.). You MUST answer in first person with a complete answer. 
+4. **Double Check Your Answer**:
+  - After you have answered the question, fact check your answer against the job title, job description, company name, and company description as 
+  well as any additional information that the user uploaded about themselves via their resume, cover letter, or other files.
+  - Do not make up any information. You can stretch the truth to make answers more relevant/more interesting/more impressive, but
+  it must still be grounded on the information provided.
 
 # Output format
    {
      "answer": string 
    }
 
-# Question
-${question}
+${
+  question
+    ? `# Question
+${question}`
+    : ""
+}
+
+${
+  jobTitle
+    ? `# Job Title
+${jobTitle}`
+    : ""
+}
+
+${
+  jobDescription
+    ? `# Job Description
+${jobDescription}`
+    : ""
+}
+
+${
+  companyName
+    ? `# Company Name
+${companyName}`
+    : ""
+}
+
+${
+  companyDescription
+    ? `# Company Description
+${companyDescription}`
+    : ""
+}
 `;
 
 const getAllInterviewCopilotFiles = async (interviewCopilotId: string) => {
