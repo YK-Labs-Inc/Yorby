@@ -458,7 +458,12 @@
         "helper": "Upload your resume, cover letter, or any other relevant documents (must be a PDF file)"
       },
       "submit": "Create Interview Copilot",
-      "submitting": "Creating..."
+      "submitting": "Creating...",
+      "emptyFields": {
+        "title": "Please Fill Out Information",
+        "description": "To get the best performance from your interview copilot, please fill out as many fields as possible. At least one field must be filled out to proceed.",
+        "button": "Got it"
+      }
     },
     "edit": {
       "saveSuccess": "Changes saved successfully",
@@ -472,7 +477,7 @@
       "notFound": {
         "title": "Interview Copilot Not Found",
         "description": "The interview copilot you're looking for doesn't exist or has been deleted.",
-        "action": "Return to Interview Copilots"
+        "action": "Create A New Interview Copilot"
       },
       "uploadFailed": "Failed to upload file",
       "deleteFailed": "Failed to delete file",
@@ -575,6 +580,22 @@
       "fileUpload": {
         "pdfOnlyNotice": "Note: All documents must be in PDF format.",
         "pdfOnlyHelper": "Only PDF files are supported"
+      },
+      "title": "Interview Copilot"
+    },
+    "credits": {
+      "subtitle": "Creating an interview copilot will use 1 credit. You currently have {credits} credits.",
+      "insufficientDialog": {
+        "title": "Need More Credits",
+        "description": "You need at least 1 credit to create an interview copilot. Purchase credits to continue.",
+        "button": "Purchase Credits"
+      },
+      "confirmDialog": {
+        "title": "Confirm Creation",
+        "description": "Creating an interview copilot will use 1 credit from your account. You currently have {credits} credits remaining.",
+        "cancel": "Cancel",
+        "confirm": "Create Copilot",
+        "creating": "Creating..."
       }
     }
   }

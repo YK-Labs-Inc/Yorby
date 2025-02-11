@@ -6,6 +6,7 @@ import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
+
 export const createInterviewCopilot = async (
   prevState: any,
   formData: FormData
@@ -19,6 +20,17 @@ export const createInterviewCopilot = async (
 
   if (!user) {
     return { error: t("generic") };
+  }
+
+  // Check user credits
+  const { data: credits } = await supabase
+    .from("custom_job_credits")
+    .select("number_of_credits")
+    .eq("id", user.id)
+    .single();
+
+  if (!credits || credits.number_of_credits < 1) {
+    return { error: t("insufficientCredits") };
   }
 
   let copilotId;
@@ -70,9 +82,31 @@ export const createInterviewCopilot = async (
       await logger.flush();
       return { error: t("generic") };
     }
+    copilotId = sessionData.id;
     logger.info("Interview copilot session created", {
       sessionId: sessionData.id,
     });
+
+    // Deduct credit
+    const { error: creditError } = await supabase
+      .from("custom_job_credits")
+      .update({
+        number_of_credits: credits.number_of_credits - 1,
+      })
+      .eq("id", user.id);
+
+    if (creditError) {
+      // If credit deduction fails, delete the created session
+      await supabase
+        .from("interview_copilots")
+        .delete()
+        .eq("id", sessionData.id);
+      logger.error("Failed to deduct credit", {
+        error: creditError,
+      });
+      await logger.flush();
+      return { error: t("generic") };
+    }
 
     // Upload files and create file entries
     for (const file of files) {
@@ -127,12 +161,17 @@ export const createInterviewCopilot = async (
     logger.info("Interview copilot created", {
       sessionId: sessionData.id,
     });
-    copilotId = sessionData.id;
     await logger.flush();
   } catch (error) {
     logger.error("Failed to create interview copilot", {
       error: error,
     });
+    if (copilotId) {
+      await supabase.from("interview_copilots").delete().eq("id", copilotId);
+      logger.info("Deleted interview copilot due to error", {
+        copilotId,
+      });
+    }
     await logger.flush();
     return { error: t("generic") };
   }
@@ -154,14 +193,29 @@ const generateJobTitle = async ({
   companyName: string | null;
 }) => {
   const t = await getTranslations("interviewCopilots");
-  if (!jobTitle && !companyName) {
-    return `${new Date().toLocaleString()} ${t("jobTitle.label")} `;
+
+  if (jobTitle && companyName) {
+    return `${companyName
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")} ${jobTitle
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")} ${t("jobCreation.title")} `;
   }
-  return `${companyName
-    ?.split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")} ${jobTitle
-    ?.split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")} ${t("jobTitle.label")} `;
+
+  if (jobTitle && !companyName) {
+    return `${jobTitle
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")} ${t("jobCreation.title")} `;
+  }
+
+  if (!jobTitle && companyName) {
+    return `${companyName
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")} ${t("jobCreation.title")} `;
+  }
+  return `${new Date().toLocaleString()} ${t("jobCreation.title")} `;
 };
