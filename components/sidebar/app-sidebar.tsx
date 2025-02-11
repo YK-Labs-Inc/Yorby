@@ -149,7 +149,7 @@ export function AppSidebar({
                     {interviewCopilots.map((copilot) => (
                       <Link
                         key={copilot.id}
-                        href={`/dashboard/interview-copilots/${copilot.id}/review`}
+                        href={`/dashboard/interview-copilots/${copilot.id}`}
                         className="flex items-center px-4 py-2 text-sm hover:bg-accent rounded-lg"
                       >
                         {copilot.title}

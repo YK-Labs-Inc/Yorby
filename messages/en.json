@@ -424,42 +424,83 @@
   },
   "interviewCopilots": {
     "title": "Interview Copilots",
+    "jobDetails": "Job Details",
+    "companyDetails": "Company Details",
+    "documents": {
+      "label": "Documents",
+      "uploadButton": "Upload Document",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Document uploaded successfully",
+      "deleteSuccess": "Document deleted successfully",
+      "helper": "Upload your resume, cover letter, or any other relevant documents (must be a PDF file)",
+      "empty": "No documents uploaded yet"
+    },
     "createNew": {
       "title": "Create New Interview Copilot",
       "jobTitle": {
-        "label": "Job Title (Optional)",
+        "label": "Job Title",
         "placeholder": "Enter job title"
       },
       "jobDescription": {
-        "label": "Job Description (Optional)",
+        "label": "Job Description",
         "placeholder": "Enter job description"
       },
       "companyName": {
-        "label": "Company Name (Optional)",
+        "label": "Company Name",
         "placeholder": "Enter company name"
       },
       "companyDescription": {
-        "label": "Company Description (Optional)",
+        "label": "Company Description",
         "placeholder": "Enter company description"
       },
       "documents": {
-        "label": "Upload Documents (Optional)",
+        "label": "Documents",
         "helper": "Upload your resume, cover letter, or any other relevant documents (must be a PDF file)"
       },
       "submit": "Create Interview Copilot",
       "submitting": "Creating..."
     },
+    "edit": {
+      "saveSuccess": "Changes saved successfully",
+      "saveError": "Failed to save changes",
+      "editButton": "Edit",
+      "cancelButton": "Cancel",
+      "saveButton": "Save",
+      "saving": "Saving..."
+    },
     "errors": {
+      "notFound": {
+        "title": "Interview Copilot Not Found",
+        "description": "The interview copilot you're looking for doesn't exist or has been deleted.",
+        "action": "Return to Interview Copilots"
+      },
       "uploadFailed": "Failed to upload file",
-      "generic": "Something went wrong, please try again."
+      "deleteFailed": "Failed to delete file",
+      "generic": "Something went wrong, please try again.",
+      "fileRequired": "Please select a file to upload",
+      "pdfOnly": "Only PDF files are supported",
+      "unauthorized": "You must be signed in to upload files"
     },
     "jobTitle": {
-      "label": "Interview Copilot"
+      "label": "Job Title",
+      "empty": "No job title provided"
+    },
+    "jobDescription": {
+      "label": "Job Description",
+      "empty": "No job description provided"
+    },
+    "companyName": {
+      "label": "Company Name",
+      "empty": "No company name provided"
+    },
+    "companyDescription": {
+      "label": "Company Description",
+      "empty": "No company description provided"
     },
     "deviceSelection": {
       "title": "Select Device",
       "sameDevice": {
-        "title": "Continue on this device",
+        "title": "Same Device",
         "description": "Use your current device for the interview",
         "pros": [
           "Only requires one device",
@@ -472,7 +513,7 @@
         ]
       },
       "separateDevice": {
-        "title": "Continue on another device",
+        "title": "Separate Device",
         "description": "Use a different device for the interview",
         "pros": [
           "Completely undetectable during screen sharing",
@@ -488,34 +529,11 @@
         "close": "Close"
       }
     },
-    "devicePermissions": {
-      "title": "Device Permissions",
-      "subtitle": "Please allow access to your microphone and camera to continue",
-      "audio": {
-        "title": "Audio",
-        "description": "Allows the AI to give accurate feedback based on your conversation and materials",
-        "instruction": "Select \"Allow while visiting the site\" when prompted",
-        "request": "Request",
-        "granted": "Granted"
-      },
-      "video": {
-        "title": "Video",
-        "description": "Enabling the camera enhances the realism of mock interviews",
-        "instruction": "Select \"Allow while visiting the site\" when prompted",
-        "request": "Request",
-        "granted": "Granted"
-      },
-      "errors": {
-        "audio": "Error requesting audio permission",
-        "video": "Error requesting video permission"
-      },
-      "next": "Next"
-    },
     "session": {
+      "startCopilot": "Start Interview Copilot",
       "error": {
         "generic": "Sorry, something went wrong. Please try again."
       },
-      "startCopilot": "Start Copilot",
       "selectMeeting": {
         "title": "Select your interview meeting room",
         "button": "Select",
@@ -551,6 +569,12 @@
       "uploading": "Uploading recording",
       "confirm": "Confirm",
       "cancel": "Cancel"
+    },
+    "jobCreation": {
+      "fileUpload": {
+        "pdfOnlyNotice": "Note: All documents must be in PDF format.",
+        "pdfOnlyHelper": "Only PDF files are supported"
+      }
     }
   }
 }

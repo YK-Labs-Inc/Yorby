@@ -7,9 +7,10 @@ import {
 } from "@/utils/supabase/server";
 import { UploadResponse } from "@/utils/types";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { GoogleAIFileManager } from "@google/generative-ai/dist/server/server";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { revalidatePath } from "next/cache";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -142,5 +143,209 @@ const updateFileInDatabase = async ({
     .eq("id", fileId);
   if (error) {
     throw error;
+  }
+};
+
+export const uploadInterviewCopilotFile = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const file = formData.get("file") as File;
+  const interviewCopilotId = formData.get("interviewCopilotId") as string;
+  const t = await getTranslations("interviewCopilots");
+
+  const logger = new Logger().with({
+    function: "uploadInterviewCopilotFile",
+    interviewCopilotId,
+  });
+
+  if (!file) {
+    logger.error("No file provided");
+    await logger.flush();
+    return { error: t("errors.fileRequired") };
+  }
+
+  if (!interviewCopilotId) {
+    logger.error("No interview copilot ID provided");
+    await logger.flush();
+    return { error: t("errors.generic") };
+  }
+
+  if (file.type !== "application/pdf") {
+    logger.error("File is not a PDF");
+    await logger.flush();
+    return { error: t("errors.pdfOnly") };
+  }
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      logger.error("User not authenticated");
+      await logger.flush();
+      return { error: t("errors.generic") };
+    }
+
+    // Upload file to storage
+    const filePath = `${user.id}/${interviewCopilotId}/${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from("interview_copilot_files")
+      .upload(filePath, file, {
+        upsert: true,
+      });
+
+    if (uploadError) {
+      logger.error("Failed to upload file", { error: uploadError });
+      await logger.flush();
+      return { error: t("errors.generic") };
+    }
+
+    // Create file entry in database
+    const { error: dbError } = await supabase
+      .from("interview_copilot_files")
+      .insert({
+        interview_copilot_id: interviewCopilotId,
+        file_path: filePath,
+        google_file_name: file.name,
+        google_file_uri: "", // We're not using Google's file storage in this case
+        mime_type: file.type,
+      });
+
+    if (dbError) {
+      logger.error("Failed to create file entry", { error: dbError });
+      await logger.flush();
+      return { error: t("errors.generic") };
+    }
+
+    logger.info("File uploaded successfully");
+    await logger.flush();
+
+    // Revalidate the page to show the new file
+    revalidatePath(`/dashboard/interview-copilots/${interviewCopilotId}`);
+    return { success: true };
+  } catch (error) {
+    logger.error("Error uploading file", { error });
+    await logger.flush();
+    return { error: t("errors.generic") };
+  }
+};
+
+export const deleteInterviewCopilotFile = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const fileId = formData.get("fileId") as string;
+  const interviewCopilotId = formData.get("interviewCopilotId") as string;
+  const t = await getTranslations("interviewCopilots");
+
+  if (!fileId || !interviewCopilotId) {
+    return { error: t("errors.generic") };
+  }
+
+  const logger = new Logger().with({
+    function: "deleteInterviewCopilotFile",
+    fileId,
+    interviewCopilotId,
+  });
+
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // First get the file details to know what to delete from storage
+    const { data: file, error: fetchError } = await supabase
+      .from("interview_copilot_files")
+      .select("file_path")
+      .eq("id", fileId)
+      .single();
+
+    if (fetchError) {
+      logger.error("Failed to fetch file details", { error: fetchError });
+      await logger.flush();
+      return { error: "Failed to delete file" };
+    }
+
+    // Delete from storage first
+    if (file.file_path) {
+      const { error: storageError } = await supabase.storage
+        .from("interview_copilot_files")
+        .remove([file.file_path]);
+
+      if (storageError) {
+        logger.error("Failed to delete file from storage", {
+          error: storageError,
+        });
+        await logger.flush();
+        return { error: t("errors.generic") };
+      }
+    }
+
+    // Then delete from database
+    const { error: dbError } = await supabase
+      .from("interview_copilot_files")
+      .delete()
+      .eq("id", fileId);
+
+    if (dbError) {
+      logger.error("Failed to delete file from database", { error: dbError });
+      await logger.flush();
+      return { error: t("errors.generic") };
+    }
+
+    logger.info("File deleted successfully");
+    await logger.flush();
+
+    // Revalidate the page to update the file list
+    revalidatePath(`/dashboard/interview-copilots/${interviewCopilotId}`);
+    return { success: true };
+  } catch (error) {
+    logger.error("Error deleting file", { error });
+    await logger.flush();
+    return { error: t("errors.generic") };
+  }
+};
+
+export const updateInterviewCopilot = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const t = await getTranslations("interviewCopilots");
+  const logger = new Logger().with({
+    function: "updateInterviewCopilot",
+  });
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const interviewCopilotId = formData.get("id") as string;
+    const title = formData.get("title") as string;
+    const jobTitle = formData.get("job_title") as string;
+    const jobDescription = formData.get("job_description") as string;
+    const companyName = formData.get("company_name") as string;
+    const companyDescription = formData.get("company_description") as string;
+
+    const { error } = await supabase
+      .from("interview_copilots")
+      .update({
+        title: title,
+        job_title: jobTitle || null,
+        job_description: jobDescription || null,
+        company_name: companyName || null,
+        company_description: companyDescription || null,
+      })
+      .eq("id", interviewCopilotId);
+
+    if (error) throw error;
+
+    logger.info("Interview copilot updated successfully");
+    await logger.flush();
+
+    revalidatePath(`/dashboard/interview-copilots/${interviewCopilotId}`);
+    return { success: true };
+  } catch (error) {
+    logger.error("Error updating interview copilot", { error });
+    await logger.flush();
+    return { error: t("edit.saveError") };
   }
 };
