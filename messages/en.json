@@ -458,7 +458,12 @@
         "helper": "Upload your resume, cover letter, or any other relevant documents (must be a PDF file)"
       },
       "submit": "Create Interview Copilot",
-      "submitting": "Creating..."
+      "submitting": "Creating...",
+      "emptyFields": {
+        "title": "Please Fill Out Information",
+        "description": "To get the best performance from your interview copilot, please fill out as many fields as possible. At least one field must be filled out to proceed.",
+        "button": "Got it"
+      }
     },
     "edit": {
       "saveSuccess": "Changes saved successfully",

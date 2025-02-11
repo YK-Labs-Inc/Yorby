@@ -34,6 +34,7 @@ export const InterviewCopilotCreationForm = ({
   const [files, setFiles] = useState<File[]>([]);
   const [showInsufficientCreditsDialog, setShowInsufficientCreditsDialog] =
     useState(false);
+  const [showEmptyFieldsDialog, setShowEmptyFieldsDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +53,23 @@ export const InterviewCopilotCreationForm = ({
   };
 
   const handleSubmit = (formData: FormData) => {
+    const jobTitle = formData.get("jobTitle") as string;
+    const jobDescription = formData.get("jobDescription") as string;
+    const companyName = formData.get("companyName") as string;
+    const companyDescription = formData.get("companyDescription") as string;
+
+    // Check if all fields are empty
+    if (
+      !jobTitle &&
+      !jobDescription &&
+      !companyName &&
+      !companyDescription &&
+      files.length === 0
+    ) {
+      setShowEmptyFieldsDialog(true);
+      return;
+    }
+
     if (userCredits < 1) {
       setShowInsufficientCreditsDialog(true);
       return;
@@ -74,6 +92,25 @@ export const InterviewCopilotCreationForm = ({
 
   return (
     <>
+      <Dialog
+        open={showEmptyFieldsDialog}
+        onOpenChange={setShowEmptyFieldsDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("createNew.emptyFields.title")}</DialogTitle>
+            <DialogDescription className="space-y-3 pt-2">
+              {t("createNew.emptyFields.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6">
+            <Button onClick={() => setShowEmptyFieldsDialog(false)}>
+              {t("createNew.emptyFields.button")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={showInsufficientCreditsDialog}
         onOpenChange={setShowInsufficientCreditsDialog}
