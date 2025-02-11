@@ -48,10 +48,12 @@ const questionDetectionModel = genAI.getGenerativeModel({
 export const answerQuestion = async (data: FormData) => {
   const interviewCopilotId = data.get("interviewCopilotId") as string;
   const question = data.get("question") as string;
+  const responseFormat = data.get("responseFormat") as "verbatim" | "bullet";
   let logger = new Logger().with({
     function: "answerQuestion",
     interviewCopilotId,
     question,
+    responseFormat,
   });
   try {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
@@ -64,6 +66,7 @@ export const answerQuestion = async (data: FormData) => {
         jobDescription: job_description,
         companyName: company_name,
         companyDescription: company_description,
+        responseFormat,
       }),
       ...files,
     ]);
@@ -196,12 +199,14 @@ const answerQuestionPrompt = ({
   jobDescription,
   companyName,
   companyDescription,
+  responseFormat,
 }: {
   question: string;
   jobTitle: string | null;
   jobDescription: string | null;
   companyName: string | null;
   companyDescription: string | null;
+  responseFormat: "verbatim" | "bullet";
 }) => `
 You are a candidate that is in the middle of a job interview. You are the best interviewee in the world.
 You are going to be provided with an interview question that you must answer.
@@ -218,10 +223,11 @@ Answer the question by following the steps below.
   If provided, read through the files and extract relevant information that can be used to answer the interview question.
 3. **Answer The Question**: 
   - Using all of your information, answer the question in a way that fits the criteria you created in the first step
-  - Respond in complete sentences in the first person perspective as if you are the user. This is so the user
-  can read your response verbatim when answering the interview questions.
-  - Answer as if you are the user and you are in the middle of an interview. This means you must not provide any answer templates
-  (no brackets, no "candidate", no "user", etc.). You MUST answer in first person with a complete answer. 
+${
+  responseFormat === "bullet"
+    ? "- Format your response as a concise list of bullet points, highlighting the key points clearly and efficiently. Each bullet point should be prefixed with '•' and be a complete thought."
+    : "- Provide a natural, conversational response as if you're speaking directly to the interviewer. Use complete sentences and maintain a professional yet personable tone."
+}
 4. **Double Check Your Answer**:
   - After you have answered the question, fact check your answer against the job title, job description, company name, and company description as 
   well as any additional information that the user uploaded about themselves via their resume, cover letter, or other files.

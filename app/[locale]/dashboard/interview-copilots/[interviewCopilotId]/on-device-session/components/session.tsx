@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MonitorUp, LogOut, Loader2 } from "lucide-react";
+import { MonitorUp, LogOut, Loader2, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -25,6 +25,15 @@ import { uploadFile } from "@/utils/storage";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function Session({
   interviewCopilotId,
@@ -34,7 +43,6 @@ export function Session({
   const t = useTranslations("interviewCopilots.session");
   const [isSelectingMeeting, setIsSelectingMeeting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
@@ -67,6 +75,10 @@ export function Session({
   const router = useRouter();
   const [transcriptAutoScroll, setTranscriptAutoScroll] = useState(true);
   const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
+  const [responseFormat, setResponseFormat] = useState<"verbatim" | "bullet">(
+    "verbatim"
+  );
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Auto-scroll effect for both panels
   useEffect(() => {
@@ -498,6 +510,7 @@ export function Session({
     const formData = new FormData();
     formData.append("interviewCopilotId", interviewCopilotId);
     formData.append("question", question);
+    formData.append("responseFormat", responseFormat);
     const answerQuestionResponse = await answerQuestion(formData);
     const {
       data: answer,
@@ -548,6 +561,61 @@ export function Session({
               {copilotAutoScroll ? "On" : "Off"}
             </Button>
           </div>
+          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Interview Copilot Settings</DialogTitle>
+                <DialogDescription>
+                  Configure how your interview copilot behaves and responds
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Response Format</CardTitle>
+                    <CardDescription>
+                      Choose how you want the copilot to format its responses
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <RadioGroup
+                      value={responseFormat}
+                      onValueChange={(value: "verbatim" | "bullet") =>
+                        setResponseFormat(value)
+                      }
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="verbatim" id="verbatim" />
+                        <Label htmlFor="verbatim" className="flex flex-col">
+                          <span className="font-medium">Verbatim</span>
+                          <span className="text-sm text-gray-500">
+                            Word-for-word responses
+                          </span>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <RadioGroupItem value="bullet" id="bullet" />
+                        <Label htmlFor="bullet" className="flex flex-col">
+                          <span className="font-medium">Bullet Points</span>
+                          <span className="text-sm text-gray-500">
+                            Concise bullet-point format
+                          </span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </CardContent>
+                </Card>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setIsSettingsOpen(false)}>Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
         <div className="flex items-center gap-2">
           {isTranscribing ? (
