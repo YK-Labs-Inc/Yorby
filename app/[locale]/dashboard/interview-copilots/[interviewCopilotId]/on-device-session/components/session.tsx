@@ -24,6 +24,7 @@ import {
 import { uploadFile } from "@/utils/storage";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 
 export function Session({
   interviewCopilotId,
@@ -181,10 +182,10 @@ export function Session({
     };
 
     const onTranscript = (data: LiveTranscriptionEvent) => {
-      const { speech_final: speechFinal, start } = data;
+      const { is_final: isFinal, speech_final: speechFinal, start } = data;
       let transcriptText = data.channel.alternatives[0].transcript;
 
-      if (transcriptText !== "") {
+      if (isFinal && transcriptText !== "") {
         setTranscript((prev) => {
           const updated = [...prev];
 
@@ -662,6 +663,11 @@ export function Session({
             <div className="p-4 flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-medium">{t("transcription.title")}</h2>
+                {isTranscribing && (
+                  <Badge variant="destructive">
+                    {t("transcription.status.transcribing")}
+                  </Badge>
+                )}
               </div>
               <div
                 ref={transcriptRef}
@@ -706,6 +712,7 @@ export function Session({
           <div className="h-full flex flex-col p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-medium">{t("copilot.title")}</h2>
+              {isTranscribing && <Badge>{t("copilot.status.listening")}</Badge>}
             </div>
             <div ref={copilotRef} className="flex-1 overflow-y-auto px-1">
               {isTranscribing ? (

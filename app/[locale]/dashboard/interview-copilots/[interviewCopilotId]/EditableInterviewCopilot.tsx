@@ -15,6 +15,8 @@ import {
   updateInterviewCopilot,
 } from "./actions";
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/routing";
+import { AIButton } from "@/components/ai-button";
 
 interface EditableInterviewCopilotProps {
   interviewCopilot: Tables<"interview_copilots"> & {
@@ -127,6 +129,14 @@ export default function EditableInterviewCopilot({
               <Pencil className="h-4 w-4" />
               Edit
             </Button>
+            <Link
+              href={`/dashboard/interview-copilots/${interviewCopilot.id}/on-device-session`}
+              className="inline-flex items-center"
+            >
+              <AIButton pendingText={t("session.startingCopilot")}>
+                {t("session.startCopilot")}
+              </AIButton>
+            </Link>
           </div>
         )}
       </div>

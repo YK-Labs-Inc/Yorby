@@ -531,6 +531,7 @@
     },
     "session": {
       "startCopilot": "Start Interview Copilot",
+      "startingCopilot": "Starting Interview Copilot...",
       "error": {
         "generic": "Sorry, something went wrong. Please try again."
       },
@@ -544,7 +545,7 @@
         "title": "Interviewer Transcript",
         "status": {
           "ready": "Ready",
-          "transcribing": "Transcribing...",
+          "transcribing": "Transcribing",
           "recording": "Recording"
         }
       },
@@ -558,10 +559,10 @@
         "title": "Interview Copilot",
         "status": {
           "ready": "Ready",
-          "thinking": "Thinking...",
-          "error": "Error"
+          "error": "Error",
+          "listening": "Listening"
         },
-        "waitingMessage": "The Interview Copilot will answer the interviewer's questions here."
+        "waitingMessage": "The Interview Copilot will answer the interview questions here."
       },
       "stopRecording": "End Interview Copilot",
       "endInterview": "End Interview",
