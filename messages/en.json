@@ -71,7 +71,8 @@
     },
     "fileUpload": {
       "pdfOnlyNotice": "Note: All documents must be in PDF format.",
-      "pdfOnlyHelper": "Only PDF files are supported"
+      "pdfOnlyHelper": "Only PDF files are supported",
+      "uploadButton": "Upload Document"
     },
     "buttons": {
       "next": "Next Step",
