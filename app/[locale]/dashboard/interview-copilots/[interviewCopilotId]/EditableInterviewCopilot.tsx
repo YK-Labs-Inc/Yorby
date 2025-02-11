@@ -253,11 +253,8 @@ export default function EditableInterviewCopilot({
           <div className="space-y-2">
             {interviewCopilot.interview_copilot_files.length > 0 ? (
               interviewCopilot.interview_copilot_files.map((file) => (
-                <>
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between p-2 rounded-md border"
-                  >
+                <div key={file.id}>
+                  <div className="flex items-center justify-between p-2 rounded-md border">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       <span>{file.google_file_name}</span>
@@ -288,7 +285,7 @@ export default function EditableInterviewCopilot({
                   {deleteState?.error && (
                     <FormMessage message={{ error: deleteState.error }} />
                   )}
-                </>
+                </div>
               ))
             ) : (
               <p className="text-muted-foreground text-sm italic">
