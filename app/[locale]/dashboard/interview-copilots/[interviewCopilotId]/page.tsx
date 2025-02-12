@@ -2,12 +2,9 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditableInterviewCopilot from "./EditableInterviewCopilot";
-
+import { redirect } from "next/navigation";
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -35,6 +32,10 @@ export default async function Page({
   const { data: interviewCopilot } =
     await fetchInterviewCopilot(interviewCopilotId);
   const t = await getTranslations("interviewCopilots");
+
+  if (interviewCopilot?.status === "complete") {
+    redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
+  }
 
   if (!interviewCopilot) {
     return (

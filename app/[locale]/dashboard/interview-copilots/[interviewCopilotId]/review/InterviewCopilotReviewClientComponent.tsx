@@ -14,13 +14,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface InterviewCopilotReviewClientComponentProps {
-  interviewCopilot: Tables<"interview_copilots">;
   questionsAndAnswers: Tables<"interview_copilot_questions_and_answers">[];
   recordingUrl: string;
 }
 
 export default function InterviewCopilotReviewClientComponent({
-  interviewCopilot,
   questionsAndAnswers,
   recordingUrl,
 }: InterviewCopilotReviewClientComponentProps) {
@@ -85,13 +83,13 @@ export default function InterviewCopilotReviewClientComponent({
           <CardTitle>Question Review</CardTitle>
           <CardDescription>Review your questions and answers</CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow flex flex-col">
+        <CardContent className="flex-grow flex flex-col overflow-hidden">
           <Tabs
             value={selectedQuestionIndex.toString()}
-            className="w-full flex-grow flex flex-col"
+            className="flex h-full flex-col"
             onValueChange={(value) => setSelectedQuestionIndex(parseInt(value))}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-4">
               <Button
                 variant="outline"
                 size="icon"
@@ -128,16 +126,18 @@ export default function InterviewCopilotReviewClientComponent({
               <TabsContent
                 key={qa.id}
                 value={index.toString()}
-                className="flex-grow overflow-y-auto"
+                className="flex-1 overflow-hidden"
               >
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">Question</h3>
-                    <p className="text-muted-foreground">{qa.question}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-2">Your Answer</h3>
-                    <p className="text-muted-foreground">{qa.answer}</p>
+                <div className="h-full overflow-y-auto">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">Question</h3>
+                      <p className="text-muted-foreground">{qa.question}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">Your Answer</h3>
+                      <p className="text-muted-foreground">{qa.answer}</p>
+                    </div>
                   </div>
                 </div>
               </TabsContent>

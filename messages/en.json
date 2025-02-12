@@ -559,7 +559,8 @@
         "leave": "Leave",
         "settings": "Settings",
         "theme": "Toggle theme",
-        "autoScroll": "Auto Scroll"
+        "transcriptAutoScroll": "Transcript Auto Scroll",
+        "copilotAutoScroll": "Copilot Auto Scroll"
       },
       "copilot": {
         "title": "Interview Copilot",

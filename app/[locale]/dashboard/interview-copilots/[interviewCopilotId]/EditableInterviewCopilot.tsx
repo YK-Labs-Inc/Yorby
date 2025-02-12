@@ -180,7 +180,7 @@ export default function EditableInterviewCopilot({
             ) : (
               <p
                 className={cn(
-                  "text-muted-foreground whitespace-pre-wrap",
+                  "text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto pr-2",
                   !interviewCopilot.job_description && "italic"
                 )}
               >
@@ -232,7 +232,7 @@ export default function EditableInterviewCopilot({
             ) : (
               <p
                 className={cn(
-                  "text-muted-foreground whitespace-pre-wrap",
+                  "text-muted-foreground whitespace-pre-wrap max-h-[200px] overflow-y-auto pr-2",
                   !interviewCopilot.company_description && "italic"
                 )}
               >

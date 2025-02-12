@@ -62,6 +62,13 @@ const config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -96,13 +103,23 @@ const config = {
           },
         },
         sparkle: {
-          "0%": { transform: "translateX(-10%)" },
-          "100%": { transform: "translateX(10%)" },
+          "0%": {
+            transform: "translateX(-10%)",
+          },
+          "100%": {
+            transform: "translateX(10%)",
+          },
         },
         "subtle-sparkle": {
-          "0%": { transform: "translateX(-5%)" },
-          "50%": { transform: "translateX(5%)" },
-          "100%": { transform: "translateX(-5%)" },
+          "0%": {
+            transform: "translateX(-5%)",
+          },
+          "50%": {
+            transform: "translateX(5%)",
+          },
+          "100%": {
+            transform: "translateX(-5%)",
+          },
         },
       },
       animation: {
