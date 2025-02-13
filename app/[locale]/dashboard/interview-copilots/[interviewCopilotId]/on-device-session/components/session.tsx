@@ -414,6 +414,7 @@ export function Session({
       interim_results: true,
       smart_format: true,
       filler_words: true,
+      utterance_end_ms: 1000,
     });
   };
 
@@ -458,16 +459,17 @@ export function Session({
           previousStartRef.current = start;
           return updated;
         });
-
-        // Handle paragraph breaks
-        if (speechFinal) {
-          const transcriptIndex = transcriptIndexRef.current;
-          transcriptIndexRef.current += 1;
-          processTranscript(latestTranscriptRef.current[transcriptIndex]);
-          setTranscript((prev) => [...prev, []]);
-          previousStartRef.current = null; // Reset start time for new paragraph
-        }
       }
+    };
+
+    const onUtteranceEnd = (data: LiveTranscriptionEvent) => {
+      console.log("utterance end");
+      // Handle paragraph breaks
+      const transcriptIndex = transcriptIndexRef.current;
+      transcriptIndexRef.current += 1;
+      processTranscript(latestTranscriptRef.current[transcriptIndex]);
+      setTranscript((prev) => [...prev, []]);
+      previousStartRef.current = null; // Reset start time for new paragraph
     };
 
     if (stream && connectionState === SOCKET_STATES.open) {
@@ -479,6 +481,10 @@ export function Session({
       mediaRecorder.addEventListener("dataavailable", onData);
       mediaRecorder.start(500);
       connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
+      connection.addListener(
+        LiveTranscriptionEvents.UtteranceEnd,
+        onUtteranceEnd
+      );
     }
 
     return () => {
