@@ -5,7 +5,7 @@ import { MonitorUp, LogOut, Loader2, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { answerQuestion, detectQuestions } from "../actions";
+import { detectQuestions } from "../actions";
 import { useDeepgram } from "@/context/DeepgramContext";
 import {
   LiveTranscriptionEvent,
@@ -66,7 +66,12 @@ export function Session({
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const { connection, connectToDeepgram, connectionState } = useDeepgram();
+  const {
+    connection,
+    connectToDeepgram,
+    connectionState,
+    disconnectFromDeepgram,
+  } = useDeepgram();
   const keepAliveInterval = useRef<NodeJS.Timeout | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -91,10 +96,12 @@ export function Session({
       const isAtBottom =
         element.scrollHeight - element.clientHeight <= element.scrollTop + 100;
       if (isAtBottom) {
-        element.scrollTo({
-          top: element.scrollHeight,
-          behavior: "smooth",
-        });
+        setTimeout(() => {
+          element.scrollTo({
+            top: element.scrollHeight,
+            behavior: "smooth",
+          });
+        }, 100);
       }
     };
 
@@ -424,14 +431,13 @@ export function Session({
     try {
       // Clean up media recorder
       if (mediaRecorderRef.current) {
-        console.log("stopping media recorder");
         mediaRecorderRef.current.stop();
         mediaRecorderRef.current = null;
       }
 
       // Close Deepgram transcription service
       if (connection) {
-        connection.disconnect();
+        disconnectFromDeepgram();
       }
 
       if (stream) {
@@ -507,23 +513,60 @@ export function Session({
 
   const processQuestion = async (question: string) => {
     setQuestionsWithAnswers((prev) => [...prev, { question, answer: "" }]);
-    const formData = new FormData();
-    formData.append("interviewCopilotId", interviewCopilotId);
-    formData.append("question", question);
-    formData.append("responseFormat", responseFormat);
-    const answerQuestionResponse = await answerQuestion(formData);
-    const {
-      data: answer,
-      inputTokenCount,
-      outputTokenCount,
-    } = answerQuestionResponse;
-    inputTokenCountRef.current += inputTokenCount;
-    outputTokenCountRef.current += outputTokenCount;
-    if (answer) {
-      setQuestionsWithAnswers((prev) =>
-        prev.map((q) => (q.question === question ? { ...q, answer } : q))
-      );
-    } else {
+
+    try {
+      const response = await fetch("/api/answer-question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          interviewCopilotId,
+          question,
+          responseFormat,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get answer");
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      let accumulatedResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        try {
+          const textChunk = new TextDecoder().decode(value);
+          const { inputTokens, outputTokens } = JSON.parse(textChunk) as {
+            inputTokens: number;
+            outputTokens: number;
+          };
+          inputTokenCountRef.current += inputTokens;
+          outputTokenCountRef.current += outputTokens;
+          continue;
+        } catch {
+          // Do nothing
+          if (done) {
+            break;
+          }
+          const textChunk = new TextDecoder().decode(value);
+          accumulatedResponse += textChunk;
+          setQuestionsWithAnswers((prev) =>
+            prev.map((q) =>
+              q.question === question
+                ? { ...q, answer: accumulatedResponse }
+                : q
+            )
+          );
+        }
+      }
+    } catch (error) {
+      logError("Error processing question", { error });
       setQuestionsWithAnswers((prev) =>
         prev.filter((q) => q.question !== question)
       );
@@ -813,7 +856,7 @@ export function Session({
                       className="p-4 bg-blue-50 dark:bg-gray-800
                         border border-blue-100 dark:border-gray-700 rounded-lg"
                     >
-                      <div className="font-medium text-xl text-gray-900 dark:text-white mb-2">
+                      <div className="font-medium text-lg text-gray-900 dark:text-white mb-2">
                         {q.question}
                       </div>
                       {q.answer ? (
