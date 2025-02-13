@@ -542,7 +542,7 @@
         "generic": "Sorry, something went wrong. Please try again."
       },
       "selectMeeting": {
-        "title": "Select your interview meeting room",
+        "title": "Select Interview Meeting Room",
         "button": "Select",
         "instruction": "Once the interview starts, the interviewer's transcript will be displayed here.",
         "connecting": "Connecting..."
