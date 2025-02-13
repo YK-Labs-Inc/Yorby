@@ -116,11 +116,16 @@ export function Session({
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">
-              Step 1: Choose Your Meeting Platform
+              {t("onboarding.steps.1.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Select your meeting platform to see specific instructions on how
-              to open it in Chrome.
+              {t("onboarding.steps.1.description")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("onboarding.steps.1.description2")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("onboarding.steps.1.description3")}
             </p>
             <div className="grid gap-4 pt-4">
               <RadioGroup
@@ -131,15 +136,21 @@ export function Session({
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="zoom" id="zoom" />
-                  <Label htmlFor="zoom">Zoom</Label>
+                  <Label htmlFor="zoom">
+                    {t("onboarding.steps.1.platforms.zoom.name")}
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="teams" id="teams" />
-                  <Label htmlFor="teams">Microsoft Teams</Label>
+                  <Label htmlFor="teams">
+                    {t("onboarding.steps.1.platforms.teams.name")}
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="meet" id="meet" />
-                  <Label htmlFor="meet">Google Meet</Label>
+                  <Label htmlFor="meet">
+                    {t("onboarding.steps.1.platforms.meet.name")}
+                  </Label>
                 </div>
               </RadioGroup>
 
@@ -149,17 +160,20 @@ export function Session({
                     {selectedPlatform === "zoom" && (
                       <>
                         <p className="text-sm">
-                          Open your Zoom meeting in Chrome instead of the
-                          desktop app:
+                          {t("onboarding.steps.1.platforms.zoom.instruction")}
                         </p>
                         <img
                           src="/assets/zoom-demo.png"
-                          alt="How to open Zoom in Chrome"
+                          alt={t(
+                            "onboarding.steps.1.platforms.zoom.instruction"
+                          )}
                           className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
                           onClick={() =>
                             setZoomImage({
                               src: "/assets/zoom-demo.png",
-                              alt: "How to open Zoom in Chrome",
+                              alt: t(
+                                "onboarding.steps.1.platforms.zoom.instruction"
+                              ),
                             })
                           }
                         />
@@ -168,17 +182,20 @@ export function Session({
                     {selectedPlatform === "teams" && (
                       <>
                         <p className="text-sm">
-                          Open your Teams meeting in Chrome instead of the
-                          desktop app:
+                          {t("onboarding.steps.1.platforms.teams.instruction")}
                         </p>
                         <img
                           src="/assets/teams-demo.png"
-                          alt="How to open Teams in Chrome"
+                          alt={t(
+                            "onboarding.steps.1.platforms.teams.instruction"
+                          )}
                           className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
                           onClick={() =>
                             setZoomImage({
                               src: "/assets/teams-demo.png",
-                              alt: "How to open Teams in Chrome",
+                              alt: t(
+                                "onboarding.steps.1.platforms.teams.instruction"
+                              ),
                             })
                           }
                         />
@@ -187,16 +204,20 @@ export function Session({
                     {selectedPlatform === "meet" && (
                       <>
                         <p className="text-sm">
-                          Google Meet opens in Chrome by default:
+                          {t("onboarding.steps.1.platforms.meet.instruction")}
                         </p>
                         <img
                           src="/assets/meet-demo.png"
-                          alt="Google Meet in Chrome"
+                          alt={t(
+                            "onboarding.steps.1.platforms.meet.instruction"
+                          )}
                           className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
                           onClick={() =>
                             setZoomImage({
                               src: "/assets/meet-demo.png",
-                              alt: "Google Meet in Chrome",
+                              alt: t(
+                                "onboarding.steps.1.platforms.meet.instruction"
+                              ),
                             })
                           }
                         />
@@ -212,19 +233,16 @@ export function Session({
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">
-              Step 2: Share Your Meeting Tab
+              {t("onboarding.steps.2.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Click the "Select Interview Meeting Room" button and choose the
-              Chrome tab with your meeting.
+              {t("onboarding.steps.2.description")}
             </p>
             <p className="text-sm text-muted-foreground">
-              You MUST share the <span className="font-bold">chrome tab</span>{" "}
-              with the <span className="font-bold">"Also share tab audio"</span>{" "}
-              option enabled.{" "}
+              {t("onboarding.steps.2.shareTabInstructions.mustShare")}
             </p>
             <p className="text-sm text-muted-foreground">
-              DO NOT share "window" or "entire screen" as this will not work.
+              {t("onboarding.steps.2.shareTabInstructions.doNotShare")}
             </p>
             <div className="rounded-lg border p-4">
               <video
@@ -242,21 +260,20 @@ export function Session({
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">
-              Step 3: Start the Interview Copilot
+              {t("onboarding.steps.3.title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              After sharing your meeting tab, click the "Start Interview
-              Copilot" button to begin.
+              {t("onboarding.steps.3.description")}
             </p>
             <div className="rounded-lg border p-4">
               <img
                 src="/assets/start-interview-copilot-instructions.png"
-                alt="Start Interview Copilot button"
+                alt={t("onboarding.steps.3.title")}
                 className="rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
                 onClick={() =>
                   setZoomImage({
                     src: "/assets/start-interview-copilot-instructions.png",
-                    alt: "Start Interview Copilot button",
+                    alt: t("onboarding.steps.3.title"),
                   })
                 }
               />
@@ -793,7 +810,7 @@ export function Session({
               className={transcriptAutoScroll ? "bg-blue-50 text-blue-600" : ""}
               onClick={() => setTranscriptAutoScroll(!transcriptAutoScroll)}
             >
-              {transcriptAutoScroll ? "On" : "Off"}
+              {transcriptAutoScroll ? t("controls.on") : t("controls.off")}
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -806,7 +823,7 @@ export function Session({
               className={copilotAutoScroll ? "bg-blue-50 text-blue-600" : ""}
               onClick={() => setCopilotAutoScroll(!copilotAutoScroll)}
             >
-              {copilotAutoScroll ? "On" : "Off"}
+              {copilotAutoScroll ? t("controls.on") : t("controls.off")}
             </Button>
           </div>
           <TooltipProvider>
@@ -823,11 +840,11 @@ export function Session({
                     </Button>
                   </DialogTrigger>
                 </TooltipTrigger>
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Interview Copilot Setup Guide</DialogTitle>
+                    <DialogTitle>{t("onboarding.title")}</DialogTitle>
                     <DialogDescription>
-                      Follow these steps to set up your interview session
+                      {t("onboarding.description")}
                     </DialogDescription>
                   </DialogHeader>
 
@@ -849,7 +866,7 @@ export function Session({
                       variant="ghost"
                       onClick={() => setShowOnboarding(false)}
                     >
-                      Skip Setup Guide
+                      {t("onboarding.skipButton")}
                     </Button>
                     <div className="flex gap-2">
                       {currentStep > 1 && (
@@ -857,7 +874,7 @@ export function Session({
                           variant="outline"
                           onClick={() => setCurrentStep((prev) => prev - 1)}
                         >
-                          Previous
+                          {t("onboarding.previousButton")}
                         </Button>
                       )}
                       {currentStep < totalSteps ? (
@@ -865,18 +882,18 @@ export function Session({
                           onClick={() => setCurrentStep((prev) => prev + 1)}
                           disabled={currentStep === 1 && !selectedPlatform}
                         >
-                          Next
+                          {t("onboarding.nextButton")}
                         </Button>
                       ) : (
                         <Button onClick={() => setShowOnboarding(false)}>
-                          Get Started
+                          {t("onboarding.getStartedButton")}
                         </Button>
                       )}
                     </div>
                   </DialogFooter>
                 </DialogContent>
                 <TooltipContent>
-                  <p>View setup instructions</p>
+                  <p>{t("onboarding.helpButton")}</p>
                 </TooltipContent>
               </Dialog>
             </Tooltip>
