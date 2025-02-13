@@ -462,8 +462,7 @@ export function Session({
       }
     };
 
-    const onUtteranceEnd = (data: LiveTranscriptionEvent) => {
-      console.log("utterance end");
+    const onUtteranceEnd = () => {
       // Handle paragraph breaks
       const transcriptIndex = transcriptIndexRef.current;
       transcriptIndexRef.current += 1;
