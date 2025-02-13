@@ -37,10 +37,9 @@ export const InterviewCopilotCreationForm = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    setFiles((prev) => [...prev, ...Array.from(e.target.files || [])]);
-    // Clear the input value so the same file can be selected again if needed
-    e.target.value = "";
+    const newFiles = e.target.files;
+    if (!newFiles) return;
+    setFiles((prev) => [...prev, ...Array.from(newFiles)]);
   };
 
   const handleFileDelete = (index: number) => {

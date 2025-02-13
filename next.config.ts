@@ -70,6 +70,11 @@ let nextConfig = {
       },
     ];
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
 };
 if (isProduction) {
   nextConfig = withSentryConfig(nextConfig, {
