@@ -560,7 +560,9 @@
         "settings": "Settings",
         "theme": "Toggle theme",
         "transcriptAutoScroll": "Transcript Auto Scroll",
-        "copilotAutoScroll": "Copilot Auto Scroll"
+        "copilotAutoScroll": "Copilot Auto Scroll",
+        "on": "On",
+        "off": "Off"
       },
       "copilot": {
         "title": "Interview Copilot",
@@ -576,7 +578,50 @@
       "endInterviewConfirmation": "Are you sure you want to end this interview? This will save and process your recording.",
       "uploading": "Uploading recording",
       "confirm": "Confirm",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "onboarding": {
+        "title": "Interview Copilot Setup Guide",
+        "description": "Follow these steps to set up your interview session",
+        "helpButton": "View setup instructions",
+        "skipButton": "Skip Setup Guide",
+        "nextButton": "Next",
+        "previousButton": "Previous",
+        "getStartedButton": "Get Started",
+        "steps": {
+          "1": {
+            "title": "Open Your Interview in Chrome",
+            "description": "To use the Interview Copilot, you must open up your interview in a Google Chrome tab.",
+            "description2": "The Interview Copilot will not work with other browsers or if you open the interview in a desktop application — it MUST be in a Chrome tab.",
+            "description3": "Select your meeting platform to see specific instructions on how to open it in Chrome.",
+            "platforms": {
+              "zoom": {
+                "name": "Zoom",
+                "instruction": "Open your Zoom meeting in Chrome instead of the desktop app:"
+              },
+              "teams": {
+                "name": "Microsoft Teams",
+                "instruction": "Open your Teams meeting in Chrome instead of the desktop app:"
+              },
+              "meet": {
+                "name": "Google Meet",
+                "instruction": "Google Meet opens in Chrome by default:"
+              }
+            }
+          },
+          "2": {
+            "title": "Share Your Meeting Tab",
+            "description": "Click the \"Select Interview Meeting Room\" button and choose the Chrome tab with your meeting.",
+            "shareTabInstructions": {
+              "mustShare": "You MUST share the Chrome tab with the \"Also share tab audio\" option enabled.",
+              "doNotShare": "DO NOT share \"window\" or \"entire screen\" or else the Interview Copilot will not work."
+            }
+          },
+          "3": {
+            "title": "Start the Interview Copilot",
+            "description": "After sharing your interview tab, click the \"Start Interview Copilot\" button to begin."
+          }
+        }
+      }
     },
     "jobCreation": {
       "fileUpload": {
