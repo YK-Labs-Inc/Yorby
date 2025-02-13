@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MonitorUp, LogOut, Loader2, Settings2 } from "lucide-react";
+import {
+  MonitorUp,
+  LogOut,
+  Loader2,
+  Settings2,
+  HelpCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -34,6 +40,12 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function Session({
   interviewCopilotId,
@@ -84,6 +96,198 @@ export function Session({
     "verbatim"
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Onboarding modal states
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPlatform, setSelectedPlatform] = useState<
+    "zoom" | "teams" | "meet" | null
+  >(null);
+  const [zoomImage, setZoomImage] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
+
+  const totalSteps = 3;
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">
+              Step 1: Choose Your Meeting Platform
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Select your meeting platform to see specific instructions on how
+              to open it in Chrome.
+            </p>
+            <div className="grid gap-4 pt-4">
+              <RadioGroup
+                value={selectedPlatform || ""}
+                onValueChange={(value) =>
+                  setSelectedPlatform(value as "zoom" | "teams" | "meet")
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="zoom" id="zoom" />
+                  <Label htmlFor="zoom">Zoom</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="teams" id="teams" />
+                  <Label htmlFor="teams">Microsoft Teams</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="meet" id="meet" />
+                  <Label htmlFor="meet">Google Meet</Label>
+                </div>
+              </RadioGroup>
+
+              {selectedPlatform && (
+                <div className="mt-4 rounded-lg border p-4">
+                  <div className="space-y-4">
+                    {selectedPlatform === "zoom" && (
+                      <>
+                        <p className="text-sm">
+                          Open your Zoom meeting in Chrome instead of the
+                          desktop app:
+                        </p>
+                        <img
+                          src="/assets/zoom-demo.png"
+                          alt="How to open Zoom in Chrome"
+                          className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
+                          onClick={() =>
+                            setZoomImage({
+                              src: "/assets/zoom-demo.png",
+                              alt: "How to open Zoom in Chrome",
+                            })
+                          }
+                        />
+                      </>
+                    )}
+                    {selectedPlatform === "teams" && (
+                      <>
+                        <p className="text-sm">
+                          Open your Teams meeting in Chrome instead of the
+                          desktop app:
+                        </p>
+                        <img
+                          src="/assets/teams-demo.png"
+                          alt="How to open Teams in Chrome"
+                          className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
+                          onClick={() =>
+                            setZoomImage({
+                              src: "/assets/teams-demo.png",
+                              alt: "How to open Teams in Chrome",
+                            })
+                          }
+                        />
+                      </>
+                    )}
+                    {selectedPlatform === "meet" && (
+                      <>
+                        <p className="text-sm">
+                          Google Meet opens in Chrome by default:
+                        </p>
+                        <img
+                          src="/assets/meet-demo.png"
+                          alt="Google Meet in Chrome"
+                          className="rounded-lg border cursor-zoom-in hover:opacity-90 transition-opacity"
+                          onClick={() =>
+                            setZoomImage({
+                              src: "/assets/meet-demo.png",
+                              alt: "Google Meet in Chrome",
+                            })
+                          }
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">
+              Step 2: Share Your Meeting Tab
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Click the "Select Interview Meeting Room" button and choose the
+              Chrome tab with your meeting.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              You MUST share the <span className="font-bold">chrome tab</span>{" "}
+              with the <span className="font-bold">"Also share tab audio"</span>{" "}
+              option enabled.{" "}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              DO NOT share "window" or "entire screen" as this will not work.
+            </p>
+            <div className="rounded-lg border p-4">
+              <video
+                src="/assets/share-chrome-tab-demo.mp4"
+                controls
+                className="w-full rounded-lg"
+                poster="/assets/start-interview-copilot-instructions.png"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">
+              Step 3: Start the Interview Copilot
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              After sharing your meeting tab, click the "Start Interview
+              Copilot" button to begin.
+            </p>
+            <div className="rounded-lg border p-4">
+              <img
+                src="/assets/start-interview-copilot-instructions.png"
+                alt="Start Interview Copilot button"
+                className="rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                onClick={() =>
+                  setZoomImage({
+                    src: "/assets/start-interview-copilot-instructions.png",
+                    alt: "Start Interview Copilot button",
+                  })
+                }
+              />
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const ImageZoomModal = () => {
+    if (!zoomImage) return null;
+
+    return (
+      <Dialog open={!!zoomImage} onOpenChange={() => setZoomImage(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle>{zoomImage.alt}</DialogTitle>
+          </DialogHeader>
+          <div className="relative w-full h-full p-6">
+            <img
+              src={zoomImage.src}
+              alt={zoomImage.alt}
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   // Auto-scroll effect for both panels
   useEffect(() => {
@@ -575,6 +779,7 @@ export function Session({
 
   return (
     <div className="flex h-screen flex-col">
+      <ImageZoomModal />
       {/* Header */}
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-4">
@@ -604,6 +809,78 @@ export function Session({
               {copilotAutoScroll ? "On" : "Off"}
             </Button>
           </div>
+          <TooltipProvider>
+            <Tooltip>
+              <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+                <TooltipTrigger asChild>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentStep(1)}
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                </TooltipTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Interview Copilot Setup Guide</DialogTitle>
+                    <DialogDescription>
+                      Follow these steps to set up your interview session
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 rounded">
+                      <div
+                        className="h-full bg-blue-600 rounded transition-all duration-300"
+                        style={{
+                          width: `${(currentStep / totalSteps) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6">{renderStepContent()}</div>
+
+                  <DialogFooter className="flex justify-between items-center mt-6">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowOnboarding(false)}
+                    >
+                      Skip Setup Guide
+                    </Button>
+                    <div className="flex gap-2">
+                      {currentStep > 1 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setCurrentStep((prev) => prev - 1)}
+                        >
+                          Previous
+                        </Button>
+                      )}
+                      {currentStep < totalSteps ? (
+                        <Button
+                          onClick={() => setCurrentStep((prev) => prev + 1)}
+                          disabled={currentStep === 1 && !selectedPlatform}
+                        >
+                          Next
+                        </Button>
+                      ) : (
+                        <Button onClick={() => setShowOnboarding(false)}>
+                          Get Started
+                        </Button>
+                      )}
+                    </div>
+                  </DialogFooter>
+                </DialogContent>
+                <TooltipContent>
+                  <p>View setup instructions</p>
+                </TooltipContent>
+              </Dialog>
+            </Tooltip>
+          </TooltipProvider>
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="icon">
