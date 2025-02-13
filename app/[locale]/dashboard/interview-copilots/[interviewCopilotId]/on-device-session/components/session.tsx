@@ -565,10 +565,6 @@ export function Session({
           );
         }
       }
-
-      // Update token counts
-      // inputTokenCountRef.current += totalInputTokens;
-      // outputTokenCountRef.current += totalOutputTokens;
     } catch (error) {
       logError("Error processing question", { error });
       setQuestionsWithAnswers((prev) =>
