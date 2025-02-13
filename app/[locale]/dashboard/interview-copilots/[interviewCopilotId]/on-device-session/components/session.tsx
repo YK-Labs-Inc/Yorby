@@ -66,7 +66,12 @@ export function Session({
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const { connection, connectToDeepgram, connectionState } = useDeepgram();
+  const {
+    connection,
+    connectToDeepgram,
+    connectionState,
+    disconnectFromDeepgram,
+  } = useDeepgram();
   const keepAliveInterval = useRef<NodeJS.Timeout | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -91,10 +96,12 @@ export function Session({
       const isAtBottom =
         element.scrollHeight - element.clientHeight <= element.scrollTop + 100;
       if (isAtBottom) {
-        element.scrollTo({
-          top: element.scrollHeight,
-          behavior: "smooth",
-        });
+        setTimeout(() => {
+          element.scrollTo({
+            top: element.scrollHeight,
+            behavior: "smooth",
+          });
+        }, 100);
       }
     };
 
@@ -424,14 +431,13 @@ export function Session({
     try {
       // Clean up media recorder
       if (mediaRecorderRef.current) {
-        console.log("stopping media recorder");
         mediaRecorderRef.current.stop();
         mediaRecorderRef.current = null;
       }
 
       // Close Deepgram transcription service
       if (connection) {
-        connection.disconnect();
+        disconnectFromDeepgram();
       }
 
       if (stream) {
@@ -540,10 +546,6 @@ export function Session({
             inputTokens: number;
             outputTokens: number;
           };
-
-          console.log("inputTokens", inputTokens);
-          console.log("outputTokens", outputTokens);
-
           inputTokenCountRef.current += inputTokens;
           outputTokenCountRef.current += outputTokens;
           continue;

@@ -74,7 +74,7 @@ const DeepgramContextProvider: FunctionComponent<
 
   const disconnectFromDeepgram = async () => {
     if (connection) {
-      connection.finish();
+      connection.disconnect();
       setConnection(null);
     }
   };
