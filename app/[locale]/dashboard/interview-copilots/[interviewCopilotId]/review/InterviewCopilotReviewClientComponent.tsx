@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface InterviewCopilotReviewClientComponentProps {
   questionsAndAnswers: Tables<"interview_copilot_questions_and_answers">[];
@@ -136,7 +138,9 @@ export default function InterviewCopilotReviewClientComponent({
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Your Answer</h3>
-                      <p className="text-muted-foreground">{qa.answer}</p>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {qa.answer}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 </div>

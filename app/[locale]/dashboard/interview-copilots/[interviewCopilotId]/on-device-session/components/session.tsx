@@ -46,6 +46,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function Session({
   interviewCopilotId,
@@ -414,6 +416,7 @@ export function Session({
       interim_results: true,
       smart_format: true,
       filler_words: true,
+      utterance_end_ms: 1000,
     });
   };
 
@@ -458,16 +461,16 @@ export function Session({
           previousStartRef.current = start;
           return updated;
         });
-
-        // Handle paragraph breaks
-        if (speechFinal) {
-          const transcriptIndex = transcriptIndexRef.current;
-          transcriptIndexRef.current += 1;
-          processTranscript(latestTranscriptRef.current[transcriptIndex]);
-          setTranscript((prev) => [...prev, []]);
-          previousStartRef.current = null; // Reset start time for new paragraph
-        }
       }
+    };
+
+    const onUtteranceEnd = () => {
+      // Handle paragraph breaks
+      const transcriptIndex = transcriptIndexRef.current;
+      transcriptIndexRef.current += 1;
+      processTranscript(latestTranscriptRef.current[transcriptIndex]);
+      setTranscript((prev) => [...prev, []]);
+      previousStartRef.current = null; // Reset start time for new paragraph
     };
 
     if (stream && connectionState === SOCKET_STATES.open) {
@@ -479,6 +482,10 @@ export function Session({
       mediaRecorder.addEventListener("dataavailable", onData);
       mediaRecorder.start(500);
       connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
+      connection.addListener(
+        LiveTranscriptionEvents.UtteranceEnd,
+        onUtteranceEnd
+      );
     }
 
     return () => {
@@ -609,8 +616,6 @@ export function Session({
       const { error: updateError } = await supabase
         .from("interview_copilots")
         .update({
-          input_tokens_count: inputTokenCountRef.current,
-          output_tokens_count: outputTokenCountRef.current,
           title: `${formattedDate}`,
           status: "complete",
         })
@@ -721,14 +726,8 @@ export function Session({
     latestQuestionsWithAnswersRef.current.forEach((q) => {
       data.append("existingQuestions", q.question);
     });
-
-    const {
-      data: questions,
-      inputTokenCount,
-      outputTokenCount,
-    } = await detectQuestions(data);
-    inputTokenCountRef.current += inputTokenCount;
-    outputTokenCountRef.current += outputTokenCount;
+    data.append("interviewCopilotId", interviewCopilotId);
+    const { data: questions } = await detectQuestions(data);
     return questions;
   };
 
@@ -761,30 +760,17 @@ export function Session({
 
       while (true) {
         const { done, value } = await reader.read();
-        try {
-          const textChunk = new TextDecoder().decode(value);
-          const { inputTokens, outputTokens } = JSON.parse(textChunk) as {
-            inputTokens: number;
-            outputTokens: number;
-          };
-          inputTokenCountRef.current += inputTokens;
-          outputTokenCountRef.current += outputTokens;
-          continue;
-        } catch {
-          // Do nothing
-          if (done) {
-            break;
-          }
-          const textChunk = new TextDecoder().decode(value);
-          accumulatedResponse += textChunk;
-          setQuestionsWithAnswers((prev) =>
-            prev.map((q) =>
-              q.question === question
-                ? { ...q, answer: accumulatedResponse }
-                : q
-            )
-          );
+        // Do nothing
+        if (done) {
+          break;
         }
+        const textChunk = new TextDecoder().decode(value);
+        accumulatedResponse += textChunk;
+        setQuestionsWithAnswers((prev) =>
+          prev.map((q) =>
+            q.question === question ? { ...q, answer: accumulatedResponse } : q
+          )
+        );
       }
     } catch (error) {
       logError("Error processing question", { error });
@@ -1154,8 +1140,10 @@ export function Session({
                         {q.question}
                       </div>
                       {q.answer ? (
-                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                          {q.answer}
+                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {q.answer}
+                          </ReactMarkdown>
                         </div>
                       ) : (
                         <Loader2 className="w-8 h-8 text-primary animate-spin" />

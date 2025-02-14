@@ -132,6 +132,7 @@ const config = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
     function ({ addUtilities }: { addUtilities: Function }) {
       addUtilities({
         ".scrollbar-hide": {
