@@ -7,6 +7,7 @@ import {
   Loader2,
   Settings2,
   HelpCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -111,6 +112,24 @@ export function Session({
   } | null>(null);
 
   const totalSteps = 3;
+
+  const SCROLL_THRESHOLD_PX = 200;
+  const [showTranscriptScrollButton, setShowTranscriptScrollButton] =
+    useState(false);
+  const [showCopilotScrollButton, setShowCopilotScrollButton] = useState(false);
+
+  // Scroll to bottom button component
+  const ScrollToBottomButton = ({ onClick }: { onClick: () => void }) => (
+    <div className="sticky bottom-0 left-0 right-0 pb-4 flex justify-center pointer-events-none bg-gradient-to-t from-white/80 dark:from-gray-900/80 to-transparent pt-6">
+      <Button
+        size="icon"
+        className="rounded-full shadow-md pointer-events-auto"
+        onClick={onClick}
+      >
+        <ChevronDown className="h-4 w-4" />
+      </Button>
+    </div>
+  );
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -308,28 +327,96 @@ export function Session({
     );
   };
 
-  // Auto-scroll effect for both panels
-  useEffect(() => {
-    const scrollToBottom = (
-      element: HTMLDivElement | null,
-      shouldScroll: boolean
-    ) => {
-      if (!element || !shouldScroll) return;
+  // Handle scroll events for both panels
+  const handleScroll = (
+    element: HTMLDivElement,
+    setShowButton: (show: boolean) => void,
+    setShouldAutoScroll: (should: boolean) => void
+  ) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const distanceFromBottom = scrollHeight - clientHeight - scrollTop;
 
-      const isAtBottom =
-        element.scrollHeight - element.clientHeight <= element.scrollTop + 100;
-      if (isAtBottom) {
-        setTimeout(() => {
-          element.scrollTo({
-            top: element.scrollHeight,
-            behavior: "smooth",
-          });
-        }, 100);
-      }
+    if (distanceFromBottom <= SCROLL_THRESHOLD_PX) {
+      setShowButton(false);
+      setShouldAutoScroll(true);
+    } else {
+      setShowButton(true);
+      setShouldAutoScroll(false);
+    }
+  };
+
+  // Scroll to bottom handler
+  const scrollToBottom = (
+    element: HTMLDivElement | null,
+    setShouldAutoScroll: (should: boolean) => void,
+    setShowButton: (show: boolean) => void
+  ) => {
+    if (!element) return;
+
+    element.scrollTo({
+      top: element.scrollHeight,
+      behavior: "smooth",
+    });
+    setShouldAutoScroll(true);
+    setShowButton(false);
+  };
+
+  // Remove the old auto-scroll effect
+  useEffect(() => {
+    const handleAutoScroll = (
+      element: HTMLDivElement | null,
+      shouldAutoScroll: boolean
+    ) => {
+      if (!element || !shouldAutoScroll) return;
+
+      element.scrollTo({
+        top: element.scrollHeight,
+        behavior: "smooth",
+      });
     };
 
-    scrollToBottom(transcriptRef.current, transcriptAutoScroll);
-    scrollToBottom(copilotRef.current, copilotAutoScroll);
+    // Set up scroll event listeners
+    const transcriptElement = transcriptRef.current;
+    const copilotElement = copilotRef.current;
+
+    const transcriptScrollHandler = () =>
+      handleScroll(
+        transcriptElement!,
+        setShowTranscriptScrollButton,
+        setTranscriptAutoScroll
+      );
+
+    const copilotScrollHandler = () =>
+      handleScroll(
+        copilotElement!,
+        setShowCopilotScrollButton,
+        setCopilotAutoScroll
+      );
+
+    if (transcriptElement) {
+      transcriptElement.addEventListener("scroll", transcriptScrollHandler);
+    }
+
+    if (copilotElement) {
+      copilotElement.addEventListener("scroll", copilotScrollHandler);
+    }
+
+    // Handle auto-scrolling for both panels
+    handleAutoScroll(transcriptRef.current, transcriptAutoScroll);
+    handleAutoScroll(copilotRef.current, copilotAutoScroll);
+
+    // Cleanup
+    return () => {
+      if (transcriptElement) {
+        transcriptElement.removeEventListener(
+          "scroll",
+          transcriptScrollHandler
+        );
+      }
+      if (copilotElement) {
+        copilotElement.removeEventListener("scroll", copilotScrollHandler);
+      }
+    };
   }, [
     transcript,
     questionsWithAnswers,
@@ -783,7 +870,6 @@ export function Session({
   return (
     <div className="flex h-screen flex-col">
       <ImageZoomModal />
-      {/* Header */}
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -1032,11 +1118,8 @@ export function Session({
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex flex-1 h-[calc(100vh-64px)]">
-        {/* Left Panel - Meeting Display & Transcription */}
         <div className="w-1/2 flex flex-col">
-          {/* Video Area */}
           <div className="h-[50vh] bg-black relative flex items-center justify-center">
             <div
               className={`absolute inset-0 flex items-center justify-center ${
@@ -1071,7 +1154,6 @@ export function Session({
             />
           </div>
 
-          {/* Transcription Area */}
           <div className="flex-1 border-t flex flex-col min-h-0">
             <div className="p-4 flex flex-col h-full">
               <div className="flex items-center justify-between mb-4">
@@ -1084,7 +1166,7 @@ export function Session({
               </div>
               <div
                 ref={transcriptRef}
-                className="flex-1 overflow-y-auto min-h-0 px-1"
+                className="flex-1 overflow-y-auto min-h-0 px-1 space-y-3"
               >
                 <div className="text-gray-600 dark:text-gray-300 text-sm space-y-3">
                   {isTranscribing ? (
@@ -1115,19 +1197,32 @@ export function Session({
                     </div>
                   )}
                 </div>
+                {showTranscriptScrollButton && (
+                  <ScrollToBottomButton
+                    onClick={() =>
+                      scrollToBottom(
+                        transcriptRef.current,
+                        setTranscriptAutoScroll,
+                        setShowTranscriptScrollButton
+                      )
+                    }
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Panel - Copilot */}
         <div className="w-1/2 border-l">
           <div className="h-full flex flex-col p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-medium">{t("copilot.title")}</h2>
               {isTranscribing && <Badge>{t("copilot.status.listening")}</Badge>}
             </div>
-            <div ref={copilotRef} className="flex-1 overflow-y-auto px-1">
+            <div
+              ref={copilotRef}
+              className="flex-1 overflow-y-auto px-1 space-y-4"
+            >
               {isTranscribing ? (
                 <div className="space-y-4">
                   {questionsWithAnswers.map((q, index) => (
@@ -1155,6 +1250,17 @@ export function Session({
                 <div className="text-center py-4 text-gray-600 dark:text-gray-300">
                   {t("copilot.waitingMessage")}
                 </div>
+              )}
+              {showCopilotScrollButton && (
+                <ScrollToBottomButton
+                  onClick={() =>
+                    scrollToBottom(
+                      copilotRef.current,
+                      setCopilotAutoScroll,
+                      setShowCopilotScrollButton
+                    )
+                  }
+                />
               )}
             </div>
           </div>
