@@ -47,10 +47,13 @@
     "raf": "^3.4.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-markdown": "^9.0.3",
+    "remark-gfm": "^4.0.1",
     "stripe": "^17.5.0",
     "tus-js-client": "^4.3.1"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "19.0.2",

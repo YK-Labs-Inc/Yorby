@@ -57,14 +57,21 @@ export async function POST(req: NextRequest) {
             promptTokenCount: number;
             candidatesTokenCount: number;
           };
-          controller.enqueue(
-            new TextEncoder().encode(
-              JSON.stringify({
-                inputTokens: usageMetadata?.promptTokenCount,
-                outputTokens: usageMetadata?.candidatesTokenCount,
-              })
-            )
+
+          // Increment token counts in database
+          const { error: updateError } = await incrementTokenCounts(
+            interviewCopilotId,
+            usageMetadata?.promptTokenCount || 0,
+            usageMetadata?.candidatesTokenCount || 0
           );
+
+          if (updateError) {
+            logger.error("Error incrementing token counts", {
+              error: updateError,
+            });
+            await logger.flush();
+          }
+
           controller.close();
         } catch (error) {
           controller.error(error);
@@ -134,11 +141,12 @@ Answer the question by following the steps below.
   - Using all of your information, answer the question in a way that fits the criteria you created in the first step
 ${
   responseFormat === "bullet"
-    ? `- Format your response as a concise list of bullet point.
+    ? `- Format your response as a concise list of bullet points.
     - Each bullet point must be very concise. Do not be overly verbose. Your answer should be 
     short and concise  for users to quickly read and digest the information and then create their
     own answer from your bullet points..
     - Do not be overly verbose.
+
     `
     : `- Provide a natural, conversational response as if you're speaking directly to the interviewer.
     - Use complete sentences and maintain a professional yet personable tone.
@@ -153,7 +161,7 @@ ${
   - Return your answer to the interview question and nothing else. You absolutely cannot return anything
   that is not part of the answer to the question. Do not return your criteria, your thoughts, or anything else.
   Just return the answer to the question.
-
+  - Return your answer in markdown format for all styling.
 ${
   question
     ? `# Question
@@ -279,4 +287,35 @@ const updateFileInDatabase = async ({
   if (error) {
     throw error;
   }
+};
+
+const incrementTokenCounts = async (
+  interviewCopilotId: string,
+  inputTokens: number,
+  outputTokens: number
+) => {
+  const supabase = await createSupabaseServerClient();
+
+  // First get current values
+  const { data: currentData, error: fetchError } = await supabase
+    .from("interview_copilots")
+    .select("input_tokens_count, output_tokens_count")
+    .eq("id", interviewCopilotId)
+    .single();
+
+  if (fetchError) {
+    return { error: fetchError };
+  }
+
+  // Then update with incremented values
+  const { error: updateError } = await supabase
+    .from("interview_copilots")
+    .update({
+      input_tokens_count: (currentData.input_tokens_count || 0) + inputTokens,
+      output_tokens_count:
+        (currentData.output_tokens_count || 0) + outputTokens,
+    })
+    .eq("id", interviewCopilotId);
+
+  return { error: updateError };
 };

@@ -1,15 +1,8 @@
 "use server";
 
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
-import { Tables } from "@/utils/supabase/database.types";
-import {
-  createSupabaseServerClient,
-  downloadFile,
-} from "@/utils/supabase/server";
-import { UploadResponse } from "@/utils/types";
 import { SchemaType, GoogleGenerativeAI } from "@google/generative-ai";
-import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 const apiKey = process.env.GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -34,10 +27,12 @@ const questionDetectionModel = genAI.getGenerativeModel({
 export const detectQuestions = async (data: FormData) => {
   const existingQuestions = data.getAll("existingQuestions") as string[];
   const transcript = data.get("transcript") as string;
+  const interviewCopilotId = data.get("interviewCopilotId") as string;
   let logger = new Logger().with({
     function: "detectQuestions",
     transcript,
     existingQuestions,
+    interviewCopilotId,
   });
   try {
     const result = await questionDetectionModel.generateContent([
@@ -53,28 +48,69 @@ export const detectQuestions = async (data: FormData) => {
     const totalOutputTokens =
       result.response.usageMetadata?.candidatesTokenCount ?? 0;
 
+    // Increment token counts in database
+    const { error: updateError } = await incrementTokenCounts(
+      interviewCopilotId,
+      totalInputTokens,
+      totalOutputTokens
+    );
+
+    if (updateError) {
+      logger.error("Error incrementing token counts", { error: updateError });
+      await logger.flush();
+    }
+
     logger = logger.with({
-      inputTokenCount: totalInputTokens,
-      outputTokenCount: totalOutputTokens,
       questions,
     });
 
-    logger.info("Questions detected");
+    if (questions.length > 0) {
+      logger.info("Questions detected");
+    } else {
+      logger.info("No questions detected");
+    }
     await logger.flush();
     return {
       data: questions,
-      inputTokenCount: totalInputTokens,
-      outputTokenCount: totalOutputTokens,
     };
   } catch (error) {
     logger.error("Error detecting questions", { error });
     await logger.flush();
     return {
       data: [],
-      inputTokenCount: 0,
-      outputTokenCount: 0,
     };
   }
+};
+
+const incrementTokenCounts = async (
+  interviewCopilotId: string,
+  inputTokens: number,
+  outputTokens: number
+) => {
+  const supabase = await createSupabaseServerClient();
+
+  // First get current values
+  const { data: currentData, error: fetchError } = await supabase
+    .from("interview_copilots")
+    .select("input_tokens_count, output_tokens_count")
+    .eq("id", interviewCopilotId)
+    .single();
+
+  if (fetchError) {
+    return { error: fetchError };
+  }
+
+  // Then update with incremented values
+  const { error: updateError } = await supabase
+    .from("interview_copilots")
+    .update({
+      input_tokens_count: (currentData.input_tokens_count || 0) + inputTokens,
+      output_tokens_count:
+        (currentData.output_tokens_count || 0) + outputTokens,
+    })
+    .eq("id", interviewCopilotId);
+
+  return { error: updateError };
 };
 
 const questionDetectionPrompt = (
@@ -83,16 +119,10 @@ const questionDetectionPrompt = (
 ) => `
 You are going to be provided a transcript from an interviewer for a job interview and a list of questions that have already been asked by the interviewer.
 
-With this information, do the following:
+Identify any interview questions that have been asked by the interviewer in the transcript that have not been asked yet by the interviewer in the list of existing questions that you have been provided.
 
-## Steps
-1. **Detect questions in the transcript**:
-   - Read through the transcript and detect interview questions that have been asked by the interviewer.
-2. **Deduplicate the questions**:
-   - From the list of questions that you have detected from the previous step, deduplicate the questions.
-   - Remove questions that have already been asked in the list of existing questions.
-3. **Return the questions as a list of strings**:
-   - Return the questions as a list of strings in a JSON object with the following format:
+If necessary, rewrite the questions to be more concise and to the point while still maintaining the original meaning of the question.
+Use your expertise to find the true root question that is being asked in the transcript to make it easier for a candidate to tnaswer the questions.
 
 ## Output format
    {
