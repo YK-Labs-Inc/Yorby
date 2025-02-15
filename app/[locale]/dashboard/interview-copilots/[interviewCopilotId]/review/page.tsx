@@ -1,5 +1,25 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import InterviewCopilotReviewClientComponent from "./InterviewCopilotReviewClientComponent";
+import { redirect } from "next/navigation";
+import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
+
+const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({ interviewCopilotId });
+  const { data, error } = await supabase
+    .from("interview_copilots")
+    .select("deletion_status")
+    .eq("id", interviewCopilotId)
+    .single();
+  if (error) {
+    const t = await getTranslations("errors");
+    logger.error("Error fetching interview copilot status", { error });
+    await logger.flush();
+    return { error: t("pleaseTryAgain") };
+  }
+  return { deletionStatus: data.deletion_status };
+};
 
 async function fetchInterviewCopilotData(interviewCopilotId: string) {
   const supabase = await createSupabaseServerClient();
@@ -41,6 +61,12 @@ export default async function ReviewPage({
   params: Promise<{ interviewCopilotId: string }>;
 }) {
   const { interviewCopilotId } = await params;
+  const { deletionStatus } =
+    await fetchInterviewCopilotStatus(interviewCopilotId);
+
+  if (deletionStatus === "deleted") {
+    redirect("/dashboard/interview-copilots");
+  }
   const data = await fetchInterviewCopilotData(interviewCopilotId);
 
   return (

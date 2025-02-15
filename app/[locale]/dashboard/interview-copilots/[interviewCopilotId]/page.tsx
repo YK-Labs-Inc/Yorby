@@ -37,6 +37,10 @@ export default async function Page({
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
   }
 
+  if (interviewCopilot?.deletion_status === "deleted") {
+    redirect("/dashboard/interview-copilots");
+  }
+
   if (!interviewCopilot) {
     return (
       <div className="container mx-auto px-4 py-8">

@@ -8,6 +8,8 @@ import {
   Settings2,
   HelpCircle,
   ChevronDown,
+  Monitor,
+  Chrome,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -49,12 +51,16 @@ import {
 } from "@/components/ui/tooltip";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsChrome } from "@/hooks/use-chrome";
 
 export function Session({
   interviewCopilotId,
 }: {
   interviewCopilotId: string;
 }) {
+  const isMobile = useIsMobile();
+  const isChrome = useIsChrome();
   const t = useTranslations("interviewCopilots.session");
   const [isSelectingMeeting, setIsSelectingMeeting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -961,6 +967,22 @@ export function Session({
     }
   };
 
+  if (isMobile) {
+    return (
+      <div className="h-full w-full flex flex-col justify-center items-center">
+        <MobileWarning />
+      </div>
+    );
+  }
+
+  if (!isChrome) {
+    return (
+      <div className="h-full w-full flex flex-col justify-center items-center">
+        <BrowserWarning />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen flex-col">
       <ImageZoomModal />
@@ -1385,3 +1407,25 @@ export function Session({
     </div>
   );
 }
+
+const MobileWarning = () => {
+  const t = useTranslations("interviewCopilots.mobileWarning");
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center gap-4 rounded-lg border bg-card text-card-foreground shadow-sm">
+      <Monitor className="h-12 w-12 text-muted-foreground" />
+      <h2 className="text-xl font-semibold">{t("title")}</h2>
+      <p className="text-muted-foreground">{t("description")}</p>
+    </div>
+  );
+};
+
+const BrowserWarning = () => {
+  const t = useTranslations("interviewCopilots.browserWarning");
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center gap-4 rounded-lg border bg-card text-card-foreground shadow-sm">
+      <Chrome className="h-12 w-12 text-muted-foreground" />
+      <h2 className="text-xl font-semibold">{t("title")}</h2>
+      <p className="text-muted-foreground">{t("description")}</p>
+    </div>
+  );
+};

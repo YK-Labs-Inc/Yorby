@@ -405,6 +405,7 @@ export type Database = {
           company_description: string | null
           company_name: string | null
           created_at: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
           duration_ms: number
           file_path: string | null
           id: string
@@ -421,6 +422,7 @@ export type Database = {
           company_description?: string | null
           company_name?: string | null
           created_at?: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
           duration_ms: number
           file_path?: string | null
           id?: string
@@ -437,6 +439,7 @@ export type Database = {
           company_description?: string | null
           company_name?: string | null
           created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           duration_ms?: number
           file_path?: string | null
           id?: string
@@ -551,6 +554,7 @@ export type Database = {
     }
     Enums: {
       custom_job_access: "locked" | "unlocked"
+      deletion_status: "deleted" | "not_deleted"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
       message_role: "user" | "model"

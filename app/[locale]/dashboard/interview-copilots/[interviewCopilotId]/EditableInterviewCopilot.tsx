@@ -13,10 +13,21 @@ import {
   uploadInterviewCopilotFile,
   deleteInterviewCopilotFile,
   updateInterviewCopilot,
+  deleteInterviewCopilot,
 } from "./actions";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/routing";
 import { AIButton } from "@/components/ai-button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface EditableInterviewCopilotProps {
   interviewCopilot: Tables<"interview_copilots"> & {
@@ -29,6 +40,7 @@ export default function EditableInterviewCopilot({
 }: EditableInterviewCopilotProps) {
   const t = useTranslations("interviewCopilots");
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [updateState, updateAction, updatePending] = useActionState(
     updateInterviewCopilot,
     null
@@ -41,6 +53,8 @@ export default function EditableInterviewCopilot({
     deleteInterviewCopilotFile,
     null
   );
+  const [deleteInterviewState, deleteInterviewAction, deleteInterviewPending] =
+    useActionState(deleteInterviewCopilot, null);
 
   useEffect(() => {
     if (updateState?.success) {
@@ -55,7 +69,7 @@ export default function EditableInterviewCopilot({
   return (
     <>
       {/* Header with Title and Edit Controls */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex-col md:flex-row flex items-start md:items-center justify-between gap-4">
         <div className="flex-1">
           {isEditing ? (
             <form action={updateAction}>
@@ -122,6 +136,14 @@ export default function EditableInterviewCopilot({
         {!isEditing && (
           <div className="flex items-center gap-2">
             <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              {t("delete.button")}
+            </Button>
+            <Button
               variant="outline"
               onClick={() => setIsEditing(true)}
               className="gap-2"
@@ -140,6 +162,38 @@ export default function EditableInterviewCopilot({
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("delete.confirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("delete.confirmDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("delete.cancelButton")}</AlertDialogCancel>
+            <form action={deleteInterviewAction}>
+              <input type="hidden" name="id" value={interviewCopilot.id} />
+              <AlertDialogAction asChild>
+                <Button
+                  variant="destructive"
+                  type="submit"
+                  disabled={deleteInterviewPending}
+                >
+                  {deleteInterviewPending
+                    ? t("delete.deleting")
+                    : t("delete.button")}
+                </Button>
+              </AlertDialogAction>
+            </form>
+          </AlertDialogFooter>
+          {deleteInterviewState?.error && (
+            <FormMessage message={{ error: deleteInterviewState.error }} />
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Job Details */}
       <Card>

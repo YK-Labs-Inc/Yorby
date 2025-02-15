@@ -131,7 +131,9 @@ const fetchInterviewCopilots = async (userId: string) => {
   const { data, error } = await supabase
     .from("interview_copilots")
     .select("*")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("deletion_status", "not_deleted")
+    .order("created_at", { ascending: false });
   if (error) {
     throw error;
   }

@@ -11,6 +11,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -348,4 +349,65 @@ export const updateInterviewCopilot = async (
     await logger.flush();
     return { error: t("edit.saveError") };
   }
+};
+
+export const deleteInterviewCopilot = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const t = await getTranslations("interviewCopilots.errors");
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    function: "deleteInterviewCopilot",
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    logger.error("User not authenticated");
+    await logger.flush();
+    return { error: t("generic") };
+  }
+
+  const interviewCopilotId = formData.get("id") as string;
+
+  if (!interviewCopilotId) {
+    logger.error("No interview copilot ID provided");
+    await logger.flush();
+    return { error: t("generic") };
+  }
+
+  try {
+    const { error: updateError } = await supabase
+      .from("interview_copilots")
+      .update({
+        deletion_status: "deleted",
+      })
+      .eq("id", interviewCopilotId)
+      .eq("user_id", user.id);
+
+    if (updateError) {
+      logger.error("Failed to delete interview copilot", {
+        error: updateError,
+      });
+      await logger.flush();
+      return { error: t("generic") };
+    }
+
+    logger.info("Interview copilot deleted", {
+      interviewCopilotId,
+    });
+    await logger.flush();
+  } catch (error) {
+    logger.error("Failed to delete interview copilot", {
+      error,
+    });
+    await logger.flush();
+    return { error: t("generic") };
+  }
+
+  revalidatePath("/dashboard/interview-copilots");
+  redirect("/dashboard/interview-copilots");
 };

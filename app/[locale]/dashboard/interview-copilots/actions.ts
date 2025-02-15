@@ -71,6 +71,7 @@ export const createInterviewCopilot = async (
         transcript: "",
         title: title,
         status: "in_progress",
+        deletion_status: "not_deleted",
       })
       .select()
       .single();

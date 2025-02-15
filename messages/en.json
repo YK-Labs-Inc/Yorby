@@ -647,6 +647,21 @@
         "confirm": "Create Copilot",
         "creating": "Creating..."
       }
+    },
+    "mobileWarning": {
+      "title": "Desktop Only Experience",
+      "description": "The Interview Copilot is a desktop only experience. Please switch to a desktop device for the full Interview Copilot experience."
+    },
+    "browserWarning": {
+      "title": "Chrome Browser Required",
+      "description": "The Interview Copilot requires Google Chrome to function correctly. Please switch to Chrome for the best experience."
+    },
+    "delete": {
+      "button": "Delete",
+      "deleting": "Deleting...",
+      "confirmTitle": "Are you sure?",
+      "confirmDescription": "This action cannot be undone. This will permanently delete your interview copilot and all associated data.",
+      "cancelButton": "Cancel"
     }
   }
 }
