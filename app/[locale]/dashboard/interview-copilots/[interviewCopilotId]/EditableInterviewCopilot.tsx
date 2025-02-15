@@ -55,7 +55,7 @@ export default function EditableInterviewCopilot({
   return (
     <>
       {/* Header with Title and Edit Controls */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex-col md:flex-row flex items-start md:items-center justify-between gap-4">
         <div className="flex-1">
           {isEditing ? (
             <form action={updateAction}>
