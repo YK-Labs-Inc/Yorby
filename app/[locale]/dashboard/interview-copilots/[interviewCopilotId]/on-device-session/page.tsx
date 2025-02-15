@@ -9,7 +9,7 @@ const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
   const logger = new Logger().with({ interviewCopilotId });
   const { data, error } = await supabase
     .from("interview_copilots")
-    .select("status")
+    .select("status, deletion_status")
     .eq("id", interviewCopilotId)
     .single();
   if (error) {
@@ -18,7 +18,7 @@ const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
     await logger.flush();
     return { error: t("pleaseTryAgain") };
   }
-  return { status: data.status };
+  return { status: data.status, deletionStatus: data.deletion_status };
 };
 export default async function OnDeviceSessionPage({
   params,
@@ -26,10 +26,14 @@ export default async function OnDeviceSessionPage({
   params: Promise<{ interviewCopilotId: string }>;
 }) {
   const { interviewCopilotId } = await params;
-  const { error, status } =
+  const { error, status, deletionStatus } =
     await fetchInterviewCopilotStatus(interviewCopilotId);
   if (status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
+  }
+
+  if (deletionStatus === "deleted") {
+    redirect("/dashboard/interview-copilots");
   }
 
   if (error) {
