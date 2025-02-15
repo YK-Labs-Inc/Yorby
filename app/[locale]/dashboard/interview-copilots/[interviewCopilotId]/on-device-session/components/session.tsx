@@ -63,8 +63,6 @@ export function Session({
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
     useState(false);
   const [transcript, setTranscript] = useState<string[][]>([[]]);
-  const inputTokenCountRef = useRef(0);
-  const outputTokenCountRef = useRef(0);
   const contextBufferAmount = 2;
   const [questionsWithAnswers, setQuestionsWithAnswers] = useState<
     {
@@ -117,6 +115,14 @@ export function Session({
   const [showTranscriptScrollButton, setShowTranscriptScrollButton] =
     useState(false);
   const [showCopilotScrollButton, setShowCopilotScrollButton] = useState(false);
+  const [selectedMicrophone, setSelectedMicrophone] =
+    useState<MediaDeviceInfo | null>(null);
+  const [availableMicrophones, setAvailableMicrophones] = useState<
+    MediaDeviceInfo[]
+  >([]);
+  const [microphoneStream, setMicrophoneStream] = useState<MediaStream | null>(
+    null
+  );
 
   // Scroll to bottom button component
   const ScrollToBottomButton = ({ onClick }: { onClick: () => void }) => (
@@ -433,19 +439,73 @@ export function Session({
     };
   }, [stream]);
 
+  const getMicrophones = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const microphones = devices.filter(
+        (device) => device.kind === "audioinput"
+      );
+      setAvailableMicrophones(microphones);
+
+      // Select the default microphone if available
+      const defaultMicrophone = microphones.find(
+        (mic) => mic.deviceId === "default"
+      );
+      if (defaultMicrophone) {
+        handleMicrophoneSelect(defaultMicrophone.deviceId);
+      } else if (microphones.length > 0) {
+        handleMicrophoneSelect(microphones[0].deviceId);
+      }
+    } catch (error) {
+      logError("Error getting microphones:", { error });
+    }
+  };
+
+  const handleMicrophoneSelect = async (deviceId: string) => {
+    try {
+      const selectedDevice = availableMicrophones.find(
+        (mic) => mic.deviceId === deviceId
+      );
+      if (!selectedDevice) return;
+
+      // Stop any existing microphone stream
+      if (microphoneStream) {
+        microphoneStream.getTracks().forEach((track) => track.stop());
+      }
+
+      // Get new stream for selected microphone
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: deviceId } },
+      });
+
+      setMicrophoneStream(newStream);
+      setSelectedMicrophone(selectedDevice);
+    } catch (error) {
+      logError("Error selecting microphone:", { error });
+    }
+  };
+
+  useEffect(() => {
+    getMicrophones();
+  }, []);
+
   const handleSelectMeeting = async () => {
     try {
       setIsLoading(true);
       if (!navigator.mediaDevices?.getDisplayMedia) {
-        alert(
-          "Screen sharing is not supported in this browser — please switch to Google chrome for the best experience"
-        );
+        alert(t("error.noScreenSharingSupport"));
+        setIsLoading(false);
+        return;
+      }
+
+      if (!selectedMicrophone) {
+        alert(t("error.noMicrophoneSelected"));
         setIsLoading(false);
         return;
       }
 
       const mediaStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true, // Simplified video constraints
+        video: true,
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
@@ -461,7 +521,6 @@ export function Session({
       setStream(mediaStream);
       setIsSelectingMeeting(false);
 
-      // Then handle video element
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         videoRef.current.onloadedmetadata = () => {
@@ -610,9 +669,48 @@ export function Session({
   }, [connectionState]);
 
   useEffect(() => {
-    if (!stream) return;
+    if (!stream || !microphoneStream) return;
 
-    const mediaRecorder = new MediaRecorder(stream);
+    // Create audio context for mixing
+    const audioContext = new AudioContext();
+    const destination = audioContext.createMediaStreamDestination();
+
+    // Create gain nodes to control volume
+    const screenGain = audioContext.createGain();
+    const micGain = audioContext.createGain();
+
+    // Set initial volumes (can be adjusted if needed)
+    screenGain.gain.value = 1.0;
+    micGain.gain.value = 1.0;
+
+    // Connect screen audio
+    const screenAudioTrack = stream.getAudioTracks()[0];
+    if (screenAudioTrack) {
+      const screenSource = audioContext.createMediaStreamSource(
+        new MediaStream([screenAudioTrack])
+      );
+      screenSource.connect(screenGain).connect(destination);
+    }
+
+    // Connect microphone audio
+    const micAudioTrack = microphoneStream.getAudioTracks()[0];
+    if (micAudioTrack) {
+      const micSource = audioContext.createMediaStreamSource(
+        new MediaStream([micAudioTrack])
+      );
+      micSource.connect(micGain).connect(destination);
+    }
+
+    // Get video track
+    const videoTrack = stream.getVideoTracks()[0];
+
+    // Create final stream with video and mixed audio
+    const mixedStream = new MediaStream([
+      ...(videoTrack ? [videoTrack] : []),
+      ...destination.stream.getAudioTracks(),
+    ]);
+
+    const mediaRecorder = new MediaRecorder(mixedStream);
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -628,14 +726,17 @@ export function Session({
         });
         await handleUpload(blob);
       }
+      audioContext.close();
     };
+
     mediaRecorder.start(1000);
     mediaRecorderRef.current = mediaRecorder;
 
     return () => {
       mediaRecorder.stop();
+      audioContext.close();
     };
-  }, [stream]);
+  }, [microphoneStream, stream]);
 
   const handleUpload = async (videoBlob: Blob) => {
     try {
@@ -677,18 +778,6 @@ export function Session({
   const updateInterviewCopilotData = async (filePath: string) => {
     try {
       const supabase = createSupabaseBrowserClient();
-      const { error: filePathError } = await supabase
-        .from("interview_copilots")
-        .update({
-          file_path: filePath,
-        })
-        .eq("id", interviewCopilotId);
-
-      if (filePathError) {
-        logError("Error updating interview copilot file path", {
-          error: filePathError.message,
-        });
-      }
       const now = new Date();
       const formattedDate = now.toLocaleString("en-US", {
         month: "long",
@@ -705,6 +794,7 @@ export function Session({
         .update({
           title: `${formattedDate}`,
           status: "complete",
+          file_path: filePath,
         })
         .eq("id", interviewCopilotId);
 
@@ -755,6 +845,10 @@ export function Session({
 
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
+      }
+
+      if (microphoneStream) {
+        microphoneStream.getTracks().forEach((track) => track.stop());
       }
     } catch (error: any) {
       logError("Error stopping transcription", { error: error.message });
@@ -912,7 +1006,7 @@ export function Session({
                     </Button>
                   </DialogTrigger>
                 </TooltipTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[80vh] flex flex-col">
                   <DialogHeader>
                     <DialogTitle>{t("onboarding.title")}</DialogTitle>
                     <DialogDescription>
@@ -931,9 +1025,11 @@ export function Session({
                     </div>
                   </div>
 
-                  <div className="mt-6">{renderStepContent()}</div>
+                  <div className="mt-6 overflow-y-auto flex-1">
+                    {renderStepContent()}
+                  </div>
 
-                  <DialogFooter className="flex justify-between items-center mt-6">
+                  <DialogFooter className="flex justify-between items-center mt-6 border-t pt-4">
                     <Button
                       variant="ghost"
                       onClick={() => setShowOnboarding(false)}
@@ -1126,14 +1222,34 @@ export function Session({
                 !isSelectingMeeting ? "hidden" : ""
               }`}
             >
-              <div className="text-center">
+              <div className="text-center space-y-6">
                 <h2 className="text-white text-xl mb-4">
                   {t("selectMeeting.title")}
                 </h2>
+
+                <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg space-y-4 max-w-md mx-auto">
+                  <div className="text-white text-left">
+                    <label className="block text-sm font-medium mb-2">
+                      {t("selectMicrophone")}
+                    </label>
+                    <select
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white"
+                      value={selectedMicrophone?.deviceId || ""}
+                      onChange={(e) => handleMicrophoneSelect(e.target.value)}
+                    >
+                      {availableMicrophones.map((mic) => (
+                        <option key={mic.deviceId} value={mic.deviceId}>
+                          {mic.label || `Microphone ${mic.deviceId}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <Button
                   variant="secondary"
                   onClick={handleSelectMeeting}
-                  disabled={isLoading}
+                  disabled={isLoading || !selectedMicrophone}
                 >
                   <MonitorUp className="mr-2 h-4 w-4" />
                   {isLoading

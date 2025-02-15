@@ -538,8 +538,11 @@
     "session": {
       "startCopilot": "Start Interview Copilot",
       "startingCopilot": "Starting Interview Copilot...",
+      "selectMicrophone": "Select Microphone",
       "error": {
-        "generic": "Sorry, something went wrong. Please try again."
+        "generic": "Sorry, something went wrong. Please try again.",
+        "noMicrophoneSelected": "Please select a microphone to continue",
+        "noScreenSharingSupport": "Your browser does not support screen sharing. Please use Google Chrome."
       },
       "selectMeeting": {
         "title": "Select Interview Meeting Room",
