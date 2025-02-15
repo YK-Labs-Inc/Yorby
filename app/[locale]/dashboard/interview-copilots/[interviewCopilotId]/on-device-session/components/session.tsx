@@ -63,8 +63,6 @@ export function Session({
   const [loadingTranscriptionService, setLoadingTranscriptionService] =
     useState(false);
   const [transcript, setTranscript] = useState<string[][]>([[]]);
-  const inputTokenCountRef = useRef(0);
-  const outputTokenCountRef = useRef(0);
   const contextBufferAmount = 2;
   const [questionsWithAnswers, setQuestionsWithAnswers] = useState<
     {
@@ -1008,7 +1006,7 @@ export function Session({
                     </Button>
                   </DialogTrigger>
                 </TooltipTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[80vh] flex flex-col">
                   <DialogHeader>
                     <DialogTitle>{t("onboarding.title")}</DialogTitle>
                     <DialogDescription>
@@ -1027,9 +1025,11 @@ export function Session({
                     </div>
                   </div>
 
-                  <div className="mt-6">{renderStepContent()}</div>
+                  <div className="mt-6 overflow-y-auto flex-1">
+                    {renderStepContent()}
+                  </div>
 
-                  <DialogFooter className="flex justify-between items-center mt-6">
+                  <DialogFooter className="flex justify-between items-center mt-6 border-t pt-4">
                     <Button
                       variant="ghost"
                       onClick={() => setShowOnboarding(false)}
