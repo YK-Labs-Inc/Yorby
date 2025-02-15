@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import * as SibApiV3Sdk from "@sendinblue/client";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -88,6 +89,12 @@ async function handleSuccessfulPayment(
         });
         logger.info("Created new credits entry", { userId, credits });
       }
+    }
+    if (session.customer_email) {
+      await addUserToBrevoPaidUserList({
+        email: session.customer_email,
+        logger,
+      });
     }
   } catch (error) {
     logger.error("Error handling successful payment", { error });
@@ -209,3 +216,29 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     return new NextResponse("Webhook Error", { status: 400 });
   }
 });
+
+const addUserToBrevoPaidUserList = async ({
+  email,
+  logger,
+}: {
+  email: string;
+  logger: Logger;
+}) => {
+  try {
+    let apiInstance = new SibApiV3Sdk.ContactsApi();
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (!brevoApiKey) {
+      throw new Error("BREVO_API_KEY is not set");
+    }
+    apiInstance.setApiKey(SibApiV3Sdk.ContactsApiApiKeys.apiKey, brevoApiKey);
+
+    let updateContact = new SibApiV3Sdk.UpdateContact();
+
+    updateContact.listIds = [6, 8];
+
+    await apiInstance.updateContact(email, updateContact);
+    logger.info("Added contact to paid user list");
+  } catch (error: any) {
+    logger.error("Failed to add user to Brevo", { error });
+  }
+};
