@@ -10,6 +10,11 @@
     "enterJobDescription": "Enter A Job Description Here",
     "featureHighlightTitle": "What Do You Get With Perfect Interview?",
     "features": {
+      "sections": {
+        "prep": "Perfect Your Interview Skills",
+        "dayOf": "Ace Your Interview Day",
+        "other": "Additional Features"
+      },
       "practiceQuestions": {
         "title": "Unlimited Practice Questions",
         "description": "Generate unlimited practice interview questions based off of any job description and your resume so that the questions are custom to the job and your personal experience"
@@ -29,6 +34,10 @@
       "performance": {
         "title": "Performance Analysis",
         "description": "Get a detailed breakdown on your mock interview performance"
+      },
+      "interviewCopilot": {
+        "title": "Interview Copilot",
+        "description": "Your real-time interview assistant that helps you answer questions during the actual interview. Get instant suggestions and guidance to help you give the best possible answers."
       },
       "pricing": {
         "title": "No Subscription Required",
