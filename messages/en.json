@@ -313,6 +313,7 @@
   "purchase": {
     "title": "Get Interview Credits",
     "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
+    "descriptionV2": "You can redeem credits to create interview prep material for a job or create an Interview Copilot",
     "products": {
       "oneCredit": {
         "title": "Single Interview",
@@ -355,7 +356,28 @@
     "purchase_success": "Purchase Successful! 🎉",
     "purchase_failed": "Purchase Verification Failed",
     "redirect_success_message": "You will be redirected to your dashboard in {seconds} seconds...",
-    "redirect_error_message": "Redirecting you back in {seconds} seconds..."
+    "redirect_error_message": "Redirecting you back in {seconds} seconds...",
+    "creditUsage": {
+      "modalTrigger": "How Many Credits Do You Need?",
+      "modalTitle": "Credit Usage Breakdown",
+      "gotItButton": "Got it",
+      "items": {
+        "jobPrep": {
+          "title": "Job Interview Preparation",
+          "description": "Create unlimited practice interview questions and mock interviews for a single job",
+          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
+        },
+        "copilot": {
+          "title": "Interview Copilot Session",
+          "description": "One complete Interview Copilot session",
+          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
+        }
+      }
+    },
+    "errors": {
+      "generic": "Something went wrong — please try again.",
+      "login": "You must be logged in to purchase credits"
+    }
   },
   "accountLinking": {
     "title": "Sign Up To Save Your Interview Prep",
