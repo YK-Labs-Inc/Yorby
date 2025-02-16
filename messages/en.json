@@ -345,6 +345,7 @@
       "perInterview": "per credit",
       "perMonth": "per month",
       "savings": "Save {savings}% vs. single interviews",
+      "savingsV2": "Save {savings}% vs. single credit",
       "loading": "Loading pricing information...",
       "yearSuffix": "/year",
       "quarterSuffix": "/quarter",

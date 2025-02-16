@@ -94,7 +94,7 @@ export default async function PurchasePage({
                       </p>
                       {product.savings && product.savings > 0 && (
                         <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-                          {t("pricing.savings", {
+                          {t("pricing.savingsV2", {
                             savings: Math.round(product.savings),
                           })}
                         </p>
