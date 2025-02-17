@@ -12,15 +12,14 @@ import {
   Target,
   Rocket,
   Sparkles,
-  Star,
-  Trophy,
-  Zap,
   CreditCard,
   Lock,
   Calendar,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
+import JobCreationComponent from "../JobCreationComponent";
+import { InterviewCopilotCreationForm } from "../dashboard/interview-copilots/InterviewCopilotCreationForm";
 
 interface FeatureProps {
   id: keyof typeof FEATURE_IDS;
@@ -235,6 +234,10 @@ export default function FeatureHighlight() {
             </div>
           </div>
 
+          <div className="overflow-y-scroll h-[500px] relative w-full border-2 border-gray-300 rounded-lg p-4 shadow-lg mb-4">
+            <JobCreationComponent />
+          </div>
+
           {/* Day of Interview Section */}
           {isInterviewCopilotEnabled && (
             <div className="relative">
@@ -434,7 +437,7 @@ export default function FeatureHighlight() {
                 <div className="inline-block bg-white dark:bg-gray-800 rounded-full px-8 py-4 shadow-lg">
                   <span className="text-xl font-semibold text-gray-600 dark:text-gray-300">
                     Starting at just{" "}
-                    <span className="text-primary font-bold text-2xl">$10</span>{" "}
+                    <span className="text-primary font-bold text-2xl">$15</span>{" "}
                     per interview
                   </span>
                 </div>
@@ -442,52 +445,6 @@ export default function FeatureHighlight() {
             </div>
           </div>
         </motion.div>
-
-        {/* Testimonials Section */}
-        {/* <div className="mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h3 className="text-3xl font-bold mb-4">Success Stories</h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Join thousands who have transformed their interview success
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                variants={item}
-                className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg"
-              >
-                <div className="flex items-center mb-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
-                  <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 italic">
-                  "{testimonial.quote}"
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div> */}
 
         {/* Final CTA Section */}
         <motion.div
