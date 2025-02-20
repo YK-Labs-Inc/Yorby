@@ -146,6 +146,7 @@ ${
     short and concise  for users to quickly read and digest the information and then create their
     own answer from your bullet points..
     - Do not be overly verbose.
+    - Return your bullet point answer using markdown formatting for the bullet points.
 
     `
     : `- Provide a natural, conversational response as if you're speaking directly to the interviewer.
@@ -161,7 +162,6 @@ ${
   - Return your answer to the interview question and nothing else. You absolutely cannot return anything
   that is not part of the answer to the question. Do not return your criteria, your thoughts, or anything else.
   Just return the answer to the question.
-  - Return your answer in markdown format for all styling.
 ${
   question
     ? `# Question

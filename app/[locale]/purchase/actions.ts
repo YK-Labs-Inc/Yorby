@@ -104,75 +104,63 @@ export async function getProducts() {
 export async function createCheckoutSession(formData: FormData) {
   const priceId = formData.get("priceId") as string;
   const isSubscription = (formData.get("isSubscription") as string) === "true";
+  const t = await getTranslations("purchase");
   let logger = new Logger().with({
     priceId,
     isSubscription,
   });
-  let sessionUrl = "";
-  let error = "";
-  let userId = "";
   const origin = (await headers()).get("origin");
-  try {
-    if (!priceId) {
-      throw new Error("Price ID is required");
-    }
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user || !user.email) {
-      logger.error("User not found", {
-        message: "User not found",
-      });
-      await logger.flush();
-      throw new Error("User not found");
-    }
-    userId = user.id;
-    const email = user.email;
-    const metadata: { [key: string]: string } = {
-      userId: user.id,
-      userEmail: email,
-      priceId,
-      isSubscription: isSubscription.toString(),
-    };
-    const session = await stripe.checkout.sessions.create({
-      mode: isSubscription ? "subscription" : "payment",
-      customer_email: email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: `${origin}/purchase_confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/purchase`,
-      metadata,
-      allow_promotion_codes: true,
-      subscription_data: isSubscription
-        ? {
-            metadata: {
-              userId: user.id,
-              userEmail: email,
-            },
-          }
-        : undefined,
-    });
-    if (session.url) {
-      sessionUrl = session.url;
-    } else {
-      error = "Failed to create checkout session";
-      logger.error("Failed to create checkout session");
-    }
-  } catch (error: any) {
-    logger.error("Error creating checkout session", {
-      error: error.message,
-    });
-    error = error.message;
-  } finally {
+  if (!priceId) {
+    logger.error("Price ID not found");
     await logger.flush();
+    redirect(`${origin}/purchase?error=${t("errors.generic")}`);
   }
-  if (error) {
-    redirect(`${origin}/purchase?error=true`);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !user.email) {
+    logger.error("User not found", {
+      message: "User not found",
+    });
+    await logger.flush();
+    redirect(`${origin}/purchase?error=${t("errors.login")}`);
+  }
+  const userId = user.id;
+  const email = user.email;
+  const metadata: { [key: string]: string } = {
+    userId: user.id,
+    userEmail: email,
+    priceId,
+    isSubscription: isSubscription.toString(),
+  };
+  const session = await stripe.checkout.sessions.create({
+    mode: isSubscription ? "subscription" : "payment",
+    customer_email: email,
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    success_url: `${origin}/purchase_confirmation?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/purchase`,
+    metadata,
+    allow_promotion_codes: true,
+    subscription_data: isSubscription
+      ? {
+          metadata: {
+            userId: user.id,
+            userEmail: email,
+          },
+        }
+      : undefined,
+  });
+  const sessionUrl = session.url;
+  if (!sessionUrl) {
+    logger.error("Failed to create checkout session");
+    await logger.flush();
+    redirect(`${origin}/purchase?error=${t("errors.generic")}`);
   }
   await trackServerEvent({
     eventName: "purchase_started",

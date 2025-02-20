@@ -166,7 +166,7 @@ export default function JobCreationComponent({
       </Dialog>
 
       <div className="px-4 sm:px-6 w-full max-w-[1080px]">
-        <H1 className="w-full text-center mb-8">{t("title")}</H1>
+        <H1 className="w-full text-center mb-8">{t("titleV2")}</H1>
 
         {error && (
           <Alert variant="destructive" className="mb-6">

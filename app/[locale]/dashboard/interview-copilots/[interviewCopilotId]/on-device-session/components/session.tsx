@@ -458,18 +458,21 @@ export function Session({
         (mic) => mic.deviceId === "default"
       );
       if (defaultMicrophone) {
-        handleMicrophoneSelect(defaultMicrophone.deviceId);
+        await handleMicrophoneSelect(defaultMicrophone.deviceId, microphones);
       } else if (microphones.length > 0) {
-        handleMicrophoneSelect(microphones[0].deviceId);
+        await handleMicrophoneSelect(microphones[0].deviceId, microphones);
       }
     } catch (error) {
       logError("Error getting microphones:", { error });
     }
   };
 
-  const handleMicrophoneSelect = async (deviceId: string) => {
+  const handleMicrophoneSelect = async (
+    deviceId: string,
+    devices?: MediaDeviceInfo[]
+  ) => {
     try {
-      const selectedDevice = availableMicrophones.find(
+      const selectedDevice = (devices || availableMicrophones).find(
         (mic) => mic.deviceId === deviceId
       );
       if (!selectedDevice) return;
@@ -1257,7 +1260,12 @@ export function Session({
                     <select
                       className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white"
                       value={selectedMicrophone?.deviceId || ""}
-                      onChange={(e) => handleMicrophoneSelect(e.target.value)}
+                      onChange={(e) =>
+                        handleMicrophoneSelect(
+                          e.target.value,
+                          availableMicrophones
+                        )
+                      }
                     >
                       {availableMicrophones.map((mic) => (
                         <option key={mic.deviceId} value={mic.deviceId}>

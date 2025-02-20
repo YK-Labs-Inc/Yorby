@@ -1,5 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { createCheckoutSession, getProducts } from "./actions";
+import CreditUsageModal from "./components/CreditUsageModal";
+import { FormMessage } from "@/components/form-message";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 const PRODUCT_KEYS = {
   [process.env.SINGLE_CREDIT_PRODUCT_ID!]: "oneCredit",
@@ -20,30 +24,40 @@ export default async function PurchasePage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const error = ((await searchParams).error as string) === "true";
+  const error = (await searchParams).error as string;
   const t = await getTranslations("purchase");
-  const errorTranslations = await getTranslations("errors");
   const { products } = await getProducts();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let interviewCopilotsEnabled = false;
+  if (user) {
+    interviewCopilotsEnabled =
+      (await posthog.isFeatureEnabled("enable-interview-copilot", user.id)) ??
+      false;
+  }
 
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 mx-32">
-            {t("description")}
-          </p>
+        <div className="text-center space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+              {t("title")}
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              {interviewCopilotsEnabled ? t("descriptionV2") : t("description")}
+            </p>
+            {interviewCopilotsEnabled && (
+              <div className="flex justify-center">
+                <CreditUsageModal />
+              </div>
+            )}
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-500 text-red-700 dark:text-red-400 px-4 py-3 rounded relative my-4 text-center">
-            <p className="block sm:inline">
-              {errorTranslations("pleaseTryAgain")}
-            </p>
-          </div>
-        )}
+        {error && <FormMessage message={{ error }} />}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-4 md:grid-cols-2">
           {products.map((product) => {
@@ -94,7 +108,7 @@ export default async function PurchasePage({
                       </p>
                       {product.savings && product.savings > 0 && (
                         <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-                          {t("pricing.savings", {
+                          {t("pricing.savingsV2", {
                             savings: Math.round(product.savings),
                           })}
                         </p>
