@@ -205,7 +205,7 @@ export default function FeatureHighlight() {
                     <motion.div
                       key={feature.id}
                       variants={item}
-                      className="w-[32%]"
+                      className="w-[49%]"
                     >
                       <Card className="flex flex-col justify-between group h-full overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                         <div className="p-8">
@@ -223,7 +223,7 @@ export default function FeatureHighlight() {
                           <img
                             src={feature.img}
                             alt={t(`features.${feature.id}.title`)}
-                            className="w-full h-48 object-cover rounded-lg shadow-md transform group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover rounded-lg shadow-md transform group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
                       </Card>
