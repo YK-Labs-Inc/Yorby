@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { createCheckoutSession, getProducts } from "./actions";
 import CreditUsageModal from "./components/CreditUsageModal";
 import { FormMessage } from "@/components/form-message";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 const PRODUCT_KEYS = {
   [process.env.SINGLE_CREDIT_PRODUCT_ID!]: "oneCredit",
@@ -25,6 +27,16 @@ export default async function PurchasePage({
   const error = (await searchParams).error as string;
   const t = await getTranslations("purchase");
   const { products } = await getProducts();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let interviewCopilotsEnabled = false;
+  if (user) {
+    interviewCopilotsEnabled =
+      (await posthog.isFeatureEnabled("enable-interview-copilot", user.id)) ??
+      false;
+  }
 
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">
@@ -35,11 +47,13 @@ export default async function PurchasePage({
               {t("title")}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              {t("descriptionV2")}
+              {interviewCopilotsEnabled ? t("descriptionV2") : t("description")}
             </p>
-            <div className="flex justify-center">
-              <CreditUsageModal />
-            </div>
+            {interviewCopilotsEnabled && (
+              <div className="flex justify-center">
+                <CreditUsageModal />
+              </div>
+            )}
           </div>
         </div>
 
