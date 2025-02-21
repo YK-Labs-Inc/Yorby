@@ -6,6 +6,7 @@ import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
+import { INTERVIEW_COPILOT_REQUIRED_CREDITS } from "@/app/constants/interview_copilots";
 
 export const createInterviewCopilot = async (
   prevState: any,
@@ -29,9 +30,8 @@ export const createInterviewCopilot = async (
     .eq("id", user.id)
     .single();
 
-  if (!credits || credits.number_of_credits < 1) {
-    return { error: t("insufficientCredits") };
-  }
+  const hasCredits =
+    credits && credits.number_of_credits >= INTERVIEW_COPILOT_REQUIRED_CREDITS;
 
   let copilotId;
 
@@ -72,6 +72,7 @@ export const createInterviewCopilot = async (
         title: title,
         status: "in_progress",
         deletion_status: "not_deleted",
+        interview_copilot_access: hasCredits ? "unlocked" : "locked",
       })
       .select()
       .single();
@@ -88,25 +89,28 @@ export const createInterviewCopilot = async (
       sessionId: sessionData.id,
     });
 
-    // Deduct credit
-    const { error: creditError } = await supabase
-      .from("custom_job_credits")
-      .update({
-        number_of_credits: credits.number_of_credits - 1,
-      })
-      .eq("id", user.id);
+    // Only deduct credit if user has sufficient credits
+    if (hasCredits) {
+      const { error: creditError } = await supabase
+        .from("custom_job_credits")
+        .update({
+          number_of_credits:
+            credits.number_of_credits - INTERVIEW_COPILOT_REQUIRED_CREDITS,
+        })
+        .eq("id", user.id);
 
-    if (creditError) {
-      // If credit deduction fails, delete the created session
-      await supabase
-        .from("interview_copilots")
-        .delete()
-        .eq("id", sessionData.id);
-      logger.error("Failed to deduct credit", {
-        error: creditError,
-      });
-      await logger.flush();
-      return { error: t("generic") };
+      if (creditError) {
+        // If credit deduction fails, delete the created session
+        await supabase
+          .from("interview_copilots")
+          .delete()
+          .eq("id", sessionData.id);
+        logger.error("Failed to deduct credit", {
+          error: creditError,
+        });
+        await logger.flush();
+        return { error: t("generic") };
+      }
     }
 
     // Upload files and create file entries

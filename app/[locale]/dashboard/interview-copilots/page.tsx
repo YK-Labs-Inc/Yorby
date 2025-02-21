@@ -1,6 +1,6 @@
 import { InterviewCopilotCreationForm } from "./InterviewCopilotCreationForm";
 import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -41,7 +41,7 @@ export default async function InterviewCopilotsPage() {
 
       <Card>
         <CardContent className="px-2 py-4">
-          <InterviewCopilotCreationForm userCredits={userCredits} />
+          <InterviewCopilotCreationForm />
         </CardContent>
       </Card>
     </div>

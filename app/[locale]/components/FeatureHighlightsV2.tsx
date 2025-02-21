@@ -19,6 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import JobCreationComponent from "../JobCreationComponent";
+import { InterviewCopilotCreationForm } from "../dashboard/interview-copilots/InterviewCopilotCreationForm";
 
 interface FeatureProps {
   id: keyof typeof FEATURE_IDS;
@@ -239,108 +240,114 @@ export default function FeatureHighlight() {
 
           {/* Day of Interview Section */}
           {isInterviewCopilotEnabled && (
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-3xl" />
-              <div className="relative p-12">
-                <div className="text-center mb-12">
-                  <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
-                    Your Own Personal Interview Copilot
-                  </h4>
-                  <p className="text-lg text-gray-600 dark:text-gray-300">
-                    Interview Copilot listens in on your interview and answers
-                    interview questions for you in real-time based off of your
-                    previous work history to make sure you crush your job
-                    interview
-                  </p>
-                  <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
-                    Don't worry — it is 100% undetectable so this can be our
-                    little secret 🤫
-                  </p>
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-3xl" />
+                <div className="relative p-12">
+                  <div className="text-center mb-12">
+                    <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
+                      Your Own Personal Interview Copilot
+                    </h4>
+                    <p className="text-lg text-gray-600 dark:text-gray-300">
+                      Interview Copilot listens in on your interview and answers
+                      interview questions for you in real-time based off of your
+                      previous work history to make sure you crush your job
+                      interview
+                    </p>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
+                      Don't worry — it is 100% undetectable so this can be our
+                      little secret 🤫
+                    </p>
+                  </div>
+
+                  {/* Image Section - Now comes first and is full width */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="relative mb-12"
+                  >
+                    <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1000px] mx-auto">
+                      <img
+                        src="/assets/interview-copilot-demo.png"
+                        alt="Interview Copilot Demo"
+                        className="w-full"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    </div>
+                  </motion.div>
+
+                  {/* Features Section - Now in a three column layout */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-[1000px] mx-auto"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Brain className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-semibold mb-2">
+                            Real-time AI Guidance
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            Get intelligent suggestions while the interviewer is
+                            speaking, helping you craft perfect responses.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Timer className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-semibold mb-2">
+                            Perfect Timing
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            Instant suggestions appear before you need to
+                            respond, giving you time to process and deliver
+                            confidently.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                          <CheckCircle2 className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-semibold mb-2">
+                            Personalized To You
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            Suggestions tailored to your experience, the role,
+                            and company, making every answer uniquely yours.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center mt-12">
+                      <Link href="/sign-in">
+                        <Button
+                          size="lg"
+                          className="bg-primary hover:bg-primary/90 text-lg px-12"
+                        >
+                          Try Interview Copilot{" "}
+                          <ArrowRight className="ml-2 w-5 h-5" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </motion.div>
                 </div>
-
-                {/* Image Section - Now comes first and is full width */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="relative mb-12"
-                >
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1000px] mx-auto">
-                    <img
-                      src="/assets/interview-copilot-demo.png"
-                      alt="Interview Copilot Demo"
-                      className="w-full"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  </div>
-                </motion.div>
-
-                {/* Features Section - Now in a three column layout */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="max-w-[1000px] mx-auto"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Brain className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          Real-time AI Guidance
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          Get intelligent suggestions while the interviewer is
-                          speaking, helping you craft perfect responses.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Timer className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          Perfect Timing
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          Instant suggestions appear before you need to respond,
-                          giving you time to process and deliver confidently.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          Personalized To You
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          Suggestions tailored to your experience, the role, and
-                          company, making every answer uniquely yours.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center mt-12">
-                    <Link href="/sign-in">
-                      <Button
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-lg px-12"
-                      >
-                        Try Interview Copilot{" "}
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </Button>
-                    </Link>
-                  </div>
-                </motion.div>
               </div>
-            </div>
+              <div className="mt-8 overflow-y-scroll h-[500px] relative w-full border-2 border-gray-300 rounded-lg p-4 shadow-lg mb-4">
+                <InterviewCopilotCreationForm />
+              </div>
+            </>
           )}
         </div>
 
