@@ -410,6 +410,7 @@ export type Database = {
           file_path: string | null
           id: string
           input_tokens_count: number
+          interview_copilot_access: Database["public"]["Enums"]["interview_copilot_access"]
           job_description: string | null
           job_title: string | null
           output_tokens_count: number
@@ -427,6 +428,7 @@ export type Database = {
           file_path?: string | null
           id?: string
           input_tokens_count: number
+          interview_copilot_access: Database["public"]["Enums"]["interview_copilot_access"]
           job_description?: string | null
           job_title?: string | null
           output_tokens_count: number
@@ -444,6 +446,7 @@ export type Database = {
           file_path?: string | null
           id?: string
           input_tokens_count?: number
+          interview_copilot_access?: Database["public"]["Enums"]["interview_copilot_access"]
           job_description?: string | null
           job_title?: string | null
           output_tokens_count?: number
@@ -555,6 +558,7 @@ export type Database = {
     Enums: {
       custom_job_access: "locked" | "unlocked"
       deletion_status: "deleted" | "not_deleted"
+      interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
       message_role: "user" | "model"

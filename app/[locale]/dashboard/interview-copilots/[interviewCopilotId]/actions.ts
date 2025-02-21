@@ -1,5 +1,6 @@
 "use server";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
+import { INTERVIEW_COPILOT_REQUIRED_CREDITS } from "@/app/constants/interview_copilots";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
@@ -410,4 +411,83 @@ export const deleteInterviewCopilot = async (
 
   revalidatePath("/dashboard/interview-copilots");
   redirect("/dashboard/interview-copilots");
+};
+
+export const unlockInterviewCopilot = async (
+  prevState: any,
+  formData: FormData
+) => {
+  const t = await getTranslations("interviewCopilots.errors");
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    function: "unlockInterviewCopilot",
+  });
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: t("generic") };
+    }
+
+    const interviewCopilotId = formData.get("interviewCopilotId") as string;
+    const userCredits = parseInt(formData.get("numberOfCredits") as string);
+
+    if (userCredits < INTERVIEW_COPILOT_REQUIRED_CREDITS) {
+      return { error: t("insufficientCredits") };
+    }
+
+    // Update interview copilot access
+    const { error: updateError } = await supabase
+      .from("interview_copilots")
+      .update({
+        interview_copilot_access: "unlocked",
+      })
+      .eq("id", interviewCopilotId);
+
+    if (updateError) {
+      logger.error("Failed to unlock interview copilot", {
+        error: updateError,
+      });
+      await logger.flush();
+      return { error: t("generic") };
+    }
+
+    // Deduct credits
+    const { error: creditError } = await supabase
+      .from("custom_job_credits")
+      .update({
+        number_of_credits: userCredits - INTERVIEW_COPILOT_REQUIRED_CREDITS,
+      })
+      .eq("id", user.id);
+
+    if (creditError) {
+      // If credit deduction fails, revert the unlock
+      await supabase
+        .from("interview_copilots")
+        .update({
+          interview_copilot_access: "locked",
+        })
+        .eq("id", interviewCopilotId);
+
+      logger.error("Failed to deduct credits", { error: creditError });
+      await logger.flush();
+      return { error: t("generic") };
+    }
+
+    logger.info("Successfully unlocked interview copilot", {
+      interviewCopilotId,
+    });
+    await logger.flush();
+
+    // Revalidate the page to show updated content
+    revalidatePath(`/dashboard/interview-copilots/${interviewCopilotId}`);
+    return { success: true };
+  } catch (error) {
+    logger.error("Error unlocking interview copilot", { error });
+    await logger.flush();
+    return { error: t("generic") };
+  }
 };

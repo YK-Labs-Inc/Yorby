@@ -9,7 +9,7 @@ const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
   const logger = new Logger().with({ interviewCopilotId });
   const { data, error } = await supabase
     .from("interview_copilots")
-    .select("status, deletion_status")
+    .select("status, deletion_status, interview_copilot_access")
     .eq("id", interviewCopilotId)
     .single();
   if (error) {
@@ -18,7 +18,11 @@ const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
     await logger.flush();
     return { error: t("pleaseTryAgain") };
   }
-  return { status: data.status, deletionStatus: data.deletion_status };
+  return {
+    status: data.status,
+    deletionStatus: data.deletion_status,
+    interviewCopilotAccess: data.interview_copilot_access,
+  };
 };
 export default async function OnDeviceSessionPage({
   params,
@@ -26,8 +30,13 @@ export default async function OnDeviceSessionPage({
   params: Promise<{ interviewCopilotId: string }>;
 }) {
   const { interviewCopilotId } = await params;
-  const { error, status, deletionStatus } =
+  const { error, status, deletionStatus, interviewCopilotAccess } =
     await fetchInterviewCopilotStatus(interviewCopilotId);
+
+  if (interviewCopilotAccess === "locked") {
+    redirect(`/dashboard/interview-copilots/${interviewCopilotId}`);
+  }
+
   if (status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
   }

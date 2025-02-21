@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { FormMessage } from "@/components/form-message";
-import { Link } from "@/i18n/routing";
 import {
   Dialog,
   DialogContent,
@@ -18,21 +17,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { H1 } from "@/components/typography";
 
-interface InterviewCopilotCreationFormProps {
-  userCredits: number;
-}
-
-export const InterviewCopilotCreationForm = ({
-  userCredits,
-}: InterviewCopilotCreationFormProps) => {
+export const InterviewCopilotCreationForm = () => {
   const [state, action, pending] = useActionState(createInterviewCopilot, {
     error: "",
   });
   const t = useTranslations("interviewCopilots");
   const [files, setFiles] = useState<File[]>([]);
-  const [showInsufficientCreditsDialog, setShowInsufficientCreditsDialog] =
-    useState(false);
   const [showEmptyFieldsDialog, setShowEmptyFieldsDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,11 +57,6 @@ export const InterviewCopilotCreationForm = ({
       files.length === 0
     ) {
       setShowEmptyFieldsDialog(true);
-      return;
-    }
-
-    if (userCredits < 1) {
-      setShowInsufficientCreditsDialog(true);
       return;
     }
 
@@ -109,30 +96,9 @@ export const InterviewCopilotCreationForm = ({
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={showInsufficientCreditsDialog}
-        onOpenChange={setShowInsufficientCreditsDialog}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("credits.insufficientDialog.title")}</DialogTitle>
-            <DialogDescription className="space-y-3 pt-2">
-              {t("credits.insufficientDialog.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-6">
-            <Link href="/purchase">
-              <Button size="lg">
-                {t("credits.insufficientDialog.button")}
-              </Button>
-            </Link>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <form action={handleSubmit} className="space-y-6">
         {state.error && <FormMessage message={{ error: state.error }} />}
-
+        <H1 className="w-full text-center mb-8">{t("createNew.title")}</H1>
         <div className="space-y-2">
           <Label htmlFor="jobTitle">{t("createNew.jobTitle.label")}</Label>
           <Input

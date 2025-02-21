@@ -695,6 +695,19 @@
       "confirmTitle": "Are you sure?",
       "confirmDescription": "This action cannot be undone. This will permanently delete your interview copilot and all associated data.",
       "cancelButton": "Cancel"
+    },
+    "locked": {
+      "title": "This Interview Copilot is Locked",
+      "description": "Unlock this copilot to use it during your interview",
+      "creditCost": "You need {credits} {credits, plural, one {credit} other {credits}} to unlock this interview copilot",
+      "button": "Unlock",
+      "unlocking": "Unlocking...",
+      "insufficientCredits": {
+        "title": "Insufficient Credits",
+        "description": "You don't have enough credits to unlock this copilot",
+        "button": "Purchase Credits"
+      },
+      "cancel": "Cancel"
     }
   }
 }
