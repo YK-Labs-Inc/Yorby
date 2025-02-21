@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import React from "react";
 import { AIButton } from "@/components/ai-button";
+import { FormMessage } from "@/components/form-message";
 
 interface LockedInterviewCopilotComponentProps {
   interviewCopilot: Tables<"interview_copilots"> & {
@@ -34,12 +35,6 @@ export default function LockedInterviewCopilotComponent({
   const t = useTranslations("interviewCopilots");
   const [state, action, pending] = useActionState(unlockInterviewCopilot, null);
   const [showDialog, setShowDialog] = React.useState(false);
-
-  useEffect(() => {
-    if (state?.error) {
-      alert(state.error);
-    }
-  }, [state]);
 
   return (
     <>
@@ -83,14 +78,20 @@ export default function LockedInterviewCopilotComponent({
                 value={interviewCopilot.id}
               />
               <input type="hidden" name="numberOfCredits" value={userCredits} />
-              <AIButton type="submit" pendingText={t("locked.unlocking")}>
+              <AIButton
+                type="submit"
+                pending={pending}
+                pendingText={t("locked.unlocking")}
+              >
                 {t("locked.button")}
               </AIButton>
+              {state?.error && <FormMessage message={{ error: state.error }} />}
             </form>
           ) : (
             <AIButton
               onClick={() => setShowDialog(true)}
               pendingText={t("locked.unlocking")}
+              pending={pending}
             >
               {t("locked.button")}
             </AIButton>
