@@ -14,12 +14,28 @@ export const createInterviewCopilot = async (
 ) => {
   const t = await getTranslations("interviewCopilots.errors");
   const supabase = await createSupabaseServerClient();
+  const captchaToken = formData.get("captchaToken") as string;
+  let userId = "";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
+  if (!loggedInUserId) {
+    const { data, error } = await supabase.auth.signInAnonymously({
+      options: {
+        captchaToken,
+      },
+    });
+    if (error) {
+      throw error;
+    }
+    if (!data.user?.id) {
+      throw new Error("User ID not found");
+    }
+    userId = data.user?.id;
+  } else {
+    userId = loggedInUserId;
+  }
 
-  if (!user) {
+  if (!userId) {
     return { error: t("generic") };
   }
 
@@ -27,7 +43,7 @@ export const createInterviewCopilot = async (
   const { data: credits } = await supabase
     .from("custom_job_credits")
     .select("number_of_credits")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
   const hasCredits =
@@ -64,7 +80,7 @@ export const createInterviewCopilot = async (
         job_description: jobDescription,
         company_name: companyName,
         company_description: companyDescription,
-        user_id: user.id,
+        user_id: userId,
         duration_ms: 0,
         input_tokens_count: 0,
         output_tokens_count: 0,
@@ -97,7 +113,7 @@ export const createInterviewCopilot = async (
           number_of_credits:
             credits.number_of_credits - INTERVIEW_COPILOT_REQUIRED_CREDITS,
         })
-        .eq("id", user.id);
+        .eq("id", userId);
 
       if (creditError) {
         // If credit deduction fails, delete the created session
@@ -115,7 +131,7 @@ export const createInterviewCopilot = async (
 
     // Upload files and create file entries
     for (const file of files) {
-      const fileName = `${user.id}/${sessionData.id}/${file.name}`;
+      const fileName = `${userId}/${sessionData.id}/${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from("interview_copilot_files")
         .upload(fileName, file, {

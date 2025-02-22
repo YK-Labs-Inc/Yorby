@@ -178,11 +178,15 @@ Thank the candidate for their time and tell them that the interview has ended.
 
 export const linkAnonymousAccount = async (formData: FormData) => {
   const email = formData.get("email") as string;
-  const jobId = formData.get("jobId") as string;
+  const jobId = formData.get("jobId") as string | null;
+  const interviewCopilotId = formData.get("interviewCopilotId") as
+    | string
+    | null;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("accountLinking");
   const logger = new Logger().with({
     jobId,
+    interviewCopilotId,
     email,
   });
 
@@ -194,12 +198,22 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     );
   }
 
+  if (!jobId && !interviewCopilotId) {
+    return encodedRedirect(
+      "error",
+      `/dashboard/jobs/${jobId}`,
+      t("genericError")
+    );
+  }
+
   const { error } = await supabase.auth.updateUser(
     {
       email,
     },
     {
-      emailRedirectTo: `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs/${jobId}`,
+      emailRedirectTo: jobId
+        ? `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs/${jobId}`
+        : `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/interview-copilots/${interviewCopilotId}`,
     }
   );
 
@@ -208,7 +222,13 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       error,
     });
     await logger.flush();
-    return encodedRedirect("error", `/dashboard/jobs/${jobId}`, error.message);
+    return encodedRedirect(
+      "error",
+      jobId
+        ? `/dashboard/jobs/${jobId}`
+        : `/dashboard/interview-copilots/${interviewCopilotId}`,
+      error.message
+    );
   }
   const user = await supabase.auth.getUser();
   if (user.data.user?.id) {
@@ -221,7 +241,9 @@ export const linkAnonymousAccount = async (formData: FormData) => {
 
   return encodedRedirect(
     "success",
-    `/dashboard/jobs/${jobId}`,
+    jobId
+      ? `/dashboard/jobs/${jobId}`
+      : `/dashboard/interview-copilots/${interviewCopilotId}`,
     t("authSuccess")
   );
 };

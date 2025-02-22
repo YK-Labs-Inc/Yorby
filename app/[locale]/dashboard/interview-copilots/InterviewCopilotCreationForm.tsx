@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 import { FormMessage } from "@/components/form-message";
+import { Turnstile } from "@marsidev/react-turnstile";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export const InterviewCopilotCreationForm = () => {
   const t = useTranslations("interviewCopilots");
   const [files, setFiles] = useState<File[]>([]);
   const [showEmptyFieldsDialog, setShowEmptyFieldsDialog] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,8 +194,20 @@ export const InterviewCopilotCreationForm = () => {
             </div>
           )}
         </div>
-
-        <Button type="submit" className="w-full" disabled={pending}>
+        <div className="pt-6">
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => {
+              setCaptchaToken(token);
+            }}
+          />
+        </div>
+        <input type="hidden" name="captchaToken" value={captchaToken} />
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={pending || !captchaToken}
+        >
           {pending ? t("createNew.submitting") : t("createNew.submit")}
         </Button>
       </form>
