@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import EditableInterviewCopilot from "./EditableInterviewCopilot";
 import LockedInterviewCopilotComponent from "./LockedInterviewCopilotComponent";
 import { redirect } from "next/navigation";
+import { FormMessage, Message } from "@/components/form-message";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/submit-button";
+import { linkAnonymousAccount } from "@/app/[locale]/dashboard/jobs/[jobId]/actions";
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -40,13 +45,32 @@ const fetchUserCredits = async (userId: string) => {
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ interviewCopilotId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { interviewCopilotId } = await params;
   const { data: interviewCopilot } =
     await fetchInterviewCopilot(interviewCopilotId);
   const t = await getTranslations("interviewCopilots");
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAnonymous = user?.is_anonymous ?? true;
+
+  const successMessage = (await searchParams)?.success as string | undefined;
+  const errorMessage = (await searchParams)?.error as string | undefined;
+  const message = (await searchParams)?.message as string | undefined;
+  let formMessage: Message | undefined;
+  if (successMessage) {
+    formMessage = { success: successMessage };
+  } else if (errorMessage) {
+    formMessage = { error: errorMessage };
+  } else if (message) {
+    formMessage = { message: message };
+  }
 
   if (interviewCopilot?.status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
@@ -79,10 +103,6 @@ export default async function Page({
   // Get user credits if the interview copilot is locked
   let userCredits = 0;
   if (interviewCopilot.interview_copilot_access === "locked") {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     if (user) {
       userCredits = await fetchUserCredits(user.id);
     }
@@ -90,14 +110,52 @@ export default async function Page({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {interviewCopilot.interview_copilot_access === "locked" ? (
-          <LockedInterviewCopilotComponent
-            interviewCopilot={interviewCopilot}
-            userCredits={userCredits}
-          />
+      <div
+        className={`max-w-4xl mx-auto space-y-8 ${isAnonymous ? "h-full md:h-auto" : ""}`}
+      >
+        {isAnonymous ? (
+          <div className="md mx-auto w-full">
+            {(!formMessage || "error" in formMessage) && (
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                <h2 className="text-lg font-semibold mb-2">
+                  {t("accountLinking.title")}
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  {t("accountLinking.description")}
+                </p>
+                <form action={linkAnonymousAccount} className="space-y-4">
+                  <Label htmlFor="email">
+                    {t("accountLinking.form.email.label")}
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder={t("accountLinking.form.email.placeholder")}
+                    required
+                  />
+                  <input
+                    type="hidden"
+                    name="interviewCopilotId"
+                    value={interviewCopilotId}
+                  />
+                  <SubmitButton>{t("accountLinking.form.submit")}</SubmitButton>
+                </form>
+              </div>
+            )}
+            {formMessage && <FormMessage message={formMessage} />}
+          </div>
         ) : (
-          <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
+          <>
+            {interviewCopilot.interview_copilot_access === "locked" ? (
+              <LockedInterviewCopilotComponent
+                interviewCopilot={interviewCopilot}
+                userCredits={userCredits}
+              />
+            ) : (
+              <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
+            )}
+          </>
         )}
       </div>
     </div>

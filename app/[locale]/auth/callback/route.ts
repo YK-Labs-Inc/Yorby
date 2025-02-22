@@ -96,7 +96,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
 
   if (redirectTo) {
     logger.info("Redirecting to", { redirectTo });
-    return NextResponse.redirect(`${origin}${redirectTo}`);
+    return NextResponse.redirect(`${redirectTo}`);
   }
 
   logger.info("Redirecting to jobs dashboard");

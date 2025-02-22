@@ -708,6 +708,22 @@
         "button": "Purchase Credits"
       },
       "cancel": "Cancel"
+    },
+    "accountLinking": {
+      "title": "Save Your Interview Copilot",
+      "description": "Link your account to save your interview copilot and access it anytime.",
+      "form": {
+        "email": {
+          "label": "Email",
+          "placeholder": "Enter your email"
+        },
+        "submit": "Save Interview Copilot"
+      },
+      "authSuccess": "Check your email to confirm your account",
+      "errors": {
+        "emailRequiredError": "Please enter your email",
+        "genericError": "Something went wrong, please try again."
+      }
     }
   }
 }
