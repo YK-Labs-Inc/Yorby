@@ -194,7 +194,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("errors.emailRequiredError")
+      t("emailRequiredError")
     );
   }
 
@@ -202,7 +202,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("errors.genericError")
+      t("genericError")
     );
   }
 

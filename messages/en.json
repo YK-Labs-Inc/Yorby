@@ -396,6 +396,7 @@
       "submit": "Sign Up"
     },
     "emailRequiredError": "Email is required",
+    "genericError": "Something went wrong, please try again.",
     "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration.",
     "signUp": "Sign Up"
   },
