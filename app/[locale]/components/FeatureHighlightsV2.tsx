@@ -138,7 +138,7 @@ export default function FeatureHighlight() {
   return (
     <div className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
       {/* Hero Section */}
-      <div className="w-full max-w-[1200px] mx-auto px-4 py-20">
+      <div className="w-full max-w-[1200px] mx-auto px-1 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -202,7 +202,7 @@ export default function FeatureHighlight() {
                     <motion.div
                       key={feature.id}
                       variants={item}
-                      className="w-[49%]"
+                      className="w-full md:w-[49%]"
                     >
                       <Card className="flex flex-col justify-between group h-full overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                         <div className="p-8">
@@ -281,11 +281,12 @@ export default function FeatureHighlight() {
                         </div>
                         <div>
                           <h4 className="text-xl font-semibold mb-2">
-                            Real-time AI Guidance
+                            {t("features.copilot.features.aiGuidance.title")}
                           </h4>
                           <p className="text-gray-600 dark:text-gray-300">
-                            Get intelligent suggestions while the interviewer is
-                            speaking, helping you craft perfect responses.
+                            {t(
+                              "features.copilot.features.aiGuidance.description"
+                            )}
                           </p>
                         </div>
                       </div>
@@ -296,12 +297,10 @@ export default function FeatureHighlight() {
                         </div>
                         <div>
                           <h4 className="text-xl font-semibold mb-2">
-                            Perfect Timing
+                            {t("features.copilot.features.timing.title")}
                           </h4>
                           <p className="text-gray-600 dark:text-gray-300">
-                            Instant suggestions appear before you need to
-                            respond, giving you time to process and deliver
-                            confidently.
+                            {t("features.copilot.features.timing.description")}
                           </p>
                         </div>
                       </div>
@@ -312,11 +311,14 @@ export default function FeatureHighlight() {
                         </div>
                         <div>
                           <h4 className="text-xl font-semibold mb-2">
-                            Personalized To You
+                            {t(
+                              "features.copilot.features.personalization.title"
+                            )}
                           </h4>
                           <p className="text-gray-600 dark:text-gray-300">
-                            Suggestions tailored to your experience, the role,
-                            and company, making every answer uniquely yours.
+                            {t(
+                              "features.copilot.features.personalization.description"
+                            )}
                           </p>
                         </div>
                       </div>
