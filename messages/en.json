@@ -418,7 +418,8 @@
     "emailRequiredError": "Email is required",
     "genericError": "Something went wrong, please try again.",
     "authSuccess": "A verification link has been sent to your email. Please check your inbox to complete your registration.",
-    "signUp": "Sign Up"
+    "signUp": "Sign Up",
+    "signUpToStart": "Sign up to save your custom interview prep"
   },
   "faq": {
     "title": "Frequently Asked Questions",
