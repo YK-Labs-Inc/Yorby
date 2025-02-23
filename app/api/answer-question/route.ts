@@ -151,6 +151,7 @@ ${
     `
     : `- Provide a natural, conversational response as if you're speaking directly to the interviewer.
     - Use complete sentences and maintain a professional yet personable tone.
+    - Keep the answer to be 60-90 seconds long.
     `
 }
 4. **Double Check Your Answer**:

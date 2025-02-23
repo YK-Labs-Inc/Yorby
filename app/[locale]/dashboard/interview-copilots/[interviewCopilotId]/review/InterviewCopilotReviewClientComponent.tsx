@@ -14,6 +14,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useTranslations } from "next-intl";
 
 interface InterviewCopilotReviewClientComponentProps {
   questionsAndAnswers: Tables<"interview_copilot_questions_and_answers">[];
@@ -24,6 +25,7 @@ export default function InterviewCopilotReviewClientComponent({
   questionsAndAnswers,
   recordingUrl,
 }: InterviewCopilotReviewClientComponentProps) {
+  const t = useTranslations("interviewCopilots.review");
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const tabsListRef = useRef<HTMLDivElement>(null);
@@ -64,8 +66,8 @@ export default function InterviewCopilotReviewClientComponent({
       {/* Video Recording */}
       <Card className="col-span-12 lg:col-span-6 lg:h-[calc(100vh-8rem)] flex flex-col">
         <CardHeader>
-          <CardTitle>Interview Recording</CardTitle>
-          <CardDescription>Review your interview performance</CardDescription>
+          <CardTitle>{t("recording.title")}</CardTitle>
+          <CardDescription>{t("recording.description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow relative">
           <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
@@ -82,8 +84,8 @@ export default function InterviewCopilotReviewClientComponent({
       {/* Question Review */}
       <Card className="col-span-12 lg:col-span-6 lg:h-[calc(100vh-8rem)] flex flex-col">
         <CardHeader>
-          <CardTitle>Question Review</CardTitle>
-          <CardDescription>Review your questions and answers</CardDescription>
+          <CardTitle>{t("questions.title")}</CardTitle>
+          <CardDescription>{t("questions.description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow flex flex-col overflow-hidden">
           <Tabs
@@ -107,7 +109,7 @@ export default function InterviewCopilotReviewClientComponent({
               >
                 {questionsAndAnswers.map((qa, index) => (
                   <TabsTrigger key={qa.id} value={index.toString()}>
-                    Question {index + 1}
+                    {t("questions.questionNumber", { number: index + 1 })}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -133,11 +135,15 @@ export default function InterviewCopilotReviewClientComponent({
                 <div className="h-full overflow-y-auto">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-semibold mb-2">Question</h3>
+                      <h3 className="font-semibold mb-2">
+                        {t("questions.questionLabel")}
+                      </h3>
                       <p className="text-muted-foreground">{qa.question}</p>
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-2">Your Answer</h3>
+                      <h3 className="font-semibold mb-2">
+                        {t("questions.answerLabel")}
+                      </h3>
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {qa.answer}
                       </ReactMarkdown>
