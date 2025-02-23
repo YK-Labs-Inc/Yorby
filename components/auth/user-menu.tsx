@@ -9,11 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
 import { Button } from "../ui/button";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
-import { useRouter } from "next/navigation";
 import { handleSignOut } from "./actions";
 
 interface UserMenuProps {
@@ -22,7 +20,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ email, hasSubscription }: UserMenuProps) {
-  const router = useRouter();
   const [_, startTransition] = useTransition();
 
   const handleManageSubscription = () => {

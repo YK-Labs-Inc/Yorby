@@ -35,7 +35,7 @@ export function LinkAccountModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>{t("signUp")}</Button>
+        <Button variant="secondary">{t("signUp")}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

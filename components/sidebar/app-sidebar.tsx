@@ -120,7 +120,7 @@ export function AppSidebar({
           <>
             {/* Jobs Section */}
             <SidebarGroup>
-              {isInterviewCopilotEnabled && (
+              {isInterviewCopilotEnabled && jobs.length > 0 && (
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">
                     {t("jobs")}
@@ -137,7 +137,7 @@ export function AppSidebar({
             </SidebarGroup>
 
             {/* Interview Copilots Section */}
-            {isInterviewCopilotEnabled && (
+            {isInterviewCopilotEnabled && interviewCopilots.length > 0 && (
               <SidebarGroup className="mt-6">
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">
@@ -181,7 +181,7 @@ export function AppSidebar({
           <UserMenu email={user.email} hasSubscription={hasSubscription} />
         )}{" "}
         {user && user?.is_anonymous && <LinkAccountModal />}
-        {!user && (
+        {(!user || user?.is_anonymous) && (
           <div>
             <p className="text-sm text-muted-foreground mb-4 text-center w-full">
               {t("signInToStart")}
