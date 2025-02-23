@@ -219,6 +219,16 @@
     "generateAnswerOnboarding": {
       "title": "Let AI Answer For You",
       "description": "Too lazy to answer the question yourself? Let AI generate a personalized answer for you.",
+      "features": {
+        "aiPowered": {
+          "title": "AI-Powered Answers",
+          "description": "Too lazy to answer the question yourself? Let AI generate an answer for you."
+        },
+        "personalized": {
+          "title": "Personalized to Your Experience",
+          "description": "If you've uploaded your resume or cover letter, it will use your previous work experience to answer the question for you."
+        }
+      },
       "button": "Got it!"
     }
   },

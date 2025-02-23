@@ -23,10 +23,9 @@ export function GenerateAnswerOnboardingDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Let AI Answer For You</DialogTitle>
+          <DialogTitle className="text-2xl">{t("title")}</DialogTitle>
           <DialogDescription className="text-lg pt-2">
-            Too lazy to answer the question yourself? Let AI generate a
-            personalized answer for you.
+            {t("description")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-8">
@@ -44,27 +43,27 @@ export function GenerateAnswerOnboardingDialog({ open, onOpenChange }: Props) {
             <div className="flex flex-col gap-2">
               <div className="flex items-start gap-2">
                 <Sparkles className="h-5 w-5 text-primary shrink-0" />
-                <h3 className="font-medium">AI-Powered Answers</h3>
+                <h3 className="font-medium">{t("features.aiPowered.title")}</h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                Too lazy to answer the question yourself? Let AI generate an
-                answer for you.
+                {t("features.aiPowered.description")}
               </p>
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-start gap-2">
                 <FileText className="h-5 w-5 text-primary shrink-0" />
-                <h3 className="font-medium">Personalized to Your Experience</h3>
+                <h3 className="font-medium">
+                  {t("features.personalized.title")}
+                </h3>
               </div>
               <p className="text-sm text-muted-foreground pl-7">
-                If you've uploaded your resume or cover letter, it will use your
-                previous work experience to answer the question for you.
+                {t("features.personalized.description")}
               </p>
             </div>
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={() => onOpenChange(false)}>Got it!</Button>
+          <Button onClick={() => onOpenChange(false)}>{t("button")}</Button>
         </div>
       </DialogContent>
     </Dialog>

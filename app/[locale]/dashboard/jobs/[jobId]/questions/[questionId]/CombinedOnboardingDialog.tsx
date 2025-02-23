@@ -24,11 +24,10 @@ export function CombinedOnboardingDialog({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
-            Perfect Your Interview Answers
+            {t("onboarding.title")}
           </DialogTitle>
           <DialogDescription className="text-lg pt-2">
-            Practice answering interview questions and let AI help you craft the
-            perfect response.
+            {t("onboarding.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-12">
@@ -64,7 +63,9 @@ export function CombinedOnboardingDialog({ open, onOpenChange }: Props) {
 
           {/* AI Generation Section */}
           <div className="space-y-8 pt-6 border-t">
-            <h3 className="text-xl font-semibold">AI-Powered Assistance</h3>
+            <h3 className="text-xl font-semibold">
+              {t("generateAnswerOnboarding.title")}
+            </h3>
             <div className="relative aspect-video rounded-lg overflow-hidden bg-black/5">
               <video
                 src="/assets/generate-answer-demo.mp4"
@@ -79,30 +80,34 @@ export function CombinedOnboardingDialog({ open, onOpenChange }: Props) {
               <div className="flex flex-col gap-2">
                 <div className="flex items-start gap-2">
                   <Sparkles className="h-5 w-5 text-primary shrink-0" />
-                  <h3 className="font-medium">AI-Powered Answers</h3>
+                  <h3 className="font-medium">
+                    {t("generateAnswerOnboarding.features.aiPowered.title")}
+                  </h3>
                 </div>
                 <p className="text-sm text-muted-foreground pl-7">
-                  Let AI generate professional and articulate responses based on
-                  common best practices.
+                  {t("generateAnswerOnboarding.features.aiPowered.description")}
                 </p>
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-start gap-2">
                   <FileText className="h-5 w-5 text-primary shrink-0" />
                   <h3 className="font-medium">
-                    Personalized to Your Experience
+                    {t("generateAnswerOnboarding.features.personalized.title")}
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground pl-7">
-                  AI uses your resume and cover letter to create personalized
-                  answers that highlight your experience.
+                  {t(
+                    "generateAnswerOnboarding.features.personalized.description"
+                  )}
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div className="flex justify-end pt-6">
-          <Button onClick={() => onOpenChange(false)}>Got it!</Button>
+          <Button onClick={() => onOpenChange(false)}>
+            {t("onboarding.button")}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
