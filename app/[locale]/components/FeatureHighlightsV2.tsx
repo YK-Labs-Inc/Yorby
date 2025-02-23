@@ -132,7 +132,7 @@ const companies = [
 ];
 
 export default function FeatureHighlight() {
-  const t = useTranslations("landingPage");
+  const t = useTranslations("FeatureHighlightsV2");
   const isInterviewCopilotEnabled = true;
 
   return (
@@ -145,24 +145,23 @@ export default function FeatureHighlight() {
           className="text-center mb-16"
         >
           <span className="inline-block px-4 py-1 bg-primary/20 rounded-full text-primary text-sm font-semibold mb-4">
-            NO SUBSCRIPTION REQUIRED
+            {t("hero.badge")}
           </span>
           <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-            Crush Your Next Interview
+            {t("hero.title")}
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            From interview prep to real-time interview help, Perfect Interview
-            is a complete solution to help you land any job and get the bag 💰
+            {t("hero.description")}
           </p>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            No annoying subscription required.
+            {t("hero.subscriptionNote")}
           </p>
           <div className="flex justify-center gap-4 flex-col sm:flex-row">
             <Button
               size="lg"
               className="bg-primary hover:bg-primary/90 text-lg px-8"
             >
-              Get Started
+              {t("hero.getStarted")}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
@@ -175,9 +174,7 @@ export default function FeatureHighlight() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
-            <h3 className="text-4xl font-bold mb-4">
-              Everything You Need To Crush Your Next Job Interview
-            </h3>
+            <h3 className="text-4xl font-bold mb-4">{t("features.title")}</h3>
           </motion.div>
 
           {/* Interview Prep Section */}
@@ -186,11 +183,10 @@ export default function FeatureHighlight() {
             <div className="relative p-12">
               <div className="text-center mb-12">
                 <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
-                  Personalized Interview Prep Experience
+                  {t("features.prep.title")}
                 </h4>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
-                  Master your interview skills with our comprehensive
-                  preparation tools
+                  {t("features.prep.description")}
                 </p>
               </div>
 
@@ -246,17 +242,13 @@ export default function FeatureHighlight() {
                 <div className="relative p-12">
                   <div className="text-center mb-12">
                     <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
-                      Your Own Personal Interview Copilot
+                      {t("features.copilot.title")}
                     </h4>
                     <p className="text-lg text-gray-600 dark:text-gray-300">
-                      Interview Copilot listens in on your interview and answers
-                      interview questions for you in real-time based off of your
-                      previous work history to make sure you crush your job
-                      interview
+                      {t("features.copilot.description")}
                     </p>
                     <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
-                      Don't worry — it is 100% undetectable so this can be our
-                      little secret 🤫
+                      {t("features.copilot.note")}
                     </p>
                   </div>
 
@@ -336,7 +328,7 @@ export default function FeatureHighlight() {
                           size="lg"
                           className="bg-primary hover:bg-primary/90 text-lg px-12"
                         >
-                          Try Interview Copilot{" "}
+                          {t("features.copilot.tryButton")}{" "}
                           <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
                       </Link>
@@ -361,39 +353,20 @@ export default function FeatureHighlight() {
           <div className="relative p-12">
             <div className="text-center mb-12">
               <span className="inline-block px-4 py-1 bg-primary/20 rounded-full text-primary text-sm font-semibold mb-4">
-                SIMPLE PRICING
+                {t("pricing.badge")}
               </span>
-              <h3 className="text-4xl font-bold mb-4">
-                Pay Per Interview, Not Per Month
-              </h3>
+              <h3 className="text-4xl font-bold mb-4">{t("pricing.title")}</h3>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Unlike our competitors, we don't lock you into expensive
-                subscriptions
+                {t("pricing.subtitle")}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
-              {/* Image Section */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="relative lg:col-span-2 mb-12"
-              >
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1200px] mx-auto">
-                  <img
-                    src="/assets/purchase-page.png"
-                    alt="Purchase Page"
-                    className="w-full h-auto object-contain"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                </div>
-              </motion.div>
-
-              {/* Benefits Section - Now in a 3-column layout below the image */}
+            <div className="flex flex-col items-center justify-center space-y-8">
+              {/* Benefits Section - Now in a 3-column layout */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-8"
+                className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl"
               >
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -401,11 +374,10 @@ export default function FeatureHighlight() {
                   </div>
                   <div>
                     <h4 className="text-xl font-semibold mb-2">
-                      Pay As You Go
+                      {t("pricing.benefits.payAsYouGo.title")}
                     </h4>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Only pay for the interviews you're preparing for. No
-                      monthly fees or hidden costs.
+                      {t("pricing.benefits.payAsYouGo.description")}
                     </p>
                   </div>
                 </div>
@@ -415,10 +387,11 @@ export default function FeatureHighlight() {
                     <Lock className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-semibold mb-2">No Lock-in</h4>
+                    <h4 className="text-xl font-semibold mb-2">
+                      {t("pricing.benefits.noLockIn.title")}
+                    </h4>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Freedom to use our service only when you need it. No
-                      commitments or contracts.
+                      {t("pricing.benefits.noLockIn.description")}
                     </p>
                   </div>
                 </div>
@@ -429,24 +402,25 @@ export default function FeatureHighlight() {
                   </div>
                   <div>
                     <h4 className="text-xl font-semibold mb-2">
-                      Lifetime Access
+                      {t("pricing.benefits.lifetimeAccess.title")}
                     </h4>
                     <p className="text-gray-600 dark:text-gray-300">
-                      Your interview prep materials stay accessible forever. No
-                      expiration dates.
+                      {t("pricing.benefits.lifetimeAccess.description")}
                     </p>
                   </div>
                 </div>
               </motion.div>
 
-              <div className="lg:col-span-2 flex justify-center mt-8">
-                <div className="inline-block bg-white dark:bg-gray-800 rounded-full px-8 py-4 shadow-lg">
-                  <span className="text-xl font-semibold text-gray-600 dark:text-gray-300">
-                    Starting at just{" "}
-                    <span className="text-primary font-bold text-2xl">$15</span>{" "}
-                    per interview
-                  </span>
-                </div>
+              <div className="flex flex-col items-center space-y-6">
+                <Link href="/purchase">
+                  <Button
+                    size="lg"
+                    className="bg-primary hover:bg-primary/90 text-lg px-12"
+                  >
+                    {t("pricing.viewPlansButton")}{" "}
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -458,12 +432,9 @@ export default function FeatureHighlight() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center bg-primary/5 rounded-3xl p-12"
         >
-          <h3 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Interview Success?
-          </h3>
+          <h3 className="text-4xl font-bold mb-6">{t("finalCTA.title")}</h3>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of professionals who have elevated their interview
-            performance. Pay only for what you need, no subscription required.
+            {t("finalCTA.description")}
           </p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <Link href="/sign-in">
@@ -471,13 +442,11 @@ export default function FeatureHighlight() {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-lg px-8"
               >
-                Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
+                {t("finalCTA.button")} <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>
-          <p className="mt-4 text-sm text-gray-500">
-            No subscription • No hidden fees • Pay per interview
-          </p>
+          <p className="mt-4 text-sm text-gray-500">{t("finalCTA.footer")}</p>
         </motion.div>
       </div>
     </div>
