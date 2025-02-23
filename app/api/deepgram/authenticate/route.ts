@@ -8,13 +8,6 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
     path: "/api/deepgram/authenticate",
   });
-  // exit early so we don't request 70000000 keys while in devmode
-  if (process.env.DEEPGRAM_ENV === "development") {
-    logger.info("Deepgram is in development mode, returning local key");
-    return NextResponse.json({
-      key: process.env.DEEPGRAM_API_KEY ?? "",
-    });
-  }
 
   // gotta use the request object to invalidate the cache every request
   const url = request.url;

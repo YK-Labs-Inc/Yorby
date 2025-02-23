@@ -10,6 +10,8 @@ import {
   ChevronDown,
   Monitor,
   Chrome,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,129 @@ import remarkGfm from "remark-gfm";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsChrome } from "@/hooks/use-chrome";
 
+const MicrophonePermission = ({
+  onPermissionGranted,
+}: {
+  onPermissionGranted: () => void;
+}) => {
+  const [permissionStatus, setPermissionStatus] = useState<
+    "prompt" | "granted" | "denied"
+  >("prompt");
+  const [isChecking, setIsChecking] = useState(true);
+  const t = useTranslations("interviewCopilots.session");
+
+  const checkMicrophonePermission = async () => {
+    try {
+      // Check if the browser supports permissions API
+      if (navigator.permissions && navigator.permissions.query) {
+        const result = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        if (result.state === "granted") {
+          onPermissionGranted();
+        } else {
+          setPermissionStatus(result.state as "prompt" | "granted" | "denied");
+
+          // Listen for permission changes
+          result.addEventListener("change", () => {
+            setPermissionStatus(
+              result.state as "prompt" | "granted" | "denied"
+            );
+            if (result.state === "granted") {
+              onPermissionGranted();
+            }
+          });
+        }
+      } else {
+        // Fallback to getUserMedia check
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          stream.getTracks().forEach((track) => track.stop());
+          setPermissionStatus("granted");
+          onPermissionGranted();
+        } catch {
+          setPermissionStatus("denied");
+        }
+      }
+    } catch (error) {
+      setPermissionStatus("denied");
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const requestPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      setPermissionStatus("granted");
+      onPermissionGranted();
+    } catch (error) {
+      setPermissionStatus("denied");
+    }
+  };
+
+  useEffect(() => {
+    checkMicrophonePermission();
+  }, []);
+
+  if (isChecking) {
+    return (
+      <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-lg">{t("microphonePermission.checking")}</p>
+      </div>
+    );
+  }
+
+  if (permissionStatus === "granted") {
+    return null;
+  }
+
+  return (
+    <div className="h-full w-full flex flex-col items-center justify-center p-8 text-center space-y-6">
+      <div className="rounded-full bg-red-100 p-4">
+        {permissionStatus === "denied" ? (
+          <MicOff className="h-8 w-8 text-red-600" />
+        ) : (
+          <Mic className="h-8 w-8 text-primary" />
+        )}
+      </div>
+      <h2 className="text-2xl font-semibold">
+        {t("microphonePermission.title")}
+      </h2>
+      <p className="text-muted-foreground max-w-md">
+        {permissionStatus === "denied"
+          ? t("microphonePermission.description.denied")
+          : t("microphonePermission.description.prompt")}
+      </p>
+      {permissionStatus === "prompt" && (
+        <Button
+          onClick={requestPermission}
+          className="flex items-center space-x-2"
+        >
+          <Mic className="h-4 w-4" />
+          <span>{t("microphonePermission.allowButton")}</span>
+        </Button>
+      )}
+      {permissionStatus === "denied" && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            {t("microphonePermission.instructions.title")}
+          </p>
+          <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-1">
+            <li>{t("microphonePermission.instructions.steps.1")}</li>
+            <li>{t("microphonePermission.instructions.steps.2")}</li>
+            <li>{t("microphonePermission.instructions.steps.3")}</li>
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export function Session({
   interviewCopilotId,
 }: {
@@ -62,6 +187,8 @@ export function Session({
   const isMobile = useIsMobile();
   const isChrome = useIsChrome();
   const t = useTranslations("interviewCopilots.session");
+  const [microphonePermissionGranted, setMicrophonePermissionGranted] =
+    useState(false);
   const [isSelectingMeeting, setIsSelectingMeeting] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -461,9 +588,14 @@ export function Session({
         await handleMicrophoneSelect(defaultMicrophone.deviceId, microphones);
       } else if (microphones.length > 0) {
         await handleMicrophoneSelect(microphones[0].deviceId, microphones);
+      } else {
+        logError("No microphones found");
+        alert("No microphones found");
       }
     } catch (error) {
       logError("Error getting microphones:", { error });
+      // Re-throw the error so it can be handled by the caller
+      alert("Error getting microphones");
     }
   };
 
@@ -493,10 +625,6 @@ export function Session({
       logError("Error selecting microphone:", { error });
     }
   };
-
-  useEffect(() => {
-    getMicrophones();
-  }, []);
 
   const handleSelectMeeting = async () => {
     try {
@@ -983,6 +1111,17 @@ export function Session({
       <div className="h-full w-full flex flex-col justify-center items-center">
         <BrowserWarning />
       </div>
+    );
+  }
+
+  if (!microphonePermissionGranted) {
+    return (
+      <MicrophonePermission
+        onPermissionGranted={() => {
+          setMicrophonePermissionGranted(true);
+          getMicrophones();
+        }}
+      />
     );
   }
 

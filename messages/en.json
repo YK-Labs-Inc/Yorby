@@ -623,6 +623,23 @@
       "startCopilot": "Start Interview Copilot",
       "startingCopilot": "Starting Interview Copilot...",
       "selectMicrophone": "Select Microphone",
+      "microphonePermission": {
+        "checking": "Checking microphone permissions...",
+        "title": "Microphone Access Required",
+        "description": {
+          "denied": "Microphone access has been denied. Please enable microphone access in your browser settings to continue.",
+          "prompt": "This application needs access to your microphone to record your interview session."
+        },
+        "allowButton": "Allow Microphone Access",
+        "instructions": {
+          "title": "To enable microphone access:",
+          "steps": {
+            "1": "Click the camera/microphone icon in your browser's address bar",
+            "2": "Select \"Allow\" for microphone access",
+            "3": "Refresh the page"
+          }
+        }
+      },
       "error": {
         "generic": "Sorry, something went wrong. Please try again.",
         "noMicrophoneSelected": "Please select a microphone to continue",
@@ -774,6 +791,19 @@
       "errors": {
         "emailRequiredError": "Please enter your email",
         "genericError": "Something went wrong, please try again."
+      }
+    },
+    "review": {
+      "recording": {
+        "title": "Interview Recording",
+        "description": "Review your interview performance"
+      },
+      "questions": {
+        "title": "Question Review",
+        "description": "Review the questions and answers",
+        "questionLabel": "Question",
+        "questionNumber": "Question {number}",
+        "answerLabel": "Your Answer"
       }
     }
   },
