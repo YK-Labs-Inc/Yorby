@@ -14,6 +14,7 @@ import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsBu
 import { Button } from "@/components/ui/button";
 import { FileText, Monitor } from "lucide-react";
 import { redirect } from "next/navigation";
+import PostHogClient from "@/app/posthog";
 
 const MobileWarning = async () => {
   const t = await getTranslations("mobileWarning");
@@ -115,6 +116,12 @@ export default async function JobPage({
   }
   const t = await getTranslations("accountLinking");
   const isLocked = job.status === "locked" && !hasSubscription;
+  const posthog = PostHogClient();
+  const isAnonymousAccountLinkingEnabled =
+    (await posthog.getFeatureFlag(
+      "optional-anonymous-account-linking",
+      user.id
+    )) === "control";
 
   return (
     <div
@@ -140,7 +147,7 @@ export default async function JobPage({
         </Link>
       </div>
 
-      {isAnonymous ? (
+      {isAnonymous && isAnonymousAccountLinkingEnabled ? (
         <div className="md mx-auto w-full">
           {(!formMessage || "error" in formMessage) && (
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">

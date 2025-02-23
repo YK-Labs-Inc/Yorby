@@ -120,7 +120,7 @@ export function AppSidebar({
           <>
             {/* Jobs Section */}
             <SidebarGroup>
-              {isInterviewCopilotEnabled && jobs.length > 0 && (
+              {jobs.length > 0 && (
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">
                     {t("jobs")}
@@ -137,7 +137,7 @@ export function AppSidebar({
             </SidebarGroup>
 
             {/* Interview Copilots Section */}
-            {isInterviewCopilotEnabled && interviewCopilots.length > 0 && (
+            {interviewCopilots.length > 0 && (
               <SidebarGroup className="mt-6">
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">

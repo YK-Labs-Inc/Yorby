@@ -120,7 +120,7 @@ const fetchOnboardingState = async (user: User) => {
       ) ?? false,
     first_question_answered: submissions ? submissions.length > 0 : false,
     first_mock_interview_completed: !!mockInterviews,
-    connected_account_to_email: user.email !== undefined,
+    connected_account_to_email: Boolean(user.email),
     last_created_job_id: jobs?.id ?? null,
     last_unanswered_question_id: unansweredQuestionId,
   };
@@ -173,10 +173,7 @@ export default async function RootLayout({
     isInterviewCopilotEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-interview-copilot", user.id)
     );
-
-    if (isInterviewCopilotEnabled) {
-      interviewCopilots = await fetchInterviewCopilots(user.id);
-    }
+    interviewCopilots = await fetchInterviewCopilots(user.id);
   }
 
   const messages = await getMessages();

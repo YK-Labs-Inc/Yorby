@@ -27,7 +27,7 @@ export default function SignUpPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
+      setIsAuthenticated(!!user?.email);
       setIsLoading(false);
     };
     checkAuth();
