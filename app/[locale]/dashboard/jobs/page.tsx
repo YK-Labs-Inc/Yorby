@@ -29,7 +29,6 @@ export default async function JobsPage({
 }) {
   const errorMessage = (await searchParams).error as string;
   const newJob = (await searchParams).newJob === "true";
-  const showOnboarding = (await searchParams).onboarding === "true";
   let jobs: Tables<"custom_jobs">[] = [];
   if (!newJob) {
     jobs = await fetchJobs();
@@ -37,6 +36,7 @@ export default async function JobsPage({
   if (jobs.length > 0) {
     redirect(`/dashboard/jobs/${jobs[0].id}?error=${errorMessage}`);
   }
+  const showOnboarding = jobs.length === 0;
   return (
     <div className="w-full flex justify-center items-center p-8">
       <JobCreationComponent showOnboarding={showOnboarding} />

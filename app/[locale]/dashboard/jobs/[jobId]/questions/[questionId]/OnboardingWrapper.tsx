@@ -1,38 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { OnboardingDialog } from "./OnboardingDialog";
-import { GenerateAnswerOnboardingDialog } from "./GenerateAnswerOnboardingDialog";
+import { CombinedOnboardingDialog } from "./CombinedOnboardingDialog";
 
 interface Props {
-  showAnswerOnboarding?: boolean;
-  showGenerateOnboarding?: boolean;
+  showOnboarding?: boolean;
 }
 
-export function OnboardingWrapper({
-  showAnswerOnboarding = false,
-  showGenerateOnboarding = false,
-}: Props) {
-  const [showAnswerDialog, setShowAnswerDialog] =
-    useState(showAnswerOnboarding);
-  const [showGenerateDialog, setShowGenerateDialog] = useState(
-    showGenerateOnboarding
-  );
+export function OnboardingWrapper({ showOnboarding = false }: Props) {
+  const [showDialog, setShowDialog] = useState(false);
+
   useEffect(() => {
-    setShowAnswerDialog(showAnswerOnboarding);
-    setShowGenerateDialog(showGenerateOnboarding);
-  }, [showAnswerOnboarding, showGenerateOnboarding]);
+    setShowDialog(showOnboarding);
+  }, [showOnboarding]);
 
   return (
-    <>
-      <OnboardingDialog
-        open={showAnswerDialog}
-        onOpenChange={setShowAnswerDialog}
-      />
-      <GenerateAnswerOnboardingDialog
-        open={showGenerateDialog}
-        onOpenChange={setShowGenerateDialog}
-      />
-    </>
+    <CombinedOnboardingDialog open={showDialog} onOpenChange={setShowDialog} />
   );
 }

@@ -71,61 +71,6 @@ const fetchHasSubscription = async (userId: string) => {
   return data !== null;
 };
 
-const fetchOnboardingState = async (user: User) => {
-  const supabase = await createSupabaseServerClient();
-  const userId = user.id;
-
-  const [{ data: jobs }, { data: submissions }, { data: mockInterviews }] =
-    await Promise.all([
-      // Check if user has created any jobs
-      supabase
-        .from("custom_jobs")
-        .select("id")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      // Check if user has submitted any answers
-      supabase.from("custom_job_question_submissions").select(),
-      // Check if user has completed any mock interviews
-      supabase
-        .from("custom_job_mock_interviews")
-        .select("id")
-        .eq("status", "complete")
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-  let unansweredQuestionId = null;
-  if (!submissions || submissions.length === 0) {
-    const { data: unansweredQuestion } = await supabase
-      .from("custom_job_questions")
-      .select("id")
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    unansweredQuestionId = unansweredQuestion?.id ?? null;
-  }
-
-  return {
-    first_custom_job_created: !!jobs,
-    first_answer_generated:
-      submissions?.some(
-        (submission) =>
-          (submission.feedback as { pros: string[]; cons: string[] })?.pros
-            .length === 0 &&
-          (submission.feedback as { pros: string[]; cons: string[] })?.cons
-            .length === 0
-      ) ?? false,
-    first_question_answered: submissions ? submissions.length > 0 : false,
-    first_mock_interview_completed: !!mockInterviews,
-    connected_account_to_email: Boolean(user.email),
-    last_created_job_id: jobs?.id ?? null,
-    last_unanswered_question_id: unansweredQuestionId,
-  };
-};
-
 const fetchInterviewCopilots = async (userId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -168,7 +113,6 @@ export default async function RootLayout({
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
-    onboardingState = await fetchOnboardingState(user);
     jobs = await fetchJobs(user.id);
     isInterviewCopilotEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-interview-copilot", user.id)

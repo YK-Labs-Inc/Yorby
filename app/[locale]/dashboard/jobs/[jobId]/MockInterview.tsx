@@ -9,6 +9,7 @@ import { CheckCircle, Clock } from "lucide-react";
 import InterviewFilter from "./InterviewFilter";
 import LockedJobComponent from "./LockedJobComponent";
 import CreateDemoMockInterviewButton from "./CreateDemoMockInterviewButton";
+import MockInterviewOnboarding from "./MockInterviewOnboarding";
 
 interface MockInterviewProps {
   filter: "all" | "complete" | "in_progress" | null;
@@ -50,6 +51,7 @@ export default async function MockInterview({
   if (isLocked) {
     return (
       <div className="flex flex-col gap-4 w-full">
+        {allMockInterviews.length === 0 && <MockInterviewOnboarding />}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <InterviewFilter jobId={jobId} currentFilter={filter} />
@@ -122,6 +124,7 @@ export default async function MockInterview({
 
   return (
     <div className="flex flex-col gap-6 w-full">
+      {allMockInterviews.length === 0 && <MockInterviewOnboarding />}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <InterviewFilter jobId={jobId} currentFilter={filter} />
