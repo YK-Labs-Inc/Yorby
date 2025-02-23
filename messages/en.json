@@ -229,6 +229,25 @@
     "starting": "Starting...",
     "previousInterviews": "Previous Mock Interviews",
     "interviewDate": "Interview on {date}",
+    "onboarding": {
+      "title": "Welcome to the Mock Interview Experience",
+      "description": "Practice your interview skills with our AI interviewer. Here's how it works:",
+      "steps": {
+        "1": {
+          "title": "Real Interview Experience",
+          "description": "Chat with our AI interviewer that conducts a realistic job interview based on the position you're applying for."
+        },
+        "2": {
+          "title": "Natural Conversation",
+          "description": "Speak naturally as you would in a real interview - our AI interviewer will listen and respond accordingly."
+        },
+        "3": {
+          "title": "Performance Review",
+          "description": "After the interview, get detailed feedback on your performance, including areas of strength and improvement."
+        }
+      },
+      "button": "Got it!"
+    },
     "setup": {
       "title": "Setup Your Interview Environment",
       "camera": {

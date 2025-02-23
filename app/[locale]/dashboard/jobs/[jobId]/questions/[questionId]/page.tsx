@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import AnswerForm from "./AnswerForm";
 import { Tables } from "@/utils/supabase/database.types";
-import { Suspense } from "react";
 import { OnboardingWrapper } from "./OnboardingWrapper";
 
 const fetchQuestion = async (questionId: string) => {
@@ -32,12 +31,9 @@ export default async function Page({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { jobId, questionId } = await params;
-  const { submissionId, answerOnboarding, generateOnboarding } =
-    (await searchParams) as {
-      submissionId?: string;
-      answerOnboarding?: string;
-      generateOnboarding?: string;
-    };
+  const { submissionId } = (await searchParams) as {
+    submissionId?: string;
+  };
   const question = await fetchQuestion(questionId);
   const lastSubmission =
     question.custom_job_question_submissions.length > 0
@@ -49,6 +45,17 @@ export default async function Page({
           (submission) => submission.id === submissionId
         )
       : undefined;
+
+  // Determine if we should show onboarding
+  const showOnboarding =
+    question.custom_job_question_submissions.length === 0 && // First question (no submissions)
+    !question.custom_job_question_submissions.some(
+      (submission) =>
+        (submission.feedback as { pros: string[]; cons: string[] })?.pros
+          .length > 0 ||
+        (submission.feedback as { pros: string[]; cons: string[] })?.cons
+          .length > 0
+    ); // No generated answers yet
 
   return (
     <>
@@ -67,10 +74,7 @@ export default async function Page({
           currentSubmission={currentSubmission ?? lastSubmission}
         />
       </div>
-      <OnboardingWrapper
-        showAnswerOnboarding={answerOnboarding === "true"}
-        showGenerateOnboarding={generateOnboarding === "true"}
-      />
+      <OnboardingWrapper showOnboarding={showOnboarding} />
     </>
   );
 }

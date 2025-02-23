@@ -117,11 +117,13 @@ export default async function JobPage({
   const t = await getTranslations("accountLinking");
   const isLocked = job.status === "locked" && !hasSubscription;
   const posthog = PostHogClient();
-  const isAnonymousAccountLinkingEnabled =
-    (await posthog.getFeatureFlag(
-      "optional-anonymous-account-linking",
-      user.id
-    )) === "control";
+  // const isAnonymousAccountLinkingEnabled =
+  //   (await posthog.getFeatureFlag(
+  //     "optional-anonymous-account-linking",
+  //     user.id
+  //   )) === "control";
+
+  const isAnonymousAccountLinkingEnabled = false;
 
   return (
     <div

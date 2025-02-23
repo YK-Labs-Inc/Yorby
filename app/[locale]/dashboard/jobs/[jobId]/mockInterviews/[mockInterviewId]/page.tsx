@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import MockInterviewClientComponent from "./MockInterviewClientComponent";
 
-const fetchMockInterviewPreviousMessageHistroy = async (
+const fetchMockInterviewPreviousMessageHistory = async (
   mockInterviewId: string
 ) => {
   const supabase = await createSupabaseServerClient();
@@ -24,7 +24,7 @@ export default async function MockInterviewPage({
   const jobId = (await params).jobId;
   const mockInterviewId = (await params).mockInterviewId;
   const previousMessageHistory =
-    await fetchMockInterviewPreviousMessageHistroy(mockInterviewId);
+    await fetchMockInterviewPreviousMessageHistory(mockInterviewId);
   return (
     <MockInterviewClientComponent
       jobId={jobId}
