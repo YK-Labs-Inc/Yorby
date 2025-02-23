@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "@/app/[locale]/dashboard/jobs/[jobId]/actions";
+import PostHogClient from "@/app/posthog";
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -58,6 +59,9 @@ export default async function Page({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
   const isAnonymous = user?.is_anonymous ?? true;
 
   const successMessage = (await searchParams)?.success as string | undefined;
@@ -71,6 +75,13 @@ export default async function Page({
   } else if (message) {
     formMessage = { message: message };
   }
+
+  const posthog = PostHogClient();
+  const isAnonymousAccountLinkingEnabled =
+    (await posthog.getFeatureFlag(
+      "optional-anonymous-account-linking",
+      user.id
+    )) === "control";
 
   if (interviewCopilot?.status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
@@ -113,7 +124,7 @@ export default async function Page({
       <div
         className={`max-w-4xl mx-auto space-y-8 ${isAnonymous ? "h-full md:h-auto" : ""}`}
       >
-        {isAnonymous ? (
+        {isAnonymous && isAnonymousAccountLinkingEnabled ? (
           <div className="md mx-auto w-full">
             {(!formMessage || "error" in formMessage) && (
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
