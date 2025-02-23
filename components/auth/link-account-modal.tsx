@@ -7,7 +7,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { FormMessage, Message } from "@/components/form-message";
@@ -35,7 +34,14 @@ export function LinkAccountModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary">{t("signUp")}</Button>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm text-muted-foreground text-center w-full">
+            {t("signUpToStart")}
+          </p>
+          <Button className="w-full" variant="outline">
+            {t("signUp")}
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

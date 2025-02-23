@@ -183,9 +183,6 @@ export function AppSidebar({
         {user && user?.is_anonymous && <LinkAccountModal />}
         {(!user || user?.is_anonymous) && (
           <div>
-            <p className="text-sm text-muted-foreground mb-4 text-center w-full">
-              {t("signInToStart")}
-            </p>
             <Button
               onClick={() => setIsAuthOpen(true)}
               className="w-full"
