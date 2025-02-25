@@ -212,6 +212,10 @@ export function Session({
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const responseFormat = useRef<"verbatim" | "bullet">("verbatim");
+  const [responseFormatState, setResponseFormatState] = useState<
+    "verbatim" | "bullet"
+  >("verbatim");
   const {
     connection,
     connectToDeepgram,
@@ -226,9 +230,6 @@ export function Session({
   const router = useRouter();
   const [transcriptAutoScroll, setTranscriptAutoScroll] = useState(true);
   const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
-  const [responseFormat, setResponseFormat] = useState<"verbatim" | "bullet">(
-    "verbatim"
-  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Onboarding modal states
@@ -1061,7 +1062,7 @@ export function Session({
         body: JSON.stringify({
           interviewCopilotId,
           question,
-          responseFormat,
+          responseFormat: responseFormat.current,
         }),
       });
 
@@ -1253,10 +1254,11 @@ export function Session({
                   </CardHeader>
                   <CardContent>
                     <RadioGroup
-                      value={responseFormat}
-                      onValueChange={(value: "verbatim" | "bullet") =>
-                        setResponseFormat(value)
-                      }
+                      value={responseFormatState}
+                      onValueChange={(value: "verbatim" | "bullet") => {
+                        responseFormat.current = value;
+                        setResponseFormatState(value);
+                      }}
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="verbatim" id="verbatim" />
