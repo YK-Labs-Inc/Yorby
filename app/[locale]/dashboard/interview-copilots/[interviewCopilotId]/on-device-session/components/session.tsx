@@ -1054,6 +1054,14 @@ export function Session({
     setQuestionsWithAnswers((prev) => [...prev, { question, answer: "" }]);
 
     try {
+      // Get previous questions and answers (excluding the current one that has an empty answer)
+      const previousQA = latestQuestionsWithAnswersRef.current
+        .filter((qa) => qa.answer)
+        .map((qa) => ({
+          question: qa.question,
+          answer: qa.answer,
+        }));
+
       const response = await fetch("/api/answer-question", {
         method: "POST",
         headers: {
@@ -1063,6 +1071,7 @@ export function Session({
           interviewCopilotId,
           question,
           responseFormat: responseFormat.current,
+          previousQA, // Include previous questions and answers
         }),
       });
 
