@@ -231,6 +231,7 @@ export function Session({
   const [transcriptAutoScroll, setTranscriptAutoScroll] = useState(true);
   const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showExitWarningModal, setShowExitWarningModal] = useState(false);
 
   // Onboarding modal states
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -485,6 +486,30 @@ export function Session({
     }
   };
 
+  // Handle beforeunload event to prevent accidental tab closure during recording
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isTranscribing && recordedChunksRef.current.length > 0) {
+        // Show browser's native dialog
+        e.preventDefault();
+        e.returnValue = "";
+
+        // Show our custom modal as well
+        setShowExitWarningModal(true);
+
+        return "";
+      }
+    };
+
+    if (isTranscribing) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isTranscribing]);
+
   // Scroll to bottom handler
   const scrollToBottom = (
     element: HTMLDivElement | null,
@@ -681,17 +706,17 @@ export function Session({
 
   const startTranscription = async () => {
     setLoadingTranscriptionService(true);
-    setIsTranscribing(false);
-    if (!stream) {
-      alert(t("error.generic"));
-      return;
-    }
-    try {
-      setupDeepgramRealTimeTranscription();
-    } catch (error) {
-      logError("Error starting transcription:", { error });
-      setIsTranscribing(false);
-    }
+    setIsTranscribing(true);
+    // if (!stream) {
+    //   alert(t("error.generic"));
+    //   return;
+    // }
+    // try {
+    //   setupDeepgramRealTimeTranscription();
+    // } catch (error) {
+    //   logError("Error starting transcription:", { error });
+    //   setIsTranscribing(false);
+    // }
   };
 
   const setupDeepgramRealTimeTranscription = () => {
@@ -993,10 +1018,6 @@ export function Session({
     }
   };
 
-  const onLeave = () => {
-    stopTranscription();
-  };
-
   useEffect(() => {
     latestTranscriptRef.current = transcript;
   }, [transcript]);
@@ -1138,6 +1159,38 @@ export function Session({
   return (
     <div className="flex h-screen flex-col">
       <ImageZoomModal />
+
+      {/* Exit Warning Modal */}
+      <Dialog
+        open={showExitWarningModal}
+        onOpenChange={setShowExitWarningModal}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("exitWarning.title")}</DialogTitle>
+            <DialogDescription>
+              {t("exitWarning.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 text-sm text-muted-foreground">
+            {t("exitWarning.instruction")}
+          </div>
+          <DialogFooter className="mt-6">
+            <Button
+              variant="destructive"
+              onClick={() => {
+                stopTranscription();
+                setShowExitWarningModal(false);
+                setIsDialogOpen(true);
+              }}
+              disabled={isUploading}
+            >
+              {t("stopRecording")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
