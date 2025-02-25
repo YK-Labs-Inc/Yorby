@@ -810,7 +810,7 @@
         "description": "Review the questions and answers",
         "questionLabel": "Question",
         "questionNumber": "Question {number}",
-        "answerLabel": "Your Answer"
+        "answerLabel": "AI's Answer"
       }
     }
   },
