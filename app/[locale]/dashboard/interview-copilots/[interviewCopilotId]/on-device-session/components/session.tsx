@@ -212,6 +212,10 @@ export function Session({
   const previousStartRef = useRef<number | null>(null);
   const latestTranscriptRef = useRef<string[][]>(transcript);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const responseFormat = useRef<"verbatim" | "bullet">("verbatim");
+  const [responseFormatState, setResponseFormatState] = useState<
+    "verbatim" | "bullet"
+  >("verbatim");
   const {
     connection,
     connectToDeepgram,
@@ -226,10 +230,8 @@ export function Session({
   const router = useRouter();
   const [transcriptAutoScroll, setTranscriptAutoScroll] = useState(true);
   const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
-  const [responseFormat, setResponseFormat] = useState<"verbatim" | "bullet">(
-    "verbatim"
-  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showExitWarningModal, setShowExitWarningModal] = useState(false);
 
   // Onboarding modal states
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -484,6 +486,30 @@ export function Session({
     }
   };
 
+  // Handle beforeunload event to prevent accidental tab closure during recording
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isTranscribing && recordedChunksRef.current.length > 0) {
+        // Show browser's native dialog
+        e.preventDefault();
+        e.returnValue = "";
+
+        // Show our custom modal as well
+        setShowExitWarningModal(true);
+
+        return "";
+      }
+    };
+
+    if (isTranscribing) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isTranscribing]);
+
   // Scroll to bottom handler
   const scrollToBottom = (
     element: HTMLDivElement | null,
@@ -680,17 +706,17 @@ export function Session({
 
   const startTranscription = async () => {
     setLoadingTranscriptionService(true);
-    setIsTranscribing(false);
-    if (!stream) {
-      alert(t("error.generic"));
-      return;
-    }
-    try {
-      setupDeepgramRealTimeTranscription();
-    } catch (error) {
-      logError("Error starting transcription:", { error });
-      setIsTranscribing(false);
-    }
+    setIsTranscribing(true);
+    // if (!stream) {
+    //   alert(t("error.generic"));
+    //   return;
+    // }
+    // try {
+    //   setupDeepgramRealTimeTranscription();
+    // } catch (error) {
+    //   logError("Error starting transcription:", { error });
+    //   setIsTranscribing(false);
+    // }
   };
 
   const setupDeepgramRealTimeTranscription = () => {
@@ -992,10 +1018,6 @@ export function Session({
     }
   };
 
-  const onLeave = () => {
-    stopTranscription();
-  };
-
   useEffect(() => {
     latestTranscriptRef.current = transcript;
   }, [transcript]);
@@ -1053,6 +1075,14 @@ export function Session({
     setQuestionsWithAnswers((prev) => [...prev, { question, answer: "" }]);
 
     try {
+      // Get previous questions and answers (excluding the current one that has an empty answer)
+      const previousQA = latestQuestionsWithAnswersRef.current
+        .filter((qa) => qa.answer)
+        .map((qa) => ({
+          question: qa.question,
+          answer: qa.answer,
+        }));
+
       const response = await fetch("/api/answer-question", {
         method: "POST",
         headers: {
@@ -1061,7 +1091,8 @@ export function Session({
         body: JSON.stringify({
           interviewCopilotId,
           question,
-          responseFormat,
+          responseFormat: responseFormat.current,
+          previousQA, // Include previous questions and answers
         }),
       });
 
@@ -1128,6 +1159,38 @@ export function Session({
   return (
     <div className="flex h-screen flex-col">
       <ImageZoomModal />
+
+      {/* Exit Warning Modal */}
+      <Dialog
+        open={showExitWarningModal}
+        onOpenChange={setShowExitWarningModal}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("exitWarning.title")}</DialogTitle>
+            <DialogDescription>
+              {t("exitWarning.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 text-sm text-muted-foreground">
+            {t("exitWarning.instruction")}
+          </div>
+          <DialogFooter className="mt-6">
+            <Button
+              variant="destructive"
+              onClick={() => {
+                stopTranscription();
+                setShowExitWarningModal(false);
+                setIsDialogOpen(true);
+              }}
+              disabled={isUploading}
+            >
+              {t("stopRecording")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -1253,10 +1316,11 @@ export function Session({
                   </CardHeader>
                   <CardContent>
                     <RadioGroup
-                      value={responseFormat}
-                      onValueChange={(value: "verbatim" | "bullet") =>
-                        setResponseFormat(value)
-                      }
+                      value={responseFormatState}
+                      onValueChange={(value: "verbatim" | "bullet") => {
+                        responseFormat.current = value;
+                        setResponseFormatState(value);
+                      }}
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="verbatim" id="verbatim" />
@@ -1367,14 +1431,6 @@ export function Session({
               )}
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={onLeave}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
         </div>
       </header>
 

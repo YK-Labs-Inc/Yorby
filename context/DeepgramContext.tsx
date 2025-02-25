@@ -33,11 +33,48 @@ interface DeepgramContextProviderProps {
 }
 
 const getApiKey = async (): Promise<string> => {
-  const response = await fetch("/api/deepgram/authenticate", {
-    cache: "no-store",
-  });
-  const result = await response.json();
-  return result.key;
+  const maxRetries = 3;
+  let retryCount = 0;
+  let lastError: Error | null = null;
+
+  while (retryCount < maxRetries) {
+    try {
+      const response = await fetch("/api/deepgram/authenticate", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch API key: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const result = await response.json();
+
+      if (!result.key) {
+        throw new Error("API key not found in response");
+      }
+
+      return result.key;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      retryCount++;
+
+      if (retryCount < maxRetries) {
+        // Exponential backoff: 1s, 2s, 4s, etc.
+        const backoffTime = Math.pow(2, retryCount - 1) * 1000;
+        console.warn(
+          `Retrying API key fetch (attempt ${retryCount}/${maxRetries}) after ${backoffTime}ms`
+        );
+        await new Promise((resolve) => setTimeout(resolve, backoffTime));
+      }
+    }
+  }
+
+  // If we've reached this point, all retries have failed
+  throw new Error(
+    `Failed to retrieve Deepgram API key after ${maxRetries} attempts. Please refresh the page and try again. Last error: ${lastError?.message}`
+  );
 };
 
 const DeepgramContextProvider: FunctionComponent<
@@ -56,20 +93,37 @@ const DeepgramContextProvider: FunctionComponent<
    * @returns A Promise that resolves when the connection is established.
    */
   const connectToDeepgram = async (options: LiveSchema, endpoint?: string) => {
-    const key = await getApiKey();
-    const deepgram = createClient(key);
+    try {
+      const key = await getApiKey();
+      const deepgram = createClient(key);
 
-    const conn = deepgram.listen.live(options, endpoint);
+      const conn = deepgram.listen.live(options, endpoint);
 
-    conn.addListener(LiveTranscriptionEvents.Open, () => {
-      setConnectionState(SOCKET_STATES.open);
-    });
+      conn.addListener(LiveTranscriptionEvents.Open, () => {
+        setConnectionState(SOCKET_STATES.open);
+      });
 
-    conn.addListener(LiveTranscriptionEvents.Close, () => {
+      conn.addListener(LiveTranscriptionEvents.Close, () => {
+        setConnectionState(SOCKET_STATES.closed);
+      });
+
+      setConnection(conn);
+    } catch (error) {
+      // Handle errors from getApiKey or other parts of the connection process
+      console.error("Failed to connect to Deepgram:", error);
+
+      // Display a user-friendly error message
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert(
+          "Failed to connect to Deepgram. Please refresh the page and try again."
+        );
+      }
+
+      // Make sure connectionState is reset to closed
       setConnectionState(SOCKET_STATES.closed);
-    });
-
-    setConnection(conn);
+    }
   };
 
   const disconnectFromDeepgram = async () => {

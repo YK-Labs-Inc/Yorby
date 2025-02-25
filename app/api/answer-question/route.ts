@@ -20,13 +20,24 @@ const answerModel = genAI.getGenerativeModel({
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const data = await req.json();
-  const { interviewCopilotId, question, responseFormat } = data;
+  const data = (await req.json()) as {
+    interviewCopilotId: string;
+    question: string;
+    responseFormat: "verbatim" | "bullet";
+    previousQA?: Array<{ question: string; answer: string }>;
+  };
+  const {
+    interviewCopilotId,
+    question,
+    responseFormat,
+    previousQA = [],
+  } = data;
   let logger = new Logger().with({
     function: "answerQuestion",
     interviewCopilotId,
     question,
     responseFormat,
+    previousQA,
   });
   try {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
@@ -40,6 +51,7 @@ export async function POST(req: NextRequest) {
         companyName: company_name,
         companyDescription: company_description,
         responseFormat,
+        previousQA,
       }),
       ...files,
     ]);
@@ -116,6 +128,7 @@ const answerQuestionPrompt = ({
   companyName,
   companyDescription,
   responseFormat,
+  previousQA = [],
 }: {
   question: string;
   jobTitle: string | null;
@@ -123,6 +136,7 @@ const answerQuestionPrompt = ({
   companyName: string | null;
   companyDescription: string | null;
   responseFormat: "verbatim" | "bullet";
+  previousQA?: Array<{ question: string; answer: string }>;
 }) => `
 You are a candidate that is in the middle of a job interview. You are the best interviewee in the world.
 You are going to be provided with an interview question that you must answer.
@@ -134,11 +148,13 @@ Answer the question by following the steps below.
   - Read the interview question and understand what it is asking and create a criteria of what would be a strong answer.
   You might be provided optional information about the job title and the job description and company name and company description.
   If provided, use this additional information to create your criteria of what would be a strong answer.
+  - If this is a follow-up question (indicated by previous questions and answers being provided), make sure to consider the context of the previous exchanges.
 2. **Consult the user's work history to find relevant information**:
   - The user might upload their resume, cover letter, or other files that are relevant to the interview/their job history.
   If provided, read through the files and extract relevant information that can be used to answer the interview question.
 3. **Answer The Question**: 
   - Using all of your information, answer the question in a way that fits the criteria you created in the first step
+  - If this is a follow-up question, ensure your response is consistent with your previous answers and builds upon them naturally.
 ${
   responseFormat === "bullet"
     ? `- Format your response as a concise list of bullet points.
@@ -159,6 +175,7 @@ ${
   well as any additional information that the user uploaded about themselves via their resume, cover letter, or other files.
   - Do not make up any information. You can stretch the truth to make answers more relevant/more interesting/more impressive, but
   it must still be grounded on the information provided.
+  - Ensure your answer is consistent with any previous answers you've provided in this interview session.
 5. **Return the answer as a string**:
   - Return your answer to the interview question and nothing else. You absolutely cannot return anything
   that is not part of the answer to the question. Do not return your criteria, your thoughts, or anything else.
@@ -195,6 +212,20 @@ ${
   companyDescription
     ? `# Company Description
 ${companyDescription}`
+    : ""
+}
+
+${
+  previousQA && previousQA.length > 0
+    ? `# Previous Questions and Answers
+${previousQA
+  .map(
+    (qa, index) => `
+Q${index + 1}: ${qa.question}
+A${index + 1}: ${qa.answer}
+`
+  )
+  .join("")}`
     : ""
 }
 `;

@@ -725,6 +725,13 @@
             "description": "After sharing your interview tab, click the \"Start Interview Copilot\" button to begin."
           }
         }
+      },
+      "exitWarning": {
+        "title": "Warning: Unsaved Recording",
+        "description": "You have an unsaved interview recording. If you exit now, your recording will be lost.",
+        "instruction": "To save your recording, please click the \"End Interview Copilot\" button before leaving.",
+        "stayButton": "Stay on Page",
+        "leaveButton": "Leave Anyway"
       }
     },
     "jobCreation": {
@@ -803,7 +810,7 @@
         "description": "Review the questions and answers",
         "questionLabel": "Question",
         "questionNumber": "Question {number}",
-        "answerLabel": "Your Answer"
+        "answerLabel": "AI's Answer"
       }
     }
   },
