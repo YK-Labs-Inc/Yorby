@@ -706,17 +706,17 @@ export function Session({
 
   const startTranscription = async () => {
     setLoadingTranscriptionService(true);
-    setIsTranscribing(true);
-    // if (!stream) {
-    //   alert(t("error.generic"));
-    //   return;
-    // }
-    // try {
-    //   setupDeepgramRealTimeTranscription();
-    // } catch (error) {
-    //   logError("Error starting transcription:", { error });
-    //   setIsTranscribing(false);
-    // }
+    setIsTranscribing(false);
+    if (!stream) {
+      alert(t("error.generic"));
+      return;
+    }
+    try {
+      setupDeepgramRealTimeTranscription();
+    } catch (error) {
+      logError("Error starting transcription:", { error });
+      setIsTranscribing(false);
+    }
   };
 
   const setupDeepgramRealTimeTranscription = () => {
