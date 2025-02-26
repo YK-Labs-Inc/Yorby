@@ -8,8 +8,6 @@ export default async function Home({
 }) {
   const v3 = (await searchParams).v3 === "true";
 
-  console.log("hey v3", v3);
-
   return (
     <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
       {v3 ? <LandingPageV3 /> : <LandingPageV2 />}
