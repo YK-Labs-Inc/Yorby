@@ -163,7 +163,7 @@ ${
     own answer from your bullet points..
     - Do not be overly verbose.
     - Return your bullet point answer using markdown formatting for the bullet points.
-
+    - Return at max 10 bullet points in your response and keep them concise.
     `
     : `- Provide a natural, conversational response as if you're speaking directly to the interviewer.
     - Use complete sentences and maintain a professional yet personable tone.

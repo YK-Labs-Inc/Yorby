@@ -46,12 +46,6 @@ const features: FeatureProps[] = [
     category: "prep",
   },
   {
-    id: "feedback",
-    icon: <Brain className="w-8 h-8" />,
-    img: "/assets/answer-feedback.png",
-    category: "prep",
-  },
-  {
     id: "aiAnswers",
     icon: <Sparkles className="w-8 h-8" />,
     img: "/assets/generate-answers.png",
@@ -157,13 +151,15 @@ export default function FeatureHighlight() {
             {t("hero.subscriptionNote")}
           </p>
           <div className="flex justify-center gap-4 flex-col sm:flex-row">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-lg px-8"
-            >
-              {t("hero.getStarted")}
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <Link href="/sign-in">
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-lg px-8"
+              >
+                {t("hero.getStarted")}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </motion.div>
 
