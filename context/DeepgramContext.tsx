@@ -33,48 +33,11 @@ interface DeepgramContextProviderProps {
 }
 
 const getApiKey = async (): Promise<string> => {
-  const maxRetries = 3;
-  let retryCount = 0;
-  let lastError: Error | null = null;
-
-  while (retryCount < maxRetries) {
-    try {
-      const response = await fetch("/api/deepgram/authenticate", {
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch API key: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const result = await response.json();
-
-      if (!result.key) {
-        throw new Error("API key not found in response");
-      }
-
-      return result.key;
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      retryCount++;
-
-      if (retryCount < maxRetries) {
-        // Exponential backoff: 1s, 2s, 4s, etc.
-        const backoffTime = Math.pow(2, retryCount - 1) * 1000;
-        console.warn(
-          `Retrying API key fetch (attempt ${retryCount}/${maxRetries}) after ${backoffTime}ms`
-        );
-        await new Promise((resolve) => setTimeout(resolve, backoffTime));
-      }
-    }
-  }
-
-  // If we've reached this point, all retries have failed
-  throw new Error(
-    `Failed to retrieve Deepgram API key after ${maxRetries} attempts. Please refresh the page and try again. Last error: ${lastError?.message}`
-  );
+  const response = await fetch("/api/deepgram/authenticate", {
+    cache: "no-store",
+  });
+  const result = await response.json();
+  return result.key;
 };
 
 const DeepgramContextProvider: FunctionComponent<
