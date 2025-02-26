@@ -168,6 +168,8 @@ ${
     : `- Provide a natural, conversational response as if you're speaking directly to the interviewer.
     - Use complete sentences and maintain a professional yet personable tone.
     - Keep the answer to be 60-90 seconds long.
+    - Answer the question in a natural way as one would in a proper interview, don't just list off things from the resume and
+    feel free to add any supporting details to make the answer flow more naturally.
     `
 }
 4. **Double Check Your Answer**:
