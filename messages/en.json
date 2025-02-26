@@ -459,7 +459,9 @@
     "q3": "What types of jobs does Perfect Interview support?",
     "a3": "Perfect Interivew supports every single job in the world. As long as you upload the job description, we will be able to generate unlimtied practice questions for you.",
     "q4": "Is there a limit to how many mock interviews I can do?",
-    "a4": "There is no limit to how many mock interviews you can do. Each mock interview is unique and tailored to the job you're applying for."
+    "a4": "There is no limit to how many mock interviews you can do. Each mock interview is unique and tailored to the job you're applying for.",
+    "q5": "What types of jobs does perfect interview support",
+    "a5": "Perfect Interview supports every single job in the world. As long as you upload the job description, we will be able to create interview questions and interview copilots for you.."
   },
   "mobileWarning": {
     "title": "Desktop Only Experience",
@@ -829,7 +831,7 @@
         "description": "Master your interview skills with our comprehensive preparation tools"
       },
       "practiceQuestions": {
-        "title": "Unlimited Practice Questions",
+        "title": "Discover Interview Questions",
         "description": "Generate unlimited practice interview questions based off of any job description and your resume so that the questions are custom to the job and your personal experience"
       },
       "feedback": {
@@ -837,16 +839,16 @@
         "description": "Get feedback on your answers to practice interview questions"
       },
       "aiAnswers": {
-        "title": "AI-Powered Answers",
-        "description": "Generate answers to practice interview questions based off of your previous work history"
+        "title": "Generate Answers With AI",
+        "description": "Generate answers to interview questions based off of your previous work history"
       },
       "mockInterviews": {
-        "title": "Realistic Mock Interviews",
+        "title": "Realistic AI Mock Interviews",
         "description": "Realistic mock interview experience by making you chat back and forth with an AI interviewer to replicate a real life interview scenario"
       },
       "performance": {
-        "title": "Performance Analysis",
-        "description": "Get a detailed breakdown on your mock interview performance"
+        "title": "Get Detailed Feedback",
+        "description": "Get a detailed breakdown on your strengths and weaknesses and areas to improve"
       },
       "copilot": {
         "title": "Your Own Personal Interview Copilot",
@@ -855,16 +857,16 @@
         "tryButton": "Try Interview Copilot",
         "features": {
           "aiGuidance": {
-            "title": "Real-time AI Guidance",
-            "description": "Get intelligent suggestions while the interviewer is speaking, helping you craft perfect responses."
+            "title": "Real-time AI Answers",
+            "description": "The AI will listen for any questions asked in the interview and provide an answer in real time"
           },
           "timing": {
             "title": "Perfect Timing",
-            "description": "Instant suggestions appear before you need to respond, giving you time to process and deliver confidently."
+            "description": "Answers appear instantly before you need to respond, giving you time to process and deliver confidently."
           },
           "personalization": {
             "title": "Personalized To You",
-            "description": "Suggestions tailored to your experience, the role, and company, making every answer uniquely yours."
+            "description": "Answers are tailored to your experience, the role, and company, making every answer uniquely yours."
           }
         }
       }
