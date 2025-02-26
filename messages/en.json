@@ -308,15 +308,17 @@
     "userNotFound": "User not found — please sign in  again."
   },
   "sidebar": {
-    "addJob": "Create New Job",
+    "addJob": "Add Job",
     "signInToStart": "Sign in to save your custom interview prep",
-    "signIn": "Sign in",
-    "numberOfCredits": "Credits: {numberOfCredits}",
+    "signIn": "Sign In",
+    "numberOfCredits": "{numberOfCredits} Credits",
     "buyMoreCredits": "Buy More Credits",
     "jobs": "Jobs",
     "interviewCopilots": "Interview Copilots",
-    "createInterviewCopilot": "Create New Copilot",
-    "create": "Create New"
+    "createInterviewCopilot": "Create Interview Copilot",
+    "create": "Create",
+    "tools": "Tools",
+    "resumeBuilder": "Resume Builder"
   },
   "upgrade": {
     "locked": {
@@ -897,5 +899,42 @@
       "button": "Get Started",
       "footer": "No subscription • No hidden fees • Pay per interview"
     }
+  },
+  "resumeBuilder": {
+    "resumeBuilder": "Resume Builder",
+    "inputYourInformation": "Input Your Information",
+    "voiceInput": "Voice Input",
+    "textInput": "Text Input",
+    "selectMicrophone": "Select Microphone",
+    "startRecording": "Start Recording",
+    "stopRecording": "Stop Recording",
+    "recording": "Recording...",
+    "transcription": "Transcription",
+    "voiceInstructions": "Speak about your education, work experience, skills, and other relevant information for your resume.",
+    "pleaseSelectAMicrophone": "Please select a microphone",
+    "micPermissionError": "Failed to start recording. Please check your microphone permissions.",
+    "recordingError": "Failed to process recording. Please try again.",
+    "resumeInputPlaceholder": "Enter your education, work experience, skills, and other information for your resume...",
+    "textInstructions": "Provide detailed information about your education, work history, skills, and other relevant information. Try to be specific about your accomplishments and responsibilities.",
+    "proTips": "Pro Tips",
+    "tipDates": "Include dates for education and work experience",
+    "tipTechnologies": "Mention specific technologies, tools, and methodologies you've used",
+    "tipQuantify": "Quantify your achievements when possible (e.g., \"Increased sales by 20%\")",
+    "tipCertifications": "List relevant certifications and additional training",
+    "tipLanguages": "Include any languages you speak and your proficiency level",
+    "generateResume": "Generate Resume",
+    "generating": "Generating...",
+    "resumePreview": "Resume Preview",
+    "aiSuggestions": "AI Suggestions",
+    "noResumeGeneratedYet": "No Resume Generated Yet",
+    "emptyStateInstructions": "Record your voice or type information about your experience, education, and skills to generate a professional resume.",
+    "generatingYourResume": "Generating your resume...",
+    "professionalSummary": "Professional Summary",
+    "downloadPDF": "Download PDF",
+    "downloading": "Downloading...",
+    "downloadError": "Failed to download PDF. Please try again.",
+    "suggestionsPrompt": "Ask for suggestions to improve your resume",
+    "suggestionsPlaceholder": "Ask for improvements or changes to your resume...",
+    "generalError": "Sorry, I encountered an error. Please try again."
   }
 }
