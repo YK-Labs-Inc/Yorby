@@ -109,6 +109,7 @@ export default async function RootLayout({
   let hasSubscription = false;
   let onboardingState = null;
   let isInterviewCopilotEnabled = false;
+  let isResumeBuilderEnabled = false;
 
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
@@ -118,6 +119,9 @@ export default async function RootLayout({
       await posthog.isFeatureEnabled("enable-interview-copilot", user.id)
     );
     interviewCopilots = await fetchInterviewCopilots(user.id);
+    isResumeBuilderEnabled = Boolean(
+      await posthog.isFeatureEnabled("enable-resume-builder", user.id)
+    );
   }
 
   const messages = await getMessages();
@@ -154,6 +158,7 @@ export default async function RootLayout({
                           user={user}
                           interviewCopilots={interviewCopilots}
                           isInterviewCopilotEnabled={isInterviewCopilotEnabled}
+                          isResumeBuilderEnabled={isResumeBuilderEnabled}
                         />
                         <SidebarTrigger />
                         <main className="w-full">
