@@ -530,6 +530,220 @@ export type Database = {
           },
         ]
       }
+      resume_detail_items: {
+        Row: {
+          created_at: string | null
+          date_range: string | null
+          display_order: number
+          id: string
+          organization: string | null
+          section_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_range?: string | null
+          display_order: number
+          id?: string
+          organization?: string | null
+          section_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_range?: string | null
+          display_order?: number
+          id?: string
+          organization?: string | null
+          section_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_detail_items_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "resume_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_item_descriptions: {
+        Row: {
+          created_at: string | null
+          description: string
+          detail_item_id: string
+          display_order: number
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          detail_item_id: string
+          display_order: number
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          detail_item_id?: string
+          display_order?: number
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_item_descriptions_detail_item_id_fkey"
+            columns: ["detail_item_id"]
+            isOneToOne: false
+            referencedRelation: "resume_detail_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_list_items: {
+        Row: {
+          content: string
+          created_at: string | null
+          display_order: number
+          id: string
+          section_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          display_order: number
+          id?: string
+          section_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          section_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_list_items_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "resume_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_sections: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          resume_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order: number
+          id?: string
+          resume_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          resume_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_sections_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_versions: {
+        Row: {
+          created_at: string | null
+          id: string
+          resume_id: string
+          version_data: Json
+          version_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          resume_id: string
+          version_data: Json
+          version_number: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          resume_id?: string
+          version_data?: Json
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_versions_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resumes: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          location: string | null
+          name: string
+          phone: string | null
+          summary: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          phone?: string | null
+          summary?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          phone?: string | null
+          summary?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
