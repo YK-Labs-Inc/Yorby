@@ -43,17 +43,23 @@ export default function ResumeBuilderPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const { startRecording, stopRecording, cancelRecording, isProcessing } =
-    useVoiceRecording({
-      onTranscription: (transcription: string) => {
-        if (transcription.trim()) {
-          setTextInput(transcription);
-          setIsRecording(false);
-          // No longer auto-sending the message after transcription
-        }
-      },
-      t,
-    });
+  const {
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    isProcessing,
+    audioDevices,
+    selectedAudio,
+    setSelectedAudio,
+  } = useVoiceRecording({
+    onTranscription: (transcription: string) => {
+      if (transcription.trim()) {
+        setTextInput(transcription);
+        setIsRecording(false);
+      }
+    },
+    t,
+  });
 
   const handleRecordingToggle = () => {
     if (isRecording) {
@@ -86,60 +92,133 @@ export default function ResumeBuilderPage() {
     setMessages(updatedMessages);
     setTextInput("");
 
-    // Simulate AI thinking
-    setTimeout(async () => {
-      try {
-        // Send to backend for processing
-        const response = await fetch("/api/resume/interview", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: updatedMessages }),
-        });
+    // Add a temporary message to indicate AI is thinking
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "...",
+        timestamp: new Date(),
+      },
+    ]);
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+    try {
+      // Send to backend for processing
+      const response = await fetch("/api/resume/interview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: updatedMessages }),
+      });
 
-        const data = await response.json();
-
-        // Add AI response to chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: data.message,
-            timestamp: new Date(),
-          },
-        ]);
-
-        // Check if resume is ready to be generated
-        if (data.isResumeReady) {
-          setIsResumeReady(true);
-          generateResume(
-            updatedMessages.concat([
-              {
-                role: "assistant",
-                content: data.message,
-                timestamp: new Date(),
-              },
-            ])
-          );
-        }
-      } catch (error) {
-        console.error("Error in AI conversation:", error);
-        // Add error message
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Sorry, I encountered an error. Please try again.",
-            timestamp: new Date(),
-          },
-        ]);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
       }
-    }, 500);
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      // Get a reader from the response body
+      const reader = response.body.getReader();
+      let accumulatedResponse = "";
+      let isComplete = false;
+
+      // Remove the temporary "..." message
+      setMessages((prev) => prev.slice(0, -1));
+
+      // Add a new message for the AI response that we'll update
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
+      ]);
+
+      while (!isComplete) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          isComplete = true;
+          break;
+        }
+
+        // Decode the chunk
+        const textChunk = new TextDecoder().decode(value);
+        accumulatedResponse += textChunk;
+
+        // Check if the chunk contains our special marker for resume readiness
+        const readyMarkerIndex =
+          accumulatedResponse.indexOf("__RESUME_READY__");
+
+        if (readyMarkerIndex !== -1) {
+          // Extract the marker data
+          const endMarkerIndex = accumulatedResponse.indexOf(
+            "__END__",
+            readyMarkerIndex
+          );
+          const markerData = accumulatedResponse.substring(
+            readyMarkerIndex + "__RESUME_READY__".length,
+            endMarkerIndex
+          );
+
+          try {
+            const { isResumeReady } = JSON.parse(markerData);
+            // Remove the marker from the accumulated response
+            accumulatedResponse = accumulatedResponse.substring(
+              0,
+              readyMarkerIndex
+            );
+
+            // Check if we should generate a resume
+            if (isResumeReady) {
+              setIsResumeReady(true);
+              // We'll generate the resume after the loop completes
+            }
+          } catch (e) {
+            console.error("Error parsing resume ready marker:", e);
+          }
+        }
+
+        // Update the last message with the accumulated response so far
+        setMessages((prev) => {
+          const updatedMessages = [...prev];
+          updatedMessages[updatedMessages.length - 1] = {
+            ...updatedMessages[updatedMessages.length - 1],
+            content: accumulatedResponse,
+          };
+          return updatedMessages;
+        });
+      }
+
+      // If resume is ready, generate it
+      if (isResumeReady) {
+        generateResume(
+          updatedMessages.concat([
+            {
+              role: "assistant",
+              content: accumulatedResponse,
+              timestamp: new Date(),
+            },
+          ])
+        );
+      }
+    } catch (error) {
+      console.error("Error in AI conversation:", error);
+      // Update the last message to show the error
+      setMessages((prev) => {
+        const updatedMessages = [...prev];
+        updatedMessages[updatedMessages.length - 1] = {
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+          timestamp: new Date(),
+        };
+        return updatedMessages;
+      });
+    }
   };
 
   const handleSendButtonClick = () => {
@@ -245,6 +324,9 @@ export default function ResumeBuilderPage() {
                       stopRecording();
                       setIsRecording(false);
                     }}
+                    audioDevices={audioDevices}
+                    selectedAudio={selectedAudio}
+                    onSelectAudio={(deviceId) => setSelectedAudio(deviceId)}
                   />
                 ) : isProcessing ? (
                   <div className="w-full p-4 rounded-lg border dark:bg-gray-800 dark:border-gray-700 bg-gray-50 flex items-center justify-center">
