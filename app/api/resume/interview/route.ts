@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  GoogleGenerativeAI,
-  HarmBlockThreshold,
-  HarmCategory,
-} from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Logger } from "next-axiom";
 
 const logger = new Logger().with({
@@ -15,7 +11,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages } = (await req.json()) as {
+      messages: { role: string; content: string }[];
+    };
+    const latestUserMessage = messages[messages.length - 1].content;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -28,85 +27,79 @@ export async function POST(req: NextRequest) {
 
     // Create a system prompt for the interview process
     const systemPrompt = `
-      You are an AI interviewer helping users create a professional resume. Your job is to have a conversation with them to gather all necessary information for a complete resume.
+    You are an AI interviewer helping users create a professional resume. Your job is to have a conversation with them to gather all necessary information for a complete resume.
       
-      Follow these guidelines:
-      1. Ask one question at a time in a friendly, conversational manner
-      2. Start by asking for their name, then contact information (email, phone, location)
-      3. Then ask about their education history, work experience, skills, and any other relevant information
-      4. For work experience, ask about their responsibilities and achievements at each job
-      5. Ask follow-up questions when you need more details or clarification
-      6. Keep responses short, focused and conversational
-      7. Never overwhelm the user with multiple questions at once
-      
-      IMPORTANT: When you've gathered all essential information (name, contact info, education, work experience, skills), 
-      set isResumeReady: true in your response. Only do this when you have enough information to generate a complete resume.
-      
-      The user's responses will be used to create their professional resume.
+    Your goal is to obtain the following information from the user:
+    - Name
+    - Email
+    - Phone
+    - Location
+    - Education
+    - Work Experience
+    - Skills
+
+    Your resume should fit on a single page with size 11 font.
+
+    As you chat back and forth with the user, ask questions to gather the information you need.
+
+    When you have all the information you need, say "Thank you for your time. I have all the information I need to create your resume."
     `;
 
     // Configure Gemini model with safety settings
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ],
+      model: "gemini-2.0-flash",
     });
 
     // Convert messages to Gemini chat format
-    const chatHistory = messages.map(
-      (msg: { role: string; content: string }) => {
+    const chatHistory = [
+      {
+        role: "user",
+        parts: [{ text: systemPrompt }],
+      },
+      ...messages.slice(0, -1).map((msg: { role: string; content: string }) => {
         return {
           role: msg.role === "user" ? "user" : "model",
           parts: [{ text: msg.content }],
         };
-      }
-    );
+      }),
+    ];
 
     // Create a chat session
     const chat = model.startChat({
       history: chatHistory,
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.95,
-        topK: 64,
-      },
     });
 
     // Send a prompt to continue the conversation
-    const result = await chat.sendMessage(
-      "Continue the interview process. Remember to follow the guidelines from earlier."
-    );
-    const responseContent = result.response.text();
+    const result = await chat.sendMessageStream(latestUserMessage);
 
-    // Determine if we have enough information to generate a resume
-    const isResumeReady =
-      hasGatheredEssentialInfo(messages) &&
-      responseContent.toLowerCase().includes("thank you") &&
-      messages.length >= 10;
+    // Create a ReadableStream to stream the response
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let responseContent = "";
 
-    logger.info("Interview response generated", { isResumeReady });
-    await logger.flush();
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            responseContent += text;
 
-    return NextResponse.json({
-      message: responseContent,
-      isResumeReady,
+            // Encode the text chunk into a Uint8Array
+            const encoded = new TextEncoder().encode(text);
+            controller.enqueue(encoded);
+          }
+
+          logger.info("Interview response generated", { responseContent });
+          await logger.flush();
+
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
     });
+
+    const headers = new Headers();
+    headers.set("Content-Type", "text/plain; charset=utf-8");
+    return new Response(stream, { headers });
   } catch (error) {
     logger.error("Error in resume interview", { error });
     await logger.flush();
