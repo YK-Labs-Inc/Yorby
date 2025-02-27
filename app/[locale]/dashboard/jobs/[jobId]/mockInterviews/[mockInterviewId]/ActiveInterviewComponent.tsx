@@ -62,6 +62,7 @@ export default function ActiveInterview({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEndModal, setShowEndModal] = useState(false);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const [textInput, setTextInput] = useState<string>("");
   const user = useUser();
   const session = useSession();
 
@@ -101,6 +102,7 @@ export default function ActiveInterview({
           ...prev,
           { role: "user", parts: [{ text: message }] },
         ]);
+        setTextInput(""); // Clear text input after sending message
       }
       setsProcessingAIResponse(true);
 
@@ -319,6 +321,25 @@ export default function ActiveInterview({
     scrollToBottom();
   }, [messages, isAnsweringQuestion, isProcessingAIResponse]);
 
+  const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTextInput(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (textInput.trim()) {
+        sendMessage({ message: textInput });
+      }
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (textInput.trim()) {
+      sendMessage({ message: textInput });
+    }
+  };
+
   if (!user || !session) {
     return null;
   }
@@ -358,28 +379,6 @@ export default function ActiveInterview({
               muted
               className="w-full h-full object-cover transform scale-x-[-1]"
             />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={
-                isAnsweringQuestion ? stopAudioRecording : startAudioRecording
-              }
-              disabled={isProcessingAIResponse || isProcessingUserResponse}
-              variant={isAnsweringQuestion ? "destructive" : "default"}
-              className="flex-1"
-            >
-              {isAnsweringQuestion ? (
-                <>
-                  <MicOff className="w-4 h-4 mr-2" />
-                  {t("stopAnswering")}
-                </>
-              ) : (
-                <>
-                  <Mic className="w-4 h-4 mr-2" />
-                  {t("answerQuestion")}
-                </>
-              )}
-            </Button>
           </div>
         </div>
 
@@ -423,6 +422,53 @@ export default function ActiveInterview({
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Unified Input UI */}
+          <div className="flex flex-col gap-4">
+            <div className="relative">
+              <textarea
+                placeholder={t("typeYourResponse")}
+                value={textInput}
+                onChange={handleTextInputChange}
+                onKeyDown={handleKeyDown}
+                className="w-full p-3 pr-24 rounded-lg border resize-none dark:bg-gray-800 dark:border-gray-700"
+                rows={3}
+                disabled={isAnsweringQuestion || isProcessingAIResponse}
+              />
+              <div className="absolute bottom-3 right-3 flex space-x-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  className={`h-8 w-8 rounded-full ${isAnsweringQuestion ? "text-red-500" : "text-gray-500"}`}
+                  onClick={
+                    isAnsweringQuestion
+                      ? stopAudioRecording
+                      : startAudioRecording
+                  }
+                  disabled={isProcessingAIResponse}
+                >
+                  {isAnsweringQuestion ? (
+                    <MicOff className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-8"
+                  onClick={handleSendMessage}
+                  disabled={
+                    (!textInput.trim() && !isAnsweringQuestion) ||
+                    isProcessingAIResponse
+                  }
+                >
+                  {t("send")}
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Controls */}

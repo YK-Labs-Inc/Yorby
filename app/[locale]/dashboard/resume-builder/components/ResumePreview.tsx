@@ -72,7 +72,7 @@ export default function ResumePreview({ resume, loading }: ResumePreviewProps) {
     return (
       <div className="flex flex-col items-center justify-center h-[600px] w-full">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="mt-4 text-lg">{t("generatingYourResume")}</p>
+        <p className="mt-4 text-lg">{t("buildingChatbot")}</p>
       </div>
     );
   }
@@ -82,10 +82,10 @@ export default function ResumePreview({ resume, loading }: ResumePreviewProps) {
       <div className="flex flex-col items-center justify-center p-10 h-[600px] w-full bg-gray-50 dark:bg-gray-900 rounded-lg">
         <div className="text-center">
           <h3 className="text-xl font-semibold mb-4">
-            {t("noResumeGeneratedYet")}
+            {t("waitingForAssistant")}
           </h3>
           <p className="text-gray-500 dark:text-gray-400 max-w-md">
-            {t("emptyStateInstructions")}
+            {t("description")}
           </p>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function ResumePreview({ resume, loading }: ResumePreviewProps) {
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              {t("downloadPDF")}
+              {t("downloadResume")}
             </>
           )}
         </Button>
@@ -144,7 +144,7 @@ export default function ResumePreview({ resume, loading }: ResumePreviewProps) {
 
         <div className="mb-6">
           <h2 className="text-lg font-semibold border-b pb-1 mb-2">
-            {t("professionalSummary")}
+            {t("summary")}
           </h2>
           <p className="text-sm">{resume.summary}</p>
         </div>

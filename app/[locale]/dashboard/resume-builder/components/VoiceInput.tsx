@@ -4,8 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useDeepgram } from "@/context/DeepgramContext";
-import { LiveSchema } from "@deepgram/sdk";
 
 interface VoiceInputProps {
   onTranscription: (transcription: string) => void;
@@ -23,8 +21,8 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
   const [recordingTime, setRecordingTime] = useState<number>(0);
   const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  const { connectToDeepgram, disconnectFromDeepgram } = useDeepgram();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,7 +61,7 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
     getDevices();
   }, []);
 
-  // Connect to Deepgram and handle transcription
+  // Start recording audio
   const startRecording = async () => {
     try {
       if (!selectedAudio) {
@@ -92,18 +90,6 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
           audioChunksRef.current.push(event.data);
         }
       };
-
-      // Set up Deepgram for live transcription
-      const options: LiveSchema = {
-        language: "en",
-        punctuate: true,
-        smart_format: true,
-        model: "nova",
-        interim_results: true,
-      };
-
-      // Connect to Deepgram
-      await connectToDeepgram(options);
 
       // Start recording
       mediaRecorder.start(1000);
@@ -135,9 +121,6 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
         timerRef.current = null;
       }
 
-      // Disconnect from Deepgram
-      disconnectFromDeepgram();
-
       // Stop all tracks in the stream
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
@@ -145,14 +128,16 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
       }
 
       setIsRecording(false);
+      setIsProcessing(true);
 
-      // Process recorded audio for full transcription
+      // Process recorded audio for transcription
       if (audioChunksRef.current.length > 0) {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/webm",
         });
         const formData = new FormData();
         formData.append("audio", audioBlob);
+        formData.append("source", "resume-builder");
 
         const response = await fetch("/api/transcribe", {
           method: "POST",
@@ -168,11 +153,13 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
         }
       }
 
+      setIsProcessing(false);
       setRecordingTime(0);
     } catch (error) {
       console.error("Failed to stop recording:", error);
       alert(t("recordingError"));
       setIsRecording(false);
+      setIsProcessing(false);
       setRecordingTime(0);
     }
   };
@@ -207,14 +194,15 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
       <Card className="p-4 flex items-center justify-center">
         {isRecording ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="text-xl font-bold">{formatTime(recordingTime)}</div>
-            <div className="animate-pulse flex space-x-2 items-center">
-              <span className="h-3 w-3 bg-red-500 rounded-full"></span>
-              <span>{t("recording")}</span>
-            </div>
             <Button variant="destructive" onClick={stopRecording}>
               {t("stopRecording")}
             </Button>
+          </div>
+        ) : isProcessing ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-pulse flex space-x-2 items-center">
+              <span>{t("processing")}</span>
+            </div>
           </div>
         ) : (
           <Button onClick={startRecording}>{t("startRecording")}</Button>
