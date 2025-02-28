@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "@/app/api/chat/route";
 import { useTranslations } from "next-intl";
-import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import EndInterviewModal from "./EndInterviewModal";
 import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
-
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown";
 interface ActiveInterviewProps {
   mockInterviewId: string;
   stream: MediaStream | null;
@@ -399,7 +400,9 @@ export default function ActiveInterview({
                       : "bg-gray-200 dark:bg-gray-800"
                   }`}
                 >
-                  {msg.parts[0].text}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.parts[0].text}
+                  </ReactMarkdown>
                 </div>
               </div>
             ))}

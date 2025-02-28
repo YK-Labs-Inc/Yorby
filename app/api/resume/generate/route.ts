@@ -5,14 +5,13 @@ import {
   HarmCategory,
 } from "@google/generative-ai";
 import { Logger } from "next-axiom";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 const logger = new Logger().with({
   route: "/api/resume/generate",
 });
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: NextRequest) {
   try {
     const { conversation } = await req.json();
@@ -98,13 +97,10 @@ export async function POST(req: NextRequest) {
       Based on this conversation, please generate a professional resume in the JSON format described above.
     `;
 
-    // Configure Gemini model with safety settings
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
-
     // Generate the resume
-    const result = await model.generateContent(prompt);
+    const result = await generateContentWithFallback({
+      contentParts: [prompt],
+    });
     const responseContent = result.response.text();
 
     if (!responseContent) {

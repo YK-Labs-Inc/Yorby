@@ -7,7 +7,6 @@ import {
   downloadFile,
 } from "@/utils/supabase/server";
 import { UploadResponse } from "@/utils/types";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
@@ -15,27 +14,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// Initialize both models
-const answerModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        answer: { type: SchemaType.STRING },
-      },
-      required: ["answer"],
-    },
-  },
-});
-
-export const generateCopilotAnswer = async (data: FormData) => {
-  const interviewCopilotId = data.get("copilotId") as string;
-  const interviewCopilot = await fetchInterviewCopilot(interviewCopilotId);
-};
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();

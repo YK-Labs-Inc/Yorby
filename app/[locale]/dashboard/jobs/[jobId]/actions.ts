@@ -11,6 +11,7 @@ import { SchemaType } from "@google/generative-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { writeCustomJobQuestionsToDb } from "@/app/[locale]/landing2/actions";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 export const startMockInterview = async (
   prevState: any,
@@ -390,33 +391,7 @@ const generateMoreCustomJobQuestions = async ({
   companyDescription: string | null;
 }) => {
   const existingQuestions = await fetchJobQuestions(customJobId);
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          questions: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                question: { type: SchemaType.STRING },
-                answerGuidelines: { type: SchemaType.STRING },
-              },
-              required: ["question", "answerGuidelines"],
-            },
-          },
-        },
-        required: ["questions"],
-      },
-    },
-  });
-
-  const result = await model.generateContent([
+  const prompt = [
     `
     You are given a job title, job description, an optional company name and optional company desription. 
     You are an expert job interviewer for the job title and description at the company with the given company description.
@@ -466,7 +441,28 @@ const generateMoreCustomJobQuestions = async ({
     ${existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")}
     `,
     ...files,
-  ]);
+  ];
+  const result = await generateContentWithFallback({
+    contentParts: prompt,
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        questions: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              question: { type: SchemaType.STRING },
+              answerGuidelines: { type: SchemaType.STRING },
+            },
+            required: ["question", "answerGuidelines"],
+          },
+        },
+      },
+      required: ["questions"],
+    },
+  });
   const response = result.response.text();
   const { questions } = JSON.parse(response) as {
     questions: { question: string; answerGuidelines: string }[];

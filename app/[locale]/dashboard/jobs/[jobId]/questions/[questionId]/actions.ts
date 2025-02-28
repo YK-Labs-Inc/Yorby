@@ -1,6 +1,7 @@
 "use server";
 
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
@@ -82,24 +83,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     const job = await fetchJob(jobId);
     const { question, answer_guidelines } = await fetchQuestion(questionId);
     const files = await getAllFiles(jobId);
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            answer: {
-              type: SchemaType.STRING,
-            },
-          },
-          required: ["answer"],
-        },
-      },
-    });
-
-    const result = await model.generateContent([
+    const prompt = [
       `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
@@ -141,7 +125,20 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     ${answer_guidelines}
     `,
       ...files,
-    ]);
+    ];
+    const result = await generateContentWithFallback({
+      contentParts: prompt,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          answer: {
+            type: SchemaType.STRING,
+          },
+        },
+        required: ["answer"],
+      },
+    });
     const llmResponse = result.response.text();
     const { answer } = JSON.parse(llmResponse) as {
       answer: string;
@@ -256,33 +253,7 @@ const generateFeedback = async (
   const job = await fetchJob(jobId);
   const { question, answer_guidelines } = await fetchQuestion(questionId);
   const files = await getAllFiles(jobId);
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          pros: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.STRING,
-            },
-          },
-          cons: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.STRING,
-            },
-          },
-        },
-        required: ["pros", "cons"],
-      },
-    },
-  });
-
-  const result = await model.generateContent([
+  const prompt = [
     `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
@@ -331,7 +302,29 @@ const generateFeedback = async (
     ${answer}
     `,
     ...files,
-  ]);
+  ];
+  const result = await generateContentWithFallback({
+    contentParts: prompt,
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        pros: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.STRING,
+          },
+        },
+        cons: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.STRING,
+          },
+        },
+      },
+      required: ["pros", "cons"],
+    },
+  });
   const response = result.response.text();
   const { pros, cons } = JSON.parse(response) as {
     pros: string[];
