@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
+import { sendMessageWithFallback } from "@/utils/ai/gemini";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -72,9 +73,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Initialize the chat model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const chat = model.startChat({
+    const result = await sendMessageWithFallback({
+      contentParts: [{ text: message }],
       history: [
         {
           role: "user",
@@ -82,9 +82,14 @@ export async function POST(request: Request) {
         },
         ...history,
       ],
+      loggingContext: {
+        mockInterviewId,
+        message,
+        history,
+        isInitialMessage,
+        path: "/api/chat",
+      },
     });
-
-    const result = await chat.sendMessage([{ text: message }]);
     const response = result.response.text();
 
     logger.info("Chat response generated");

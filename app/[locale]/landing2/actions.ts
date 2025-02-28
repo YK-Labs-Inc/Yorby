@@ -3,10 +3,11 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 export const createJob = async ({
   jobTitle,
@@ -67,6 +68,8 @@ export const createJob = async ({
       userId,
     });
 
+    logger.info("Custom job created");
+
     const geminiUploadResponses = await Promise.all([
       resume
         ? processFile({
@@ -94,6 +97,8 @@ export const createJob = async ({
       ),
     ]);
 
+    logger.info("Uploaded files to Gemini");
+
     await generateCustomJobQuestions({
       customJobId,
       files: geminiUploadResponses
@@ -106,6 +111,7 @@ export const createJob = async ({
       jobDescription,
       companyName,
       companyDescription,
+      logger,
     });
   } catch (error: any) {
     logger.error("Error creating job", { error: error.message });
@@ -248,6 +254,7 @@ export const generateCustomJobQuestions = async ({
   jobDescription,
   companyName,
   companyDescription,
+  logger,
 }: {
   customJobId: string;
   files: {
@@ -258,34 +265,10 @@ export const generateCustomJobQuestions = async ({
   jobDescription: string;
   companyName?: string;
   companyDescription?: string;
+  logger: Logger;
 }) => {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          questions: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                question: { type: SchemaType.STRING },
-                answerGuidelines: { type: SchemaType.STRING },
-              },
-              required: ["question", "answerGuidelines"],
-            },
-          },
-        },
-        required: ["questions"],
-      },
-    },
-  });
-
-  const result = await model.generateContent([
-    `
+  logger.info("Generating custom job questions");
+  const prompt = `
     You are given a job title, job description, an optional company name and optional company desription. 
     You are an expert job interviewer for the job title and description at the company with the given company description.
 
@@ -326,22 +309,66 @@ export const generateCustomJobQuestions = async ({
 
     ## Company Description
     ${companyDescription}
-    `,
+    `;
+
+  const contentParts = [
+    prompt,
     ...files.map((file) => ({
       fileData: {
         fileUri: file.uri,
         mimeType: file.mimeType,
       },
     })),
-  ]);
-  const response = result.response.text();
-  const { questions } = JSON.parse(response) as {
-    questions: { question: string; answerGuidelines: string }[];
+  ];
+
+  // Create the JSON schema for response validation
+  const questionsSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+      questions: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            question: { type: SchemaType.STRING },
+            answerGuidelines: { type: SchemaType.STRING },
+          },
+          required: ["question", "answerGuidelines"],
+        },
+      },
+    },
+    required: ["questions"],
   };
-  await writeCustomJobQuestionsToDb({
+
+  // Use the executeWithFallback utility with logging context
+  const loggingContext = {
     customJobId,
-    questions,
-  });
+    jobTitle,
+    jobDescription,
+    companyName,
+    companyDescription,
+  };
+
+  try {
+    const result = await generateContentWithFallback({
+      contentParts,
+      responseSchema: questionsSchema,
+      responseMimeType: "application/json",
+      loggingContext,
+    });
+    const response = result.response.text();
+    const { questions } = JSON.parse(response) as {
+      questions: { question: string; answerGuidelines: string }[];
+    };
+
+    await writeCustomJobQuestionsToDb({
+      customJobId,
+      questions: questions,
+    });
+  } catch (error) {
+    // Let the error propagate as in the original code
+    throw error;
+  }
 };
 
 export const writeCustomJobQuestionsToDb = async ({

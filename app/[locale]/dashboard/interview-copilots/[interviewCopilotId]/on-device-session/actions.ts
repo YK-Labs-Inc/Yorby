@@ -3,26 +3,10 @@
 import { SchemaType, GoogleGenerativeAI } from "@google/generative-ai";
 import { Logger } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 const apiKey = process.env.GEMINI_API_KEY!;
 const genAI = new GoogleGenerativeAI(apiKey);
-
-const questionDetectionModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-  generationConfig: {
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        questions: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-      },
-      required: ["questions"],
-    },
-  },
-});
 
 export const detectQuestions = async (data: FormData) => {
   const existingQuestions = data.getAll("existingQuestions") as string[];
@@ -35,9 +19,26 @@ export const detectQuestions = async (data: FormData) => {
     interviewCopilotId,
   });
   try {
-    const result = await questionDetectionModel.generateContent([
-      questionDetectionPrompt(transcript, existingQuestions),
-    ]);
+    const result = await generateContentWithFallback({
+      contentParts: [questionDetectionPrompt(transcript, existingQuestions)],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          questions: {
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
+          },
+        },
+        required: ["questions"],
+      },
+      loggingContext: {
+        function: "detectQuestions",
+        transcript,
+        existingQuestions,
+        interviewCopilotId,
+      },
+    });
     const response = result.response.text();
     const { questions } = JSON.parse(response) as {
       questions: string[];

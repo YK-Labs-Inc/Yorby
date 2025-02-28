@@ -9,14 +9,9 @@ import { Tables } from "@/utils/supabase/database.types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
+import { generateContentStreamWithFallback } from "@/utils/ai/gemini";
 
 const apiKey = process.env.GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const answerModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
-});
-
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
@@ -43,18 +38,20 @@ export async function POST(req: NextRequest) {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
     const { job_title, job_description, company_name, company_description } =
       await getInterviewCopilot(interviewCopilotId);
-    const result = await answerModel.generateContentStream([
-      answerQuestionPrompt({
-        question,
-        jobTitle: job_title,
-        jobDescription: job_description,
-        companyName: company_name,
-        companyDescription: company_description,
-        responseFormat,
-        previousQA,
-      }),
-      ...files,
-    ]);
+    const result = await generateContentStreamWithFallback({
+      contentParts: [
+        answerQuestionPrompt({
+          question,
+          jobTitle: job_title,
+          jobDescription: job_description,
+          companyName: company_name,
+          companyDescription: company_description,
+          responseFormat,
+          previousQA,
+        }),
+        ...files,
+      ],
+    });
 
     const stream = new ReadableStream({
       async start(controller) {

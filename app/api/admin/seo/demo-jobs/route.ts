@@ -7,6 +7,7 @@ import { Client } from "@notionhq/client";
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { promises as fs } from "fs";
 import path from "path";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 // Use require for csv-parse as it doesn't have TypeScript types
 const { parse } = require("csv-parse/sync");
@@ -222,23 +223,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 
 const normalizeJobTitle = async (jobTitle: string) => {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      temperature: 0,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          normalizedTitle: { type: SchemaType.STRING },
-        },
-        required: ["normalizedTitle"],
-      },
-    },
-  });
-
-  const result = await model.generateContent([
+  const prompt = [
     `Normalize the following job title to a standard format that can be used to identify similar job titles across different companies.
     Remove company-specific terms, standardize common variations, and use the most common industry-standard job title.
     For example:
@@ -250,7 +235,19 @@ const normalizeJobTitle = async (jobTitle: string) => {
     Return only the normalized title in JSON format.
     
     Input job title: ${jobTitle}`,
-  ]);
+  ];
+
+  const result = await generateContentWithFallback({
+    contentParts: prompt,
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        normalizedTitle: { type: SchemaType.STRING },
+      },
+      required: ["normalizedTitle"],
+    },
+  });
 
   const response = result.response.text();
   const { normalizedTitle } = JSON.parse(response);
@@ -268,44 +265,6 @@ const generateDemoJobQuestions = async ({
   companyName?: string;
   companyDescription?: string;
 }) => {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          questions: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                question: { type: SchemaType.STRING },
-                answerGuidelines: { type: SchemaType.STRING },
-                correctExampleAnswers: {
-                  type: SchemaType.ARRAY,
-                  items: { type: SchemaType.STRING },
-                },
-                incorrectExampleAnswers: {
-                  type: SchemaType.ARRAY,
-                  items: { type: SchemaType.STRING },
-                },
-              },
-              required: [
-                "question",
-                "answerGuidelines",
-                "correctExampleAnswers",
-                "incorrectExampleAnswers",
-              ],
-            },
-          },
-        },
-        required: ["questions"],
-      },
-    },
-  });
-
   const isCompanySpecific = !!companyName;
   const promptPrefix = isCompanySpecific
     ? `You are given a job title, job description, company name and company description.
@@ -358,7 +317,40 @@ const generateDemoJobQuestions = async ({
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const result = await model.generateContent([prompt]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            questions: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  question: { type: SchemaType.STRING },
+                  answerGuidelines: { type: SchemaType.STRING },
+                  correctExampleAnswers: {
+                    type: SchemaType.ARRAY,
+                    items: { type: SchemaType.STRING },
+                  },
+                  incorrectExampleAnswers: {
+                    type: SchemaType.ARRAY,
+                    items: { type: SchemaType.STRING },
+                  },
+                },
+                required: [
+                  "question",
+                  "answerGuidelines",
+                  "correctExampleAnswers",
+                  "incorrectExampleAnswers",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      });
       const response = result.response.text();
 
       try {
@@ -712,31 +704,26 @@ const writeDemoJobToNotion = async ({
 };
 
 const cleanupText = async (text: string) => {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      temperature: 0,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          cleanedText: { type: SchemaType.STRING },
-        },
-        required: ["cleanedText"],
-      },
-    },
-  });
-
-  const result = await model.generateContent([
+  const prompt = [
     `Clean up and format the following text as a proper English title/name. 
     The first letter of each major word should be capitalized, and everything else should be lowercase.
     Remove any unnecessary spaces, special characters, or formatting.
     Return only the cleaned text in JSON format.
     
     Input text: ${text}`,
-  ]);
+  ];
 
+  const result = await generateContentWithFallback({
+    contentParts: prompt,
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        cleanedText: { type: SchemaType.STRING },
+      },
+      required: ["cleanedText"],
+    },
+  });
   const response = result.response.text();
   const { cleanedText } = JSON.parse(response);
   return cleanedText;

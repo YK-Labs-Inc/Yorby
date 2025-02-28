@@ -10,6 +10,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
 import { withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { generateContentWithFallback } from "@/utils/ai/gemini";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -70,25 +71,21 @@ ${transcript}
 Provide a concise overview of the interview performance in 2-3 paragraphs at maximum. Do not force yourself
 to write more feedback if you don't have any.`;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          overview: {
-            type: SchemaType.STRING,
-          },
-        },
-        required: ["overview"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            overview: {
+              type: SchemaType.STRING,
+            },
+          },
+          required: ["overview"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Overview generated");
       return {
@@ -130,34 +127,30 @@ Provide your analysis in JSON format:
 Do not force yourself to write more feedback if you don't have any. If there are no pros or no cons, return an empty list.
 Do not force yourself to think of a pro or a con if it is unnecessary.`;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          pros: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.STRING,
-            },
-          },
-          cons: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.STRING,
-            },
-          },
-        },
-        required: ["pros", "cons"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            pros: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.STRING,
+              },
+            },
+            cons: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.STRING,
+              },
+            },
+          },
+          required: ["pros", "cons"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Pros and cons generated");
       return {
@@ -221,59 +214,54 @@ If there are no strengths or areas for improvement, return an empty list for tha
 Do not force yourself to write more feedback if you don't have any.
 It is okay to have an empty strengths or any empty improvements field, however, it is not okay to have an empty rating.
 `;
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          question_breakdown: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.OBJECT,
-              properties: {
-                question: {
-                  type: SchemaType.STRING,
-                },
-                answer: {
-                  type: SchemaType.STRING,
-                },
-                feedback: {
-                  type: SchemaType.OBJECT,
-                  properties: {
-                    strengths: {
-                      type: SchemaType.ARRAY,
-                      items: {
-                        type: SchemaType.STRING,
-                      },
-                    },
-                    improvements: {
-                      type: SchemaType.ARRAY,
-                      items: {
-                        type: SchemaType.STRING,
-                      },
-                    },
-                    rating: {
-                      type: SchemaType.NUMBER,
-                    },
-                  },
-                  required: ["strengths", "improvements", "rating"],
-                },
-              },
-              required: ["question", "answer", "feedback"],
-            },
-          },
-        },
-        required: ["question_breakdown"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            question_breakdown: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  question: {
+                    type: SchemaType.STRING,
+                  },
+                  answer: {
+                    type: SchemaType.STRING,
+                  },
+                  feedback: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                      strengths: {
+                        type: SchemaType.ARRAY,
+                        items: {
+                          type: SchemaType.STRING,
+                        },
+                      },
+                      improvements: {
+                        type: SchemaType.ARRAY,
+                        items: {
+                          type: SchemaType.STRING,
+                        },
+                      },
+                      rating: {
+                        type: SchemaType.NUMBER,
+                      },
+                    },
+                    required: ["strengths", "improvements", "rating"],
+                  },
+                },
+                required: ["question", "answer", "feedback"],
+              },
+            },
+          },
+          required: ["question_breakdown"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       const questionBreakdown = JSON.parse(result.response.text())
         .question_breakdown as {
@@ -344,28 +332,24 @@ When writing your job fit analysis, do not force yourself to write more feedback
 
   `;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          job_fit_analysis: {
-            type: SchemaType.STRING,
-          },
-          job_fit_percentage: {
-            type: SchemaType.NUMBER,
-          },
-        },
-        required: ["job_fit_analysis", "job_fit_percentage"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            job_fit_analysis: {
+              type: SchemaType.STRING,
+            },
+            job_fit_percentage: {
+              type: SchemaType.NUMBER,
+            },
+          },
+          required: ["job_fit_analysis", "job_fit_percentage"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Job fit analysis generated");
       return {
@@ -399,25 +383,21 @@ ${transcript}
 
 Return a number between 0-100 representing the overall interview performance, considering communication skills, relevance of answers, and job fit.`;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          score: {
-            type: SchemaType.NUMBER,
-          },
-        },
-        required: ["score"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            score: {
+              type: SchemaType.NUMBER,
+            },
+          },
+          required: ["score"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Score generated");
       return {
@@ -460,28 +440,24 @@ It is okay for there to be no improvement areas if the candidate is very qualifi
 It is also okay to include multiple improvements if the candidate has multiple areas for improvement.
 `;
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          key_improvements: {
-            type: SchemaType.ARRAY,
-            items: {
-              type: SchemaType.STRING,
-            },
-          },
-        },
-        required: ["key_improvements"],
-      },
-    },
-  });
-
   return withRetry(
     async () => {
-      const result = await model.generateContent([prompt, ...fileContents]);
+      const result = await generateContentWithFallback({
+        contentParts: [prompt, ...fileContents],
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            key_improvements: {
+              type: SchemaType.ARRAY,
+              items: {
+                type: SchemaType.STRING,
+              },
+            },
+          },
+          required: ["key_improvements"],
+        },
+      });
       const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Key improvements generated");
       return {

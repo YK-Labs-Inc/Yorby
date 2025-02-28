@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Logger } from "next-axiom";
+import { sendMessageWithFallback } from "@/utils/ai/gemini";
 
 const logger = new Logger().with({
   route: "/api/resume/interview",
@@ -44,12 +45,6 @@ export async function POST(req: NextRequest) {
 
     When you have all the information you need, say "Thank you for your time. I have all the information I need to create your resume."
     `;
-
-    // Configure Gemini model with safety settings
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-    });
-
     // Convert messages to Gemini chat format
     const chatHistory = [
       {
@@ -64,42 +59,13 @@ export async function POST(req: NextRequest) {
       }),
     ];
 
-    // Create a chat session
-    const chat = model.startChat({
+    // Send a prompt to continue the conversation
+    const result = await sendMessageWithFallback({
+      contentParts: latestUserMessage,
       history: chatHistory,
     });
 
-    // Send a prompt to continue the conversation
-    const result = await chat.sendMessageStream(latestUserMessage);
-
-    // Create a ReadableStream to stream the response
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          let responseContent = "";
-
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            responseContent += text;
-
-            // Encode the text chunk into a Uint8Array
-            const encoded = new TextEncoder().encode(text);
-            controller.enqueue(encoded);
-          }
-
-          logger.info("Interview response generated", { responseContent });
-          await logger.flush();
-
-          controller.close();
-        } catch (error) {
-          controller.error(error);
-        }
-      },
-    });
-
-    const headers = new Headers();
-    headers.set("Content-Type", "text/plain; charset=utf-8");
-    return new Response(stream, { headers });
+    return NextResponse.json(result);
   } catch (error) {
     logger.error("Error in resume interview", { error });
     await logger.flush();

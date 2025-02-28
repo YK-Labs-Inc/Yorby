@@ -13,6 +13,8 @@ import { Progress } from "@/components/ui/progress";
 import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown";
 
 interface MockInterviewReviewClientComponentProps {
   mockInterview: Tables<"custom_job_mock_interviews">;
@@ -111,7 +113,9 @@ export default function MockInterviewReviewClientComponent({
                       : "bg-gray-200 dark:bg-gray-800"
                   }`}
                 >
-                  {message.text}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.text}
+                  </ReactMarkdown>
                 </div>
               </div>
             ))}
