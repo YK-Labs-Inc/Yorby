@@ -3,6 +3,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
+export const maxDuration = 300;
+
 const fetchJobs = async () => {
   const supabase = await createSupabaseServerClient();
   const {
