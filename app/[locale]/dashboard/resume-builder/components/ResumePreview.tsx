@@ -3,173 +3,19 @@
 import { useTranslations } from "next-intl";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types";
+import { ResumeDataType } from "../page";
 
 interface ResumePreviewProps {
   loading: boolean;
-  resumeId: string;
+  resume: ResumeDataType;
 }
 
-// Define types to structure the aggregated resume data using Tables types
-type ResumeSection = {
-  title: Tables<"resume_sections">["title"];
-  content:
-    | Tables<"resume_list_items">["content"][]
-    | {
-        title: Tables<"resume_detail_items">["title"];
-        organization: Tables<"resume_detail_items">["subtitle"];
-        date: Tables<"resume_detail_items">["date_range"];
-        description: Tables<"resume_item_descriptions">["description"][];
-      }[];
-};
-
-type ResumeDataType = {
-  name: Tables<"resumes">["name"];
-  email: NonNullable<Tables<"resumes">["email"]>;
-  phone: NonNullable<Tables<"resumes">["phone"]>;
-  location: NonNullable<Tables<"resumes">["location"]>;
-  summary: NonNullable<Tables<"resumes">["summary"]>;
-  sections: ResumeSection[];
-};
-
-export default function ResumePreview({
-  loading: initialLoading,
-  resumeId,
-}: ResumePreviewProps) {
+export default function ResumePreview({ loading, resume }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
   const resumeRef = useRef<HTMLDivElement>(null);
-  const [resume, setResume] = useState<ResumeDataType | null>(null);
-  const [loading, setLoading] = useState<boolean>(initialLoading);
-
-  useEffect(() => {
-    // If resumeId is provided, fetch the resume data
-    if (resumeId) {
-      const fetchResumeData = async () => {
-        setLoading(true);
-        try {
-          const supabase = createSupabaseBrowserClient();
-
-          // Fetch basic resume data
-          const { data: resumeData, error: resumeError } = await supabase
-            .from("resumes")
-            .select("*")
-            .eq("id", resumeId)
-            .single();
-
-          if (resumeError || !resumeData) {
-            throw new Error(resumeError?.message || "Resume not found");
-          }
-
-          // Fetch resume sections
-          const { data: sectionsData, error: sectionsError } = await supabase
-            .from("resume_sections")
-            .select("*")
-            .eq("resume_id", resumeId)
-            .order("display_order", { ascending: true });
-
-          if (sectionsError) {
-            throw new Error(sectionsError.message);
-          }
-
-          // Create an array to hold all section data with their content
-          const formattedSections = [];
-
-          // Process each section
-          for (const section of sectionsData as Tables<"resume_sections">[]) {
-            // Check if it's a skills section (usually just list items)
-            const isSkillsSection = section.title
-              .toLowerCase()
-              .includes("skill");
-
-            if (isSkillsSection) {
-              // Fetch skills list items
-              const { data: listItems, error: listError } = await supabase
-                .from("resume_list_items")
-                .select("*")
-                .eq("section_id", section.id)
-                .order("display_order", { ascending: true });
-
-              if (listError) {
-                throw new Error(listError.message);
-              }
-
-              // Add skills section with list items as content
-              formattedSections.push({
-                title: section.title,
-                content: (listItems as Tables<"resume_list_items">[]).map(
-                  (item) => item.content
-                ),
-              });
-            } else {
-              // Fetch detail items for this section
-              const { data: detailItems, error: detailError } = await supabase
-                .from("resume_detail_items")
-                .select("*")
-                .eq("section_id", section.id)
-                .order("display_order", { ascending: true });
-
-              if (detailError) {
-                throw new Error(detailError.message);
-              }
-
-              // Process each detail item to get its descriptions
-              const formattedItems = [];
-              for (const item of detailItems as Tables<"resume_detail_items">[]) {
-                // Fetch descriptions for this detail item
-                const { data: descriptions, error: descError } = await supabase
-                  .from("resume_item_descriptions")
-                  .select("*")
-                  .eq("detail_item_id", item.id)
-                  .order("display_order", { ascending: true });
-
-                if (descError) {
-                  throw new Error(descError.message);
-                }
-
-                // Format the detail item with its descriptions
-                formattedItems.push({
-                  title: item.title,
-                  organization: item.subtitle,
-                  date: item.date_range,
-                  description: (
-                    descriptions as Tables<"resume_item_descriptions">[]
-                  ).map((desc) => desc.description),
-                });
-              }
-
-              // Add the section with its formatted detail items
-              formattedSections.push({
-                title: section.title,
-                content: formattedItems,
-              });
-            }
-          }
-
-          // Create the complete resume data object
-          const formattedResume: ResumeDataType = {
-            name: resumeData.name,
-            email: resumeData.email || "",
-            phone: resumeData.phone || "",
-            location: resumeData.location || "",
-            summary: resumeData.summary || "",
-            sections: formattedSections,
-          };
-
-          setResume(formattedResume);
-        } catch (error) {
-          console.error("Error fetching resume data:", error);
-          setResume(null);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchResumeData();
-    }
-  }, [resumeId]);
 
   const downloadAsPdf = async () => {
     if (!resume || !resumeRef.current) return;

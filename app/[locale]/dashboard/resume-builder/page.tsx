@@ -11,15 +11,45 @@ import { useVoiceRecording } from "./components/useVoiceRecording";
 import VoiceRecordingOverlay from "./components/VoiceRecordingOverlay";
 import { Content } from "@google/generative-ai";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { Tables } from "@/utils/supabase/database.types";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { useSearchParams } from "next/navigation";
+
+// Define types to structure the aggregated resume data using Tables types
+type ResumeSection = {
+  title: Tables<"resume_sections">["title"];
+  content:
+    | Tables<"resume_list_items">["content"][]
+    | {
+        title: Tables<"resume_detail_items">["title"];
+        organization: Tables<"resume_detail_items">["subtitle"];
+        date: Tables<"resume_detail_items">["date_range"];
+        description: Tables<"resume_item_descriptions">["description"][];
+      }[];
+};
+
+export type ResumeDataType = {
+  name: Tables<"resumes">["name"];
+  email: NonNullable<Tables<"resumes">["email"]>;
+  phone: NonNullable<Tables<"resumes">["phone"]>;
+  location: NonNullable<Tables<"resumes">["location"]>;
+  summary: NonNullable<Tables<"resumes">["summary"]>;
+  sections: ResumeSection[];
+};
 
 export default function ResumeBuilderPage() {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
-  const [generatedResumeId, setGeneratedResumeId] = useState<string>();
+  const searchParams = useSearchParams();
+  const resumeId = searchParams.get("resumeId");
+  const [generatedResumeId, setGeneratedResumeId] = useState<string>(
+    resumeId || ""
+  );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isResumeReady, setIsResumeReady] = useState<boolean>(false);
   const [messages, setMessages] = useState<Content[]>(conversationHistory);
+  const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
@@ -36,6 +66,133 @@ export default function ResumeBuilderPage() {
   //     },
   //   ]);
   // }, []);
+
+  useEffect(() => {
+    // If resumeId is provided, fetch the resume data
+    if (generatedResumeId) {
+      const fetchResumeData = async () => {
+        setIsGenerating(true);
+        try {
+          const supabase = createSupabaseBrowserClient();
+
+          // Fetch basic resume data
+          const { data: resumeData, error: resumeError } = await supabase
+            .from("resumes")
+            .select("*")
+            .eq("id", generatedResumeId)
+            .single();
+
+          if (resumeError || !resumeData) {
+            throw new Error(resumeError?.message || "Resume not found");
+          }
+
+          // Fetch resume sections
+          const { data: sectionsData, error: sectionsError } = await supabase
+            .from("resume_sections")
+            .select("*")
+            .eq("resume_id", generatedResumeId)
+            .order("display_order", { ascending: true });
+
+          if (sectionsError) {
+            throw new Error(sectionsError.message);
+          }
+
+          // Create an array to hold all section data with their content
+          const formattedSections = [];
+
+          // Process each section
+          for (const section of sectionsData as Tables<"resume_sections">[]) {
+            // Check if it's a skills section (usually just list items)
+            const isSkillsSection = section.title
+              .toLowerCase()
+              .includes("skill");
+
+            if (isSkillsSection) {
+              // Fetch skills list items
+              const { data: listItems, error: listError } = await supabase
+                .from("resume_list_items")
+                .select("*")
+                .eq("section_id", section.id)
+                .order("display_order", { ascending: true });
+
+              if (listError) {
+                throw new Error(listError.message);
+              }
+
+              // Add skills section with list items as content
+              formattedSections.push({
+                title: section.title,
+                content: (listItems as Tables<"resume_list_items">[]).map(
+                  (item) => item.content
+                ),
+              });
+            } else {
+              // Fetch detail items for this section
+              const { data: detailItems, error: detailError } = await supabase
+                .from("resume_detail_items")
+                .select("*")
+                .eq("section_id", section.id)
+                .order("display_order", { ascending: true });
+
+              if (detailError) {
+                throw new Error(detailError.message);
+              }
+
+              // Process each detail item to get its descriptions
+              const formattedItems = [];
+              for (const item of detailItems as Tables<"resume_detail_items">[]) {
+                // Fetch descriptions for this detail item
+                const { data: descriptions, error: descError } = await supabase
+                  .from("resume_item_descriptions")
+                  .select("*")
+                  .eq("detail_item_id", item.id)
+                  .order("display_order", { ascending: true });
+
+                if (descError) {
+                  throw new Error(descError.message);
+                }
+
+                // Format the detail item with its descriptions
+                formattedItems.push({
+                  title: item.title,
+                  organization: item.subtitle,
+                  date: item.date_range,
+                  description: (
+                    descriptions as Tables<"resume_item_descriptions">[]
+                  ).map((desc) => desc.description),
+                });
+              }
+
+              // Add the section with its formatted detail items
+              formattedSections.push({
+                title: section.title,
+                content: formattedItems,
+              });
+            }
+          }
+
+          // Create the complete resume data object
+          const formattedResume: ResumeDataType = {
+            name: resumeData.name,
+            email: resumeData.email || "",
+            phone: resumeData.phone || "",
+            location: resumeData.location || "",
+            summary: resumeData.summary || "",
+            sections: formattedSections,
+          };
+
+          setResume(formattedResume);
+        } catch (error) {
+          console.error("Error fetching resume data:", error);
+          setResume(null);
+        } finally {
+          setIsGenerating(false);
+        }
+      };
+
+      fetchResumeData();
+    }
+  }, [generatedResumeId]);
 
   // Scroll to bottom of chat whenever messages update
   useEffect(() => {
@@ -81,7 +238,7 @@ export default function ResumeBuilderPage() {
     setTextInput(e.target.value);
   };
 
-  const sendMessage = async (transcription?: string) => {
+  const sendInterviewMessage = async (transcription?: string) => {
     const messageContent = transcription || textInput;
     if (!messageContent.trim() || isGenerating) return;
 
@@ -158,6 +315,54 @@ export default function ResumeBuilderPage() {
     sendMessage();
   };
 
+  const sendMessage = async () => {
+    if (generatedResumeId) {
+      sendEditMessage();
+    } else {
+      sendInterviewMessage();
+    }
+  };
+
+  const sendEditMessage = async () => {
+    const messageContent = textInput.trim();
+
+    const updatedMessages = [
+      ...messages,
+      {
+        role: "user",
+        parts: [{ text: messageContent }],
+      },
+    ];
+
+    setMessages(updatedMessages);
+    setTextInput("");
+
+    // Add a temporary message to indicate AI is thinking
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "role",
+        parts: [{ text: "..." }],
+      },
+    ]);
+
+    const response = await fetch("/api/resume/edit", {
+      method: "POST",
+      body: JSON.stringify({
+        resume: resume,
+        userMessage: messageContent,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const { updatedResume } = data;
+    setResume(updatedResume);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -186,6 +391,9 @@ export default function ResumeBuilderPage() {
       };
       if (error) {
         alert(error);
+      }
+      if (!resumeId) {
+        throw new Error("No resume ID returned from server");
       }
       setGeneratedResumeId(resumeId);
 
@@ -322,13 +530,10 @@ export default function ResumeBuilderPage() {
         </div>
 
         {/* Resume preview column - only shown when a resume exists */}
-        {shouldShowSplitView && (
+        {shouldShowSplitView && resume && (
           <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto">
-              <ResumePreview
-                resumeId={generatedResumeId}
-                loading={isGenerating}
-              />
+              <ResumePreview resume={resume} loading={isGenerating} />
             </div>
           </div>
         )}
