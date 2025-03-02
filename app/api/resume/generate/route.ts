@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { Content, SchemaType } from "@google/generative-ai";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { Tables } from "@/utils/supabase/database.types";
-import {
-  generateContentWithFallback,
-  sendMessageWithFallback,
-} from "@/utils/ai/gemini";
+import { sendMessageWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
@@ -82,6 +78,7 @@ const saveResumeContent = async (
     logger
   );
   await saveResumeSkills(resumeId, resumeContent.skills, logger);
+  return resumeId;
 };
 
 const saveResumePersonalInfo = async (personalInfo: {
