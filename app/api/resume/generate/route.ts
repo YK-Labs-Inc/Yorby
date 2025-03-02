@@ -67,6 +67,10 @@ const saveResumeContent = async (
       endDate: string | null;
       description: string[];
     }[];
+    skills: {
+      category: string;
+      skills: string[];
+    }[];
   },
   logger: Logger
 ) => {
@@ -77,6 +81,7 @@ const saveResumeContent = async (
     resumeContent.workExperience,
     logger
   );
+  await saveResumeSkills(resumeId, resumeContent.skills, logger);
 };
 
 const saveResumePersonalInfo = async (personalInfo: {
@@ -276,14 +281,65 @@ const saveResumeWorkExperience = async (
   );
 };
 
+const saveResumeSkills = async (
+  resumeId: string,
+  skills: {
+    category: string;
+    skills: string[];
+  }[],
+  logger: Logger
+) => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const { data, error } = await supabase
+    .from("resume_sections")
+    .insert({
+      title: "Skills",
+      resume_id: resumeId,
+      display_order: 0,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  const skillsSectionId = data.id;
+  await Promise.all(
+    skills.map(async (skill) => {
+      const { error } = await supabase.from("resume_list_items").insert({
+        content: `${skill.category}: ${skill.skills.join(", ")}`,
+        section_id: skillsSectionId,
+        display_order: 0,
+      });
+
+      if (error) {
+        logger.error("Failed to insert resume detail item", {
+          error,
+        });
+      }
+    })
+  );
+};
+
 const generateResumeContent = async (messages: Content[], logger: Logger) => {
   const personalInfo = await extractPersonalInfo(messages, logger);
   const educationHistory = await extractEducationHistory(messages, logger);
   const workExperience = await extractWorkExperience(messages, logger);
+  const skills = await extractSkills(messages, logger);
   return {
     personalInfo,
     educationHistory,
     workExperience,
+    skills,
   };
 };
 
@@ -562,6 +618,82 @@ const extractWorkExperience = async (messages: Content[], logger: Logger) => {
         startDate: null,
         endDate: null,
         description: [],
+      },
+    ];
+  }
+};
+
+const extractSkills = async (messages: Content[], logger: Logger) => {
+  const functionLogger = logger.with({
+    path: "api/resume/generate",
+    dataToExtract: "skills",
+  });
+
+  try {
+    const prompt = `
+    You are analyzing the conversation history of a user and an interviewer who is helping the user create a resume.
+    Your job is to extract the work skills of the user from the conversation history.
+
+    Your response type will be an array of objects. Each object will have a category and an array of skills.
+
+    For the skills, try to group them into categories that the user mentions. Some examples of categories are
+    proficiency level, programming languages, frameworks, toosl, etc.
+
+    If skills cannot be grouped into categories, return a single object with a category set to "noCategory" and an array of all
+    of the skills.
+
+    If you are unable to extract any skills return an empty array in the final JSON response.
+
+    Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+    characters are not needed. Just return the raw JSON object string.
+  `;
+
+    const result = await sendMessageWithFallback({
+      contentParts: ["Extract the information from the conversation"],
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+        ...messages,
+      ],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            category: { type: SchemaType.STRING },
+            skills: {
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
+            },
+          },
+          required: ["category", "skills"],
+        },
+      },
+      loggingContext: {
+        path: "api/resume/generate",
+        dataToExtract: "skills",
+      },
+    });
+
+    functionLogger.info("Skills extracted", {
+      result: result.response.text(),
+    });
+
+    return JSON.parse(result.response.text()) as {
+      category: string;
+      skills: string[];
+    }[];
+  } catch (error) {
+    logger.error("Failed to extract personal information", {
+      error,
+    });
+    return [
+      {
+        category: "noCategory",
+        skills: [],
       },
     ];
   }
