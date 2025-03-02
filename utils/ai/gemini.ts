@@ -2,7 +2,6 @@ import { ChatMessage } from "@/app/api/chat/route";
 import {
   GoogleGenerativeAI,
   GenerativeModel,
-  SchemaType,
   Part,
   GenerateContentResult,
   GenerateContentStreamResult,

@@ -1,3 +1,4 @@
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useState, useRef, useEffect } from "react";
 
 interface UseVoiceRecordingProps {
@@ -14,6 +15,9 @@ export function useVoiceRecording({
   const [audioDevices, setAudioDevices] = useState<
     { deviceId: string; label: string }[]
   >([]);
+  const [shouldProcessAudio, setShouldProcessAudio] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const { logError } = useAxiomLogging();
 
   // Default messages for when translation function isn't provided
   const messages = {
@@ -33,50 +37,65 @@ export function useVoiceRecording({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
 
-  // Get available audio devices
-  useEffect(() => {
-    async function getDevices() {
-      try {
-        // Request microphone permission
-        await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
+  // Get available audio devices - but don't run automatically on mount
+  const initializeRecording = async (): Promise<string | false> => {
+    if (isInitialized) return selectedAudio;
 
-        const devices = await navigator.mediaDevices.enumerateDevices();
+    try {
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
 
-        const audios = devices
-          .filter((device) => device.kind === "audioinput")
-          .map((device) => ({
-            deviceId: device.deviceId,
-            label:
-              device.label ||
-              `Microphone ${device.deviceId.substring(0, 5)}...`,
-          }));
+      const devices = await navigator.mediaDevices.enumerateDevices();
 
-        setAudioDevices(audios);
-        if (audios.length > 0) {
-          setSelectedAudio(audios[0].deviceId);
-        }
-      } catch (error) {
-        console.error("Error getting audio devices:", error);
+      const audios = devices
+        .filter((device) => device.kind === "audioinput")
+        .map((device) => ({
+          deviceId: device.deviceId,
+          label:
+            device.label || `Microphone ${device.deviceId.substring(0, 5)}...`,
+        }));
+
+      setAudioDevices(audios);
+
+      let selectedDevice = "";
+      if (audios.length > 0) {
+        selectedDevice = audios[0].deviceId;
+        setSelectedAudio(selectedDevice);
       }
-    }
 
-    getDevices();
-  }, []);
+      setIsInitialized(true);
+      return selectedDevice || false;
+    } catch (error) {
+      logError("Error getting audio devices:", { error });
+      alert(messages.micPermissionError);
+      return false;
+    }
+  };
 
   // Start recording audio
   const startRecording = async () => {
     try {
-      if (!selectedAudio) {
+      // First initialize recording if not already done
+      const initializedAudioDevice = await initializeRecording();
+      if (initializedAudioDevice === false) return;
+
+      // Use the device ID returned from initialization or the current selectedAudio
+      const deviceToUse = initializedAudioDevice || selectedAudio;
+
+      if (!deviceToUse) {
         alert(messages.pleaseSelectAMicrophone);
         return;
       }
 
+      // Reset the processing flag when starting a new recording
+      setShouldProcessAudio(false);
+
       // Initialize media stream with selected audio device
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          deviceId: selectedAudio,
+          deviceId: deviceToUse,
         },
       });
 
@@ -91,19 +110,22 @@ export function useVoiceRecording({
       // Handle data from microphone
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
-          setAudioChunks([...audioChunks, event.data]);
+          setAudioChunks((prev) => [...prev, event.data]);
         }
       };
 
       // Start recording
       mediaRecorder.start();
     } catch (error) {
-      console.error("Failed to start recording:", error);
+      logError("Failed to start recording:", { error });
       alert(messages.micPermissionError);
     }
   };
 
   const cancelRecording = () => {
+    // Ensure audio won't be processed
+    setShouldProcessAudio(false);
+
     // Stop the recording without processing
     if (
       mediaRecorderRef.current &&
@@ -130,6 +152,9 @@ export function useVoiceRecording({
 
   const stopRecording = async () => {
     try {
+      // Set flag to process the audio
+      setShouldProcessAudio(true);
+
       // Stop media recorder
       if (
         mediaRecorderRef.current &&
@@ -152,12 +177,14 @@ export function useVoiceRecording({
     } catch (error) {
       alert(messages.recordingError);
       setIsProcessing(false);
+      setShouldProcessAudio(false);
     }
   };
 
   useEffect(() => {
     const processAudio = async () => {
-      if (audioChunks.length > 0) {
+      // Only process audio if shouldProcessAudio is true and we have chunks
+      if (shouldProcessAudio && audioChunks.length > 0) {
         setIsProcessing(true);
 
         // Process recorded audio for transcription
@@ -180,11 +207,13 @@ export function useVoiceRecording({
           throw new Error(`Transcription failed: ${response.status}`);
         }
         setIsProcessing(false);
+        setShouldProcessAudio(false); // Reset the flag after processing
+        setAudioChunks([]);
       }
     };
 
     processAudio();
-  }, [audioChunks]);
+  }, [audioChunks, shouldProcessAudio, onTranscription]);
 
   return {
     startRecording,
@@ -194,5 +223,6 @@ export function useVoiceRecording({
     audioDevices,
     selectedAudio,
     setSelectedAudio,
+    isInitialized,
   };
 }
