@@ -1,138 +1,697 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  GoogleGenerativeAI,
-  HarmBlockThreshold,
-  HarmCategory,
-} from "@google/generative-ai";
-import { Logger } from "next-axiom";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
+import { NextResponse } from "next/server";
+import { Content, SchemaType } from "@google/generative-ai";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { sendMessageWithFallback } from "@/utils/ai/gemini";
+import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 
-const logger = new Logger().with({
-  route: "/api/resume/generate",
-});
-
-// Initialize Gemini API
-export async function POST(req: NextRequest) {
+export const POST = withAxiom(async (req: AxiomRequest) => {
+  const logger = req.log.with({
+    route: "/api/resume/generate",
+  });
   try {
-    const { conversation } = await req.json();
+    const { messages } = (await req.json()) as { messages: Content[] };
 
-    if (!conversation || !Array.isArray(conversation)) {
+    if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
-        { error: "Conversation history is required" },
+        { error: "Valid messages array is required" },
         { status: 400 }
       );
     }
 
     logger.info("Generating resume from conversation history");
 
-    // Extract user messages for context
-    const userMessages = conversation
-      .filter((msg: any) => msg.role === "user")
-      .map((msg: any) => msg.content)
-      .join("\n\n");
+    const resumeContent = await generateResumeContent(messages, logger);
 
-    // Create a prompt that instructs the AI to parse the conversation and generate a structured resume
-    const prompt = `
-      You are a professional resume writer. Extract relevant information from the user's conversation and create a well-structured, 
-      ATS-friendly resume. The resume should include the following:
+    const resumeId = await saveResumeContent(resumeContent, logger);
 
-      1. Name, contact information (email and phone if provided, otherwise use placeholder)
-      2. Professional summary that highlights key strengths and career goals
-      3. Work experience with company names, job titles, dates, and achievements
-      4. Education details with institution names, degrees, and dates
-      5. Skills section with technical and soft skills
-      6. Any other relevant sections like certifications, languages, etc.
-
-      Structure the resume in a clean, professional format that will pass ATS systems.
-      
-      Carefully analyze the conversation history I'll provide to extract all relevant details.
-      
-      Return ONLY a JSON object with the following structure:
-      {
-        "name": "Full Name",
-        "email": "email@example.com",
-        "phone": "123-456-7890", // if provided, otherwise null
-        "location": "City, State", // if provided, otherwise null
-        "summary": "Professional summary text",
-        "sections": [
-          {
-            "title": "Work Experience",
-            "content": [
-              {
-                "title": "Job Title",
-                "organization": "Company Name",
-                "date": "Start Date - End Date",
-                "description": ["Achievement 1", "Achievement 2", ...]
-              },
-              ...
-            ]
-          },
-          {
-            "title": "Education",
-            "content": [
-              {
-                "title": "Degree",
-                "organization": "Institution Name",
-                "date": "Graduation Year",
-                "description": "Additional details if any"
-              },
-              ...
-            ]
-          },
-          {
-            "title": "Skills",
-            "content": ["Skill 1", "Skill 2", ...]
-          },
-          ...
-        ]
-      }
-
-      Make sure the resume is professional and highlights the user's strengths effectively. 
-      Ensure that all dates are formatted consistently and the structure is clean.
-      
-      Here is the conversation with the user about their resume information: 
-        
-      ${userMessages}
-      
-      Based on this conversation, please generate a professional resume in the JSON format described above.
-    `;
-
-    // Generate the resume
-    const result = await generateContentWithFallback({
-      contentParts: [prompt],
-    });
-    const responseContent = result.response.text();
-
-    if (!responseContent) {
-      throw new Error("No content returned from Gemini");
-    }
-
-    // Parse the JSON response
-    let resumeData;
-    try {
-      // Extract JSON from the response if it's wrapped in markdown code blocks
-      const jsonMatch =
-        responseContent.match(/```(?:json)?([\s\S]*?)```/) ||
-        responseContent.match(/({[\s\S]*})/);
-
-      const jsonString = jsonMatch ? jsonMatch[1] : responseContent;
-      resumeData = JSON.parse(jsonString.trim());
-    } catch (error) {
-      logger.error("Failed to parse resume data", { error, responseContent });
-      await logger.flush();
-      throw new Error("Failed to parse resume data");
-    }
-
-    logger.info("Resume generated successfully");
-    await logger.flush();
-
-    return NextResponse.json({ resume: resumeData });
-  } catch (error) {
-    logger.error("Error generating resume", { error });
-    await logger.flush();
+    return NextResponse.json({ resumeId });
+  } catch (extractionError) {
+    logger.error("Resume extraction failed", { error: extractionError });
     return NextResponse.json(
-      { error: "Failed to generate resume" },
+      {
+        error: "Failed to extract resume data",
+        details:
+          extractionError instanceof Error
+            ? extractionError.message
+            : String(extractionError),
+      },
       { status: 500 }
     );
   }
-}
+});
+
+const saveResumeContent = async (
+  resumeContent: {
+    personalInfo: {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      location: string | null;
+    };
+    educationHistory: {
+      name: string;
+      degree: string | null;
+      startDate: string | null;
+      endDate: string | null;
+      gpa: string | null;
+      additionalInfo: string[] | null;
+    }[];
+    workExperience: {
+      companyName: string;
+      jobTitle: string | null;
+      startDate: string | null;
+      endDate: string | null;
+      description: string[];
+    }[];
+    skills: {
+      category: string;
+      skills: string[];
+    }[];
+  },
+  logger: Logger
+) => {
+  const resumeId = await saveResumePersonalInfo(resumeContent.personalInfo);
+  await saveResumeEducation(resumeId, resumeContent.educationHistory, logger);
+  await saveResumeWorkExperience(
+    resumeId,
+    resumeContent.workExperience,
+    logger
+  );
+  await saveResumeSkills(resumeId, resumeContent.skills, logger);
+  return resumeId;
+};
+
+const saveResumePersonalInfo = async (personalInfo: {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const { data, error } = await supabase
+    .from("resumes")
+    .insert({
+      name: personalInfo.name,
+      email: personalInfo.email,
+      phone: personalInfo.phone,
+      location: personalInfo.location,
+      user_id: user.id,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data.id;
+};
+
+const saveResumeEducation = async (
+  resumeId: string,
+  educationHistory: {
+    name: string;
+    degree: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    gpa: string | null;
+    additionalInfo: string[] | null;
+  }[],
+  logger: Logger
+) => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const { data, error } = await supabase
+    .from("resume_sections")
+    .insert({
+      title: "Education",
+      resume_id: resumeId,
+      display_order: 0,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  const educationSectionId = data.id;
+  await Promise.all(
+    educationHistory.map(async (education) => {
+      let subtitle = "";
+      if (education.gpa && education.degree) {
+        subtitle = `${education.degree} - ${education.gpa}`;
+      } else if (education.degree) {
+        subtitle = education.degree;
+      } else if (education.gpa) {
+        subtitle = education.gpa;
+      }
+      const { data, error } = await supabase
+        .from("resume_detail_items")
+        .insert({
+          title: education.name,
+          subtitle,
+          date_range: `${education.startDate} - ${education.endDate}`,
+          section_id: educationSectionId,
+          display_order: 0,
+        })
+        .select("id")
+        .single();
+      if (error) {
+        logger.error("Failed to insert resume detail item", {
+          error,
+        });
+        return;
+      }
+      const { id: resumeDetailItemId } = data;
+      if (education.additionalInfo) {
+        await Promise.all(
+          education.additionalInfo.map(async (info, index) => {
+            const { error } = await supabase
+              .from("resume_item_descriptions")
+              .insert({
+                detail_item_id: resumeDetailItemId,
+                description: info,
+                display_order: index,
+              });
+            if (error) {
+              logger.error("Failed to insert resume item description", {
+                error,
+              });
+            }
+          })
+        );
+      }
+    })
+  );
+};
+
+const saveResumeWorkExperience = async (
+  resumeId: string,
+  workExperience: {
+    companyName: string;
+    jobTitle: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    description: string[];
+  }[],
+  logger: Logger
+) => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const { data, error } = await supabase
+    .from("resume_sections")
+    .insert({
+      title: "Work Experience",
+      resume_id: resumeId,
+      display_order: 0,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  const workExperienceSectionId = data.id;
+  await Promise.all(
+    workExperience.map(async (experience) => {
+      const { data, error } = await supabase
+        .from("resume_detail_items")
+        .insert({
+          title: experience.companyName,
+          subtitle: experience.jobTitle,
+          date_range: `${experience.startDate} - ${experience.endDate}`,
+          section_id: workExperienceSectionId,
+          display_order: 0,
+        })
+        .select("id")
+        .single();
+      if (error) {
+        logger.error("Failed to insert resume detail item", {
+          error,
+        });
+        return;
+      }
+      const { id: resumeDetailItemId } = data;
+      if (experience.description) {
+        await Promise.all(
+          experience.description.map(async (description, index) => {
+            const { error } = await supabase
+              .from("resume_item_descriptions")
+              .insert({
+                detail_item_id: resumeDetailItemId,
+                description,
+                display_order: index,
+              });
+            if (error) {
+              logger.error("Failed to insert resume item description", {
+                error,
+              });
+            }
+          })
+        );
+      }
+    })
+  );
+};
+
+const saveResumeSkills = async (
+  resumeId: string,
+  skills: {
+    category: string;
+    skills: string[];
+  }[],
+  logger: Logger
+) => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const { data, error } = await supabase
+    .from("resume_sections")
+    .insert({
+      title: "Skills",
+      resume_id: resumeId,
+      display_order: 0,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  const skillsSectionId = data.id;
+  await Promise.all(
+    skills.map(async (skill) => {
+      const { error } = await supabase.from("resume_list_items").insert({
+        content: `${skill.category}: ${skill.skills.join(", ")}`,
+        section_id: skillsSectionId,
+        display_order: 0,
+      });
+
+      if (error) {
+        logger.error("Failed to insert resume detail item", {
+          error,
+        });
+      }
+    })
+  );
+};
+
+const generateResumeContent = async (messages: Content[], logger: Logger) => {
+  const personalInfo = await extractPersonalInfo(messages, logger);
+  const educationHistory = await extractEducationHistory(messages, logger);
+  const workExperience = await extractWorkExperience(messages, logger);
+  const skills = await extractSkills(messages, logger);
+  return {
+    personalInfo,
+    educationHistory,
+    workExperience,
+    skills,
+  };
+};
+
+const extractPersonalInfo = async (messages: Content[], logger: Logger) => {
+  const functionLogger = logger.with({
+    path: "api/resume/generate",
+    dataToExtract: "personal information",
+  });
+  try {
+    const prompt = `
+  Extract the following information from the conversation:
+  - Name
+  - Email
+  - Phone
+  - Location
+
+
+  If you are unable to extract the name return a placeholder for that field in the final JSON response.
+
+  If you are unable to extract the email return a null value for the field in the final JSON response.
+
+  If you are unable to extract the phone return a null value for the field in the final JSON response.
+
+  If you are unable to extract the location return a null value for the field in the final JSON response.
+
+  Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+  characters are not needed. Just return the raw JSON object string.
+  `;
+
+    const result = await sendMessageWithFallback({
+      contentParts: ["Extract the information from the conversation"],
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+        ...messages,
+      ],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          name: { type: SchemaType.STRING },
+          email: { type: SchemaType.STRING },
+          phone: { type: SchemaType.STRING },
+          location: { type: SchemaType.STRING },
+        },
+        required: ["name", "email", "phone", "location"],
+      },
+      loggingContext: {
+        path: "api/resume/generate",
+        dataToExtract: "personal information",
+      },
+    });
+
+    functionLogger.info("Personal information extracted", {
+      result: result.response.text(),
+    });
+
+    return JSON.parse(result.response.text()) as {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      location: string | null;
+    };
+  } catch (error) {
+    logger.error("Failed to extract personal information", {
+      error,
+    });
+    return {
+      name: "John Doe",
+      email: null,
+      phone: null,
+      location: null,
+    };
+  }
+};
+
+const extractEducationHistory = async (messages: Content[], logger: Logger) => {
+  const functionLogger = logger.with({
+    path: "api/resume/generate",
+    dataToExtract: "education",
+  });
+  try {
+    const prompt = `
+    You are analyzing the conversation history of a user and an interviewer who is helping the user create a resume.
+    Your job is to extract the education history of the user from the conversation history.
+
+    The education history should include the following information:
+    - School name
+    - Degree
+    - Start date
+    - End date
+    - GPA
+    - Additional information about the education (e.g. awards, accolades, etc) 
+
+    There could be multiple education entries so you must extract the above information for each education entry.
+
+    If you are unable to extract the school name return a placeholder for that field in the final JSON response.
+
+    If you are unable to extract the degree return a null value for the field in the final JSON response.
+
+    If you are unable to extract the start date return a null value for the field in the final JSON response.
+
+    If you are unable to extract the end date return a null value for the field in the final JSON response.
+
+    If you are unable to extract the GPA return a null value for the field in the final JSON response.
+
+    If you are unable to extract the additional information return an empty array for the field in the final JSON response.
+
+    Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+    characters are not needed. Just return the raw JSON object string.
+  `;
+
+    const result = await sendMessageWithFallback({
+      contentParts: ["Extract the information from the conversation"],
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+        ...messages,
+      ],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            name: { type: SchemaType.STRING },
+            degree: { type: SchemaType.STRING },
+            startDate: { type: SchemaType.STRING },
+            endDate: { type: SchemaType.STRING },
+            gpa: { type: SchemaType.STRING },
+            additionalInfo: {
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
+            },
+          },
+          required: [
+            "name",
+            "degree",
+            "startDate",
+            "endDate",
+            "gpa",
+            "additionalInfo",
+          ],
+        },
+      },
+      loggingContext: {
+        path: "api/resume/generate",
+        dataToExtract: "personal information",
+      },
+    });
+
+    functionLogger.info("Education history extracted", {
+      result: result.response.text(),
+    });
+
+    return JSON.parse(result.response.text()) as {
+      name: string;
+      degree: string | null;
+      startDate: string | null;
+      endDate: string | null;
+      gpa: string | null;
+      additionalInfo: string[] | null;
+    }[];
+  } catch (error) {
+    logger.error("Failed to extract personal information", {
+      error,
+    });
+    return [
+      {
+        name: "Perfect Interview College",
+        degree: null,
+        startDate: null,
+        endDate: null,
+        gpa: null,
+        additionalInfo: null,
+      },
+    ];
+  }
+};
+
+const extractWorkExperience = async (messages: Content[], logger: Logger) => {
+  const functionLogger = logger.with({
+    path: "api/resume/generate",
+    dataToExtract: "work experience",
+  });
+  try {
+    const prompt = `
+    You are analyzing the conversation history of a user and an interviewer who is helping the user create a resume.
+    Your job is to extract the work experience of the user from the conversation history.
+
+    The work experience should include the following information:
+    - Company name
+    - Job title
+    - Start date
+    - End date
+    - Description of the job (e.g. responsibilities, accomplishments, etc) 
+
+    There could be multiple work experience entries so you must extract the above information for each work experience entry.
+
+    If you are unable to extract the company name return a placeholder for that field in the final JSON response.
+
+    If you are unable to extract the job title return a null value for the field in the final JSON response.
+
+    If you are unable to extract the start date return a null value for the field in the final JSON response.
+
+    If you are unable to extract the end date return a null value for the field in the final JSON response.
+
+    If you are unable to extract the description of the job return an empty array for the field in the final JSON response.
+
+    Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+    characters are not needed. Just return the raw JSON object string.
+  `;
+
+    const result = await sendMessageWithFallback({
+      contentParts: ["Extract the information from the conversation"],
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+        ...messages,
+      ],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            companyName: { type: SchemaType.STRING },
+            jobTitle: { type: SchemaType.STRING },
+            startDate: { type: SchemaType.STRING },
+            endDate: { type: SchemaType.STRING },
+            description: {
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
+            },
+          },
+          required: [
+            "companyName",
+            "jobTitle",
+            "startDate",
+            "endDate",
+            "description",
+          ],
+        },
+      },
+      loggingContext: {
+        path: "api/resume/generate",
+        dataToExtract: "work experience",
+      },
+    });
+
+    functionLogger.info("Work experience extracted", {
+      result: result.response.text(),
+    });
+
+    return JSON.parse(result.response.text()) as {
+      companyName: string;
+      jobTitle: string | null;
+      startDate: string | null;
+      endDate: string | null;
+      description: string[];
+    }[];
+  } catch (error) {
+    logger.error("Failed to extract personal information", {
+      error,
+    });
+    return [
+      {
+        companyName: "Perfect Interview",
+        jobTitle: null,
+        startDate: null,
+        endDate: null,
+        description: [],
+      },
+    ];
+  }
+};
+
+const extractSkills = async (messages: Content[], logger: Logger) => {
+  const functionLogger = logger.with({
+    path: "api/resume/generate",
+    dataToExtract: "skills",
+  });
+
+  try {
+    const prompt = `
+    You are analyzing the conversation history of a user and an interviewer who is helping the user create a resume.
+    Your job is to extract the work skills of the user from the conversation history.
+
+    Your response type will be an array of objects. Each object will have a category and an array of skills.
+
+    For the skills, try to group them into categories that the user mentions. Some examples of categories are
+    proficiency level, programming languages, frameworks, toosl, etc.
+
+    If skills cannot be grouped into categories, return a single object with a category set to "noCategory" and an array of all
+    of the skills.
+
+    If you are unable to extract any skills return an empty array in the final JSON response.
+
+    Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+    characters are not needed. Just return the raw JSON object string.
+  `;
+
+    const result = await sendMessageWithFallback({
+      contentParts: ["Extract the information from the conversation"],
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+        ...messages,
+      ],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.OBJECT,
+          properties: {
+            category: { type: SchemaType.STRING },
+            skills: {
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
+            },
+          },
+          required: ["category", "skills"],
+        },
+      },
+      loggingContext: {
+        path: "api/resume/generate",
+        dataToExtract: "skills",
+      },
+    });
+
+    functionLogger.info("Skills extracted", {
+      result: result.response.text(),
+    });
+
+    return JSON.parse(result.response.text()) as {
+      category: string;
+      skills: string[];
+    }[];
+  } catch (error) {
+    logger.error("Failed to extract personal information", {
+      error,
+    });
+    return [
+      {
+        category: "noCategory",
+        skills: [],
+      },
+    ];
+  }
+};

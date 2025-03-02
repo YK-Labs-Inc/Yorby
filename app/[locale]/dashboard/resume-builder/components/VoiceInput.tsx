@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface VoiceInputProps {
   onTranscription: (transcription: string) => void;
@@ -27,6 +28,7 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const { logError } = useAxiomLogging();
 
   // Get available audio devices
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
           setSelectedAudio(defaultDevice);
         }
       } catch (error) {
-        console.error("Error getting audio devices:", error);
+        logError("Error getting audio devices:", { error });
       }
     }
 
@@ -100,7 +102,7 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (error) {
-      console.error("Failed to start recording:", error);
+      logError("Failed to start recording:", { error });
       alert(t("micPermissionError"));
     }
   };
@@ -156,18 +158,12 @@ export default function VoiceInput({ onTranscription }: VoiceInputProps) {
       setIsProcessing(false);
       setRecordingTime(0);
     } catch (error) {
-      console.error("Failed to stop recording:", error);
+      logError("Failed to stop recording:", { error });
       alert(t("recordingError"));
       setIsRecording(false);
       setIsProcessing(false);
       setRecordingTime(0);
     }
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (

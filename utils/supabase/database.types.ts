@@ -536,8 +536,8 @@ export type Database = {
           date_range: string | null
           display_order: number
           id: string
-          organization: string | null
           section_id: string
+          subtitle: string | null
           title: string
           updated_at: string | null
         }
@@ -546,8 +546,8 @@ export type Database = {
           date_range?: string | null
           display_order: number
           id?: string
-          organization?: string | null
           section_id: string
+          subtitle?: string | null
           title: string
           updated_at?: string | null
         }
@@ -556,8 +556,8 @@ export type Database = {
           date_range?: string | null
           display_order?: number
           id?: string
-          organization?: string | null
           section_id?: string
+          subtitle?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -669,38 +669,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "resume_sections_resume_id_fkey"
-            columns: ["resume_id"]
-            isOneToOne: false
-            referencedRelation: "resumes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resume_versions: {
-        Row: {
-          created_at: string | null
-          id: string
-          resume_id: string
-          version_data: Json
-          version_number: number
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          resume_id: string
-          version_data: Json
-          version_number: number
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          resume_id?: string
-          version_data?: Json
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resume_versions_resume_id_fkey"
             columns: ["resume_id"]
             isOneToOne: false
             referencedRelation: "resumes"

@@ -6,37 +6,36 @@ import { Button } from "@/components/ui/button";
 import ResumePreview from "./components/ResumePreview";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { ArrowUp, Mic, MicOff, Send } from "lucide-react";
+import { Mic, Send } from "lucide-react";
 import { useVoiceRecording } from "./components/useVoiceRecording";
 import VoiceRecordingOverlay from "./components/VoiceRecordingOverlay";
-
-interface Message {
-  role: string;
-  content: string;
-  timestamp: Date;
-}
+import { Content } from "@google/generative-ai";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 export default function ResumeBuilderPage() {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
-  const [generatedResume, setGeneratedResume] = useState<any>(null);
+  const [generatedResumeId, setGeneratedResumeId] = useState<string>();
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isResumeReady, setIsResumeReady] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Content[]>(conversationHistory);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { logError } = useAxiomLogging();
 
   // Initialize the conversation with the first AI message
-  useEffect(() => {
-    setMessages([
-      {
-        role: "assistant",
-        content:
-          "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
-        timestamp: new Date(),
-      },
-    ]);
-  }, []);
+  // useEffect(() => {
+  //   setMessages([
+  //     {
+  //       role: "model",
+  //       parts: [
+  //         {
+  //           text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
+  //         },
+  //       ],
+  //     },
+  //   ]);
+  // }, []);
 
   // Scroll to bottom of chat whenever messages update
   useEffect(() => {
@@ -51,6 +50,7 @@ export default function ResumeBuilderPage() {
     audioDevices,
     selectedAudio,
     setSelectedAudio,
+    isInitialized,
   } = useVoiceRecording({
     onTranscription: (transcription: string) => {
       if (transcription.trim()) {
@@ -61,13 +61,19 @@ export default function ResumeBuilderPage() {
     t,
   });
 
-  const handleRecordingToggle = () => {
+  const handleRecordingToggle = async () => {
     if (isRecording) {
       stopRecording();
       setIsRecording(false);
     } else {
-      startRecording();
-      setIsRecording(true);
+      try {
+        // Start recording, using the microphone directly
+        await startRecording();
+        setIsRecording(true);
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+        logError("Voice recording toggle error:", { error });
+      }
     }
   };
 
@@ -84,8 +90,7 @@ export default function ResumeBuilderPage() {
       ...messages,
       {
         role: "user",
-        content: messageContent,
-        timestamp: new Date(),
+        parts: [{ text: messageContent }],
       },
     ];
 
@@ -96,9 +101,8 @@ export default function ResumeBuilderPage() {
     setMessages((prev) => [
       ...prev,
       {
-        role: "assistant",
-        content: "...",
-        timestamp: new Date(),
+        role: "role",
+        parts: [{ text: "..." }],
       },
     ]);
 
@@ -116,105 +120,34 @@ export default function ResumeBuilderPage() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      if (!response.body) {
-        throw new Error("No response body");
-      }
-
-      // Get a reader from the response body
-      const reader = response.body.getReader();
-      let accumulatedResponse = "";
-      let isComplete = false;
+      // Parse the JSON response
+      const data = await response.json();
+      const { interviewIsComplete, interviewerResponse } = data;
 
       // Remove the temporary "..." message
       setMessages((prev) => prev.slice(0, -1));
 
-      // Add a new message for the AI response that we'll update
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "",
-          timestamp: new Date(),
-        },
-      ]);
+      // Add the AI response as a new message
+      const aiMessage = {
+        role: "model",
+        parts: [{ text: interviewerResponse }],
+      };
 
-      while (!isComplete) {
-        const { done, value } = await reader.read();
+      setMessages((prev) => [...prev, aiMessage]);
 
-        if (done) {
-          isComplete = true;
-          break;
-        }
-
-        // Decode the chunk
-        const textChunk = new TextDecoder().decode(value);
-        accumulatedResponse += textChunk;
-
-        // Check if the chunk contains our special marker for resume readiness
-        const readyMarkerIndex =
-          accumulatedResponse.indexOf("__RESUME_READY__");
-
-        if (readyMarkerIndex !== -1) {
-          // Extract the marker data
-          const endMarkerIndex = accumulatedResponse.indexOf(
-            "__END__",
-            readyMarkerIndex
-          );
-          const markerData = accumulatedResponse.substring(
-            readyMarkerIndex + "__RESUME_READY__".length,
-            endMarkerIndex
-          );
-
-          try {
-            const { isResumeReady } = JSON.parse(markerData);
-            // Remove the marker from the accumulated response
-            accumulatedResponse = accumulatedResponse.substring(
-              0,
-              readyMarkerIndex
-            );
-
-            // Check if we should generate a resume
-            if (isResumeReady) {
-              setIsResumeReady(true);
-              // We'll generate the resume after the loop completes
-            }
-          } catch (e) {
-            console.error("Error parsing resume ready marker:", e);
-          }
-        }
-
-        // Update the last message with the accumulated response so far
-        setMessages((prev) => {
-          const updatedMessages = [...prev];
-          updatedMessages[updatedMessages.length - 1] = {
-            ...updatedMessages[updatedMessages.length - 1],
-            content: accumulatedResponse,
-          };
-          return updatedMessages;
-        });
-      }
-
-      // If resume is ready, generate it
-      if (isResumeReady) {
-        generateResume(
-          updatedMessages.concat([
-            {
-              role: "assistant",
-              content: accumulatedResponse,
-              timestamp: new Date(),
-            },
-          ])
-        );
+      // If interview is complete, set resume as ready and generate it
+      if (interviewIsComplete) {
+        setIsResumeReady(true);
+        generateResume([...updatedMessages]);
       }
     } catch (error) {
-      console.error("Error in AI conversation:", error);
+      logError("Error in AI resume conversation:", { error });
       // Update the last message to show the error
       setMessages((prev) => {
         const updatedMessages = [...prev];
         updatedMessages[updatedMessages.length - 1] = {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-          timestamp: new Date(),
+          role: "model",
+          parts: [{ text: "Sorry, I encountered an error. Please try again." }],
         };
         return updatedMessages;
       });
@@ -232,7 +165,7 @@ export default function ResumeBuilderPage() {
     }
   };
 
-  const generateResume = async (conversationHistory: Message[]) => {
+  const generateResume = async (conversationHistory: Content[]) => {
     setIsGenerating(true);
     try {
       const response = await fetch("/api/resume/generate", {
@@ -240,35 +173,45 @@ export default function ResumeBuilderPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ conversation: conversationHistory }),
+        body: JSON.stringify({ messages: conversationHistory }),
       });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
 
-      const data = await response.json();
-      setGeneratedResume(data.resume);
+      const { resumeId, error } = (await response.json()) as {
+        resumeId?: string;
+        error?: string;
+      };
+      if (error) {
+        alert(error);
+      }
+      setGeneratedResumeId(resumeId);
 
-      // Add a message indicating resume is ready
       setMessages((prev) => [
         ...prev,
         {
-          role: "assistant",
-          content:
-            "Great! I've created your resume based on our conversation. You can preview it on the right and download it when you're ready.",
-          timestamp: new Date(),
+          role: "model",
+          parts: [
+            {
+              text: `Great! I've created your resume based on our conversation. You can preview it on the right. If you want 
+              to make any modifications, just let me know and I'll update it for you.`,
+            },
+          ],
         },
       ]);
     } catch (error) {
-      console.error("Error generating resume:", error);
+      logError("Error generating resume:", { error });
       setMessages((prev) => [
         ...prev,
         {
-          role: "assistant",
-          content:
-            "I'm having trouble generating your resume. Please try again.",
-          timestamp: new Date(),
+          role: "model",
+          parts: [
+            {
+              text: "I'm having trouble generating your resume. Please try again.",
+            },
+          ],
         },
       ]);
     } finally {
@@ -276,19 +219,20 @@ export default function ResumeBuilderPage() {
     }
   };
 
+  const shouldShowSplitView = generatedResumeId;
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-      </div>
-
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 px-6 pb-6 overflow-hidden">
-        <div className="h-full flex flex-col">
-          <Card className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex-1 flex flex-col overflow-hidden">
-            <h2 className="text-xl font-semibold mb-4">{t("description")}</h2>
-
+      <div
+        className={`flex-1 grid ${shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"} gap-6 px-6 pb-6 overflow-hidden`}
+      >
+        {/* Chat UI column - always shown */}
+        <div
+          className={`min-h-0 flex flex-col ${shouldShowSplitView ? "" : "lg:col-span-2 max-w-3xl mx-auto w-full"}`}
+        >
+          <Card className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex-1 flex flex-col min-h-0">
             {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4 min-h-0">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -303,14 +247,13 @@ export default function ResumeBuilderPage() {
                         : "bg-gray-200 dark:bg-gray-800"
                     }`}
                   >
-                    {message.content}
+                    {message.parts[0].text}
                   </div>
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Unified Input area */}
             <div className="w-full">
               <div className="relative">
                 {isRecording ? (
@@ -378,17 +321,189 @@ export default function ResumeBuilderPage() {
           </Card>
         </div>
 
-        <div className="h-full flex flex-col">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex-1 flex flex-col overflow-hidden">
-            <h2 className="text-xl font-semibold mb-4">
-              {t("downloadResume")}
-            </h2>
+        {/* Resume preview column - only shown when a resume exists */}
+        {shouldShowSplitView && (
+          <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto">
-              <ResumePreview resume={generatedResume} loading={isGenerating} />
+              <ResumePreview
+                resumeId={generatedResumeId}
+                loading={isGenerating}
+              />
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+const conversationHistory = [
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "My name is Thomas Kim.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Thanks, Thomas! What is your email address?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "97thomas@gmail.com.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Thanks, Thomas! What is your phone number?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "714-365-9744.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Thanks, Thomas! What is your current location?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "Chicago, Illinois.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Thanks, Thomas! Let's move on to your education. Could you tell me the name of the school you attended, the degree you obtained, your graduation year, and your GPA?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "I went to Dartmouth College with a Bachelor of Arts in Computer Science and my GPA was a 3.49. I went to school from September 25th to June 2019.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Do you have any other educational experiences to add?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "Nope, that's it.\n",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Okay, let's move on to your work experience. Could you tell me the name of the company you worked for, your job title, your start date, your end date, and what you did at the company?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "So, I currently work at Instacart. I started working here in July 2021, and I'm a software engineer, senior software engineer actually. And while I was here, I have worked as both a full stack engineer as well as an iOS mobile engineer, which I learned while on the job. I've worked on a various amount of projects while I was here.",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Could you provide a few bullet points describing your responsibilities and accomplishments at Instacart?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "Yeah, so I led to actually, yeah, no, I worked on a project to help scale display advertisement such as banners and shoppable displays, uh, as a business from maybe $10 million a year revenue to currently almost $100 million of recurring revenue.\nI was primarily the lead front-end engineer to help build these formats, worked very closely with design and product to create these innovative formats to constantly increase advertiser return on ad spend, ROAS, as well as click through rate, add to cart rates, and stuff like that.",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Do you have any more work experiences that you would like to add?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "no",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Okay, let's move on to your skills. Could you tell me the skills that you are most proficient in?",
+      },
+    ],
+  },
+  {
+    role: "user",
+    parts: [
+      {
+        text: "nextjs, react, expo, typescript, kafka",
+      },
+    ],
+  },
+  {
+    role: "model",
+    parts: [
+      {
+        text: "Thanks for chatting — I'll generate your resume now.",
+      },
+    ],
+  },
+];
