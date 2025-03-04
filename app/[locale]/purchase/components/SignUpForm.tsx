@@ -5,27 +5,26 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { signInWithOTP } from "@/app/[locale]/(auth-pages)/actions";
 import { useTranslations } from "next-intl";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 
 export default function SignUpForm() {
   const t = useTranslations("purchase");
-  const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const [state, action, pending] = useActionState(signInWithOTP, {
+    success: "",
+    error: undefined,
+  });
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const successMessage = searchParams.get("success") as string | undefined;
-  const errorMessage = searchParams.get("error") as string | undefined;
-  const message = searchParams.get("message") as string | undefined;
 
   let formMessage: Message | undefined;
-  if (successMessage) {
-    formMessage = { success: successMessage };
-  } else if (errorMessage) {
-    formMessage = { error: errorMessage };
-  } else if (message) {
-    formMessage = { message: message };
+  if (state.success) {
+    formMessage = { success: state.success };
+  } else if (state.error) {
+    formMessage = { error: state.error };
   }
 
   return (
@@ -37,7 +36,7 @@ export default function SignUpForm() {
         </p>
       </div>
 
-      <form action={signInWithOTP} className="space-y-4">
+      <form action={action} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">{t("unauthenticated.form.email.label")}</Label>
           <Input
@@ -52,6 +51,7 @@ export default function SignUpForm() {
         <input type="hidden" name="redirectTo" value={pathname} />
         <SubmitButton
           pendingText={t("unauthenticated.form.submit")}
+          disabled={!captchaToken || pending}
           type="submit"
           className="w-full"
         >

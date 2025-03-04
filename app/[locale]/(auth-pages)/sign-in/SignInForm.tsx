@@ -1,35 +1,33 @@
 "use client";
 
 import { FormMessage, Message } from "@/components/form-message";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signInWithOTP } from "../actions";
 import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function SignInForm() {
   const signInT = useTranslations("signIn");
-  const searchParams = useSearchParams();
-  const successMessage = searchParams.get("success") as string | undefined;
-  const errorMessage = searchParams.get("error") as string | undefined;
-  const message = searchParams.get("message") as string | undefined;
+  const [state, action, pending] = useActionState(signInWithOTP, {
+    success: "",
+    error: undefined,
+  });
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
   let formMessage: Message | undefined;
-  if (successMessage) {
-    formMessage = { success: successMessage };
-  } else if (errorMessage) {
-    formMessage = { error: errorMessage };
-  } else if (message) {
-    formMessage = { message: message };
+  if (state.success) {
+    formMessage = { success: state.success };
+  } else if (state.error) {
+    formMessage = { error: state.error };
   }
 
   return (
     <div className="container max-w-md mx-auto pt-20">
-      <form action={signInWithOTP} className="space-y-6">
+      <form action={action} className="space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">{signInT("title")}</h1>
           <p className="text-muted-foreground">{signInT("description")}</p>
@@ -49,6 +47,7 @@ export default function SignInForm() {
           <input type="hidden" name="captchaToken" value={captchaToken} />
           <input type="hidden" name="redirectTo" value={pathname} />
           <SubmitButton
+            disabled={!captchaToken || pending}
             pendingText={signInT("form.submitting")}
             type="submit"
             className="w-full"
