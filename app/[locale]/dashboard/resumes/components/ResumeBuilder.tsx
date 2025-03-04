@@ -14,6 +14,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
@@ -50,20 +51,34 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
+  const router = useRouter();
 
   // Initialize the conversation with the first AI message
   useEffect(() => {
-    setMessages([
-      {
-        role: "model",
-        parts: [
-          {
-            text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
-          },
-        ],
-      },
-    ]);
-  }, []);
+    if (resumeId) {
+      setMessages([
+        {
+          role: "model",
+          parts: [
+            {
+              text: t("editResumeInitialMessage"),
+            },
+          ],
+        },
+      ]);
+    } else {
+      setMessages([
+        {
+          role: "model",
+          parts: [
+            {
+              text: t("createResumeInitialMessage"),
+            },
+          ],
+        },
+      ]);
+    }
+  }, [resumeId]);
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
@@ -351,13 +366,28 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
+    setMessages((prev) => prev.slice(0, -1));
 
-    const data = await response.json();
-    const { updatedResume } = data;
-    setResume(updatedResume);
+    // Add the AI response as a new message
+
+    if (!response.ok) {
+      const aiMessage = {
+        role: "model",
+        parts: [{ text: t("errors.resumeEditError") }],
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } else {
+      const data = await response.json();
+      const { updatedResume, aiResponse } = data;
+      const aiMessage = {
+        role: "model",
+        parts: [{ text: aiResponse }],
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setResume(updatedResume);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -392,8 +422,8 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
       if (!resumeId) {
         throw new Error("No resume ID returned from server");
       }
+      router.replace(`/dashboard/resumes/${resumeId}`);
       setGeneratedResumeId(resumeId);
-
       setMessages((prev) => [
         ...prev,
         {
@@ -515,31 +545,31 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                       value={textInput}
                       onChange={handleTextInputChange}
                       onKeyDown={handleKeyDown}
-                      className="pr-24 resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300"
+                      className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
                       rows={3}
                       disabled={isGenerating}
                     />
-                    <div className="absolute bottom-3 right-3 flex space-x-2">
+                    <div className="flex justify-end space-x-3 px-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         type="button"
-                        className="h-10 w-10 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+                        className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center"
                         onClick={handleRecordingToggle}
                         disabled={isGenerating}
                       >
-                        <Mic className="h-5 w-5" />
+                        <Mic className="h-4 w-4" />
                       </Button>
                       <Button
                         type="button"
                         size="icon"
-                        className="h-10 w-10 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
+                        className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
                         onClick={handleSendButtonClick}
                         disabled={
                           (!textInput.trim() && !isRecording) || isGenerating
                         }
                       >
-                        <Send className="h-5 w-5" />
+                        <Send className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -565,25 +595,3 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     </div>
   );
 }
-
-// Add this to your global CSS file (app/globals.css)
-/*
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 20px;
-  border: transparent;
-}
-*/

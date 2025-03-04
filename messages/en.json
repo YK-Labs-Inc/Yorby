@@ -938,6 +938,11 @@
     "transcription": "Your transcription",
     "selectMicrophone": "Select Microphone",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "createResumeInitialMessage": "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
+    "editResumeInitialMessage": "Hi! I'll help you edit your resume. What would you like to change?",
+    "errors": {
+      "resumeEditError": "Error editing resume. Please try again."
+    }
   }
 }
