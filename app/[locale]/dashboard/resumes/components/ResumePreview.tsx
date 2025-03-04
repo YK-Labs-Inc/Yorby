@@ -1,11 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
-import { Tables } from "@/utils/supabase/database.types";
-import { ResumeDataType } from "../page";
+import { ResumeDataType } from "./ResumeBuilder";
 
 interface ResumePreviewProps {
   loading: boolean;
