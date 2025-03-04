@@ -24,9 +24,9 @@ const formatPrice = (price: number) => {
 export default async function PurchasePage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const error = searchParams.error as string;
+  const error = (await searchParams).error as string;
   const t = await getTranslations("purchase");
   const supabase = await createSupabaseServerClient();
   const {
