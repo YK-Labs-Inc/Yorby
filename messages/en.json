@@ -310,7 +310,7 @@
     "userNotFound": "User not found — please sign in  again."
   },
   "sidebar": {
-    "addJob": "Add Job",
+    "addJob": "Create Interview Questions",
     "signInToStart": "Sign in to save your custom interview prep",
     "signIn": "Sign In",
     "numberOfCredits": "{numberOfCredits} Credits",
@@ -319,8 +319,9 @@
     "interviewCopilots": "Interview Copilots",
     "createInterviewCopilot": "Create Interview Copilot",
     "create": "Create",
-    "tools": "Tools",
-    "resumeBuilder": "Resume Builder"
+    "resumes": "Resumes",
+    "resumeBuilder": "Resume Builder",
+    "createResume": "Create Resume"
   },
   "upgrade": {
     "locked": {
