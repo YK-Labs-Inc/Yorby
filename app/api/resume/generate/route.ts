@@ -314,7 +314,7 @@ const saveResumeSkills = async (
   await Promise.all(
     skills.map(async (skill) => {
       const { error } = await supabase.from("resume_list_items").insert({
-        content: `${skill.category}: ${skill.skills.join(", ")}`,
+        content: `${skill.category ? `${skill.category}: ` : ""}${skill.skills.join(", ")}`,
         section_id: skillsSectionId,
         display_order: 0,
       });
@@ -637,7 +637,7 @@ const extractSkills = async (messages: Content[], logger: Logger) => {
     For the skills, try to group them into categories that the user mentions. Some examples of categories are
     proficiency level, programming languages, frameworks, toosl, etc.
 
-    If skills cannot be grouped into categories, return a single object with a category set to "noCategory" and an array of all
+    If skills cannot be grouped into categories, return a single object with a category set to an empty string and an array of all
     of the skills.
 
     If you are unable to extract any skills return an empty array in the final JSON response.
@@ -690,7 +690,7 @@ const extractSkills = async (messages: Content[], logger: Logger) => {
     });
     return [
       {
-        category: "noCategory",
+        category: "",
         skills: [],
       },
     ];
