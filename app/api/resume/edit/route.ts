@@ -1,15 +1,32 @@
 import { sendMessageWithFallback } from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { SchemaType } from "@google/generative-ai";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const { resume, userMessage } = (await req.json()) as {
     resume: string;
     userMessage: string;
   };
-  const updatedResume = await updateResume(JSON.stringify(resume), userMessage);
-
-  return NextResponse.json({ updatedResume }, { status: 200 });
+  const logger = req.log.with({
+    resume,
+    userMessage,
+    path: "api/resume/edit",
+  });
+  try {
+    const { updatedResume, aiResponse } = await updateResume(
+      JSON.stringify(resume),
+      userMessage
+    );
+    logger.info("Resume updated", { updatedResume, aiResponse });
+    return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
+  } catch (error) {
+    logger.error("Failed to update resume", { error });
+    return NextResponse.json(
+      { error: "Failed to update resume" },
+      { status: 500 }
+    );
+  }
 });
 
 const updateResume = async (resume: string, userMessage: string) => {
@@ -18,11 +35,19 @@ const updateResume = async (resume: string, userMessage: string) => {
     
     You will be given a resume in JSON format and a comment from the user about what they want to change.
     
-    Your job is to update the resume in the JSON format to reflect the changes.
+    Your job is to update the resume in the JSON format to reflect the changes and then provide a response to the user
+    about the changes you made.
 
-    Return only the updated resume in the same exact JSON format as the original resume and nothing else.
+    Your response must be in the following format:
+    {
+      "updatedResumeJSON": string //updated resume in JSON format,
+      "aiResponse": string //response to the user about the changes you made
+    }
 
-    Your response will be parsed as JSON so make sure your response is a valid JSON without any modifications necessary.
+    The updatedResumeJSON must be a valid JSON object. Return only the updated resume in the same exact JSON format
+    as the original resume and nothing else.
+
+    The updatedResumseJSON response will be parsed as JSON so make sure your response is a valid JSON without any modifications necessary.
     
     Here is the resume:
     ${resume}
@@ -36,11 +61,28 @@ const updateResume = async (resume: string, userMessage: string) => {
         parts: [{ text: prompt }],
       },
     ],
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: SchemaType.OBJECT,
+      properties: {
+        updatedResumeJSON: { type: SchemaType.STRING },
+        aiResponse: { type: SchemaType.STRING },
+      },
+      required: ["updatedResumeJSON", "aiResponse"],
+    },
+    loggingContext: {
+      path: "api/resume/edit",
+    },
   });
 
-  const resp = result.response.text();
-  const json = extractJSONFromString(resp);
-  return JSON.parse(json);
+  const { updatedResumeJSON, aiResponse } = JSON.parse(
+    result.response.text()
+  ) as {
+    updatedResumeJSON: string;
+    aiResponse: string;
+  };
+  const json = extractJSONFromString(updatedResumeJSON);
+  return { updatedResume: JSON.parse(json), aiResponse };
 };
 
 const extractJSONFromString = (text: string): string => {

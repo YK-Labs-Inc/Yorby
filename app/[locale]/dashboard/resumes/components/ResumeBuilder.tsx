@@ -14,6 +14,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
@@ -45,25 +46,38 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     resumeId || ""
   );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [isResumeReady, setIsResumeReady] = useState<boolean>(false);
   const [messages, setMessages] = useState<Content[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
+  const router = useRouter();
 
   // Initialize the conversation with the first AI message
   useEffect(() => {
-    setMessages([
-      {
-        role: "model",
-        parts: [
-          {
-            text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
-          },
-        ],
-      },
-    ]);
-  }, []);
+    if (resumeId) {
+      setMessages([
+        {
+          role: "model",
+          parts: [
+            {
+              text: t("editResumeInitialMessage"),
+            },
+          ],
+        },
+      ]);
+    } else {
+      setMessages([
+        {
+          role: "model",
+          parts: [
+            {
+              text: t("createResumeInitialMessage"),
+            },
+          ],
+        },
+      ]);
+    }
+  }, [resumeId]);
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
@@ -291,7 +305,6 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
 
       // If interview is complete, set resume as ready and generate it
       if (interviewIsComplete) {
-        setIsResumeReady(true);
         generateResume([...updatedMessages]);
       }
     } catch (error) {
@@ -351,13 +364,28 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status}`);
-    }
+    setMessages((prev) => prev.slice(0, -1));
 
-    const data = await response.json();
-    const { updatedResume } = data;
-    setResume(updatedResume);
+    // Add the AI response as a new message
+
+    if (!response.ok) {
+      const aiMessage = {
+        role: "model",
+        parts: [{ text: t("errors.resumeEditError") }],
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } else {
+      const data = await response.json();
+      const { updatedResume, aiResponse } = data;
+      const aiMessage = {
+        role: "model",
+        parts: [{ text: aiResponse }],
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setResume(updatedResume);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -392,20 +420,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
       if (!resumeId) {
         throw new Error("No resume ID returned from server");
       }
-      setGeneratedResumeId(resumeId);
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "model",
-          parts: [
-            {
-              text: `Great! I've created your resume based on our conversation. You can preview it on the right. If you want 
-              to make any modifications, just let me know and I'll update it for you.`,
-            },
-          ],
-        },
-      ]);
+      router.replace(`/dashboard/resumes/${resumeId}`);
     } catch (error) {
       logError("Error generating resume:", { error });
       setMessages((prev) => [
@@ -414,7 +429,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           role: "model",
           parts: [
             {
-              text: "I'm having trouble generating your resume. Please try again.",
+              text: t("errors.resumeGenerationError"),
             },
           ],
         },
@@ -424,7 +439,8 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     }
   };
 
-  const shouldShowSplitView = generatedResumeId;
+  // Update the shouldShowSplitView logic to include isGenerating
+  const shouldShowSplitView = generatedResumeId || isGenerating;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -515,31 +531,31 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                       value={textInput}
                       onChange={handleTextInputChange}
                       onKeyDown={handleKeyDown}
-                      className="pr-24 resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300"
+                      className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
                       rows={3}
                       disabled={isGenerating}
                     />
-                    <div className="absolute bottom-3 right-3 flex space-x-2">
+                    <div className="flex justify-end space-x-3 px-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         type="button"
-                        className="h-10 w-10 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+                        className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center"
                         onClick={handleRecordingToggle}
                         disabled={isGenerating}
                       >
-                        <Mic className="h-5 w-5" />
+                        <Mic className="h-4 w-4" />
                       </Button>
                       <Button
                         type="button"
                         size="icon"
-                        className="h-10 w-10 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300"
+                        className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
                         onClick={handleSendButtonClick}
                         disabled={
                           (!textInput.trim() && !isRecording) || isGenerating
                         }
                       >
-                        <Send className="h-5 w-5" />
+                        <Send className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -549,15 +565,33 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           </Card>
         </div>
 
-        {/* Resume preview column - only shown when a resume exists */}
-        {shouldShowSplitView && resume && (
+        {/* Resume preview column - shown when resume exists or generating */}
+        {shouldShowSplitView && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="h-full flex flex-col"
           >
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <ResumePreview resume={resume} loading={isGenerating} />
+              {isGenerating && !resume ? (
+                <div className="h-full flex items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center space-y-4"
+                  >
+                    <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 dark:border-gray-600 dark:border-t-gray-300" />
+                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                      {t("generation.title")}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                      {t("generation.description")}
+                    </p>
+                  </motion.div>
+                </div>
+              ) : resume ? (
+                <ResumePreview resume={resume} loading={isGenerating} />
+              ) : null}
             </div>
           </motion.div>
         )}
@@ -565,25 +599,3 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     </div>
   );
 }
-
-// Add this to your global CSS file (app/globals.css)
-/*
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 20px;
-  border: transparent;
-}
-*/
