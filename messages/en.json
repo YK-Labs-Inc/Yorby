@@ -915,7 +915,7 @@
     }
   },
   "resumeBuilder": {
-    "title": "Resume Builder",
+    "title": "Chat To Resume",
     "description": "I'll help you build a professional resume by asking you a series of questions. Just answer in conversational style, and I'll take care of formatting your resume.",
     "downloadResume": "Resume Preview",
     "typeYourResponse": "Type your response...",
@@ -941,13 +941,32 @@
     "confirm": "Confirm",
     "createResumeInitialMessage": "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
     "editResumeInitialMessage": "Hi! I'll help you edit your resume. What would you like to change?",
+    "editResume": "Edit Resume",
+    "cancelEdit": "Cancel Edit",
+    "saveChanges": "Save Changes",
+    "savingChanges": "Saving changes...",
+    "addItem": "Add Item",
+    "addEducation": "Add Education",
+    "addWorkExperience": "Add Work Experience",
+    "addSkill": "Add Skill",
+    "deleteItem": "Delete Item",
+    "newItemDefaults": {
+      "title": "New Position",
+      "organization": "Company Name",
+      "date": "Date Range",
+      "description": ["Add description"]
+    },
     "errors": {
       "resumeEditError": "Error editing resume. Please try again.",
-      "resumeGenerationError": "Error generating resume. Please try again."
+      "resumeGenerationError": "Error generating resume. Please try again.",
+      "resumeSaveError": "Error saving resume. Please try again.",
+      "auth": "You must be logged in to save your resume"
+    },
+    "success": {
+      "resumeSave": "Resume saved"
     },
     "generation": {
-      "title": "Generating your resume...",
-      "description": "Please wait while I create a professional resume based on our conversation."
+      "title": "Loading your resume..."
     }
   }
 }

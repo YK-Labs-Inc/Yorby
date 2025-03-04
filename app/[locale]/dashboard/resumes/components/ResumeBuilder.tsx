@@ -447,17 +447,27 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
       <div
         className={`flex-1 grid ${
           shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
-        } gap-8 p-8 overflow-hidden max-w-[2000px] mx-auto w-full`}
+        } gap-8 p-8 overflow-hidden max-w-[2000px] mx-auto w-full h-full`}
       >
         {/* Chat UI column - always shown */}
         <div
-          className={`min-h-0 flex flex-col ${
+          className={`m-1 flex flex-col h-full overflow-hidden ${
             shouldShowSplitView ? "" : "lg:col-span-2 max-w-3xl mx-auto w-full"
           }`}
         >
-          <Card className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 flex-1 flex flex-col min-h-0 border-0 transition-all duration-300">
+          {/* Title Section */}
+          <div className="flex-none mb-4 space-y-1">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {t("title")}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t("description")}
+            </p>
+          </div>
+
+          <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
             {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto space-y-6 p-4 rounded-xl mb-4 min-h-0 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto space-y-6 p-4 rounded-xl custom-scrollbar min-h-0">
               <AnimatePresence>
                 {messages.map((message, index) => (
                   <motion.div
@@ -525,7 +535,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="relative transition-all duration-300 hover:transform hover:scale-[1.01]">
+                  <div className="relative transition-all duration-300 hover:transform hover:scale-[1.01] p-4">
                     <Textarea
                       placeholder={t("typeYourResponse")}
                       value={textInput}
@@ -570,7 +580,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="h-full flex flex-col"
+            className="flex flex-col h-full overflow-hidden"
           >
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {isGenerating && !resume ? (
@@ -584,13 +594,15 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                     <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       {t("generation.title")}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-                      {t("generation.description")}
-                    </p>
                   </motion.div>
                 </div>
               ) : resume ? (
-                <ResumePreview resume={resume} loading={isGenerating} />
+                <ResumePreview
+                  resume={resume}
+                  loading={isGenerating}
+                  setResume={setResume}
+                  resumeId={generatedResumeId}
+                />
               ) : null}
             </div>
           </motion.div>

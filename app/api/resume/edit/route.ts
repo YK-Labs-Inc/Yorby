@@ -18,7 +18,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       JSON.stringify(resume),
       userMessage
     );
-    logger.info("Resume updated", { updatedResume, aiResponse });
+    logger.info("Resume updated", {
+      updatedResume: JSON.stringify(updatedResume),
+      aiResponse,
+    });
     return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
   } catch (error) {
     logger.error("Failed to update resume", { error });
