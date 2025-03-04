@@ -69,7 +69,8 @@ export default function ResumePreview({
 
       // Set white background explicitly
       element.style.backgroundColor = "white";
-      element.style.padding = "40px";
+      element.style.border = "none";
+      element.style.padding = "10px";
 
       // Configure pdf options
       const opt = {
