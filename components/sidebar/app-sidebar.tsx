@@ -100,9 +100,7 @@ export function AppSidebar({
                 </DropdownMenuItem>
                 {isResumeBuilderEnabled && (
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/resume-builder">
-                      {t("createResume")}
-                    </Link>
+                    <Link href="/dashboard/resumes">{t("createResume")}</Link>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
