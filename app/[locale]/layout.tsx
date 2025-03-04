@@ -13,7 +13,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import Chatwoot from "@/components/ChatwootWidget";
 import { OnboardingProvider } from "@/context/OnboardingContext";
-import { User } from "@supabase/supabase-js";
 import { Tables } from "@/utils/supabase/database.types";
 import { DeepgramContextProvider } from "@/context/DeepgramContext";
 import { posthog } from "@/utils/tracking/serverUtils";
@@ -85,6 +84,19 @@ const fetchInterviewCopilots = async (userId: string) => {
   return data;
 };
 
+const fetchResumes = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("resumes")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -105,23 +117,23 @@ export default async function RootLayout({
   } = await supabase.auth.getSession();
   let interviewCopilots: Tables<"interview_copilots">[] = [];
   let jobs: Tables<"custom_jobs">[] = [];
+  let resumes: Tables<"resumes">[] = [];
   let numberOfCredits = 0;
   let hasSubscription = false;
   let onboardingState = null;
-  let isInterviewCopilotEnabled = false;
   let isResumeBuilderEnabled = false;
 
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
     jobs = await fetchJobs(user.id);
-    isInterviewCopilotEnabled = Boolean(
-      await posthog.isFeatureEnabled("enable-interview-copilot", user.id)
-    );
     interviewCopilots = await fetchInterviewCopilots(user.id);
     isResumeBuilderEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-resume-builder", user.id)
     );
+    if (isResumeBuilderEnabled) {
+      resumes = await fetchResumes(user.id);
+    }
   }
 
   const messages = await getMessages();
@@ -157,8 +169,8 @@ export default async function RootLayout({
                           hasSubscription={hasSubscription}
                           user={user}
                           interviewCopilots={interviewCopilots}
-                          isInterviewCopilotEnabled={isInterviewCopilotEnabled}
                           isResumeBuilderEnabled={isResumeBuilderEnabled}
+                          resumes={resumes}
                         />
                         <SidebarTrigger />
                         <main className="w-full">

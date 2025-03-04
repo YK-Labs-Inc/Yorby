@@ -101,6 +101,7 @@ const saveResumePersonalInfo = async (personalInfo: {
   const { data, error } = await supabase
     .from("resumes")
     .insert({
+      title: `${new Date().toLocaleDateString()} Resume`,
       name: personalInfo.name,
       email: personalInfo.email,
       phone: personalInfo.phone,

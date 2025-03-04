@@ -48,24 +48,24 @@ export default function ResumeBuilderPage() {
   );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isResumeReady, setIsResumeReady] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Content[]>(conversationHistory);
+  const [messages, setMessages] = useState<Content[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
   // Initialize the conversation with the first AI message
-  // useEffect(() => {
-  //   setMessages([
-  //     {
-  //       role: "model",
-  //       parts: [
-  //         {
-  //           text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
-  //         },
-  //       ],
-  //     },
-  //   ]);
-  // }, []);
+  useEffect(() => {
+    setMessages([
+      {
+        role: "model",
+        parts: [
+          {
+            text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
+          },
+        ],
+      },
+    ]);
+  }, []);
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
@@ -541,174 +541,3 @@ export default function ResumeBuilderPage() {
     </div>
   );
 }
-
-const conversationHistory = [
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Hi! I'll help you create a professional resume. Let's start with your full name. What is your name?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "My name is Thomas Kim.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Thanks, Thomas! What is your email address?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "97thomas@gmail.com.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Thanks, Thomas! What is your phone number?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "714-365-9744.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Thanks, Thomas! What is your current location?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "Chicago, Illinois.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Thanks, Thomas! Let's move on to your education. Could you tell me the name of the school you attended, the degree you obtained, your graduation year, and your GPA?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "I went to Dartmouth College with a Bachelor of Arts in Computer Science and my GPA was a 3.49. I went to school from September 25th to June 2019.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Do you have any other educational experiences to add?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "Nope, that's it.\n",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Okay, let's move on to your work experience. Could you tell me the name of the company you worked for, your job title, your start date, your end date, and what you did at the company?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "So, I currently work at Instacart. I started working here in July 2021, and I'm a software engineer, senior software engineer actually. And while I was here, I have worked as both a full stack engineer as well as an iOS mobile engineer, which I learned while on the job. I've worked on a various amount of projects while I was here.",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Could you provide a few bullet points describing your responsibilities and accomplishments at Instacart?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "Yeah, so I led to actually, yeah, no, I worked on a project to help scale display advertisement such as banners and shoppable displays, uh, as a business from maybe $10 million a year revenue to currently almost $100 million of recurring revenue.\nI was primarily the lead front-end engineer to help build these formats, worked very closely with design and product to create these innovative formats to constantly increase advertiser return on ad spend, ROAS, as well as click through rate, add to cart rates, and stuff like that.",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Do you have any more work experiences that you would like to add?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "no",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Okay, let's move on to your skills. Could you tell me the skills that you are most proficient in?",
-      },
-    ],
-  },
-  {
-    role: "user",
-    parts: [
-      {
-        text: "nextjs, react, expo, typescript, kafka",
-      },
-    ],
-  },
-  {
-    role: "model",
-    parts: [
-      {
-        text: "Thanks for chatting — I'll generate your resume now.",
-      },
-    ],
-  },
-];
