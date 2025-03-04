@@ -16,6 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Edit2, Save, Plus, Trash2 } from "lucide-react";
 import { saveResume } from "../actions";
 import React from "react";
+import html2pdf from "html2pdf.js";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface ResumePreviewProps {
   loading: boolean;
@@ -34,6 +36,7 @@ export default function ResumePreview({
   const [downloading, setDownloading] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const resumeRef = useRef<HTMLDivElement>(null);
+  const { logError } = useAxiomLogging();
 
   const [saveState, saveAction, pending] = useActionState(saveResume, {
     error: "",
@@ -52,34 +55,48 @@ export default function ResumePreview({
 
     setDownloading(true);
     try {
-      const response = await fetch("/api/resume/download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ resume }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+      // Force light mode for PDF generation
+      const currentTheme = document.documentElement.classList.contains("dark");
+      if (currentTheme) {
+        document.documentElement.classList.remove("dark");
       }
 
-      // Get the blob from the response
-      const blob = await response.blob();
+      // Clone the resume div to avoid modifying the actual DOM
+      const element = resumeRef.current.cloneNode(true) as HTMLElement;
 
-      // Create a link and trigger download
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`;
-      document.body.appendChild(a);
-      a.click();
+      // Remove any buttons or interactive elements from the clone
+      element.querySelectorAll("button").forEach((button) => button.remove());
 
-      // Clean up
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Set white background explicitly
+      element.style.backgroundColor = "white";
+      element.style.padding = "40px";
+
+      // Configure pdf options
+      const opt = {
+        margin: [10, 10],
+        filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+      };
+
+      // Generate PDF
+      await html2pdf().set(opt).from(element).save();
+
+      // Restore dark mode if it was enabled
+      if (currentTheme) {
+        document.documentElement.classList.add("dark");
+      }
     } catch (error) {
-      console.error("Error downloading PDF:", error);
+      logError("Error generating PDF", { error });
       alert(t("downloadError"));
     } finally {
       setDownloading(false);
