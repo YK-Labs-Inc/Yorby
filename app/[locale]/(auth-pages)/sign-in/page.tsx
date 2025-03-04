@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import SignInForm from "./SignInForm";
 
 export default async function Login({
   searchParams,
@@ -18,7 +19,6 @@ export default async function Login({
     data: { user },
   } = await supabase.auth.getUser();
   const signUpT = await getTranslations("signUp");
-  const signInT = await getTranslations("signIn");
   // If user is already signed in, show the already signed in UI
   if (user) {
     return (
@@ -44,47 +44,5 @@ export default async function Login({
     );
   }
 
-  const successMessage = (await searchParams)?.success as string | undefined;
-  const errorMessage = (await searchParams)?.error as string | undefined;
-  const message = (await searchParams)?.message as string | undefined;
-  let formMessage: Message | undefined;
-  if (successMessage) {
-    formMessage = { success: successMessage };
-  } else if (errorMessage) {
-    formMessage = { error: errorMessage };
-  } else if (message) {
-    formMessage = { message: message };
-  }
-
-  return (
-    <div className="container max-w-md mx-auto pt-20">
-      <form action={signInWithOTP} className="space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">{signInT("title")}</h1>
-          <p className="text-muted-foreground">{signInT("description")}</p>
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">{signInT("form.email.label")}</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder={signInT("form.email.placeholder")}
-              required
-            />
-          </div>
-          <SubmitButton
-            pendingText={signInT("form.submitting")}
-            type="submit"
-            className="w-full"
-          >
-            {signInT("form.submit")}
-          </SubmitButton>
-          {formMessage && <FormMessage message={formMessage} />}
-        </div>
-      </form>
-    </div>
-  );
+  return <SignInForm />;
 }

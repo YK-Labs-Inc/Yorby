@@ -27,8 +27,12 @@ export default function SignUpPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user?.email);
-      setIsLoading(false);
+      if (!user) {
+        router.push("/sign-in");
+      } else {
+        setIsAuthenticated(!!user?.email);
+        setIsLoading(false);
+      }
     };
     checkAuth();
   }, []);

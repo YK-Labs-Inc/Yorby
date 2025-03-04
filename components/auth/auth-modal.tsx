@@ -1,6 +1,5 @@
 "use client";
 
-import { signInWithOTP } from "@/app/[locale]/(auth-pages)/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import {
@@ -15,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { signInWithOTP } from "./actions";
 
 interface AuthModalProps {
   isOpen: boolean;
