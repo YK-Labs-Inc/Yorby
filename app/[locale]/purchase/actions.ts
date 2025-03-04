@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
@@ -23,39 +23,63 @@ export interface Product extends Omit<Stripe.Product, "description"> {
 
 const CREDITS_MAP: { [key: string]: number } = {
   [process.env.SINGLE_CREDIT_PRODUCT_ID!]: 1,
+  [process.env.SINGLE_CREDIT_PRODUCT_ID_2!]: 1,
   [process.env.FIVE_CREDITS_PRODUCT_ID!]: 5,
   [process.env.TEN_CREDITS_PRODUCT_ID!]: 10,
   [process.env.UNLIMITED_CREDITS_PRODUCT_ID!]: -1, // -1 represents unlimited
 };
 
-export async function getProducts() {
+export async function getProducts(userId: string) {
   try {
+    const increasedPrice =
+      (await posthog.getFeatureFlag("price-test-1", userId)) === "test";
+
+    const stripeProductIds = [
+      process.env.SINGLE_CREDIT_PRODUCT_ID!,
+      process.env.FIVE_CREDITS_PRODUCT_ID!,
+      process.env.TEN_CREDITS_PRODUCT_ID!,
+      process.env.UNLIMITED_CREDITS_PRODUCT_ID!,
+    ];
+
     const products = await stripe.products.list({
       active: true,
-      ids: [
-        process.env.SINGLE_CREDIT_PRODUCT_ID!,
-        process.env.FIVE_CREDITS_PRODUCT_ID!,
-        process.env.TEN_CREDITS_PRODUCT_ID!,
-        process.env.UNLIMITED_CREDITS_PRODUCT_ID!,
-      ],
+      ids: stripeProductIds,
     });
 
     let singleCreditPrice: number | null = null;
 
+    const increasedSingleCreditPriceId =
+      process.env.INCRERASED_SINGLE_CREDIT_PRICE_ID!;
     // First pass to get the single credit price
     for (const product of products.data) {
-      if (product.id === process.env.SINGLE_CREDIT_PRODUCT_ID) {
+      if (
+        product.id === process.env.SINGLE_CREDIT_PRODUCT_ID ||
+        product.id === process.env.SINGLE_CREDIT_PRODUCT_ID_2
+      ) {
         const prices = await stripe.prices.list({
           product: product.id,
           active: true,
         });
-        if (prices.data[0]) {
-          singleCreditPrice = prices.data[0].unit_amount! / 100;
+        if (increasedPrice) {
+          // If increasedPrice is true, find the price with matching ID
+          const increasedPriceData = prices.data.find(
+            (price) => price.id === increasedSingleCreditPriceId
+          );
+          if (increasedPriceData) {
+            singleCreditPrice = increasedPriceData.unit_amount! / 100;
+          }
+        } else {
+          // If increasedPrice is false, find the price that doesn't match the increased price ID
+          const regularPriceData = prices.data.find(
+            (price) => price.id !== increasedSingleCreditPriceId
+          );
+          if (regularPriceData) {
+            singleCreditPrice = regularPriceData.unit_amount! / 100;
+          }
         }
         break;
       }
     }
-
     const productsWithPrices = await Promise.all(
       products.data.map(async (product) => {
         const prices = await stripe.prices.list({
@@ -65,7 +89,25 @@ export async function getProducts() {
 
         const description = product.description || "";
         const credits = CREDITS_MAP[product.id];
-        const price = prices.data[0]?.unit_amount! / 100;
+
+        let selectedPrice;
+        // Only apply increased price logic for single credit product
+        if (product.id === process.env.SINGLE_CREDIT_PRODUCT_ID) {
+          if (increasedPrice) {
+            selectedPrice = prices.data.find(
+              (price) => price.id === increasedSingleCreditPriceId
+            );
+          } else {
+            selectedPrice = prices.data.find(
+              (price) => price.id !== increasedSingleCreditPriceId
+            );
+          }
+        } else {
+          // For all other products, use the first available price
+          selectedPrice = prices.data[0];
+        }
+
+        const price = selectedPrice?.unit_amount! / 100;
         const pricePerCredit = credits > 0 ? price / credits : null;
 
         let savings = null;

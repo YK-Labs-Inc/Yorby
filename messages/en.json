@@ -368,6 +368,17 @@
     "title": "Get Interview Credits",
     "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
     "descriptionV2": "You can redeem credits to create interview prep material for a job or create an Interview Copilot",
+    "unauthenticated": {
+      "title": "Sign In to View Pricing",
+      "description": "Sign in to view our pricing plans and purchase interview credits.",
+      "form": {
+        "email": {
+          "label": "Email",
+          "placeholder": "Enter your email"
+        },
+        "submit": "Sign In"
+      }
+    },
     "products": {
       "oneCredit": {
         "title": "Single Interview",

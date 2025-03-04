@@ -4,9 +4,11 @@ import CreditUsageModal from "./components/CreditUsageModal";
 import { FormMessage } from "@/components/form-message";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { posthog } from "@/utils/tracking/serverUtils";
+import SignUpForm from "./components/SignUpForm";
 
 const PRODUCT_KEYS = {
   [process.env.SINGLE_CREDIT_PRODUCT_ID!]: "oneCredit",
+  [process.env.SINGLE_CREDIT_PRODUCT_ID_2!]: "oneCredit",
   [process.env.FIVE_CREDITS_PRODUCT_ID!]: "fiveCredits",
   [process.env.TEN_CREDITS_PRODUCT_ID!]: "tenCredits",
   [process.env.UNLIMITED_CREDITS_PRODUCT_ID!]: "unlimited",
@@ -26,17 +28,29 @@ export default async function PurchasePage({
 }) {
   const error = (await searchParams).error as string;
   const t = await getTranslations("purchase");
-  const { products } = await getProducts();
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // If no user is found, show the sign-up form
+  if (!user) {
+    return (
+      <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+        <div className="container max-w-md mx-auto">
+          <SignUpForm />
+        </div>
+      </div>
+    );
+  }
+
   let interviewCopilotsEnabled = false;
   if (user) {
     interviewCopilotsEnabled =
       (await posthog.isFeatureEnabled("enable-interview-copilot", user.id)) ??
       false;
   }
+  const { products } = await getProducts(user.id);
 
   return (
     <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">

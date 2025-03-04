@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
 import { Logger } from "next-axiom";
 
-export async function signInWithOTP(formData: FormData) {
+export async function signInWithOTP(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
   const redirectTo = (formData.get("redirectTo") as string) || "/";
   const captchaToken = formData.get("captchaToken") as string;
@@ -25,12 +25,8 @@ export async function signInWithOTP(formData: FormData) {
   if (error) {
     logger.error("Failed to send magic link", { error });
     await logger.flush();
-    return encodedRedirect("authError", redirectTo, error.message);
+    return { error: error.message };
   }
 
-  return encodedRedirect(
-    "authSuccess",
-    redirectTo,
-    "Check your email for the magic link."
-  );
+  return { success: "Check your email for the magic link." };
 }
