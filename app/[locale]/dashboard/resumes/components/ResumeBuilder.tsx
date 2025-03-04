@@ -46,7 +46,6 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     resumeId || ""
   );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [isResumeReady, setIsResumeReady] = useState<boolean>(false);
   const [messages, setMessages] = useState<Content[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -306,7 +305,6 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
 
       // If interview is complete, set resume as ready and generate it
       if (interviewIsComplete) {
-        setIsResumeReady(true);
         generateResume([...updatedMessages]);
       }
     } catch (error) {
@@ -423,19 +421,6 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
         throw new Error("No resume ID returned from server");
       }
       router.replace(`/dashboard/resumes/${resumeId}`);
-      setGeneratedResumeId(resumeId);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "model",
-          parts: [
-            {
-              text: `Great! I've created your resume based on our conversation. You can preview it on the right. If you want 
-              to make any modifications, just let me know and I'll update it for you.`,
-            },
-          ],
-        },
-      ]);
     } catch (error) {
       logError("Error generating resume:", { error });
       setMessages((prev) => [
@@ -444,7 +429,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           role: "model",
           parts: [
             {
-              text: "I'm having trouble generating your resume. Please try again.",
+              text: t("errors.resumeGenerationError"),
             },
           ],
         },
@@ -454,7 +439,8 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     }
   };
 
-  const shouldShowSplitView = generatedResumeId;
+  // Update the shouldShowSplitView logic to include isGenerating
+  const shouldShowSplitView = generatedResumeId || isGenerating;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -579,15 +565,33 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           </Card>
         </div>
 
-        {/* Resume preview column - only shown when a resume exists */}
-        {shouldShowSplitView && resume && (
+        {/* Resume preview column - shown when resume exists or generating */}
+        {shouldShowSplitView && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="h-full flex flex-col"
           >
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <ResumePreview resume={resume} loading={isGenerating} />
+              {isGenerating && !resume ? (
+                <div className="h-full flex items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center space-y-4"
+                  >
+                    <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 dark:border-gray-600 dark:border-t-gray-300" />
+                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                      {t("generation.title")}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                      {t("generation.description")}
+                    </p>
+                  </motion.div>
+                </div>
+              ) : resume ? (
+                <ResumePreview resume={resume} loading={isGenerating} />
+              ) : null}
             </div>
           </motion.div>
         )}
