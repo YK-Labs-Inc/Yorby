@@ -120,7 +120,7 @@ export async function getProducts(userId: string) {
         return {
           ...product,
           description,
-          prices: prices.data,
+          prices: [selectedPrice],
           credits,
           totalPrice: price,
           pricePerCredit: pricePerCredit,
@@ -135,6 +135,7 @@ export async function getProducts(userId: string) {
       if (b.credits === -1) return -1;
       return (a.credits || 0) - (b.credits || 0);
     });
+    console.log(sortedProducts);
 
     return { products: sortedProducts };
   } catch (error) {
