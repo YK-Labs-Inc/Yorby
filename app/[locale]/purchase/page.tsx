@@ -44,10 +44,10 @@ export default async function PurchasePage({
     );
   }
 
-  let interviewCopilotsEnabled = false;
+  let resumeBuilderEnabled = false;
   if (user) {
-    interviewCopilotsEnabled =
-      (await posthog.isFeatureEnabled("enable-interview-copilot", user.id)) ??
+    resumeBuilderEnabled =
+      (await posthog.isFeatureEnabled("enable-resume-builder", user.id)) ??
       false;
   }
   const { products } = await getProducts(user.id);
@@ -61,13 +61,11 @@ export default async function PurchasePage({
               {t("title")}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              {interviewCopilotsEnabled ? t("descriptionV2") : t("description")}
+              {resumeBuilderEnabled ? t("descriptionV3") : t("descriptionV2")}
             </p>
-            {interviewCopilotsEnabled && (
-              <div className="flex justify-center">
-                <CreditUsageModal />
-              </div>
-            )}
+            <div className="flex justify-center">
+              <CreditUsageModal resumeBuilderEnabled={resumeBuilderEnabled} />
+            </div>
           </div>
         </div>
 
@@ -94,7 +92,7 @@ export default async function PurchasePage({
                 )}
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {t(`products.${productKey}.title`)}
+                    {t(`products.${productKey}.titleV2`)}
                   </h3>
                   <p className="mt-4 text-gray-500 dark:text-gray-400">
                     {t(`products.${productKey}.description`)}

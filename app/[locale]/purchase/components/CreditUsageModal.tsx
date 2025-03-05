@@ -33,7 +33,11 @@ const CreditUsageItem = ({
   </div>
 );
 
-const CreditUsageModal = async () => {
+const CreditUsageModal = async ({
+  resumeBuilderEnabled,
+}: {
+  resumeBuilderEnabled: boolean;
+}) => {
   const t = await getTranslations("purchase.creditUsage");
 
   const formatCredits = (count: number) => {
@@ -52,6 +56,13 @@ const CreditUsageModal = async () => {
       creditCount: 1,
     },
   ];
+  if (resumeBuilderEnabled) {
+    creditUsageItems.push({
+      title: t("items.resumeBuilder.title"),
+      description: t("items.resumeBuilder.description"),
+      creditCount: 1,
+    });
+  }
 
   return (
     <Dialog>
