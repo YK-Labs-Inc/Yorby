@@ -5,61 +5,11 @@ import { Logger } from "next-axiom";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
-
-const fetchUserCredits = async (userId: string) => {
-  const logger = new Logger().with({
-    function: "fetchUserCredits",
-    userId,
-  });
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("custom_job_credits")
-    .select("number_of_credits")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) {
-    logger.error("Error fetching user credits", { error });
-    return 0;
-  }
-  return data?.number_of_credits || 0;
-};
-
-const fetchHasSubscription = async (userId: string) => {
-  const logger = new Logger().with({
-    function: "fetchHasSubscription",
-    userId,
-  });
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) {
-    logger.error("Error fetching has subscription", { error });
-    return false;
-  }
-  return data !== null;
-};
-
-const fetchResume = async (resumeId: string) => {
-  const logger = new Logger().with({
-    function: "fetchResume",
-    resumeId,
-  });
-  const supabase = await createSupabaseServerClient();
-  const { data: resumeData, error: resumeError } = await supabase
-    .from("resumes")
-    .select("*")
-    .eq("id", resumeId)
-    .single();
-  if (resumeError) {
-    logger.error("Error fetching resume", { error: resumeError });
-    return null;
-  }
-  return resumeData;
-};
-
+import {
+  fetchResume,
+  fetchHasSubscription,
+  fetchUserCredits,
+} from "../actions";
 export default async function ResumePage({
   params,
 }: {

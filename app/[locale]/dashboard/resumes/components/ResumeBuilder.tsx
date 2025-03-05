@@ -23,9 +23,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
-import { unlockResume } from "./actions";
 import { FormMessage } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
+import { unlockResume } from "../actions";
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
   title: Tables<"resume_sections">["title"];
