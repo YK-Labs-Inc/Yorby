@@ -551,6 +551,10 @@ const extractWorkExperience = async (messages: Content[], logger: Logger) => {
 
     If you are unable to extract the description of the job return an empty array for the field in the final JSON response.
 
+    When generating the descriptions of the job, use your knowledge as an expert resume writer to extract the most important information from the conversation
+    and to create 3-5 blocks of information that will be used to demonstrate what the candidate has done at the job. Format your response to maximize the chances that it will be
+    noticed by a hiring manager and that it will pass any resume screening software.
+
     Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
     characters are not needed. Just return the raw JSON object string.
   `;
