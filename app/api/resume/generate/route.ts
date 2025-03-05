@@ -3,13 +3,30 @@ import { Content, SchemaType } from "@google/generative-ai";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { sendMessageWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
     route: "/api/resume/generate",
   });
   try {
-    const { messages } = (await req.json()) as { messages: Content[] };
+    const supabase = await createSupabaseServerClient();
+    const { messages, captchaToken } = (await req.json()) as {
+      messages: Content[];
+      captchaToken?: string;
+    };
+    const t = await getTranslations("resumeBuilder");
+
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user && !captchaToken) {
+      logger.error("User not found and captcha token is not provided");
+      return NextResponse.json(
+        {
+          error: t("errors.generic"),
+        },
+        { status: 500 }
+      );
+    }
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -22,7 +39,11 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     const resumeContent = await generateResumeContent(messages, logger);
 
-    const resumeId = await saveResumeContent(resumeContent, logger);
+    const resumeId = await saveResumeContent(
+      resumeContent,
+      logger,
+      captchaToken
+    );
 
     return NextResponse.json({ resumeId });
   } catch (extractionError) {
@@ -68,9 +89,13 @@ const saveResumeContent = async (
       skills: string[];
     }[];
   },
-  logger: Logger
+  logger: Logger,
+  captchaToken?: string
 ) => {
-  const resumeId = await saveResumePersonalInfo(resumeContent.personalInfo);
+  const resumeId = await saveResumePersonalInfo(
+    resumeContent.personalInfo,
+    captchaToken
+  );
   await saveResumeEducation(resumeId, resumeContent.educationHistory, logger);
   await saveResumeWorkExperience(
     resumeId,
@@ -81,23 +106,17 @@ const saveResumeContent = async (
   return resumeId;
 };
 
-const saveResumePersonalInfo = async (personalInfo: {
-  name: string;
-  email: string | null;
-  phone: string | null;
-  location: string | null;
-}) => {
+const saveResumePersonalInfo = async (
+  personalInfo: {
+    name: string;
+    email: string | null;
+    phone: string | null;
+    location: string | null;
+  },
+  captchaToken?: string
+) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) {
-    throw new Error(userError.message);
-  }
-  if (!user) {
-    throw new Error("User not found");
-  }
+  const userId = await getCurrentUser(captchaToken);
   const { data, error } = await supabase
     .from("resumes")
     .insert({
@@ -106,7 +125,7 @@ const saveResumePersonalInfo = async (personalInfo: {
       email: personalInfo.email,
       phone: personalInfo.phone,
       location: personalInfo.location,
-      user_id: user.id,
+      user_id: userId,
       locked_status: "locked",
     })
     .select("id")
@@ -708,5 +727,29 @@ const extractSkills = async (messages: Content[], logger: Logger) => {
         skills: [],
       },
     ];
+  }
+};
+
+const getCurrentUser = async (captchaToken?: string) => {
+  const supabase = await createSupabaseServerClient();
+  const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
+  if (!loggedInUserId) {
+    if (!captchaToken) {
+      throw new Error("Captcha token is required");
+    }
+    const { data, error } = await supabase.auth.signInAnonymously({
+      options: {
+        captchaToken,
+      },
+    });
+    if (error) {
+      throw error;
+    }
+    if (!data.user?.id) {
+      throw new Error("User ID not found");
+    }
+    return data.user?.id;
+  } else {
+    return loggedInUserId;
   }
 };

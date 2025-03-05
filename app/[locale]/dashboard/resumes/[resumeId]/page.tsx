@@ -46,13 +46,12 @@ export default async function ResumePage({
   }
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const credits = await fetchUserCredits(user?.id || "");
-  const isAnonymous = user?.is_anonymous ?? true;
   return (
     <ResumeBuilder
       resumeId={resumeId}
       hasSubscription={hasSubscription}
-      isAnonymous={isAnonymous}
       credits={credits}
+      user={user}
     />
   );
 }
