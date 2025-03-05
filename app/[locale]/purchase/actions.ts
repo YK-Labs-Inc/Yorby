@@ -30,6 +30,10 @@ const CREDITS_MAP: { [key: string]: number } = {
 };
 
 export async function getProducts(userId: string) {
+  const logger = new Logger().with({
+    function: "getProducts",
+    userId,
+  });
   try {
     const increasedPrice =
       (await posthog.getFeatureFlag("price-test-1", userId)) === "test";
@@ -135,11 +139,13 @@ export async function getProducts(userId: string) {
       if (b.credits === -1) return -1;
       return (a.credits || 0) - (b.credits || 0);
     });
-    console.log(sortedProducts);
 
     return { products: sortedProducts };
   } catch (error) {
-    console.error("Error fetching products:", error);
+    logger.error("Error fetching products:", {
+      error: error instanceof Error ? error.message : JSON.stringify(error),
+    });
+    await logger.flush();
     throw new Error("Failed to fetch products");
   }
 }
