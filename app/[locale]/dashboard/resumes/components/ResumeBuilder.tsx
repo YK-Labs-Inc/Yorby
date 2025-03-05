@@ -26,6 +26,8 @@ import ReactMarkdown from "react-markdown";
 import { FormMessage } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
 import { unlockResume } from "../actions";
+import { User } from "@supabase/supabase-js";
+import { Turnstile } from "@marsidev/react-turnstile";
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
   title: Tables<"resume_sections">["title"];
@@ -107,13 +109,13 @@ const LockedResumeOverlay = ({
 export default function ResumeBuilder({
   resumeId,
   hasSubscription,
-  isAnonymous,
   credits,
+  user,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
-  isAnonymous: boolean;
   credits: number;
+  user: User | null;
 }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -121,6 +123,7 @@ export default function ResumeBuilder({
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [messages, setMessages] = useState<Content[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
@@ -478,7 +481,10 @@ export default function ResumeBuilder({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages: conversationHistory }),
+        body: JSON.stringify({
+          messages: conversationHistory,
+          captchaToken,
+        }),
       });
 
       if (!response.ok) {
@@ -637,7 +643,9 @@ export default function ResumeBuilder({
                         className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
                         onClick={handleSendButtonClick}
                         disabled={
-                          (!textInput.trim() && !isRecording) || isGenerating
+                          (!textInput.trim() && !isRecording) ||
+                          isGenerating ||
+                          (!user && !captchaToken)
                         }
                       >
                         <Send className="h-4 w-4" />
@@ -647,6 +655,16 @@ export default function ResumeBuilder({
                 )}
               </AnimatePresence>
             </div>
+            {!user && (
+              <div className="mt-4">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                />
+              </div>
+            )}
           </Card>
         </div>
 
