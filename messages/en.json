@@ -945,10 +945,12 @@
     "cancelEdit": "Cancel Edit",
     "saveChanges": "Save Changes",
     "savingChanges": "Saving changes...",
+    "showEmptySections": "Show Empty Sections",
     "addItem": "Add Item",
     "addEducation": "Add Education",
     "addWorkExperience": "Add Work Experience",
     "addSkill": "Add Skill",
+    "addSection": "Add New Section",
     "deleteItem": "Delete Item",
     "newItemDefaults": {
       "title": "New Position",
@@ -956,6 +958,7 @@
       "date": "Date Range",
       "description": ["Add description"]
     },
+    "newSectionTitle": "New section title",
     "errors": {
       "resumeEditError": "Error editing resume. Please try again.",
       "resumeGenerationError": "Error generating resume. Please try again.",
