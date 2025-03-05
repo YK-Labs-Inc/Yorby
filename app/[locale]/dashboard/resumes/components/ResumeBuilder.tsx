@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useActionState,
+  useCallback,
+} from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import ResumePreview from "./ResumePreview";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Mic, Send } from "lucide-react";
+import { Mic, Send, Lock } from "lucide-react";
 import { useVoiceRecording } from "./useVoiceRecording";
 import VoiceRecordingOverlay from "./VoiceRecordingOverlay";
 import { Content } from "@google/generative-ai";
@@ -17,6 +23,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
+import { FormMessage } from "@/components/form-message";
+import { Link } from "@/i18n/routing";
+import { unlockResume } from "../actions";
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
   title: Tables<"resume_sections">["title"];
@@ -37,9 +46,75 @@ export type ResumeDataType = {
   location: NonNullable<Tables<"resumes">["location"]>;
   summary: NonNullable<Tables<"resumes">["summary"]>;
   sections: ResumeSection[];
+  locked_status: Tables<"resumes">["locked_status"];
 };
 
-export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
+const LockedResumeOverlay = ({
+  hasCredits,
+  requiredCredits,
+  resumeId,
+  onUnlock,
+}: {
+  hasCredits: boolean;
+  requiredCredits: number;
+  resumeId: string;
+  onUnlock: (resumeId: string) => void;
+}) => {
+  const t = useTranslations("resumeBuilder");
+  const router = useRouter();
+  const [state, action, pending] = useActionState(unlockResume, { error: "" });
+
+  useEffect(() => {
+    if (state?.success) {
+      onUnlock(resumeId);
+    }
+  }, [state?.success]);
+
+  return (
+    <div className="flex-grow overflow-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border p-6 flex flex-col items-center justify-center space-y-6 text-center h-full">
+      <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+      </div>
+      <div className="space-y-2 max-w-md">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          {t("locked.title")}
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300">
+          {hasCredits
+            ? t("locked.descriptionWithCredits", { credits: requiredCredits })
+            : t("locked.descriptionNoCredits", { credits: requiredCredits })}
+        </p>
+      </div>
+      {hasCredits ? (
+        <form action={action}>
+          <input type="hidden" name="resumeId" value={resumeId} />
+          <Button type="submit" disabled={pending}>
+            {pending
+              ? t("locked.unlocking")
+              : t("locked.unlockButton", { credits: requiredCredits })}
+          </Button>
+        </form>
+      ) : (
+        <Link href="/purchase">
+          <Button>{t("locked.purchaseButton")}</Button>
+        </Link>
+      )}
+      {state?.error && <FormMessage message={{ error: state.error }} />}
+    </div>
+  );
+};
+
+export default function ResumeBuilder({
+  resumeId,
+  hasSubscription,
+  isAnonymous,
+  credits,
+}: {
+  resumeId?: string;
+  hasSubscription: boolean;
+  isAnonymous: boolean;
+  credits: number;
+}) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
@@ -77,130 +152,132 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
     }
   }, [resumeId]);
 
+  const fetchResumeData = useCallback(
+    async (resumeId: string) => {
+      setIsGenerating(true);
+      try {
+        const supabase = createSupabaseBrowserClient();
+
+        // Fetch basic resume data
+        const { data: resumeData, error: resumeError } = await supabase
+          .from("resumes")
+          .select("*")
+          .eq("id", resumeId)
+          .single();
+
+        if (resumeError || !resumeData) {
+          throw new Error(resumeError?.message || "Resume not found");
+        }
+
+        // Fetch resume sections
+        const { data: sectionsData, error: sectionsError } = await supabase
+          .from("resume_sections")
+          .select("*")
+          .eq("resume_id", resumeId)
+          .order("display_order", { ascending: true });
+
+        if (sectionsError) {
+          throw new Error(sectionsError.message);
+        }
+
+        // Create an array to hold all section data with their content
+        const formattedSections = [];
+
+        // Process each section
+        for (const section of sectionsData as Tables<"resume_sections">[]) {
+          // Check if it's a skills section (usually just list items)
+          const isSkillsSection = section.title.toLowerCase().includes("skill");
+
+          if (isSkillsSection) {
+            // Fetch skills list items
+            const { data: listItems, error: listError } = await supabase
+              .from("resume_list_items")
+              .select("*")
+              .eq("section_id", section.id)
+              .order("display_order", { ascending: true });
+
+            if (listError) {
+              throw new Error(listError.message);
+            }
+
+            // Add skills section with list items as content
+            formattedSections.push({
+              title: section.title,
+              content: (listItems as Tables<"resume_list_items">[]).map(
+                (item) => item.content
+              ),
+            });
+          } else {
+            // Fetch detail items for this section
+            const { data: detailItems, error: detailError } = await supabase
+              .from("resume_detail_items")
+              .select("*")
+              .eq("section_id", section.id)
+              .order("display_order", { ascending: true });
+
+            if (detailError) {
+              throw new Error(detailError.message);
+            }
+
+            // Process each detail item to get its descriptions
+            const formattedItems = [];
+            for (const item of detailItems as Tables<"resume_detail_items">[]) {
+              // Fetch descriptions for this detail item
+              const { data: descriptions, error: descError } = await supabase
+                .from("resume_item_descriptions")
+                .select("*")
+                .eq("detail_item_id", item.id)
+                .order("display_order", { ascending: true });
+
+              if (descError) {
+                throw new Error(descError.message);
+              }
+
+              // Format the detail item with its descriptions
+              formattedItems.push({
+                title: item.title,
+                organization: item.subtitle,
+                date: item.date_range,
+                description: (
+                  descriptions as Tables<"resume_item_descriptions">[]
+                ).map((desc) => desc.description),
+              });
+            }
+
+            // Add the section with its formatted detail items
+            formattedSections.push({
+              title: section.title,
+              content: formattedItems,
+            });
+          }
+        }
+
+        // Create the complete resume data object
+        const formattedResume: ResumeDataType = {
+          name: resumeData.name,
+          email: resumeData.email || "",
+          phone: resumeData.phone || "",
+          location: resumeData.location || "",
+          summary: resumeData.summary || "",
+          sections: formattedSections,
+          locked_status: resumeData.locked_status,
+        };
+
+        setResume(formattedResume);
+      } catch (error) {
+        console.error("Error fetching resume data:", error);
+        setResume(null);
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [resumeId]
+  );
+
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
     if (resumeId) {
-      const fetchResumeData = async () => {
-        setIsGenerating(true);
-        try {
-          const supabase = createSupabaseBrowserClient();
-
-          // Fetch basic resume data
-          const { data: resumeData, error: resumeError } = await supabase
-            .from("resumes")
-            .select("*")
-            .eq("id", resumeId)
-            .single();
-
-          if (resumeError || !resumeData) {
-            throw new Error(resumeError?.message || "Resume not found");
-          }
-
-          // Fetch resume sections
-          const { data: sectionsData, error: sectionsError } = await supabase
-            .from("resume_sections")
-            .select("*")
-            .eq("resume_id", resumeId)
-            .order("display_order", { ascending: true });
-
-          if (sectionsError) {
-            throw new Error(sectionsError.message);
-          }
-
-          // Create an array to hold all section data with their content
-          const formattedSections = [];
-
-          // Process each section
-          for (const section of sectionsData as Tables<"resume_sections">[]) {
-            // Check if it's a skills section (usually just list items)
-            const isSkillsSection = section.title
-              .toLowerCase()
-              .includes("skill");
-
-            if (isSkillsSection) {
-              // Fetch skills list items
-              const { data: listItems, error: listError } = await supabase
-                .from("resume_list_items")
-                .select("*")
-                .eq("section_id", section.id)
-                .order("display_order", { ascending: true });
-
-              if (listError) {
-                throw new Error(listError.message);
-              }
-
-              // Add skills section with list items as content
-              formattedSections.push({
-                title: section.title,
-                content: (listItems as Tables<"resume_list_items">[]).map(
-                  (item) => item.content
-                ),
-              });
-            } else {
-              // Fetch detail items for this section
-              const { data: detailItems, error: detailError } = await supabase
-                .from("resume_detail_items")
-                .select("*")
-                .eq("section_id", section.id)
-                .order("display_order", { ascending: true });
-
-              if (detailError) {
-                throw new Error(detailError.message);
-              }
-
-              // Process each detail item to get its descriptions
-              const formattedItems = [];
-              for (const item of detailItems as Tables<"resume_detail_items">[]) {
-                // Fetch descriptions for this detail item
-                const { data: descriptions, error: descError } = await supabase
-                  .from("resume_item_descriptions")
-                  .select("*")
-                  .eq("detail_item_id", item.id)
-                  .order("display_order", { ascending: true });
-
-                if (descError) {
-                  throw new Error(descError.message);
-                }
-
-                // Format the detail item with its descriptions
-                formattedItems.push({
-                  title: item.title,
-                  organization: item.subtitle,
-                  date: item.date_range,
-                  description: (
-                    descriptions as Tables<"resume_item_descriptions">[]
-                  ).map((desc) => desc.description),
-                });
-              }
-
-              // Add the section with its formatted detail items
-              formattedSections.push({
-                title: section.title,
-                content: formattedItems,
-              });
-            }
-          }
-
-          // Create the complete resume data object
-          const formattedResume: ResumeDataType = {
-            name: resumeData.name,
-            email: resumeData.email || "",
-            phone: resumeData.phone || "",
-            location: resumeData.location || "",
-            summary: resumeData.summary || "",
-            sections: formattedSections,
-          };
-
-          setResume(formattedResume);
-        } catch (error) {
-          console.error("Error fetching resume data:", error);
-          setResume(null);
-        } finally {
-          setIsGenerating(false);
-        }
-      };
-
-      fetchResumeData();
+      fetchResumeData(resumeId);
     }
   }, [resumeId]);
 
@@ -595,12 +672,23 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                   </motion.div>
                 </div>
               ) : resumeId && resume ? (
-                <ResumePreview
-                  resume={resume}
-                  loading={isGenerating}
-                  setResume={setResume}
-                  resumeId={resumeId}
-                />
+                resume.locked_status === "locked" && !hasSubscription ? (
+                  <LockedResumeOverlay
+                    hasCredits={credits >= 1}
+                    requiredCredits={1}
+                    resumeId={resumeId}
+                    onUnlock={() => {
+                      fetchResumeData(resumeId);
+                    }}
+                  />
+                ) : (
+                  <ResumePreview
+                    resume={resume}
+                    loading={isGenerating}
+                    setResume={setResume}
+                    resumeId={resumeId}
+                  />
+                )
               ) : null}
             </div>
           </motion.div>
