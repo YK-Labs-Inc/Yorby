@@ -139,6 +139,9 @@ const saveResumeEducation = async (
   if (!user) {
     throw new Error("User not found");
   }
+  if (educationHistory.length === 0) {
+    return;
+  }
   const { data, error } = await supabase
     .from("resume_sections")
     .insert({
@@ -224,6 +227,9 @@ const saveResumeWorkExperience = async (
   if (!user) {
     throw new Error("User not found");
   }
+  if (workExperience.length === 0) {
+    return;
+  }
   const { data, error } = await supabase
     .from("resume_sections")
     .insert({
@@ -297,6 +303,9 @@ const saveResumeSkills = async (
   }
   if (!user) {
     throw new Error("User not found");
+  }
+  if (skills.length === 0) {
+    return;
   }
   const { data, error } = await supabase
     .from("resume_sections")

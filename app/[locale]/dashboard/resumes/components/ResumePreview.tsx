@@ -18,6 +18,7 @@ import { saveResume } from "../actions";
 import React from "react";
 import html2pdf from "html2pdf.js";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { Switch } from "@/components/ui/switch";
 
 interface ResumePreviewProps {
   loading: boolean;
@@ -35,6 +36,7 @@ export default function ResumePreview({
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [showEmptySections, setShowEmptySections] = useState<boolean>(true);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
@@ -191,6 +193,22 @@ export default function ResumePreview({
     );
   };
 
+  const addNewSection = () => {
+    setResume(
+      (prev) =>
+        ({
+          ...prev,
+          sections: [
+            ...(prev?.sections || []),
+            {
+              title: t("newSectionTitle"),
+              content: [],
+            },
+          ],
+        }) as ResumeDataType
+    );
+  };
+
   const deleteDetailItem = (sectionIndex: number, itemIndex: number) => {
     setResume(
       (prev) =>
@@ -239,14 +257,24 @@ export default function ResumePreview({
     <div className="flex flex-col h-full">
       <div className="flex justify-end mb-4 gap-2 mt-1">
         {!isEditMode && (
-          <Button
-            onClick={() => setIsEditMode(!isEditMode)}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <Edit2 className="h-4 w-4" />
-            {t("editResume")}
-          </Button>
+          <>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={showEmptySections}
+                onCheckedChange={setShowEmptySections}
+                aria-label={t("showEmptySections")}
+              />
+              <span className="text-sm">{t("showEmptySections")}</span>
+            </div>
+            <Button
+              onClick={() => setIsEditMode(!isEditMode)}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Edit2 className="h-4 w-4" />
+              {t("editResume")}
+            </Button>
+          </>
         )}
         {isEditMode && (
           <form action={saveAction}>
@@ -338,176 +366,201 @@ export default function ResumePreview({
           )}
         </div>
 
-        {resume.sections.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="mb-6">
-            {isEditMode ? (
-              <div className="mb-2">
-                <Input
-                  value={section.title}
-                  onChange={(e) =>
-                    updateSection(sectionIndex, "title", e.target.value)
-                  }
-                  className="text-lg font-semibold"
-                />
-              </div>
-            ) : (
-              <h2 className="text-lg font-semibold border-b pb-1 mb-2">
-                {section.title}
-              </h2>
-            )}
+        {resume.sections.map((section, sectionIndex) => {
+          // Skip rendering empty sections in view mode unless showEmptySections is true
+          if (!isEditMode && !showEmptySections) {
+            const isEmpty =
+              Array.isArray(section.content) &&
+              (section.content.length === 0 ||
+                (section.content.length === 1 && section.content[0] === ""));
+            if (isEmpty) return null;
+          }
 
-            {section.title.toLowerCase().includes("skill") ? (
-              isEditMode ? (
-                <Textarea
-                  value={(section.content as string[]).join("\n")}
-                  onChange={(e) => {
-                    let descriptions = e.target.value.split("\n");
-                    if (descriptions.length === 1 && descriptions[0] === "") {
-                      descriptions = [];
+          return (
+            <div key={sectionIndex} className="mb-6">
+              {isEditMode ? (
+                <div className="mb-2">
+                  <Input
+                    value={section.title}
+                    onChange={(e) =>
+                      updateSection(sectionIndex, "title", e.target.value)
                     }
-                    updateSkills(sectionIndex, e.target.value);
-                  }}
-                  placeholder="Enter skills (one per line)"
-                  className="w-full min-h-[100px]"
-                />
-              ) : (
-                <div className="flex flex-col flex-wrap gap-0.5">
-                  {(section.content as Array<string>).map(
-                    (skill, skillIndex) => (
-                      <span key={skillIndex} className="text-sm px-2 ">
-                        {skill}
-                      </span>
-                    )
-                  )}
+                    className="text-lg font-semibold"
+                  />
                 </div>
-              )
-            ) : (
-              <div className="space-y-4">
-                {(
-                  section.content as Array<{
-                    title: string;
-                    organization?: string | null;
-                    date?: string | null;
-                    description: string[];
-                  }>
-                ).map((item, itemIndex) => (
-                  <div key={itemIndex} className="text-sm">
-                    {isEditMode ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={item.title}
-                            onChange={(e) =>
-                              updateDetailItem(
-                                sectionIndex,
-                                itemIndex,
-                                "title",
-                                e.target.value
-                              )
-                            }
-                            className="font-medium flex-1"
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() =>
-                              deleteDetailItem(sectionIndex, itemIndex)
-                            }
-                            className="shrink-0"
-                            type="button"
-                            title={t("deleteItem")}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="flex gap-2">
-                          <Input
-                            value={item.organization || ""}
-                            onChange={(e) =>
-                              updateDetailItem(
-                                sectionIndex,
-                                itemIndex,
-                                "organization",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Organization"
-                            className="flex-1"
-                          />
-                          <Input
-                            value={item.date || ""}
-                            onChange={(e) =>
-                              updateDetailItem(
-                                sectionIndex,
-                                itemIndex,
-                                "date",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Date"
-                            className="w-1/3"
-                          />
-                        </div>
-                        <Textarea
-                          value={item.description.join("\n")}
-                          onChange={(e) => {
-                            let descriptions = e.target.value.split("\n");
-                            if (
-                              descriptions.length === 1 &&
-                              descriptions[0] === ""
-                            ) {
-                              descriptions = [];
-                            }
-                            updateDetailItem(
-                              sectionIndex,
-                              itemIndex,
-                              "description",
-                              descriptions
-                            );
-                          }}
-                          placeholder="Description (one point per line)"
-                          className="min-h-[100px]"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        {item.title && (
-                          <div className="font-medium">{item.title}</div>
-                        )}
-                        {item.organization && (
-                          <div className="flex justify-between">
-                            <div>{item.organization}</div>
-                            {item.date && (
-                              <div className="text-gray-500">{item.date}</div>
-                            )}
-                          </div>
-                        )}
-                        {item.description && (
-                          <div className="mt-1 text-gray-600 dark:text-gray-300">
-                            <ul className="list-disc pl-5 space-y-1">
-                              {item.description.map((point, pointIndex) => (
-                                <li key={pointIndex}>{point}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </>
+              ) : (
+                <h2 className="text-lg font-semibold border-b pb-1 mb-2">
+                  {section.title}
+                </h2>
+              )}
+
+              {section.title.toLowerCase().includes("skill") ? (
+                isEditMode ? (
+                  <Textarea
+                    value={(section.content as string[]).join("\n")}
+                    onChange={(e) => {
+                      let descriptions = e.target.value.split("\n");
+                      if (descriptions.length === 1 && descriptions[0] === "") {
+                        descriptions = [];
+                      }
+                      updateSkills(sectionIndex, e.target.value);
+                    }}
+                    placeholder="Enter skills (one per line)"
+                    className="w-full min-h-[100px]"
+                  />
+                ) : (
+                  <div className="flex flex-col flex-wrap gap-0.5">
+                    {(section.content as Array<string>).map(
+                      (skill, skillIndex) => (
+                        <span key={skillIndex} className="text-sm px-2 ">
+                          {skill}
+                        </span>
+                      )
                     )}
                   </div>
-                ))}
-                {isEditMode && (
-                  <Button
-                    onClick={() => addNewDetailItem(sectionIndex)}
-                    className="w-full mt-4"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {getSectionCTA(section.title)}
-                  </Button>
-                )}
-              </div>
-            )}
+                )
+              ) : (
+                <div className="space-y-4">
+                  {(
+                    section.content as Array<{
+                      title: string;
+                      organization?: string | null;
+                      date?: string | null;
+                      description: string[];
+                    }>
+                  ).map((item, itemIndex) => (
+                    <div key={itemIndex} className="text-sm">
+                      {isEditMode ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={item.title}
+                              onChange={(e) =>
+                                updateDetailItem(
+                                  sectionIndex,
+                                  itemIndex,
+                                  "title",
+                                  e.target.value
+                                )
+                              }
+                              className="font-medium flex-1"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() =>
+                                deleteDetailItem(sectionIndex, itemIndex)
+                              }
+                              className="shrink-0"
+                              type="button"
+                              title={t("deleteItem")}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input
+                              value={item.organization || ""}
+                              onChange={(e) =>
+                                updateDetailItem(
+                                  sectionIndex,
+                                  itemIndex,
+                                  "organization",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Organization"
+                              className="flex-1"
+                            />
+                            <Input
+                              value={item.date || ""}
+                              onChange={(e) =>
+                                updateDetailItem(
+                                  sectionIndex,
+                                  itemIndex,
+                                  "date",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Date"
+                              className="w-1/3"
+                            />
+                          </div>
+                          <Textarea
+                            value={item.description.join("\n")}
+                            onChange={(e) => {
+                              let descriptions = e.target.value.split("\n");
+                              if (
+                                descriptions.length === 1 &&
+                                descriptions[0] === ""
+                              ) {
+                                descriptions = [];
+                              }
+                              updateDetailItem(
+                                sectionIndex,
+                                itemIndex,
+                                "description",
+                                descriptions
+                              );
+                            }}
+                            placeholder="Description (one point per line)"
+                            className="min-h-[100px]"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          {item.title && (
+                            <div className="font-medium">{item.title}</div>
+                          )}
+                          {item.organization && (
+                            <div className="flex justify-between">
+                              <div>{item.organization}</div>
+                              {item.date && (
+                                <div className="text-gray-500">{item.date}</div>
+                              )}
+                            </div>
+                          )}
+                          {item.description && (
+                            <div className="mt-1 text-gray-600 dark:text-gray-300">
+                              <ul className="list-disc pl-5 space-y-1">
+                                {item.description.map((point, pointIndex) => (
+                                  <li key={pointIndex}>{point}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {isEditMode && (
+                    <Button
+                      onClick={() => addNewDetailItem(sectionIndex)}
+                      className="w-full mt-4"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {getSectionCTA(section.title)}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Add New Section Button */}
+        {isEditMode && (
+          <div className="mt-6">
+            <Button
+              onClick={addNewSection}
+              className="w-full"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t("addSection")}
+            </Button>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
