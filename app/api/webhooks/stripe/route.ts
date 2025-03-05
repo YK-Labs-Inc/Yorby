@@ -22,6 +22,7 @@ async function handleSuccessfulPayment(
 ) {
   const userId = session.metadata?.userId;
   let productId = "";
+  let amountTotal = 0;
   try {
     const supabase = await createAdminClient();
     const isSubscription = session.metadata?.isSubscription === "true";
@@ -52,6 +53,7 @@ async function handleSuccessfulPayment(
         session.id
       );
       productId = lineItems.data[0]?.price?.product as string;
+      amountTotal = lineItems.data[0]?.amount_total;
       const credits = CREDITS_MAP[productId];
 
       if (!credits) {
@@ -105,6 +107,7 @@ async function handleSuccessfulPayment(
         userId,
         args: {
           priceId: productId,
+          amountTotal,
         },
       });
     }
