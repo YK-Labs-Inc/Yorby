@@ -15,7 +15,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown";
 // Define types to structure the aggregated resume data using Tables types
 type ResumeSection = {
   title: Tables<"resume_sections">["title"];
@@ -42,9 +43,6 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
-  const [generatedResumeId, setGeneratedResumeId] = useState<string>(
-    resumeId || ""
-  );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [messages, setMessages] = useState<Content[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
@@ -81,7 +79,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
-    if (generatedResumeId) {
+    if (resumeId) {
       const fetchResumeData = async () => {
         setIsGenerating(true);
         try {
@@ -91,7 +89,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           const { data: resumeData, error: resumeError } = await supabase
             .from("resumes")
             .select("*")
-            .eq("id", generatedResumeId)
+            .eq("id", resumeId)
             .single();
 
           if (resumeError || !resumeData) {
@@ -102,7 +100,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
           const { data: sectionsData, error: sectionsError } = await supabase
             .from("resume_sections")
             .select("*")
-            .eq("resume_id", generatedResumeId)
+            .eq("resume_id", resumeId)
             .order("display_order", { ascending: true });
 
           if (sectionsError) {
@@ -204,7 +202,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
 
       fetchResumeData();
     }
-  }, [generatedResumeId]);
+  }, [resumeId]);
 
   // Scroll to bottom of chat whenever messages update
   useEffect(() => {
@@ -326,7 +324,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
   };
 
   const sendMessage = async () => {
-    if (generatedResumeId) {
+    if (resumeId) {
       sendEditMessage();
     } else {
       sendInterviewMessage();
@@ -440,7 +438,7 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
   };
 
   // Update the shouldShowSplitView logic to include isGenerating
-  const shouldShowSplitView = generatedResumeId || isGenerating;
+  const shouldShowSplitView = resumeId || isGenerating;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -487,9 +485,9 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                           : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transform hover:scale-[1.02]"
                       }`}
                     >
-                      <p className="text-sm md:text-base leading-relaxed">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {message.parts[0].text}
-                      </p>
+                      </ReactMarkdown>
                     </div>
                   </motion.div>
                 ))}
@@ -596,12 +594,12 @@ export default function ResumeBuilder({ resumeId }: { resumeId?: string }) {
                     </p>
                   </motion.div>
                 </div>
-              ) : resume ? (
+              ) : resumeId && resume ? (
                 <ResumePreview
                   resume={resume}
                   loading={isGenerating}
                   setResume={setResume}
-                  resumeId={generatedResumeId}
+                  resumeId={resumeId}
                 />
               ) : null}
             </div>
