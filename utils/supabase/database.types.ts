@@ -682,6 +682,7 @@ export type Database = {
           email: string | null
           id: string
           location: string | null
+          locked_status: Database["public"]["Enums"]["locked_status"]
           name: string
           phone: string | null
           summary: string | null
@@ -694,6 +695,7 @@ export type Database = {
           email?: string | null
           id?: string
           location?: string | null
+          locked_status: Database["public"]["Enums"]["locked_status"]
           name: string
           phone?: string | null
           summary?: string | null
@@ -706,6 +708,7 @@ export type Database = {
           email?: string | null
           id?: string
           location?: string | null
+          locked_status?: Database["public"]["Enums"]["locked_status"]
           name?: string
           phone?: string | null
           summary?: string | null
@@ -746,6 +749,7 @@ export type Database = {
       interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
+      locked_status: "locked" | "unlocked"
       message_role: "user" | "model"
     }
     CompositeTypes: {

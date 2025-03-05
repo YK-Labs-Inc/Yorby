@@ -44,6 +44,19 @@ const fetchUserCredits = async (userId: string) => {
   return data?.number_of_credits || 0;
 };
 
+const fetchHasSubscription = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  return data !== null;
+};
+
 export default async function Page({
   params,
   searchParams,
@@ -118,6 +131,9 @@ export default async function Page({
       userCredits = await fetchUserCredits(user.id);
     }
   }
+  const hasSubscription = await fetchHasSubscription(user?.id || "");
+  const isLocked =
+    interviewCopilot.interview_copilot_access === "locked" && !hasSubscription;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -158,7 +174,7 @@ export default async function Page({
           </div>
         ) : (
           <>
-            {interviewCopilot.interview_copilot_access === "locked" ? (
+            {isLocked ? (
               <LockedInterviewCopilotComponent
                 interviewCopilot={interviewCopilot}
                 userCredits={userCredits}

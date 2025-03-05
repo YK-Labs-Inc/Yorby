@@ -107,6 +107,7 @@ const saveResumePersonalInfo = async (personalInfo: {
       phone: personalInfo.phone,
       location: personalInfo.location,
       user_id: user.id,
+      locked_status: "locked",
     })
     .select("id")
     .single();

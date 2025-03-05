@@ -960,16 +960,32 @@
     },
     "newSectionTitle": "New section title",
     "errors": {
+      "notFound": {
+        "title": "Resume Not Found",
+        "description": "The resume you're looking for doesn't exist or has been deleted.",
+        "action": "Create A New Resume"
+      },
       "resumeEditError": "Error editing resume. Please try again.",
       "resumeGenerationError": "Error generating resume. Please try again.",
       "resumeSaveError": "Error saving resume. Please try again.",
-      "auth": "You must be logged in to save your resume"
+      "auth": "You must be logged in to save your resume",
+      "insufficientCredits": "You don't have enough credits to unlock this resume. Please purchase more credits.",
+      "generic": "Sorry, something went wrong. Please try again."
     },
     "success": {
-      "resumeSave": "Resume saved"
+      "resumeSave": "Resume saved",
+      "resumeUnlock": "Resume unlocked"
     },
     "generation": {
       "title": "Loading your resume..."
+    },
+    "locked": {
+      "title": "Resume Locked",
+      "descriptionWithCredits": "Unlock the resume by using {credits} {credits, plural, one {credit} other {credits}} from your account.",
+      "descriptionNoCredits": "Unlock the resume by adding {credits} {credits, plural, one {credit} other {credits}} to your account.",
+      "unlockButton": "Unlock with {credits} {credits, plural, one {Credit} other {Credits}}",
+      "unlocking": "Unlocking...",
+      "purchaseButton": "Purchase Credits"
     }
   }
 }
