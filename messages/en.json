@@ -369,6 +369,7 @@
     "title": "Get Interview Credits",
     "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
     "descriptionV2": "You can redeem credits to create interview prep material for a job or create an Interview Copilot",
+    "descriptionV3": "You can redeem credits to generate interview questions, create an Interview Copilot, or build a resume.",
     "unauthenticated": {
       "title": "Sign In to View Pricing",
       "description": "Sign in to view our pricing plans and purchase interview credits.",
@@ -383,21 +384,25 @@
     "products": {
       "oneCredit": {
         "title": "Single Interview",
+        "titleV2": "1 Credit",
         "description": "Perfect for trying out our mock interview system",
         "highlight": "1 Credit"
       },
       "fiveCredits": {
         "title": "Interview Pack",
+        "titleV2": "5 Credits",
         "description": "Great for practicing multiple interviews",
         "highlight": "5 Credits"
       },
       "tenCredits": {
         "title": "Pro Pack",
+        "titleV2": "10 Credits",
         "description": "Best value for serious preparation",
         "highlight": "10 Credits"
       },
       "unlimited": {
         "title": "Unlimited Annual",
+        "titleV2": "Unlimited Credits",
         "description": "For professionals and frequent job seekers",
         "highlight": "Unlimited Credits"
       }
@@ -437,6 +442,11 @@
         "copilot": {
           "title": "Interview Copilot Session",
           "description": "One complete Interview Copilot session",
+          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
+        },
+        "resumeBuilder": {
+          "title": "Build a Resume",
+          "description": "Build a resume with our easy to use resume builder",
           "credits": "{count} {count, plural, one {Credit} other {Credits}}"
         }
       }
