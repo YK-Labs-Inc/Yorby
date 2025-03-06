@@ -56,11 +56,13 @@ const LockedResumeOverlay = ({
   requiredCredits,
   resumeId,
   onUnlock,
+  resume,
 }: {
   hasCredits: boolean;
   requiredCredits: number;
   resumeId: string;
   onUnlock: (resumeId: string) => void;
+  resume: ResumeDataType;
 }) => {
   const t = useTranslations("resumeBuilder");
   const router = useRouter();
@@ -72,36 +74,168 @@ const LockedResumeOverlay = ({
     }
   }, [state?.success]);
 
+  const firstSection = resume.sections[0];
+
   return (
-    <div className="flex-grow overflow-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border p-6 flex flex-col items-center justify-center space-y-6 text-center h-full">
-      <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-        <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+    <div className="relative flex-grow overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border h-full">
+      {/* Preview Section */}
+      <div className="absolute inset-0">
+        <div className="p-6">
+          {/* Contact Information */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {resume.name}
+            </h1>
+            <div className="flex flex-wrap gap-2 text-sm mt-1 text-gray-600 dark:text-gray-300">
+              {resume.email && <span>{resume.email}</span>}
+              {resume.phone && <span>• {resume.phone}</span>}
+              {resume.location && <span>• {resume.location}</span>}
+            </div>
+            {resume.summary && (
+              <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+                {resume.summary}
+              </p>
+            )}
+          </div>
+
+          {/* First Section Preview */}
+          {firstSection && (
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold border-b pb-1 mb-2 text-gray-900 dark:text-white">
+                {firstSection.title}
+              </h2>
+              {firstSection.title.toLowerCase().includes("skill") ? (
+                <div className="flex flex-col flex-wrap gap-0.5">
+                  {(firstSection.content as string[])
+                    .slice(0, 3)
+                    .map((skill, index) => (
+                      <span
+                        key={index}
+                        className="text-sm px-2 text-gray-600 dark:text-gray-300"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  {(firstSection.content as string[]).length > 3 && (
+                    <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      ...
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {(
+                    firstSection.content as Array<{
+                      title: string;
+                      organization?: string | null;
+                      date?: string | null;
+                      description: string[];
+                    }>
+                  )
+                    .slice(0, 1)
+                    .map((item, index) => (
+                      <div key={index} className="text-sm">
+                        {item.title && (
+                          <div className="font-medium text-gray-800 dark:text-gray-200">
+                            {item.title}
+                          </div>
+                        )}
+                        {item.organization && (
+                          <div className="flex justify-between text-gray-600 dark:text-gray-300">
+                            <div>{item.organization}</div>
+                            {item.date && <div>{item.date}</div>}
+                          </div>
+                        )}
+                        {item.description && item.description.length > 0 && (
+                          <div className="mt-1">
+                            <ul className="space-y-1">
+                              {item.description
+                                .slice(0, 2)
+                                .map((point, pointIndex) => (
+                                  <li
+                                    key={pointIndex}
+                                    className="flex items-center text-gray-600 dark:text-gray-300 before:content-['•'] before:mr-2 pl-0 list-none"
+                                  >
+                                    {point}
+                                  </li>
+                                ))}
+                              {item.description.length > 2 && (
+                                <li className="text-sm text-gray-500 dark:text-gray-400">
+                                  ...
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Gradient Overlay - Adjusted to start fading earlier */}
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white/95 dark:via-gray-800/70 dark:to-gray-800/95 pointer-events-none"
+          style={{
+            background: `linear-gradient(to bottom, 
+                 transparent 0%, 
+                 rgba(255, 255, 255, 0.7) 40%, 
+                 rgba(255, 255, 255, 0.95) 70%
+               )`,
+            backgroundColor: "transparent",
+          }}
+        />
+
+        {/* Blur Overlay - Adjusted to align with gradient */}
+        <div
+          className="absolute inset-0 bg-white/30 dark:bg-gray-800/30 backdrop-blur-[2px] pointer-events-none"
+          style={{
+            maskImage: "linear-gradient(to bottom, transparent 30%, black 70%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 30%, black 70%)",
+          }}
+        />
       </div>
-      <div className="space-y-2 max-w-md">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          {t("locked.title")}
-        </h3>
-        <p className="text-gray-600 dark:text-gray-300">
-          {hasCredits
-            ? t("locked.descriptionWithCredits", { credits: requiredCredits })
-            : t("locked.descriptionNoCredits", { credits: requiredCredits })}
-        </p>
+
+      {/* Lock UI */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="p-6 flex flex-col items-center justify-center space-y-6 text-center max-w-md">
+          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center backdrop-blur-md">
+            <Lock className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {t("locked.title")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              {hasCredits
+                ? t("locked.descriptionWithCredits", {
+                    credits: requiredCredits,
+                  })
+                : t("locked.descriptionNoCredits", {
+                    credits: requiredCredits,
+                  })}
+            </p>
+          </div>
+          {hasCredits ? (
+            <form action={action}>
+              <input type="hidden" name="resumeId" value={resumeId} />
+              <Button type="submit" disabled={pending}>
+                {pending
+                  ? t("locked.unlocking")
+                  : t("locked.unlockButton", { credits: requiredCredits })}
+              </Button>
+            </form>
+          ) : (
+            <Link href="/purchase">
+              <Button>{t("locked.purchaseButton")}</Button>
+            </Link>
+          )}
+          {state?.error && <FormMessage message={{ error: state.error }} />}
+        </div>
       </div>
-      {hasCredits ? (
-        <form action={action}>
-          <input type="hidden" name="resumeId" value={resumeId} />
-          <Button type="submit" disabled={pending}>
-            {pending
-              ? t("locked.unlocking")
-              : t("locked.unlockButton", { credits: requiredCredits })}
-          </Button>
-        </form>
-      ) : (
-        <Link href="/purchase">
-          <Button>{t("locked.purchaseButton")}</Button>
-        </Link>
-      )}
-      {state?.error && <FormMessage message={{ error: state.error }} />}
     </div>
   );
 };
@@ -694,7 +828,7 @@ export default function ResumeBuilder({
                     </p>
                   </motion.div>
                 </div>
-              ) : resumeId && resume ? (
+              ) : resume && resumeId ? (
                 resume.locked_status === "locked" && !hasSubscription ? (
                   <LockedResumeOverlay
                     hasCredits={credits >= 1}
@@ -703,6 +837,7 @@ export default function ResumeBuilder({
                     onUnlock={() => {
                       fetchResumeData(resumeId);
                     }}
+                    resume={resume}
                   />
                 ) : (
                   <ResumePreview
