@@ -25,7 +25,7 @@ import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { FormMessage } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
-import { unlockResume } from "../actions";
+import { saveResume, unlockResume } from "../actions";
 import { User } from "@supabase/supabase-js";
 import { Turnstile } from "@marsidev/react-turnstile";
 // Define types to structure the aggregated resume data using Tables types
@@ -412,6 +412,10 @@ export default function ResumeBuilder({
   };
 
   const sendEditMessage = async () => {
+    if (!resumeId) {
+      logError("No resume found");
+      throw new Error("No resume found");
+    }
     const messageContent = textInput.trim();
 
     const updatedMessages = [
@@ -463,6 +467,7 @@ export default function ResumeBuilder({
 
       setMessages((prev) => [...prev, aiMessage]);
       setResume(updatedResume);
+      void saveResume(updatedResume, resumeId);
     }
   };
 

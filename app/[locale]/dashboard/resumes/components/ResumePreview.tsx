@@ -14,7 +14,7 @@ import { ResumeDataType } from "./ResumeBuilder";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Edit2, Save, Plus, Trash2 } from "lucide-react";
-import { saveResume } from "../actions";
+import { saveResumeServerAction } from "../actions";
 import React from "react";
 import html2pdf from "html2pdf.js";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -40,9 +40,12 @@ export default function ResumePreview({
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
-  const [saveState, saveAction, pending] = useActionState(saveResume, {
-    error: "",
-  });
+  const [saveState, saveAction, pending] = useActionState(
+    saveResumeServerAction,
+    {
+      error: "",
+    }
+  );
 
   useEffect(() => {
     if (saveState?.error) {
