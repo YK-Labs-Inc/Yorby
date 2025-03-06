@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { ResumeDataType } from "./ResumeBuilder";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Edit2,
   Save,
@@ -23,7 +22,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { saveResumeServerAction } from "../actions";
+import { saveResume, saveResumeServerAction } from "../actions";
 import React from "react";
 import html2pdf from "html2pdf.js";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -76,20 +75,15 @@ export default function ResumePreview({
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
-  const [saveState, saveAction, pending] = useActionState(
-    saveResumeServerAction,
-    {
-      error: "",
-    }
-  );
-
-  useEffect(() => {
-    if (saveState?.error) {
-      alert(saveState.error);
-    } else {
-      setIsEditMode(false);
-    }
-  }, [saveState]);
+  const handleSaveResume = async (resume: ResumeDataType, resumeId: string) => {
+    saveResume(resume, resumeId).then(({ error }) => {
+      if (error) {
+        setIsEditMode(true);
+        alert(error);
+      }
+    });
+    setIsEditMode(false);
+  };
 
   const downloadAsPdf = async () => {
     if (!resume || !resumeRef.current) return;
@@ -451,18 +445,13 @@ export default function ResumePreview({
           </Button>
         )}
         {isEditMode && (
-          <form action={saveAction}>
-            <input type="hidden" name="resumeId" value={resumeId} />
-            <input type="hidden" name="resume" value={JSON.stringify(resume)} />
-            <Button
-              disabled={pending}
-              type="submit"
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {pending ? t("savingChanges") : t("saveChanges")}
-            </Button>
-          </form>
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => handleSaveResume(resume, resumeId)}
+          >
+            <Save className="h-4 w-4" />
+            {t("saveChanges")}
+          </Button>
         )}
         <Button
           onClick={downloadAsPdf}
