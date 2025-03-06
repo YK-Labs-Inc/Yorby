@@ -28,27 +28,14 @@ import { Link } from "@/i18n/routing";
 import { saveResume, unlockResume } from "../actions";
 import { User } from "@supabase/supabase-js";
 import { Turnstile } from "@marsidev/react-turnstile";
-// Define types to structure the aggregated resume data using Tables types
-type ResumeSection = {
-  title: Tables<"resume_sections">["title"];
-  content:
-    | Tables<"resume_list_items">["content"][]
-    | {
-        title: Tables<"resume_detail_items">["title"];
-        organization: Tables<"resume_detail_items">["subtitle"];
-        date: Tables<"resume_detail_items">["date_range"];
-        description: Tables<"resume_item_descriptions">["description"][];
-      }[];
-};
 
-export type ResumeDataType = {
-  name: Tables<"resumes">["name"];
-  email: NonNullable<Tables<"resumes">["email"]>;
-  phone: NonNullable<Tables<"resumes">["phone"]>;
-  location: NonNullable<Tables<"resumes">["location"]>;
-  summary: NonNullable<Tables<"resumes">["summary"]>;
-  sections: ResumeSection[];
-  locked_status: Tables<"resumes">["locked_status"];
+export type ResumeDataType = Tables<"resumes"> & {
+  resume_sections: (Tables<"resume_sections"> & {
+    resume_list_items: Tables<"resume_list_items">[];
+    resume_detail_items: (Tables<"resume_detail_items"> & {
+      resume_item_descriptions: Tables<"resume_item_descriptions">[];
+    })[];
+  })[];
 };
 
 const LockedResumeOverlay = ({
@@ -65,7 +52,6 @@ const LockedResumeOverlay = ({
   resume: ResumeDataType;
 }) => {
   const t = useTranslations("resumeBuilder");
-  const router = useRouter();
   const [state, action, pending] = useActionState(unlockResume, { error: "" });
 
   useEffect(() => {
@@ -74,7 +60,7 @@ const LockedResumeOverlay = ({
     }
   }, [state?.success]);
 
-  const firstSection = resume.sections[0];
+  const firstSection = resume.resume_sections[0];
 
   return (
     <div className="relative flex-grow overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border h-full">
@@ -91,11 +77,6 @@ const LockedResumeOverlay = ({
               {resume.phone && <span>• {resume.phone}</span>}
               {resume.location && <span>• {resume.location}</span>}
             </div>
-            {resume.summary && (
-              <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
-                {resume.summary}
-              </p>
-            )}
           </div>
 
           {/* First Section Preview */}
@@ -104,19 +85,19 @@ const LockedResumeOverlay = ({
               <h2 className="text-lg font-semibold border-b pb-1 mb-2 text-gray-900 dark:text-white">
                 {firstSection.title}
               </h2>
-              {firstSection.title.toLowerCase().includes("skill") ? (
+              {firstSection.resume_list_items.length > 0 ? (
                 <div className="flex flex-col flex-wrap gap-0.5">
-                  {(firstSection.content as string[])
+                  {firstSection.resume_list_items
                     .slice(0, 3)
                     .map((skill, index) => (
                       <span
                         key={index}
                         className="text-sm px-2 text-gray-600 dark:text-gray-300"
                       >
-                        {skill}
+                        {skill.content}
                       </span>
                     ))}
-                  {(firstSection.content as string[]).length > 3 && (
+                  {firstSection.resume_list_items.length > 3 && (
                     <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       ...
                     </span>
@@ -124,14 +105,7 @@ const LockedResumeOverlay = ({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {(
-                    firstSection.content as Array<{
-                      title: string;
-                      organization?: string | null;
-                      date?: string | null;
-                      description: string[];
-                    }>
-                  )
+                  {firstSection.resume_detail_items
                     .slice(0, 1)
                     .map((item, index) => (
                       <div key={index} className="text-sm">
@@ -140,33 +114,34 @@ const LockedResumeOverlay = ({
                             {item.title}
                           </div>
                         )}
-                        {item.organization && (
+                        {item.subtitle && (
                           <div className="flex justify-between text-gray-600 dark:text-gray-300">
-                            <div>{item.organization}</div>
-                            {item.date && <div>{item.date}</div>}
+                            <div>{item.subtitle}</div>
+                            {item.date_range && <div>{item.date_range}</div>}
                           </div>
                         )}
-                        {item.description && item.description.length > 0 && (
-                          <div className="mt-1">
-                            <ul className="space-y-1">
-                              {item.description
-                                .slice(0, 2)
-                                .map((point, pointIndex) => (
-                                  <li
-                                    key={pointIndex}
-                                    className="flex items-center text-gray-600 dark:text-gray-300 before:content-['•'] before:mr-2 pl-0 list-none"
-                                  >
-                                    {point}
+                        {item.resume_item_descriptions &&
+                          item.resume_item_descriptions.length > 0 && (
+                            <div className="mt-1">
+                              <ul className="space-y-1">
+                                {item.resume_item_descriptions
+                                  .slice(0, 2)
+                                  .map((point, pointIndex) => (
+                                    <li
+                                      key={pointIndex}
+                                      className="flex items-center text-gray-600 dark:text-gray-300 before:content-['•'] before:mr-2 pl-0 list-none"
+                                    >
+                                      {point.description}
+                                    </li>
+                                  ))}
+                                {item.resume_item_descriptions.length > 2 && (
+                                  <li className="text-sm text-gray-500 dark:text-gray-400">
+                                    ...
                                   </li>
-                                ))}
-                              {item.description.length > 2 && (
-                                <li className="text-sm text-gray-500 dark:text-gray-400">
-                                  ...
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        )}
+                                )}
+                              </ul>
+                            </div>
+                          )}
                       </div>
                     ))}
                 </div>
@@ -296,111 +271,48 @@ export default function ResumeBuilder({
         const supabase = createSupabaseBrowserClient();
 
         // Fetch basic resume data
-        const { data: resumeData, error: resumeError } = await supabase
+        const { data, error } = await supabase
           .from("resumes")
-          .select("*")
+          .select(
+            `*, 
+              resume_sections(
+                *, 
+                resume_list_items(*), 
+                resume_detail_items(
+                  *,
+                  resume_item_descriptions(*))
+              )`
+          )
           .eq("id", resumeId)
           .single();
 
-        if (resumeError || !resumeData) {
-          throw new Error(resumeError?.message || "Resume not found");
+        if (error || !data) {
+          throw new Error(error?.message || "Resume not found");
         }
 
-        // Fetch resume sections
-        const { data: sectionsData, error: sectionsError } = await supabase
-          .from("resume_sections")
-          .select("*")
-          .eq("resume_id", resumeId)
-          .order("display_order", { ascending: true });
-
-        if (sectionsError) {
-          throw new Error(sectionsError.message);
-        }
-
-        // Create an array to hold all section data with their content
-        const formattedSections = [];
-
-        // Process each section
-        for (const section of sectionsData as Tables<"resume_sections">[]) {
-          // Check if it's a skills section (usually just list items)
-          const isSkillsSection = section.title.toLowerCase().includes("skill");
-
-          if (isSkillsSection) {
-            // Fetch skills list items
-            const { data: listItems, error: listError } = await supabase
-              .from("resume_list_items")
-              .select("*")
-              .eq("section_id", section.id)
-              .order("display_order", { ascending: true });
-
-            if (listError) {
-              throw new Error(listError.message);
-            }
-
-            // Add skills section with list items as content
-            formattedSections.push({
-              title: section.title,
-              content: (listItems as Tables<"resume_list_items">[]).map(
-                (item) => item.content
+        // Sort all nested arrays by display_order
+        const sortedData = {
+          ...data,
+          resume_sections: data.resume_sections
+            .sort((a, b) => a.display_order - b.display_order)
+            .map((section) => ({
+              ...section,
+              resume_list_items: section.resume_list_items.sort(
+                (a, b) => a.display_order - b.display_order
               ),
-            });
-          } else {
-            // Fetch detail items for this section
-            const { data: detailItems, error: detailError } = await supabase
-              .from("resume_detail_items")
-              .select("*")
-              .eq("section_id", section.id)
-              .order("display_order", { ascending: true });
-
-            if (detailError) {
-              throw new Error(detailError.message);
-            }
-
-            // Process each detail item to get its descriptions
-            const formattedItems = [];
-            for (const item of detailItems as Tables<"resume_detail_items">[]) {
-              // Fetch descriptions for this detail item
-              const { data: descriptions, error: descError } = await supabase
-                .from("resume_item_descriptions")
-                .select("*")
-                .eq("detail_item_id", item.id)
-                .order("display_order", { ascending: true });
-
-              if (descError) {
-                throw new Error(descError.message);
-              }
-
-              // Format the detail item with its descriptions
-              formattedItems.push({
-                title: item.title,
-                organization: item.subtitle,
-                date: item.date_range,
-                description: (
-                  descriptions as Tables<"resume_item_descriptions">[]
-                ).map((desc) => desc.description),
-              });
-            }
-
-            // Add the section with its formatted detail items
-            formattedSections.push({
-              title: section.title,
-              content: formattedItems,
-            });
-          }
-        }
-
-        // Create the complete resume data object
-        const formattedResume: ResumeDataType = {
-          name: resumeData.name,
-          email: resumeData.email || "",
-          phone: resumeData.phone || "",
-          location: resumeData.location || "",
-          summary: resumeData.summary || "",
-          sections: formattedSections,
-          locked_status: resumeData.locked_status,
+              resume_detail_items: section.resume_detail_items
+                .sort((a, b) => a.display_order - b.display_order)
+                .map((detailItem) => ({
+                  ...detailItem,
+                  resume_item_descriptions:
+                    detailItem.resume_item_descriptions.sort(
+                      (a, b) => a.display_order - b.display_order
+                    ),
+                })),
+            })),
         };
 
-        setResume(formattedResume);
+        setResume(sortedData);
       } catch (error) {
         console.error("Error fetching resume data:", error);
         setResume(null);
