@@ -955,20 +955,26 @@
     "cancelEdit": "Cancel Edit",
     "saveChanges": "Save Changes",
     "savingChanges": "Saving changes...",
-    "showEmptySections": "Show Empty Sections",
     "addItem": "Add Item",
     "addEducation": "Add Education",
     "addWorkExperience": "Add Work Experience",
     "addSkill": "Add Skill",
-    "addSection": "Add New Section",
+    "addSection": "Add Section",
+    "chooseSectionType": "Choose Section Type",
+    "chooseSectionTypeDescription": "Select the type of section you want to add to your resume",
+    "detailedSection": "Detailed Section",
+    "detailedSectionDescription": "For work experience, education, or projects with titles, dates, and bullet points",
+    "listSection": "List Section",
+    "listSectionDescription": "For skills, technologies, or simple lists of items",
+    "deleteSection": "Delete Section",
     "deleteItem": "Delete Item",
+    "newSectionTitle": "New Section",
     "newItemDefaults": {
-      "title": "New Position",
-      "organization": "Company Name",
+      "title": "New Section",
+      "organization": "Organization Name",
       "date": "Date Range",
-      "description": ["Add description"]
+      "description": ["Description"]
     },
-    "newSectionTitle": "New section title",
     "errors": {
       "notFound": {
         "title": "Resume Not Found",

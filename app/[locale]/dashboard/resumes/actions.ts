@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import type { Message } from "@/components/form-message";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
+import { Tables } from "@/utils/supabase/database.types";
 
 type ResumeListItem = {
   section_id: string;
@@ -25,12 +26,12 @@ export async function saveResumeServerAction(
 export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
   const t = await getTranslations("resumeBuilder");
   const logger = new Logger().with({
-    resume: JSON.stringify(resume),
+    function: "saveResume",
   });
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Start a Supabase transaction
+    const { resume_sections, ...baseResumeInfo } = resume;
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -40,17 +41,9 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
       return { error: t("errors.auth") };
     }
 
-    // 1. Update the resume basic info
     const { error: resumeError } = await supabase
       .from("resumes")
-      .update({
-        name: resume.name,
-        email: resume.email,
-        phone: resume.phone,
-        location: resume.location,
-        summary: resume.summary,
-        updated_at: new Date().toISOString(),
-      })
+      .update(baseResumeInfo)
       .eq("id", resumeId);
 
     if (resumeError) {
@@ -58,166 +51,8 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
       await logger.flush();
       return { error: t("errors.resumeSaveError") };
     }
-
-    // 2. Get existing sections to handle deletions
-    const { data: existingSections } = await supabase
-      .from("resume_sections")
-      .select("id, title")
-      .eq("resume_id", resumeId);
-
-    // 3. Process each section
-    for (let i = 0; i < resume.sections.length; i++) {
-      const section = resume.sections[i];
-
-      // Find or create section
-      const { data: sectionData, error: sectionError } = await supabase
-        .from("resume_sections")
-        .upsert({
-          resume_id: resumeId,
-          title: section.title,
-          display_order: i,
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (sectionError || !sectionData) {
-        logger.error("Error creating section", { error: sectionError });
-        await logger.flush();
-        return { error: t("errors.resumeSaveError") };
-      }
-
-      // Handle section content based on type
-      if (
-        Array.isArray(section.content) &&
-        typeof section.content[0] === "string"
-      ) {
-        // Skills section - handle as list items
-        // First, delete existing list items for this section
-        await supabase
-          .from("resume_list_items")
-          .delete()
-          .eq("section_id", sectionData.id);
-
-        // Insert new list items
-        const listItems: ResumeListItem[] = (section.content as string[]).map(
-          (content, index) => ({
-            section_id: sectionData.id,
-            content: content,
-            display_order: index,
-          })
-        );
-
-        const { error: listError } = await supabase
-          .from("resume_list_items")
-          .insert(listItems);
-
-        if (listError) {
-          logger.error("Error saving list items", { error: listError });
-          await logger.flush();
-          return { error: t("errors.resumeSaveError") };
-        }
-      } else {
-        // Detail items section
-        const detailItems = section.content as unknown as Array<{
-          title: string;
-          subtitle: string;
-          date: string | null;
-          description: string[];
-          id?: string;
-        }>;
-
-        // Get existing detail items to handle deletions
-        const { data: existingDetailItems } = await supabase
-          .from("resume_detail_items")
-          .select("id")
-          .eq("section_id", sectionData.id);
-
-        // Process each detail item
-        for (let j = 0; j < detailItems.length; j++) {
-          const item = detailItems[j];
-
-          // Create or update detail item
-          const { data: detailItemData, error: detailError } = await supabase
-            .from("resume_detail_items")
-            .upsert({
-              section_id: sectionData.id,
-              title: item.title,
-              subtitle: item.subtitle,
-              date_range: item.date,
-              display_order: j,
-              updated_at: new Date().toISOString(),
-            })
-            .select()
-            .single();
-
-          if (detailError || !detailItemData) {
-            logger.error("Error saving detail item", { error: detailError });
-            await logger.flush();
-            return { error: t("errors.resumeSaveError") };
-          }
-
-          // Delete existing descriptions
-          await supabase
-            .from("resume_item_descriptions")
-            .delete()
-            .eq("detail_item_id", detailItemData.id);
-
-          // Insert new descriptions
-          if (item.description.length > 0) {
-            const descriptions = item.description.map((desc, index) => ({
-              detail_item_id: detailItemData.id,
-              description: desc,
-              display_order: index,
-            }));
-
-            const { error: descError } = await supabase
-              .from("resume_item_descriptions")
-              .insert(descriptions);
-
-            if (descError) {
-              logger.error("Error saving descriptions", { error: descError });
-              await logger.flush();
-              return { error: t("errors.resumeSaveError") };
-            }
-          }
-        }
-
-        // Delete removed detail items
-        if (existingDetailItems) {
-          const currentDetailItemIds = detailItems
-            .map((item) => item.id)
-            .filter((id): id is string => id !== undefined);
-          const removedDetailItemIds = existingDetailItems
-            .map((item) => item.id)
-            .filter((id) => !currentDetailItemIds.includes(id));
-
-          if (removedDetailItemIds.length > 0) {
-            await supabase
-              .from("resume_detail_items")
-              .delete()
-              .in("id", removedDetailItemIds);
-          }
-        }
-      }
-    }
-
-    // Delete removed sections
-    if (existingSections) {
-      const currentSectionIds = resume.sections
-        .map((section) => (section as any).id)
-        .filter((id): id is string => id !== undefined);
-      const removedSectionIds = existingSections
-        .map((section) => section.id)
-        .filter((id) => !currentSectionIds.includes(id));
-
-      if (removedSectionIds.length > 0) {
-        await supabase
-          .from("resume_sections")
-          .delete()
-          .in("id", removedSectionIds);
-      }
-    }
+    await deleteResumeSections(resumeId);
+    await insertNewResumeSections(resume_sections);
     logger.info("Resume saved");
     await logger.flush();
     return { error: "" };
@@ -225,6 +60,129 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
     logger.error("Error saving resume", { error });
     await logger.flush();
     return { error: t("errors.resumeSaveError") };
+  }
+};
+
+const insertNewResumeSections = async (
+  sections: (Tables<"resume_sections"> & {
+    resume_list_items: Tables<"resume_list_items">[];
+    resume_detail_items: (Tables<"resume_detail_items"> & {
+      resume_item_descriptions: Tables<"resume_item_descriptions">[];
+    })[];
+  })[]
+) => {
+  const t = await getTranslations("resumeBuilder");
+  const logger = new Logger().with({
+    sections,
+    function: "insertNewResumeSections",
+  });
+  const supabase = await createSupabaseServerClient();
+  await Promise.all(
+    sections.map(async (section) => {
+      const { resume_list_items, resume_detail_items, ...baseResumeSection } =
+        section;
+      const { error: resumeError } = await supabase
+        .from("resume_sections")
+        .insert(baseResumeSection);
+      if (resumeError) {
+        logger.error("Error inserting resume sections", { error: resumeError });
+        await logger.flush();
+        throw new Error(t("errors.generic"));
+      }
+      if (resume_list_items.length > 0) {
+        await saveResumeListItems(resume_list_items);
+      }
+      if (resume_detail_items.length > 0) {
+        await saveResumeDetailItems(resume_detail_items);
+      }
+    })
+  );
+};
+
+const saveResumeDetailItems = async (
+  detailItems: (Tables<"resume_detail_items"> & {
+    resume_item_descriptions: Tables<"resume_item_descriptions">[];
+  })[]
+) => {
+  const t = await getTranslations("resumeBuilder");
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    detailItems,
+    function: "saveResumeDetailItem",
+  });
+  await Promise.all(
+    detailItems.map(async (item) => {
+      const { resume_item_descriptions, ...baseResumeDetailItem } = item;
+      const { error: resumeError } = await supabase
+        .from("resume_detail_items")
+        .insert(baseResumeDetailItem);
+      if (resumeError) {
+        logger.error("Error inserting resume detail items", {
+          error: resumeError,
+        });
+        await logger.flush();
+        throw new Error(t("errors.generic"));
+      }
+      if (resume_item_descriptions.length > 0) {
+        await saveResumeItemDescriptions(resume_item_descriptions);
+      }
+    })
+  );
+};
+
+const saveResumeItemDescriptions = async (
+  itemDescriptions: Tables<"resume_item_descriptions">[]
+) => {
+  const t = await getTranslations("resumeBuilder");
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    itemDescriptions,
+    function: "saveResumeItemDescription",
+  });
+  const { error: resumeError } = await supabase
+    .from("resume_item_descriptions")
+    .insert(itemDescriptions);
+  if (resumeError) {
+    logger.error("Error inserting resume item descriptions", {
+      error: resumeError,
+    });
+    await logger.flush();
+    throw new Error(t("errors.generic"));
+  }
+};
+const saveResumeListItems = async (items: Tables<"resume_list_items">[]) => {
+  const t = await getTranslations("resumeBuilder");
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    items,
+    function: "saveResumeListItem",
+  });
+  const { error: resumeError } = await supabase
+    .from("resume_list_items")
+    .insert(items);
+  if (resumeError) {
+    logger.error("Error inserting resume list items", { error: resumeError });
+    await logger.flush();
+    throw new Error(t("errors.generic"));
+  }
+};
+
+const deleteResumeSections = async (resumeId: string) => {
+  const t = await getTranslations("resumeBuilder");
+  const logger = new Logger().with({
+    resumeId,
+    function: "deleteResumeSections",
+  });
+  const supabase = await createSupabaseServerClient();
+  const { error: resumeError } = await supabase
+    .from("resume_sections")
+    .delete()
+    .eq("resume_id", resumeId);
+
+  if (resumeError) {
+    logger.error("Error deleting resume sections", { error: resumeError });
+    await logger.flush();
+    throw new Error(t("errors.generic"));
   }
 };
 
