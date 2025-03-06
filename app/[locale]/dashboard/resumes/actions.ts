@@ -13,15 +13,18 @@ type ResumeListItem = {
   display_order: number;
 };
 
-export async function saveResume(
+export async function saveResumeServerAction(
   prevState: { error?: string },
   data: FormData
 ) {
-  const t = await getTranslations("resumeBuilder");
   const resumeId = data.get("resumeId") as string;
   const resume = JSON.parse(data.get("resume") as string) as ResumeDataType;
+  return saveResume(resume, resumeId);
+}
+
+export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
+  const t = await getTranslations("resumeBuilder");
   const logger = new Logger().with({
-    resumeId,
     resume: JSON.stringify(resume),
   });
   try {
@@ -215,13 +218,15 @@ export async function saveResume(
           .in("id", removedSectionIds);
       }
     }
+    logger.info("Resume saved");
+    await logger.flush();
     return { error: "" };
   } catch (error) {
     logger.error("Error saving resume", { error });
     await logger.flush();
     return { error: t("errors.resumeSaveError") };
   }
-}
+};
 
 export const unlockResume = async (prevState: any, formData: FormData) => {
   const t = await getTranslations("resumeBuilder");
