@@ -72,25 +72,43 @@ export default function ResumePreview({
       // Remove any buttons or interactive elements from the clone
       element.querySelectorAll("button").forEach((button) => button.remove());
 
-      // Set white background explicitly
+      // Set white background explicitly and optimize for PDF generation
       element.style.backgroundColor = "white";
       element.style.border = "none";
-      element.style.padding = "10px";
+      element.style.padding = "20px";
+      element.style.width = "210mm"; // A4 width
+      element.style.margin = "0";
+      element.style.height = "auto"; // Let height be determined by content
 
       // Configure pdf options
       const opt = {
-        margin: [10, 10],
+        margin: [15, 15], // Slightly larger margins for better readability
         filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg", quality: 1 },
         html2canvas: {
           scale: 2,
           useCORS: true,
           letterRendering: true,
+          scrollY: -window.scrollY,
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight,
+          logging: false,
+          removeContainer: true, // Remove the temporary container after rendering
         },
         jsPDF: {
           unit: "mm",
           format: "a4",
           orientation: "portrait",
+          compress: true,
+          putOnlyUsedFonts: true,
+          precision: 16,
+          floatPrecision: 16,
+        },
+        pagebreak: {
+          mode: ["avoid-all", "css", "legacy"],
+          before: ".page-break",
+          avoid: ["tr", "td", ".description-item"],
+          after: [".avoid-break-after"],
         },
       };
 
@@ -360,7 +378,7 @@ export default function ResumePreview({
           ) : (
             <>
               <h1 className="text-2xl font-bold">{resume.name}</h1>
-              <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-300 mt-1">
+              <div className="flex flex-wrap gap-2 text-sm mt-1">
                 {resume.email && <span>{resume.email}</span>}
                 {resume.phone && <span>• {resume.phone}</span>}
                 {resume.location && <span>• {resume.location}</span>}
@@ -518,16 +536,19 @@ export default function ResumePreview({
                           {item.organization && (
                             <div className="flex justify-between">
                               <div>{item.organization}</div>
-                              {item.date && (
-                                <div className="text-gray-500">{item.date}</div>
-                              )}
+                              {item.date && <div>{item.date}</div>}
                             </div>
                           )}
                           {item.description && (
-                            <div className="mt-1 text-gray-600 dark:text-gray-300">
+                            <div className="mt-1">
                               <ul className="list-disc pl-5 space-y-1">
                                 {item.description.map((point, pointIndex) => (
-                                  <li key={pointIndex}>{point}</li>
+                                  <li
+                                    key={pointIndex}
+                                    className="flex items-center before:content-['•'] before:mr-2 pl-0 list-none"
+                                  >
+                                    {point}
+                                  </li>
                                 ))}
                               </ul>
                             </div>
