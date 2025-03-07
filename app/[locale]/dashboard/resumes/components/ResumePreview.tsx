@@ -1,14 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  useState,
-  useRef,
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useActionState,
-} from "react";
+import { useState, useRef, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { ResumeDataType } from "./ResumeBuilder";
 import { Input } from "@/components/ui/input";
@@ -21,8 +14,9 @@ import {
   Layout,
   ChevronUp,
   ChevronDown,
+  X,
 } from "lucide-react";
-import { saveResume, saveResumeServerAction } from "../actions";
+import { saveResume } from "../actions";
 import React from "react";
 import html2pdf from "html2pdf.js";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -204,9 +198,9 @@ export default function ResumePreview({
   };
 
   const updateDetailItemDescription = (
-    sectionId: number,
-    detailId: number,
-    descriptionId: string,
+    sectionIndex: number,
+    detailIndex: number,
+    descriptionIndex: number,
     value: string
   ) => {
     setResume(
@@ -214,24 +208,26 @@ export default function ResumePreview({
         ({
           ...prev,
           resume_sections: prev?.resume_sections.map((section, idx) => {
-            if (idx === sectionId) {
+            if (idx === sectionIndex) {
               return {
                 ...section,
                 resume_detail_items: section.resume_detail_items.map(
                   (detailItem, detailIdx) => {
-                    if (detailIdx === detailId) {
+                    if (detailIdx === detailIndex) {
                       return {
                         ...detailItem,
                         resume_item_descriptions:
-                          detailItem.resume_item_descriptions.map((desc) => {
-                            if (desc.id === descriptionId) {
-                              return {
-                                ...desc,
-                                description: value,
-                              };
+                          detailItem.resume_item_descriptions.map(
+                            (desc, descIdx) => {
+                              if (descIdx === descriptionIndex) {
+                                return {
+                                  ...desc,
+                                  description: value,
+                                };
+                              }
+                              return desc;
                             }
-                            return desc;
-                          }),
+                          ),
                       };
                     }
                     return detailItem;
@@ -241,19 +237,6 @@ export default function ResumePreview({
             }
             return section;
           }),
-        }) as ResumeDataType
-    );
-  };
-
-  const updateSkills = (sectionIndex: number, skillsString: string) => {
-    const skills = skillsString.split("\n");
-    setResume(
-      (prev) =>
-        ({
-          ...prev,
-          resume_sections: prev?.resume_sections.map((section, idx) =>
-            idx === sectionIndex ? { ...section, content: skills } : section
-          ),
         }) as ResumeDataType
     );
   };
@@ -273,6 +256,7 @@ export default function ResumePreview({
                 organization: t("newItemDefaults.organization"),
                 date: t("newItemDefaults.date"),
                 description: [t("newItemDefaults.description.0")],
+                resume_item_descriptions: [],
               };
 
               return {
@@ -289,6 +273,63 @@ export default function ResumePreview({
     );
   };
 
+  const addNewDetailItemDescription = (
+    sectionIndex: number,
+    itemIndex: number
+  ) => {
+    setResume(
+      (prev) =>
+        ({
+          ...prev,
+          resume_sections: prev?.resume_sections.map((section, idx) =>
+            idx === sectionIndex
+              ? {
+                  ...section,
+                  resume_detail_items: section.resume_detail_items.map(
+                    (item, idx) =>
+                      idx === itemIndex
+                        ? {
+                            ...item,
+                            resume_item_descriptions: [
+                              ...item.resume_item_descriptions,
+                              {
+                                description: "",
+                                display_order:
+                                  item.resume_item_descriptions.length,
+                              },
+                            ],
+                          }
+                        : item
+                  ),
+                }
+              : section
+          ),
+        }) as ResumeDataType
+    );
+  };
+
+  const addNewListItem = (sectionIndex: number) => {
+    setResume(
+      (prev) =>
+        ({
+          ...prev,
+          resume_sections: prev?.resume_sections.map((section, idx) =>
+            idx === sectionIndex
+              ? {
+                  ...section,
+                  resume_list_items: [
+                    ...section.resume_list_items,
+                    {
+                      content: "",
+                      display_order: section.resume_list_items.length,
+                    },
+                  ],
+                }
+              : section
+          ),
+        }) as ResumeDataType
+    );
+  };
   const addNewSection = (type: "detail" | "list") => {
     setResume(
       (prev) =>
@@ -303,11 +344,23 @@ export default function ResumePreview({
                   ? [
                       {
                         title: t("newItemDefaults.title"),
+                        display_order: 0,
                         description: [],
+                        resume_item_descriptions: [
+                          { description: "", display_order: 0 },
+                        ],
                       },
                     ]
                   : [],
-              type: type, // Store the section type
+              resume_list_items:
+                type === "list"
+                  ? [
+                      {
+                        content: "",
+                      },
+                    ]
+                  : [],
+              display_order: prev?.resume_sections.length,
             },
           ],
         }) as ResumeDataType
@@ -418,6 +471,87 @@ export default function ResumePreview({
     }));
   };
 
+  const deleteResumeListItem = (sectionIndex: number, itemIndex: number) => {
+    setResume((prev) => ({
+      ...prev!,
+      resume_sections: prev!.resume_sections.map((section, idx) =>
+        idx === sectionIndex
+          ? {
+              ...section,
+              resume_list_items: section.resume_list_items.filter(
+                (_, idx) => idx !== itemIndex
+              ),
+            }
+          : section
+      ),
+    }));
+  };
+
+  const moveDetailItemDescription = (
+    sectionIndex: number,
+    detailIndex: number,
+    descriptionIndex: number,
+    direction: "up" | "down"
+  ) => {
+    const newIndex =
+      direction === "up" ? descriptionIndex - 1 : descriptionIndex + 1;
+    setResume((prev) => ({
+      ...prev!,
+      resume_sections: prev!.resume_sections.map((section, idx) => {
+        if (idx === sectionIndex) {
+          return {
+            ...section,
+            resume_detail_items: section.resume_detail_items.map(
+              (detailItem, detailIdx) => {
+                if (detailIdx === detailIndex) {
+                  return {
+                    ...detailItem,
+                    resume_item_descriptions: reorderItem(
+                      detailItem.resume_item_descriptions,
+                      descriptionIndex,
+                      newIndex
+                    ),
+                  };
+                }
+                return detailItem;
+              }
+            ),
+          };
+        }
+        return section;
+      }),
+    }));
+  };
+
+  const deleteDetailItemDescription = (
+    sectionIndex: number,
+    detailIndex: number,
+    descriptionIndex: number
+  ) => {
+    setResume((prev) => ({
+      ...prev!,
+      resume_sections: prev!.resume_sections.map((section, idx) =>
+        idx === sectionIndex
+          ? {
+              ...section,
+              resume_detail_items: section.resume_detail_items.map(
+                (detailItem, detailIdx) =>
+                  detailIdx === detailIndex
+                    ? {
+                        ...detailItem,
+                        resume_item_descriptions:
+                          detailItem.resume_item_descriptions.filter(
+                            (_, idx) => idx !== descriptionIndex
+                          ),
+                      }
+                    : detailItem
+              ),
+            }
+          : section
+      ),
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[600px] w-full">
@@ -499,6 +633,7 @@ export default function ResumePreview({
                 value={resume.name}
                 onChange={(e) => updateBasicInfo("name", e.target.value)}
                 className="text-2xl font-bold"
+                placeholder={t("form.placeholders.name")}
               />
             </CardHeader>
             <CardContent>
@@ -506,17 +641,17 @@ export default function ResumePreview({
                 <Input
                   value={resume.email || ""}
                   onChange={(e) => updateBasicInfo("email", e.target.value)}
-                  placeholder="Email"
+                  placeholder={t("form.placeholders.email")}
                 />
                 <Input
                   value={resume.phone || ""}
                   onChange={(e) => updateBasicInfo("phone", e.target.value)}
-                  placeholder="Phone"
+                  placeholder={t("form.placeholders.phone")}
                 />
                 <Input
                   value={resume.location || ""}
                   onChange={(e) => updateBasicInfo("location", e.target.value)}
-                  placeholder="Location"
+                  placeholder={t("form.placeholders.location")}
                 />
               </div>
             </CardContent>
@@ -542,6 +677,7 @@ export default function ResumePreview({
                     onChange={(e) =>
                       updateSection(sectionIndex, "title", e.target.value)
                     }
+                    placeholder={t("form.placeholders.title")}
                     className="text-lg font-semibold flex-1"
                   />
                   <div className="flex gap-1 ml-2">
@@ -614,6 +750,17 @@ export default function ResumePreview({
                           >
                             <ChevronDown className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              deleteResumeListItem(sectionIndex, itemIndex)
+                            }
+                            disabled={section.resume_list_items.length === 1}
+                            className="h-8 w-8"
+                          >
+                            <X className="h-4 w-4 text-red-500" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -634,6 +781,7 @@ export default function ResumePreview({
                                   e.target.value
                                 )
                               }
+                              placeholder={t("form.placeholders.title")}
                               className="font-medium flex-1"
                             />
                             <div className="flex gap-1">
@@ -668,16 +816,17 @@ export default function ResumePreview({
                               </Button>
                             </div>
                             <Button
-                              variant="destructive"
+                              variant="ghost"
                               size="icon"
                               onClick={() =>
                                 deleteDetailItem(sectionIndex, itemIndex)
                               }
-                              className="shrink-0"
+                              disabled={
+                                section.resume_detail_items.length === 1
+                              }
                               type="button"
-                              title={t("deleteItem")}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <X className="h-4 w-4 text-red-500" />
                             </Button>
                           </div>
                           <div className="flex gap-2">
@@ -691,7 +840,7 @@ export default function ResumePreview({
                                   e.target.value
                                 )
                               }
-                              placeholder="Subtitle"
+                              placeholder={t("form.placeholders.subtitle")}
                               className="flex-1"
                             />
                             <Input
@@ -704,29 +853,100 @@ export default function ResumePreview({
                                   e.target.value
                                 )
                               }
-                              placeholder="Date"
+                              placeholder={t("form.placeholders.dateRange")}
                               className="w-1/3"
                             />
                           </div>
                           {item.resume_item_descriptions.map(
                             (description, descriptionIndex) => (
-                              <div key={descriptionIndex}>
+                              <div
+                                key={descriptionIndex}
+                                className="flex items-center gap-2"
+                              >
                                 <Input
                                   value={description.description}
                                   onChange={(e) =>
                                     updateDetailItemDescription(
                                       sectionIndex,
                                       itemIndex,
-                                      description.id,
+                                      descriptionIndex,
                                       e.target.value
                                     )
                                   }
-                                  placeholder="Description"
-                                  className="w-full"
+                                  placeholder={t(
+                                    "form.placeholders.description"
+                                  )}
+                                  className="flex-1"
                                 />
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      moveDetailItemDescription(
+                                        sectionIndex,
+                                        itemIndex,
+                                        descriptionIndex,
+                                        "up"
+                                      )
+                                    }
+                                    disabled={descriptionIndex === 0}
+                                    className="h-8 w-8"
+                                  >
+                                    <ChevronUp className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      moveDetailItemDescription(
+                                        sectionIndex,
+                                        itemIndex,
+                                        descriptionIndex,
+                                        "down"
+                                      )
+                                    }
+                                    disabled={
+                                      descriptionIndex ===
+                                      item.resume_item_descriptions.length - 1
+                                    }
+                                    className="h-8 w-8"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      deleteDetailItemDescription(
+                                        sectionIndex,
+                                        itemIndex,
+                                        descriptionIndex
+                                      )
+                                    }
+                                    disabled={
+                                      item.resume_item_descriptions.length === 1
+                                    }
+                                    className="h-8 w-8"
+                                  >
+                                    <X className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
                               </div>
                             )
                           )}
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              addNewDetailItemDescription(
+                                sectionIndex,
+                                itemIndex
+                              )
+                            }
+                          >
+                            <Plus className="h-4 w-4" />
+                            {t("form.newItem")}
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -743,16 +963,20 @@ export default function ResumePreview({
                   <Trash2 className="h-4 w-4 mr-2" />
                   {t("deleteSection")}
                 </Button>
-                {!section.title.toLowerCase().includes("skill") && (
-                  <Button
-                    onClick={() => addNewDetailItem(sectionIndex)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {getSectionCTA(section.title)}
-                  </Button>
-                )}
+                <Button
+                  onClick={() => {
+                    if (section.resume_list_items.length > 0) {
+                      addNewListItem(sectionIndex);
+                    } else {
+                      addNewDetailItem(sectionIndex);
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {getSectionCTA(section.title)}
+                </Button>
               </CardFooter>
             </Card>
           ) : (
