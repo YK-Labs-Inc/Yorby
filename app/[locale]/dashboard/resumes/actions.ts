@@ -2,17 +2,9 @@
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { ResumeDataType } from "./components/ResumeBuilder";
-import { revalidatePath } from "next/cache";
-import type { Message } from "@/components/form-message";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
-
-type ResumeListItem = {
-  section_id: string;
-  content: string;
-  display_order: number;
-};
 
 export async function saveResumeServerAction(
   prevState: { error?: string },
@@ -52,7 +44,7 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
       return { error: t("errors.resumeSaveError") };
     }
     await deleteResumeSections(resumeId);
-    await insertNewResumeSections(resume_sections);
+    await insertNewResumeSections(resume_sections, resumeId);
     logger.info("Resume saved");
     await logger.flush();
     return { error: "" };
@@ -69,7 +61,8 @@ const insertNewResumeSections = async (
     resume_detail_items: (Tables<"resume_detail_items"> & {
       resume_item_descriptions: Tables<"resume_item_descriptions">[];
     })[];
-  })[]
+  })[],
+  resumeId: string
 ) => {
   const t = await getTranslations("resumeBuilder");
   const logger = new Logger().with({
@@ -78,22 +71,27 @@ const insertNewResumeSections = async (
   });
   const supabase = await createSupabaseServerClient();
   await Promise.all(
-    sections.map(async (section) => {
-      const { resume_list_items, resume_detail_items, ...baseResumeSection } =
-        section;
-      const { error: resumeError } = await supabase
+    sections.map(async (section, index) => {
+      const { resume_list_items, resume_detail_items } = section;
+      const { data: resumeSection, error: resumeError } = await supabase
         .from("resume_sections")
-        .insert(baseResumeSection);
+        .insert({
+          title: section.title,
+          display_order: index,
+          resume_id: resumeId,
+        })
+        .select("id")
+        .single();
       if (resumeError) {
         logger.error("Error inserting resume sections", { error: resumeError });
         await logger.flush();
         throw new Error(t("errors.generic"));
       }
       if (resume_list_items.length > 0) {
-        await saveResumeListItems(resume_list_items);
+        await saveResumeListItems(resume_list_items, resumeSection.id);
       }
       if (resume_detail_items.length > 0) {
-        await saveResumeDetailItems(resume_detail_items);
+        await saveResumeDetailItems(resume_detail_items, resumeSection.id);
       }
     })
   );
@@ -102,7 +100,8 @@ const insertNewResumeSections = async (
 const saveResumeDetailItems = async (
   detailItems: (Tables<"resume_detail_items"> & {
     resume_item_descriptions: Tables<"resume_item_descriptions">[];
-  })[]
+  })[],
+  sectionId: string
 ) => {
   const t = await getTranslations("resumeBuilder");
   const supabase = await createSupabaseServerClient();
@@ -111,11 +110,19 @@ const saveResumeDetailItems = async (
     function: "saveResumeDetailItem",
   });
   await Promise.all(
-    detailItems.map(async (item) => {
+    detailItems.map(async (item, index) => {
       const { resume_item_descriptions, ...baseResumeDetailItem } = item;
-      const { error: resumeError } = await supabase
+      const { data: resumeDetailItem, error: resumeError } = await supabase
         .from("resume_detail_items")
-        .insert(baseResumeDetailItem);
+        .insert({
+          section_id: sectionId,
+          title: item.title,
+          subtitle: item.subtitle,
+          date_range: item.date_range,
+          display_order: index,
+        })
+        .select("id")
+        .single();
       if (resumeError) {
         logger.error("Error inserting resume detail items", {
           error: resumeError,
@@ -124,14 +131,18 @@ const saveResumeDetailItems = async (
         throw new Error(t("errors.generic"));
       }
       if (resume_item_descriptions.length > 0) {
-        await saveResumeItemDescriptions(resume_item_descriptions);
+        await saveResumeItemDescriptions(
+          resume_item_descriptions,
+          resumeDetailItem.id
+        );
       }
     })
   );
 };
 
 const saveResumeItemDescriptions = async (
-  itemDescriptions: Tables<"resume_item_descriptions">[]
+  itemDescriptions: Tables<"resume_item_descriptions">[],
+  detailItemId: string
 ) => {
   const t = await getTranslations("resumeBuilder");
   const supabase = await createSupabaseServerClient();
@@ -141,7 +152,13 @@ const saveResumeItemDescriptions = async (
   });
   const { error: resumeError } = await supabase
     .from("resume_item_descriptions")
-    .insert(itemDescriptions);
+    .insert(
+      itemDescriptions.map((item, index) => ({
+        detail_item_id: detailItemId,
+        display_order: index,
+        description: item.description,
+      }))
+    );
   if (resumeError) {
     logger.error("Error inserting resume item descriptions", {
       error: resumeError,
@@ -150,7 +167,10 @@ const saveResumeItemDescriptions = async (
     throw new Error(t("errors.generic"));
   }
 };
-const saveResumeListItems = async (items: Tables<"resume_list_items">[]) => {
+const saveResumeListItems = async (
+  items: Tables<"resume_list_items">[],
+  sectionId: string
+) => {
   const t = await getTranslations("resumeBuilder");
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
@@ -159,7 +179,13 @@ const saveResumeListItems = async (items: Tables<"resume_list_items">[]) => {
   });
   const { error: resumeError } = await supabase
     .from("resume_list_items")
-    .insert(items);
+    .insert(
+      items.map((item, index) => ({
+        content: item.content,
+        section_id: sectionId,
+        display_order: index,
+      }))
+    );
   if (resumeError) {
     logger.error("Error inserting resume list items", { error: resumeError });
     await logger.flush();

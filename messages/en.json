@@ -1012,7 +1012,18 @@
       "submit": "Save Resume",
       "pending": "Saving...",
       "title": "Enter Your Email Address To View Your Resume",
-      "description": "This is so that you can sign in to your account in the future and view your resume anytime."
+      "description": "This is so that you can sign in to your account in the future and view your resume anytime.",
+      "newItem": "New Item",
+      "placeholders": {
+        "email": "Email",
+        "phone": "Phone",
+        "location": "Location",
+        "dateRange": "Date Range",
+        "description": "Description",
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "name": "Name"
+      }
     }
   }
 }
