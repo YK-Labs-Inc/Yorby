@@ -7,11 +7,13 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState } from "react";
 import { linkAnonymousAccount } from "@/components/auth/actions";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function SignUpPage() {
-  const [message, setMessage] = useState<Message>();
+  let message: Message | undefined;
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
   const t = useTranslations("accountLinking");
   const signUpT = useTranslations("signUp");
   const router = useRouter();
@@ -37,13 +39,13 @@ export default function SignUpPage() {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    if (state.error) {
-      setMessage({ error: state.error });
-    } else if (state.success) {
-      setMessage({ success: state.success });
-    }
-  }, [state]);
+  if (state.error) {
+    message = { error: state.error };
+  } else if (state.success) {
+    message = { success: state.success };
+  } else if (error) {
+    message = { error };
+  }
 
   if (isLoading) {
     return (

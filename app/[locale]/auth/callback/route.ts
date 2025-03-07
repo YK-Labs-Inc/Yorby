@@ -77,9 +77,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     });
     if (error) {
       logger.error("Failed to verify email change", { error });
-      return NextResponse.redirect(
-        `${origin}/dashboard/jobs?error=Failed to update your email. Please try again.`
-      );
+      return NextResponse.redirect(`${origin}/sign-up?error=${error.message}`);
     }
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;

@@ -23,11 +23,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
-import { FormMessage } from "@/components/form-message";
+import { FormMessage, Message } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
 import { saveResume, unlockResume } from "../actions";
 import { User } from "@supabase/supabase-js";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { linkAnonymousAccount } from "@/components/auth/actions";
+import { SubmitButton } from "@/components/submit-button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -44,23 +48,44 @@ const LockedResumeOverlay = ({
   resumeId,
   onUnlock,
   resume,
+  resumeBuilderRequiresEmail,
+  user,
 }: {
   hasCredits: boolean;
   requiredCredits: number;
   resumeId: string;
   onUnlock: (resumeId: string) => void;
   resume: ResumeDataType;
+  resumeBuilderRequiresEmail: boolean;
+  user: User;
 }) => {
   const t = useTranslations("resumeBuilder");
-  const [state, action, pending] = useActionState(unlockResume, { error: "" });
+  const [unlockState, unlockAction, unlockPending] = useActionState(
+    unlockResume,
+    { error: "" }
+  );
+  const [
+    linkAnonymousAccountState,
+    linkAnonymousAccountAction,
+    linkAnonymousAccountPending,
+  ] = useActionState(linkAnonymousAccount, { error: "" });
 
   useEffect(() => {
-    if (state?.success) {
+    if (unlockState?.success) {
       onUnlock(resumeId);
     }
-  }, [state?.success]);
+  }, [unlockState?.success]);
 
   const firstSection = resume.resume_sections[0];
+  const showEmailForm = resumeBuilderRequiresEmail && !user.email;
+  let linkAnonymousAccountMessage: Message | undefined;
+  if (linkAnonymousAccountState?.error) {
+    linkAnonymousAccountMessage = { error: linkAnonymousAccountState.error };
+  } else if (linkAnonymousAccountState?.success) {
+    linkAnonymousAccountMessage = {
+      success: linkAnonymousAccountState.success,
+    };
+  }
 
   return (
     <div className="relative flex-grow overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border h-full">
@@ -185,30 +210,72 @@ const LockedResumeOverlay = ({
               {t("locked.title")}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {hasCredits
-                ? t("locked.descriptionWithCredits", {
-                    credits: requiredCredits,
-                  })
-                : t("locked.descriptionNoCredits", {
-                    credits: requiredCredits,
-                  })}
+              {showEmailForm
+                ? t("locked.descriptionEmailForm")
+                : hasCredits
+                  ? t("locked.descriptionWithCredits", {
+                      credits: requiredCredits,
+                    })
+                  : t("locked.descriptionNoCredits", {
+                      credits: requiredCredits,
+                    })}
             </p>
           </div>
-          {hasCredits ? (
-            <form action={action}>
-              <input type="hidden" name="resumeId" value={resumeId} />
-              <Button type="submit" disabled={pending}>
-                {pending
-                  ? t("locked.unlocking")
-                  : t("locked.unlockButton", { credits: requiredCredits })}
-              </Button>
-            </form>
+          {showEmailForm ? (
+            <div className="md mx-auto w-full text-left">
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+                <h2 className="text-lg font-semibold mb-2">
+                  {t("form.title")}
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  {t("form.description")}
+                </p>
+                <form action={linkAnonymousAccountAction} className="space-y-4">
+                  <Label htmlFor="email">{t("form.email.label")}</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder={t("form.email.placeholder")}
+                    required
+                  />
+                  <input
+                    type="hidden"
+                    name="redirectTo"
+                    value={`/dashboard/resumes/${resumeId}`}
+                  />
+                  <SubmitButton disabled={linkAnonymousAccountPending}>
+                    {linkAnonymousAccountPending
+                      ? t("form.pending")
+                      : t("form.submit")}
+                  </SubmitButton>
+                </form>
+              </div>
+              {linkAnonymousAccountMessage && (
+                <FormMessage message={linkAnonymousAccountMessage} />
+              )}
+            </div>
           ) : (
-            <Link href="/purchase">
-              <Button>{t("locked.purchaseButton")}</Button>
-            </Link>
+            <>
+              {hasCredits ? (
+                <form action={unlockAction}>
+                  <input type="hidden" name="resumeId" value={resumeId} />
+                  <Button type="submit" disabled={unlockPending}>
+                    {unlockPending
+                      ? t("locked.unlocking")
+                      : t("locked.unlockButton", { credits: requiredCredits })}
+                  </Button>
+                </form>
+              ) : (
+                <Link href="/purchase">
+                  <Button>{t("locked.purchaseButton")}</Button>
+                </Link>
+              )}
+              {unlockState?.error && (
+                <FormMessage message={{ error: unlockState.error }} />
+              )}
+            </>
           )}
-          {state?.error && <FormMessage message={{ error: state.error }} />}
         </div>
       </div>
     </div>
@@ -220,11 +287,13 @@ export default function ResumeBuilder({
   hasSubscription,
   credits,
   user,
+  resumeBuilderRequiresEmail = true,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
   credits: number;
   user: User | null;
+  resumeBuilderRequiresEmail?: boolean;
 }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -657,7 +726,7 @@ export default function ResumeBuilder({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="w-full p-6 rounded-xl border dark:bg-gray-800/50 dark:border-gray-700 bg-white/50 backdrop-blur-sm flex items-center justify-center"
+                    className="w-full p-6 rounded-xl border dark:bg-gray-800/50 dark:border-gray-700 bg-white/50 flex items-center justify-center"
                   >
                     <div className="flex flex-col items-center space-y-3">
                       <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800 dark:border-gray-700 dark:border-t-white" />
@@ -673,7 +742,7 @@ export default function ResumeBuilder({
                       value={textInput}
                       onChange={handleTextInputChange}
                       onKeyDown={handleKeyDown}
-                      className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
+                      className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
                       rows={3}
                       disabled={isGenerating}
                     />
@@ -740,7 +809,7 @@ export default function ResumeBuilder({
                     </p>
                   </motion.div>
                 </div>
-              ) : resume && resumeId ? (
+              ) : resume && resumeId && user ? (
                 resume.locked_status === "locked" && !hasSubscription ? (
                   <LockedResumeOverlay
                     hasCredits={credits >= 1}
@@ -750,6 +819,8 @@ export default function ResumeBuilder({
                       fetchResumeData(resumeId);
                     }}
                     resume={resume}
+                    resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
+                    user={user}
                   />
                 ) : (
                   <ResumePreview

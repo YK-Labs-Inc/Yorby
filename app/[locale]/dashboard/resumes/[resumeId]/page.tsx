@@ -1,7 +1,6 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import ResumeBuilder from "../components/ResumeBuilder";
 import { redirect } from "next/navigation";
-import { Logger } from "next-axiom";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
@@ -10,6 +9,7 @@ import {
   fetchHasSubscription,
   fetchUserCredits,
 } from "../actions";
+import { posthog } from "@/utils/tracking/serverUtils";
 export default async function ResumePage({
   params,
 }: {
@@ -23,6 +23,7 @@ export default async function ResumePage({
   } = await supabase.auth.getUser();
   if (!user) {
     redirect("/sign-in");
+    return;
   }
   const resume = await fetchResume(resumeId);
   if (!resume) {
@@ -46,12 +47,17 @@ export default async function ResumePage({
   }
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const credits = await fetchUserCredits(user?.id || "");
+  const resumeBuilderRequiresEmail =
+    (await posthog.getFeatureFlag("resume-builder-require-email", user.id)) ===
+    "test";
+
   return (
     <ResumeBuilder
       resumeId={resumeId}
       hasSubscription={hasSubscription}
       credits={credits}
       user={user}
+      resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
     />
   );
 }

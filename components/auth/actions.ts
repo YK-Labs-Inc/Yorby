@@ -13,6 +13,7 @@ export const linkAnonymousAccount = async (
   formData: FormData
 ) => {
   const email = formData.get("email") as string;
+  const redirectTo = formData.get("redirectTo") as string | undefined;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("accountLinking");
   const logger = new Logger().with({
@@ -32,7 +33,7 @@ export const linkAnonymousAccount = async (
       email,
     },
     {
-      emailRedirectTo: `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs`,
+      emailRedirectTo: `https://${process.env.NEXT_PUBLIC_SITE_URL}${redirectTo ? redirectTo : "/dashboard/jobs"}`,
     }
   );
 

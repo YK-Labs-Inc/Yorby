@@ -999,9 +999,20 @@
       "title": "Resume Locked",
       "descriptionWithCredits": "Unlock the resume by using {credits} {credits, plural, one {credit} other {credits}} from your account.",
       "descriptionNoCredits": "Unlock the resume by adding {credits} {credits, plural, one {credit} other {credits}} to your account.",
+      "descriptionEmailForm": "Unlock the resume by adding your email address to your account.",
       "unlockButton": "Unlock with {credits} {credits, plural, one {Credit} other {Credits}}",
       "unlocking": "Unlocking...",
       "purchaseButton": "Purchase Credits"
+    },
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "submit": "Save Resume",
+      "pending": "Saving...",
+      "title": "Enter Your Email Address To View Your Resume",
+      "description": "This is so that you can sign in to your account in the future and view your resume anytime."
     }
   }
 }
