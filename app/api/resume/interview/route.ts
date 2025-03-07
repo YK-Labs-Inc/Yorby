@@ -77,6 +77,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - When you have gathered all of the information, set the interviewerResponse to "Thanks for chatting — I'll generate your resume now."
     - When you have not gathered all of the information, set the interviewIsComplete to false.
     - When you have not gathered all of the information, provide a response to the user that is your next sentence in your interview with the user.
+
+    Conduct the interview in a friendly and engaging manner.
+
+    Conduct the interview in the language of the user.
     `;
 
     // Convert messages to Gemini chat format
