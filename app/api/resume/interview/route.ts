@@ -47,6 +47,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Work Experience
     - Skills
 
+    If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
+    after the initial resume is created, they can add more information and customize it to their liking.
+
     As you chat back and forth with the user, ask questions to gather the information you need.
 
     Ask for each piece of information one at a time.
@@ -60,13 +63,13 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     ## Work Experience
     - Ask for the company, title, start date, end date, and what they did at the company
-    - For each company that they work for, we should aim for 3-5 bullet points of what they did at the company. Do your best to ask for more information
-    about their responsibilities and accomplishments. If they are unable to provide more information, then move onto the next company.
+    - For each company that they work for, ask them about their responsibilities and accomplishments. This information will be used to generate a list of bullet points for the resume.
+    We will try to generate 3-5 bullet points for each company, so ask for as much information as possible about their responsibilities and accomplishments. If they 
+    do not have any additional information about a company, then move onto the next company.
     - At the end, ask for any additional information about the work experience. If they do not have any additional work experience, move onto the skills section.
     
     ## Skills
-    - Ask for the skills that they are most proficient in
-    - Ask for the skills that they are most interested in
+    - Ask for the skills that they are most proficient in and have experience with
     - At the end, ask for any additional information about the skills. If they do not have any additional skills, then you can move onto completing the interview. 
 
     ## Response Format
