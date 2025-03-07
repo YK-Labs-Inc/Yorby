@@ -168,7 +168,7 @@ export async function createCheckoutSession(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user || !user.email) {
+  if (!user) {
     logger.error("User not found", {
       message: "User not found",
     });
@@ -179,13 +179,14 @@ export async function createCheckoutSession(formData: FormData) {
   const email = user.email;
   const metadata: { [key: string]: string } = {
     userId: user.id,
-    userEmail: email,
     priceId,
     isSubscription: isSubscription.toString(),
   };
-  const session = await stripe.checkout.sessions.create({
+  if (email) {
+    metadata.userEmail = email;
+  }
+  const checkoutParams: Stripe.Checkout.SessionCreateParams = {
     mode: isSubscription ? "subscription" : "payment",
-    customer_email: email,
     line_items: [
       {
         price: priceId,
@@ -198,13 +199,14 @@ export async function createCheckoutSession(formData: FormData) {
     allow_promotion_codes: true,
     subscription_data: isSubscription
       ? {
-          metadata: {
-            userId: user.id,
-            userEmail: email,
-          },
+          metadata,
         }
       : undefined,
-  });
+  };
+  if (email) {
+    checkoutParams.customer_email = email;
+  }
+  const session = await stripe.checkout.sessions.create(checkoutParams);
   const sessionUrl = session.url;
   if (!sessionUrl) {
     logger.error("Failed to create checkout session");
