@@ -3,11 +3,11 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
-import { SchemaType } from "@google/generative-ai";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { z } from "zod";
 
 export const createJob = async ({
   jobTitle,
@@ -161,7 +161,7 @@ export const createCustomJob = async ({
   return data.id;
 };
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
 export const processFile = async ({
   file,
@@ -233,6 +233,7 @@ export const writeToDb = async (
   customJobId: string,
   filePath: string
 ) => {
+  console.log("hey uploadResponse", uploadResponse);
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("custom_job_files").insert({
     display_name: uploadResponse.file.displayName,
@@ -268,7 +269,7 @@ export const generateCustomJobQuestions = async ({
   logger: Logger;
 }) => {
   logger.info("Generating custom job questions");
-  const prompt = `
+  const systemPrompt = `
     You are given a job title, job description, an optional company name and optional company desription. 
     You are an expert job interviewer for the job title and description at the company with the given company description.
 
@@ -311,35 +312,6 @@ export const generateCustomJobQuestions = async ({
     ${companyDescription}
     `;
 
-  const contentParts = [
-    prompt,
-    ...files.map((file) => ({
-      fileData: {
-        fileUri: file.uri,
-        mimeType: file.mimeType,
-      },
-    })),
-  ];
-
-  // Create the JSON schema for response validation
-  const questionsSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-      questions: {
-        type: SchemaType.ARRAY,
-        items: {
-          type: SchemaType.OBJECT,
-          properties: {
-            question: { type: SchemaType.STRING },
-            answerGuidelines: { type: SchemaType.STRING },
-          },
-          required: ["question", "answerGuidelines"],
-        },
-      },
-    },
-    required: ["questions"],
-  };
-
   // Use the executeWithFallback utility with logging context
   const loggingContext = {
     customJobId,
@@ -350,20 +322,40 @@ export const generateCustomJobQuestions = async ({
   };
 
   try {
-    const result = await generateContentWithFallback({
-      contentParts,
-      responseSchema: questionsSchema,
-      responseMimeType: "application/json",
+    const result = await generateObjectWithFallback({
+      systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Generate the custom job questions",
+            },
+            ...files.map((f) => ({
+              type: "file" as "file",
+              data: f.uri,
+              mimeType: f.mimeType,
+            })),
+          ],
+        },
+      ],
+      schema: z.object({
+        questions: z.array(
+          z.object({
+            question: z.string(),
+            answerGuidelines: z.string(),
+          })
+        ),
+      }),
       loggingContext,
     });
-    const response = result.response.text();
-    const { questions } = JSON.parse(response) as {
-      questions: { question: string; answerGuidelines: string }[];
-    };
+
+    const { questions } = result;
 
     await writeCustomJobQuestionsToDb({
       customJobId,
-      questions: questions,
+      questions,
     });
   } catch (error) {
     // Let the error propagate as in the original code

@@ -1,7 +1,7 @@
-import { sendMessageWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
-import { SchemaType } from "@google/generative-ai";
+import { z } from "zod";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const { resume, userMessage } = (await req.json()) as {
@@ -33,7 +33,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 });
 
 const updateResume = async (resume: string, userMessage: string) => {
-  const prompt = `
+  const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
     
     You will be given a resume in JSON format and a comment from the user about what they want to change.
@@ -56,36 +56,19 @@ const updateResume = async (resume: string, userMessage: string) => {
     ${resume}
     `;
 
-  const result = await sendMessageWithFallback({
-    contentParts: [userMessage],
-    history: [
-      {
-        role: "user",
-        parts: [{ text: prompt }],
-      },
-    ],
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        updatedResumeJSON: { type: SchemaType.STRING },
-        aiResponse: { type: SchemaType.STRING },
-      },
-      required: ["updatedResumeJSON", "aiResponse"],
-    },
+  const result = await generateObjectWithFallback({
+    prompt: userMessage,
+    systemPrompt,
+    schema: z.object({
+      updatedResumeJSON: z.string(),
+      aiResponse: z.string(),
+    }),
     loggingContext: {
       path: "api/resume/edit",
     },
   });
-
-  const { updatedResumeJSON, aiResponse } = JSON.parse(
-    result.response.text()
-  ) as {
-    updatedResumeJSON: string;
-    aiResponse: string;
-  };
-  const json = extractJSONFromString(updatedResumeJSON);
-  return { updatedResume: JSON.parse(json), aiResponse };
+  const { updatedResumeJSON, aiResponse } = result;
+  return { updatedResume: JSON.parse(updatedResumeJSON), aiResponse };
 };
 
 const extractJSONFromString = (text: string): string => {

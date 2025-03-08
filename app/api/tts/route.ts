@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { AxiomRequest, withAxiom } from "next-axiom";
 
@@ -24,6 +23,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     } = await request.json();
 
     if (!text) {
+      logger.error("Text is required");
+      await logger.flush();
       return new Response(JSON.stringify({ error: "Text is required" }), {
         status: 400,
       });

@@ -7,11 +7,10 @@ import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/utils/utils";
 import { revalidatePath } from "next/cache";
 import { getAllFiles } from "./questions/[questionId]/actions";
-import { SchemaType } from "@google/generative-ai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { writeCustomJobQuestionsToDb } from "@/app/[locale]/landing2/actions";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { z } from "zod";
 
 export const startMockInterview = async (
   prevState: any,
@@ -391,8 +390,7 @@ const generateMoreCustomJobQuestions = async ({
   companyDescription: string | null;
 }) => {
   const existingQuestions = await fetchJobQuestions(customJobId);
-  const prompt = [
-    `
+  const prompt = `
     You are given a job title, job description, an optional company name and optional company desription. 
     You are an expert job interviewer for the job title and description at the company with the given company description.
 
@@ -439,34 +437,35 @@ const generateMoreCustomJobQuestions = async ({
 
     ## Existing Questions
     ${existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")}
-    `,
-    ...files,
-  ];
-  const result = await generateContentWithFallback({
-    contentParts: prompt,
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        questions: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              question: { type: SchemaType.STRING },
-              answerGuidelines: { type: SchemaType.STRING },
-            },
-            required: ["question", "answerGuidelines"],
+    `;
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user" as "user",
+        content: [
+          {
+            type: "text",
+            text: "Generate the custom job questions",
           },
-        },
+          ...files.map((f) => ({
+            type: "file" as "file",
+            data: f.fileData.fileUri,
+            mimeType: f.fileData.mimeType,
+          })),
+        ],
       },
-      required: ["questions"],
-    },
+    ],
+    schema: z.object({
+      questions: z.array(
+        z.object({
+          question: z.string(),
+          answerGuidelines: z.string(),
+        })
+      ),
+    }),
   });
-  const response = result.response.text();
-  const { questions } = JSON.parse(response) as {
-    questions: { question: string; answerGuidelines: string }[];
-  };
+  const { questions } = result;
   await writeCustomJobQuestionsToDb({
     customJobId,
     questions,

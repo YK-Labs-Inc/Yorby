@@ -13,7 +13,7 @@ import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();

@@ -291,7 +291,11 @@
       "loading": {
         "title": "Starting Interview",
         "description": "Please wait while we set up your interview session..."
-      }
+      },
+      "pleaseSelectAMicrophone": "Please select a microphone",
+      "micPermissionError": "Please grant permission to access your microphone",
+      "recordingError": "Error recording your response. Please try again.",
+      "transcribing": "Transcribing..."
     },
     "endModal": {
       "title": "End Interview",

@@ -1,12 +1,8 @@
 "use server";
 
-import { SchemaType, GoogleGenerativeAI } from "@google/generative-ai";
 import { Logger } from "next-axiom";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
-
-const apiKey = process.env.GEMINI_API_KEY!;
-const genAI = new GoogleGenerativeAI(apiKey);
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { z } from "zod";
 
 export const detectQuestions = async (data: FormData) => {
   const existingQuestions = data.getAll("existingQuestions") as string[];
@@ -19,19 +15,21 @@ export const detectQuestions = async (data: FormData) => {
     interviewCopilotId,
   });
   try {
-    const result = await generateContentWithFallback({
-      contentParts: [questionDetectionPrompt(transcript, existingQuestions)],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          questions: {
-            type: SchemaType.ARRAY,
-            items: { type: SchemaType.STRING },
-          },
+    const result = await generateObjectWithFallback({
+      systemPrompt: questionDetectionPrompt(transcript, existingQuestions),
+      schema: z.object({
+        questions: z.array(z.string()),
+      }),
+      messages: [
+        {
+          role: "user",
+          content: "Extract the questions from the transcript",
         },
-        required: ["questions"],
-      },
+        {
+          role: "assistant",
+          content: questionDetectionPrompt(transcript, existingQuestions),
+        },
+      ],
       loggingContext: {
         function: "detectQuestions",
         transcript,
@@ -39,28 +37,8 @@ export const detectQuestions = async (data: FormData) => {
         interviewCopilotId,
       },
     });
-    const response = result.response.text();
-    const { questions } = JSON.parse(response) as {
-      questions: string[];
-    };
 
-    const totalInputTokens =
-      result.response.usageMetadata?.promptTokenCount ?? 0;
-    const totalOutputTokens =
-      result.response.usageMetadata?.candidatesTokenCount ?? 0;
-
-    // Increment token counts in database
-    const { error: updateError } = await incrementTokenCounts(
-      interviewCopilotId,
-      totalInputTokens,
-      totalOutputTokens
-    );
-
-    if (updateError) {
-      logger.error("Error incrementing token counts", { error: updateError });
-      await logger.flush();
-    }
-
+    const { questions } = result;
     logger = logger.with({
       questions,
     });
@@ -83,37 +61,6 @@ export const detectQuestions = async (data: FormData) => {
   }
 };
 
-const incrementTokenCounts = async (
-  interviewCopilotId: string,
-  inputTokens: number,
-  outputTokens: number
-) => {
-  const supabase = await createSupabaseServerClient();
-
-  // First get current values
-  const { data: currentData, error: fetchError } = await supabase
-    .from("interview_copilots")
-    .select("input_tokens_count, output_tokens_count")
-    .eq("id", interviewCopilotId)
-    .single();
-
-  if (fetchError) {
-    return { error: fetchError };
-  }
-
-  // Then update with incremented values
-  const { error: updateError } = await supabase
-    .from("interview_copilots")
-    .update({
-      input_tokens_count: (currentData.input_tokens_count || 0) + inputTokens,
-      output_tokens_count:
-        (currentData.output_tokens_count || 0) + outputTokens,
-    })
-    .eq("id", interviewCopilotId);
-
-  return { error: updateError };
-};
-
 const questionDetectionPrompt = (
   transcript: string,
   existingQuestions: string[]
@@ -122,7 +69,8 @@ You are going to be provided a transcript from an interviewer for a job intervie
 
 Identify any interview questions that have been asked by the interviewer in the transcript that have not been asked yet by the interviewer in the list of existing questions that you have been provided.
 
-If necessary, rewrite the questions to be more concise and to the point while still maintaining the original meaning of the question.
+If necessary, rewrite the questions to be more concise and to the point while still maintaining the original meaning of the question. For example, if it is
+a multi part question, feel free to combine it into one question which is more concise and to the point.
 Use your expertise to find the true root question that is being asked in the transcript to make it easier for a candidate to tnaswer the questions.
 
 ## Output format

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChatMessage } from "@/app/api/chat/route";
 import { useTranslations } from "next-intl";
 import { Mic, MicOff } from "lucide-react";
 import {
@@ -19,6 +18,11 @@ import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
+import { CoreMessage } from "ai";
+import { motion, AnimatePresence } from "framer-motion";
+import { useVoiceRecording } from "@/app/[locale]/dashboard/resumes/components/useVoiceRecording";
+import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/VoiceRecordingOverlay";
+
 interface ActiveInterviewProps {
   mockInterviewId: string;
   stream: MediaStream | null;
@@ -35,10 +39,10 @@ export default function ActiveInterview({
   selectedAudioOutputId,
 }: ActiveInterviewProps) {
   const t = useTranslations("mockInterview.active");
-  const [messages, setMessages] = useState<ChatMessage[]>(
+  const [messages, setMessages] = useState<CoreMessage[]>(
     messageHistory.map((message) => ({
-      role: message.role,
-      parts: [{ text: message.text }],
+      role: message.role === "model" ? "assistant" : "user",
+      content: message.text,
     }))
   );
   const [isProcessingAIResponse, setsProcessingAIResponse] = useState(false);
@@ -48,16 +52,14 @@ export default function ActiveInterview({
     null
   );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isAnsweringQuestion, setIsAnsweringQuestion] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [isInitialized, setIsInitialized] = useState(false);
   const [firstQuestionAudioIsInitialized, setFirstQuestionAudioIsInitialized] =
     useState(messageHistory.length > 0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const videoRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -66,6 +68,24 @@ export default function ActiveInterview({
   const [textInput, setTextInput] = useState<string>("");
   const user = useUser();
   const session = useSession();
+
+  const {
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    isProcessing,
+    audioDevices,
+    selectedAudio,
+    setSelectedAudio,
+  } = useVoiceRecording({
+    onTranscription: (transcription: string) => {
+      if (transcription.trim()) {
+        setTextInput(transcription);
+        setIsRecording(false);
+      }
+    },
+    t,
+  });
 
   useEffect(() => {
     if (!isInitialized) {
@@ -99,10 +119,7 @@ export default function ActiveInterview({
     try {
       if (!isInitialMessage) {
         setsProcessingUserResponse(false);
-        setMessages((prev) => [
-          ...prev,
-          { role: "user", parts: [{ text: message }] },
-        ]);
+        setMessages((prev) => [...prev, { role: "user", content: message }]);
         setTextInput(""); // Clear text input after sending message
       }
       setsProcessingAIResponse(true);
@@ -122,15 +139,26 @@ export default function ActiveInterview({
       });
 
       if (!chatResponse.ok) {
-        throw new Error("Failed to send message");
+        logError("Failed to send message", {
+          error: chatResponse.statusText,
+        });
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "Sorry, I couldn't process your message. Could you please send it again?",
+          },
+        ]);
+        return;
       }
 
       const { response: aiResponse } = await chatResponse.json();
 
       // Add messages to history
-      const newAiMessage: ChatMessage = {
-        role: "model",
-        parts: [{ text: aiResponse }],
+      const newAiMessage: CoreMessage = {
+        role: "assistant",
+        content: aiResponse,
       };
 
       // Convert AI response to speech
@@ -196,73 +224,17 @@ export default function ActiveInterview({
     }
   };
 
-  const startAudioRecording = async () => {
-    try {
-      if (!stream) {
-        throw new Error("No media stream available");
+  const handleRecordingToggle = async () => {
+    if (isRecording) {
+      stopRecording();
+      setIsRecording(false);
+    } else {
+      try {
+        await startRecording();
+        setIsRecording(true);
+      } catch (error) {
+        logError("Voice recording toggle error:", { error });
       }
-
-      // Stop any currently playing audio
-      if (currentAudio && isPlaying) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        setIsPlaying(false);
-      }
-
-      const audioStream = new MediaStream(stream.getAudioTracks());
-      const audioRecorder = new MediaRecorder(audioStream);
-      audioRecorderRef.current = audioRecorder;
-      audioChunksRef.current = [];
-
-      audioRecorder.ondataavailable = (e) => {
-        console.log("audio chunk", e.data);
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-
-      audioRecorder.onstop = async () => {
-        setIsAnsweringQuestion(false);
-        setsProcessingUserResponse(true);
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm",
-        });
-        const formData = new FormData();
-        formData.append("audio", audioBlob);
-        formData.append("source", "mockInterview");
-
-        try {
-          const response = await fetch("/api/transcribe", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error("Transcription failed");
-          }
-
-          const { transcription } = (await response.json()) as {
-            transcription: string;
-          };
-          if (transcription) {
-            await sendMessage({ message: transcription });
-          }
-        } catch (error: any) {
-          logError("Error processing recording:", { error: error.message });
-        }
-      };
-
-      audioRecorder.start();
-      setIsAnsweringQuestion(true);
-    } catch (error: any) {
-      logError("Error starting audio recording:", { error: error.message });
-    }
-  };
-
-  const stopAudioRecording = () => {
-    if (audioRecorderRef.current && isAnsweringQuestion) {
-      audioRecorderRef.current.stop();
-      setIsAnsweringQuestion(false);
     }
   };
 
@@ -320,7 +292,7 @@ export default function ActiveInterview({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isAnsweringQuestion, isProcessingAIResponse]);
+  }, [messages, isRecording, isProcessingAIResponse]);
 
   const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextInput(e.target.value);
@@ -335,19 +307,13 @@ export default function ActiveInterview({
     }
   };
 
-  const handleSendMessage = () => {
-    if (textInput.trim()) {
-      sendMessage({ message: textInput });
-    }
-  };
-
   if (!user || !session) {
     return null;
   }
 
   if (!firstQuestionAudioIsInitialized) {
     return (
-      <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
+      <div className="h-screen flex flex-col gap-6 max-w-[1080px] mx-auto justify-center items-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4  border-t-transparent rounded-full animate-spin" />
           <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
@@ -363,15 +329,15 @@ export default function ActiveInterview({
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center relative">
-      <div className="absolute top-4 right-4">
+    <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-6">
+      <div className="flex justify-end mb-4">
         <Button onClick={() => setShowEndModal(true)} variant="destructive">
           {t("endInterview")}
         </Button>
       </div>
-      <div className="flex justify-between items-center gap-6">
+      <div className="flex-1 flex justify-between items-start gap-6 min-h-0">
         {/* Video Feed */}
-        <div className="flex flex-col gap-4 w-1/2">
+        <div className="flex flex-col gap-4 w-1/2 h-full">
           <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
             <video
               ref={videoRef}
@@ -384,8 +350,8 @@ export default function ActiveInterview({
         </div>
 
         {/* Chat Interface */}
-        <div className="flex flex-col gap-4 w-1/2">
-          <div className="flex-1 overflow-auto space-y-4 min-h-[300px] max-h-[500px] bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
+        <div className="flex flex-col gap-4 w-1/2 h-full">
+          <div className="flex-1 overflow-auto space-y-4 min-h-0 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -401,7 +367,7 @@ export default function ActiveInterview({
                   }`}
                 >
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.parts[0].text}
+                    {msg.content as string}
                   </ReactMarkdown>
                 </div>
               </div>
@@ -430,47 +396,85 @@ export default function ActiveInterview({
           {/* Unified Input UI */}
           <div className="flex flex-col gap-4">
             <div className="relative">
-              <textarea
-                placeholder={t("typeYourResponse")}
-                value={textInput}
-                onChange={handleTextInputChange}
-                onKeyDown={handleKeyDown}
-                className="w-full p-3 pr-24 rounded-lg border resize-none dark:bg-gray-800 dark:border-gray-700"
-                rows={3}
-                disabled={isAnsweringQuestion || isProcessingAIResponse}
-              />
-              <div className="absolute bottom-3 right-3 flex space-x-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  className={`h-8 w-8 rounded-full ${isAnsweringQuestion ? "text-red-500" : "text-gray-500"}`}
-                  onClick={
-                    isAnsweringQuestion
-                      ? stopAudioRecording
-                      : startAudioRecording
-                  }
-                  disabled={isProcessingAIResponse}
-                >
-                  {isAnsweringQuestion ? (
-                    <MicOff className="h-4 w-4" />
-                  ) : (
-                    <Mic className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-8"
-                  onClick={handleSendMessage}
-                  disabled={
-                    (!textInput.trim() && !isAnsweringQuestion) ||
-                    isProcessingAIResponse
-                  }
-                >
-                  {t("send")}
-                </Button>
-              </div>
+              {isProcessing ? (
+                <div className="w-full p-6 rounded-lg border dark:bg-gray-800 dark:border-gray-700 bg-white/50 flex items-center justify-center min-h-[120px]">
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800 dark:border-gray-700 dark:border-t-white" />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      {t("transcribing")}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    placeholder={t("typeYourResponse")}
+                    value={textInput}
+                    onChange={handleTextInputChange}
+                    onKeyDown={handleKeyDown}
+                    className="w-full p-3 pr-24 rounded-lg border resize-none dark:bg-gray-800 dark:border-gray-700"
+                    rows={3}
+                    disabled={isRecording || isProcessingAIResponse}
+                  />
+                  <div className="absolute bottom-3 right-3 flex space-x-2">
+                    <AnimatePresence>
+                      {isRecording ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 20 }}
+                          className="absolute bottom-full right-0 mb-2 w-[400px]"
+                        >
+                          <VoiceRecordingOverlay
+                            isOpen={true}
+                            onClose={() => {
+                              cancelRecording();
+                              setIsRecording(false);
+                            }}
+                            onConfirm={() => {
+                              stopRecording();
+                              setIsRecording(false);
+                            }}
+                            audioDevices={audioDevices}
+                            selectedAudio={selectedAudio}
+                            onSelectAudio={(deviceId) =>
+                              setSelectedAudio(deviceId)
+                            }
+                          />
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      className={`h-8 w-8 rounded-full ${
+                        isRecording ? "text-red-500" : "text-gray-500"
+                      }`}
+                      onClick={handleRecordingToggle}
+                      disabled={isProcessingAIResponse}
+                    >
+                      {isRecording ? (
+                        <MicOff className="h-4 w-4" />
+                      ) : (
+                        <Mic className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-8"
+                      onClick={() => sendMessage({ message: textInput })}
+                      disabled={
+                        (!textInput.trim() && !isRecording) ||
+                        isProcessingAIResponse
+                      }
+                    >
+                      {t("send")}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { Content, SchemaType } from "@google/generative-ai";
-import { sendMessageWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { z } from "zod";
+import { CoreMessage, CoreUserMessage } from "ai";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = req.log.with({
@@ -9,9 +10,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   });
   try {
     const { messages } = (await req.json()) as {
-      messages: Content[];
+      messages: CoreMessage[];
     };
-    const latestUserMessage = messages[messages.length - 1].parts[0].text;
 
     if (!messages || !Array.isArray(messages)) {
       logger.error("Invalid messages array", { messages });
@@ -20,15 +20,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         { status: 400 }
       );
     }
-    if (!latestUserMessage) {
-      logger.error("Latest user message is required");
-      return NextResponse.json(
-        { error: "Latest user message is required" },
-        { status: 400 }
-      );
-    }
     logger = logger.with({
-      latestUserMessage,
       messages,
     });
 
@@ -93,45 +85,27 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     ];
 
     // Send a prompt to continue the conversation
-    const result = await sendMessageWithFallback({
-      contentParts: latestUserMessage,
-      history: chatHistory,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          interviewIsComplete: {
-            type: SchemaType.BOOLEAN,
-          },
-          interviewerResponse: {
-            type: SchemaType.STRING,
-          },
-        },
-        required: ["interviewIsComplete", "interviewerResponse"],
-      },
+    const result = await generateObjectWithFallback({
+      systemPrompt,
+      messages,
+      schema: z.object({
+        interviewIsComplete: z.boolean(),
+        interviewerResponse: z.string(),
+      }),
       loggingContext: {
         route: "/api/resume/interview",
-        latestUserMessage,
         chatHistory,
       },
     });
 
-    const { interviewIsComplete, interviewerResponse } = JSON.parse(
-      result.response.text()
-    ) as {
-      interviewIsComplete: boolean;
-      interviewerResponse: string;
-    };
     logger.info("Interview response generated", {
-      interviewIsComplete,
-      interviewerResponse,
+      ...result,
     });
 
     await logger.flush();
 
     return NextResponse.json({
-      interviewIsComplete,
-      interviewerResponse,
+      ...result,
     });
   } catch (error) {
     logger.error("Error in resume interview", { error });

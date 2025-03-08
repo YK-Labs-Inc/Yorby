@@ -7,7 +7,8 @@ import { Client } from "@notionhq/client";
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { promises as fs } from "fs";
 import path from "path";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { z } from "zod";
 
 // Use require for csv-parse as it doesn't have TypeScript types
 const { parse } = require("csv-parse/sync");
@@ -220,11 +221,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   }
 });
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-
 const normalizeJobTitle = async (jobTitle: string) => {
-  const prompt = [
-    `Normalize the following job title to a standard format that can be used to identify similar job titles across different companies.
+  const systemPrompt = `Normalize the following job title to a standard format that can be used to identify similar job titles across different companies.
     Remove company-specific terms, standardize common variations, and use the most common industry-standard job title.
     For example:
     - "Senior Software Engineer (Python)" -> "Senior Software Engineer"
@@ -234,23 +232,16 @@ const normalizeJobTitle = async (jobTitle: string) => {
     
     Return only the normalized title in JSON format.
     
-    Input job title: ${jobTitle}`,
-  ];
+    Input job title: ${jobTitle}`;
 
-  const result = await generateContentWithFallback({
-    contentParts: prompt,
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        normalizedTitle: { type: SchemaType.STRING },
-      },
-      required: ["normalizedTitle"],
-    },
+  const result = await generateObjectWithFallback({
+    prompt: "Normalize the job title",
+    schema: z.object({
+      normalizedTitle: z.string(),
+    }),
+    systemPrompt,
   });
-
-  const response = result.response.text();
-  const { normalizedTitle } = JSON.parse(response);
+  const { normalizedTitle } = result;
   return normalizedTitle;
 };
 
@@ -274,7 +265,7 @@ const generateDemoJobQuestions = async ({
        You are an expert job interviewer for this type of role.
        Generate general questions that would be applicable for this type of role at any company.`;
 
-  const prompt = `${promptPrefix}
+  const systemPrompt = `${promptPrefix}
 
     Use all of this information to generate 10 job interview questions that will help you understand the candidate's skills and experience and their fit for the job.
 
@@ -317,52 +308,28 @@ const generateDemoJobQuestions = async ({
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            questions: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  question: { type: SchemaType.STRING },
-                  answerGuidelines: { type: SchemaType.STRING },
-                  correctExampleAnswers: {
-                    type: SchemaType.ARRAY,
-                    items: { type: SchemaType.STRING },
-                  },
-                  incorrectExampleAnswers: {
-                    type: SchemaType.ARRAY,
-                    items: { type: SchemaType.STRING },
-                  },
-                },
-                required: [
-                  "question",
-                  "answerGuidelines",
-                  "correctExampleAnswers",
-                  "incorrectExampleAnswers",
-                ],
-              },
-            },
-          },
-          required: ["questions"],
+      const result = await generateObjectWithFallback({
+        prompt: "Generate the job interview questions",
+        systemPrompt,
+        schema: z.object({
+          questions: z.array(
+            z.object({
+              question: z.string(),
+              answerGuidelines: z.string(),
+              correctExampleAnswers: z.array(z.string()),
+              incorrectExampleAnswers: z.array(z.string()),
+            })
+          ),
+        }),
+        loggingContext: {
+          path: "api/resume/generate",
+          dataToExtract: "interview questions",
         },
       });
-      const response = result.response.text();
+
+      const { questions } = result;
 
       try {
-        const { questions } = JSON.parse(response) as {
-          questions: {
-            question: string;
-            answerGuidelines: string;
-            correctExampleAnswers: string[];
-            incorrectExampleAnswers: string[];
-          }[];
-        };
-
         // If we get here, both the API call and JSON parsing succeeded
         const demoJobId = await createDemoJob({
           jobTitle,
@@ -713,18 +680,16 @@ const cleanupText = async (text: string) => {
     Input text: ${text}`,
   ];
 
-  const result = await generateContentWithFallback({
-    contentParts: prompt,
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        cleanedText: { type: SchemaType.STRING },
-      },
-      required: ["cleanedText"],
+  const result = await generateObjectWithFallback({
+    prompt: prompt[0],
+    schema: z.object({
+      cleanedText: z.string(),
+    }),
+    loggingContext: {
+      path: "api/resume/generate",
+      dataToExtract: "cleaned text",
     },
   });
-  const response = result.response.text();
-  const { cleanedText } = JSON.parse(response);
-  return cleanedText;
+
+  return result.cleanedText;
 };

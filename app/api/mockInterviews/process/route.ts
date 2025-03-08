@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
   GoogleGenerativeAI,
@@ -10,9 +9,9 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
 import { withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { z } from "zod";
+import { generateObject } from "ai";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -59,8 +58,7 @@ async function generateOverview(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<string>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Review this job interview and provide a concise overview of the candidate's performance.
+  const systemPrompt = `You are an expert interview coach. Review this job interview and provide a concise overview of the candidate's performance.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -73,29 +71,34 @@ to write more feedback if you don't have any.`;
 
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            overview: {
-              type: SchemaType.STRING,
-            },
+      const result = await generateObjectWithFallback({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the overview",
+              },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["overview"],
-        },
+        ],
+        systemPrompt,
+        schema: z.object({
+          overview: z.string(),
+        }),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
+      const { overview } = result;
       logger.info("Overview generated");
       return {
-        data: (
-          JSON.parse(result.response.text()) as {
-            overview: string;
-          }
-        ).overview,
-        inputTokens,
-        outputTokens,
+        data: overview,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "overview generation",
@@ -109,8 +112,7 @@ async function generateProsAndCons(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<{ pros: string[]; cons: string[] }>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Review this job interview and list the strengths and areas for improvement.
+  const systemPrompt = `You are an expert interview coach. Review this job interview and list the strengths and areas for improvement.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -129,37 +131,34 @@ Do not force yourself to think of a pro or a con if it is unnecessary.`;
 
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            pros: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.STRING,
+      const result = await generateObjectWithFallback({
+        systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the pros and cons",
               },
-            },
-            cons: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.STRING,
-              },
-            },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["pros", "cons"],
-        },
+        ],
+        schema: z.object({
+          pros: z.array(z.string()),
+          cons: z.array(z.string()),
+        }),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Pros and cons generated");
       return {
-        data: JSON.parse(result.response.text()) as {
-          pros: string[];
-          cons: string[];
-        },
-        inputTokens,
-        outputTokens,
+        data: result,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "pros and cons generation",
@@ -174,8 +173,7 @@ async function generateQuestionBreakdown(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<any[]>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Your job is to provide feedback on every interview question 
+  const systemPrompt = `You are an expert interview coach. Your job is to provide feedback on every interview question 
   that is asked in this interview. 
 
   Follow these steps:
@@ -216,68 +214,49 @@ It is okay to have an empty strengths or any empty improvements field, however, 
 `;
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            question_breakdown: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  question: {
-                    type: SchemaType.STRING,
-                  },
-                  answer: {
-                    type: SchemaType.STRING,
-                  },
-                  feedback: {
-                    type: SchemaType.OBJECT,
-                    properties: {
-                      strengths: {
-                        type: SchemaType.ARRAY,
-                        items: {
-                          type: SchemaType.STRING,
-                        },
-                      },
-                      improvements: {
-                        type: SchemaType.ARRAY,
-                        items: {
-                          type: SchemaType.STRING,
-                        },
-                      },
-                      rating: {
-                        type: SchemaType.NUMBER,
-                      },
-                    },
-                    required: ["strengths", "improvements", "rating"],
-                  },
-                },
-                required: ["question", "answer", "feedback"],
+      const result = await generateObjectWithFallback({
+        systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the question breakdown",
               },
-            },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["question_breakdown"],
-        },
+        ],
+        schema: z
+          .object({
+            question_breakdown: z.array(
+              z
+                .object({
+                  question: z.string(),
+                  answer: z.string(),
+                  feedback: z
+                    .object({
+                      strengths: z.array(z.string()),
+                      improvements: z.array(z.string()),
+                      rating: z.number(),
+                    })
+                    .required(),
+                })
+                .required()
+            ),
+          })
+          .required(),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
-      const questionBreakdown = JSON.parse(result.response.text())
-        .question_breakdown as {
-        question: string;
-        answer: string;
-        feedback: {
-          strengths: string[];
-          improvements: string[];
-          rating: number;
-        };
-      }[];
       const supabase = await createSupabaseServerClient();
       const { error } = await supabase
         .from("mock_interview_question_feedback")
         .insert(
-          questionBreakdown.map((q) => ({
+          result.question_breakdown.map((q) => ({
             question: q.question,
             answer: q.answer,
             pros: q.feedback.strengths,
@@ -292,8 +271,8 @@ It is okay to have an empty strengths or any empty improvements field, however, 
       logger.info("Question breakdown generated");
       return {
         data: [],
-        inputTokens,
-        outputTokens,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "question breakdown generation",
@@ -312,8 +291,7 @@ async function generateJobFitAnalysis(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<JobFitAnalysis>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Analyze how well the candidate's responses align with the job requirements.
+  const systemPrompt = `You are an expert interview coach. Analyze how well the candidate's responses align with the job requirements.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -334,31 +312,36 @@ When writing your job fit analysis, do not force yourself to write more feedback
 
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            job_fit_analysis: {
-              type: SchemaType.STRING,
-            },
-            job_fit_percentage: {
-              type: SchemaType.NUMBER,
-            },
+      const result = await generateObjectWithFallback({
+        systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the job fit analysis",
+              },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["job_fit_analysis", "job_fit_percentage"],
-        },
+        ],
+        schema: z
+          .object({
+            job_fit_analysis: z.string(),
+            job_fit_percentage: z.number(),
+          })
+          .required(),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Job fit analysis generated");
       return {
-        data: JSON.parse(result.response.text()) as {
-          job_fit_analysis: string;
-          job_fit_percentage: number;
-        },
-        inputTokens,
-        outputTokens,
+        data: result,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "job fit analysis generation",
@@ -372,8 +355,7 @@ async function generateScore(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<number>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Provide an overall score for this interview performance.
+  const systemPrompt = `You are an expert interview coach. Provide an overall score for this interview performance.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -385,29 +367,35 @@ Return a number between 0-100 representing the overall interview performance, co
 
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            score: {
-              type: SchemaType.NUMBER,
-            },
+      const result = await generateObjectWithFallback({
+        systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the score",
+              },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["score"],
-        },
+        ],
+        schema: z
+          .object({
+            score: z.number(),
+          })
+          .required(),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Score generated");
       return {
-        data: (
-          JSON.parse(result.response.text()) as {
-            score: number;
-          }
-        ).score,
-        inputTokens,
-        outputTokens,
+        data: result.score,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "score generation",
@@ -421,8 +409,7 @@ async function generateKeyImprovements(
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger
 ): Promise<GenerationResult<string[]>> {
-  const fileContents = jobFiles.map((file) => file.fileData.fileUri);
-  const prompt = `You are an expert interview coach. Identify the key areas where the candidate should focus on improving.
+  const systemPrompt = `You are an expert interview coach. Identify the key areas where the candidate should focus on improving.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -442,32 +429,35 @@ It is also okay to include multiple improvements if the candidate has multiple a
 
   return withRetry(
     async () => {
-      const result = await generateContentWithFallback({
-        contentParts: [prompt, ...fileContents],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            key_improvements: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.STRING,
+      const result = await generateObjectWithFallback({
+        systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Generate the key improvements",
               },
-            },
+              ...jobFiles.map((file) => ({
+                type: "file" as "file",
+                data: file.fileData.fileUri,
+                mimeType: file.fileData.mimeType,
+              })),
+            ],
           },
-          required: ["key_improvements"],
-        },
+        ],
+        schema: z
+          .object({
+            key_improvements: z.array(z.string()),
+          })
+          .required(),
       });
-      const { inputTokens, outputTokens } = getTokenCounts(result);
       logger.info("Key improvements generated");
       return {
-        data: (
-          JSON.parse(result.response.text()) as {
-            key_improvements: string[];
-          }
-        ).key_improvements,
-        inputTokens,
-        outputTokens,
+        data: result.key_improvements,
+        inputTokens: 0,
+        outputTokens: 0,
       };
     },
     "key improvements generation",
