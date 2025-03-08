@@ -15,7 +15,6 @@ import { Card } from "@/components/ui/card";
 import { Mic, Send, Lock } from "lucide-react";
 import { useVoiceRecording } from "./useVoiceRecording";
 import VoiceRecordingOverlay from "./VoiceRecordingOverlay";
-import { Content } from "@google/generative-ai";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
@@ -32,6 +31,7 @@ import { linkAnonymousAccount } from "@/components/auth/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from "ai";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -299,7 +299,7 @@ export default function ResumeBuilder({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Content[]>([]);
+  const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -311,23 +311,15 @@ export default function ResumeBuilder({
     if (resumeId) {
       setMessages([
         {
-          role: "model",
-          parts: [
-            {
-              text: t("editResumeInitialMessage"),
-            },
-          ],
+          role: "assistant",
+          content: t("editResumeInitialMessage"),
         },
       ]);
     } else {
       setMessages([
         {
-          role: "model",
-          parts: [
-            {
-              text: t("createResumeInitialMessage"),
-            },
-          ],
+          role: "assistant",
+          content: t("createResumeInitialMessage"),
         },
       ]);
     }
@@ -447,11 +439,11 @@ export default function ResumeBuilder({
     if (!messageContent.trim() || isGenerating) return;
 
     // Add user message to chat
-    const updatedMessages = [
+    const updatedMessages: CoreMessage[] = [
       ...messages,
       {
         role: "user",
-        parts: [{ text: messageContent }],
+        content: messageContent,
       },
     ];
 
@@ -462,8 +454,8 @@ export default function ResumeBuilder({
     setMessages((prev) => [
       ...prev,
       {
-        role: "role",
-        parts: [{ text: "..." }],
+        role: "assistant",
+        content: "...",
       },
     ]);
 
@@ -489,9 +481,9 @@ export default function ResumeBuilder({
       setMessages((prev) => prev.slice(0, -1));
 
       // Add the AI response as a new message
-      const aiMessage = {
-        role: "model",
-        parts: [{ text: interviewerResponse }],
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: interviewerResponse,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -506,8 +498,8 @@ export default function ResumeBuilder({
       setMessages((prev) => {
         const updatedMessages = [...prev];
         updatedMessages[updatedMessages.length - 1] = {
-          role: "model",
-          parts: [{ text: "Sorry, I encountered an error. Please try again." }],
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
         };
         return updatedMessages;
       });
@@ -533,11 +525,11 @@ export default function ResumeBuilder({
     }
     const messageContent = textInput.trim();
 
-    const updatedMessages = [
+    const updatedMessages: CoreMessage[] = [
       ...messages,
       {
         role: "user",
-        parts: [{ text: messageContent }],
+        content: messageContent,
       },
     ];
 
@@ -548,8 +540,8 @@ export default function ResumeBuilder({
     setMessages((prev) => [
       ...prev,
       {
-        role: "role",
-        parts: [{ text: "..." }],
+        role: "assistant",
+        content: "...",
       },
     ]);
 
@@ -566,18 +558,18 @@ export default function ResumeBuilder({
     // Add the AI response as a new message
 
     if (!response.ok) {
-      const aiMessage = {
-        role: "model",
-        parts: [{ text: t("errors.resumeEditError") }],
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: t("errors.resumeEditError"),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
     } else {
       const data = await response.json();
       const { updatedResume, aiResponse } = data;
-      const aiMessage = {
-        role: "model",
-        parts: [{ text: aiResponse }],
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: aiResponse,
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -593,7 +585,7 @@ export default function ResumeBuilder({
     }
   };
 
-  const generateResume = async (conversationHistory: Content[]) => {
+  const generateResume = async (conversationHistory: CoreMessage[]) => {
     setIsGenerating(true);
     try {
       const response = await fetch("/api/resume/generate", {
@@ -627,12 +619,8 @@ export default function ResumeBuilder({
       setMessages((prev) => [
         ...prev,
         {
-          role: "model",
-          parts: [
-            {
-              text: t("errors.resumeGenerationError"),
-            },
-          ],
+          role: "assistant",
+          content: t("errors.resumeGenerationError"),
         },
       ]);
     } finally {
@@ -689,7 +677,7 @@ export default function ResumeBuilder({
                       }`}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.parts[0].text}
+                        {message.content as string}
                       </ReactMarkdown>
                     </div>
                   </motion.div>

@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest } from "next/server";
 import { Logger } from "next-axiom";
 import {
@@ -9,9 +8,9 @@ import { Tables } from "@/utils/supabase/database.types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
-import { generateContentStreamWithFallback } from "@/utils/ai/gemini";
+import { streamTextResponseWithFallback } from "@/utils/ai/gemini";
 
-const apiKey = process.env.GEMINI_API_KEY!;
+const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
@@ -38,49 +37,46 @@ export async function POST(req: NextRequest) {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
     const { job_title, job_description, company_name, company_description } =
       await getInterviewCopilot(interviewCopilotId);
-    const result = await generateContentStreamWithFallback({
-      contentParts: [
-        answerQuestionPrompt({
-          question,
-          jobTitle: job_title,
-          jobDescription: job_description,
-          companyName: company_name,
-          companyDescription: company_description,
-          responseFormat,
-          previousQA,
-        }),
-        ...files,
-      ],
+    const result = await streamTextResponseWithFallback({
+      systemPrompt: answerQuestionPrompt({
+        question,
+        jobTitle: job_title,
+        jobDescription: job_description,
+        companyName: company_name,
+        companyDescription: company_description,
+        responseFormat,
+        previousQA,
+      }),
+      messages: files.map((file) => ({
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Answer the question based on the information provided.",
+          },
+          {
+            type: "file" as "file",
+            data: file.fileData.fileUri,
+            mimeType: file.fileData.mimeType,
+          },
+        ],
+      })),
+      loggingContext: {
+        interviewCopilotId,
+        question,
+        responseFormat,
+        previousQA,
+      },
     });
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
+          for await (const chunk of result) {
             // Encode the text chunk into a Uint8Array
-            const encoded = new TextEncoder().encode(text);
+            const encoded = new TextEncoder().encode(chunk);
             controller.enqueue(encoded);
           }
-          const usageMetadata = (await result.response).usageMetadata as {
-            promptTokenCount: number;
-            candidatesTokenCount: number;
-          };
-
-          // Increment token counts in database
-          const { error: updateError } = await incrementTokenCounts(
-            interviewCopilotId,
-            usageMetadata?.promptTokenCount || 0,
-            usageMetadata?.candidatesTokenCount || 0
-          );
-
-          if (updateError) {
-            logger.error("Error incrementing token counts", {
-              error: updateError,
-            });
-            await logger.flush();
-          }
-
           controller.close();
         } catch (error) {
           controller.error(error);

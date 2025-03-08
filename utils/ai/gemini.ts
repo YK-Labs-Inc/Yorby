@@ -1,214 +1,208 @@
-import { ChatMessage } from "@/app/api/chat/route";
-import {
-  GoogleGenerativeAI,
-  GenerativeModel,
-  Part,
-  GenerateContentResult,
-  GenerateContentStreamResult,
-  Content,
-  ModelParams,
-} from "@google/generative-ai";
 import { Logger } from "next-axiom";
+import { z } from "zod";
+import { generateObject, CoreMessage, streamText, generateText } from "ai";
+import { google } from "@ai-sdk/google";
+import { withTracing } from "@posthog/ai";
+import { posthog } from "../tracking/serverUtils";
+import { createSupabaseServerClient } from "../supabase/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+type BaseParams = {
+  systemPrompt?: string;
+  loggingContext?: Record<string, any>;
+};
 
-/**
- * Creates a generative model with the specified configuration
- */
-export const createGeminiModel = (
-  modelParams: ModelParams
-): GenerativeModel => {
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+type MessagesOnlyParams = BaseParams & {
+  messages: CoreMessage[];
+  prompt?: never;
+};
 
-  return genAI.getGenerativeModel(modelParams);
+type PromptOnlyParams = BaseParams & {
+  messages?: never;
+  prompt: string;
+};
+
+type MutuallyExclusiveParams = MessagesOnlyParams | PromptOnlyParams;
+
+type GenerateObjectParams<T extends z.ZodType> = MutuallyExclusiveParams & {
+  schema: T;
 };
 
 /**
- * Execute a generateContent function call with automatic fallback to a secondary model if the primary fails
- *
- * @param contentParts The content to send to the model
- * @param modelConfig The model configuration to use
- * @param loggingContext Additional context to include in error logs
- * @returns The processed response
+ * Execute a generateObject function call with automatic fallback to a secondary model
  */
-export const generateContentWithFallback = async ({
-  contentParts,
-  responseSchema,
-  responseMimeType,
+export const generateObjectWithFallback = async <T extends z.ZodType>({
+  messages,
+  prompt,
+  systemPrompt,
+  schema,
   loggingContext = {},
-}: {
-  contentParts: (string | Part)[];
-  responseSchema?: any;
-  responseMimeType?: string;
-  loggingContext?: Record<string, any>;
-}): Promise<GenerateContentResult> => {
+}: GenerateObjectParams<T>): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   try {
-    const primaryModel = createGeminiModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseSchema,
-        responseMimeType,
-      },
+    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+      posthogDistinctId: user?.id,
+      posthogProperties: loggingContext,
     });
-    const result = await primaryModel.generateContent(contentParts);
-    logger.info("Primary model completed successfully");
-    await logger.flush();
-    return result;
-  } catch (error: any) {
-    // Log the primary model failure
-    logger.error(`Primary model failed, trying fallback model now`, {
-      error: error.message,
+    const result = await generateObject({
+      model,
+      messages: messages?.filter((message) => message.content),
+      prompt,
+      system: systemPrompt,
+      schema,
     });
     await logger.flush();
-
+    const jsonResponse = result.object;
+    logger.with({ jsonResponse }).info("Primary model completed successfully");
+    return jsonResponse;
+  } catch (error) {
+    logger.error(`Primary model failed, trying fallback model`, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await logger.flush();
     try {
-      // Create and try the fallback model
-      const fallbackModel = createGeminiModel({
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          responseMimeType,
-          responseSchema,
-        },
+      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+        posthogDistinctId: user?.id,
+        posthogProperties: loggingContext,
+      });
+      const result = await generateObject({
+        model,
+        messages: messages?.filter((message) => message.content),
+        prompt,
+        system: systemPrompt,
+        schema,
       });
 
-      const result = await fallbackModel.generateContent(contentParts);
-      return result;
-    } catch (fallbackError: any) {
-      // Log that both models failed
+      logger.info("Fallback model completed successfully");
+      await logger.flush();
+      const jsonResponse = result.object;
+      logger
+        .with({ jsonResponse })
+        .info("Fallback model completed successfully");
+      return jsonResponse;
+    } catch (fallbackError) {
       logger.error("Both primary and fallback models failed", {
-        error: fallbackError.message,
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError),
       });
       await logger.flush();
-
-      // Re-throw the error
       throw fallbackError;
     }
   }
 };
 
 /**
- * Execute a generateContentStream function call with automatic fallback to a secondary model if the primary fails
- *
- * @param contentParts The content to send to the model
- * @param modelConfig The model configuration to use
- * @param loggingContext Additional context to include in error logs
- * @returns The processed response
+ * Execute a generateText function call with automatic fallback to a secondary model
  */
-export const generateContentStreamWithFallback = async ({
-  contentParts,
-  responseSchema,
-  responseMimeType,
+export const generateTextWithFallback = async ({
+  messages,
+  prompt,
+  systemPrompt,
   loggingContext = {},
-}: {
-  contentParts: (string | Part)[];
-  responseSchema?: any;
-  responseMimeType?: string;
-  loggingContext?: Record<string, any>;
-}): Promise<GenerateContentStreamResult> => {
+}: MutuallyExclusiveParams): Promise<string> => {
   const logger = new Logger().with(loggingContext);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   try {
-    const primaryModel = createGeminiModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseSchema,
-        responseMimeType,
-      },
+    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+      posthogDistinctId: user?.id,
+      posthogProperties: loggingContext,
     });
-    const result = await primaryModel.generateContentStream(contentParts);
-    logger.info("Primary model completed successfully");
+    const { text } = await generateText({
+      model,
+      messages: messages?.filter((message) => message.content),
+      prompt,
+      system: systemPrompt,
+    });
+    logger.with({ result: text }).info("Primary model completed successfully");
     await logger.flush();
-    return result;
-  } catch (error: any) {
-    // Log the primary model failure
-    logger.error(`Primary model failed, trying fallback model now`, {
-      error: error.message,
+    return text;
+  } catch (error) {
+    logger.error(`Primary model failed, trying fallback model`, {
+      error: error instanceof Error ? error.message : String(error),
     });
     await logger.flush();
-
     try {
-      // Create and try the fallback model
-      const fallbackModel = createGeminiModel({
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          responseMimeType,
-          responseSchema,
-        },
+      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+        posthogDistinctId: user?.id,
+        posthogProperties: loggingContext,
       });
-
-      const result = await fallbackModel.generateContentStream(contentParts);
-      logger.info("Primary model completed successfully");
+      const { text } = await generateText({
+        model,
+        messages: messages?.filter((message) => message.content),
+        prompt,
+        system: systemPrompt,
+      });
+      logger
+        .with({ result: text })
+        .info("Fallback model completed successfully");
       await logger.flush();
-      return result;
-    } catch (fallbackError: any) {
-      // Log that both models failed
+      return text;
+    } catch (fallbackError) {
       logger.error("Both primary and fallback models failed", {
-        error: fallbackError.message,
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError),
       });
       await logger.flush();
-
-      // Re-throw the error
       throw fallbackError;
     }
   }
 };
 
 /**
- * Execute a sendMessage function call with automatic fallback to a secondary model if the primary fails
- *
- * @param contentParts The content to send to the model
- * @param modelConfig The model configuration to use
- * @param loggingContext Additional context to include in error logs
- * @returns The processed response
+ * Execute a streaming content generation with automatic fallback
  */
-export const sendMessageWithFallback = async ({
-  contentParts,
-  responseMimeType,
-  responseSchema,
+export const streamTextResponseWithFallback = async <T extends z.ZodType>({
+  messages,
+  prompt,
+  systemPrompt,
   loggingContext = {},
-  history,
-}: {
-  contentParts: string | Array<string | Part>;
-  history: Content[];
-  responseMimeType?: string;
-  responseSchema?: any;
-  loggingContext?: Record<string, any>;
-}): Promise<GenerateContentResult> => {
+}: MutuallyExclusiveParams): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
   try {
-    const primaryModel = createGeminiModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType,
-        responseSchema,
-      },
+    const model = google("gemini-2.0-flash");
+    const result = streamText({
+      model,
+      messages,
+      prompt,
+      system: systemPrompt,
     });
-    const chat = primaryModel.startChat({
-      history,
-    });
-    const result = await chat.sendMessage(contentParts);
-    return result;
-  } catch (error: any) {
-    logger.error(`Primary model failed, trying fallback model now`, {
-      error: error.message,
+    logger.info("Primary model completed successfully");
+    await logger.flush();
+    return result.textStream;
+  } catch (error) {
+    logger.error(`Primary model failed, trying fallback model`, {
+      error: error instanceof Error ? error.message : String(error),
     });
     await logger.flush();
+
     try {
-      const fallbackModel = createGeminiModel({
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          responseMimeType,
-          responseSchema,
-        },
+      const model = google("gemini-1.5-flash");
+      const result = streamText({
+        model,
+        messages,
+        prompt,
+        system: systemPrompt,
       });
-      const chat = fallbackModel.startChat({
-        history,
-      });
-      const result = await chat.sendMessage(contentParts);
-      return result;
-    } catch (fallbackError: any) {
+
+      logger.info("Fallback model completed successfully");
+      await logger.flush();
+      return result.textStream;
+    } catch (fallbackError) {
       logger.error("Both primary and fallback models failed", {
-        error: fallbackError.message,
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError),
       });
       await logger.flush();
       throw fallbackError;

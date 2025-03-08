@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { Content, SchemaType } from "@google/generative-ai";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { sendMessageWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { CoreMessage } from "ai";
+import { z } from "zod";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
@@ -12,7 +13,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   try {
     const supabase = await createSupabaseServerClient();
     const { messages, captchaToken } = (await req.json()) as {
-      messages: Content[];
+      messages: CoreMessage[];
       captchaToken?: string;
     };
     const t = await getTranslations("resumeBuilder");
@@ -37,10 +38,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     logger.info("Generating resume from conversation history");
 
-    const resumeContent = await generateResumeContent(messages, logger);
+    const resumeCoreMessage = await generateResumeCoreMessage(messages, logger);
 
-    const resumeId = await saveResumeContent(
-      resumeContent,
+    const resumeId = await saveResumeCoreMessage(
+      resumeCoreMessage,
       logger,
       captchaToken
     );
@@ -61,8 +62,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   }
 });
 
-const saveResumeContent = async (
-  resumeContent: {
+const saveResumeCoreMessage = async (
+  resumeCoreMessage: {
     personalInfo: {
       name: string;
       email: string | null;
@@ -93,16 +94,20 @@ const saveResumeContent = async (
   captchaToken?: string
 ) => {
   const resumeId = await saveResumePersonalInfo(
-    resumeContent.personalInfo,
+    resumeCoreMessage.personalInfo,
     captchaToken
   );
-  await saveResumeEducation(resumeId, resumeContent.educationHistory, logger);
-  await saveResumeWorkExperience(
+  await saveResumeEducation(
     resumeId,
-    resumeContent.workExperience,
+    resumeCoreMessage.educationHistory,
     logger
   );
-  await saveResumeSkills(resumeId, resumeContent.skills, logger);
+  await saveResumeWorkExperience(
+    resumeId,
+    resumeCoreMessage.workExperience,
+    logger
+  );
+  await saveResumeSkills(resumeId, resumeCoreMessage.skills, logger);
   return resumeId;
 };
 
@@ -357,7 +362,10 @@ const saveResumeSkills = async (
   );
 };
 
-const generateResumeContent = async (messages: Content[], logger: Logger) => {
+const generateResumeCoreMessage = async (
+  messages: CoreMessage[],
+  logger: Logger
+) => {
   const personalInfo = await extractPersonalInfo(messages, logger);
   const educationHistory = await extractEducationHistory(messages, logger);
   const workExperience = await extractWorkExperience(messages, logger);
@@ -370,7 +378,7 @@ const generateResumeContent = async (messages: Content[], logger: Logger) => {
   };
 };
 
-const extractPersonalInfo = async (messages: Content[], logger: Logger) => {
+const extractPersonalInfo = async (messages: CoreMessage[], logger: Logger) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "personal information",
@@ -396,26 +404,21 @@ const extractPersonalInfo = async (messages: Content[], logger: Logger) => {
   characters are not needed. Just return the raw JSON object string.
   `;
 
-    const result = await sendMessageWithFallback({
-      contentParts: ["Extract the information from the conversation"],
-      history: [
+    const result = await generateObjectWithFallback({
+      systemPrompt: prompt,
+      messages: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          content: "Extract the information from the conversation",
         },
         ...messages,
       ],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          name: { type: SchemaType.STRING },
-          email: { type: SchemaType.STRING },
-          phone: { type: SchemaType.STRING },
-          location: { type: SchemaType.STRING },
-        },
-        required: ["name", "email", "phone", "location"],
-      },
+      schema: z.object({
+        name: z.string(),
+        email: z.string().nullable(),
+        phone: z.string().nullable(),
+        location: z.string().nullable(),
+      }),
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "personal information",
@@ -423,15 +426,10 @@ const extractPersonalInfo = async (messages: Content[], logger: Logger) => {
     });
 
     functionLogger.info("Personal information extracted", {
-      result: result.response.text(),
+      result,
     });
 
-    return JSON.parse(result.response.text()) as {
-      name: string;
-      email: string | null;
-      phone: string | null;
-      location: string | null;
-    };
+    return result;
   } catch (error) {
     logger.error("Failed to extract personal information", {
       error,
@@ -445,7 +443,10 @@ const extractPersonalInfo = async (messages: Content[], logger: Logger) => {
   }
 };
 
-const extractEducationHistory = async (messages: Content[], logger: Logger) => {
+const extractEducationHistory = async (
+  messages: CoreMessage[],
+  logger: Logger
+) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "education",
@@ -481,41 +482,25 @@ const extractEducationHistory = async (messages: Content[], logger: Logger) => {
     characters are not needed. Just return the raw JSON object string.
   `;
 
-    const result = await sendMessageWithFallback({
-      contentParts: ["Extract the information from the conversation"],
-      history: [
+    const result = await generateObjectWithFallback({
+      systemPrompt: prompt,
+      messages: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          content: "Extract the information from the conversation",
         },
         ...messages,
       ],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.ARRAY,
-        items: {
-          type: SchemaType.OBJECT,
-          properties: {
-            name: { type: SchemaType.STRING },
-            degree: { type: SchemaType.STRING },
-            startDate: { type: SchemaType.STRING },
-            endDate: { type: SchemaType.STRING },
-            gpa: { type: SchemaType.STRING },
-            additionalInfo: {
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING },
-            },
-          },
-          required: [
-            "name",
-            "degree",
-            "startDate",
-            "endDate",
-            "gpa",
-            "additionalInfo",
-          ],
-        },
-      },
+      schema: z.array(
+        z.object({
+          name: z.string(),
+          degree: z.string().nullable(),
+          startDate: z.string().nullable(),
+          endDate: z.string().nullable(),
+          gpa: z.string().nullable(),
+          additionalInfo: z.array(z.string()).nullable(),
+        })
+      ),
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "personal information",
@@ -523,17 +508,10 @@ const extractEducationHistory = async (messages: Content[], logger: Logger) => {
     });
 
     functionLogger.info("Education history extracted", {
-      result: result.response.text(),
+      result,
     });
 
-    return JSON.parse(result.response.text()) as {
-      name: string;
-      degree: string | null;
-      startDate: string | null;
-      endDate: string | null;
-      gpa: string | null;
-      additionalInfo: string[] | null;
-    }[];
+    return result;
   } catch (error) {
     logger.error("Failed to extract personal information", {
       error,
@@ -551,7 +529,10 @@ const extractEducationHistory = async (messages: Content[], logger: Logger) => {
   }
 };
 
-const extractWorkExperience = async (messages: Content[], logger: Logger) => {
+const extractWorkExperience = async (
+  messages: CoreMessage[],
+  logger: Logger
+) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "work experience",
@@ -588,39 +569,24 @@ const extractWorkExperience = async (messages: Content[], logger: Logger) => {
     characters are not needed. Just return the raw JSON object string.
   `;
 
-    const result = await sendMessageWithFallback({
-      contentParts: ["Extract the information from the conversation"],
-      history: [
+    const result = await generateObjectWithFallback({
+      systemPrompt: prompt,
+      messages: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          content: "Extract the information from the conversation",
         },
         ...messages,
       ],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.ARRAY,
-        items: {
-          type: SchemaType.OBJECT,
-          properties: {
-            companyName: { type: SchemaType.STRING },
-            jobTitle: { type: SchemaType.STRING },
-            startDate: { type: SchemaType.STRING },
-            endDate: { type: SchemaType.STRING },
-            description: {
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING },
-            },
-          },
-          required: [
-            "companyName",
-            "jobTitle",
-            "startDate",
-            "endDate",
-            "description",
-          ],
-        },
-      },
+      schema: z.array(
+        z.object({
+          companyName: z.string(),
+          jobTitle: z.string().nullable(),
+          startDate: z.string().nullable(),
+          endDate: z.string().nullable(),
+          description: z.array(z.string()),
+        })
+      ),
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "work experience",
@@ -628,16 +594,10 @@ const extractWorkExperience = async (messages: Content[], logger: Logger) => {
     });
 
     functionLogger.info("Work experience extracted", {
-      result: result.response.text(),
+      result,
     });
 
-    return JSON.parse(result.response.text()) as {
-      companyName: string;
-      jobTitle: string | null;
-      startDate: string | null;
-      endDate: string | null;
-      description: string[];
-    }[];
+    return result;
   } catch (error) {
     logger.error("Failed to extract personal information", {
       error,
@@ -654,7 +614,7 @@ const extractWorkExperience = async (messages: Content[], logger: Logger) => {
   }
 };
 
-const extractSkills = async (messages: Content[], logger: Logger) => {
+const extractSkills = async (messages: CoreMessage[], logger: Logger) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "skills",
@@ -679,30 +639,21 @@ const extractSkills = async (messages: Content[], logger: Logger) => {
     characters are not needed. Just return the raw JSON object string.
   `;
 
-    const result = await sendMessageWithFallback({
-      contentParts: ["Extract the information from the conversation"],
-      history: [
+    const result = await generateObjectWithFallback({
+      systemPrompt: prompt,
+      messages: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          content: "Extract the information from the conversation",
         },
         ...messages,
       ],
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.ARRAY,
-        items: {
-          type: SchemaType.OBJECT,
-          properties: {
-            category: { type: SchemaType.STRING },
-            skills: {
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING },
-            },
-          },
-          required: ["category", "skills"],
-        },
-      },
+      schema: z.array(
+        z.object({
+          category: z.string(),
+          skills: z.array(z.string()),
+        })
+      ),
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "skills",
@@ -710,13 +661,10 @@ const extractSkills = async (messages: Content[], logger: Logger) => {
     });
 
     functionLogger.info("Skills extracted", {
-      result: result.response.text(),
+      result,
     });
 
-    return JSON.parse(result.response.text()) as {
-      category: string;
-      skills: string[];
-    }[];
+    return result;
   } catch (error) {
     logger.error("Failed to extract personal information", {
       error,

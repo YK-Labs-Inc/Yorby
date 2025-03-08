@@ -1,7 +1,7 @@
 "use server";
 
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
-import { generateContentWithFallback } from "@/utils/ai/gemini";
+import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
@@ -10,12 +10,12 @@ import {
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
 import { SchemaType } from "@google/generative-ai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -83,8 +83,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     const job = await fetchJob(jobId);
     const { question, answer_guidelines } = await fetchQuestion(questionId);
     const files = await getAllFiles(jobId);
-    const prompt = [
-      `
+    const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
     As an expert job interviewer, you will provide a response to the question that I will provide you.
@@ -123,26 +122,35 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
 
     ## Answer Guidelines
     ${answer_guidelines}
-    `,
-      ...files,
-    ];
-    const result = await generateContentWithFallback({
-      contentParts: prompt,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: SchemaType.OBJECT,
-        properties: {
-          answer: {
-            type: SchemaType.STRING,
-          },
+    `;
+    const result = await generateObjectWithFallback({
+      systemPrompt: prompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Generate the answer",
+            },
+            ...files.map((f) => ({
+              type: "file" as "file",
+              data: f.fileData.fileUri,
+              mimeType: f.fileData.mimeType,
+            })),
+          ],
         },
-        required: ["answer"],
+      ],
+      schema: z.object({
+        answer: z.string(),
+      }),
+      loggingContext: {
+        jobId,
+        questionId,
+        function: "generateAnswer",
       },
     });
-    const llmResponse = result.response.text();
-    const { answer } = JSON.parse(llmResponse) as {
-      answer: string;
-    };
+    const { answer } = result;
     response = answer;
     logger.info("Answer generated", { answer });
     await logger.flush();
@@ -237,7 +245,7 @@ const writeAnswerToDatabase = async (
   return data;
 };
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
+const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
 const generateFeedback = async (
   jobId: string,
@@ -253,8 +261,7 @@ const generateFeedback = async (
   const job = await fetchJob(jobId);
   const { question, answer_guidelines } = await fetchQuestion(questionId);
   const files = await getAllFiles(jobId);
-  const prompt = [
-    `
+  const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
     As an expert job interviewer, you will provide feedback on the candidate's answer to the question.
@@ -300,36 +307,36 @@ const generateFeedback = async (
 
     ## Answer
     ${answer}
-    `,
-    ...files,
-  ];
-  const result = await generateContentWithFallback({
-    contentParts: prompt,
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        pros: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.STRING,
+    `;
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Generate the feedback",
           },
-        },
-        cons: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.STRING,
-          },
-        },
+          ...files.map((f) => ({
+            type: "file" as "file",
+            data: f.fileData.fileUri,
+            mimeType: f.fileData.mimeType,
+          })),
+        ],
       },
-      required: ["pros", "cons"],
+    ],
+    schema: z.object({
+      pros: z.array(z.string()),
+      cons: z.array(z.string()),
+    }),
+    loggingContext: {
+      jobId,
+      questionId,
+      function: "generateFeedback",
     },
   });
-  const response = result.response.text();
-  const { pros, cons } = JSON.parse(response) as {
-    pros: string[];
-    cons: string[];
-  };
+  const { pros, cons } = result;
   logger.info("Feedback generated", { pros, cons });
   return {
     pros,

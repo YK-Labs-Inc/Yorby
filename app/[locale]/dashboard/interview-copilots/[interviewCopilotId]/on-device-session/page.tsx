@@ -3,6 +3,7 @@ import { Session } from "./components/session";
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { fetchHasSubscription } from "../../../resumes/actions";
 
 const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -30,10 +31,18 @@ export default async function OnDeviceSessionPage({
   params: Promise<{ interviewCopilotId: string }>;
 }) {
   const { interviewCopilotId } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
   const { error, status, deletionStatus, interviewCopilotAccess } =
     await fetchInterviewCopilotStatus(interviewCopilotId);
-
-  if (interviewCopilotAccess === "locked") {
+  const hasSubscription = await fetchHasSubscription(user?.id || "");
+  const isLocked = interviewCopilotAccess === "locked" && !hasSubscription;
+  if (isLocked) {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}`);
   }
 

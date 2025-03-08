@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { UploadResponse } from "@/utils/types";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { generateTextWithFallback } from "@/utils/ai/gemini";
 
 // Initialize Gemini
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
 
 const MAX_INLINE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
@@ -29,27 +28,34 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       );
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     let transcription: string;
 
     if (audioFile.size < MAX_INLINE_SIZE) {
       logger.info("Processing audio in line");
-      const bytes = await audioFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const result = await model.generateContent([
-        {
-          text: "Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.",
-        },
-        {
-          inlineData: {
-            mimeType: audioFile.type,
-            data: buffer.toString("base64"),
+      const result = await generateTextWithFallback({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.",
+              },
+              {
+                type: "file",
+                mimeType: audioFile.type,
+                data: await audioFile.arrayBuffer(),
+              },
+            ],
           },
+        ],
+        systemPrompt: "",
+        loggingContext: {
+          audioFile,
+          source,
         },
-      ]);
-
-      transcription = result.response.text();
+      });
+      transcription = result;
       logger = logger.with({ transcription });
     } else {
       logger.info("Processing audio in file upload");
@@ -70,19 +76,31 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       const geminiUploadResponse = (await res2.json()) as UploadResponse;
 
       // Generate transcription
-      const result = await model.generateContent([
-        {
-          text: "Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.",
-        },
-        {
-          fileData: {
-            fileUri: geminiUploadResponse.file.uri,
-            mimeType: geminiUploadResponse.file.mimeType,
+      const result = await generateTextWithFallback({
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.",
+              },
+              {
+                type: "file",
+                data: geminiUploadResponse.file.uri,
+                mimeType: geminiUploadResponse.file.mimeType,
+              },
+            ],
           },
+        ],
+        systemPrompt: "",
+        loggingContext: {
+          audioFile,
+          source,
         },
-      ]);
+      });
 
-      transcription = result.response.text();
+      transcription = result;
       logger = logger.with({ transcription });
       // Clean up - delete the uploaded file from Gemini
       await fileManager.deleteFile(geminiUploadResponse.file.name);

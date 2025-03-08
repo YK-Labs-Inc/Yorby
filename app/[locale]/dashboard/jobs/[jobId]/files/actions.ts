@@ -116,7 +116,7 @@ const uploadFileToGemini = async ({
   );
   formData.append("file", blob);
   const res2 = await fetch(
-    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`,
     { method: "post", body: formData }
   );
   const geminiUploadResponse = (await res2.json()) as UploadResponse;
@@ -182,7 +182,9 @@ export const deleteFile = async (fileId: string) => {
 
     // Try to delete from Gemini AI
     try {
-      const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY!);
+      const fileManager = new GoogleAIFileManager(
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY!
+      );
       await fileManager.deleteFile(file.google_file_name);
     } catch (error) {
       // Log but don't fail if Gemini deletion fails

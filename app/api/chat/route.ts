@@ -1,22 +1,14 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
-import { sendMessageWithFallback } from "@/utils/ai/gemini";
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-export interface ChatMessage {
-  role: "user" | "model";
-  parts: { text: string }[];
-}
+import { generateTextWithFallback } from "@/utils/ai/gemini";
+import { CoreMessage } from "ai";
 
 interface ChatRequestBody {
   message: string;
   mockInterviewId: string;
   isInitialMessage?: boolean;
-  history?: ChatMessage[];
+  history?: CoreMessage[];
 }
 
 export async function POST(request: Request) {
@@ -73,24 +65,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await sendMessageWithFallback({
-      contentParts: [{ text: message }],
-      history: [
-        {
-          role: "user",
-          parts: [{ text: mockInterview.interview_prompt }],
-        },
-        ...history,
-      ],
+    const messages = [
+      ...history,
+      {
+        role: "user" as const,
+        content: message,
+      },
+    ];
+    const response = await generateTextWithFallback({
+      systemPrompt: mockInterview.interview_prompt,
+      messages,
       loggingContext: {
         mockInterviewId,
-        message,
+        messages,
         history,
         isInitialMessage,
         path: "/api/chat",
       },
     });
-    const response = result.response.text();
 
     logger.info("Chat response generated");
 

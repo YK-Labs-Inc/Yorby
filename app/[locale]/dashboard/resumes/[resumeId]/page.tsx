@@ -23,7 +23,6 @@ export default async function ResumePage({
   } = await supabase.auth.getUser();
   if (!user) {
     redirect("/sign-in");
-    return;
   }
   const resume = await fetchResume(resumeId);
   if (!resume) {
