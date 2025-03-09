@@ -3,6 +3,62 @@ import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
 
+const resumeItemDescriptionsSchema = z.object({
+  created_at: z.string().nullable(),
+  description: z.string(),
+  detail_item_id: z.string(),
+  display_order: z.number(),
+  id: z.string(),
+  updated_at: z.string().nullable(),
+});
+
+const resumeDetailItemsSchema = z.object({
+  created_at: z.string().nullable(),
+  date_range: z.string().nullable(),
+  display_order: z.number(),
+  id: z.string(),
+  section_id: z.string(),
+  subtitle: z.string().nullable(),
+  title: z.string(),
+  updated_at: z.string().nullable(),
+  resume_item_descriptions: z.array(resumeItemDescriptionsSchema),
+});
+
+const resumeListItemsSchema = z.object({
+  content: z.string(),
+  created_at: z.string().nullable(),
+  display_order: z.number(),
+  id: z.string(),
+  section_id: z.string(),
+  updated_at: z.string().nullable(),
+});
+
+const resumeSectionsSchema = z.object({
+  created_at: z.string().nullable(),
+  display_order: z.number(),
+  id: z.string(),
+  resume_id: z.string(),
+  title: z.string(),
+  updated_at: z.string().nullable(),
+  resume_list_items: z.array(resumeListItemsSchema),
+  resume_detail_items: z.array(resumeDetailItemsSchema),
+});
+
+const resumeSchema = z.object({
+  created_at: z.string().nullable(),
+  email: z.string().nullable(),
+  id: z.string(),
+  location: z.string().nullable(),
+  locked_status: z.enum(["locked", "unlocked"]),
+  name: z.string(),
+  phone: z.string().nullable(),
+  summary: z.string().nullable(),
+  title: z.string(),
+  updated_at: z.string().nullable(),
+  user_id: z.string(),
+  resume_sections: z.array(resumeSectionsSchema),
+});
+
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const { resume, userMessage } = (await req.json()) as {
     resume: string;
@@ -60,7 +116,7 @@ const updateResume = async (resume: string, userMessage: string) => {
     prompt: userMessage,
     systemPrompt,
     schema: z.object({
-      updatedResumeJSON: z.string(),
+      updatedResumeJSON: resumeSchema,
       aiResponse: z.string(),
     }),
     loggingContext: {
@@ -68,7 +124,7 @@ const updateResume = async (resume: string, userMessage: string) => {
     },
   });
   const { updatedResumeJSON, aiResponse } = result;
-  return { updatedResume: JSON.parse(updatedResumeJSON), aiResponse };
+  return { updatedResume: updatedResumeJSON, aiResponse };
 };
 
 const extractJSONFromString = (text: string): string => {
