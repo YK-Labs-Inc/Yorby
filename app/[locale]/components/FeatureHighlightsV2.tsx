@@ -173,63 +173,6 @@ export default function FeatureHighlight() {
             <h3 className="text-4xl font-bold mb-4">{t("features.title")}</h3>
           </motion.div>
 
-          {/* Interview Prep Section */}
-          <div className="mb-20 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
-            <div className="relative p-12">
-              <div className="text-center mb-12">
-                <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
-                  {t("features.prep.title")}
-                </h4>
-                <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
-                  {t("features.prep.description")}
-                </p>
-              </div>
-
-              <motion.div
-                variants={container}
-                initial="hidden"
-                animate="show"
-                className="flex flex-row justify-center gap-4 flex-wrap"
-              >
-                {features
-                  .filter((f) => f.category === "prep")
-                  .map((feature) => (
-                    <motion.div
-                      key={feature.id}
-                      variants={item}
-                      className="w-full md:w-[49%]"
-                    >
-                      <Card className="flex flex-col justify-between group h-full overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="p-8">
-                          <div className="mb-6 text-primary">
-                            {feature.icon}
-                          </div>
-                          <h4 className="text-xl font-bold mb-4 dark:text-white group-hover:text-primary transition-colors">
-                            {t(`features.${feature.id}.title`)}
-                          </h4>
-                          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                            {t(`features.${feature.id}.description`)}
-                          </p>
-                        </div>
-                        <div className="relative bg-gray-50 dark:bg-gray-900 p-4">
-                          <img
-                            src={feature.img}
-                            alt={t(`features.${feature.id}.title`)}
-                            className="w-full h-full object-cover rounded-lg shadow-md transform group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="overflow-y-scroll h-[500px] relative w-full border-2 border-gray-300 rounded-lg p-4 shadow-lg mb-4">
-            <JobCreationComponent />
-          </div>
-
           {/* Day of Interview Section */}
           {isInterviewCopilotEnabled && (
             <>
@@ -339,6 +282,61 @@ export default function FeatureHighlight() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Interview Prep Section */}
+        <div className="mb-20 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
+          <div className="relative p-12">
+            <div className="text-center mb-12">
+              <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
+                {t("features.prep.title")}
+              </h4>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
+                {t("features.prep.description")}
+              </p>
+            </div>
+
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="flex flex-row justify-center gap-4 flex-wrap"
+            >
+              {features
+                .filter((f) => f.category === "prep")
+                .map((feature) => (
+                  <motion.div
+                    key={feature.id}
+                    variants={item}
+                    className="w-full md:w-[49%]"
+                  >
+                    <Card className="flex flex-col justify-between group h-full overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                      <div className="p-8">
+                        <div className="mb-6 text-primary">{feature.icon}</div>
+                        <h4 className="text-xl font-bold mb-4 dark:text-white group-hover:text-primary transition-colors">
+                          {t(`features.${feature.id}.title`)}
+                        </h4>
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                          {t(`features.${feature.id}.description`)}
+                        </p>
+                      </div>
+                      <div className="relative bg-gray-50 dark:bg-gray-900 p-4">
+                        <img
+                          src={feature.img}
+                          alt={t(`features.${feature.id}.title`)}
+                          className="w-full h-full object-cover rounded-lg shadow-md transform group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="overflow-y-scroll h-[500px] relative w-full border-2 border-gray-300 rounded-lg p-4 shadow-lg mb-4">
+          <JobCreationComponent />
         </div>
 
         {/* Pricing Section */}
