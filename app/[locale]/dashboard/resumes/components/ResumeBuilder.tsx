@@ -628,7 +628,6 @@ export default function ResumeBuilder({
           content: t("errors.resumeGenerationError"),
         },
       ]);
-    } finally {
       setIsGenerating(false);
     }
   };
