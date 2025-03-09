@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useRef, Dispatch, SetStateAction } from "react";
+import { useState, useRef, Dispatch, SetStateAction, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ResumeDataType } from "./ResumeBuilder";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ResumePreviewProps {
   loading: boolean;
@@ -66,8 +68,23 @@ export default function ResumePreview({
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [showNewSectionDialog, setShowNewSectionDialog] =
     useState<boolean>(false);
+  const [showReassurance, setShowReassurance] = useState<boolean>(false);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (loading) {
+      timeoutId = setTimeout(() => {
+        setShowReassurance(true);
+      }, 7000);
+    } else {
+      setShowReassurance(false);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [loading]);
 
   const handleSaveResume = async (resume: ResumeDataType, resumeId: string) => {
     saveResume(resume, resumeId).then(({ error }) => {
@@ -554,9 +571,46 @@ export default function ResumePreview({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[600px] w-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="mt-4 text-lg">{t("buildingChatbot")}</p>
+      <div className="flex flex-col items-center justify-center h-full w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border p-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {t("updating.title")}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300">
+              {t("updating.description")}
+            </p>
+            {showReassurance && (
+              <p className="text-gray-600 dark:text-gray-300 mt-2 animate-fade-in">
+                {t("updating.reassurance", {
+                  defaultValue:
+                    "We're still working on it, just a little longer...",
+                })}
+              </p>
+            )}
+          </div>
+
+          {/* Decorative Elements */}
+          <div className="relative mt-12">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="w-32 h-32 rounded-full bg-primary/10 blur-xl"
+              />
+            </div>
+            <div className="relative z-10 flex justify-center">
+              <LoadingSpinner size="xl" className="text-primary" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
