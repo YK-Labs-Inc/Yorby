@@ -32,6 +32,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from "ai";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -455,7 +456,8 @@ export default function ResumeBuilder({
       ...prev,
       {
         role: "assistant",
-        content: "...",
+        content: "",
+        isLoading: true,
       },
     ]);
 
@@ -541,7 +543,8 @@ export default function ResumeBuilder({
       ...prev,
       {
         role: "assistant",
-        content: "...",
+        content: "",
+        isLoading: true,
       },
     ]);
 
@@ -676,9 +679,15 @@ export default function ResumeBuilder({
                           : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transform hover:scale-[1.02]"
                       }`}
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.content as string}
-                      </ReactMarkdown>
+                      {(message as any).isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <LoadingSpinner variant="muted" />
+                        </div>
+                      ) : (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {message.content as string}
+                        </ReactMarkdown>
+                      )}
                     </div>
                   </motion.div>
                 ))}
