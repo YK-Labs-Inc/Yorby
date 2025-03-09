@@ -1028,6 +1028,11 @@
         "subtitle": "Subtitle",
         "name": "Name"
       }
+    },
+    "updating": {
+      "title": "✨ Building Your Resume",
+      "description": "This could take a few seconds...",
+      "reassurance": "We're still working on it, just a little longer..."
     }
   }
 }

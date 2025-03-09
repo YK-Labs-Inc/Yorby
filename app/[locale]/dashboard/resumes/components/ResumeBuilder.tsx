@@ -513,11 +513,13 @@ export default function ResumeBuilder({
   };
 
   const sendMessage = async () => {
+    setIsGenerating(true);
     if (resumeId) {
-      sendEditMessage();
+      await sendEditMessage();
     } else {
-      sendInterviewMessage();
+      await sendInterviewMessage();
     }
+    setIsGenerating(false);
   };
 
   const sendEditMessage = async () => {
@@ -626,7 +628,6 @@ export default function ResumeBuilder({
           content: t("errors.resumeGenerationError"),
         },
       ]);
-    } finally {
       setIsGenerating(false);
     }
   };
