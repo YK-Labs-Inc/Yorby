@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from "ai";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import * as Sentry from "@sentry/nextjs";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -435,7 +436,10 @@ export default function ResumeBuilder({
     setTextInput(e.target.value);
   };
 
-  const sendInterviewMessage = async (transcription?: string) => {
+  const sendInterviewMessage = async (
+    transcription?: string,
+    retryCount = 0
+  ) => {
     const messageContent = transcription || textInput;
     if (!messageContent.trim() || isGenerating) return;
 
@@ -496,33 +500,34 @@ export default function ResumeBuilder({
       }
     } catch (error) {
       logError("Error in AI resume conversation:", { error });
+
+      // Remove the temporary loading message
+      setMessages((prev) => prev.slice(0, -1));
+
+      if (retryCount < 2) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: t("errors.resumeGenerationRetryMessage"),
+          },
+        ]);
+        return sendInterviewMessage(messageContent, retryCount + 1);
+      }
+
       // Update the last message to show the error
-      setMessages((prev) => {
-        const updatedMessages = [...prev];
-        updatedMessages[updatedMessages.length - 1] = {
+      setMessages((prev) => [
+        ...prev,
+        {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        };
-        return updatedMessages;
-      });
+          content: t("errors.resumeGenerationError"),
+        },
+      ]);
+      Sentry.captureException(error);
     }
   };
 
-  const handleSendButtonClick = () => {
-    sendMessage();
-  };
-
-  const sendMessage = async () => {
-    setIsGenerating(true);
-    if (resumeId) {
-      await sendEditMessage();
-    } else {
-      await sendInterviewMessage();
-    }
-    setIsGenerating(false);
-  };
-
-  const sendEditMessage = async () => {
+  const sendEditMessage = async (retryCount = 0) => {
     if (!resumeId) {
       logError("No resume found");
       throw new Error("No resume found");
@@ -550,26 +555,22 @@ export default function ResumeBuilder({
       },
     ]);
 
-    const response = await fetch("/api/resume/edit", {
-      method: "POST",
-      body: JSON.stringify({
-        resume: resume,
-        userMessage: messageContent,
-      }),
-    });
+    try {
+      const response = await fetch("/api/resume/edit", {
+        method: "POST",
+        body: JSON.stringify({
+          resume: resume,
+          userMessage: messageContent,
+        }),
+      });
 
-    setMessages((prev) => prev.slice(0, -1));
+      // Remove the temporary loading message
+      setMessages((prev) => prev.slice(0, -1));
 
-    // Add the AI response as a new message
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
 
-    if (!response.ok) {
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: t("errors.resumeEditError"),
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
-    } else {
       const data = await response.json();
       const { updatedResume, aiResponse } = data;
       const aiMessage: CoreAssistantMessage = {
@@ -580,7 +581,43 @@ export default function ResumeBuilder({
       setMessages((prev) => [...prev, aiMessage]);
       setResume(updatedResume);
       void saveResume(updatedResume, resumeId);
+    } catch (error) {
+      // Remove the temporary loading message
+      setMessages((prev) => prev.slice(0, -1));
+
+      if (retryCount < 2) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: t("errors.resumeGenerationRetryMessage"),
+          },
+        ]);
+        return sendEditMessage(retryCount + 1);
+      }
+
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: t("errors.resumeEditError"),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      Sentry.captureException(error);
     }
+  };
+
+  const handleSendButtonClick = () => {
+    sendMessage();
+  };
+
+  const sendMessage = async () => {
+    setIsGenerating(true);
+    if (resumeId) {
+      await sendEditMessage();
+    } else {
+      await sendInterviewMessage();
+    }
+    setIsGenerating(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -590,7 +627,10 @@ export default function ResumeBuilder({
     }
   };
 
-  const generateResume = async (conversationHistory: CoreMessage[]) => {
+  const generateResume = async (
+    conversationHistory: CoreMessage[],
+    retryCount = 0
+  ) => {
     setIsGenerating(true);
     try {
       const response = await fetch("/api/resume/generate", {
@@ -613,7 +653,7 @@ export default function ResumeBuilder({
         error?: string;
       };
       if (error) {
-        alert(error);
+        throw error;
       }
       if (!resumeId) {
         throw new Error("No resume ID returned from server");
@@ -621,6 +661,18 @@ export default function ResumeBuilder({
       router.replace(`/dashboard/resumes/${resumeId}`);
     } catch (error) {
       logError("Error generating resume:", { error });
+
+      if (retryCount < 2) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: t("errors.resumeGenerationRetryMessage"),
+          },
+        ]);
+        return generateResume(conversationHistory, retryCount + 1);
+      }
+
       setMessages((prev) => [
         ...prev,
         {
@@ -629,6 +681,7 @@ export default function ResumeBuilder({
         },
       ]);
       setIsGenerating(false);
+      Sentry.captureException(error);
     }
   };
 
