@@ -990,7 +990,8 @@
       "resumeSaveError": "Error saving resume. Please try again.",
       "auth": "You must be logged in to save your resume",
       "insufficientCredits": "You don't have enough credits to unlock this resume. Please purchase more credits.",
-      "generic": "Sorry, something went wrong. Please try again."
+      "generic": "Sorry, something went wrong. Please try again.",
+      "resumeGenerationRetryMessage": "Hmm, something went wrong trying to build your resume. Let me try again."
     },
     "success": {
       "resumeSave": "Resume saved",
