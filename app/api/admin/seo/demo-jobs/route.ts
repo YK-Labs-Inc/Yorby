@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
-import { SchemaType } from "@google/generative-ai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Client } from "@notionhq/client";
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
@@ -12,8 +10,6 @@ import { z } from "zod";
 
 // Use require for csv-parse as it doesn't have TypeScript types
 const { parse } = require("csv-parse/sync");
-
-export const maxDuration = 300;
 
 interface JobRecord {
   jobTitle: string;
@@ -362,7 +358,7 @@ const generateDemoJobQuestions = async ({
             metaDescription,
             metaTitle,
             blogIntro: metaDescription,
-            questions: questions.slice(0, 5),
+            questions: questions.slice(0, 4),
             demoJobId,
           });
         } else if (companyName) {
