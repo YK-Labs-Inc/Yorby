@@ -5,6 +5,7 @@ import { ResumeDataType } from "./components/ResumeBuilder";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
+import { revalidatePath } from "next/cache";
 
 export async function saveResumeServerAction(
   prevState: { error?: string },
@@ -339,3 +340,31 @@ export const fetchResume = async (resumeId: string) => {
   }
   return resumeData;
 };
+
+export async function verifyAnonymousUser(prevState: any, formData: FormData) {
+  const captchaToken = formData.get("captchaToken") as string;
+  const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("resumeBuilder");
+  const logger = new Logger().with({
+    function: "verifyAnonymousUser",
+    captchaToken,
+  });
+  try {
+    const { data, error } = await supabase.auth.signInAnonymously({
+      options: {
+        captchaToken,
+      },
+    });
+
+    if (error || !data) {
+      logger.error("Error verifying anonymous user", { error });
+      await logger.flush();
+      return { error: t("errors.generic") };
+    }
+  } catch (error) {
+    logger.error("Error verifying anonymous user", { error });
+    await logger.flush();
+    return { error: t("errors.generic") };
+  }
+  revalidatePath("/dashboard/resumes");
+}

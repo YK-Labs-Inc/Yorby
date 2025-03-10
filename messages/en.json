@@ -1034,6 +1034,11 @@
       "title": "✨ Building Your Resume",
       "description": "This could take a few seconds...",
       "reassurance": "We're still working on it, just a little longer..."
+    },
+    "verification": {
+      "title": "Before We Build Your Resume, Please Verify You Are A Real Human",
+      "description": "This helps us prevent bots from creating fake accounts and building resumes — we hope you understand 🙂",
+      "submit": "Verify You're Human"
     }
   }
 }
