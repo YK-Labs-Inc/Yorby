@@ -2,7 +2,6 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { fetchUserCredits } from "./actions";
 import { fetchHasSubscription } from "./actions";
 import ResumeBuilder from "./components/ResumeBuilder";
-import { VerificationDialog } from "./components/VerificationDialog";
 
 export default async function ResumesPage() {
   const supabase = await createSupabaseServerClient();
@@ -17,13 +16,10 @@ export default async function ResumesPage() {
   }
 
   return (
-    <>
-      <ResumeBuilder
-        hasSubscription={hasSubscription}
-        credits={credits}
-        user={user}
-      />
-      {!user && <VerificationDialog />}
-    </>
+    <ResumeBuilder
+      hasSubscription={hasSubscription}
+      credits={credits}
+      user={user}
+    />
   );
 }

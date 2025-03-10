@@ -5,7 +5,7 @@ import { ResumeDataType } from "./components/ResumeBuilder";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function saveResumeServerAction(
   prevState: { error?: string },
@@ -366,5 +366,5 @@ export async function verifyAnonymousUser(prevState: any, formData: FormData) {
     await logger.flush();
     return { error: t("errors.generic") };
   }
-  revalidatePath("/dashboard/resumes");
+  redirect("/dashboard/resumes");
 }
