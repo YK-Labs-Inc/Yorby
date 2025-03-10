@@ -25,7 +25,7 @@ export default async function InterviewCopilotsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const userCredits = await fetchUserCredits(user.id);
