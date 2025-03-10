@@ -301,6 +301,7 @@ export default function ResumeBuilder({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isInterviewing, setIsInterviewing] = useState<boolean>(false);
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -611,13 +612,15 @@ export default function ResumeBuilder({
   };
 
   const sendMessage = async () => {
-    setIsGenerating(true);
     if (resumeId) {
+      setIsGenerating(true);
       await sendEditMessage();
+      setIsGenerating(false);
     } else {
+      setIsInterviewing(true);
       await sendInterviewMessage();
+      setIsInterviewing(false);
     }
-    setIsGenerating(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -687,6 +690,9 @@ export default function ResumeBuilder({
 
   // Update the shouldShowSplitView logic to include isGenerating
   const shouldShowSplitView = resumeId || isGenerating;
+  const isLocked = Boolean(
+    resume && resume?.locked_status === "locked" && !hasSubscription
+  );
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -795,7 +801,7 @@ export default function ResumeBuilder({
                       onKeyDown={handleKeyDown}
                       className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
                       rows={3}
-                      disabled={isGenerating}
+                      disabled={isGenerating || isInterviewing || isLocked}
                     />
                     <div className="flex justify-end space-x-3 px-1">
                       <Button
@@ -804,7 +810,7 @@ export default function ResumeBuilder({
                         type="button"
                         className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center"
                         onClick={handleRecordingToggle}
-                        disabled={isGenerating}
+                        disabled={isGenerating || isInterviewing || isLocked}
                       >
                         <Mic className="h-4 w-4" />
                       </Button>
@@ -816,7 +822,9 @@ export default function ResumeBuilder({
                         disabled={
                           (!textInput.trim() && !isRecording) ||
                           isGenerating ||
-                          (!user && !captchaToken)
+                          isInterviewing ||
+                          (!user && !captchaToken) ||
+                          isLocked
                         }
                       >
                         <Send className="h-4 w-4" />
