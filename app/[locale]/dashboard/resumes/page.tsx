@@ -9,8 +9,12 @@ export default async function ResumesPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const hasSubscription = await fetchHasSubscription(user?.id || "");
-  const credits = await fetchUserCredits(user?.id || "");
+  let hasSubscription = false;
+  let credits = 0;
+  if (user) {
+    hasSubscription = await fetchHasSubscription(user.id || "");
+    credits = await fetchUserCredits(user.id || "");
+  }
 
   return (
     <>
