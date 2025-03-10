@@ -12,15 +12,14 @@ export default async function ResumesPage() {
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const credits = await fetchUserCredits(user?.id || "");
 
-  if (!user) {
-    return <VerificationDialog />;
-  }
-
   return (
-    <ResumeBuilder
-      hasSubscription={hasSubscription}
-      credits={credits}
-      user={user}
-    />
+    <>
+      <ResumeBuilder
+        hasSubscription={hasSubscription}
+        credits={credits}
+        user={user}
+      />
+      {!user && <VerificationDialog />}
+    </>
   );
 }

@@ -17,14 +17,13 @@ import { Button } from "@/components/ui/button";
 export function VerificationDialog() {
   const t = useTranslations("resumeBuilder");
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const [open, setOpen] = useState(true);
   const [state, formAction, pending] = useActionState(verifyAnonymousUser, {
     error: "",
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+    <Dialog open={true}>
+      <DialogContent hideClose>
         <DialogHeader>
           <DialogTitle>{t("verification.title")}</DialogTitle>
           <DialogDescription>{t("verification.description")}</DialogDescription>
