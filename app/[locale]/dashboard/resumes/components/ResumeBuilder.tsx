@@ -26,12 +26,11 @@ import { FormMessage, Message } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
 import { saveResume, unlockResume } from "../actions";
 import { User } from "@supabase/supabase-js";
-import { Turnstile } from "@marsidev/react-turnstile";
 import { linkAnonymousAccount } from "@/components/auth/actions";
 import { SubmitButton } from "@/components/submit-button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CoreAssistantMessage, CoreMessage, CoreUserMessage } from "ai";
+import { CoreAssistantMessage, CoreMessage } from "ai";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import * as Sentry from "@sentry/nextjs";
 
@@ -304,7 +303,6 @@ export default function ResumeBuilder({
   const [isInterviewing, setIsInterviewing] = useState<boolean>(false);
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
@@ -643,7 +641,6 @@ export default function ResumeBuilder({
         },
         body: JSON.stringify({
           messages: conversationHistory,
-          captchaToken,
         }),
       });
 
@@ -823,7 +820,6 @@ export default function ResumeBuilder({
                           (!textInput.trim() && !isRecording) ||
                           isGenerating ||
                           isInterviewing ||
-                          (!user && !captchaToken) ||
                           isLocked
                         }
                       >
@@ -834,16 +830,6 @@ export default function ResumeBuilder({
                 )}
               </AnimatePresence>
             </div>
-            {!user && (
-              <div className="mt-4">
-                <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                  onSuccess={(token) => {
-                    setCaptchaToken(token);
-                  }}
-                />
-              </div>
-            )}
           </Card>
         </div>
 
