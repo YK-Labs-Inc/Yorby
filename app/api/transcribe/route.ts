@@ -10,8 +10,6 @@ import { generateTextWithFallback } from "@/utils/ai/gemini";
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
 
-const MAX_INLINE_SIZE = 15 * 1024 * 1024; // 15MB in bytes
-
 export const POST = withAxiom(async (request: AxiomRequest) => {
   let logger = request.log.with({
     method: request.method,
@@ -19,18 +17,23 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
   });
   try {
     const formData = await request.formData();
-    const audioFile = formData.get("audio") as File;
+    const audioFileToTranscribe = formData.get(
+      "audioFileToTranscribe"
+    ) as File | null;
+    const filePath = formData.get("filePath") as string | null;
     const source = formData.get("source") as string;
-    if (!audioFile) {
+    const supabase = await createSupabaseServerClient();
+    if (!audioFileToTranscribe && !filePath) {
+      logger.error("No audio file or file path provided");
       return NextResponse.json(
-        { error: "No audio file provided" },
+        { error: "No audio file or file path provided" },
         { status: 400 }
       );
     }
 
-    let transcription: string;
+    let transcription: string = "";
 
-    if (audioFile.size < MAX_INLINE_SIZE) {
+    if (audioFileToTranscribe) {
       logger.info("Processing audio in line");
       const result = await generateTextWithFallback({
         messages: [
@@ -43,35 +46,50 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
               },
               {
                 type: "file",
-                mimeType: audioFile.type,
-                data: await audioFile.arrayBuffer(),
+                mimeType: audioFileToTranscribe.type,
+                data: await audioFileToTranscribe.arrayBuffer(),
               },
             ],
           },
         ],
         systemPrompt: "",
         loggingContext: {
-          audioFile,
+          audioFileToTranscribe,
           source,
         },
       });
       transcription = result;
       logger = logger.with({ transcription });
-    } else {
+    } else if (filePath) {
+      const { data: audioFile, error: downloadError } = await supabase.storage
+        .from("temp-audio-recordings")
+        .download(filePath);
+
+      if (downloadError) {
+        logger.error("Error downloading audio file:", { error: downloadError });
+        return NextResponse.json(
+          { error: "Failed to download audio file" },
+          { status: 500 }
+        );
+      }
+
       logger.info("Processing audio in file upload");
       const blob = new Blob([audioFile], { type: audioFile.type });
-      const formData = new FormData();
+      const geminiFormData = new FormData();
       const metadata = {
-        file: { mimeType: audioFile.type, displayName: audioFile.name },
+        file: {
+          mimeType: audioFile.type,
+          displayName: filePath.split("/").pop() || "audio.webm",
+        },
       };
-      formData.append(
+      geminiFormData.append(
         "metadata",
         new Blob([JSON.stringify(metadata)], { type: "application/json" })
       );
-      formData.append("file", blob);
+      geminiFormData.append("file", blob);
       const res2 = await fetch(
         `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${GEMINI_API_KEY}`,
-        { method: "post", body: formData }
+        { method: "post", body: geminiFormData }
       );
       const geminiUploadResponse = (await res2.json()) as UploadResponse;
 
@@ -95,7 +113,6 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         ],
         systemPrompt: "",
         loggingContext: {
-          audioFile,
           source,
         },
       });
@@ -108,7 +125,6 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     logger.info("Transcription complete");
 
-    const supabase = await createSupabaseServerClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

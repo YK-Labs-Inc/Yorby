@@ -1,6 +1,8 @@
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useState, useRef, useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
+const MAX_INLINE_SIZE = 3.5 * 1024 * 1024; // 3.5MB in bytes
 interface UseVoiceRecordingProps {
   onTranscription: (transcription: string) => void;
   t?: (key: string) => string; // Add optional translation function
@@ -187,33 +189,94 @@ export function useVoiceRecording({
       if (shouldProcessAudio && audioChunks.length > 0) {
         setIsProcessing(true);
 
-        // Process recorded audio for transcription
-        const audioBlob = new Blob(audioChunks, {
-          type: "audio/webm",
-        });
-        const formData = new FormData();
-        formData.append("audio", audioBlob);
-        formData.append("source", "resume-builder");
+        try {
+          // Create audio blob
+          const audioBlob = new Blob(audioChunks, {
+            type: "audio/webm",
+          });
 
-        const response = await fetch("/api/transcribe", {
-          method: "POST",
-          body: formData,
-        });
+          // Get current user and session
+          const supabase = createSupabaseBrowserClient();
+          if (audioBlob.size < MAX_INLINE_SIZE) {
+            const formData = new FormData();
+            formData.append("audioFileToTranscribe", audioBlob);
+            formData.append("source", "resume-builder");
 
-        if (response.ok) {
-          const data = await response.json();
-          onTranscription(data.transcription);
-        } else {
-          throw new Error(`Transcription failed: ${response.status}`);
+            const response = await fetch("/api/transcribe", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              if (response.status === 400) {
+                alert(messages.recordingError);
+              } else {
+                throw new Error(`Transcription failed: ${response.status}`);
+              }
+            }
+
+            const { transcription } = (await response.json()) as {
+              transcription: string;
+            };
+            onTranscription(transcription);
+          } else {
+            const filePath = `${crypto.randomUUID()}.webm`;
+
+            // Upload to Supabase storage
+            const { error: uploadError } = await supabase.storage
+              .from("temp-audio-recordings")
+              .upload(filePath, audioBlob);
+
+            if (uploadError) {
+              logError("Error uploading audio file:", { error: uploadError });
+              return;
+            }
+
+            // Send file path to transcription API
+            const formData = new FormData();
+            formData.append("filePath", filePath);
+            formData.append("source", "resume-builder");
+
+            const response = await fetch("/api/transcribe", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              if (response.status === 400) {
+                alert(messages.recordingError);
+              } else {
+                throw new Error(`Transcription failed: ${response.status}`);
+              }
+            }
+
+            const { transcription } = (await response.json()) as {
+              transcription: string;
+            };
+            onTranscription(transcription);
+
+            // Clean up - delete the temporary file
+            await supabase.storage
+              .from("temp-audio-recordings")
+              .remove([filePath]);
+          }
+        } catch (error) {
+          logError("Error processing audio:", { error });
+        } finally {
+          setIsProcessing(false);
+          setShouldProcessAudio(false);
+          setAudioChunks([]);
         }
-        setIsProcessing(false);
-        setShouldProcessAudio(false); // Reset the flag after processing
-        setAudioChunks([]);
       }
     };
 
     processAudio();
-  }, [audioChunks, shouldProcessAudio, onTranscription]);
+  }, [
+    audioChunks,
+    shouldProcessAudio,
+    onTranscription,
+    messages.recordingError,
+  ]);
 
   return {
     startRecording,
