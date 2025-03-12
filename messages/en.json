@@ -1058,15 +1058,29 @@
     },
     "endDialog": {
       "title": "Interview Copilot Demo Completed",
-      "callToAction": "Create your own Interview Copilot to ace your next interview.",
-      "button": "Create Interview Copilot"
+      "callToAction": "Create a Perfect Interview account so you can make your own Interview Copilot to ace your next interview.",
+      "button": "Create An Account"
     },
     "fileUpload": {
       "title": "Welcome To The Interview Copilot Demo",
       "description": "Upload your resume to see how the Interview Copilot works.",
       "helper": "PDF files only, maximum 4MB",
       "button": "Upload Resume",
-      "uploading": "Uploading..."
+      "uploading": "Uploading...",
+      "previewButton": "Preview demo resume",
+      "demoButton": "Try with demo resume",
+      "demoHelper": "No resume on hand? Test the feature with our sample resume",
+      "previewModal": {
+        "title": "Demo Resume Preview",
+        "fallback": "Unable to display PDF.",
+        "openInNewTab": "Click here to open in new tab"
+      },
+      "errors": {
+        "pdfOnly": "Only PDF files are allowed",
+        "fileSize": "File size must be less than 4MB",
+        "uploadFailed": "Failed to upload file",
+        "demoFailed": "Failed to load demo resume"
+      }
     }
   }
 }
