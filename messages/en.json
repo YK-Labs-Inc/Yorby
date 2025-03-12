@@ -844,6 +844,11 @@
         "questionNumber": "Question {number}",
         "answerLabel": "AI's Answer"
       }
+    },
+    "demo": {
+      "title": "See How The Interview Copilot Can Help You",
+      "description": "Experience how Interview Copilot can help you out in your next interview. Try out our Interview Copilot demo before creating your own.",
+      "button": "Try Demo"
     }
   },
   "FeatureHighlightsV2": {
@@ -884,7 +889,7 @@
         "title": "Your Own Personal Interview Copilot",
         "description": "Interview Copilot listens in on your interview and answers interview questions for you in real-time based off of your previous work history to make sure you crush your job interview",
         "note": "Don't worry — it is 100% undetectable so this can be our little secret 🤫",
-        "tryButton": "Try Interview Copilot",
+        "tryButton": "Try The Interview Copilot Demo",
         "features": {
           "aiGuidance": {
             "title": "Real-time AI Answers",
@@ -1081,6 +1086,10 @@
         "uploadFailed": "Failed to upload file",
         "demoFailed": "Failed to load demo resume"
       }
+    },
+    "mobileWarning": {
+      "title": "Interview Copilot Demo Only Works On Desktop 😬",
+      "description": "Please switch to a desktop device to try the Interview Copilot demo."
     }
   }
 }

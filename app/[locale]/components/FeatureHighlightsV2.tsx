@@ -267,7 +267,7 @@ export default function FeatureHighlight() {
                     </div>
 
                     <div className="flex justify-center mt-12">
-                      <Link href="/sign-in">
+                      <Link href="/interview-copilot-demo">
                         <Button
                           size="lg"
                           className="bg-primary hover:bg-primary/90 text-lg px-12"
