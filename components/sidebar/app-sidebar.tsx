@@ -30,6 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 interface AppSidebarProps {
   numberOfCredits: number;
@@ -207,6 +208,20 @@ export function AppSidebar({
               {t("signIn")}
             </Button>
           </div>
+        )}
+        {/* Temporary Logout Button */}
+        {user && (
+          <Button
+            onClick={async () => {
+              const supabase = createSupabaseBrowserClient();
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            variant="destructive"
+            className="w-full mt-2"
+          >
+            Temporary Logout
+          </Button>
         )}
       </SidebarFooter>
       <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />

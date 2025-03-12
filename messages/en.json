@@ -1046,5 +1046,27 @@
       "description": "This helps us prevent bots from creating fake accounts and building resumes — we hope you understand 🙂",
       "submit": "Verify You're Human"
     }
+  },
+  "interviewCopilotDemo": {
+    "verifyUser": {
+      "title": "Before we start the Interview Copilot demo, please verify you are a real human",
+      "submit": "Verify You're Human",
+      "submitting": "Verifying..."
+    },
+    "errors": {
+      "generic": "Sorry, something went wrong. Please try again."
+    },
+    "endDialog": {
+      "title": "Interview Copilot Demo Completed",
+      "callToAction": "Create your own Interview Copilot to ace your next interview.",
+      "button": "Create Interview Copilot"
+    },
+    "fileUpload": {
+      "title": "Welcome To The Interview Copilot Demo",
+      "description": "Upload your resume to see how the Interview Copilot works.",
+      "helper": "PDF files only, maximum 4MB",
+      "button": "Upload Resume",
+      "uploading": "Uploading..."
+    }
   }
 }

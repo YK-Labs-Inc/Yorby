@@ -330,6 +330,30 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_copilot_demo_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          google_file_mime_type: string
+          google_file_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          google_file_mime_type: string
+          google_file_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          google_file_mime_type?: string
+          google_file_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       interview_copilot_files: {
         Row: {
           created_at: string
