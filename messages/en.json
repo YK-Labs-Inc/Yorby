@@ -937,8 +937,32 @@
     "title": "Chat To Resume",
     "description": "I'll help you build a professional resume by asking you a series of questions. Just answer in conversational style, and I'll take care of formatting your resume.",
     "landingPage": {
-      "title": "You Do The Talking, And We'll Build Your Resume",
-      "description": "Have a conversation with our AI assistant, tell us a little bit about yourself, and we'll create a perfectly formatted custom resume for you.",
+      "title": "You Yap. We'll Build Your Resume.",
+      "description": "Talk to our AI assistant, tell us a little bit about yourself, and we'll create a perfectly formatted custom resume for you.",
+      "features": {
+        "conversation": {
+          "title": "Natural Conversation",
+          "description": "Tell us about your experience (with either your voice or typing) and our AI will find all of the important details for your resume."
+        },
+        "formatting": {
+          "title": "Perfect Formatting Guaranteed",
+          "description": "We make resumes that are 100% compliant with the latest resume writing standards."
+        },
+        "time": {
+          "title": "Save Hours of Time",
+          "description": "No more typing and manual editing. Tell us what edits to make using natural language and we'll take care of the rest."
+        }
+      },
+      "testimonials": {
+        "title": "What Users Are Saying",
+        "cta": {
+          "title": "Ready to Build Your Perfect Resume?",
+          "description": "Join thousands of others who have already created winning resumes through our AI-powered platform."
+        }
+      },
+      "stats": {
+        "users": "3,200+ Resumes Created"
+      },
       "cta": "Build Your Resume",
       "ctaPending": "Building..."
     },
