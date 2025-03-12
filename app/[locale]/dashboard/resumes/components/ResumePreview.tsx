@@ -125,11 +125,11 @@ export default function ResumePreview({
       // Set white background explicitly and optimize for PDF generation
       element.style.backgroundColor = "white";
       element.style.border = "none";
-      element.style.padding = "20px";
+      element.style.padding = "10px 10px 20px 10px";
       // A4 size in mm (210mm x 297mm), accounting for margins
-      element.style.width = "170mm"; // Reduced from 210mm to account for margins
+      element.style.width = "190mm";
       element.style.margin = "auto";
-      element.style.minHeight = "297mm"; // A4 height
+      element.style.minHeight = "297mm";
       element.style.height = "fit-content";
       element.style.position = "relative";
       element.style.maxWidth = "100%";
@@ -137,16 +137,16 @@ export default function ResumePreview({
 
       // Configure pdf options
       const opt = {
-        margin: [15, 20], // Increased horizontal margins (top/bottom, left/right)
+        margin: [10, 10, 20, 10],
         filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: {
-          scale: 4, // Increased scale for better quality
+          scale: 4,
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
           windowWidth: element.scrollWidth,
-          windowHeight: element.scrollHeight,
+          windowHeight: element.scrollHeight + 40,
           logging: false,
           removeContainer: true,
           onclone: (clonedDoc: Document) => {
@@ -156,10 +156,11 @@ export default function ResumePreview({
             if (clonedElement) {
               clonedElement.style.height = "auto";
               clonedElement.style.overflow = "visible";
-              clonedElement.style.width = "170mm";
+              clonedElement.style.width = "190mm";
               clonedElement.style.margin = "auto";
               clonedElement.style.maxWidth = "100%";
               clonedElement.style.wordWrap = "break-word";
+              clonedElement.style.padding = "10px 10px 20px 10px";
             }
           },
         },
