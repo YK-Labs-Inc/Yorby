@@ -35,12 +35,21 @@ import {
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { jsPDF } from "jspdf";
 
 interface ResumePreviewProps {
   loading: boolean;
   resume: ResumeDataType;
   setResume: Dispatch<SetStateAction<ResumeDataType | null>>;
   resumeId: string;
+}
+
+interface Html2PdfInstance {
+  from: (element: HTMLElement) => Html2PdfInstance;
+  set: (options: any) => Html2PdfInstance;
+  toPdf: () => Html2PdfInstance;
+  get: (type: string) => Promise<jsPDF>;
+  save: () => Promise<void>;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -117,9 +126,12 @@ export default function ResumePreview({
       element.style.backgroundColor = "white";
       element.style.border = "none";
       element.style.padding = "20px";
-      element.style.width = "210mm"; // A4 width
+      // A4 size in mm (210mm x 297mm)
+      element.style.width = "210mm";
       element.style.margin = "0";
-      element.style.height = "auto"; // Let height be determined by content
+      element.style.minHeight = "297mm"; // A4 height
+      element.style.height = "fit-content";
+      element.style.position = "relative";
 
       // Configure pdf options
       const opt = {
@@ -127,14 +139,23 @@ export default function ResumePreview({
         filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: {
-          scale: 2,
+          scale: 4, // Increased scale for better quality
           useCORS: true,
           letterRendering: true,
-          scrollY: -window.scrollY,
+          scrollY: 0,
           windowWidth: element.scrollWidth,
           windowHeight: element.scrollHeight,
           logging: false,
-          removeContainer: true, // Remove the temporary container after rendering
+          removeContainer: true,
+          onclone: (clonedDoc: Document) => {
+            const clonedElement = clonedDoc.querySelector(
+              "[data-pdf-content]"
+            ) as HTMLElement;
+            if (clonedElement) {
+              clonedElement.style.height = "auto";
+              clonedElement.style.overflow = "visible";
+            }
+          },
         },
         jsPDF: {
           unit: "mm",
@@ -144,17 +165,20 @@ export default function ResumePreview({
           putOnlyUsedFonts: true,
           precision: 16,
           floatPrecision: 16,
+          hotfixes: ["px_scaling"],
         },
         pagebreak: {
           mode: ["avoid-all", "css", "legacy"],
           before: ".page-break",
           avoid: ["tr", "td", ".description-item"],
           after: [".avoid-break-after"],
+          allowTags: ["DIV", "P", "LI", "UL"],
         },
       };
 
-      // Generate PDF
-      await html2pdf().set(opt).from(element).save();
+      // Generate PDF with page numbers
+      const worker = html2pdf();
+      worker.from(element).set(opt).save();
 
       // Restore dark mode if it was enabled
       if (currentTheme) {
@@ -677,6 +701,7 @@ export default function ResumePreview({
 
       <div
         ref={resumeRef}
+        data-pdf-content
         className="flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 max-h-[750px]"
       >
         {/* Basic Information Section */}
