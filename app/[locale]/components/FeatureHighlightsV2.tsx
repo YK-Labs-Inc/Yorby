@@ -198,12 +198,15 @@ export default function FeatureHighlight() {
                     className="relative mb-12"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1000px] mx-auto">
-                      <img
-                        src="/assets/interview-copilot-demo.png"
-                        alt="Interview Copilot Demo"
+                      <video
+                        src="/assets/interview-copilot-demo.mp4"
                         className="w-full"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        controls
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     </div>
                   </motion.div>
 
