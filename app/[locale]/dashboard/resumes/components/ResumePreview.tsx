@@ -126,16 +126,18 @@ export default function ResumePreview({
       element.style.backgroundColor = "white";
       element.style.border = "none";
       element.style.padding = "20px";
-      // A4 size in mm (210mm x 297mm)
-      element.style.width = "210mm";
-      element.style.margin = "0";
+      // A4 size in mm (210mm x 297mm), accounting for margins
+      element.style.width = "170mm"; // Reduced from 210mm to account for margins
+      element.style.margin = "auto";
       element.style.minHeight = "297mm"; // A4 height
       element.style.height = "fit-content";
       element.style.position = "relative";
+      element.style.maxWidth = "100%";
+      element.style.wordWrap = "break-word";
 
       // Configure pdf options
       const opt = {
-        margin: [15, 15], // Slightly larger margins for better readability
+        margin: [15, 20], // Increased horizontal margins (top/bottom, left/right)
         filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
         image: { type: "jpeg", quality: 1 },
         html2canvas: {
@@ -154,6 +156,10 @@ export default function ResumePreview({
             if (clonedElement) {
               clonedElement.style.height = "auto";
               clonedElement.style.overflow = "visible";
+              clonedElement.style.width = "170mm";
+              clonedElement.style.margin = "auto";
+              clonedElement.style.maxWidth = "100%";
+              clonedElement.style.wordWrap = "break-word";
             }
           },
         },
