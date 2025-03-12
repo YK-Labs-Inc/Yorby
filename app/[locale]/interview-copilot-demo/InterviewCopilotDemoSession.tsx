@@ -24,7 +24,6 @@ export default function InterviewCopilotDemoSession({
   uploadResponse: UploadResponse | null;
   signedUrl: string;
 }) {
-  const isMobile = useIsMobile();
   const [hasStarted, setHasStarted] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const t = useTranslations("interviewCopilots.session");
@@ -234,14 +233,6 @@ export default function InterviewCopilotDemoSession({
     // Cleanup
   }, [transcript, questionsWithAnswers]);
 
-  if (isMobile) {
-    return (
-      <div className="h-full w-full flex flex-col justify-center items-center">
-        <MobileWarning />
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-3">
@@ -350,14 +341,3 @@ export default function InterviewCopilotDemoSession({
     </div>
   );
 }
-
-const MobileWarning = () => {
-  const t = useTranslations("interviewCopilots.mobileWarning");
-  return (
-    <div className="flex flex-col items-center justify-center p-8 text-center gap-4 rounded-lg border bg-card text-card-foreground shadow-sm">
-      <Monitor className="h-12 w-12 text-muted-foreground" />
-      <h2 className="text-xl font-semibold">{t("title")}</h2>
-      <p className="text-muted-foreground">{t("description")}</p>
-    </div>
-  );
-};
