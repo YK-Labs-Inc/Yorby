@@ -1128,13 +1128,19 @@
       "editResumeInitialMessage": "Here is a sample resume — feel free to edit using one of the predefined edits below. When building your own resume, you can make any changes you want.",
       "errors": {
         "rateLimitMessage": "You've hit the rate limit for the demo — please make your own resume to continue using the tool 😊"
-      }
+      },
+      "createYourOwnResume": "Create Your Own Resume"
     },
     "demoTitle": "See How The Resume Builder Works",
     "demoDescription": "Experience how the resume builder works with one of our sample resumes.",
     "demoCta": "Try Demo"
   },
   "interviewCopilotDemo": {
+    "session": {
+      "title": "Interview Copilot Demo",
+      "cta": "Start Interview Copilot",
+      "createYourOwnInterviewCopilot": "Create Your Own Interview Copilot"
+    },
     "verifyUser": {
       "title": "Before we start the Interview Copilot demo, please verify you are a real human",
       "submit": "Verify You're Human",

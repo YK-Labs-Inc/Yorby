@@ -237,11 +237,26 @@ export default function InterviewCopilotDemoSession({
     <div className="flex h-screen flex-col">
       <header className="flex items-center justify-between border-b px-6 py-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-medium">Interview Co-pilot Demo</h1>
+          <h1 className="text-lg font-medium">
+            {demoT("session.title") || "Interview Co-pilot Demo"}
+          </h1>
         </div>
-        <Button onClick={startSession} disabled={hasStarted} className="ml-4">
-          Start Interview Copilot
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={startSession}
+            disabled={hasStarted}
+            className="ml-4"
+            variant="outline"
+          >
+            {demoT("session.cta") || "Start Interview Copilot"}
+          </Button>
+          <Link href="/sign-in" className="w-full">
+            <Button>
+              {demoT("session.createYourOwnInterviewCopilot") ||
+                "Create Your Own Interview Copilot"}
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
