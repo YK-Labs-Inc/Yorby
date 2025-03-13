@@ -202,16 +202,10 @@ export function AppSidebar({
           <UserMenu email={user.email} hasSubscription={hasSubscription} />
         )}{" "}
         {user && user?.is_anonymous && <LinkAccountModal />}
-        {(!user || user?.is_anonymous) && (
-          <div>
-            <Button
-              onClick={() => setIsAuthOpen(true)}
-              className="w-full"
-              size="lg"
-            >
-              {t("signIn")}
-            </Button>
-          </div>
+        {!user && (
+          <Link href="/sign-in">
+            <Button className="w-full">{t("signIn")}</Button>
+          </Link>
         )}
       </SidebarFooter>
       <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} />
