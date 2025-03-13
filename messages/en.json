@@ -1082,7 +1082,10 @@
       "errors": {
         "rateLimitMessage": "You've hit the rate limit for the demo — please make your own resume to continue using the tool 😊"
       }
-    }
+    },
+    "demoTitle": "See How The Resume Builder Works",
+    "demoDescription": "Experience how the resume builder works with one of our sample resumes.",
+    "demoCta": "Try Demo"
   },
   "interviewCopilotDemo": {
     "verifyUser": {
