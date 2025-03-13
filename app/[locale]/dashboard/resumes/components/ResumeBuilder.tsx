@@ -11,8 +11,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import ResumePreview from "./ResumePreview";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Mic, Send, Lock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Mic, Send, Lock, PlayCircle } from "lucide-react";
 import { useVoiceRecording } from "./useVoiceRecording";
 import VoiceRecordingOverlay from "./VoiceRecordingOverlay";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -566,7 +566,18 @@ export default function ResumeBuilder({
       // Remove the temporary loading message
       setMessages((prev) => prev.slice(0, -1));
 
-      if (!response.ok) {
+      if (response.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant" as const,
+            content:
+              t("errors.rateLimitMessage") ||
+              "You've been rate limited — please try again in an hour.",
+          },
+        ]);
+        return;
+      } else if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
 
@@ -693,6 +704,28 @@ export default function ResumeBuilder({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {messages.length === 1 && (
+        <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+          <CardContent className="px-6 py-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("demoTitle")}
+                </h2>
+                <p className="text-muted-foreground max-w-lg">
+                  {t("demoDescription")}
+                </p>
+              </div>
+              <Link href="/resume-builder-demo" className="shrink-0">
+                <Button size="lg" className="gap-2">
+                  <PlayCircle className="w-5 h-5" />
+                  {t("demoCta")}
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div
         className={`flex-1 grid ${
           shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
