@@ -311,7 +311,8 @@
   },
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again.",
-    "userNotFound": "User not found — please sign in  again."
+    "userNotFound": "User not found — please sign in  again.",
+    "onlyPdfFilesAllowed": "Only PDF files are allowed. Please upload PDF documents only."
   },
   "sidebar": {
     "addJob": "Create Interview Questions",
