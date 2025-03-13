@@ -16,7 +16,8 @@ import * as Sentry from "@sentry/nextjs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
-
+import { User } from "@supabase/supabase-js";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 const demoResumes: { resumeId: string; title: string }[] = [
   {
     resumeId: "4cbdd2c8-a96b-4d3c-bd32-d9b89d924153",
@@ -63,7 +64,11 @@ const DEMO_EDIT_OPTIONS = [
   },
 ];
 
-export default function ResumeBuilderDemo() {
+export default async function ResumeBuilderDemo() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const t = useTranslations("resumeBuilder");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [resumeId, setResumeId] = useState<string>("");
@@ -593,7 +598,10 @@ export default function ResumeBuilderDemo() {
                         ))}
                       </div>
                     </div>
-                    <Link href="/sign-in" className="w-full">
+                    <Link
+                      href={user ? "/dashboard/resumes" : "/sign-in"}
+                      className="w-full"
+                    >
                       <Button size="lg" className="gap-2 w-full">
                         {t("demo.createYourOwnResume") ||
                           "Create Your Own Resume"}
