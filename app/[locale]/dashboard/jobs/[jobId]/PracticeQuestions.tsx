@@ -17,6 +17,7 @@ interface PracticeQuestionsProps {
   userCredits: number;
   currentPage: number;
   numFreeQuestions?: number;
+  isSubscriptionVariant: boolean;
 }
 
 export default function PracticeQuestions({
@@ -26,6 +27,7 @@ export default function PracticeQuestions({
   userCredits,
   currentPage,
   numFreeQuestions = 1,
+  isSubscriptionVariant,
 }: PracticeQuestionsProps) {
   const firstQuestion = questions[0];
   const remainingQuestions = questions.slice(1);
@@ -70,6 +72,7 @@ export default function PracticeQuestions({
             jobId={jobId}
             userCredits={userCredits}
             view="practice"
+            isSubscriptionVariant={isSubscriptionVariant}
           />
         </>
       ) : (

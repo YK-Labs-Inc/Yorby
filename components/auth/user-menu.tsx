@@ -13,6 +13,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
 import { handleSignOut } from "./actions";
+import { useTranslations } from "next-intl";
 
 interface UserMenuProps {
   email: string;
@@ -21,6 +22,7 @@ interface UserMenuProps {
 
 export function UserMenu({ email, hasSubscription }: UserMenuProps) {
   const [_, startTransition] = useTransition();
+  const t = useTranslations("userMenu");
 
   const handleManageSubscription = () => {
     startTransition(async () => {
@@ -43,20 +45,20 @@ export function UserMenu({ email, hasSubscription }: UserMenuProps) {
         {hasSubscription && (
           <>
             <DropdownMenuItem onSelect={handleManageSubscription}>
-              Manage Subscription
+              {t("manageSubscription")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
         )}
         <div className="flex items-center justify-between px-2 py-1.5">
-          <span className="text-sm">Appearance</span>
+          <span className="text-sm">{t("appearance")}</span>
           <ThemeSwitcher />
         </div>
         <DropdownMenuSeparator />
         <form action={handleSignOut}>
           <DropdownMenuItem asChild>
             <Button variant="ghost" className="w-full" type="submit">
-              Sign Out
+              {t("signOut")}
             </Button>
           </DropdownMenuItem>
         </form>

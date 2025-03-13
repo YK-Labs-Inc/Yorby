@@ -38,6 +38,7 @@ interface AppSidebarProps {
   user: User | null;
   hasSubscription: boolean;
   isResumeBuilderEnabled: boolean;
+  isSubscriptionVariant: boolean;
   resumes: Tables<"resumes">[];
 }
 
@@ -48,6 +49,7 @@ export function AppSidebar({
   hasSubscription,
   user,
   isResumeBuilderEnabled,
+  isSubscriptionVariant,
   resumes,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
@@ -180,19 +182,22 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter>
         {user && <OnboardingChecklist />}
-        {user && !user.is_anonymous && !hasSubscription && (
-          <>
-            <p className="text-lg text-center font-bold px-4">
-              {t("numberOfCredits", { numberOfCredits })}
-            </p>
-            <Link className="w-full" href="/purchase">
-              <Button className="w-full">
-                <PlusIcon />
-                {t("buyMoreCredits")}
-              </Button>
-            </Link>
-          </>
-        )}
+        {!isSubscriptionVariant &&
+          user &&
+          !user.is_anonymous &&
+          !hasSubscription && (
+            <>
+              <p className="text-lg text-center font-bold px-4">
+                {t("numberOfCredits", { numberOfCredits })}
+              </p>
+              <Link className="w-full" href="/purchase">
+                <Button className="w-full">
+                  <PlusIcon />
+                  {t("buyMoreCredits")}
+                </Button>
+              </Link>
+            </>
+          )}
         {user && user.email && (
           <UserMenu email={user.email} hasSubscription={hasSubscription} />
         )}{" "}

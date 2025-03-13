@@ -233,7 +233,6 @@ export const writeToDb = async (
   customJobId: string,
   filePath: string
 ) => {
-  console.log("hey uploadResponse", uploadResponse);
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("custom_job_files").insert({
     display_name: uploadResponse.file.displayName,

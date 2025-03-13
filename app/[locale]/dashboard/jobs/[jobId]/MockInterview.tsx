@@ -16,6 +16,7 @@ interface MockInterviewProps {
   jobId: string;
   userCredits: number;
   isLocked: boolean;
+  isSubscriptionVariant: boolean;
 }
 
 async function fetchMockInterviews(jobId: string) {
@@ -38,6 +39,7 @@ export default async function MockInterview({
   jobId,
   userCredits,
   isLocked,
+  isSubscriptionVariant,
 }: MockInterviewProps) {
   const t = await getTranslations("mockInterview");
   const allMockInterviews = await fetchMockInterviews(jobId);
@@ -115,6 +117,7 @@ export default async function MockInterview({
               jobId={jobId}
               userCredits={userCredits}
               view="mock"
+              isSubscriptionVariant={isSubscriptionVariant}
             />
           </>
         )}

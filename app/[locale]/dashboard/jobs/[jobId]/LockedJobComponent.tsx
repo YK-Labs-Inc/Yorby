@@ -36,10 +36,12 @@ export default function LockedJobComponent({
   jobId,
   userCredits,
   view = "practice",
+  isSubscriptionVariant = false,
 }: {
   jobId: string;
   userCredits: number;
   view: "practice" | "mock";
+  isSubscriptionVariant: boolean;
 }) {
   const t = useTranslations("upgrade");
   const [state, action, pending] = useActionState(unlockJob, null);
@@ -104,7 +106,9 @@ export default function LockedJobComponent({
               <Lock className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {t("locked.title")}
+              {isSubscriptionVariant
+                ? t("locked.subscriptionTitle")
+                : t("locked.title")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
               {t(
@@ -113,7 +117,13 @@ export default function LockedJobComponent({
                   : "locked.description"
               )}
             </p>
-            {userCredits > 0 ? (
+            {isSubscriptionVariant ? (
+              <Link href="/purchase">
+                <Button size="lg" className="mt-2">
+                  {t("locked.button")}
+                </Button>
+              </Link>
+            ) : userCredits > 0 ? (
               <form action={action}>
                 <input type="hidden" name="jobId" value={jobId} />
                 <input

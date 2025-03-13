@@ -75,7 +75,7 @@ export default async function Page({
   if (!user) {
     redirect("/sign-in");
   }
-  const isAnonymous = user?.is_anonymous ?? true;
+  const isAnonymous = user.is_anonymous ?? true;
 
   const successMessage = (await searchParams)?.success as string | undefined;
   const errorMessage = (await searchParams)?.error as string | undefined;
@@ -127,13 +127,14 @@ export default async function Page({
   // Get user credits if the interview copilot is locked
   let userCredits = 0;
   if (interviewCopilot.interview_copilot_access === "locked") {
-    if (user) {
-      userCredits = await fetchUserCredits(user.id);
-    }
+    userCredits = await fetchUserCredits(user.id);
   }
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const isLocked =
     interviewCopilot.interview_copilot_access === "locked" && !hasSubscription;
+  const isSubscriptionVariant =
+    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
+    "test";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -178,6 +179,7 @@ export default async function Page({
               <LockedInterviewCopilotComponent
                 interviewCopilot={interviewCopilot}
                 userCredits={userCredits}
+                isSubscriptionVariant={isSubscriptionVariant}
               />
             ) : (
               <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
