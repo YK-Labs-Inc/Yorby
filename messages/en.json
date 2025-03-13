@@ -856,11 +856,52 @@
       "badge": "NO SUBSCRIPTION REQUIRED",
       "title": "Crush Your Next Interview",
       "description": "From interview prep to real-time interview help, Perfect Interview is a complete solution to help you land any job and get the bag 💰",
+      "descriptionV2": "Perfect Interview is everything you need to help you land any job and get the bag 💰",
       "subscriptionNote": "No annoying subscription required.",
       "getStarted": "Get Started"
     },
+    "journey": {
+      "before": {
+        "title": "Before Interviews",
+        "resumeBuilder": {
+          "title": "AI Resume Builder",
+          "description": "Create a professional resume through natural conversation with our AI assistant"
+        },
+        "practiceQuestions": {
+          "title": "Interview Question Generator",
+          "description": "Get personalized practice questions based on the job and your experience"
+        }
+      },
+      "during": {
+        "title": "During Interviews",
+        "interviewCopilot": {
+          "title": "Interview Copilot",
+          "description": "Your real-time AI interview assistant that helps you answer questions perfectly",
+          "badge": "100% Undetectable"
+        }
+      }
+    },
     "features": {
       "title": "Everything You Need To Crush Your Next Job Interview",
+      "resumeBuilder": {
+        "title": "Build Your Resume With AI",
+        "description": "Create a professional resume in minutes by having a natural conversation with our AI assistant. No more manual formatting or writer's block.",
+        "tryButton": "Try The Resume Builder Demo",
+        "features": {
+          "conversation": {
+            "title": "Natural Conversation",
+            "description": "Tell us about your experience and our AI will find all of the important details for your resume."
+          },
+          "formatting": {
+            "title": "Perfect Formatting",
+            "description": "We make resumes that are 100% compliant with the latest resume writing standards."
+          },
+          "time": {
+            "title": "Save Hours of Time",
+            "description": "No more typing and manual editing. Tell us what edits to make using natural language and we'll take care of the rest."
+          }
+        }
+      },
       "prep": {
         "title": "Personalized Interview Prep Experience",
         "description": "Master your interview skills with our comprehensive preparation tools"
@@ -924,7 +965,7 @@
           "description": "Your interview prep materials stay accessible forever. No expiration dates."
         }
       },
-      "viewPlansButton": "View Pricing Plans"
+    "viewPlansButton": "View Pricing Plans"
     },
     "finalCTA": {
       "title": "Ready to Transform Your Interview Success?",
