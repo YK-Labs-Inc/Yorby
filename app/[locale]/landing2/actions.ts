@@ -9,6 +9,11 @@ import { redirect } from "next/navigation";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { z } from "zod";
 
+// Helper function to check if a file is a PDF
+const isPdfFile = (file: File): boolean => {
+  return file.type === "application/pdf";
+};
+
 export const createJob = async ({
   jobTitle,
   jobDescription,
@@ -40,6 +45,25 @@ export const createJob = async ({
   const logger = new Logger().with(trackingProperties);
   logger.info("Starting to create job");
   const t = await getTranslations("errors");
+
+  // Check if all files are PDFs
+  const allFiles = [resume, coverLetter, ...miscDocuments].filter(
+    (file) => file !== null
+  ) as File[];
+  const nonPdfFiles = allFiles.filter((file) => !isPdfFile(file));
+
+  if (nonPdfFiles.length > 0) {
+    logger.info("Non-PDF files detected", {
+      fileTypes: nonPdfFiles.map((file) => file.type),
+      fileNames: nonPdfFiles.map((file) => file.name),
+    });
+    return {
+      error:
+        t("onlyPdfFilesAllowed") ||
+        "Only PDF files are allowed. Please upload PDF documents only.",
+    };
+  }
+
   let userId = "";
   let customJobId = "";
   try {
