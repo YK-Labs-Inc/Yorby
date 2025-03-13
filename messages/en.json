@@ -1026,7 +1026,8 @@
       "auth": "You must be logged in to save your resume",
       "insufficientCredits": "You don't have enough credits to unlock this resume. Please purchase more credits.",
       "generic": "Sorry, something went wrong. Please try again.",
-      "resumeGenerationRetryMessage": "Hmm, something went wrong trying to build your resume. Let me try again."
+      "resumeGenerationRetryMessage": "Hmm, something went wrong trying to build your resume. Let me try again.",
+      "rateLimitMessage": "You've been rate limited — please try again in an hour." 
     },
     "success": {
       "resumeSave": "Resume saved",
@@ -1074,6 +1075,13 @@
       "title": "Before We Build Your Resume, Please Verify You Are A Real Human",
       "description": "This helps us prevent bots from creating fake accounts and building resumes — we hope you understand 🙂",
       "submit": "Verify You're Human"
+    },
+    "demo": {
+      "createInitialResume": "Welcome to the resume builder demo. Pick one of the sample resumes below to get started.",
+      "editResumeInitialMessage": "Here is a sample resume — feel free to edit using one of the predefined edits below. When building your own resume, you can make any changes you want.",
+      "errors": {
+        "rateLimitMessage": "You've hit the rate limit for the demo — please make your own resume to continue using the tool 😊"
+      }
     }
   },
   "interviewCopilotDemo": {

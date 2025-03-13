@@ -35,21 +35,12 @@ import {
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { jsPDF } from "jspdf";
 
 interface ResumePreviewProps {
   loading: boolean;
   resume: ResumeDataType;
   setResume: Dispatch<SetStateAction<ResumeDataType | null>>;
   resumeId: string;
-}
-
-interface Html2PdfInstance {
-  from: (element: HTMLElement) => Html2PdfInstance;
-  set: (options: any) => Html2PdfInstance;
-  toPdf: () => Html2PdfInstance;
-  get: (type: string) => Promise<jsPDF>;
-  save: () => Promise<void>;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -66,6 +57,11 @@ const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
   }));
 };
 
+const TEST_RESUME_IDS = [
+  "4cbdd2c8-a96b-4d3c-bd32-d9b89d924153",
+  "0d4a08c1-4054-4c45-b12f-500081499cad",
+];
+
 export default function ResumePreview({
   loading,
   resume,
@@ -78,6 +74,7 @@ export default function ResumePreview({
   const [showNewSectionDialog, setShowNewSectionDialog] =
     useState<boolean>(false);
   const [showReassurance, setShowReassurance] = useState<boolean>(false);
+  const isTestResume = TEST_RESUME_IDS.includes(resumeId);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
 
@@ -96,12 +93,14 @@ export default function ResumePreview({
   }, [loading]);
 
   const handleSaveResume = async (resume: ResumeDataType, resumeId: string) => {
-    saveResume(resume, resumeId).then(({ error }) => {
-      if (error) {
-        setIsEditMode(true);
-        alert(error);
-      }
-    });
+    if (!isTestResume) {
+      saveResume(resume, resumeId).then(({ error }) => {
+        if (error) {
+          setIsEditMode(true);
+          alert(error);
+        }
+      });
+    }
     setIsEditMode(false);
   };
 

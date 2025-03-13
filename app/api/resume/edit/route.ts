@@ -2,6 +2,10 @@ import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
+import { ipAddress } from "@vercel/functions";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -59,10 +63,28 @@ const resumeSchema = z.object({
   resume_sections: z.array(resumeSectionsSchema),
 });
 
+const redis = Redis.fromEnv();
+
+const rateLimits = {
+  regular: new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(300, "1 h"),
+    analytics: true,
+    prefix: "regular-resume-edit",
+  }),
+  demo: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, "1 h"),
+    analytics: true,
+    prefix: "demo-resume-edit",
+  }),
+};
+
 export const POST = withAxiom(async (req: AxiomRequest) => {
-  const { resume, userMessage } = (await req.json()) as {
+  const { resume, userMessage, isDemo } = (await req.json()) as {
     resume: string;
     userMessage: string;
+    isDemo: boolean;
   };
   const logger = req.log.with({
     resume,
@@ -70,6 +92,19 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     path: "api/resume/edit",
   });
   try {
+    const isRateLimited = isDemo
+      ? await checkIsRateLimitedDemo(req)
+      : await checkIsRateLimited(req);
+    if (isRateLimited) {
+      logger.info("Rate limit exceeded", {
+        isDemo,
+      });
+      return NextResponse.json(
+        { error: "Rate limit exceeded" },
+        { status: 429 }
+      );
+    }
+
     const { updatedResume, aiResponse } = await updateResume(
       JSON.stringify(resume),
       userMessage
@@ -127,24 +162,30 @@ const updateResume = async (resume: string, userMessage: string) => {
   return { updatedResume: updatedResumeJSON, aiResponse };
 };
 
-const extractJSONFromString = (text: string): string => {
-  try {
-    // First try to parse the entire string as JSON
-    JSON.parse(text);
-    return text;
-  } catch {
-    // If that fails, try to find JSON-like content
-    const jsonMatch = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const possibleJson = jsonMatch[0];
-      try {
-        // Validate that it's actually JSON
-        JSON.parse(possibleJson);
-        return possibleJson;
-      } catch {
-        throw new Error("No valid JSON found in the response");
-      }
-    }
-    throw new Error("No JSON-like content found in the response");
+const checkIsRateLimited = async (req: AxiomRequest) => {
+  const ip = ipAddress(req);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const identifier = user?.id || ip;
+  if (!identifier) {
+    return true;
   }
+  const { success } = await rateLimits.regular.limit(identifier);
+  return !success;
+};
+
+const checkIsRateLimitedDemo = async (req: AxiomRequest) => {
+  const ip = ipAddress(req);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const identifier = user?.id || ip;
+  if (!identifier) {
+    return true;
+  }
+  const { success } = await rateLimits.demo.limit(identifier);
+  return !success;
 };

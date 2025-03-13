@@ -566,7 +566,18 @@ export default function ResumeBuilder({
       // Remove the temporary loading message
       setMessages((prev) => prev.slice(0, -1));
 
-      if (!response.ok) {
+      if (response.status === 429) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant" as const,
+            content:
+              t("errors.rateLimitMessage") ||
+              "You've been rate limited — please try again in an hour.",
+          },
+        ]);
+        return;
+      } else if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
 
