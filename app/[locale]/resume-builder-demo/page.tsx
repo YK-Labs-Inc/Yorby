@@ -31,21 +31,33 @@ const DEMO_EDIT_OPTIONS = [
     title: "Add Work Experience",
     prompt:
       "I worked as a Marketing Manager at TechCorp from 2020-2023, where I led digital campaigns that increased user engagement by 45% and managed a team of 5 content creators. Can you add this experience to my resume?",
+    aiResponse:
+      "I've added your Marketing Manager experience at TechCorp (2020-2023) to your resume. I included the key achievements you mentioned: leading digital campaigns that increased user engagement by 45% and managing a team of 5 content creators. This experience showcases your leadership and marketing skills effectively.",
+    resumeData: null as ResumeDataType | null, // This will be populated dynamically when a resume is selected
   },
   {
     title: "Update Personal Info",
     prompt:
       "Could you update my name to Sarah Johnson and add my email address sarah.johnson@email.com to the resume?",
+    aiResponse:
+      "I've updated your personal information on the resume. Your name has been changed to Sarah Johnson and I've added your email address (sarah.johnson@email.com). These updates will make it easier for potential employers to contact you.",
+    resumeData: null as ResumeDataType | null, // This will be populated dynamically when a resume is selected
   },
   {
     title: "Add Education",
     prompt:
       "I completed my Master's in Business Analytics from Stanford University in 2021 with a 3.8 GPA. Please add this to my education section.",
+    aiResponse:
+      "I've added your Master's in Business Analytics from Stanford University to your education section. I included your graduation year (2021) and your impressive 3.8 GPA. This educational achievement will strengthen your resume and highlight your analytical skills.",
+    resumeData: null as ResumeDataType | null, // This will be populated dynamically when a resume is selected
   },
   {
     title: "Add Technical Skills",
     prompt:
       "Please add the following technical skills to my resume: Python, SQL, Tableau, Power BI, and Data Visualization.",
+    aiResponse:
+      "I've added the technical skills you mentioned to your resume: Python, SQL, Tableau, Power BI, and Data Visualization. These skills are highly sought after in data-focused roles and will make your resume more appealing to potential employers looking for candidates with strong analytical and visualization capabilities.",
+    resumeData: null as ResumeDataType | null, // This will be populated dynamically when a resume is selected
   },
 ];
 
@@ -55,6 +67,9 @@ export default function ResumeBuilderDemo() {
   const [resumeId, setResumeId] = useState<string>("");
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Set<number>>(
+    new Set()
+  );
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
@@ -137,6 +152,8 @@ export default function ResumeBuilderDemo() {
 
   const handleResumeSelection = async (resumeId: string, title: string) => {
     setIsGenerating(true);
+    // Reset selected options when a new resume is selected
+    setSelectedOptions(new Set());
     setMessages((prev) => [
       ...prev,
       {
@@ -151,7 +168,232 @@ export default function ResumeBuilderDemo() {
     setResumeId(resumeId);
   };
 
-  const sendEditMessage = async (retryCount = 0, messageContent: string) => {
+  // Update DEMO_EDIT_OPTIONS when resume changes
+  useEffect(() => {
+    if (resume) {
+      // Update the DEMO_EDIT_OPTIONS with the current resume data
+      DEMO_EDIT_OPTIONS.forEach((option, index) => {
+        // Create modified versions of the resume for each option
+        if (index === 0) {
+          // Add Work Experience
+          const updatedResume = createWorkExperienceResume(resume);
+          DEMO_EDIT_OPTIONS[index].resumeData = updatedResume;
+        } else if (index === 1) {
+          // Update Personal Info
+          const updatedResume = createUpdatedPersonalInfoResume(resume);
+          DEMO_EDIT_OPTIONS[index].resumeData = updatedResume;
+        } else if (index === 2) {
+          // Add Education
+          const updatedResume = createEducationResume(resume);
+          DEMO_EDIT_OPTIONS[index].resumeData = updatedResume;
+        } else if (index === 3) {
+          // Add Technical Skills
+          const updatedResume = createTechnicalSkillsResume(resume);
+          DEMO_EDIT_OPTIONS[index].resumeData = updatedResume;
+        }
+      });
+    }
+  }, [resume]);
+
+  // Helper functions to create modified resume data for each demo option
+  const createWorkExperienceResume = (
+    originalResume: ResumeDataType
+  ): ResumeDataType => {
+    // Create a deep copy of the resume
+    const updatedResume = JSON.parse(
+      JSON.stringify(originalResume)
+    ) as ResumeDataType;
+
+    // Find the work experience section or create one if it doesn't exist
+    let workSection = updatedResume.resume_sections.find(
+      (section) =>
+        section.title.toLowerCase().includes("experience") ||
+        section.title.toLowerCase().includes("work")
+    );
+
+    if (!workSection) {
+      // Create a new work experience section if it doesn't exist
+      const newSectionId = crypto.randomUUID();
+      workSection = {
+        id: newSectionId,
+        resume_id: updatedResume.id,
+        title: "Work Experience",
+        display_order: updatedResume.resume_sections.length,
+        created_at: null,
+        updated_at: null,
+        resume_list_items: [],
+        resume_detail_items: [],
+      };
+      updatedResume.resume_sections.push(workSection);
+    }
+
+    // Add the new work experience
+    const newDetailItemId = crypto.randomUUID();
+    const newWorkExperience = {
+      id: newDetailItemId,
+      section_id: workSection.id,
+      title: "Marketing Manager",
+      subtitle: "TechCorp",
+      date_range: "2020-2023",
+      display_order: workSection.resume_detail_items.length,
+      created_at: null,
+      updated_at: null,
+      resume_item_descriptions: [
+        {
+          id: crypto.randomUUID(),
+          detail_item_id: newDetailItemId,
+          description:
+            "Led digital campaigns that increased user engagement by 45%",
+          display_order: 0,
+          created_at: null,
+          updated_at: null,
+        },
+        {
+          id: crypto.randomUUID(),
+          detail_item_id: newDetailItemId,
+          description: "Managed a team of 5 content creators",
+          display_order: 1,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+    };
+
+    workSection.resume_detail_items.push(newWorkExperience);
+    return updatedResume;
+  };
+
+  const createUpdatedPersonalInfoResume = (
+    originalResume: ResumeDataType
+  ): ResumeDataType => {
+    // Create a deep copy of the resume
+    const updatedResume = JSON.parse(
+      JSON.stringify(originalResume)
+    ) as ResumeDataType;
+
+    // Update personal information
+    updatedResume.name = "Sarah Johnson";
+    updatedResume.email = "sarah.johnson@email.com";
+
+    return updatedResume;
+  };
+
+  const createEducationResume = (
+    originalResume: ResumeDataType
+  ): ResumeDataType => {
+    // Create a deep copy of the resume
+    const updatedResume = JSON.parse(
+      JSON.stringify(originalResume)
+    ) as ResumeDataType;
+
+    // Find the education section or create one if it doesn't exist
+    let educationSection = updatedResume.resume_sections.find((section) =>
+      section.title.toLowerCase().includes("education")
+    );
+
+    if (!educationSection) {
+      // Create a new education section if it doesn't exist
+      const newSectionId = crypto.randomUUID();
+      educationSection = {
+        id: newSectionId,
+        resume_id: updatedResume.id,
+        title: "Education",
+        display_order: updatedResume.resume_sections.length,
+        created_at: null,
+        updated_at: null,
+        resume_list_items: [],
+        resume_detail_items: [],
+      };
+      updatedResume.resume_sections.push(educationSection);
+    }
+
+    // Add the new education
+    const newDetailItemId = crypto.randomUUID();
+    const newEducation = {
+      id: newDetailItemId,
+      section_id: educationSection.id,
+      title: "Master's in Business Analytics",
+      subtitle: "Stanford University",
+      date_range: "2021",
+      display_order: educationSection.resume_detail_items.length,
+      created_at: null,
+      updated_at: null,
+      resume_item_descriptions: [
+        {
+          id: crypto.randomUUID(),
+          detail_item_id: newDetailItemId,
+          description: "GPA: 3.8",
+          display_order: 0,
+          created_at: null,
+          updated_at: null,
+        },
+      ],
+    };
+
+    educationSection.resume_detail_items.push(newEducation);
+    return updatedResume;
+  };
+
+  const createTechnicalSkillsResume = (
+    originalResume: ResumeDataType
+  ): ResumeDataType => {
+    // Create a deep copy of the resume
+    const updatedResume = JSON.parse(
+      JSON.stringify(originalResume)
+    ) as ResumeDataType;
+
+    // Find the skills section or create one if it doesn't exist
+    let skillsSection = updatedResume.resume_sections.find((section) =>
+      section.title.toLowerCase().includes("skill")
+    );
+
+    if (!skillsSection) {
+      // Create a new skills section if it doesn't exist
+      const newSectionId = crypto.randomUUID();
+      skillsSection = {
+        id: newSectionId,
+        resume_id: updatedResume.id,
+        title: "Skills",
+        display_order: updatedResume.resume_sections.length,
+        created_at: null,
+        updated_at: null,
+        resume_list_items: [],
+        resume_detail_items: [],
+      };
+      updatedResume.resume_sections.push(skillsSection);
+    }
+
+    // Add the new skills as individual items
+    const skills = [
+      "Python",
+      "SQL",
+      "Tableau",
+      "Power BI",
+      "Data Visualization",
+    ];
+
+    // Check if the skills already exist to avoid duplicates
+    const existingSkills = skillsSection.resume_list_items.map((item) =>
+      item.content.toLowerCase()
+    );
+
+    skills.forEach((skill, index) => {
+      if (!existingSkills.includes(skill.toLowerCase())) {
+        skillsSection.resume_list_items.push({
+          id: crypto.randomUUID(),
+          section_id: skillsSection.id,
+          content: skill,
+          display_order: skillsSection.resume_list_items.length + index,
+          created_at: null,
+          updated_at: null,
+        });
+      }
+    });
+
+    return updatedResume;
+  };
+
+  const sendEditMessage = async (messageContent: string) => {
     if (!resumeId) {
       logError("No resume found");
       throw new Error("No resume found");
@@ -178,56 +420,48 @@ export default function ResumeBuilderDemo() {
     ]);
 
     try {
-      const response = await fetch("/api/resume/edit", {
-        method: "POST",
-        body: JSON.stringify({
-          resume: resume,
-          userMessage: messageContent,
-          isDemo: true,
-        }),
-      });
+      // Find the matching demo option
+      const selectedOptionIndex = DEMO_EDIT_OPTIONS.findIndex(
+        (option) => option.prompt === messageContent
+      );
+      const selectedOption =
+        selectedOptionIndex !== -1
+          ? DEMO_EDIT_OPTIONS[selectedOptionIndex]
+          : null;
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 4000));
 
       // Remove the temporary loading message
       setMessages((prev) => prev.slice(0, -1));
 
-      if (response.status === 429) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant" as const,
-            content:
-              t("demo.errors.rateLimitMessage") ||
-              "You've hit the rate limit for the demo — please make your own resume to continue using the tool 😊",
-          },
-        ]);
-        return;
-      } else if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+      if (selectedOption && selectedOption.resumeData) {
+        // Mark this option as selected
+        setSelectedOptions((prev) => {
+          const updated = new Set(prev);
+          updated.add(selectedOptionIndex);
+          return updated;
+        });
+
+        const aiMessage: CoreAssistantMessage = {
+          role: "assistant",
+          content: selectedOption.aiResponse,
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+        setResume(selectedOption.resumeData);
+      } else {
+        // For the demo, we only support the predefined options
+        const aiMessage: CoreAssistantMessage = {
+          role: "assistant",
+          content:
+            "I'm sorry, in this demo I can only process the predefined options. Please select one of the provided buttons to see how the resume builder works.",
+        };
+        setMessages((prev) => [...prev, aiMessage]);
       }
-
-      const data = await response.json();
-      const { updatedResume, aiResponse } = data;
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: aiResponse,
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
-      setResume(updatedResume);
     } catch (error) {
       // Remove the temporary loading message
       setMessages((prev) => prev.slice(0, -1));
-
-      if (retryCount < 2) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: t("errors.resumeGenerationRetryMessage"),
-          },
-        ]);
-        return sendEditMessage(retryCount + 1, messageContent);
-      }
 
       const aiMessage: CoreAssistantMessage = {
         role: "assistant",
@@ -241,7 +475,7 @@ export default function ResumeBuilderDemo() {
 
   const sendMessage = async (messageContent: string) => {
     setIsGenerating(true);
-    await sendEditMessage(0, messageContent);
+    await sendEditMessage(messageContent);
     setIsGenerating(false);
   };
 
@@ -347,9 +581,12 @@ export default function ResumeBuilderDemo() {
                             }}
                             className="w-full h-auto py-2"
                             variant="outline"
-                            disabled={isGenerating}
+                            disabled={
+                              isGenerating || selectedOptions.has(index)
+                            }
                           >
                             {option.title}
+                            {selectedOptions.has(index) && " ✓"}
                           </Button>
                         ))}
                       </div>
