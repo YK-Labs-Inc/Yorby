@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
+import { useActionState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Pencil, Trash2, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
 import { unlockInterviewCopilot } from "./actions";
@@ -20,17 +20,20 @@ import {
 import React from "react";
 import { AIButton } from "@/components/ai-button";
 import { FormMessage } from "@/components/form-message";
+import { Link } from "@/i18n/routing";
 
 interface LockedInterviewCopilotComponentProps {
   interviewCopilot: Tables<"interview_copilots"> & {
     interview_copilot_files: Tables<"interview_copilot_files">[];
   };
   userCredits: number;
+  isSubscriptionVariant: boolean;
 }
 
 export default function LockedInterviewCopilotComponent({
   interviewCopilot,
   userCredits,
+  isSubscriptionVariant,
 }: LockedInterviewCopilotComponentProps) {
   const t = useTranslations("interviewCopilots");
   const [state, action, pending] = useActionState(unlockInterviewCopilot, null);
@@ -70,7 +73,13 @@ export default function LockedInterviewCopilotComponent({
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {userCredits > 0 ? (
+          {isSubscriptionVariant ? (
+            <Link href="/purchase">
+              <AIButton pending={false} pendingText={""}>
+                {t("locked.subscriptionCTA")}
+              </AIButton>
+            </Link>
+          ) : userCredits > 0 ? (
             <form action={action}>
               <input
                 type="hidden"

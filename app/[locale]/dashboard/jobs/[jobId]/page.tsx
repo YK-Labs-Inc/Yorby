@@ -122,6 +122,11 @@ export default async function JobPage({
       "optional-anonymous-account-linking",
       user.id
     )) === "control";
+  const isSubscriptionVariant =
+    (await posthog.getFeatureFlag(
+      "subscription-price-test-1",
+      user.id || ""
+    )) === "test";
 
   return (
     <div
@@ -199,6 +204,7 @@ export default async function JobPage({
                 userCredits={userCredits}
                 currentPage={currentPage}
                 numFreeQuestions={3}
+                isSubscriptionVariant={isSubscriptionVariant}
               />
             )}
             {view === "mock" && (

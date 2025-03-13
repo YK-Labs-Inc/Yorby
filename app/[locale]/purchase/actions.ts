@@ -15,129 +15,154 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export interface Product extends Omit<Stripe.Product, "description"> {
   description: string;
   prices: Stripe.Price[];
-  pricePerCredit?: number;
-  savings?: number;
+  pricePerCredit?: number | null;
+  savings?: number | null;
   totalPrice?: number;
   credits?: number;
+  months?: number; // Added for subscription products
 }
 
-const CREDITS_MAP: { [key: string]: number } = {
-  [process.env.SINGLE_CREDIT_PRODUCT_ID!]: 1,
-  [process.env.SINGLE_CREDIT_PRODUCT_ID_2!]: 1,
-  [process.env.FIVE_CREDITS_PRODUCT_ID!]: 5,
-  [process.env.TEN_CREDITS_PRODUCT_ID!]: 10,
-  [process.env.UNLIMITED_CREDITS_PRODUCT_ID!]: -1, // -1 represents unlimited
-};
+const CREDIT_PRICES = {
+  single: {
+    priceId: process.env.STRIPE_SINGLE_CREDIT_PRICE_ID!,
+    credits: 1,
+  },
+  five: {
+    priceId: process.env.STRIPE_FIVE_CREDITS_PRICE_ID!,
+    credits: 5,
+  },
+  ten: {
+    priceId: process.env.STRIPE_TEN_CREDITS_PRICE_ID!,
+    credits: 10,
+  },
+} as const;
+
+const SUBSCRIPTION_PRICES = {
+  monthly: {
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID!,
+    months: 1,
+  },
+  threeMonth: {
+    priceId: process.env.STRIPE_3_MONTH_PRICE_ID!,
+    months: 3,
+  },
+  sixMonth: {
+    priceId: process.env.STRIPE_6_MONTH_PRICE_ID!,
+    months: 6,
+  },
+} as const;
 
 export async function getProducts(userId: string) {
   const logger = new Logger().with({
     function: "getProducts",
     userId,
   });
+
   try {
-    const increasedPrice =
-      (await posthog.getFeatureFlag("price-test-1", userId)) === "test";
+    const isTestVariant =
+      (await posthog.getFeatureFlag("subscription-price-test-1", userId)) ===
+      "test";
 
-    const stripeProductIds = [
-      process.env.SINGLE_CREDIT_PRODUCT_ID!,
-      process.env.FIVE_CREDITS_PRODUCT_ID!,
-      process.env.TEN_CREDITS_PRODUCT_ID!,
-      process.env.UNLIMITED_CREDITS_PRODUCT_ID!,
-    ];
+    // Determine which price IDs to fetch based on the variant
+    const priceIds = isTestVariant
+      ? Object.values(SUBSCRIPTION_PRICES).map(({ priceId }) => priceId)
+      : Object.values(CREDIT_PRICES).map(({ priceId }) => priceId);
 
-    const products = await stripe.products.list({
-      active: true,
-      ids: stripeProductIds,
-    });
-
-    let singleCreditPrice: number | null = null;
-
-    const increasedSingleCreditPriceId =
-      process.env.INCRERASED_SINGLE_CREDIT_PRICE_ID!;
-    // First pass to get the single credit price
-    for (const product of products.data) {
-      if (
-        product.id === process.env.SINGLE_CREDIT_PRODUCT_ID ||
-        product.id === process.env.SINGLE_CREDIT_PRODUCT_ID_2
-      ) {
-        const prices = await stripe.prices.list({
-          product: product.id,
-          active: true,
-        });
-        if (increasedPrice) {
-          // If increasedPrice is true, find the price with matching ID
-          const increasedPriceData = prices.data.find(
-            (price) => price.id === increasedSingleCreditPriceId
-          );
-          if (increasedPriceData) {
-            singleCreditPrice = increasedPriceData.unit_amount! / 100;
-          }
-        } else {
-          // If increasedPrice is false, find the price that doesn't match the increased price ID
-          const regularPriceData = prices.data.find(
-            (price) => price.id !== increasedSingleCreditPriceId
-          );
-          if (regularPriceData) {
-            singleCreditPrice = regularPriceData.unit_amount! / 100;
-          }
-        }
-        break;
-      }
-    }
-    const productsWithPrices = await Promise.all(
-      products.data.map(async (product) => {
-        const prices = await stripe.prices.list({
-          product: product.id,
-          active: true,
-        });
-
-        const description = product.description || "";
-        const credits = CREDITS_MAP[product.id];
-
-        let selectedPrice;
-        // Only apply increased price logic for single credit product
-        if (product.id === process.env.SINGLE_CREDIT_PRODUCT_ID) {
-          if (increasedPrice) {
-            selectedPrice = prices.data.find(
-              (price) => price.id === increasedSingleCreditPriceId
-            );
-          } else {
-            selectedPrice = prices.data.find(
-              (price) => price.id !== increasedSingleCreditPriceId
-            );
-          }
-        } else {
-          // For all other products, use the first available price
-          selectedPrice = prices.data[0];
-        }
-
-        const price = selectedPrice?.unit_amount! / 100;
-        const pricePerCredit = credits > 0 ? price / credits : null;
-
-        let savings = null;
-        if (singleCreditPrice && credits > 0) {
-          const totalCostAtSinglePrice = singleCreditPrice * credits;
-          savings =
-            ((totalCostAtSinglePrice - price) / totalCostAtSinglePrice) * 100;
-        }
-
-        return {
-          ...product,
-          description,
-          prices: [selectedPrice],
-          credits,
-          totalPrice: price,
-          pricePerCredit: pricePerCredit,
-          savings: savings,
-        } as Product;
-      })
+    // Fetch all prices in parallel with expanded product data
+    const prices = await Promise.all(
+      priceIds.map((priceId) =>
+        stripe.prices.retrieve(priceId, { expand: ["product"] })
+      )
     );
 
-    // Sort products by number of credits (unlimited last)
+    let productsWithPrices: Product[] = [];
+
+    if (isTestVariant) {
+      // Get monthly price as base price for calculating savings
+      const monthlyPrice = prices.find(
+        (p) => p.id === SUBSCRIPTION_PRICES.monthly.priceId
+      )!;
+      const monthlyAmount = monthlyPrice.unit_amount! / 100;
+
+      // Create subscription products
+      productsWithPrices = Object.entries(SUBSCRIPTION_PRICES).map(
+        ([key, { months }]) => {
+          const price = prices.find(
+            (p) =>
+              p.id ===
+              SUBSCRIPTION_PRICES[key as keyof typeof SUBSCRIPTION_PRICES]
+                .priceId
+          )!;
+          const product = price.product as Stripe.Product;
+          const totalPrice = price.unit_amount! / 100;
+
+          // Calculate savings compared to paying month-by-month
+          let savings = null;
+          if (months > 1) {
+            const totalCostAtMonthly = monthlyAmount * months;
+            savings =
+              ((totalCostAtMonthly - totalPrice) / totalCostAtMonthly) * 100;
+          }
+
+          return {
+            ...product,
+            description: product.description || "",
+            credits: -1, // Unlimited
+            prices: [price],
+            totalPrice,
+            pricePerCredit: null,
+            savings,
+            months,
+          } as Product;
+        }
+      );
+    } else {
+      // Get single credit price as base price for calculating savings
+      const singleCreditPrice =
+        prices.find((p) => p.id === CREDIT_PRICES.single.priceId)!
+          .unit_amount! / 100;
+
+      // Create credit products
+      productsWithPrices = Object.entries(CREDIT_PRICES).map(
+        ([key, { credits }]) => {
+          const price = prices.find(
+            (p) =>
+              p.id === CREDIT_PRICES[key as keyof typeof CREDIT_PRICES].priceId
+          )!;
+          const product = price.product as Stripe.Product;
+          const totalPrice = price.unit_amount! / 100;
+
+          // Calculate savings compared to buying single credits
+          let savings = null;
+          if (credits > 1) {
+            const totalCostAtSinglePrice = singleCreditPrice * credits;
+            savings =
+              ((totalCostAtSinglePrice - totalPrice) / totalCostAtSinglePrice) *
+              100;
+          }
+
+          return {
+            ...product,
+            description: product.description || "",
+            credits,
+            prices: [price],
+            totalPrice,
+            pricePerCredit: totalPrice / credits,
+            savings,
+          } as Product;
+        }
+      );
+    }
+
+    // Sort products
     const sortedProducts = productsWithPrices.sort((a, b) => {
-      if (a.credits === -1) return 1;
-      if (b.credits === -1) return -1;
-      return (a.credits || 0) - (b.credits || 0);
+      if (isTestVariant) {
+        // Sort by subscription duration
+        return (a.months || 0) - (b.months || 0);
+      } else {
+        // Sort by number of credits
+        return (a.credits || 0) - (b.credits || 0);
+      }
     });
 
     return { products: sortedProducts };

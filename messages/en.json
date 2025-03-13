@@ -330,6 +330,7 @@
   "upgrade": {
     "locked": {
       "title": "Unlock The Full Interview Preparation Experience With 1 Credit",
+      "subscriptionTitle": "Unlock The Full Interview Preparation Experience",
       "description": "Get access to unlimited practice questions, personalized mock interviews, and tailored answer suggestions based on your experience.",
       "mockDescription": "Get access to unlimited AI-powered mock interviews that simulate real interview scenarios. Practice with our advanced AI interviewer that adapts to your responses and provides instant feedback.",
       "button": "Unlock Full Interview Prep Access",
@@ -371,9 +372,11 @@
   },
   "purchase": {
     "title": "Get Interview Credits",
+    "subscriptionTitle": "Get Unlimited Access To Perfect Interview",
     "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
     "descriptionV2": "You can redeem credits to create interview prep material for a job or create an Interview Copilot",
     "descriptionV3": "You can redeem credits to generate interview questions, create an Interview Copilot, or build a resume.",
+    "subscriptionDescription": "Create unlimited resumes, unlimited interview questions, and unlimited Interview Copilots",
     "unauthenticated": {
       "title": "Sign In to View Pricing",
       "description": "Sign in to view our pricing plans and purchase interview credits.",
@@ -408,7 +411,7 @@
         "title": "Unlimited Annual",
         "titleV2": "Unlimited Credits",
         "description": "For professionals and frequent job seekers",
-        "highlight": "Unlimited Credits"
+        "highlight": "Create Unlimited Resumes, Interview Questions, and Interview Copilots"
       }
     },
     "cta": {
@@ -814,7 +817,8 @@
         "description": "You don't have enough credits to unlock this copilot",
         "button": "Purchase Credits"
       },
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "subscriptionCTA": "Unlock Interview Copilot"
     },
     "accountLinking": {
       "title": "Save Your Interview Copilot",
@@ -1043,7 +1047,9 @@
       "descriptionEmailForm": "Unlock the resume by adding your email address to your account.",
       "unlockButton": "Unlock with {credits} {credits, plural, one {Credit} other {Credits}}",
       "unlocking": "Unlocking...",
-      "purchaseButton": "Purchase Credits"
+      "purchaseButton": "Purchase Credits",
+      "subscriptionCTA": "Unlock Resume",
+      "subscriptionDescription": "Unlock the resume to get access to unlimited edits and updates"
     },
     "form": {
       "email": {
@@ -1126,5 +1132,10 @@
       "title": "Interview Copilot Demo Only Works On Desktop 😬",
       "description": "Please switch to a desktop device to try the Interview Copilot demo."
     }
+  },
+  "userMenu": {
+    "manageSubscription": "Manage Subscription",
+    "appearance": "Appearance",
+    "signOut": "Sign Out"
   }
 }

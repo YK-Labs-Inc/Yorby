@@ -51,6 +51,7 @@ const LockedResumeOverlay = ({
   resume,
   resumeBuilderRequiresEmail,
   user,
+  isSubscriptionVariant,
 }: {
   hasCredits: boolean;
   requiredCredits: number;
@@ -59,6 +60,7 @@ const LockedResumeOverlay = ({
   resume: ResumeDataType;
   resumeBuilderRequiresEmail: boolean;
   user: User;
+  isSubscriptionVariant: boolean;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [unlockState, unlockAction, unlockPending] = useActionState(
@@ -213,13 +215,15 @@ const LockedResumeOverlay = ({
             <p className="text-gray-600 dark:text-gray-300">
               {showEmailForm
                 ? t("locked.descriptionEmailForm")
-                : hasCredits
-                  ? t("locked.descriptionWithCredits", {
-                      credits: requiredCredits,
-                    })
-                  : t("locked.descriptionNoCredits", {
-                      credits: requiredCredits,
-                    })}
+                : isSubscriptionVariant
+                  ? t("locked.subscriptionDescription")
+                  : hasCredits
+                    ? t("locked.descriptionWithCredits", {
+                        credits: requiredCredits,
+                      })
+                    : t("locked.descriptionNoCredits", {
+                        credits: requiredCredits,
+                      })}
             </p>
           </div>
           {showEmailForm ? (
@@ -258,7 +262,11 @@ const LockedResumeOverlay = ({
             </div>
           ) : (
             <>
-              {hasCredits ? (
+              {isSubscriptionVariant ? (
+                <Link href="/purchase">
+                  <Button>{t("locked.subscriptionCTA")}</Button>
+                </Link>
+              ) : hasCredits ? (
                 <form action={unlockAction}>
                   <input type="hidden" name="resumeId" value={resumeId} />
                   <Button type="submit" disabled={unlockPending}>
@@ -289,12 +297,14 @@ export default function ResumeBuilder({
   credits,
   user,
   resumeBuilderRequiresEmail = true,
+  isSubscriptionVariant = false,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
   credits: number;
   user: User | null;
   resumeBuilderRequiresEmail?: boolean;
+  isSubscriptionVariant?: boolean;
 }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -704,7 +714,7 @@ export default function ResumeBuilder({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {messages.length === 1 && (
+      {!resume && messages.length === 1 && (
         <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
           <CardContent className="px-6 py-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -899,6 +909,7 @@ export default function ResumeBuilder({
                     resume={resume}
                     resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
                     user={user}
+                    isSubscriptionVariant={isSubscriptionVariant}
                   />
                 ) : (
                   <ResumePreview

@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { fetchUserCredits } from "./actions";
 import { fetchHasSubscription } from "./actions";
 import ResumeBuilder from "./components/ResumeBuilder";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 export default async function ResumesPage() {
   const supabase = await createSupabaseServerClient();
@@ -10,9 +11,15 @@ export default async function ResumesPage() {
   } = await supabase.auth.getUser();
   let hasSubscription = false;
   let credits = 0;
+  let isSubscriptionVariant = false;
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id || "");
     credits = await fetchUserCredits(user.id || "");
+    isSubscriptionVariant =
+      (await posthog.getFeatureFlag(
+        "subscription-price-test-1",
+        user.id || ""
+      )) === "test";
   }
 
   return (
@@ -20,6 +27,7 @@ export default async function ResumesPage() {
       hasSubscription={hasSubscription}
       credits={credits}
       user={user}
+      isSubscriptionVariant={isSubscriptionVariant}
     />
   );
 }

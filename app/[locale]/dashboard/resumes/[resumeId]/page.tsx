@@ -49,6 +49,11 @@ export default async function ResumePage({
   const resumeBuilderRequiresEmail =
     (await posthog.getFeatureFlag("resume-builder-require-email", user.id)) ===
     "test";
+  const isSubscriptionVariant =
+    (await posthog.getFeatureFlag(
+      "subscription-price-test-1",
+      user.id || ""
+    )) === "test";
 
   return (
     <ResumeBuilder
@@ -57,6 +62,7 @@ export default async function ResumePage({
       credits={credits}
       user={user}
       resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
+      isSubscriptionVariant={isSubscriptionVariant}
     />
   );
 }

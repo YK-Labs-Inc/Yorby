@@ -122,12 +122,15 @@ export default async function RootLayout({
   let hasSubscription = false;
   let onboardingState = null;
   let isResumeBuilderEnabled = false;
-
+  let isSubscriptionVariant = false;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
     jobs = await fetchJobs(user.id);
     interviewCopilots = await fetchInterviewCopilots(user.id);
+    isSubscriptionVariant =
+      (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
+      "test";
     isResumeBuilderEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-resume-builder", user.id)
     );
@@ -171,6 +174,7 @@ export default async function RootLayout({
                           interviewCopilots={interviewCopilots}
                           isResumeBuilderEnabled={isResumeBuilderEnabled}
                           resumes={resumes}
+                          isSubscriptionVariant={isSubscriptionVariant}
                         />
                         <SidebarTrigger />
                         <main className="w-full">
