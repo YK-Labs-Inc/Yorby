@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState } from "react";
 import { linkAnonymousAccount } from "./actions";
 import { Button } from "../ui/button";
+import { Link } from "@/i18n/routing";
 
 export function LinkAccountModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,6 +63,18 @@ export function LinkAccountModal() {
                 {t("form.submit")}
               </SubmitButton>
             </form>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                {t("alreadyHaveAccount") || "Already have an account?"}
+              </p>
+              <Link
+                href="/sign-in"
+                className="text-sm font-medium text-primary hover:underline"
+                onClick={() => setIsOpen(false)}
+              >
+                {t("signIn") || "Sign in"}
+              </Link>
+            </div>
           </>
         )}
         {message && <FormMessage message={message} />}
