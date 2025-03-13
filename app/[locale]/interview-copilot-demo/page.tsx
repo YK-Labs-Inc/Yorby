@@ -26,12 +26,19 @@ const fetchDemoVideo = async () => {
 };
 
 export default async function InterviewCopilotDemo() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const signedUrl = await fetchDemoVideo();
   if (!signedUrl) {
     const t = await getTranslations("interviewCopilotDemo.errors");
     return <div>{t("generic")}</div>;
   }
   return (
-    <InterviewCopilotDemoClientComponent signedUrl={signedUrl.signedUrl} />
+    <InterviewCopilotDemoClientComponent
+      signedUrl={signedUrl.signedUrl}
+      user={user}
+    />
   );
 }

@@ -16,13 +16,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Link } from "@/i18n/routing";
-
+import { User } from "@supabase/supabase-js";
 export default function InterviewCopilotDemoSession({
   uploadResponse,
   signedUrl,
+  user,
 }: {
   uploadResponse: UploadResponse | null;
   signedUrl: string;
+  user: User | null;
 }) {
   const [hasStarted, setHasStarted] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
@@ -250,7 +252,10 @@ export default function InterviewCopilotDemoSession({
           >
             {demoT("session.cta") || "Start Interview Copilot"}
           </Button>
-          <Link href="/sign-in" className="w-full">
+          <Link
+            href={user ? "/dashboard/interview-copilots" : "/sign-in"}
+            className="w-full"
+          >
             <Button>
               {demoT("session.createYourOwnInterviewCopilot") ||
                 "Create Your Own Interview Copilot"}

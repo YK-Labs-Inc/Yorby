@@ -16,7 +16,7 @@ import * as Sentry from "@sentry/nextjs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
-
+import { useUser } from "@/context/UserContext";
 const demoResumes: { resumeId: string; title: string }[] = [
   {
     resumeId: "4cbdd2c8-a96b-4d3c-bd32-d9b89d924153",
@@ -72,6 +72,7 @@ export default function ResumeBuilderDemo() {
   const [selectedOptions, setSelectedOptions] = useState<Set<number>>(
     new Set()
   );
+  const user = useUser();
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
@@ -137,7 +138,7 @@ export default function ResumeBuilderDemo() {
 
         setResume(sortedData);
       } catch (error) {
-        console.error("Error fetching resume data:", error);
+        logError("Error fetching resume data:", { error });
         setResume(null);
       } finally {
         setIsGenerating(false);
@@ -593,7 +594,10 @@ export default function ResumeBuilderDemo() {
                         ))}
                       </div>
                     </div>
-                    <Link href="/sign-in" className="w-full">
+                    <Link
+                      href={user ? "/dashboard/resumes" : "/sign-in"}
+                      className="w-full"
+                    >
                       <Button size="lg" className="gap-2 w-full">
                         {t("demo.createYourOwnResume") ||
                           "Create Your Own Resume"}

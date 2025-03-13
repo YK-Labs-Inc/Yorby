@@ -7,11 +7,13 @@ import InterviewCopilotDemoSession from "./InterviewCopilotDemoSession";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslations } from "next-intl";
 import { Monitor } from "lucide-react";
-
+import { User } from "@supabase/supabase-js";
 export default function InterviewCopilotDemoClientComponent({
   signedUrl,
+  user,
 }: {
   signedUrl: string;
+  user: User | null;
 }) {
   const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(
     null
@@ -28,6 +30,7 @@ export default function InterviewCopilotDemoClientComponent({
     <InterviewCopilotDemoSession
       uploadResponse={uploadResponse}
       signedUrl={signedUrl}
+      user={user}
     />
   ) : (
     <FileUpload setUploadResponse={setUploadResponse} />
