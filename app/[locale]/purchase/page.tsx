@@ -47,7 +47,6 @@ export default async function PurchasePage({
   const isSubscriptionVariant =
     (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
     "test";
-  console.log("isSubscriptionVariant", isSubscriptionVariant);
 
   let resumeBuilderEnabled = false;
   if (user) {
@@ -186,7 +185,6 @@ const CreditPricingCards = async ({ products }: { products: Product[] }) => {
   return (
     <>
       {products.map((product) => {
-        console.log("product", product);
         // Find the first price ID that matches a key in PRICE_KEYS
         const priceId = product.prices.find((price) =>
           Object.keys(PRICE_KEYS).includes(price.id)
