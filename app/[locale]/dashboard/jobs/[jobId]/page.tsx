@@ -213,6 +213,7 @@ export default async function JobPage({
                 filter={filter}
                 userCredits={userCredits}
                 isLocked={isLocked}
+                isSubscriptionVariant={isSubscriptionVariant}
               />
             )}
           </div>
