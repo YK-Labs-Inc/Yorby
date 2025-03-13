@@ -14,6 +14,8 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { CoreAssistantMessage, CoreMessage } from "ai";
 import * as Sentry from "@sentry/nextjs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Link } from "@/i18n/routing";
+import { ArrowRight } from "lucide-react";
 
 const demoResumes: { resumeId: string; title: string }[] = [
   {
@@ -591,6 +593,13 @@ export default function ResumeBuilderDemo() {
                         ))}
                       </div>
                     </div>
+                    <Link href="/sign-in" className="w-full">
+                      <Button size="lg" className="gap-2 w-full">
+                        {t("demo.createYourOwnResume") ||
+                          "Create Your Own Resume"}
+                        <ArrowRight className="w-5 h-5" />
+                      </Button>
+                    </Link>
                   </div>
                 </AnimatePresence>
               </div>
