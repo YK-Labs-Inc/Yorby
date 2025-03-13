@@ -16,8 +16,7 @@ import * as Sentry from "@sentry/nextjs";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
-import { User } from "@supabase/supabase-js";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { useUser } from "@/context/UserContext";
 const demoResumes: { resumeId: string; title: string }[] = [
   {
     resumeId: "4cbdd2c8-a96b-4d3c-bd32-d9b89d924153",
@@ -64,11 +63,7 @@ const DEMO_EDIT_OPTIONS = [
   },
 ];
 
-export default async function ResumeBuilderDemo() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function ResumeBuilderDemo() {
   const t = useTranslations("resumeBuilder");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [resumeId, setResumeId] = useState<string>("");
@@ -77,6 +72,7 @@ export default async function ResumeBuilderDemo() {
   const [selectedOptions, setSelectedOptions] = useState<Set<number>>(
     new Set()
   );
+  const user = useUser();
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
@@ -142,7 +138,7 @@ export default async function ResumeBuilderDemo() {
 
         setResume(sortedData);
       } catch (error) {
-        console.error("Error fetching resume data:", error);
+        logError("Error fetching resume data:", { error });
         setResume(null);
       } finally {
         setIsGenerating(false);
