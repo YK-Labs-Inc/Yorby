@@ -325,7 +325,8 @@
     "create": "Create",
     "resumes": "Resumes",
     "resumeBuilder": "Resume Builder",
-    "createResume": "Create Resume"
+    "createResume": "Create Resume",
+    "unlockAllAccess": "Unlock Unlimited Access"
   },
   "upgrade": {
     "locked": {

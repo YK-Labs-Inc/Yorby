@@ -95,7 +95,7 @@ export default async function PurchasePage({
 
               return (
                 <div
-                  key={product.id}
+                  key={product.totalPrice}
                   className={`relative flex flex-col rounded-2xl ${
                     isPopular
                       ? "border-2 border-indigo-600 dark:border-indigo-400"
