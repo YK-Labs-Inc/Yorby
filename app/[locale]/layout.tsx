@@ -156,8 +156,8 @@ export default async function RootLayout({
           >
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
-              enableSystem
+              defaultTheme="light"
+              forcedTheme="light"
               disableTransitionOnChange
             >
               <UserProvider user={user} session={session}>

@@ -54,9 +54,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [logoSrc, setLogoSrc] = useState("/assets/dark-logo.png");
   const t = useTranslations("sidebar");
-  const { theme } = useTheme();
   const authError = searchParams.get("authError");
   const authSuccess = searchParams.get("authSuccess");
 
@@ -66,17 +64,15 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  useEffect(() => {
-    setLogoSrc(
-      theme === "light" ? "/assets/dark-logo.png" : "/assets/light-logo.png"
-    );
-  }, [theme]);
-
   return (
     <Sidebar>
       <SidebarHeader>
         <Link href="/dashboard/jobs" className="flex items-center">
-          <img src={logoSrc} alt="Perfect Interview" className="w-8 h-8 mr-2" />
+          <img
+            src="/assets/dark-logo.png"
+            alt="Perfect Interview"
+            className="w-8 h-8 mr-2"
+          />
           <H3>Perfect Interview</H3>
         </Link>
         {user && (

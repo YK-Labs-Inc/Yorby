@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
 import { Button } from "../ui/button";
-import { ThemeSwitcher } from "../theme-switcher";
 import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
 import { handleSignOut } from "./actions";
@@ -50,11 +49,6 @@ export function UserMenu({ email, hasSubscription }: UserMenuProps) {
             <DropdownMenuSeparator />
           </>
         )}
-        <div className="flex items-center justify-between px-2 py-1.5">
-          <span className="text-sm">{t("appearance")}</span>
-          <ThemeSwitcher />
-        </div>
-        <DropdownMenuSeparator />
         <form action={handleSignOut}>
           <DropdownMenuItem asChild>
             <Button variant="ghost" className="w-full" type="submit">
