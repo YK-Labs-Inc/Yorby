@@ -92,18 +92,18 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     path: "api/resume/edit",
   });
   try {
-    const isRateLimited = isDemo
-      ? await checkIsRateLimitedDemo(req)
-      : await checkIsRateLimited(req);
-    if (isRateLimited) {
-      logger.info("Rate limit exceeded", {
-        isDemo,
-      });
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 }
-      );
-    }
+    // const isRateLimited = isDemo
+    //   ? await checkIsRateLimitedDemo(req)
+    //   : await checkIsRateLimited(req);
+    // if (isRateLimited) {
+    //   logger.info("Rate limit exceeded", {
+    //     isDemo,
+    //   });
+    //   return NextResponse.json(
+    //     { error: "Rate limit exceeded" },
+    //     { status: 429 }
+    //   );
+    // }
 
     const { updatedResume, aiResponse } = await updateResume(
       JSON.stringify(resume),
