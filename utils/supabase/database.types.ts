@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      custom_job_categories: {
+        Row: {
+          category: string
+          created_at: string
+          custom_job_id: string
+          id: string
+          job_title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          job_title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          job_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_categories_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_credits: {
         Row: {
           created_at: string
