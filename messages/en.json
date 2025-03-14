@@ -958,6 +958,7 @@
     "pricing": {
       "badge": "SIMPLE PRICING",
       "title": "No Subscription Required",
+      "titleV2": "Simple, Transparent Pricing",
       "subtitle": "Unlike our competitors, we don't lock you into expensive subscriptions. Only pay for what you need.",
       "benefits": {
         "payAsYouGo": {

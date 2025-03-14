@@ -130,7 +130,6 @@ const companies = [
 
 export default function FeatureHighlight() {
   const t = useTranslations("FeatureHighlightsV2");
-  const resumeBuilderEnabled = useFeatureFlagEnabled("enable-resume-builder");
 
   return (
     <div className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
@@ -164,93 +163,91 @@ export default function FeatureHighlight() {
         </motion.div>
 
         {/* Journey Feature Showcase */}
-        {resumeBuilderEnabled && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-24"
-          >
-            <div className="relative">
-              {/* Connection Line */}
-              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform -translate-y-1/2 hidden md:block" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-24"
+        >
+          <div className="relative">
+            {/* Connection Line */}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform -translate-y-1/2 hidden md:block" />
 
-              {/* Journey Steps */}
-              <div className="grid md:grid-cols-2 gap-8 md:gap-16 relative">
-                {/* Before Interviews */}
-                <div className="relative">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
-                  <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700 h-full">
-                    <h3 className="text-2xl font-bold mb-8 flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
-                        1
-                      </span>
-                      {t("journey.before.title")}
-                    </h3>
-                    <div className="space-y-8">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <MessageSquare className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-lg mb-2">
-                            {t("journey.before.resumeBuilder.title")}
-                          </h4>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            {t("journey.before.resumeBuilder.description")}
-                          </p>
-                        </div>
+            {/* Journey Steps */}
+            <div className="grid md:grid-cols-2 gap-8 md:gap-16 relative">
+              {/* Before Interviews */}
+              <div className="relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
+                <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700 h-full">
+                  <h3 className="text-2xl font-bold mb-8 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
+                      1
+                    </span>
+                    {t("journey.before.title")}
+                  </h3>
+                  <div className="space-y-8">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <MessageSquare className="w-6 h-6 text-primary" />
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Target className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-lg mb-2">
-                            {t("journey.before.practiceQuestions.title")}
-                          </h4>
-                          <p className="text-gray-600 dark:text-gray-300">
-                            {t("journey.before.practiceQuestions.description")}
-                          </p>
-                        </div>
+                      <div>
+                        <h4 className="font-semibold text-lg mb-2">
+                          {t("journey.before.resumeBuilder.title")}
+                        </h4>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          {t("journey.before.resumeBuilder.description")}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* During Interviews */}
-                <div className="relative">
-                  <div className="absolute top-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
-                  <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700 h-full flex flex-col">
-                    <h3 className="text-2xl font-bold mb-8 flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
-                        2
-                      </span>
-                      {t("journey.during.title")}
-                    </h3>
-                    <div className="flex-grow flex items-center justify-center">
-                      <div className="text-center max-w-sm">
-                        <div className="flex justify-center mb-4">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Rocket className="w-6 h-6 text-primary" />
-                          </div>
-                        </div>
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Target className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
                         <h4 className="font-semibold text-lg mb-2">
-                          {t("journey.during.interviewCopilot.title")}
+                          {t("journey.before.practiceQuestions.title")}
                         </h4>
-                        <p className="text-gray-600 dark:text-gray-300 mb-4">
-                          {t("journey.during.interviewCopilot.description")}
+                        <p className="text-gray-600 dark:text-gray-300">
+                          {t("journey.before.practiceQuestions.description")}
                         </p>
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                          {t("journey.during.interviewCopilot.badge")}
-                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* During Interviews */}
+              <div className="relative">
+                <div className="absolute top-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
+                <div className="relative bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+                  <h3 className="text-2xl font-bold mb-8 flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
+                      2
+                    </span>
+                    {t("journey.during.title")}
+                  </h3>
+                  <div className="flex-grow flex items-center justify-center">
+                    <div className="text-center max-w-sm">
+                      <div className="flex justify-center mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <Rocket className="w-6 h-6 text-primary" />
+                        </div>
+                      </div>
+                      <h4 className="font-semibold text-lg mb-2">
+                        {t("journey.during.interviewCopilot.title")}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        {t("journey.during.interviewCopilot.description")}
+                      </p>
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                        {t("journey.during.interviewCopilot.badge")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
 
         {/* Feature Journey Section */}
         <div className="mb-24">
@@ -263,114 +260,107 @@ export default function FeatureHighlight() {
           </motion.div>
 
           {/* Resume Builder Section */}
-          {resumeBuilderEnabled && (
-            <div className="mb-20 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
-              <div className="relative p-12">
-                <div className="text-center mb-12">
-                  <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
-                    {t("features.resumeBuilder.title")}
-                  </h4>
-                  <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
-                    {t("features.resumeBuilder.description")}
-                  </p>
+          <div className="mb-20 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
+            <div className="relative p-12">
+              <div className="text-center mb-12">
+                <h4 className="text-2xl font-bold mb-4 inline-block px-6 py-2 bg-primary/10 rounded-full text-primary">
+                  {t("features.resumeBuilder.title")}
+                </h4>
+                <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">
+                  {t("features.resumeBuilder.description")}
+                </p>
+              </div>
+
+              {/* Video Demo Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative mb-12"
+              >
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1000px] mx-auto">
+                  <video
+                    src="/assets/resume-builder-demo.mp4"
+                    className="w-full aspect-video"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    controls
+                  />
+                </div>
+              </motion.div>
+
+              {/* Features Grid */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-[1000px] mx-auto"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <MessageSquare className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold mb-2">
+                        {t(
+                          "features.resumeBuilder.features.conversation.title"
+                        )}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {t(
+                          "features.resumeBuilder.features.conversation.description"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold mb-2">
+                        {t("features.resumeBuilder.features.formatting.title")}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {t(
+                          "features.resumeBuilder.features.formatting.description"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold mb-2">
+                        {t("features.resumeBuilder.features.time.title")}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {t("features.resumeBuilder.features.time.description")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Video Demo Section */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="relative mb-12"
-                >
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl max-w-[1000px] mx-auto">
-                    <video
-                      src="/assets/resume-builder-demo.mp4"
-                      className="w-full aspect-video"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      controls
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Features Grid */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="max-w-[1000px] mx-auto"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <MessageSquare className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          {t(
-                            "features.resumeBuilder.features.conversation.title"
-                          )}
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          {t(
-                            "features.resumeBuilder.features.conversation.description"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          {t(
-                            "features.resumeBuilder.features.formatting.title"
-                          )}
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          {t(
-                            "features.resumeBuilder.features.formatting.description"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Clock className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-semibold mb-2">
-                          {t("features.resumeBuilder.features.time.title")}
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-300">
-                          {t(
-                            "features.resumeBuilder.features.time.description"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center mt-12">
-                    <Link href="/resume-builder-demo">
-                      <Button
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-lg px-12"
-                      >
-                        {t("features.resumeBuilder.tryButton")}{" "}
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </Button>
-                    </Link>
-                  </div>
-                </motion.div>
-              </div>
+                <div className="flex justify-center mt-12">
+                  <Link href="/resume-builder-demo">
+                    <Button
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90 text-lg px-12"
+                    >
+                      {t("features.resumeBuilder.tryButton")}{" "}
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
             </div>
-          )}
-
+          </div>
           {/* Interview Prep Section */}
           <div className="mb-20 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
@@ -541,67 +531,15 @@ export default function FeatureHighlight() {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
           <div className="relative p-12">
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <span className="inline-block px-4 py-1 bg-primary/20 rounded-full text-primary text-sm font-semibold mb-4">
                 {t("pricing.badge")}
               </span>
-              <h3 className="text-4xl font-bold mb-4">{t("pricing.title")}</h3>
-              <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                {t("pricing.subtitle")}
-              </p>
-            </div>
+              <h3 className="text-5xl font-bold mb-6">
+                {t("pricing.titleV2") || "Simple Transparent Pricing"}
+              </h3>
 
-            <div className="flex flex-col items-center justify-center space-y-8">
-              {/* Benefits Section - Now in a 3-column layout */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl"
-              >
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2">
-                      {t("pricing.benefits.payAsYouGo.title")}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {t("pricing.benefits.payAsYouGo.description")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Lock className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2">
-                      {t("pricing.benefits.noLockIn.title")}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {t("pricing.benefits.noLockIn.description")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold mb-2">
-                      {t("pricing.benefits.lifetimeAccess.title")}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {t("pricing.benefits.lifetimeAccess.description")}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <div className="flex flex-col items-center space-y-6">
+              <div className="flex justify-center">
                 <Link href="/purchase">
                   <Button
                     size="lg"
