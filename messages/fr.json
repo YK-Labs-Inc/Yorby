@@ -33,7 +33,36 @@
       "pricing": {
         "title": "Aucun abonnement requis",
         "description": "Aucun abonnement requis, payez seulement ce dont vous avez besoin"
+      },
+      "sections": {
+        "prep": "Perfectionnez vos compétences d'entretien.",
+        "dayOf": "Réussissez votre journée d'entretien haut la main ! 👍",
+        "other": "Fonctionnalités supplémentaires"
+      },
+      "interviewCopilot": {
+        "title": "Interview Copilot",
+        "description": "Votre assistant d'entretien en temps réel qui vous aide à répondre aux questions pendant l'entretien. Obtenez des suggestions et des conseils instantanés pour vous aider à donner les meilleures réponses possibles."
       }
+    },
+    "pricing": {
+      "badge": "TARIFICATION SIMPLE",
+      "title": "Aucun abonnement requis",
+      "subtitle": "Contrairement à nos concurrents, nous ne vous enfermons pas dans des abonnements coûteux. Payez uniquement ce dont vous avez besoin.",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "Paiement à l'utilisation",
+          "description": "Ne payez que les entretiens que vous préparez. Pas de frais mensuels ni de coûts cachés."
+        },
+        "noLockIn": {
+          "title": "Pas de verrouillage.",
+          "description": "La liberté d'utiliser notre service uniquement quand vous en avez besoin. Pas d'engagements ni de contrats."
+        },
+        "lifetimeAccess": {
+          "title": "Accès à vie",
+          "description": "Vos supports de préparation aux entretiens restent accessibles pour toujours. Aucune date d'expiration."
+        }
+      },
+      "viewPlansButton": "Voir les Plans Tarifaires"
     }
   },
   "jobCreation": {
@@ -81,7 +110,33 @@
     },
     "fileUpload": {
       "pdfOnlyNotice": "Remarque : Tous les documents doivent être au format PDF.",
-      "pdfOnlyHelper": "Seuls les fichiers PDF sont pris en charge"
+      "pdfOnlyHelper": "Seuls les fichiers PDF sont pris en charge",
+      "uploadButton": "Télécharger un document"
+    },
+    "titleV2": "Créer du Matériel de Préparation à l'Entretien",
+    "cloneDemoJob": {
+      "description": "Souhaitez-vous vous entraîner à ces questions d'entretien ? Cliquez sur le bouton ci-dessous pour vous exercer à ces questions avec nos simulations d'entretien assistées par l'IA !",
+      "button": "Entraînez-vous avec ces questions d'entretien.",
+      "loading": "Préparation de votre matériel de préparation d'entretien..."
+    },
+    "onboarding": {
+      "title": "Bienvenue chez Perfect Interview !",
+      "description": "Aidons-nous à vous préparer pour votre prochain entretien. Voici comment ça marche :",
+      "steps": {
+        "1": {
+          "title": "Détails de l'offre d'emploi",
+          "description": "Tout d'abord, parlez-nous du poste pour lequel vous postulez. Saisissez l'intitulé du poste, la description et éventuellement les détails de l'entreprise."
+        },
+        "2": {
+          "title": "Télécharger des documents",
+          "description": "Ensuite, téléversez votre CV, lettre de motivation ou tout autre document pertinent. Cela nous aide à adapter les questions de l'entretien à votre expérience."
+        },
+        "3": {
+          "title": "Générer des questions",
+          "description": "Enfin, nous analyserons tout et générerons des questions d'entretien personnalisées. Cela peut prendre quelques minutes, mais ça vaut la peine d'attendre !"
+        }
+      },
+      "button": "Compris !"
     }
   },
   "jobPage": {
@@ -141,6 +196,40 @@
       "testMicrophone": "Testez votre microphone",
       "testRecording": "Enregistrer un test audio",
       "stopTestRecording": "Arrêter l'enregistrement du test"
+    },
+    "onboarding": {
+      "title": "Entraînez-vous à répondre aux questions d'entretien.",
+      "description": "Obtenez un retour instantané sur vos réponses d'entretien. Voici comment ça marche :",
+      "features": {
+        "1": {
+          "title": "Plusieurs façons de répondre.",
+          "description": "Tapez votre réponse ou utilisez l'enregistrement vocal - ce qui vous semble le plus naturel. 🎤"
+        },
+        "2": {
+          "title": "Retour d'information instantané",
+          "description": "Obtenez un retour détaillé sur vos réponses, incluant les points forts et les axes d'amélioration."
+        },
+        "3": {
+          "title": "Pratique illimitée",
+          "description": "Entraînez-vous autant que vous voulez - il n'y a pas de limite au nombre de fois où vous pouvez répondre à chaque question."
+        }
+      },
+      "button": "Compris !"
+    },
+    "generateAnswerOnboarding": {
+      "title": "Laissez l'IA répondre à votre place 🤖",
+      "description": "Trop paresseux pour répondre à la question vous-même ? Laissez l'IA générer une réponse personnalisée pour vous.",
+      "features": {
+        "aiPowered": {
+          "title": "Réponses propulsées par l'IA",
+          "description": "Trop paresseux pour répondre à la question vous-même ? Laissez l'IA générer une réponse pour vous."
+        },
+        "personalized": {
+          "title": "Personnalisé pour Votre Expérience",
+          "description": "Si vous avez téléchargé votre CV ou votre lettre de motivation, il utilisera votre expérience professionnelle précédente pour répondre à la question à votre place."
+        }
+      },
+      "button": "Compris !"
     }
   },
   "mockInterview": {
@@ -181,7 +270,13 @@
       "loading": {
         "title": "Début de l'entretien",
         "description": "Veuillez patienter pendant que nous préparons votre session d'entretien..."
-      }
+      },
+      "send": "Envoyer",
+      "typeYourResponse": "Tapez votre réponse...",
+      "pleaseSelectAMicrophone": "Veuillez sélectionner un microphone.",
+      "micPermissionError": "Veuillez autoriser l'accès à votre microphone.",
+      "recordingError": "Erreur lors de l'enregistrement de votre réponse. Veuillez réessayer.",
+      "transcribing": "Transcription en cours..."
     },
     "endModal": {
       "title": "Fin de l'entretien",
@@ -191,19 +286,48 @@
       "processingMessage": "Cela peut prendre quelques minutes...",
       "emailAlert": "Nous vous enverrons un e-mail lorsque votre entretien sera prêt à être examiné.",
       "confirmButton": "Fin de l'entretien",
-      "cancelButton": "Continuer l'entretien"
+      "cancelButton": "Continuer l'entretien",
+      "uploadVideoLabel": "Télécharger l'enregistrement de l'entretien pour relecture."
+    },
+    "onboarding": {
+      "title": "Bienvenue dans l'Expérience d'Entretien Simulé.",
+      "description": "Entraînez-vous à vos compétences d'entretien avec notre intervieweur IA. Voici comment ça marche :",
+      "steps": {
+        "1": {
+          "title": "Expérience réelle d'entretien d'embauche",
+          "description": "Discutez avec notre IA interviewer qui mène un entretien d'embauche réaliste basé sur le poste pour lequel vous postulez."
+        },
+        "2": {
+          "title": "Conversation naturelle",
+          "description": "Parlez naturellement comme vous le feriez lors d'un vrai entretien – notre interviewer IA vous écoutera et répondra en conséquence."
+        },
+        "3": {
+          "title": "Bilan de performance",
+          "description": "Après l'entretien, obtenez un feedback détaillé sur votre performance, incluant vos points forts et vos axes d'amélioration."
+        }
+      },
+      "button": "Compris !"
     }
   },
   "errors": {
     "pleaseTryAgain": "Désolé, une erreur s'est produite. Veuillez réessayer.",
-    "userNotFound": "Utilisateur non trouvé — veuillez vous reconnecter."
+    "userNotFound": "Utilisateur non trouvé — veuillez vous reconnecter.",
+    "onlyPdfFilesAllowed": "Seuls les fichiers PDF sont autorisés. Veuillez télécharger uniquement des documents PDF."
   },
   "sidebar": {
     "addJob": "Créer un nouveau job",
     "signInToStart": "Connectez-vous pour enregistrer votre préparation d'entretien personnalisée",
     "signIn": "Se connecter",
     "numberOfCredits": "Crédits : {numberOfCredits}",
-    "buyMoreCredits": "Acheter plus de crédits"
+    "buyMoreCredits": "Acheter plus de crédits",
+    "jobs": "Emplois",
+    "interviewCopilots": "Copilotes d'entretien",
+    "createInterviewCopilot": "Créer un copilote d'entretien",
+    "create": "Créer",
+    "resumes": "CVs",
+    "resumeBuilder": "Créateur de CV",
+    "createResume": "Créer un CV",
+    "unlockAllAccess": "Débloquez l'Accès Illimité"
   },
   "upgrade": {
     "locked": {
@@ -212,7 +336,8 @@
       "mockDescription": "Accédez à un nombre illimité d'entretiens blancs basés sur l'IA simulant des scénarios d'entretien réels. Entraînez-vous avec notre intervieweur IA avancé qui s'adapte à vos réponses et fournit un retour instantané.",
       "button": "Débloquez un accès complet à la préparation aux entrevues",
       "insufficientCredits": "Vous n'avez pas assez de crédits pour débloquer cette expérience de préparation aux entretiens.",
-      "unlocking": "Déverrouillage..."
+      "unlocking": "Déverrouillage...",
+      "subscriptionTitle": "Débloquez l'expérience complète de préparation aux entretiens 🗝️"
     },
     "modal": {
       "title": "Passer à Premium",
@@ -254,22 +379,26 @@
       "oneCredit": {
         "title": "Entretien individuel",
         "description": "Parfait pour essayer notre système d'entretien fictif",
-        "highlight": "1 Crédit"
+        "highlight": "1 Crédit",
+        "titleV2": "1 crédit"
       },
       "fiveCredits": {
         "title": "Dossier d'entretien",
         "description": "Super pour s'entraîner à plusieurs entretiens",
-        "highlight": "5 Crédits"
+        "highlight": "5 Crédits",
+        "titleV2": "5 Crédits"
       },
       "tenCredits": {
         "title": "Pack Pro",
         "description": "Meilleur rapport qualité-prix pour une préparation sérieuse",
-        "highlight": "10 Crédits"
+        "highlight": "10 Crédits",
+        "titleV2": "10 crédits"
       },
       "unlimited": {
         "title": "Illimité Annuel",
         "description": "Pour les professionnels et les personnes recherchant fréquemment un emploi",
-        "highlight": "Crédits illimités"
+        "highlight": "Crédits illimités",
+        "titleV2": "Crédits Illimités"
       }
     },
     "cta": {
@@ -286,13 +415,55 @@
       "quarterSuffix": "/trimestre",
       "subscription": "Abonnement annuel",
       "quarterlySubscription": "Facturé tous les 3 mois",
-      "oneTime": "Achat unique"
+      "oneTime": "Achat unique",
+      "savingsV2": "Économisez {savings}% vs. crédit unique"
     },
     "verifying_purchase": "Vérification de votre achat...",
     "purchase_success": "Achat réussi ! 🎉",
     "purchase_failed": "Échec de la vérification d'achat",
     "redirect_success_message": "Vous serez redirigé(e) vers votre tableau de bord dans {seconds} secondes...",
-    "redirect_error_message": "Redirection dans {seconds} secondes..."
+    "redirect_error_message": "Redirection dans {seconds} secondes...",
+    "subscriptionTitle": "Accédez à un Accès Illimité à l'Entretien Parfait",
+    "descriptionV2": "Vous pouvez utiliser vos crédits pour créer du matériel de préparation d'entretien pour un emploi ou créer un Copilote d'Entretien.",
+    "descriptionV3": "Vous pouvez utiliser vos crédits pour générer des questions d'entretien, créer un Copilote d'Entretien ou créer un CV.",
+    "subscriptionDescription": "Créez des CV illimités, des questions d'entretien illimitées et des Copilotes d'entretien illimités.",
+    "unauthenticated": {
+      "title": "Connectez-vous pour voir les prix",
+      "description": "Connectez-vous pour consulter nos plans tarifaires et acheter des crédits d'entretien.",
+      "form": {
+        "email": {
+          "label": "E-mail",
+          "placeholder": "Entrez votre adresse courriel"
+        },
+        "submit": "Se connecter"
+      }
+    },
+    "creditUsage": {
+      "modalTrigger": "De combien de crédits avez-vous besoin ?",
+      "modalTitle": "Répartition de l'utilisation des crédits",
+      "gotItButton": "Compris.",
+      "items": {
+        "jobPrep": {
+          "title": "Préparation à l'entretien d'embauche",
+          "description": "Créez des questions d'entraînement d'entretien et des entretiens blancs illimités pour un seul poste 🚀",
+          "credits": "{count} {count, plural, one {Crédit} other {Crédits}}"
+        },
+        "copilot": {
+          "title": "Session d'entretien Copilot",
+          "description": "Une session complète de copilote d'entretien",
+          "credits": "{count} {count, plural, one {Crédit} other {Crédits}}"
+        },
+        "resumeBuilder": {
+          "title": "Créer un CV",
+          "description": "Créez un CV avec notre créateur de CV facile à utiliser 🚀",
+          "credits": "{count} {count, plural, one {Crédit} other {Crédits}}"
+        }
+      }
+    },
+    "errors": {
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "login": "Vous devez être connecté(e) pour acheter des crédits."
+    }
   },
   "accountLinking": {
     "title": "Lier votre compte",
@@ -309,7 +480,12 @@
       "submit": "Lier un compte"
     },
     "emailRequiredError": "L'adresse e-mail est obligatoire",
-    "authSuccess": "Un lien de vérification a été envoyé à votre adresse e-mail. Veuillez consulter votre boîte de réception pour terminer votre inscription."
+    "authSuccess": "Un lien de vérification a été envoyé à votre adresse e-mail. Veuillez consulter votre boîte de réception pour terminer votre inscription.",
+    "genericError": "Une erreur s'est produite, veuillez réessayer.",
+    "signUp": "S'inscrire",
+    "signUpToStart": "Inscrivez-vous pour sauvegarder votre préparation d'entretien personnalisée.",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter"
   },
   "faq": {
     "title": "Foire Aux Questions",
@@ -320,10 +496,701 @@
     "q3": "Quels types d'emplois Perfect Interview prend-il en charge ?",
     "a3": "Perfect Interivew prend en charge tous les emplois du monde. Tant que vous téléchargez la description du poste, nous pourrons générer un nombre illimité de questions d'entraînement pour vous.",
     "q4": "Y a-t-il une limite au nombre d'entretiens simulés que je peux faire ?",
-    "a4": "Il n'y a pas de limite au nombre d'entretiens blancs que vous pouvez faire. Chaque entretien blanc est unique et adapté au poste auquel vous postulez."
+    "a4": "Il n'y a pas de limite au nombre d'entretiens blancs que vous pouvez faire. Chaque entretien blanc est unique et adapté au poste auquel vous postulez.",
+    "q5": "Quels types d'emplois Perfect Interview prend-il en charge ?",
+    "a5": "Perfect Interview prend en charge absolument tous les emplois dans le monde. Tant que vous téléchargez la description du poste, nous serons en mesure de créer des questions d'entretien et des copilotes d'entretien pour vous."
   },
   "mobileWarning": {
     "title": "Expérience Bureau Uniquement",
     "description": "PerfectInterview fonctionne mieux sur les navigateurs d'ordinateurs. Veuillez passer à un ordinateur de bureau pour une expérience d'entretien complète."
+  },
+  "demoJobs": {
+    "errors": {
+      "demoJobNotFound": "Désolé, nous n'avons pas pu trouver cet entretien.",
+      "captchaRequired": "Captcha requis – veuillez réessayer.",
+      "pleaseTryAgain": "Une erreur s'est produite. Veuillez réessayer.",
+      "createYourOwn": "Mais vous pouvez créer votre propre préparation d'entretien personnalisée sur notre page d'accueil. Téléchargez n'importe quelle description de poste, votre CV, et nous générerons des questions d'entraînement adaptées à votre expérience pour n'importe quel emploi dans le monde."
+    },
+    "actions": {
+      "goToHome": "Aller à la page d'accueil"
+    }
+  },
+  "onboarding": {
+    "checklistTitle": "Premiers pas",
+    "createJob": "Créez votre premier emploi ✨",
+    "generateAnswer": "Générez votre première réponse.",
+    "answerQuestion": "Réponds à ta première question.",
+    "completeMockInterview": "Termine ton premier entretien blanc.",
+    "signUp": "S'inscrire pour un compte"
+  },
+  "signUp": {
+    "alreadySignedIn": {
+      "title": "Déjà connecté(e)",
+      "description": "Vous avez déjà un compte et êtes connecté(e).",
+      "buttons": {
+        "dashboard": "Aller au Tableau de bord",
+        "home": "Aller à l'accueil 🏠"
+      }
+    },
+    "loading": "Chargement..."
+  },
+  "signIn": {
+    "title": "Se connecter",
+    "description": "Nous vous enverrons un lien magique pour vous connecter à votre compte.",
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Entrez votre adresse e-mail"
+      },
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours..."
+    }
+  },
+  "interviewCopilots": {
+    "title": "Copilotes d'entretien",
+    "jobDetails": "Détails du poste",
+    "companyDetails": "Coordonnées de l'entreprise",
+    "documents": {
+      "label": "Documents",
+      "uploadButton": "Télécharger le document",
+      "uploading": "Téléchargement en cours...",
+      "uploadSuccess": "Document téléchargé avec succès ✅",
+      "deleteSuccess": "Document supprimé avec succès.",
+      "helper": "Téléversez votre CV, lettre de motivation ou tout autre document pertinent (doit être un fichier PDF)",
+      "empty": "Aucun document n'a encore été téléchargé."
+    },
+    "createNew": {
+      "title": "Créer un nouveau copilote d'entretien",
+      "jobTitle": {
+        "label": "Titre du poste",
+        "placeholder": "Saisir l'intitulé du poste"
+      },
+      "jobDescription": {
+        "label": "Description de poste",
+        "placeholder": "Entrez la description du poste."
+      },
+      "companyName": {
+        "label": "Nom de l'entreprise",
+        "placeholder": "Entrez le nom de l'entreprise"
+      },
+      "companyDescription": {
+        "label": "Description de l'entreprise",
+        "placeholder": "Saisir la description de l'entreprise"
+      },
+      "documents": {
+        "label": "Documents",
+        "helper": "Téléversez votre CV, lettre de motivation, ou tout autre document pertinent (doit être un fichier PDF)"
+      },
+      "submit": "Créer un copilote d'entretien",
+      "submitting": "Création...",
+      "emptyFields": {
+        "title": "Veuillez remplir les informations.",
+        "description": "Pour optimiser les performances de votre copilote d'entretien, veuillez remplir autant de champs que possible. Au moins un champ doit être rempli pour continuer.",
+        "button": "Compris."
+      }
+    },
+    "edit": {
+      "saveSuccess": "Modifications enregistrées avec succès ✅",
+      "saveError": "Échec de l'enregistrement des modifications.",
+      "editButton": "Modifier",
+      "cancelButton": "Annuler",
+      "saveButton": "Sauvegarder",
+      "saving": "Enregistrement..."
+    },
+    "errors": {
+      "notFound": {
+        "title": "Copilot d'entretien introuvable",
+        "description": "Le copilote d'entretien que vous recherchez n'existe pas ou a été supprimé.",
+        "action": "Créer un nouveau copilote d'entretien"
+      },
+      "uploadFailed": "Échec du chargement du fichier",
+      "deleteFailed": "Échec de la suppression du fichier.",
+      "generic": "Une erreur s'est produite, veuillez réessayer.",
+      "fileRequired": "Veuillez sélectionner un fichier à télécharger.",
+      "pdfOnly": "Seuls les fichiers PDF sont pris en charge.",
+      "unauthorized": "Vous devez être connecté(e) pour télécharger des fichiers."
+    },
+    "jobTitle": {
+      "label": "Titre du poste",
+      "empty": "Aucun titre de poste fourni"
+    },
+    "jobDescription": {
+      "label": "Description de poste",
+      "empty": "Pas de description de poste fournie."
+    },
+    "companyName": {
+      "label": "Nom de l'entreprise",
+      "empty": "Nom de l'entreprise non fourni"
+    },
+    "companyDescription": {
+      "label": "Description de l'entreprise",
+      "empty": "Aucune description d'entreprise fournie"
+    },
+    "deviceSelection": {
+      "title": "Sélectionner un appareil",
+      "sameDevice": {
+        "title": "Même appareil",
+        "description": "Utilisez votre appareil actuel pour l'entretien.",
+        "pros": {
+          "0": "Nécessite un seul appareil",
+          "1": "Processus d'installation simple",
+          "2": "Intégration audio + vidéo fluide"
+        },
+        "cons": {
+          "0": "Le partage d'écran peut révéler le copilote.",
+          "1": "Limité au navigateur Chrome"
+        }
+      },
+      "separateDevice": {
+        "title": "Appareil séparé",
+        "description": "Utilisez un autre appareil pour l'entretien.",
+        "pros": {
+          "0": "Complètement indétectable lors du partage d'écran.",
+          "1": "Fonctionne avec n'importe quelle plateforme de réunion 👍"
+        },
+        "cons": {
+          "0": "Nécessite un deuxième appareil."
+        }
+      },
+      "modal": {
+        "title": "Comparaison des options d'appareil",
+        "learnMore": "Quelle option vous convient le mieux ?",
+        "close": "Fermer"
+      }
+    },
+    "session": {
+      "startCopilot": "Démarrer le copilote d'entretien",
+      "startingCopilot": "Démarrage de Copilot d'entretien...",
+      "selectMicrophone": "Sélectionner un microphone",
+      "microphonePermission": {
+        "checking": "Vérification des autorisations du microphone...",
+        "title": "Accès au microphone requis.",
+        "description": {
+          "denied": "L'accès au microphone a été refusé. Veuillez autoriser l'accès au microphone dans les paramètres de votre navigateur pour continuer.",
+          "prompt": "Cette application a besoin d'accéder à votre microphone pour enregistrer votre session d'entretien."
+        },
+        "allowButton": "Autoriser l'accès au microphone",
+        "instructions": {
+          "title": "Pour activer l'accès au microphone :",
+          "steps": {
+            "1": "Cliquez sur l'icône de caméra/microphone dans la barre d'adresse de votre navigateur.",
+            "2": "Sélectionnez \"Autoriser\" pour l'accès au microphone.",
+            "3": "Actualiser la page"
+          }
+        }
+      },
+      "error": {
+        "generic": "Désolé(e), une erreur s'est produite. Veuillez réessayer.",
+        "noMicrophoneSelected": "Veuillez sélectionner un microphone pour continuer.",
+        "noScreenSharingSupport": "Votre navigateur ne prend pas en charge le partage d'écran. Veuillez utiliser Google Chrome."
+      },
+      "selectMeeting": {
+        "title": "Sélectionner une salle de réunion pour l'entretien",
+        "button": "Sélectionner",
+        "instruction": "Une fois l'entretien commencé, la transcription de l'intervieweur s'affichera ici.",
+        "connecting": "Connexion en cours..."
+      },
+      "transcription": {
+        "title": "Transcription de l'entretien",
+        "status": {
+          "ready": "Prêt(e) 👍",
+          "transcribing": "Transcription",
+          "recording": "Enregistrement"
+        }
+      },
+      "controls": {
+        "leave": "Partir",
+        "settings": "Paramètres",
+        "theme": "Changer de thème",
+        "transcriptAutoScroll": "Défilement automatique de la transcription",
+        "copilotAutoScroll": "Défilement automatique Copilot",
+        "on": "Sur",
+        "off": "Éteint"
+      },
+      "copilot": {
+        "title": "Interview Copilot",
+        "status": {
+          "ready": "Prêt",
+          "error": "Erreur",
+          "listening": "Écoute"
+        },
+        "waitingMessage": "Le Copilote d'Entretien répondra aux questions de l'entretien ici."
+      },
+      "stopRecording": "Terminer l'entretien avec Copilot",
+      "endInterview": "Fin de l'entretien",
+      "endInterviewConfirmation": "Êtes-vous sûr(e) de vouloir terminer cet entretien ? Cela sauvegardera et traitera votre enregistrement.",
+      "uploading": "Téléchargement de l'enregistrement en cours...",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "onboarding": {
+        "title": "Guide d'installation de Copilot pour les entretiens",
+        "description": "Suivez ces étapes pour configurer votre session d'entretien.",
+        "helpButton": "Voir les instructions d'installation",
+        "skipButton": "Ignorer le guide de configuration",
+        "nextButton": "Suivant",
+        "previousButton": "Précédent",
+        "getStartedButton": "Commencer",
+        "steps": {
+          "1": {
+            "title": "Ouvrez votre entretien dans Chrome.",
+            "description": "Pour utiliser le Copilote d'entretien, vous devez ouvrir votre entretien dans un onglet Google Chrome.",
+            "description2": "L'Assistant d'Entretien ne fonctionnera pas avec d'autres navigateurs ou si vous ouvrez l'entretien dans une application de bureau — il DOIT être dans un onglet Chrome.",
+            "description3": "Sélectionnez votre plateforme de réunion pour voir les instructions spécifiques sur la façon de l'ouvrir dans Chrome.",
+            "platforms": {
+              "zoom": {
+                "name": "Zoom",
+                "instruction": "Ouvrez votre réunion Zoom dans Chrome au lieu de l'application de bureau :"
+              },
+              "teams": {
+                "name": "Microsoft Teams",
+                "instruction": "Ouvrez votre réunion Teams dans Chrome au lieu de l'application de bureau :"
+              },
+              "meet": {
+                "name": "Google Meet",
+                "instruction": "Google Meet s'ouvre dans Chrome par défaut :"
+              }
+            }
+          },
+          "2": {
+            "title": "Partager l'onglet de votre réunion",
+            "description": "Cliquez sur le bouton \"Select Interview Meeting Room\" et choisissez l'onglet Chrome avec votre réunion.",
+            "shareTabInstructions": {
+              "mustShare": "Vous DEVEZ partager l'onglet Chrome avec l'option \"Partager aussi l'audio de l'onglet\" activée.",
+              "doNotShare": "NE PAS partager la \"fenêtre\" ou \"l'écran entier\" sinon le Copilote d'entretien ne fonctionnera pas."
+            }
+          },
+          "3": {
+            "title": "Lancer le Copilote d'entretien",
+            "description": "Après avoir partagé l'onglet de votre entretien, cliquez sur le bouton « Start Interview Copilot » pour commencer."
+          }
+        }
+      },
+      "exitWarning": {
+        "title": "Attention : Enregistrement non sauvegardé",
+        "description": "Vous avez un enregistrement d'entretien non sauvegardé. Si vous quittez maintenant, votre enregistrement sera perdu.",
+        "instruction": "Pour sauvegarder votre enregistrement, veuillez cliquer sur le bouton « End Interview Copilot » avant de quitter.",
+        "stayButton": "Rester sur la page",
+        "leaveButton": "Pars quand même."
+      }
+    },
+    "jobCreation": {
+      "fileUpload": {
+        "pdfOnlyNotice": "Note : Tous les documents doivent être au format PDF.",
+        "pdfOnlyHelper": "Seuls les fichiers PDF sont pris en charge."
+      },
+      "title": "Interview Copilot"
+    },
+    "credits": {
+      "subtitle": "La création d'un copilote d'entretien utilisera 1 crédit. Vous avez actuellement {credits} crédits.",
+      "insufficientDialog": {
+        "title": "Besoin de plus de crédits",
+        "description": "Vous avez besoin d'au moins 1 crédit pour créer un copilote d'entretien. Achetez des crédits pour continuer.",
+        "button": "Acheter des crédits"
+      },
+      "confirmDialog": {
+        "title": "Confirmer la création",
+        "description": "La création d'un copilote d'entretien utilisera 1 crédit de votre compte. Il vous reste actuellement {credits} crédits.",
+        "cancel": "Annuler",
+        "confirm": "Créer Copilot",
+        "creating": "Création..."
+      }
+    },
+    "mobileWarning": {
+      "title": "Expérience uniquement disponible sur ordinateur de bureau.",
+      "description": "Le Copilote d'entretien est une expérience réservée aux ordinateurs de bureau. Veuillez passer à un appareil de bureau pour profiter pleinement de l'expérience Copilote d'entretien."
+    },
+    "browserWarning": {
+      "title": "Navigateur Chrome requis",
+      "description": "L'Assistant d'entretien nécessite Google Chrome pour fonctionner correctement. Veuillez passer à Chrome pour une expérience optimale."
+    },
+    "delete": {
+      "button": "Supprimer",
+      "deleting": "Suppression en cours...",
+      "confirmTitle": "Êtes-vous sûr(e) ?",
+      "confirmDescription": "Cette action est irréversible. Cela supprimera définitivement votre copilote d'entretien et toutes les données associées.",
+      "cancelButton": "Annuler"
+    },
+    "locked": {
+      "title": "Ce Copilote d'entretien est verrouillé 🔒",
+      "description": "Déverrouillez ce copilote pour l'utiliser pendant votre entretien.",
+      "creditCost": "Vous avez besoin de {credits} {credits, plural, one {credit} other {credits}} pour débloquer ce copilote d'entretien",
+      "button": "Déverrouiller",
+      "unlocking": "Déverrouillage...",
+      "insufficientCredits": {
+        "title": "Crédits insuffisants",
+        "description": "Vous n'avez pas assez de crédits pour débloquer ce copilote.",
+        "button": "Acheter des crédits"
+      },
+      "cancel": "Annuler",
+      "subscriptionCTA": "Débloquer Interview Copilot 🚀"
+    },
+    "accountLinking": {
+      "title": "Sauvegardez votre copilote d'entretien 🦺",
+      "description": "Liez votre compte pour sauvegarder votre copilote d'entretien et y accéder à tout moment.",
+      "form": {
+        "email": {
+          "label": "Courriel",
+          "placeholder": "Entrez votre adresse e-mail"
+        },
+        "submit": "Sauvegarder Interview Copilot 💾"
+      },
+      "authSuccess": "Vérifiez votre email pour confirmer votre compte.",
+      "errors": {
+        "emailRequiredError": "Veuillez entrer votre adresse e-mail",
+        "genericError": "Un problème est survenu, veuillez réessayer."
+      }
+    },
+    "review": {
+      "recording": {
+        "title": "Enregistrement d'entretien",
+        "description": "Évaluez votre performance à l'entretien."
+      },
+      "questions": {
+        "title": "Revue des questions",
+        "description": "Relisez les questions et réponses.",
+        "questionLabel": "Question",
+        "questionNumber": "Question {numéro}",
+        "answerLabel": "La réponse de l'IA"
+      }
+    },
+    "demo": {
+      "title": "Découvrez comment Interview Copilot peut vous aider 🚀",
+      "description": "Découvrez comment Interview Copilot peut vous aider lors de votre prochain entretien. Essayez notre démo Interview Copilot avant de créer la vôtre.",
+      "button": "Essayer la démo"
+    }
+  },
+  "FeatureHighlightsV2": {
+    "hero": {
+      "badge": "AUCUN ABONNEMENT REQUIS",
+      "title": "Écrasez votre prochain entretien 🚀",
+      "titleV2": "Tout ce dont vous avez besoin pour décrocher votre prochain emploi.",
+      "description": "De la préparation aux entretiens à l'aide en temps réel, Perfect Interview est une solution complète pour vous aider à décrocher n'importe quel emploi et à empocher le pactole 💰",
+      "descriptionV2": "Perfect Interview est tout ce dont vous avez besoin pour décrocher n'importe quel emploi et toucher le pactole 💰",
+      "subscriptionNote": "Aucun abonnement ennuyeux requis.",
+      "getStarted": "Commencer"
+    },
+    "journey": {
+      "before": {
+        "title": "Avant les entretiens",
+        "resumeBuilder": {
+          "title": "Créateur de CV IA 🤖",
+          "description": "Créez un CV professionnel grâce à une conversation naturelle avec notre assistant IA."
+        },
+        "practiceQuestions": {
+          "title": "Générateur de Questions d'Entretien",
+          "description": "Obtenez des questions d'entraînement personnalisées en fonction du poste et de votre expérience."
+        }
+      },
+      "during": {
+        "title": "Pendant les entretiens",
+        "interviewCopilot": {
+          "title": "Interview Copilot",
+          "description": "Votre assistant d'entretien d'embauche IA en temps réel qui vous aide à répondre parfaitement aux questions.",
+          "badge": "100% Indétectable"
+        }
+      }
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin pour réussir votre prochain entretien d'embauche 🚀",
+      "resumeBuilder": {
+        "title": "Créez votre CV avec l'IA 🤖",
+        "description": "Créez un CV professionnel en quelques minutes en ayant une conversation naturelle avec notre assistant IA. Plus besoin de mise en forme manuelle ni de blocage de l'écrivain.",
+        "tryButton": "Essayez la démo du créateur de CV",
+        "features": {
+          "conversation": {
+            "title": "Conversation naturelle",
+            "description": "Parlez-nous de votre expérience et notre IA trouvera tous les détails importants pour votre CV."
+          },
+          "formatting": {
+            "title": "Format parfait",
+            "description": "Nous créons des CV qui sont 100% conformes aux dernières normes de rédaction de CV."
+          },
+          "time": {
+            "title": "Gagnez des heures de temps ⏳",
+            "description": "Plus besoin de taper et d'éditer manuellement. Dites-nous quelles modifications apporter en utilisant un langage naturel et nous nous occuperons du reste."
+          }
+        }
+      },
+      "prep": {
+        "title": "Préparation d'entretien personnalisée 🧑‍💼✨",
+        "description": "Maîtrisez vos compétences en entretien avec nos outils de préparation complets."
+      },
+      "practiceQuestions": {
+        "title": "Découvrez les questions d'entretien",
+        "description": "Générez un nombre illimité de questions d'entraînement à l'entretien d'embauche basées sur n'importe quelle description de poste et votre CV, afin que les questions soient personnalisées pour le poste et votre expérience personnelle. 🚀"
+      },
+      "feedback": {
+        "title": "Retour d'information instantané ⚡",
+        "description": "Obtenez des retours sur vos réponses aux questions d'entretien d'entraînement."
+      },
+      "aiAnswers": {
+        "title": "Générer des réponses avec l'IA",
+        "description": "Générez des réponses aux questions d'entretien en vous basant sur votre historique de travail précédent."
+      },
+      "mockInterviews": {
+        "title": "Entretiens simulés réalistes avec l'IA 🤖🎙️",
+        "description": "Une expérience d'entretien simulé réaliste en vous faisant discuter avec un interviewer IA pour reproduire un scénario d'entretien réel 🗣️🤖."
+      },
+      "performance": {
+        "title": "Obtenir un feedback détaillé.",
+        "description": "Obtenez une analyse détaillée de vos forces et faiblesses et des points à améliorer."
+      },
+      "copilot": {
+        "title": "Votre copilote d'entretien personnel 🚀",
+        "description": "Interview Copilot écoute votre entretien et répond aux questions à votre place en temps réel, en se basant sur votre expérience professionnelle précédente, pour vous assurer de réussir votre entretien d'embauche. 💥",
+        "note": "Ne t'inquiète pas, c'est 100% indétectable, donc ça peut rester notre petit secret 🤫",
+        "tryButton": "Essayez la Démo Interview Copilot 🚀",
+        "features": {
+          "aiGuidance": {
+            "title": "Réponses IA en temps réel 🚀",
+            "description": "L'IA écoutera toutes les questions posées lors de l'entretien et fournira une réponse en temps réel."
+          },
+          "timing": {
+            "title": "Timing parfait",
+            "description": "Les réponses apparaissent instantanément avant même que vous ayez besoin de répondre, ce qui vous donne le temps de traiter l'information et de répondre avec assurance."
+          },
+          "personalization": {
+            "title": "Personnalisé(e) pour vous ✨",
+            "description": "Les réponses sont adaptées à votre expérience, au poste et à l'entreprise, ce qui rend chaque réponse unique."
+          }
+        }
+      }
+    },
+    "pricing": {
+      "badge": "TARIFICATION SIMPLE",
+      "title": "Pas d'abonnement requis",
+      "titleV2": "Tarification simple et transparente.",
+      "subtitle": "Contrairement à nos concurrents, nous ne vous enfermons pas dans des abonnements coûteux. Ne payez que ce dont vous avez besoin.",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "Payer au fur et à mesure",
+          "description": "Ne payez que pour les entretiens que vous préparez. Pas de frais mensuels ni de coûts cachés."
+        },
+        "noLockIn": {
+          "title": "Pas de verrouillage ✅",
+          "description": "La liberté d'utiliser notre service uniquement quand vous en avez besoin. Sans engagement ni contrat."
+        },
+        "lifetimeAccess": {
+          "title": "Accès à vie",
+          "description": "Vos supports de préparation à l'entretien restent accessibles pour toujours. Pas de date d'expiration."
+        }
+      },
+      "viewPlansButton": "Voir les plans de tarification"
+    },
+    "finalCTA": {
+      "title": "Prêt(e) à Transformer Votre Succès aux Entretiens ?",
+      "description": "Rejoignez des milliers de professionnels qui ont amélioré leur performance en entretien. Payez uniquement ce dont vous avez besoin, sans abonnement requis.",
+      "button": "Commencer",
+      "footer": "Pas d'abonnement • Pas de frais cachés • Paiement à l'entretien"
+    }
+  },
+  "resumeBuilder": {
+    "title": "Chat pour reprendre",
+    "description": "Je vais vous aider à créer un CV professionnel en vous posant une série de questions. Répondez simplement de manière conversationnelle, et je m'occuperai de la mise en forme de votre CV. 😉",
+    "landingPage": {
+      "title": "Tu parles. On te crée ton CV.",
+      "description": "Parlez à notre assistant IA, dites-nous-en un peu plus sur vous et nous créerons un CV personnalisé parfaitement formaté pour vous.",
+      "features": {
+        "conversation": {
+          "title": "Conversation naturelle",
+          "description": "Parlez-nous de votre expérience (à l'oral ou par écrit) et notre IA trouvera tous les détails importants pour votre CV. 🗣️⌨️🤖"
+        },
+        "formatting": {
+          "title": "Formatage parfait garanti",
+          "description": "Nous créons des CV 100% conformes aux dernières normes de rédaction de CV."
+        },
+        "time": {
+          "title": "Gagnez des heures de temps.",
+          "description": "Fini la frappe et l'édition manuelle. Dites-nous quelles modifications apporter en utilisant le langage naturel et nous nous occuperons du reste."
+        }
+      },
+      "testimonials": {
+        "title": "Ce que disent les utilisateurs",
+        "cta": {
+          "title": "Prêt(e) à créer le CV parfait ?",
+          "description": "Rejoignez les milliers d'autres qui ont déjà créé des CV gagnants grâce à notre plateforme alimentée par l'IA."
+        }
+      },
+      "stats": {
+        "users": "Plus de 3 200 CV créés"
+      },
+      "cta": "Créez Votre CV",
+      "ctaPending": "Construction..."
+    },
+    "downloadResume": "Aperçu du CV",
+    "typeYourResponse": "Tapez votre réponse...",
+    "sendResponse": "Envoyer la réponse.",
+    "send": "Envoyer",
+    "switchToVoice": "Passer à la commande vocale",
+    "switchToText": "Passer en mode Texte",
+    "processing": "Traitement en cours...",
+    "summary": "Résumé professionnel",
+    "downloading": "Téléchargement en cours...",
+    "downloadError": "Erreur lors du téléchargement du PDF. Veuillez réessayer.",
+    "buildingChatbot": "Construction de votre CV...",
+    "waitingForAssistant": "En attente de vos informations...",
+    "pleaseSelectAMicrophone": "Veuillez sélectionner un microphone avant d'enregistrer.",
+    "micPermissionError": "Erreur : Impossible d'accéder au microphone. Veuillez vérifier les autorisations et réessayer.",
+    "recordingError": "Erreur lors de l'enregistrement ou de la transcription. Veuillez réessayer.",
+    "voiceInstructions": "Parlez clairement dans votre microphone. Votre réponse sera transcrite automatiquement.",
+    "startRecording": "Commencer l'enregistrement",
+    "stopRecording": "Arrêter l'enregistrement",
+    "transcription": "Votre transcription",
+    "selectMicrophone": "Sélectionner un microphone",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "createResumeInitialMessage": "Salut ! Je vais t'aider à créer un CV professionnel, mais j'ai besoin d'apprendre à te connaître un peu d'abord.\n\nPourrais-tu me dire ton nom, des informations générales pour te contacter comme ton adresse e-mail, ton parcours professionnel/scolaire antérieur, et quelques compétences professionnelles pertinentes que tu possèdes ?\n\nUne fois que j'aurai rassemblé ces informations, je créerai une première version de ton CV, et ensuite nous pourrons continuer à le modifier pour qu'il soit parfait.",
+    "editResumeInitialMessage": "Salut ! Je vais vous aider à modifier votre CV. Que souhaitez-vous changer ? \nJe peux modifier tout ce que vous voulez : ajouter une nouvelle section, modifier une section existante ou même changer l'ordre.",
+    "editResume": "Modifier le CV",
+    "cancelEdit": "Annuler Modifier",
+    "saveChanges": "Enregistrer les modifications",
+    "savingChanges": "Enregistrement des modifications...",
+    "addItem": "Ajouter un élément",
+    "addEducation": "Ajouter une formation",
+    "addWorkExperience": "Ajouter une expérience professionnelle",
+    "addSkill": "Ajouter une compétence",
+    "addSection": "Ajouter une section",
+    "chooseSectionType": "Choisir le type de section",
+    "chooseSectionTypeDescription": "Sélectionnez le type de section que vous souhaitez ajouter à votre CV",
+    "detailedSection": "Section détaillée",
+    "detailedSectionDescription": "Pour l'expérience professionnelle, la formation, ou les projets avec des titres, des dates, et des puces",
+    "listSection": "Section de la liste",
+    "listSectionDescription": "Pour les compétences, les technologies ou de simples listes d'éléments",
+    "deleteSection": "Supprimer la section",
+    "deleteItem": "Supprimer l'élément",
+    "newSectionTitle": "Nouvelle section",
+    "newItemDefaults": {
+      "title": "Nouvelle section",
+      "organization": "Nom de l'organisation",
+      "date": "Plage de dates",
+      "description": {
+        "0": "La description"
+      }
+    },
+    "errors": {
+      "notFound": {
+        "title": "CV Introuvable",
+        "description": "Le CV que vous recherchez n'existe pas ou a été supprimé.",
+        "action": "Créer un nouveau CV"
+      },
+      "resumeEditError": "Erreur lors de la modification du CV. Veuillez réessayer.",
+      "resumeGenerationError": "Erreur lors de la génération du CV. Veuillez réessayer.",
+      "resumeSaveError": "Erreur lors de l'enregistrement du CV. Veuillez réessayer.",
+      "auth": "Vous devez être connecté(e) pour sauvegarder votre CV.",
+      "insufficientCredits": "Vous n'avez pas assez de crédits pour déverrouiller ce CV. Veuillez acheter plus de crédits.",
+      "generic": "Désolé, un problème est survenu. Veuillez réessayer.",
+      "resumeGenerationRetryMessage": "Hmm, une erreur s'est produite lors de la création de votre CV. Laissez-moi réessayer.",
+      "rateLimitMessage": "Vous avez été limité(e) en raison d'un trop grand nombre de requêtes — veuillez réessayer dans une heure."
+    },
+    "success": {
+      "resumeSave": "CV enregistré",
+      "resumeUnlock": "CV débloqué 🔓"
+    },
+    "generation": {
+      "title": "Chargement de votre CV..."
+    },
+    "locked": {
+      "title": "CV verrouillé 🔒",
+      "descriptionWithCredits": "Débloquez le CV en utilisant {credits} {credits, plural, one {credit} other {credits}} de votre compte.",
+      "descriptionNoCredits": "Débloquez le CV en ajoutant {credits} {credits, plural, one {credit} other {credits}} à votre compte.",
+      "descriptionEmailForm": "Déverrouillez le CV en ajoutant votre adresse e-mail à votre compte.",
+      "unlockButton": "Débloquer avec {credits} {credits, plural, one {Crédit} other {Crédits}}",
+      "unlocking": "Déverrouillage...",
+      "purchaseButton": "Acheter des crédits",
+      "subscriptionCTA": "Débloquer le CV",
+      "subscriptionDescription": "Débloquez le CV pour obtenir un accès illimité aux modifications et aux mises à jour."
+    },
+    "form": {
+      "email": {
+        "label": "Courriel 📧",
+        "placeholder": "Entrez votre courriel"
+      },
+      "submit": "Enregistrer le CV",
+      "pending": "Enregistrement...",
+      "title": "Entrez votre adresse e-mail pour consulter votre CV.",
+      "description": "C'est pour que vous puissiez vous connecter à votre compte à l'avenir et consulter votre CV à tout moment.",
+      "newItem": "Nouvel article",
+      "placeholders": {
+        "email": "Courriel",
+        "phone": "Téléphone",
+        "location": "Emplacement",
+        "dateRange": "Période 📅",
+        "description": "La description",
+        "title": "Titre",
+        "subtitle": "Sous-titre",
+        "name": "Nom"
+      }
+    },
+    "updating": {
+      "title": "✨ Créer votre CV",
+      "description": "Cela pourrait prendre quelques secondes...",
+      "reassurance": "On y travaille encore, encore un petit peu..."
+    },
+    "verification": {
+      "title": "Avant de créer votre CV, veuillez vérifier que vous êtes bien une personne réelle.",
+      "description": "Cela nous aide à empêcher les bots de créer de faux comptes et de constituer des CV — nous espérons que vous comprenez 🙂",
+      "submit": "Vérifiez que vous êtes un humain."
+    },
+    "demo": {
+      "createInitialResume": "Bienvenue dans la démo de l'outil de création de CV. Choisissez l'un des exemples de CV ci-dessous pour commencer.",
+      "editResumeInitialMessage": "Voici un exemple de CV — n'hésitez pas à le modifier en utilisant l'une des modifications prédéfinies ci-dessous. Lorsque vous créez votre propre CV, vous pouvez apporter toutes les modifications que vous souhaitez.",
+      "errors": {
+        "rateLimitMessage": "Vous avez atteint la limite du nombre d'utilisations pour la démo. Veuillez créer votre propre CV pour continuer à utiliser l'outil 😊"
+      },
+      "createYourOwnResume": "Créez Votre Propre CV"
+    },
+    "demoTitle": "Voyez comment fonctionne le créateur de CV.",
+    "demoDescription": "Découvrez comment fonctionne le créateur de CV avec l'un de nos exemples de CV.",
+    "demoCta": "Essayer la démo"
+  },
+  "interviewCopilotDemo": {
+    "session": {
+      "title": "Démo Interview Copilot",
+      "cta": "Démarrer le copilote d'entretien 🚀",
+      "createYourOwnInterviewCopilot": "Créez votre propre copilote d'entretien 🤖"
+    },
+    "verifyUser": {
+      "title": "Avant de commencer la démo de Interview Copilot, veuillez vérifier que vous êtes bien un humain 🤖.",
+      "submit": "Veuillez vérifier que vous êtes un humain.",
+      "submitting": "Vérification..."
+    },
+    "errors": {
+      "generic": "Désolé(e), un problème est survenu. Veuillez réessayer."
+    },
+    "endDialog": {
+      "title": "Démo Interview Copilot Terminée ✅",
+      "callToAction": "Créez un compte Perfect Interview pour pouvoir créer votre propre Interview Copilot et réussir votre prochain entretien.",
+      "button": "Créer un compte"
+    },
+    "fileUpload": {
+      "title": "Bienvenue à la Démo de Copilote d'Entretien 👋",
+      "description": "Téléchargez votre CV pour voir comment fonctionne le Copilote d'entretien.",
+      "helper": "Fichiers PDF uniquement, maximum 4 Mo",
+      "button": "Télécharger CV",
+      "uploading": "Téléchargement en cours...",
+      "previewButton": "Aperçu de la démo du CV",
+      "demoButton": "Essayer avec un CV de démonstration",
+      "demoHelper": "Pas de CV sous la main ? Testez la fonctionnalité avec notre CV d'exemple 😉",
+      "previewModal": {
+        "title": "Aperçu de Démo CV",
+        "fallback": "Impossible d'afficher le PDF.",
+        "openInNewTab": "Cliquez ici pour ouvrir dans un nouvel onglet"
+      },
+      "errors": {
+        "pdfOnly": "Seuls les fichiers PDF sont autorisés.",
+        "fileSize": "La taille du fichier doit être inférieure à 4 Mo.",
+        "uploadFailed": "Échec du chargement du fichier",
+        "demoFailed": "Impossible de charger l'exemple de CV 😔"
+      }
+    },
+    "mobileWarning": {
+      "title": "La démo d'Interview Copilot ne fonctionne que sur ordinateur 😬",
+      "description": "Veuillez passer sur un ordinateur de bureau pour essayer la démonstration de l'Assistant d'entretien."
+    }
+  },
+  "userMenu": {
+    "manageSubscription": "Gérer l'abonnement",
+    "appearance": "Apparence",
+    "signOut": "Déconnexion"
   }
 }

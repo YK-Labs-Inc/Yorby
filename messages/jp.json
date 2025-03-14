@@ -33,7 +33,36 @@
       "pricing": {
         "title": "登録不要",
         "description": "サブスクリプション不要、必要な分だけお支払いください"
+      },
+      "sections": {
+        "prep": "面接スキルを完璧に✨",
+        "dayOf": "面接当日、最高のパフォーマンスを！💪✨",
+        "other": "追加機能✨"
+      },
+      "interviewCopilot": {
+        "title": "インタビュー Copilot",
+        "description": "本番の面接中に質問に答えるのを支援するリアルタイム面接アシスタント。最高の回答ができるよう、即座に提案やガイダンスを提供します。"
       }
+    },
+    "pricing": {
+      "badge": "シンプルな料金体系",
+      "title": "サブスクリプションは不要です",
+      "subtitle": "他社とは異なり、高額なサブスクリプションに縛り付けることはありません。必要な分だけお支払いください。",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "従量課金制",
+          "description": "準備している面接の分だけ料金を支払えばOK。月額料金や隠れた費用は一切ありません。"
+        },
+        "noLockIn": {
+          "title": "縛りなし🔒",
+          "description": "必要な時にだけサービスを利用できる自由。契約や義務は一切ありません。"
+        },
+        "lifetimeAccess": {
+          "title": "生涯アクセス",
+          "description": "あなたの面接対策資料は、いつでもアクセス可能です。有効期限はありません。"
+        }
+      },
+      "viewPlansButton": "料金プランを見る"
     }
   },
   "jobCreation": {
@@ -81,7 +110,33 @@
     },
     "fileUpload": {
       "pdfOnlyNotice": "注：すべての書類はPDF形式である必要があります。",
-      "pdfOnlyHelper": "PDFファイルのみ対応しています"
+      "pdfOnlyHelper": "PDFファイルのみ対応しています",
+      "uploadButton": "ドキュメントをアップロード 📤"
+    },
+    "titleV2": "面接対策資料を作成する",
+    "cloneDemoJob": {
+      "description": "これらの面接の練習問題を試してみませんか？下のボタンをクリックして、AI搭載の模擬面接でこれらの問題を練習しましょう！",
+      "button": "これらの面接の質問を練習しましょう。",
+      "loading": "面接準備資料を作成中..."
+    },
+    "onboarding": {
+      "title": "完璧な面接へようこそ！",
+      "description": "次の面接の準備をお手伝いします。仕組みは以下の通りです:",
+      "steps": {
+        "1": {
+          "title": "仕事内容",
+          "description": "まず、応募する仕事について教えてください。職種、仕事内容、そしてオプションで会社詳細を入力してください。"
+        },
+        "2": {
+          "title": "ドキュメントをアップロード",
+          "description": "次に、履歴書、職務経歴書、その他関連書類をアップロードしてください。これにより、あなたの経験に合わせて面接の質問を調整できます。"
+        },
+        "3": {
+          "title": "質問を作成",
+          "description": "最後に、すべてを分析して、パーソナライズされた面接の質問を生成します。これには数分かかる場合がありますが、待つ価値はあります！"
+        }
+      },
+      "button": "了解しました！"
     }
   },
   "jobPage": {
@@ -141,6 +196,40 @@
       "testMicrophone": "マイクテスト 🎤",
       "testRecording": "録音テスト音声",
       "stopTestRecording": "テスト録画停止"
+    },
+    "onboarding": {
+      "title": "面接の回答を練習しましょう。",
+      "description": "面接の回答に対する即時フィードバックを手に入れよう。仕組みは次のとおりです:",
+      "features": {
+        "1": {
+          "title": "複数の答え方​",
+          "description": "ご回答を入力するか、音声録音をご利用ください - いずれか自然に感じる方でどうぞ。"
+        },
+        "2": {
+          "title": "即時フィードバック",
+          "description": "あなたの回答について、良かった点や改善点など、詳細なフィードバックを入手できます。"
+        },
+        "3": {
+          "title": "無制限に練習 💪",
+          "description": "何回でも練習できます。各質問に何度でも答えてください。制限はありません。"
+        }
+      },
+      "button": "了解しました！"
+    },
+    "generateAnswerOnboarding": {
+      "title": "AIに代わりに答えさせます。",
+      "description": "自分で答えるのが面倒くさい？🤔 AIがあなたのためにパーソナライズされた答えを生成します。",
+      "features": {
+        "aiPowered": {
+          "title": "AI搭載の回答💡",
+          "description": "自分で質問に答えるのが面倒？AIに答えを生成させよう。"
+        },
+        "personalized": {
+          "title": "あなたに合わせた体験✨",
+          "description": "履歴書またはカバーレターをアップロードした場合、以前の職務経験に基づいて質問に回答します。"
+        }
+      },
+      "button": "了解しました！"
     }
   },
   "mockInterview": {
@@ -181,7 +270,13 @@
       "loading": {
         "title": "面接開始",
         "description": "面接セッションを準備していますので、しばらくお待ちください..."
-      }
+      },
+      "send": "送信",
+      "typeYourResponse": "ここに回答を入力...",
+      "pleaseSelectAMicrophone": "🎤マイクを選択してください",
+      "micPermissionError": "マイクへのアクセスを許可してください 🙏",
+      "recordingError": "応答の録音にエラーが発生しました。もう一度お試しください。",
+      "transcribing": "転写中..."
     },
     "endModal": {
       "title": "面接終了",
@@ -191,19 +286,48 @@
       "processingMessage": "少々お待ちください…",
       "emailAlert": "面接の準備ができたらメールでお知らせします",
       "confirmButton": "面接終了",
-      "cancelButton": "面接を続ける"
+      "cancelButton": "面接を続ける",
+      "uploadVideoLabel": "レビュー用に面接の録音をアップロードする"
+    },
+    "onboarding": {
+      "title": "模擬面接へようこそ！",
+      "description": "AI面接官との面接スキル練習をしましょう。使い方はこちら:",
+      "steps": {
+        "1": {
+          "title": "リアルな面接体験",
+          "description": "応募する職種に基づいて、リアルな面接を行うAI面接官とチャットしましょう。"
+        },
+        "2": {
+          "title": "自然な会話",
+          "description": "AI面接官が聞いて、それに応じて答えるので、実際の面接のように自然に話してください。"
+        },
+        "3": {
+          "title": "パフォーマンスレビュー",
+          "description": "面接後、あなたのパフォーマンスについて、強みと改善点を含め、詳細なフィードバックをもらってください。"
+        }
+      },
+      "button": "了解しました！"
     }
   },
   "errors": {
     "pleaseTryAgain": "申し訳ありません。問題が発生しました。もう一度お試しください。",
-    "userNotFound": "ユーザーが見つかりません — もう一度サインインしてください。"
+    "userNotFound": "ユーザーが見つかりません — もう一度サインインしてください。",
+    "onlyPdfFilesAllowed": "PDFファイルのみ許可されています。PDFドキュメントのみアップロードしてください。"
   },
   "sidebar": {
     "addJob": "新規ジョブ作成",
     "signInToStart": "カスタム面接準備を保存するには、サインインしてください",
     "signIn": "サインイン",
     "numberOfCredits": "クレジット: {numberOfCredits}",
-    "buyMoreCredits": "さらにクレジットを購入する"
+    "buyMoreCredits": "さらにクレジットを購入する",
+    "jobs": "求人情報",
+    "interviewCopilots": "インタビューコパイロット",
+    "createInterviewCopilot": "インタビューCopilotを作成 📝",
+    "create": "作成",
+    "resumes": "履歴書 (Rirekisho)",
+    "resumeBuilder": "履歴書作成ツール",
+    "createResume": "履歴書を作成 📝",
+    "unlockAllAccess": "無制限アクセスをアンロック🔓"
   },
   "upgrade": {
     "locked": {
@@ -212,7 +336,8 @@
       "mockDescription": "AIを活用した無制限の模擬面接にアクセスし、実際の面接シナリオを体験しましょう。高度なAI面接官はあなたの回答に適応し、即時フィードバックを提供します。",
       "button": "面接対策フルアクセスをアンロック",
       "insufficientCredits": "この面接準備体験をアンロックするにはクレジットが足りません。",
-      "unlocking": "ロック解除中..."
+      "unlocking": "ロック解除中...",
+      "subscriptionTitle": "面接対策を最大限に活用しよう🔓"
     },
     "modal": {
       "title": "プレミアムにアップグレード",
@@ -254,22 +379,26 @@
       "oneCredit": {
         "title": "単一インタビュー",
         "description": "模擬面接システムをお試しいただくのに最適です",
-        "highlight": "1クレジット"
+        "highlight": "1クレジット",
+        "titleV2": "1クレジット"
       },
       "fiveCredits": {
         "title": "面接パック",
         "description": "複数の面接練習に最適です",
-        "highlight": "5クレジット"
+        "highlight": "5クレジット",
+        "titleV2": "5クレジット"
       },
       "tenCredits": {
         "title": "プロパック",
         "description": "真剣な準備のための最高の価値",
-        "highlight": "10クレジット"
+        "highlight": "10クレジット",
+        "titleV2": "10クレジット"
       },
       "unlimited": {
         "title": "年間無制限",
         "description": "プロフェッショナルと頻繁に求職する方向け",
-        "highlight": "クレジット無制限"
+        "highlight": "クレジット無制限",
+        "titleV2": "無制限クレジット"
       }
     },
     "cta": {
@@ -286,13 +415,55 @@
       "quarterSuffix": "/クォーター",
       "subscription": "年間購読",
       "quarterlySubscription": "3ヶ月ごとに請求",
-      "oneTime": "一回限りの購入"
+      "oneTime": "一回限りの購入",
+      "savingsV2": "{savings}% 節約 vs. クレジット一括払い"
     },
     "verifying_purchase": "ご購入の確認中です...",
     "purchase_success": "購入成功！🎉",
     "purchase_failed": "購入確認に失敗しました",
     "redirect_success_message": "{seconds}秒後にダッシュボードにリダイレクトされます...",
-    "redirect_error_message": "{seconds}秒後にリダイレクトします..."
+    "redirect_error_message": "{seconds}秒後にリダイレクトします...",
+    "subscriptionTitle": "完璧な面接への無制限アクセスを手に入れよう！",
+    "descriptionV2": "クレジットを消費して、就職面接の準備資料を作成したり、面接コパイロットを作成したりできます。",
+    "descriptionV3": "クレジットを使って、面接の質問を作成したり、面接コパイロットを作成したり、履歴書を作成したりできます。",
+    "subscriptionDescription": "無制限の履歴書作成、無制限の面接質問、そして無制限の面接コパイロット",
+    "unauthenticated": {
+      "title": "価格を見るにはサインインしてください",
+      "description": "料金プランを確認して面接クレジットを購入するには、サインインしてください。",
+      "form": {
+        "email": {
+          "label": "メール",
+          "placeholder": "メールアドレスを入力してください"
+        },
+        "submit": "サインイン"
+      }
+    },
+    "creditUsage": {
+      "modalTrigger": "いくらクレジットが必要ですか？",
+      "modalTitle": "クレジット利用内訳",
+      "gotItButton": "了解 👍",
+      "items": {
+        "jobPrep": {
+          "title": "就職面接の準備",
+          "description": "単一の求人に対して、練習面接の質問と模擬面接を無制限に作成できます。",
+          "credits": "{count} {count, plural, one {クレジット} other {クレジット}}"
+        },
+        "copilot": {
+          "title": "インタビュー Copilot セッション",
+          "description": "完全なインタビューコパイロットのセッション 1 回分",
+          "credits": "{count} {count, plural, one {クレジット} other {クレジット}}"
+        },
+        "resumeBuilder": {
+          "title": "履歴書を作成する",
+          "description": "使いやすい履歴書ビルダーで履歴書を作成しましょう✨",
+          "credits": "{count} {count, plural, one {クレジット} other {クレジット}}"
+        }
+      }
+    },
+    "errors": {
+      "generic": "問題が発生しました。もう一度お試しください。",
+      "login": "クレジットを購入するにはログインが必要です。"
+    }
   },
   "accountLinking": {
     "title": "アカウントをリンクする",
@@ -309,7 +480,12 @@
       "submit": "アカウント連携"
     },
     "emailRequiredError": "メールアドレスは必須です",
-    "authSuccess": "確認リンクをメールでお送りしました。受信トレイをご確認いただき、登録を完了してください。"
+    "authSuccess": "確認リンクをメールでお送りしました。受信トレイをご確認いただき、登録を完了してください。",
+    "genericError": "問題が発生しました。もう一度お試しください。",
+    "signUp": "サインアップ",
+    "signUpToStart": "カスタム面接対策を保存するためにサインアップ📝",
+    "alreadyHaveAccount": "アカウントをお持ちですか？",
+    "signIn": "サインイン"
   },
   "faq": {
     "title": "よくある質問",
@@ -320,10 +496,701 @@
     "q3": "Perfect Interviewはどのような職種に対応していますか？",
     "a3": "Perfect Interivewは世界のあらゆる仕事をサポートします。職務内容をアップロードしていただければ、無制限の練習問題を生成できます。",
     "q4": "模擬面接は何回までできますか？",
-    "a4": "模擬面接は何回でも行えます。各模擬面接は、応募する仕事に合わせて個別に調整されます。"
+    "a4": "模擬面接は何回でも行えます。各模擬面接は、応募する仕事に合わせて個別に調整されます。",
+    "q5": "完璧な面接サポートはどのような種類の仕事に対応していますか？",
+    "a5": "Perfect Interviewは、世界中のあらゆる仕事をサポートします。求人内容をアップロードするだけで、面接の質問や面接コパイロットを作成できます。"
   },
   "mobileWarning": {
     "title": "デスクトップ限定エクスペリエンス",
     "description": "PerfectInterviewはデスクトップブラウザで最適に動作します。完全なインタビュー体験を得るには、デスクトップデバイスに切り替えてください。"
+  },
+  "demoJobs": {
+    "errors": {
+      "demoJobNotFound": "申し訳ありませんが、このインタビューは見つかりませんでした。",
+      "captchaRequired": "Captchaが必要です — もう一度お試しください。",
+      "pleaseTryAgain": "問題が発生しました。もう一度お試しください。",
+      "createYourOwn": "でも、ホームページであなただけの面接対策を作成できます。求人内容や履歴書をアップロードすれば、世界中のどんな仕事でも、あなたの経験に合わせた練習問題を作成します。"
+    },
+    "actions": {
+      "goToHome": "ホームページへ移動"
+    }
+  },
+  "onboarding": {
+    "checklistTitle": "はじめに",
+    "createJob": "最初のジョブを作成する",
+    "generateAnswer": "最初の回答を生成する",
+    "answerQuestion": "最初の質問に答えてください。",
+    "completeMockInterview": "最初の模擬面接を完了しましょう✅",
+    "signUp": "アカウントを作成する"
+  },
+  "signUp": {
+    "alreadySignedIn": {
+      "title": "すでにサインイン済みです",
+      "description": "すでにアカウントをお持ちで、サインイン済みです。",
+      "buttons": {
+        "dashboard": "ダッシュボードへ移動",
+        "home": "ホームへ移動"
+      }
+    },
+    "loading": "読み込み中..."
+  },
+  "signIn": {
+    "title": "サインイン",
+    "description": "アカウントにサインインするためのマジックリンクをお送りします。",
+    "form": {
+      "email": {
+        "label": "メール",
+        "placeholder": "メールアドレスを入力してください"
+      },
+      "submit": "サインイン",
+      "submitting": "サインイン中..."
+    }
+  },
+  "interviewCopilots": {
+    "title": "インタビューコパイロット",
+    "jobDetails": "求人詳細",
+    "companyDetails": "会社概要",
+    "documents": {
+      "label": "書類 📝",
+      "uploadButton": "ドキュメントをアップロード",
+      "uploading": "アップロード中...",
+      "uploadSuccess": "ドキュメントが正常にアップロードされました。",
+      "deleteSuccess": "ドキュメントを正常に削除しました。",
+      "helper": "履歴書、カバーレター、その他関連書類（PDFファイル必須）をアップロードしてください。",
+      "empty": "ドキュメントはまだアップロードされていません。"
+    },
+    "createNew": {
+      "title": "新しいインタビューCopilotを作成",
+      "jobTitle": {
+        "label": "職名",
+        "placeholder": "役職名を入力してください"
+      },
+      "jobDescription": {
+        "label": "職務記述書",
+        "placeholder": "求人内容を入力してください"
+      },
+      "companyName": {
+        "label": "会社名",
+        "placeholder": "会社名を入力してください"
+      },
+      "companyDescription": {
+        "label": "会社概要",
+        "placeholder": "会社概要を入力してください。"
+      },
+      "documents": {
+        "label": "書類 📂",
+        "helper": "履歴書、職務経歴書、その他関連書類（PDFファイル必須）をアップロードしてください。"
+      },
+      "submit": "面接コパイロットを作成 🤖",
+      "submitting": "作成中...",
+      "emptyFields": {
+        "title": "情報をご記入ください。",
+        "description": "面接コパイロットの最高のパフォーマンスを得るには、できるだけ多くのフィールドにご記入ください。次に進むには、少なくとも1つのフィールドに入力する必要があります。",
+        "button": "了解 👍"
+      }
+    },
+    "edit": {
+      "saveSuccess": "変更は正常に保存されました。",
+      "saveError": "変更を保存できませんでした。",
+      "editButton": "編集",
+      "cancelButton": "キャンセル",
+      "saveButton": "保存",
+      "saving": "保存中..."
+    },
+    "errors": {
+      "notFound": {
+        "title": "インタビュー Copilot が見つかりませんでした",
+        "description": "お探しの面接コパイロットは存在しないか、削除されました。",
+        "action": "新しい面接コパイロットを作成する"
+      },
+      "uploadFailed": "ファイルのアップロードに失敗しました。",
+      "deleteFailed": "ファイルの削除に失敗しました。",
+      "generic": "問題が発生しました。もう一度お試しください。",
+      "fileRequired": "アップロードするファイルを選択してください。",
+      "pdfOnly": "PDFファイルのみ対応しています。",
+      "unauthorized": "ファイルをアップロードするには、サインインが必要です。"
+    },
+    "jobTitle": {
+      "label": "職務名",
+      "empty": "役職は提供されていません"
+    },
+    "jobDescription": {
+      "label": "職務内容",
+      "empty": "求人情報の記載はありません。"
+    },
+    "companyName": {
+      "label": "社名",
+      "empty": "会社名未提供"
+    },
+    "companyDescription": {
+      "label": "会社概要",
+      "empty": "会社概要はありません。"
+    },
+    "deviceSelection": {
+      "title": "デバイスを選択",
+      "sameDevice": {
+        "title": "同じデバイス",
+        "description": "面接には、今お使いのデバイスをご使用ください。",
+        "pros": {
+          "0": "デバイス1つのみ必要です。",
+          "1": "簡単な設定プロセス",
+          "2": "シームレスなオーディオ＋ビデオ統合"
+        },
+        "cons": {
+          "0": "画面共有はコパイロットを明らかにする可能性があります。",
+          "1": "Chromeブラウザ限定"
+        }
+      },
+      "separateDevice": {
+        "title": "別のデバイス",
+        "description": "面接には別のデバイスを使ってください。",
+        "pros": {
+          "0": "画面共有中に完全に検知不能😎",
+          "1": "あらゆる会議プラットフォームに対応🤝"
+        },
+        "cons": {
+          "0": "別のデバイスが必要です。"
+        }
+      },
+      "modal": {
+        "title": "デバイスオプション比較",
+        "learnMore": "あなたにぴったりのオプションはどれ？",
+        "close": "閉じる"
+      }
+    },
+    "session": {
+      "startCopilot": "面接 Copilot を起動 🚀",
+      "startingCopilot": "面接コパイロットを開始中...",
+      "selectMicrophone": "🎤マイクを選択してください",
+      "microphonePermission": {
+        "checking": "マイクの権限を確認中...",
+        "title": "マイクへのアクセスが必要です",
+        "description": {
+          "denied": "マイクへのアクセスが拒否されました。続行するには、ブラウザの設定でマイクへのアクセスを許可してください。",
+          "prompt": "このアプリケーションは、インタビューセッションを録音するために、あなたのマイクへのアクセスを必要とします。"
+        },
+        "allowButton": "マイクへのアクセスを許可",
+        "instructions": {
+          "title": "マイクへのアクセスを有効にするには:",
+          "steps": {
+            "1": "ブラウザのアドレスバーにあるカメラ/マイクのアイコンをクリックしてください。",
+            "2": "マイクへのアクセスを「許可」してください。",
+            "3": "ページを再読み込み"
+          }
+        }
+      },
+      "error": {
+        "generic": "申し訳ありません。問題が発生しました。もう一度お試しください。",
+        "noMicrophoneSelected": "続行するにはマイクを選択してください。",
+        "noScreenSharingSupport": "お使いのブラウザは画面共有に対応していません。Google Chromeをご利用ください。"
+      },
+      "selectMeeting": {
+        "title": "面接会議室を選択してください",
+        "button": "選択",
+        "instruction": "面接が開始されると、面接官のトランスクリプトがここに表示されます。",
+        "connecting": "接続中..."
+      },
+      "transcription": {
+        "title": "面接官の記録",
+        "status": {
+          "ready": "準備完了",
+          "transcribing": "文字起こし",
+          "recording": "録画中 ⏺️"
+        }
+      },
+      "controls": {
+        "leave": "去る",
+        "settings": "設定",
+        "theme": "テーマを切り替える",
+        "transcriptAutoScroll": "トランスクリプトの自動スクロール",
+        "copilotAutoScroll": "Copilot オートスクロール",
+        "on": "オン",
+        "off": "オフ"
+      },
+      "copilot": {
+        "title": "インタビュー Copilot",
+        "status": {
+          "ready": "準備完了",
+          "error": "エラー",
+          "listening": "聴いています 🎧"
+        },
+        "waitingMessage": "面接コパイロットがここで面接の質問に答えます。"
+      },
+      "stopRecording": "面接 Copilot を終了する",
+      "endInterview": "面接終了",
+      "endInterviewConfirmation": "本当にこのインタビューを終了しますか？終了すると、録音内容が保存および処理されます。",
+      "uploading": "録音をアップロード中…",
+      "confirm": "確認",
+      "cancel": "キャンセル",
+      "onboarding": {
+        "title": "Interview Copilot セットアップガイド",
+        "description": "面接の設定は以下の手順に従ってください。",
+        "helpButton": "セットアップ方法を見る",
+        "skipButton": "セットアップガイドをスキップ 🚀",
+        "nextButton": "次へ",
+        "previousButton": "前",
+        "getStartedButton": "始めましょう🚀",
+        "steps": {
+          "1": {
+            "title": "Chrome で面接を開く",
+            "description": "Interview Copilot を使用するには、Google Chrome タブで面接を開く必要があります。",
+            "description2": "Interview Copilot は、他のブラウザやデスクトップアプリケーションでインタビューを開いた場合、動作しません。必ず Chrome のタブで開いてください。",
+            "description3": "Chromeで開く方法の具体的な手順を表示するには、ミーティングプラットフォームを選択してください。",
+            "platforms": {
+              "zoom": {
+                "name": "ズーム",
+                "instruction": "デスクトップアプリではなく、ChromeでZoomミーティングを開いてください:"
+              },
+              "teams": {
+                "name": "Microsoft Teams",
+                "instruction": "デスクトップアプリではなく、ChromeでTeamsミーティングを開いてください："
+              },
+              "meet": {
+                "name": "Google Meet",
+                "instruction": "Google Meet は既定で Chrome で開きます:"
+              }
+            }
+          },
+          "2": {
+            "title": "会議タブを共有する",
+            "description": "「Select Interview Meeting Room」ボタンをクリックして、ミーティングのあるChromeタブを選択してください。",
+            "shareTabInstructions": {
+              "mustShare": "「タブの音声も共有」オプションを有効にして、Chromeタブを共有する必要があります。",
+              "doNotShare": "「ウィンドウ」や「画面全体」を共有しないでください。さもないと、Interview Copilot が作動しません。"
+            }
+          },
+          "3": {
+            "title": "面接 Copilot を開始する 🚀",
+            "description": "面接タブを共有後、「Start Interview Copilot」ボタンをクリックして開始してください。"
+          }
+        }
+      },
+      "exitWarning": {
+        "title": "警告: 未保存の録音 ⚠️",
+        "description": "未保存のインタビュー録音があります。今終了すると、録音は失われます。",
+        "instruction": "録音を保存するには、退出する前に「End Interview Copilot」ボタンをクリックしてください。",
+        "stayButton": "ページに留まる",
+        "leaveButton": "とにかく出て行け"
+      }
+    },
+    "jobCreation": {
+      "fileUpload": {
+        "pdfOnlyNotice": "注：すべてのドキュメントはPDF形式である必要があります。",
+        "pdfOnlyHelper": "PDFファイルのみサポートされています。"
+      },
+      "title": "インタビュー Copilot"
+    },
+    "credits": {
+      "subtitle": "面接コパイロットの作成には1クレジット消費します。現在のクレジット残高は{credits}クレジットです。",
+      "insufficientDialog": {
+        "title": "もっとクレジットが必要です",
+        "description": "面接コパイロットを作成するには、最低1クレジットが必要です。クレジットを購入して続行してください。",
+        "button": "クレジットを購入"
+      },
+      "confirmDialog": {
+        "title": "作成を確認",
+        "description": "面接コパイロットを作成すると、アカウントから1クレジット消費されます。現在、残り{credits}クレジットです。",
+        "cancel": "キャンセル",
+        "confirm": "Copilot を作成する",
+        "creating": "作成中..."
+      }
+    },
+    "mobileWarning": {
+      "title": "デスクトップ専用の体験🖥️",
+      "description": "Interview Copilotはデスクトップでのみ利用可能です。最高のInterview Copilot体験のために、デスクトップデバイスに切り替えてください。"
+    },
+    "browserWarning": {
+      "title": "Chromeブラウザが必要です",
+      "description": "Interview Copilot は正常に機能するために Google Chrome が必要です。最高の体験を得るには、Chrome に切り替えてください。"
+    },
+    "delete": {
+      "button": "削除",
+      "deleting": "削除中...",
+      "confirmTitle": "本当によろしいですか？",
+      "confirmDescription": "この操作は元に戻せません。面接コパイロットとその関連データがすべて完全に削除されます。",
+      "cancelButton": "キャンセル"
+    },
+    "locked": {
+      "title": "このインタビューコパイロットはロックされています 🔒",
+      "description": "このコパイロットをアンロックして、面接中に使用できるようにしましょう。",
+      "creditCost": "このインタビューコパイロットをアンロックするには{credits} {credits, plural, one {クレジット} other {クレジット}}必要です",
+      "button": "ロック解除",
+      "unlocking": "ロック解除中...",
+      "insufficientCredits": {
+        "title": "クレジットが不足しています",
+        "description": "このCopilotをアンロックするためのクレジットが不足しています。",
+        "button": "クレジットを購入"
+      },
+      "cancel": "キャンセル",
+      "subscriptionCTA": "面接コパイロットをアンロック🔓"
+    },
+    "accountLinking": {
+      "title": "面接コパイロットを保存 💾",
+      "description": "アカウントを連携して、面接コパイロットを保存して、いつでもアクセスできるようにしましょう。",
+      "form": {
+        "email": {
+          "label": "メール",
+          "placeholder": "メールアドレスを入力してください"
+        },
+        "submit": "面接コパイロットを保存 💾"
+      },
+      "authSuccess": "メールを確認してアカウントを認証してください。",
+      "errors": {
+        "emailRequiredError": "メールアドレスを入力してください",
+        "genericError": "問題が発生しました。もう一度お試しください。"
+      }
+    },
+    "review": {
+      "recording": {
+        "title": "インタビュー録音",
+        "description": "面接でのパフォーマンスを見直しましょう 🔍"
+      },
+      "questions": {
+        "title": "質問のレビュー",
+        "description": "質問と回答を見直してください。",
+        "questionLabel": "質問",
+        "questionNumber": "質問 {number}",
+        "answerLabel": "AI の回答"
+      }
+    },
+    "demo": {
+      "title": "面接コパイロットがどのように役立つかをご覧ください",
+      "description": "次回の面接でInterview Copilotがどのように役立つか体験してください。ご自身で作成する前に、Interview Copilotのデモをお試しください。",
+      "button": "デモを試す"
+    }
+  },
+  "FeatureHighlightsV2": {
+    "hero": {
+      "badge": "サブスクリプションは不要です。",
+      "title": "次の面接、絶対に成功させよう💪",
+      "titleV2": "次の仕事を手に入れるために必要なものすべて🚀",
+      "description": "面接準備からリアルタイム面接サポートまで、Perfect Interviewは、どんな仕事でも内定をゲットし、💰を手にするための完全なソリューションです。",
+      "descriptionV2": "完璧な面接は、どんな仕事も手に入れて💰をゲットするために必要なすべてが揃っています。",
+      "subscriptionNote": "わずらわしいサブスクリプションは不要です。",
+      "getStarted": "はじめに🚀"
+    },
+    "journey": {
+      "before": {
+        "title": "面接前",
+        "resumeBuilder": {
+          "title": "AI履歴作成ツール",
+          "description": "AIアシスタントとの自然な会話を通じて、プロフェッショナルな履歴書を作成しましょう。"
+        },
+        "practiceQuestions": {
+          "title": "面接質問作成ツール",
+          "description": "仕事とあなたの経験に基づいた、パーソナライズされた練習問題を入手しましょう。"
+        }
+      },
+      "during": {
+        "title": "面接中",
+        "interviewCopilot": {
+          "title": "インタビュー Copilot",
+          "description": "あなたのリアルタイムAI面接アシスタント。質問に完璧に答えられるようにサポートします✨",
+          "badge": "100%検出不可能"
+        }
+      }
+    },
+    "features": {
+      "title": "次の面接を成功させるために必要なすべて💪",
+      "resumeBuilder": {
+        "title": "AIで履歴書を作成 🚀",
+        "description": "当社のAIアシスタントと自然な会話をするだけで、数分でプロフェッショナルな履歴書を作成できます。手動でのフォーマットや筆が進まないといった悩みはもうありません。",
+        "tryButton": "履歴書作成ツール デモを試す🚀",
+        "features": {
+          "conversation": {
+            "title": "自然な会話",
+            "description": "あなたの経験について教えてください。弊社のAIがあなたの履歴書に必要な重要な情報をすべて見つけ出します。"
+          },
+          "formatting": {
+            "title": "完璧なフォーマット",
+            "description": "最新の履歴書作成基準に100%準拠した履歴書を作成します。"
+          },
+          "time": {
+            "title": "何時間も節約できます⏱️",
+            "description": "もうタイピングや手動編集は不要です。どんな編集をすればいいか自然な言葉で教えていただければ、残りの作業は私たちが引き受けます。"
+          }
+        }
+      },
+      "prep": {
+        "title": "パーソナライズされた面接対策体験 ✨",
+        "description": "徹底的な準備ツールで面接スキルをマスターしよう💪"
+      },
+      "practiceQuestions": {
+        "title": "面接対策を発見🔎",
+        "description": "どんな職務記述書やあなたの履歴書に基づいて、職務とあなたの個人的な経験に合わせてカスタマイズされた、無限の面接練習問題を作成します。"
+      },
+      "feedback": {
+        "title": "即時フィードバック",
+        "description": "面接練習の回答に対するフィードバックをもらおう"
+      },
+      "aiAnswers": {
+        "title": "AIで答えを生成する",
+        "description": "あなたの過去の職務経歴に基づいて、面接の質問に対する回答を生成します。"
+      },
+      "mockInterviews": {
+        "title": "リアルなAI模擬面接",
+        "description": "AI面接官とのチャット形式で、まるで本物のような面接を体験できます🗣️"
+      },
+      "performance": {
+        "title": "詳細なフィードバックを入手する",
+        "description": "あなたの強みと弱点、そして改善すべき点を詳細に分析します。"
+      },
+      "copilot": {
+        "title": "あなただけの面接コパイロット🚀",
+        "description": "インタビューコパイロットは、あなたの面接を聞き取り、あなたの過去の職務経歴に基づいてリアルタイムで面接の質問に答えます。面接を成功させるために。",
+        "note": "心配しないで — 100%検知されないから、これは私たちだけの秘密🤫",
+        "tryButton": "インタビュー Copilot デモを試す",
+        "features": {
+          "aiGuidance": {
+            "title": "リアルタイムAI回答",
+            "description": "AIは、面接で聞かれた質問を聞き取り、リアルタイムで回答を提供します。"
+          },
+          "timing": {
+            "title": "完璧なタイミング✨",
+            "description": "回答は、あなたが反応する必要がある前に即座に表示され、自信を持って処理し、提供するための時間を与えてくれます。"
+          },
+          "personalization": {
+            "title": "あなたに合わせてカスタマイズ✨",
+            "description": "回答はあなたの経験、役割、そして会社に合わせて調整され、すべての回答があなただけのものになります。"
+          }
+        }
+      }
+    },
+    "pricing": {
+      "badge": "シンプルな料金体系",
+      "title": "登録不要",
+      "titleV2": "シンプルで分かりやすい料金体系",
+      "subtitle": "競合他社とは異なり、高額なサブスクリプションに縛り付けることはありません。必要な分だけお支払いください。",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "従量課金制",
+          "description": "面接対策した分だけお支払い。月額料金や隠れた費用は一切ありません。"
+        },
+        "noLockIn": {
+          "title": "囲い込みなし🔒",
+          "description": "必要な時だけサービスを利用できる自由。契約や義務はありません。"
+        },
+        "lifetimeAccess": {
+          "title": "生涯アクセス",
+          "description": "面接対策資料はいつでもアクセス可能。有効期限はありません。"
+        }
+      },
+      "viewPlansButton": "料金プランを見る"
+    },
+    "finalCTA": {
+      "title": "面接成功をTransformする準備はできた？",
+      "description": "何千人ものプロフェッショナルたちと共に、あなたの面接力を高めましょう。必要なものだけを必要な時に。サブスクリプションは不要です。",
+      "button": "はじめよう！",
+      "footer": "サブスク不要 • 隠れ費用なし • 面接ごとに支払い💰"
+    }
+  },
+  "resumeBuilder": {
+    "title": "チャットを再開 💬",
+    "description": "いくつか質問をして、プロフェッショナルな履歴書を作成するお手伝いをします。会話形式で答えていただければ、履歴書のフォーマットはこちらで対応します。😊",
+    "landingPage": {
+      "title": "You Yap. 履歴書作成はお任せください。",
+      "description": "AIアシスタントに話しかけて、あなた自身について少し教えてください。あなたにぴったりのフォーマットされたカスタム履歴書を作成します。",
+      "features": {
+        "conversation": {
+          "title": "自然な会話",
+          "description": "あなたの経験を（声またはタイピングで）教えてください。AIがあなたの履歴書に必要な重要な詳細をすべて見つけ出します。"
+        },
+        "formatting": {
+          "title": "完璧なフォーマットを保証します✨",
+          "description": "私たちは最新の履歴書作成基準に100％準拠した履歴書を作成します。"
+        },
+        "time": {
+          "title": "何時間も節約⏱️",
+          "description": "もう入力や手作業での編集は不要です。どのような編集をすればよいか自然な言葉で教えていただければ、残りの作業は弊社にお任せください。"
+        }
+      },
+      "testimonials": {
+        "title": "ユーザーの声",
+        "cta": {
+          "title": "完璧な履歴書を作成する準備はできましたか？",
+          "description": "当社のAI搭載プラットフォームを通じて、すでに勝利を収める履歴書を作成した数千人に仲間入りしましょう。"
+        }
+      },
+      "stats": {
+        "users": "3,200件以上の履歴書が作成されました✨"
+      },
+      "cta": "履歴書を作成 📝",
+      "ctaPending": "構築中..."
+    },
+    "downloadResume": "履歴書プレビュー",
+    "typeYourResponse": "ここにテキストを入力してください...",
+    "sendResponse": "応答を送信",
+    "send": "送信",
+    "switchToVoice": "音声に切り替え",
+    "switchToText": "テキストに切り替え",
+    "processing": "処理中...",
+    "summary": "職務経歴概要",
+    "downloading": "ダウンロード中...",
+    "downloadError": "PDFのダウンロードに失敗しました。もう一度お試しください。",
+    "buildingChatbot": "履歴書を作成中...",
+    "waitingForAssistant": "ご連絡をお待ちしております...",
+    "pleaseSelectAMicrophone": "録音の前にマイクを選択してください。",
+    "micPermissionError": "エラー：マイクにアクセスできませんでした。権限を確認して、もう一度お試しください。",
+    "recordingError": "録音または文字起こし中にエラーが発生しました。もう一度お試しください。",
+    "voiceInstructions": "マイクに向かってはっきりと話してください。あなたの回答は自動的に文字起こしされます。",
+    "startRecording": "録画開始",
+    "stopRecording": "録画停止",
+    "transcription": "あなたの書き起こし",
+    "selectMicrophone": "マイクを選択",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "createResumeInitialMessage": "こんにちは！プロフェッショナルな履歴書作成をお手伝いしますが、まずあなたについて少し知る必要があります。\n\nお名前、メールアドレスなどの連絡先情報、職務経歴/学歴、そしてお持ちの関連する仕事のスキルを教えていただけますか？\n\nこれらの情報を収集したら、履歴書の最初の草案を作成し、その後、完璧にするために編集を続けることができます。",
+    "editResumeInitialMessage": "こんにちは！履歴書の編集をお手伝いします。何を修正したいですか？\n新しいセクションを追加したり、既存のセクションを編集したり、順番を変更したり、何でもできますよ。",
+    "editResume": "履歴書を編集📝",
+    "cancelEdit": "キャンセル 編集",
+    "saveChanges": "変更を保存",
+    "savingChanges": "変更を保存中…",
+    "addItem": "アイテムを追加",
+    "addEducation": "教育を追加",
+    "addWorkExperience": "職務経歴を追加",
+    "addSkill": "スキルの追加",
+    "addSection": "セクションを追加",
+    "chooseSectionType": "セクションタイプを選択してください",
+    "chooseSectionTypeDescription": "履歴書に追加したいセクションの種類を選択してください。",
+    "detailedSection": "詳細セクション",
+    "detailedSectionDescription": "職務経歴、学歴、またはタイトル、日付、箇条書きのあるプロジェクトについて",
+    "listSection": "リストセクション",
+    "listSectionDescription": "スキル、テクノロジー、または項目の簡単なリスト",
+    "deleteSection": "セクションを削除",
+    "deleteItem": "アイテムを削除",
+    "newSectionTitle": "新しいセクション",
+    "newItemDefaults": {
+      "title": "新しいセクション",
+      "organization": "組織名",
+      "date": "日付範囲",
+      "description": {
+        "0": "説明"
+      }
+    },
+    "errors": {
+      "notFound": {
+        "title": "履歴書が見つかりません 😥",
+        "description": "お探しの履歴書は存在しないか、削除されました。",
+        "action": "新しい履歴書を作成する"
+      },
+      "resumeEditError": "履歴書の編集中にエラーが発生しました。もう一度お試しください。",
+      "resumeGenerationError": "履歴書の作成中にエラーが発生しました。もう一度お試しください。",
+      "resumeSaveError": "履歴書の保存にエラーが発生しました。もう一度お試しください。",
+      "auth": "履歴書を保存するにはログインが必要です。",
+      "insufficientCredits": "この履歴書をアンロックするためのクレジットが不足しています。クレジットを追加購入してください。",
+      "generic": "申し訳ありません。問題が発生しました。もう一度お試しください。",
+      "resumeGenerationRetryMessage": "うーん、履歴書の作成中に何か問題が発生しました。もう一度試してみます。",
+      "rateLimitMessage": "レート制限されています。1時間後にもう一度お試しください。"
+    },
+    "success": {
+      "resumeSave": "履歴書を保存しました",
+      "resumeUnlock": "履歴書をアンロックしました🔓"
+    },
+    "generation": {
+      "title": "履歴書を読み込んでいます..."
+    },
+    "locked": {
+      "title": "履歴書はロックされています。",
+      "descriptionWithCredits": "アカウントの{credits} {credits, plural, one {クレジット} other {クレジット}}を使用して、履歴書をアンロックします。",
+      "descriptionNoCredits": "アカウントに{credits} {credits, plural, one {credit} other {credits}}を追加して、履歴書をアンロックしてください。",
+      "descriptionEmailForm": "アカウントにメールアドレスを追加して、履歴書をアンロックしてください。",
+      "unlockButton": "{credits} {credits, plural, one {クレジット} other {クレジット}}でアンロック",
+      "unlocking": "ロック解除中... 🔓",
+      "purchaseButton": "クレジットを購入",
+      "subscriptionCTA": "履歴書をアンロック🔓",
+      "subscriptionDescription": "履歴書をアンロックして、無制限の編集と更新にアクセスしましょう🔓✨"
+    },
+    "form": {
+      "email": {
+        "label": "メール",
+        "placeholder": "メールアドレスを入力してください"
+      },
+      "submit": "履歴書を保存",
+      "pending": "保存中...",
+      "title": "履歴書を見るにはメールアドレスを入力してください。",
+      "description": "これは、今後アカウントにサインインして、いつでも履歴書を閲覧できるようにするためです。",
+      "newItem": "新商品",
+      "placeholders": {
+        "email": "メール",
+        "phone": "電話",
+        "location": "場所",
+        "dateRange": "日付範囲",
+        "description": "説明",
+        "title": "タイトル",
+        "subtitle": "字幕",
+        "name": "名前"
+      }
+    },
+    "updating": {
+      "title": "✨ 履歴書を作成する",
+      "description": "これには数秒かかることがあります...",
+      "reassurance": "まだ作業中です。もう少しだけお待ちください... 🙇‍♀️"
+    },
+    "verification": {
+      "title": "履歴を作成する前に、あなたが人間であることを確認してください。",
+      "description": "これは、ボットが偽のアカウントを作成したり、履歴書を大量に作成したりするのを防ぐのに役立ちます。ご理解いただけると幸いです 🙂",
+      "submit": "あなたが人間であることを確認してください。"
+    },
+    "demo": {
+      "createInitialResume": "履歴書ビルダーのデモへようこそ！始めるには、以下のサンプル履歴書を1つ選択してください。",
+      "editResumeInitialMessage": "以下は履歴書のサンプルです。以下の定義済みの編集を使用して自由に編集してください。ご自身の履歴書を作成する際は、ご希望の変更を自由に行うことができます。",
+      "errors": {
+        "rateLimitMessage": "デモのレート制限に達しました — ツールを使い続けるにはご自身の履歴書を作成してください 😊"
+      },
+      "createYourOwnResume": "自分だけの履歴書を作成 📝"
+    },
+    "demoTitle": "履歴書ビルダーの仕組みを見る",
+    "demoDescription": "サンプル履歴書を使って、履歴書ビルダーの使い心地を体験してください。",
+    "demoCta": "デモを試す"
+  },
+  "interviewCopilotDemo": {
+    "session": {
+      "title": "Interview Copilot Demo",
+      "cta": "面接 Copilot を開始 🚀",
+      "createYourOwnInterviewCopilot": "あなただけの面接コパイロットを作成"
+    },
+    "verifyUser": {
+      "title": "面接Copilotのデモを始める前に、あなたが本物の人間であることを確認してください。",
+      "submit": "あなたが人間であることを確認してください",
+      "submitting": "検証中..."
+    },
+    "errors": {
+      "generic": "申し訳ありません。問題が発生しました。もう一度お試しください。"
+    },
+    "endDialog": {
+      "title": "インタビュー Copilot デモ完了 ✅",
+      "callToAction": "完璧なInterviewアカウントを作成して、あなただけのInterview Copilotを作り、次の面接を成功させましょう！",
+      "button": "アカウントを作成"
+    },
+    "fileUpload": {
+      "title": "面接コパイロットのデモへようこそ🎉",
+      "description": "履歴書をアップロードして、Interview Copilotの動作をご確認ください。",
+      "helper": "PDFファイルのみ、最大4MB",
+      "button": "履歴書をアップロード",
+      "uploading": "アップロード中...",
+      "previewButton": "デモ履歴書プレビュー 📝",
+      "demoButton": "デモの履歴書でお試しください。",
+      "demoHelper": "履歴書が手元にない？ サンプル履歴書で機能を試してみよう📝",
+      "previewModal": {
+        "title": "デモ レジュメ プレビュー",
+        "fallback": "PDFを表示できません。",
+        "openInNewTab": "新しいタブで開くにはこちらをクリックしてください。"
+      },
+      "errors": {
+        "pdfOnly": "PDFファイルのみ許可されます。",
+        "fileSize": "ファイルサイズは4MB未満である必要があります。",
+        "uploadFailed": "ファイルのアップロードに失敗しました。",
+        "demoFailed": "デモ履歴書の読み込みに失敗しました"
+      }
+    },
+    "mobileWarning": {
+      "title": "インタビューCopilotデモはデスクトップでのみ動作します 😬",
+      "description": "デスクトップデバイスに切り替えて、Interview Copilotのデモをお試しください。"
+    }
+  },
+  "userMenu": {
+    "manageSubscription": "サブスクリプションの管理",
+    "appearance": "外見",
+    "signOut": "サインアウト"
   }
 }

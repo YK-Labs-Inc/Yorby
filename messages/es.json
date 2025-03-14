@@ -33,7 +33,36 @@
       "pricing": {
         "title": "No se requiere suscripción",
         "description": "Sin suscripción obligatoria, solo paga por lo que necesita"
+      },
+      "sections": {
+        "prep": "Perfecciona Tus Habilidades Para Entrevistas",
+        "dayOf": "¡Triunfa En El Día De Tu Entrevista!",
+        "other": "Características Adicionales"
+      },
+      "interviewCopilot": {
+        "title": "Copiloto de Entrevistas",
+        "description": "Tu asistente de entrevista en tiempo real que te ayuda a responder preguntas durante la entrevista real. Obtén sugerencias y orientación instantáneas para ayudarte a dar las mejores respuestas posibles."
       }
+    },
+    "pricing": {
+      "badge": "PRECIOS SENCILLOS",
+      "title": "Sin suscripción necesaria.",
+      "subtitle": "A diferencia de nuestros competidores, no te obligamos a suscribirte a planes costosos. Paga solo por lo que necesitas.",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "Paga a medida que avanzas.",
+          "description": "Solo paga por las entrevistas para las que te estás preparando. Sin cuotas mensuales ni costos ocultos."
+        },
+        "noLockIn": {
+          "title": "Sin ataduras",
+          "description": "Libertad para usar nuestro servicio solo cuando lo necesites. Sin compromisos ni contratos."
+        },
+        "lifetimeAccess": {
+          "title": "Acceso de por vida",
+          "description": "Tus materiales de preparación para la entrevista permanecen accesibles para siempre. Sin fechas de caducidad."
+        }
+      },
+      "viewPlansButton": "Ver planes de precios"
     }
   },
   "jobCreation": {
@@ -81,7 +110,33 @@
     },
     "fileUpload": {
       "pdfOnlyNotice": "Nota: Todos los documentos deben estar en formato PDF.",
-      "pdfOnlyHelper": "Solo se admiten archivos PDF"
+      "pdfOnlyHelper": "Solo se admiten archivos PDF",
+      "uploadButton": "Subir Documento"
+    },
+    "titleV2": "Crear Material de Preparación para Entrevistas",
+    "cloneDemoJob": {
+      "description": "¿Te gustaría practicar estas preguntas de entrevista? ¡Haz clic en el botón de abajo para practicar estas preguntas con nuestras entrevistas simuladas impulsadas por IA!",
+      "button": "Practica estas preguntas de entrevista.",
+      "loading": "Preparando tus materiales de preparación para la entrevista..."
+    },
+    "onboarding": {
+      "title": "¡Bienvenido/a a Perfect Interview!",
+      "description": "Vamos a ayudarte a prepararte para tu próxima entrevista. Así es como funciona:",
+      "steps": {
+        "1": {
+          "title": "Detalles del empleo",
+          "description": "Primero, cuéntanos sobre el trabajo al que te postulas. Introduce el título del puesto, la descripción y, opcionalmente, los detalles de la empresa."
+        },
+        "2": {
+          "title": "Subir Documentos",
+          "description": "A continuación, sube tu currículum vitae, carta de presentación o cualquier otro documento relevante. Esto nos ayuda a personalizar las preguntas de la entrevista a tu experiencia."
+        },
+        "3": {
+          "title": "Generar preguntas",
+          "description": "Finalmente, analizaremos todo y generaremos preguntas de entrevista personalizadas. Esto podría tomar unos minutos, ¡pero vale la pena la espera!"
+        }
+      },
+      "button": "¡Entendido!"
     }
   },
   "jobPage": {
@@ -141,6 +196,40 @@
       "testMicrophone": "Prueba tu micrófono",
       "testRecording": "Grabar audio de prueba",
       "stopTestRecording": "Detener grabación de prueba"
+    },
+    "onboarding": {
+      "title": "Practica tus respuestas para la entrevista.",
+      "description": "Obtén retroalimentación instantánea sobre tus respuestas de entrevistas. Así es como funciona:",
+      "features": {
+        "1": {
+          "title": "Múltiples maneras de responder",
+          "description": "Escribe tu respuesta o usa la grabación de voz, lo que te resulte más natural."
+        },
+        "2": {
+          "title": "Retroalimentación instantánea.",
+          "description": "Obtén comentarios detallados sobre tus respuestas, incluyendo fortalezas y áreas de mejora."
+        },
+        "3": {
+          "title": "Práctica ilimitada",
+          "description": "Practica tanto como quieras; no hay límite en cuántas veces puedes responder cada pregunta."
+        }
+      },
+      "button": "¡Entendido!"
+    },
+    "generateAnswerOnboarding": {
+      "title": "Deja que la IA responda por ti.",
+      "description": "¿Demasiado vago para responder la pregunta tú mismo? Deja que la IA genere una respuesta personalizada para ti.",
+      "features": {
+        "aiPowered": {
+          "title": "Respuestas impulsadas por IA 🚀",
+          "description": "¿Demasiado vago para responder la pregunta tú mismo? Deja que la IA genere una respuesta por ti."
+        },
+        "personalized": {
+          "title": "Personalizado para tu experiencia.",
+          "description": "Si has subido tu currículum vitae o carta de presentación, utilizará tu experiencia laboral previa para responder la pregunta por ti."
+        }
+      },
+      "button": "¡Entendido!"
     }
   },
   "mockInterview": {
@@ -181,7 +270,13 @@
       "loading": {
         "title": "Comenzando Entrevista",
         "description": "Espere mientras configuramos su sesión de entrevista..."
-      }
+      },
+      "send": "Enviar",
+      "typeYourResponse": "Escribe tu respuesta...",
+      "pleaseSelectAMicrophone": "Por favor, selecciona un micrófono.",
+      "micPermissionError": "Por favor, concede permiso para acceder a tu micrófono.",
+      "recordingError": "Error al grabar tu respuesta. Por favor, inténtalo de nuevo.",
+      "transcribing": "Transcribiendo..."
     },
     "endModal": {
       "title": "Finalizar Entrevista",
@@ -191,19 +286,48 @@
       "processingMessage": "Esto puede tardar unos minutos...",
       "emailAlert": "Te enviaremos un correo electrónico cuando tu entrevista esté lista para revisión.",
       "confirmButton": "Finalizar Entrevista",
-      "cancelButton": "Continuar entrevista"
+      "cancelButton": "Continuar entrevista",
+      "uploadVideoLabel": "Subir grabación de entrevista para revisión"
+    },
+    "onboarding": {
+      "title": "Bienvenido(a) a la Experiencia de Entrevista Simulada",
+      "description": "Practica tus habilidades de entrevista con nuestro entrevistador de IA. Así es como funciona:",
+      "steps": {
+        "1": {
+          "title": "Experiencia Real de Entrevista",
+          "description": "Chatea con nuestro entrevistador de IA que realiza una entrevista de trabajo realista basada en el puesto al que estás postulando."
+        },
+        "2": {
+          "title": "Conversación natural",
+          "description": "Habla con naturalidad como lo harías en una entrevista real; nuestro entrevistador de IA escuchará y responderá en consecuencia."
+        },
+        "3": {
+          "title": "Revisión de Desempeño",
+          "description": "Después de la entrevista, obtén retroalimentación detallada sobre tu desempeño, incluyendo áreas de fortaleza y mejora."
+        }
+      },
+      "button": "¡Entendido!"
     }
   },
   "errors": {
     "pleaseTryAgain": "Lo siento, algo salió mal. Por favor, inténtalo de nuevo.",
-    "userNotFound": "Usuario no encontrado — por favor, inicia sesión de nuevo."
+    "userNotFound": "Usuario no encontrado — por favor, inicia sesión de nuevo.",
+    "onlyPdfFilesAllowed": "Solo se permiten archivos PDF. Por favor, suba solo documentos PDF."
   },
   "sidebar": {
     "addJob": "Crear nuevo trabajo",
     "signInToStart": "Inicia sesión para guardar tu preparación de entrevista personalizada",
     "signIn": "Iniciar sesión",
     "numberOfCredits": "Créditos: {numberOfCredits}",
-    "buyMoreCredits": "Comprar más créditos"
+    "buyMoreCredits": "Comprar más créditos",
+    "jobs": "Empleos",
+    "interviewCopilots": "Copilotos de entrevistas",
+    "createInterviewCopilot": "Crear Copiloto de Entrevistas",
+    "create": "Crear",
+    "resumes": "Currículums",
+    "resumeBuilder": "Constructor de Currículums",
+    "createResume": "Crear currículum vitae",
+    "unlockAllAccess": "Desbloquea el Acceso Ilimitado"
   },
   "upgrade": {
     "locked": {
@@ -212,7 +336,8 @@
       "mockDescription": "Obtén acceso a entrevistas simuladas ilimitadas con tecnología de IA que simulan escenarios de entrevistas reales. Practica con nuestro entrevistador de IA avanzado que se adapta a tus respuestas y proporciona comentarios instantáneos.",
       "button": "Desbloquea acceso completo a la preparación de entrevistas",
       "insufficientCredits": "No tienes suficientes créditos para desbloquear esta experiencia de preparación para entrevistas.",
-      "unlocking": "Desbloqueando..."
+      "unlocking": "Desbloqueando...",
+      "subscriptionTitle": "Desbloquea La Experiencia Completa De Preparación Para Entrevistas"
     },
     "modal": {
       "title": "Actualiza a Premium",
@@ -254,22 +379,26 @@
       "oneCredit": {
         "title": "Entrevista individual",
         "description": "Perfecto para probar nuestro sistema de entrevistas de prueba",
-        "highlight": "1 Crédito"
+        "highlight": "1 Crédito",
+        "titleV2": "1 Crédito"
       },
       "fiveCredits": {
         "title": "Paquete de entrevista",
         "description": "Genial para practicar múltiples entrevistas",
-        "highlight": "5 Créditos"
+        "highlight": "5 Créditos",
+        "titleV2": "5 Créditos"
       },
       "tenCredits": {
         "title": "Paquete Pro",
         "description": "La mejor opción para una preparación seria",
-        "highlight": "10 Créditos"
+        "highlight": "10 Créditos",
+        "titleV2": "10 Créditos"
       },
       "unlimited": {
         "title": "Anual Ilimitado",
         "description": "Para profesionales y personas que buscan empleo con frecuencia",
-        "highlight": "Créditos ilimitados"
+        "highlight": "Créditos ilimitados",
+        "titleV2": "Créditos ilimitados"
       }
     },
     "cta": {
@@ -286,13 +415,55 @@
       "quarterSuffix": "/trimestre",
       "subscription": "Suscripción anual",
       "quarterlySubscription": "Facturado cada 3 meses",
-      "oneTime": "Compra única"
+      "oneTime": "Compra única",
+      "savingsV2": "Ahorra {savings}% vs. crédito único"
     },
     "verifying_purchase": "Verificando tu compra...",
     "purchase_success": "¡Compra exitosa! 🎉",
     "purchase_failed": "Verificación de compra fallida",
     "redirect_success_message": "Serás redirigido a tu panel de control en {seconds} segundos...",
-    "redirect_error_message": "Redireccionando en {seconds} segundos..."
+    "redirect_error_message": "Redireccionando en {seconds} segundos...",
+    "subscriptionTitle": "Obtén Acceso Ilimitado a Entrevistas Perfectas",
+    "descriptionV2": "Puedes canjear créditos para crear material de preparación para entrevistas de trabajo o crear un Copiloto de Entrevistas.",
+    "descriptionV3": "Puedes canjear créditos para generar preguntas de entrevista, crear un Copiloto de Entrevista o crear un currículum.",
+    "subscriptionDescription": "Crea currículums ilimitados, preguntas de entrevista ilimitadas y copilotos de entrevista ilimitados.",
+    "unauthenticated": {
+      "title": "Inicia sesión para ver los precios.",
+      "description": "Inicia sesión para ver nuestros planes de precios y comprar créditos de entrevista.",
+      "form": {
+        "email": {
+          "label": "Correo electrónico",
+          "placeholder": "Introduce tu correo electrónico"
+        },
+        "submit": "Iniciar sesión"
+      }
+    },
+    "creditUsage": {
+      "modalTrigger": "¿Cuántos créditos necesitas?",
+      "modalTitle": "Desglose del Uso de Crédito",
+      "gotItButton": "Entendido.",
+      "items": {
+        "jobPrep": {
+          "title": "Preparación para la Entrevista de Trabajo",
+          "description": "Crea preguntas ilimitadas para practicar entrevistas y simulacros de entrevistas para un solo puesto de trabajo.",
+          "credits": "{count} {count, plural, one {Crédito} other {Créditos}}"
+        },
+        "copilot": {
+          "title": "Sesión de Copilot para Entrevistas",
+          "description": "Una sesión completa de Interview Copilot",
+          "credits": "{count} {count, plural, one {Crédito} other {Créditos}}"
+        },
+        "resumeBuilder": {
+          "title": "Crear un currículum vitae",
+          "description": "Crea un currículum con nuestro creador de currículums fácil de usar.",
+          "credits": "{count} {count, plural, one {Crédito} other {Créditos}}"
+        }
+      }
+    },
+    "errors": {
+      "generic": "Algo salió mal — por favor, inténtalo de nuevo.",
+      "login": "Debes iniciar sesión para comprar créditos."
+    }
   },
   "accountLinking": {
     "title": "Vincular tu cuenta",
@@ -309,7 +480,12 @@
       "submit": "Vincular cuenta"
     },
     "emailRequiredError": "Correo electrónico requerido",
-    "authSuccess": "Se ha enviado un enlace de verificación a tu correo electrónico. Revisa tu bandeja de entrada para completar tu registro."
+    "authSuccess": "Se ha enviado un enlace de verificación a tu correo electrónico. Revisa tu bandeja de entrada para completar tu registro.",
+    "genericError": "Algo salió mal, por favor intenta de nuevo.",
+    "signUp": "Regístrate",
+    "signUpToStart": "Regístrate para guardar tu preparación personalizada para la entrevista.",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar sesión"
   },
   "faq": {
     "title": "Preguntas frecuentes",
@@ -320,10 +496,701 @@
     "q3": "¿Qué tipos de trabajos admite Perfect Interview?",
     "a3": "Perfect Interivew soporta todos los trabajos del mundo. Siempre y cuando subas la descripción del trabajo, podremos generar preguntas de práctica ilimitadas para ti.",
     "q4": "¿Hay un límite de cuántas entrevistas simuladas puedo hacer?",
-    "a4": "No hay límite en la cantidad de entrevistas de práctica que puedes hacer. Cada entrevista de práctica es única y se adapta al trabajo que estás solicitando."
+    "a4": "No hay límite en la cantidad de entrevistas de práctica que puedes hacer. Cada entrevista de práctica es única y se adapta al trabajo que estás solicitando.",
+    "q5": "¿Qué tipos de trabajos apoya perfect interview?",
+    "a5": "Perfect Interview es compatible con todos y cada uno de los trabajos del mundo. Siempre y cuando subas la descripción del puesto, podremos crear preguntas de entrevista y copilotos de entrevista para ti."
   },
   "mobileWarning": {
     "title": "Experiencia solo para escritorio",
     "description": "PerfectInterview funciona mejor en navegadores de escritorio. Cambia a un dispositivo de escritorio para disfrutar de la experiencia completa de la entrevista."
+  },
+  "demoJobs": {
+    "errors": {
+      "demoJobNotFound": "Lo sentimos, no pudimos encontrar esta entrevista.",
+      "captchaRequired": "Se requiere Captcha; inténtelo de nuevo.",
+      "pleaseTryAgain": "Algo salió mal; por favor, inténtalo de nuevo.",
+      "createYourOwn": "Pero puedes crear tu propia preparación de entrevista personalizada en nuestra página de inicio. Sube cualquier descripción de trabajo, tu currículum y generaremos preguntas de práctica adaptadas a tu experiencia para cualquier trabajo en el mundo."
+    },
+    "actions": {
+      "goToHome": "Ir a la página de inicio"
+    }
+  },
+  "onboarding": {
+    "checklistTitle": "Empezando ✨",
+    "createJob": "Crea tu primer empleo",
+    "generateAnswer": "Genera tu primera respuesta",
+    "answerQuestion": "Responde a tu primera pregunta",
+    "completeMockInterview": "Completa tu primera entrevista simulada.",
+    "signUp": "Regístrate para crear una cuenta"
+  },
+  "signUp": {
+    "alreadySignedIn": {
+      "title": "Ya has iniciado sesión.",
+      "description": "Ya tienes una cuenta y has iniciado sesión.",
+      "buttons": {
+        "dashboard": "Ir al Panel de Control",
+        "home": "Ir a Inicio"
+      }
+    },
+    "loading": "Cargando..."
+  },
+  "signIn": {
+    "title": "Iniciar sesión",
+    "description": "Te enviaremos un enlace mágico para iniciar sesión en tu cuenta.",
+    "form": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "Introduce tu correo electrónico"
+      },
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión..."
+    }
+  },
+  "interviewCopilots": {
+    "title": "Copilotos de entrevistas",
+    "jobDetails": "Detalles del empleo",
+    "companyDetails": "Detalles de la Compañía",
+    "documents": {
+      "label": "Documentos",
+      "uploadButton": "Subir Documento",
+      "uploading": "Subiendo...",
+      "uploadSuccess": "Documento subido con éxito.",
+      "deleteSuccess": "Documento eliminado exitosamente.",
+      "helper": "Sube tu currículum, carta de presentación o cualquier otro documento relevante (debe ser un archivo PDF)",
+      "empty": "Aún no se han subido documentos."
+    },
+    "createNew": {
+      "title": "Crear Nuevo Copiloto de Entrevista",
+      "jobTitle": {
+        "label": "Título del puesto",
+        "placeholder": "Introduce el título del puesto"
+      },
+      "jobDescription": {
+        "label": "Descripción del puesto de trabajo",
+        "placeholder": "Ingresa la descripción del puesto"
+      },
+      "companyName": {
+        "label": "Nombre de la Empresa",
+        "placeholder": "Ingrese el nombre de la empresa"
+      },
+      "companyDescription": {
+        "label": "Descripción de la empresa",
+        "placeholder": "Introduce la descripción de la empresa"
+      },
+      "documents": {
+        "label": "Documentos",
+        "helper": "Sube tu currículum vitae, carta de presentación o cualquier otro documento relevante (debe ser un archivo PDF)"
+      },
+      "submit": "Crear Copiloto de Entrevistas",
+      "submitting": "Creando...",
+      "emptyFields": {
+        "title": "Por favor, complete la información.",
+        "description": "Para obtener el mejor rendimiento de tu copiloto de entrevistas, por favor, completa tantos campos como sea posible. Debe completarse al menos un campo para poder continuar.",
+        "button": "Entendido ✅"
+      }
+    },
+    "edit": {
+      "saveSuccess": "Cambios guardados exitosamente.",
+      "saveError": "Error al guardar los cambios.",
+      "editButton": "Editar",
+      "cancelButton": "Cancelar",
+      "saveButton": "Guardar",
+      "saving": "Guardando..."
+    },
+    "errors": {
+      "notFound": {
+        "title": "Copilot de entrevista no encontrado",
+        "description": "El copiloto de entrevistas que estás buscando no existe o ha sido eliminado.",
+        "action": "Crear un nuevo copiloto de entrevista"
+      },
+      "uploadFailed": "Error al subir el archivo.",
+      "deleteFailed": "Error al eliminar el archivo.",
+      "generic": "Algo salió mal, por favor inténtalo de nuevo.",
+      "fileRequired": "Por favor, selecciona un archivo para subir 📤",
+      "pdfOnly": "Solo se admiten archivos PDF",
+      "unauthorized": "Debes haber iniciado sesión para subir archivos."
+    },
+    "jobTitle": {
+      "label": "Título del puesto",
+      "empty": "Sin título de trabajo proporcionado"
+    },
+    "jobDescription": {
+      "label": "Descripción del puesto",
+      "empty": "Sin descripción del puesto proporcionada."
+    },
+    "companyName": {
+      "label": "Nombre de la Empresa",
+      "empty": "Ningún nombre de empresa proporcionado"
+    },
+    "companyDescription": {
+      "label": "Descripción de la empresa",
+      "empty": "Sin descripción de la compañía proporcionada."
+    },
+    "deviceSelection": {
+      "title": "Seleccionar Dispositivo",
+      "sameDevice": {
+        "title": "Mismo dispositivo",
+        "description": "Usa tu dispositivo actual para la entrevista.",
+        "pros": {
+          "0": "Solo se requiere un dispositivo.",
+          "1": "Proceso de configuración sencillo",
+          "2": "Integración perfecta de audio + video"
+        },
+        "cons": {
+          "0": "Compartir la pantalla puede revelar el copiloto.",
+          "1": "Limitado al navegador Chrome."
+        }
+      },
+      "separateDevice": {
+        "title": "Dispositivo separado",
+        "description": "Usa un dispositivo diferente para la entrevista.",
+        "pros": {
+          "0": "Completamente indetectable durante el screen sharing",
+          "1": "Funciona con cualquier plataforma de reuniones."
+        },
+        "cons": {
+          "0": "Requiere un segundo dispositivo."
+        }
+      },
+      "modal": {
+        "title": "Comparación de opciones de dispositivos",
+        "learnMore": "¿Qué Opción es la Correcta Para Ti?",
+        "close": "Cerrar"
+      }
+    },
+    "session": {
+      "startCopilot": "Iniciar Copiloto de Entrevista",
+      "startingCopilot": "Iniciando Copilot para Entrevistas...",
+      "selectMicrophone": "Seleccionar Micrófono",
+      "microphonePermission": {
+        "checking": "Comprobando permisos del micrófono...",
+        "title": "Acceso al micrófono requerido.",
+        "description": {
+          "denied": "Se ha denegado el acceso al micrófono. Por favor, habilita el acceso al micrófono en la configuración de tu navegador para continuar.",
+          "prompt": "Esta aplicación necesita acceso a tu micrófono para grabar tu sesión de entrevista."
+        },
+        "allowButton": "Permitir acceso al micrófono",
+        "instructions": {
+          "title": "Para habilitar el acceso al micrófono:",
+          "steps": {
+            "1": "Haz clic en el icono de la cámara/micrófono en la barra de direcciones de tu navegador.",
+            "2": "Selecciona \"Permitir\" para el acceso al micrófono.",
+            "3": "Recargar la página"
+          }
+        }
+      },
+      "error": {
+        "generic": "Lo sentimos, algo salió mal. Por favor, inténtalo de nuevo.",
+        "noMicrophoneSelected": "Por favor, selecciona un micrófono para continuar.",
+        "noScreenSharingSupport": "Tu navegador no es compatible con la función de compartir pantalla. Por favor, utiliza Google Chrome."
+      },
+      "selectMeeting": {
+        "title": "Seleccionar Sala de Reuniones para Entrevistas",
+        "button": "Seleccionar",
+        "instruction": "Una vez que comience la entrevista, la transcripción del entrevistador se mostrará aquí.",
+        "connecting": "Conectando..."
+      },
+      "transcription": {
+        "title": "Transcripción de la entrevista",
+        "status": {
+          "ready": "Listo",
+          "transcribing": "Transcribiendo",
+          "recording": "Grabando"
+        }
+      },
+      "controls": {
+        "leave": "Salida",
+        "settings": "Ajustes",
+        "theme": "Cambiar tema",
+        "transcriptAutoScroll": "Desplazamiento automático de la transcripción",
+        "copilotAutoScroll": "Desplazamiento automático de Copilot",
+        "on": "En",
+        "off": "Apagado"
+      },
+      "copilot": {
+        "title": "Copilot de Entrevista",
+        "status": {
+          "ready": "Listo",
+          "error": "Error",
+          "listening": "Escuchando"
+        },
+        "waitingMessage": "El Copiloto de Entrevistas responderá las preguntas de la entrevista aquí."
+      },
+      "stopRecording": "Finalizar Copiloto de Entrevista",
+      "endInterview": "Fin de la entrevista",
+      "endInterviewConfirmation": "¿Estás seguro de que quieres finalizar esta entrevista? Esto guardará y procesará tu grabación.",
+      "uploading": "Subiendo grabación",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "onboarding": {
+        "title": "Guía de configuración de Interview Copilot",
+        "description": "Sigue estos pasos para configurar tu sesión de entrevista.",
+        "helpButton": "Ver instrucciones de configuración",
+        "skipButton": "Omitir la guía de configuración",
+        "nextButton": "Siguiente",
+        "previousButton": "Anterior",
+        "getStartedButton": "Empezar",
+        "steps": {
+          "1": {
+            "title": "Abre Tu Entrevista en Chrome",
+            "description": "Para usar el Interview Copilot, debes abrir tu entrevista en una pestaña de Google Chrome.",
+            "description2": "El Copiloto de Entrevistas no funcionará con otros navegadores o si abres la entrevista en una aplicación de escritorio; DEBE estar en una pestaña de Chrome.",
+            "description3": "Selecciona tu plataforma de reunión para ver instrucciones específicas sobre cómo abrirla en Chrome.",
+            "platforms": {
+              "zoom": {
+                "name": "Zoom",
+                "instruction": "Abre tu reunión de Zoom en Chrome en lugar de la aplicación de escritorio:"
+              },
+              "teams": {
+                "name": "Microsoft Teams",
+                "instruction": "Abre tu reunión de Teams en Chrome en lugar de la aplicación de escritorio:"
+              },
+              "meet": {
+                "name": "Google Meet",
+                "instruction": "Google Meet se abre en Chrome de forma predeterminada."
+              }
+            }
+          },
+          "2": {
+            "title": "Comparta Su Pestaña de Reunión",
+            "description": "Haz clic en el botón \"Select Interview Meeting Room\" y elige la pestaña de Chrome con tu reunión.",
+            "shareTabInstructions": {
+              "mustShare": "DEBES compartir la pestaña de Chrome con la opción \"También compartir el audio de la pestaña\" activada.",
+              "doNotShare": "NO comparta \"ventana\" o \"pantalla completa\" o, de lo contrario, el copiloto de entrevistas no funcionará."
+            }
+          },
+          "3": {
+            "title": "Comenzar el Copiloto de Entrevista 🤖",
+            "description": "Después de compartir tu pestaña de entrevista, haz clic en el botón \"Start Interview Copilot\" para comenzar."
+          }
+        }
+      },
+      "exitWarning": {
+        "title": "Advertencia: Grabación no guardada",
+        "description": "Tienes una grabación de entrevista sin guardar. Si sales ahora, tu grabación se perderá.",
+        "instruction": "Para guardar tu grabación, por favor haz clic en el botón \"End Interview Copilot\" antes de salir.",
+        "stayButton": "Quédate en la página.",
+        "leaveButton": "Vete de todos modos."
+      }
+    },
+    "jobCreation": {
+      "fileUpload": {
+        "pdfOnlyNotice": "Nota: Todos los documentos deben estar en formato PDF.",
+        "pdfOnlyHelper": "Solo se admiten archivos PDF."
+      },
+      "title": "Copiloto de entrevistas"
+    },
+    "credits": {
+      "subtitle": "Crear un copiloto de entrevistas usará 1 crédito. Actualmente tienes {credits} créditos.",
+      "insufficientDialog": {
+        "title": "Necesito más créditos.",
+        "description": "Necesitas al menos 1 crédito para crear un copiloto de entrevista. Compra créditos para continuar.",
+        "button": "Comprar Créditos"
+      },
+      "confirmDialog": {
+        "title": "Confirmar creación",
+        "description": "Crear un copiloto de entrevista usará 1 crédito de tu cuenta. Actualmente tienes {credits} créditos restantes.",
+        "cancel": "Cancelar",
+        "confirm": "Crear Copilot",
+        "creating": "Creando..."
+      }
+    },
+    "mobileWarning": {
+      "title": "Experiencia solo para computadoras de escritorio.",
+      "description": "El Copiloto de Entrevistas es una experiencia solo para escritorio. Por favor, cambia a un dispositivo de escritorio para disfrutar de la experiencia completa del Copiloto de Entrevistas."
+    },
+    "browserWarning": {
+      "title": "Se requiere el navegador Chrome.",
+      "description": "El Copiloto de Entrevistas requiere Google Chrome para funcionar correctamente. Por favor, cambia a Chrome para la mejor experiencia."
+    },
+    "delete": {
+      "button": "Borrar",
+      "deleting": "Borrando...",
+      "confirmTitle": "¿Estás seguro?",
+      "confirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu copiloto de entrevistas y todos los datos asociados.",
+      "cancelButton": "Cancelar"
+    },
+    "locked": {
+      "title": "Este Copiloto de Entrevistas está Bloqueado.",
+      "description": "Desbloquea este copiloto para usarlo durante tu entrevista.",
+      "creditCost": "Necesitas {credits} {credits, plural, one {crédito} other {créditos}} para desbloquear este copiloto de entrevistas",
+      "button": "Desbloquear",
+      "unlocking": "Desbloqueando...",
+      "insufficientCredits": {
+        "title": "Créditos insuficientes",
+        "description": "No tienes suficientes créditos para desbloquear este copiloto.",
+        "button": "Comprar Créditos"
+      },
+      "cancel": "Cancelar",
+      "subscriptionCTA": "Desbloquear Interview Copilot"
+    },
+    "accountLinking": {
+      "title": "Guarda tu Copiloto de Entrevista.",
+      "description": "Vincula tu cuenta para guardar tu copiloto de entrevista y acceder a él en cualquier momento.",
+      "form": {
+        "email": {
+          "label": "Correo electrónico",
+          "placeholder": "Introduce tu correo electrónico"
+        },
+        "submit": "Guardar Copiloto de Entrevista"
+      },
+      "authSuccess": "Revisa tu correo electrónico para confirmar tu cuenta.",
+      "errors": {
+        "emailRequiredError": "Por favor, introduzca su correo electrónico.",
+        "genericError": "Algo salió mal, por favor intenta de nuevo."
+      }
+    },
+    "review": {
+      "recording": {
+        "title": "Grabación de Entrevista",
+        "description": "Revisa tu desempeño en la entrevista."
+      },
+      "questions": {
+        "title": "Revisión de la pregunta",
+        "description": "Revisa las preguntas y respuestas.",
+        "questionLabel": "Pregunta",
+        "questionNumber": "Pregunta {number}",
+        "answerLabel": "Respuesta de la IA"
+      }
+    },
+    "demo": {
+      "title": "Mira cómo el copiloto de entrevistas puede ayudarte.",
+      "description": "Experimenta cómo Interview Copilot puede ayudarte en tu próxima entrevista. Prueba nuestra demo de Interview Copilot antes de crear el tuyo propio.",
+      "button": "Prueba la Demo"
+    }
+  },
+  "FeatureHighlightsV2": {
+    "hero": {
+      "badge": "NO SE REQUIERE SUSCRIPCIÓN",
+      "title": "¡Triunfa en tu Próxima Entrevista!",
+      "titleV2": "Todo lo que Necesitas para Conseguir Tu Próximo Trabajo ✨",
+      "description": "Desde la preparación para la entrevista hasta la ayuda en tiempo real, Perfect Interview es una solución completa para ayudarte a conseguir cualquier trabajo y obtener la pasta 💰",
+      "descriptionV2": "Perfect Interview es todo lo que necesitas para ayudarte a conseguir cualquier trabajo y ganar la pasta 💰",
+      "subscriptionNote": "No se requiere una suscripción molesta.",
+      "getStarted": "Comenzar"
+    },
+    "journey": {
+      "before": {
+        "title": "Antes de las entrevistas",
+        "resumeBuilder": {
+          "title": "Constructor de currículums con IA",
+          "description": "Crea un currículum profesional a través de una conversación natural con nuestro asistente de IA."
+        },
+        "practiceQuestions": {
+          "title": "Generador de Preguntas para Entrevistas",
+          "description": "Obtén preguntas de práctica personalizadas según el trabajo y tu experiencia."
+        }
+      },
+      "during": {
+        "title": "Durante las Entrevistas",
+        "interviewCopilot": {
+          "title": "Copiloto de entrevistas",
+          "description": "Tu asistente de entrevistas con IA en tiempo real que te ayuda a responder preguntas a la perfección 💯",
+          "badge": "100% Indetectable"
+        }
+      }
+    },
+    "features": {
+      "title": "Todo lo que Necesitas Para Triunfar en Tu Próxima Entrevista de Trabajo 💪",
+      "resumeBuilder": {
+        "title": "Crea tu currículum con IA",
+        "description": "Crea un currículum profesional en minutos teniendo una conversación natural con nuestro asistente de IA. Se acabaron el formateo manual y el bloqueo del escritor.",
+        "tryButton": "Prueba la Demostración del Creador de Currículums 🚀",
+        "features": {
+          "conversation": {
+            "title": "Conversación Natural",
+            "description": "Cuéntanos sobre tu experiencia y nuestra IA encontrará todos los detalles importantes para tu currículum."
+          },
+          "formatting": {
+            "title": "Formato Perfecto",
+            "description": "Creamos currículums que cumplen al 100% con los últimos estándares de redacción de currículums."
+          },
+          "time": {
+            "title": "Ahorra Horas de Tiempo",
+            "description": "Se acabaron la escritura y la edición manual. Dinos qué modificaciones hacer usando lenguaje natural y nosotros nos encargaremos del resto."
+          }
+        }
+      },
+      "prep": {
+        "title": "Experiencia personalizada de preparación para entrevistas.",
+        "description": "Domina tus habilidades de entrevista con nuestras herramientas de preparación integrales."
+      },
+      "practiceQuestions": {
+        "title": "Descubre Preguntas de Entrevista",
+        "description": "Genera preguntas ilimitadas de práctica para entrevistas basadas en cualquier descripción de trabajo y tu currículum vitae para que las preguntas se adapten al trabajo y a tu experiencia personal."
+      },
+      "feedback": {
+        "title": "Retroalimentación instantánea",
+        "description": "Obtén retroalimentación sobre tus respuestas a preguntas de entrevista de práctica."
+      },
+      "aiAnswers": {
+        "title": "Generar respuestas con IA",
+        "description": "Genera respuestas a preguntas de entrevista basadas en tu historial laboral anterior."
+      },
+      "mockInterviews": {
+        "title": "Entrevistas simuladas realistas con IA 🤖",
+        "description": "Experiencia realista de simulación de entrevista haciéndote chatear con un entrevistador de IA para replicar un escenario de entrevista de la vida real 🗣️"
+      },
+      "performance": {
+        "title": "Obtén retroalimentación detallada",
+        "description": "Obtén un desglose detallado de tus fortalezas y debilidades y áreas a mejorar."
+      },
+      "copilot": {
+        "title": "Tu propio copiloto personal para entrevistas",
+        "description": "Interview Copilot escucha tu entrevista y responde preguntas de la entrevista por ti en tiempo real basándose en tu historial laboral anterior para asegurarse de que arrasas en tu entrevista de trabajo.",
+        "note": "No te preocupes, es 100% indetectable, así que este puede ser nuestro pequeño secreto 🤫",
+        "tryButton": "Prueba la Demo de Interview Copilot.",
+        "features": {
+          "aiGuidance": {
+            "title": "Respuestas de IA en tiempo real",
+            "description": "La IA escuchará cualquier pregunta formulada en la entrevista y proporcionará una respuesta en tiempo real."
+          },
+          "timing": {
+            "title": "Momento perfecto",
+            "description": "Las respuestas aparecen instantáneamente antes de que necesites responder, dándote tiempo para procesar y responder con confianza."
+          },
+          "personalization": {
+            "title": "Personalizado para ti",
+            "description": "Las respuestas se adaptan a tu experiencia, el puesto y la empresa, haciendo que cada respuesta sea exclusivamente tuya."
+          }
+        }
+      }
+    },
+    "pricing": {
+      "badge": "PRECIOS SENCILLOS",
+      "title": "Sin suscripción requerida.",
+      "titleV2": "Precios sencillos y transparentes.",
+      "subtitle": "A diferencia de nuestros competidores, no te obligamos a suscribirte a costosas suscripciones. Paga solo por lo que necesitas.",
+      "benefits": {
+        "payAsYouGo": {
+          "title": "Paga según consumes",
+          "description": "Paga solo por las entrevistas para las que te estás preparando. Sin cuotas mensuales ni costos ocultos."
+        },
+        "noLockIn": {
+          "title": "Sin ataduras",
+          "description": "Libertad para usar nuestro servicio solo cuando lo necesites. Sin compromisos ni contratos."
+        },
+        "lifetimeAccess": {
+          "title": "Acceso de por vida",
+          "description": "Tus materiales de preparación para la entrevista permanecen accesibles para siempre. Sin fechas de vencimiento."
+        }
+      },
+      "viewPlansButton": "Ver planes de precios"
+    },
+    "finalCTA": {
+      "title": "¿Listo para transformar el éxito de tu entrevista?",
+      "description": "Únete a miles de profesionales que han elevado su desempeño en entrevistas. Paga solo por lo que necesitas, sin suscripción requerida.",
+      "button": "Comenzar",
+      "footer": "Sin suscripción • Sin cargos ocultos • Paga por entrevista"
+    }
+  },
+  "resumeBuilder": {
+    "title": "Chat para Reanudar",
+    "description": "Te ayudaré a crear un currículum profesional haciéndote una serie de preguntas. Simplemente responde de manera conversacional y yo me encargaré de darle formato a tu currículum.",
+    "landingPage": {
+      "title": "Tú parlotéas. Nosotros construiremos tu currículum.",
+      "description": "Habla con nuestro asistente de IA, cuéntanos un poco sobre ti y crearemos un currículum personalizado con el formato perfecto para ti.",
+      "features": {
+        "conversation": {
+          "title": "Conversación natural",
+          "description": "Cuéntanos sobre tu experiencia (ya sea con tu voz o escribiendo) y nuestra IA encontrará todos los detalles importantes para tu currículum."
+        },
+        "formatting": {
+          "title": "Formato Perfecto Garantizado",
+          "description": "Creamos currículums que cumplen al 100% con los últimos estándares de redacción de currículums."
+        },
+        "time": {
+          "title": "Ahorra Horas de Tiempo",
+          "description": "Se acabaron la escritura y la edición manual. Dinos qué ediciones quieres que hagamos usando lenguaje natural y nosotros nos encargaremos del resto."
+        }
+      },
+      "testimonials": {
+        "title": "Lo que dicen los usuarios",
+        "cta": {
+          "title": "¿Listo para construir tu currículum perfecto?",
+          "description": "Únete a miles de personas que ya han creado currículums ganadores a través de nuestra plataforma con tecnología de IA."
+        }
+      },
+      "stats": {
+        "users": "Más de 3200 currículums creados"
+      },
+      "cta": "Crea Tu Currículum",
+      "ctaPending": "Construyendo..."
+    },
+    "downloadResume": "Vista previa del currículum vitae",
+    "typeYourResponse": "Escribe tu respuesta...",
+    "sendResponse": "Enviar respuesta",
+    "send": "Enviar",
+    "switchToVoice": "Cambiar a Voz",
+    "switchToText": "Cambiar a texto",
+    "processing": "Procesando...",
+    "summary": "Resumen Profesional",
+    "downloading": "Descargando...",
+    "downloadError": "Error al descargar el PDF. Por favor, inténtalo de nuevo.",
+    "buildingChatbot": "Creando tu currículum...",
+    "waitingForAssistant": "Esperando tu información...",
+    "pleaseSelectAMicrophone": "Por favor, selecciona un micrófono antes de grabar.",
+    "micPermissionError": "Error: No se pudo acceder al micrófono. Por favor, revise los permisos e intente de nuevo.",
+    "recordingError": "Error durante la grabación o transcripción. Por favor, inténtalo de nuevo.",
+    "voiceInstructions": "Habla claramente en tu micrófono. Tu respuesta se transcribirá automáticamente.",
+    "startRecording": "Comenzar a grabar",
+    "stopRecording": "Detener grabación",
+    "transcription": "Tu transcripción",
+    "selectMicrophone": "Seleccionar Micrófono",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "createResumeInitialMessage": "¡Hola! Te ayudaré a crear un currículum profesional, pero primero necesito conocerte un poco.\n\n¿Podrías decirme tu nombre, información de contacto general como tu dirección de correo electrónico, tu historial laboral/educativo anterior y algunas habilidades laborales relevantes que tengas?\n\nUna vez que recopile esta información, crearé un borrador inicial de tu currículum y luego podremos seguir editándolo para que sea perfecto.",
+    "editResumeInitialMessage": "¡Hola! Te ayudaré a editar tu currículum. ¿Qué te gustaría cambiar?\n Puedo cambiar cualquier cosa que quieras: agregar una nueva sección, editar una existente o incluso cambiar el orden.",
+    "editResume": "Editar currículum vitae",
+    "cancelEdit": "Cancelar Editar",
+    "saveChanges": "Guardar cambios",
+    "savingChanges": "Guardando cambios...",
+    "addItem": "Añadir Elemento",
+    "addEducation": "Añadir Educación",
+    "addWorkExperience": "Añadir Experiencia Laboral",
+    "addSkill": "Añadir Habilidad",
+    "addSection": "Añadir Sección",
+    "chooseSectionType": "Elige el tipo de sección",
+    "chooseSectionTypeDescription": "Selecciona el tipo de sección que quieres añadir a tu currículum vitae.",
+    "detailedSection": "Sección Detallada",
+    "detailedSectionDescription": "Para experiencia laboral, educación o proyectos con títulos, fechas y viñetas.",
+    "listSection": "Sección de lista",
+    "listSectionDescription": "Para habilidades, tecnologías, o listas simples de elementos",
+    "deleteSection": "Eliminar sección",
+    "deleteItem": "Borrar elemento",
+    "newSectionTitle": "Nueva sección",
+    "newItemDefaults": {
+      "title": "Nueva Sección",
+      "organization": "Nombre de la Organización",
+      "date": "Rango de fechas",
+      "description": {
+        "0": "Descripción"
+      }
+    },
+    "errors": {
+      "notFound": {
+        "title": "Currículum No Encontrado",
+        "description": "El currículum que estás buscando no existe o ha sido eliminado.",
+        "action": "Crear Un Nuevo Currículum 📝"
+      },
+      "resumeEditError": "Error al editar el currículum. Por favor, inténtalo de nuevo.",
+      "resumeGenerationError": "Error al generar el currículum. Por favor, inténtalo de nuevo.",
+      "resumeSaveError": "Error al guardar el currículum. Por favor, inténtalo de nuevo.",
+      "auth": "Debes iniciar sesión para guardar tu currículum.",
+      "insufficientCredits": "No tienes suficientes créditos para desbloquear este currículum. Por favor, compra más créditos.",
+      "generic": "Lo sentimos, algo salió mal. Por favor, inténtalo de nuevo.",
+      "resumeGenerationRetryMessage": "Mmm, algo salió mal al intentar crear tu currículum. Déjame intentarlo de nuevo.",
+      "rateLimitMessage": "Has sido limitado. Por favor, inténtalo de nuevo en una hora."
+    },
+    "success": {
+      "resumeSave": "Currículum guardado ✅",
+      "resumeUnlock": "Currículum desbloqueado 🔓"
+    },
+    "generation": {
+      "title": "Cargando tu currículum..."
+    },
+    "locked": {
+      "title": "Currículum Bloqueado 🔒",
+      "descriptionWithCredits": "Desbloquea el currículum usando {credits} {credits, plural, one {crédito} other {créditos}} de tu cuenta.",
+      "descriptionNoCredits": "Desbloquea el currículum añadiendo {credits} {credits, plural, one {credit} other {credits}} a tu cuenta.",
+      "descriptionEmailForm": "Desbloquea el currículum añadiendo tu dirección de correo electrónico a tu cuenta.",
+      "unlockButton": "Desbloquear con {credits} {credits, plural, one {Crédito} other {Créditos}}",
+      "unlocking": "Desbloqueando...",
+      "purchaseButton": "Comprar Créditos",
+      "subscriptionCTA": "Desbloquear Currículum",
+      "subscriptionDescription": "Desbloquea el currículum para obtener acceso a ediciones y actualizaciones ilimitadas."
+    },
+    "form": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "Ingresa tu correo electrónico"
+      },
+      "submit": "Guardar currículum vitae",
+      "pending": "Guardando...",
+      "title": "Introduce tu correo electrónico para ver tu currículum.",
+      "description": "Esto es para que puedas iniciar sesión en tu cuenta en el futuro y ver tu currículum vitae en cualquier momento.",
+      "newItem": "Artículo nuevo",
+      "placeholders": {
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "location": "Ubicación",
+        "dateRange": "Rango de fechas",
+        "description": "Descripción",
+        "title": "Título",
+        "subtitle": "Subtítulo",
+        "name": "Nombre"
+      }
+    },
+    "updating": {
+      "title": "✨ Construyendo tu Currículum Vitae",
+      "description": "Esto podría tomar unos segundos...",
+      "reassurance": "Todavía estamos trabajando en ello, solo un poquito más..."
+    },
+    "verification": {
+      "title": "Antes de que construyamos tu currículum, por favor verifica que eres un humano real.",
+      "description": "Esto nos ayuda a evitar que los bots creen cuentas falsas y construyan currículums — esperamos que entiendas 🙂",
+      "submit": "Verifica que eres humano."
+    },
+    "demo": {
+      "createInitialResume": "Bienvenido a la demostración del creador de currículums. Elija uno de los currículums de muestra a continuación para comenzar.",
+      "editResumeInitialMessage": "Aquí tienes un ejemplo de currículum vitae — siéntete libre de editarlo usando una de las ediciones predefinidas a continuación. Al crear tu propio currículum, puedes realizar cualquier cambio que desees.",
+      "errors": {
+        "rateLimitMessage": "Has alcanzado el límite de la demo. Por favor, crea tu propio currículum para continuar usando la herramienta 😊"
+      },
+      "createYourOwnResume": "Crea Tu Propio Currículum Vitae"
+    },
+    "demoTitle": "Mira cómo funciona el creador de currículums",
+    "demoDescription": "Experimenta cómo funciona el creador de currículums con uno de nuestros currículums de ejemplo.",
+    "demoCta": "Probar Demo"
+  },
+  "interviewCopilotDemo": {
+    "session": {
+      "title": "Demostración de Interview Copilot",
+      "cta": "Comenzar Interview Copilot",
+      "createYourOwnInterviewCopilot": "Crea Tu Propio Copiloto de Entrevistas"
+    },
+    "verifyUser": {
+      "title": "Antes de que empecemos la demostración de Interview Copilot, por favor verifica que eres un humano real.",
+      "submit": "Verifica que eres humano.",
+      "submitting": "Verificando..."
+    },
+    "errors": {
+      "generic": "Lo sentimos, algo salió mal. Por favor, inténtalo de nuevo."
+    },
+    "endDialog": {
+      "title": "Demostración de Copilot para Entrevistas Completada ✅",
+      "callToAction": "Crea una cuenta en Perfect Interview para que puedas crear tu propio Interview Copilot y ¡triunfar en tu próxima entrevista!",
+      "button": "Crear una cuenta"
+    },
+    "fileUpload": {
+      "title": "Bienvenido/a a la demostración de Interview Copilot 🚀",
+      "description": "Sube tu currículum para ver cómo funciona el Copiloto de entrevistas.",
+      "helper": "Solo archivos PDF, máximo 4MB",
+      "button": "Subir currículum vitae",
+      "uploading": "Subiendo...",
+      "previewButton": "Vista previa del currículum de demostración",
+      "demoButton": "Prueba con el currículum de demostración",
+      "demoHelper": "¿No tienes un currículum a mano? Prueba la función con nuestro currículum de ejemplo.",
+      "previewModal": {
+        "title": "Vista previa del currículum de demostración",
+        "fallback": "No se puede mostrar el PDF.",
+        "openInNewTab": "Haz clic aquí para abrir en una nueva pestaña"
+      },
+      "errors": {
+        "pdfOnly": "Solo se permiten archivos PDF",
+        "fileSize": "El tamaño del archivo debe ser inferior a 4MB",
+        "uploadFailed": "Error al cargar el archivo",
+        "demoFailed": "Error al cargar el currículum de demostración."
+      }
+    },
+    "mobileWarning": {
+      "title": "La demostración de Copilot para entrevistas solo funciona en computadoras de escritorio 😬",
+      "description": "Por favor, cambia a un dispositivo de escritorio para probar la demo de Interview Copilot."
+    }
+  },
+  "userMenu": {
+    "manageSubscription": "Gestionar suscripción",
+    "appearance": "Apariencia",
+    "signOut": "Cerrar sesión"
   }
 }
