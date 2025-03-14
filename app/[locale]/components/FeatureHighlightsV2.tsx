@@ -140,14 +140,11 @@ export default function FeatureHighlight() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-1 bg-primary/20 rounded-full text-primary text-sm font-semibold mb-4">
-            {t("hero.badge")}
-          </span>
           <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-            {t("hero.title")}
+            {t("hero.titleV2")}
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            {t("hero.description")}
+            {t("hero.descriptionV2")}
           </p>
           <div className="flex justify-center gap-4 flex-col sm:flex-row">
             <Link href="/sign-in">
@@ -251,14 +248,6 @@ export default function FeatureHighlight() {
 
         {/* Feature Journey Section */}
         <div className="mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
-            <h3 className="text-4xl font-bold mb-4">{t("features.title")}</h3>
-          </motion.div>
-
           {/* Resume Builder Section */}
           <div className="mb-20 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl" />
