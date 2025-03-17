@@ -669,24 +669,28 @@ export default function ResumePreview({
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-end mb-4 gap-2 mt-1">
-        {!isEditMode && (
-          <Button
-            onClick={handleEditClick}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <Edit2 className="h-4 w-4" />
-            {t("editResume")}
-          </Button>
-        )}
-        {isEditMode && (
-          <Button
-            className="flex items-center gap-2"
-            onClick={() => handleSaveResume(resume, resumeId)}
-          >
-            <Save className="h-4 w-4" />
-            {t("saveChanges")}
-          </Button>
+        {!isTestResume && (
+          <>
+            {!isEditMode && (
+              <Button
+                onClick={handleEditClick}
+                className="flex items-center gap-2"
+                variant="outline"
+              >
+                <Edit2 className="h-4 w-4" />
+                {t("editResume")}
+              </Button>
+            )}
+            {isEditMode && (
+              <Button
+                className="flex items-center gap-2"
+                onClick={() => handleSaveResume(resume, resumeId)}
+              >
+                <Save className="h-4 w-4" />
+                {t("saveChanges")}
+              </Button>
+            )}
+          </>
         )}
         <Button
           onClick={downloadAsPdf}
