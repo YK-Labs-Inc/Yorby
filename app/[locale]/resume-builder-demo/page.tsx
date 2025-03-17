@@ -637,6 +637,9 @@ export default function ResumeBuilderDemo() {
                 resume={resume}
                 setResume={setResume}
                 resumeId={resumeId}
+                hasReachedFreemiumLimit={false}
+                isFreemiumEnabled={false}
+                isLocked={false}
               />
             </div>
           </motion.div>
