@@ -332,7 +332,7 @@ export default function ResumeBuilder({
   const router = useRouter();
   const [editCount, setEditCount] = useState<number>(0);
   const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
-  const MAX_FREE_EDITS = 3;
+  const MAX_FREE_EDITS = 2;
   const [unlockState, unlockAction, unlockPending] = useActionState(
     unlockResume,
     {
