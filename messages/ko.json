@@ -1141,7 +1141,21 @@
     },
     "demoTitle": "이력서 작성기 작동 방식 알아보기",
     "demoDescription": "샘플 이력서 중 하나로 이력서 작성기가 어떻게 작동하는지 경험해보세요.",
-    "demoCta": "데모 체험하기"
+    "demoCta": "데모 체험하기",
+    "freemium": {
+      "limitReached": {
+        "title": "무료 수정 횟수 초과 😩",
+        "description": "이력서 무료 편집 횟수를 모두 소진했습니다. 계속 편집하려면 업그레이드하세요.",
+        "descriptionNoCredits": "이력서 무료 수정 횟수를 모두 소진했습니다. 이력서를 무제한으로 수정하려면 {numberOfCredits, plural, one {최소 1크레딧} other {최소 {numberOfCredits}크레딧}}을 구매하여 잠금 해제하세요.",
+        "descriptionWithCredits": "이력서 무료 편집 횟수를 모두 소진했습니다. {numberOfCredits, plural, one {크레딧} other {크레딧}}으로 이력서를 잠금 해제하여 무제한으로 편집하세요.",
+        "cancel": "취소",
+        "upgrade": "지금 업그레이드하세요",
+        "purchaseCredits": "크레딧 구매",
+        "unlockWithCredit": "1 크레딧으로 잠금 해제 🔓",
+        "unlocking": "잠금 해제 중..."
+      },
+      "remainingEdits": "{total}번의 무료 편집 중 {remaining}번 남음"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

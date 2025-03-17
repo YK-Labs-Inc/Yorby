@@ -41,6 +41,11 @@ interface ResumePreviewProps {
   resume: ResumeDataType;
   setResume: Dispatch<SetStateAction<ResumeDataType | null>>;
   resumeId: string;
+  editCount?: number;
+  hasReachedFreemiumLimit: boolean;
+  onShowLimitDialog?: () => void;
+  isFreemiumEnabled: boolean;
+  isLocked: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -67,6 +72,10 @@ export default function ResumePreview({
   resume,
   setResume,
   resumeId,
+  onShowLimitDialog,
+  hasReachedFreemiumLimit,
+  isFreemiumEnabled,
+  isLocked,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
@@ -91,6 +100,14 @@ export default function ResumePreview({
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [loading]);
+
+  const handleEditClick = () => {
+    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
+      onShowLimitDialog?.();
+      return;
+    }
+    setIsEditMode(!isEditMode);
+  };
 
   const handleSaveResume = async (resume: ResumeDataType, resumeId: string) => {
     if (!isTestResume) {
@@ -652,24 +669,28 @@ export default function ResumePreview({
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-end mb-4 gap-2 mt-1">
-        {!isEditMode && (
-          <Button
-            onClick={() => setIsEditMode(!isEditMode)}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <Edit2 className="h-4 w-4" />
-            {t("editResume")}
-          </Button>
-        )}
-        {isEditMode && (
-          <Button
-            className="flex items-center gap-2"
-            onClick={() => handleSaveResume(resume, resumeId)}
-          >
-            <Save className="h-4 w-4" />
-            {t("saveChanges")}
-          </Button>
+        {!isTestResume && (
+          <>
+            {!isEditMode && (
+              <Button
+                onClick={handleEditClick}
+                className="flex items-center gap-2"
+                variant="outline"
+              >
+                <Edit2 className="h-4 w-4" />
+                {t("editResume")}
+              </Button>
+            )}
+            {isEditMode && (
+              <Button
+                className="flex items-center gap-2"
+                onClick={() => handleSaveResume(resume, resumeId)}
+              >
+                <Save className="h-4 w-4" />
+                {t("saveChanges")}
+              </Button>
+            )}
+          </>
         )}
         <Button
           onClick={downloadAsPdf}

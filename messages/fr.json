@@ -1141,7 +1141,21 @@
     },
     "demoTitle": "Voyez comment fonctionne le créateur de CV.",
     "demoDescription": "Découvrez comment fonctionne le créateur de CV avec l'un de nos exemples de CV.",
-    "demoCta": "Essayer la démo"
+    "demoCta": "Essayer la démo",
+    "freemium": {
+      "limitReached": {
+        "title": "Limite de modifications gratuites atteinte.",
+        "description": "Vous avez utilisé toutes vos modifications gratuites sur ce CV. Mettez à niveau pour continuer à modifier votre CV.",
+        "descriptionNoCredits": "Vous avez utilisé toutes vos modifications gratuites sur ce CV. Pour effectuer des modifications illimitées sur ce CV, veuillez acheter au moins {numberOfCredits, plural, one {credit} other {credits}} pour le déverrouiller.",
+        "descriptionWithCredits": "Vous avez utilisé toutes vos modifications gratuites sur ce CV. Débloquez le CV avec {numberOfCredits, plural, one {credit} other {credits}} pour débloquer ce CV et effectuer des modifications illimitées.",
+        "cancel": "Annuler",
+        "upgrade": "Mettre à niveau maintenant",
+        "purchaseCredits": "Acheter des crédits",
+        "unlockWithCredit": "Débloquer avec 1 crédit",
+        "unlocking": "Déverrouillage..."
+      },
+      "remainingEdits": "{remaining} modifications gratuites restantes sur {total} ✨"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

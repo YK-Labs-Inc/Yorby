@@ -1141,7 +1141,21 @@
     },
     "demoTitle": "Mira cómo funciona el creador de currículums",
     "demoDescription": "Experimenta cómo funciona el creador de currículums con uno de nuestros currículums de ejemplo.",
-    "demoCta": "Probar Demo"
+    "demoCta": "Probar Demo",
+    "freemium": {
+      "limitReached": {
+        "title": "Límite de edición gratuita alcanzado",
+        "description": "Has agotado todas tus ediciones gratuitas en este currículum. Actualiza para continuar editando tu currículum.",
+        "descriptionNoCredits": "Has agotado todas tus ediciones gratuitas en este currículum. Para realizar ediciones ilimitadas a este currículum, por favor compra al menos {numberOfCredits, plural, one {crédito} other {créditos}} para desbloquearlo.",
+        "descriptionWithCredits": "Has utilizado todas tus ediciones gratuitas en este currículum. Desbloquea el currículum con {numberOfCredits, plural, one {crédito} other {créditos}} para desbloquearlo y realizar ediciones ilimitadas.",
+        "cancel": "Cancelar",
+        "upgrade": "Actualizar Ahora",
+        "purchaseCredits": "Comprar Créditos",
+        "unlockWithCredit": "Desbloquear con 1 Crédito",
+        "unlocking": "Desbloqueando..."
+      },
+      "remainingEdits": "{quedan} {remaining} de {total} ediciones gratuitas restantes"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

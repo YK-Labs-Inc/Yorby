@@ -1141,7 +1141,21 @@
     },
     "demoTitle": "履歴書ビルダーの仕組みを見る",
     "demoDescription": "サンプル履歴書を使って、履歴書ビルダーの使い心地を体験してください。",
-    "demoCta": "デモを試す"
+    "demoCta": "デモを試す",
+    "freemium": {
+      "limitReached": {
+        "title": "無料編集制限に達しました",
+        "description": "この履歴書の無料編集可能回数を使い切りました。アップグレードして履歴書の編集を続けてください。",
+        "descriptionNoCredits": "この履歴書では無料編集可能回数を使い切りました。この履歴書を無制限に編集するには、少なくとも{numberOfCredits, plural, one {1クレジット} other {#クレジット}}をご購入いただき、ロックを解除してください。",
+        "descriptionWithCredits": "この履歴書では無料編集の上限に達しました。{numberOfCredits, plural, one {クレジット} other {クレジット}}で履歴書をアンロックすると、無制限に編集できます。",
+        "cancel": "キャンセル",
+        "upgrade": "今すぐアップグレード🚀",
+        "purchaseCredits": "クレジットを購入",
+        "unlockWithCredit": "1クレジットでアンロック🔓",
+        "unlocking": "ロック解除中..."
+      },
+      "remainingEdits": "残り{remaining}回/{total}回の無料編集が可能です。"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

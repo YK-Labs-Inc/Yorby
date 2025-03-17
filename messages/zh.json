@@ -1141,7 +1141,21 @@
     },
     "demoTitle": "了解简历制作工具的工作原理",
     "demoDescription": "体验简历制作工具如何使用，不妨试试我们的示例简历之一。",
-    "demoCta": "尝试演示 🚀"
+    "demoCta": "尝试演示 🚀",
+    "freemium": {
+      "limitReached": {
+        "title": "已达到免费编辑次数限制。",
+        "description": "您已用完所有免费简历编辑次数。升级以继续编辑您的简历。",
+        "descriptionNoCredits": "您已用完此简历的所有免费编辑次数。如需无限次编辑此简历，请购买至少 {numberOfCredits, plural, one {credit} other {credits}} 以解锁。",
+        "descriptionWithCredits": "您已用完此简历的所有免费编辑次数。使用 {numberOfCredits, plural, one {credit} other {credits}} 解锁此简历，即可进行无限次编辑。",
+        "cancel": "取消",
+        "upgrade": "立即升級 🚀",
+        "purchaseCredits": "购买积分",
+        "unlockWithCredit": "用 1 Credit 解锁",
+        "unlocking": "正在解锁..."
+      },
+      "remainingEdits": "剩余 {remaining} 个，共 {total} 个免费编辑次数 📝"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

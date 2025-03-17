@@ -627,6 +627,32 @@ export type Database = {
           },
         ]
       }
+      resume_edits: {
+        Row: {
+          created_at: string
+          id: string
+          resume_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resume_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_edits_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resume_item_descriptions: {
         Row: {
           created_at: string | null

@@ -24,7 +24,12 @@ import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { FormMessage, Message } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
-import { saveResume, unlockResume } from "../actions";
+import {
+  saveResume,
+  unlockResume,
+  trackResumeEdit,
+  getResumeEditCount,
+} from "../actions";
 import { User } from "@supabase/supabase-js";
 import { linkAnonymousAccount } from "@/components/auth/actions";
 import { SubmitButton } from "@/components/submit-button";
@@ -33,6 +38,13 @@ import { Input } from "@/components/ui/input";
 import { CoreAssistantMessage, CoreMessage } from "ai";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import * as Sentry from "@sentry/nextjs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -296,15 +308,17 @@ export default function ResumeBuilder({
   hasSubscription,
   credits,
   user,
-  resumeBuilderRequiresEmail = true,
-  isSubscriptionVariant = false,
+  resumeBuilderRequiresEmail,
+  isSubscriptionVariant,
+  isFreemiumEnabled,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
   credits: number;
   user: User | null;
-  resumeBuilderRequiresEmail?: boolean;
-  isSubscriptionVariant?: boolean;
+  resumeBuilderRequiresEmail: boolean;
+  isSubscriptionVariant: boolean;
+  isFreemiumEnabled: boolean;
 }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -316,6 +330,29 @@ export default function ResumeBuilder({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
+  const [editCount, setEditCount] = useState<number>(0);
+  const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
+  const MAX_FREE_EDITS = 2;
+  const [unlockState, unlockAction, unlockPending] = useActionState(
+    unlockResume,
+    {
+      error: "",
+    }
+  );
+
+  // Handle unlock success
+  useEffect(() => {
+    if (unlockState?.success && resumeId) {
+      setShowLimitDialog(false);
+      fetchResumeData(resumeId);
+    }
+  }, [unlockState?.success, resumeId]);
+
+  const shouldShowSplitView = resumeId || isGenerating;
+  const isLocked = Boolean(
+    resume && resume?.locked_status === "locked" && !hasSubscription
+  );
+  const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
   // Initialize the conversation with the first AI message
   useEffect(() => {
@@ -335,6 +372,13 @@ export default function ResumeBuilder({
       ]);
     }
   }, [resumeId]);
+
+  // Fetch initial edit count
+  useEffect(() => {
+    if (resumeId && isFreemiumEnabled) {
+      getResumeEditCount(resumeId).then((count) => setEditCount(count));
+    }
+  }, [resumeId, isFreemiumEnabled]);
 
   const fetchResumeData = useCallback(
     async (resumeId: string) => {
@@ -631,9 +675,18 @@ export default function ResumeBuilder({
   };
 
   const sendMessage = async () => {
+    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
+      setShowLimitDialog(true);
+      return;
+    }
+
     if (resumeId) {
       setIsGenerating(true);
       await sendEditMessage();
+      if (isFreemiumEnabled && !hasSubscription) {
+        await trackResumeEdit(resumeId);
+        setEditCount((prev) => prev + 1);
+      }
       setIsGenerating(false);
     } else {
       setIsInterviewing(true);
@@ -705,12 +758,6 @@ export default function ResumeBuilder({
       Sentry.captureException(error);
     }
   };
-
-  // Update the shouldShowSplitView logic to include isGenerating
-  const shouldShowSplitView = resumeId || isGenerating;
-  const isLocked = Boolean(
-    resume && resume?.locked_status === "locked" && !hasSubscription
-  );
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -841,7 +888,11 @@ export default function ResumeBuilder({
                       onKeyDown={handleKeyDown}
                       className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
                       rows={3}
-                      disabled={isGenerating || isInterviewing || isLocked}
+                      disabled={
+                        isGenerating ||
+                        isInterviewing ||
+                        (isLocked && !isFreemiumEnabled)
+                      }
                     />
                     <div className="flex justify-end space-x-3 px-1">
                       <Button
@@ -850,7 +901,11 @@ export default function ResumeBuilder({
                         type="button"
                         className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center"
                         onClick={handleRecordingToggle}
-                        disabled={isGenerating || isInterviewing || isLocked}
+                        disabled={
+                          isGenerating ||
+                          isInterviewing ||
+                          (isLocked && !isFreemiumEnabled)
+                        }
                       >
                         <Mic className="h-4 w-4" />
                       </Button>
@@ -863,7 +918,7 @@ export default function ResumeBuilder({
                           (!textInput.trim() && !isRecording) ||
                           isGenerating ||
                           isInterviewing ||
-                          isLocked
+                          (isLocked && !isFreemiumEnabled)
                         }
                       >
                         <Send className="h-4 w-4" />
@@ -898,7 +953,9 @@ export default function ResumeBuilder({
                   </motion.div>
                 </div>
               ) : resume && resumeId && user ? (
-                resume.locked_status === "locked" && !hasSubscription ? (
+                !isFreemiumEnabled &&
+                resume.locked_status === "locked" &&
+                !hasSubscription ? (
                   <LockedResumeOverlay
                     hasCredits={credits >= 1}
                     requiredCredits={1}
@@ -917,6 +974,11 @@ export default function ResumeBuilder({
                     loading={isGenerating}
                     setResume={setResume}
                     resumeId={resumeId}
+                    hasReachedFreemiumLimit={hasReachedFreemiumLimit}
+                    editCount={editCount}
+                    onShowLimitDialog={() => setShowLimitDialog(true)}
+                    isFreemiumEnabled={isFreemiumEnabled}
+                    isLocked={isLocked}
                   />
                 )
               ) : null}
@@ -924,6 +986,52 @@ export default function ResumeBuilder({
           </motion.div>
         )}
       </div>
+
+      {/* Add the limit reached dialog */}
+      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("freemium.limitReached.title")}</DialogTitle>
+            <DialogDescription>
+              {isSubscriptionVariant
+                ? t("freemium.limitReached.description")
+                : credits < 1
+                  ? t("freemium.limitReached.descriptionNoCredits", {
+                      numberOfCredits: 1,
+                    })
+                  : t("freemium.limitReached.descriptionWithCredits", {
+                      numberOfCredits: 1,
+                    })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
+              {t("freemium.limitReached.cancel")}
+            </Button>
+            {isSubscriptionVariant ? (
+              <Link href="/purchase">
+                <Button>{t("freemium.limitReached.upgrade")}</Button>
+              </Link>
+            ) : credits < 1 ? (
+              <Link href="/purchase">
+                <Button>{t("freemium.limitReached.purchaseCredits")}</Button>
+              </Link>
+            ) : (
+              <form action={unlockAction}>
+                <input type="hidden" name="resumeId" value={resumeId} />
+                <Button type="submit" disabled={unlockPending}>
+                  {unlockPending
+                    ? t("freemium.limitReached.unlocking")
+                    : t("freemium.limitReached.unlockWithCredit")}
+                </Button>
+              </form>
+            )}
+          </div>
+          {unlockState?.error && (
+            <FormMessage message={{ error: unlockState.error }} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

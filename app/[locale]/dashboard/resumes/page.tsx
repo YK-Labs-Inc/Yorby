@@ -12,13 +12,21 @@ export default async function ResumesPage() {
   let hasSubscription = false;
   let credits = 0;
   let isSubscriptionVariant = false;
+  let isFreemiumEnabled = false;
+  let resumeBuilderRequiresEmail = false;
   if (user) {
-    hasSubscription = await fetchHasSubscription(user.id || "");
-    credits = await fetchUserCredits(user.id || "");
+    hasSubscription = await fetchHasSubscription(user.id);
+    credits = await fetchUserCredits(user.id);
     isSubscriptionVariant =
+      (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
+      "test";
+    isFreemiumEnabled =
+      (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
+      "test";
+    resumeBuilderRequiresEmail =
       (await posthog.getFeatureFlag(
-        "subscription-price-test-1",
-        user.id || ""
+        "resume-builder-require-email",
+        user.id
       )) === "test";
   }
 
@@ -28,6 +36,8 @@ export default async function ResumesPage() {
       credits={credits}
       user={user}
       isSubscriptionVariant={isSubscriptionVariant}
+      isFreemiumEnabled={isFreemiumEnabled}
+      resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
     />
   );
 }
