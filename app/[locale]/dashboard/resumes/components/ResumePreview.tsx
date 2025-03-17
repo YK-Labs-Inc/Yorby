@@ -41,6 +41,11 @@ interface ResumePreviewProps {
   resume: ResumeDataType;
   setResume: Dispatch<SetStateAction<ResumeDataType | null>>;
   resumeId: string;
+  editCount?: number;
+  hasReachedFreemiumLimit: boolean;
+  onShowLimitDialog?: () => void;
+  isFreemiumEnabled: boolean;
+  isLocked: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -67,6 +72,10 @@ export default function ResumePreview({
   resume,
   setResume,
   resumeId,
+  onShowLimitDialog,
+  hasReachedFreemiumLimit,
+  isFreemiumEnabled,
+  isLocked,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
@@ -91,6 +100,14 @@ export default function ResumePreview({
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [loading]);
+
+  const handleEditClick = () => {
+    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
+      onShowLimitDialog?.();
+      return;
+    }
+    setIsEditMode(!isEditMode);
+  };
 
   const handleSaveResume = async (resume: ResumeDataType, resumeId: string) => {
     if (!isTestResume) {
@@ -654,7 +671,7 @@ export default function ResumePreview({
       <div className="flex justify-end mb-4 gap-2 mt-1">
         {!isEditMode && (
           <Button
-            onClick={() => setIsEditMode(!isEditMode)}
+            onClick={handleEditClick}
             className="flex items-center gap-2"
             variant="outline"
           >

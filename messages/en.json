@@ -1095,8 +1095,8 @@
       "unlockButton": "Unlock with {credits} {credits, plural, one {Credit} other {Credits}}",
       "unlocking": "Unlocking...",
       "purchaseButton": "Purchase Credits",
-      "subscriptionCTA": "Unlock Resume",
-      "subscriptionDescription": "Unlock the resume to get access to unlimited edits and updates"
+      "subscriptionCTA": "Upgrade Now",
+      "subscriptionDescription": "Upgrade to get access to unlimited edits and updates"
     },
     "form": {
       "email": {
@@ -1139,7 +1139,21 @@
     },
     "demoTitle": "See How The Resume Builder Works",
     "demoDescription": "Experience how the resume builder works with one of our sample resumes.",
-    "demoCta": "Try Demo"
+    "demoCta": "Try Demo",
+    "freemium": {
+      "limitReached": {
+        "title": "Free Edit Limit Reached",
+        "description": "You've used up all of your free edits on this resume. Upgrade to continue editing your resume.",
+        "descriptionNoCredits": "You've used up all of your free edits on this resume. To make unlimited edits to this resume, please purchase at least {numberOfCredits, plural, one {credit} other {credits}} to unlock it.",
+        "descriptionWithCredits": "You've used up all of your free edits on this resume. Unlock the resume with {numberOfCredits, plural, one {credit} other {credits}} to unlock this resume and make unlimited edits.",
+        "cancel": "Cancel",
+        "upgrade": "Upgrade Now",
+        "purchaseCredits": "Purchase Credits",
+        "unlockWithCredit": "Unlock with 1 Credit",
+        "unlocking": "Unlocking..."
+      },
+      "remainingEdits": "{remaining} of {total} free edits remaining"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

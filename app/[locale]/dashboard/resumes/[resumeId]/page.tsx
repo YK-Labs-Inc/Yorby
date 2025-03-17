@@ -44,16 +44,17 @@ export default async function ResumePage({
       </div>
     );
   }
-  const hasSubscription = await fetchHasSubscription(user?.id || "");
-  const credits = await fetchUserCredits(user?.id || "");
+  const hasSubscription = await fetchHasSubscription(user.id);
+  const credits = await fetchUserCredits(user.id);
   const resumeBuilderRequiresEmail =
     (await posthog.getFeatureFlag("resume-builder-require-email", user.id)) ===
     "test";
   const isSubscriptionVariant =
-    (await posthog.getFeatureFlag(
-      "subscription-price-test-1",
-      user.id || ""
-    )) === "test";
+    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
+    "test";
+  const isFreemiumEnabled =
+    (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
+    "test";
 
   return (
     <ResumeBuilder
@@ -63,6 +64,7 @@ export default async function ResumePage({
       user={user}
       resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
       isSubscriptionVariant={isSubscriptionVariant}
+      isFreemiumEnabled={isFreemiumEnabled}
     />
   );
 }

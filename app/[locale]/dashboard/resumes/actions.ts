@@ -368,3 +368,39 @@ export async function verifyAnonymousUser(prevState: any, formData: FormData) {
   }
   redirect("/dashboard/resumes");
 }
+
+export const trackResumeEdit = async (resumeId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("resume_edits")
+    .insert({ resume_id: resumeId });
+
+  if (error) {
+    const logger = new Logger().with({
+      function: "trackResumeEdit",
+      resumeId,
+    });
+    logger.error("Error tracking resume edit", { error });
+    await logger.flush();
+  }
+};
+
+export const getResumeEditCount = async (resumeId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { count, error } = await supabase
+    .from("resume_edits")
+    .select("*", { count: "exact", head: true })
+    .eq("resume_id", resumeId);
+
+  if (error) {
+    const logger = new Logger().with({
+      function: "trackResumeEdit",
+      resumeId,
+    });
+    logger.error("Error getting resume edit count:", { error });
+    await logger.flush();
+    return 0;
+  }
+
+  return count || 0;
+};
