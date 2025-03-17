@@ -308,17 +308,17 @@ export default function ResumeBuilder({
   hasSubscription,
   credits,
   user,
-  resumeBuilderRequiresEmail = true,
-  isSubscriptionVariant = false,
-  isFreemiumEnabled = false,
+  resumeBuilderRequiresEmail,
+  isSubscriptionVariant,
+  isFreemiumEnabled,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
   credits: number;
   user: User | null;
-  resumeBuilderRequiresEmail?: boolean;
-  isSubscriptionVariant?: boolean;
-  isFreemiumEnabled?: boolean;
+  resumeBuilderRequiresEmail: boolean;
+  isSubscriptionVariant: boolean;
+  isFreemiumEnabled: boolean;
 }) {
   const t = useTranslations("resumeBuilder");
   const [isRecording, setIsRecording] = useState<boolean>(false);
