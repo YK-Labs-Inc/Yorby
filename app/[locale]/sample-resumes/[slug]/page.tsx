@@ -28,26 +28,26 @@ type ResumeMetadata = {
 export const revalidate = 86400; // Revalidate every 24 hours
 export const dynamicParams = true;
 
-// export async function generateStaticParams() {
-//   const baseUrl =
-//     process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
-//   const posts = await fetch(`${baseUrl}/api/sample-resumes`).then(
-//     (res) =>
-//       res.json() as Promise<{
-//         data: (Tables<"resumes"> & {
-//           resume_metadata: Tables<"resume_metadata">;
-//         })[];
-//       }>
-//   );
+export async function generateStaticParams() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
+  const posts = await fetch(`${baseUrl}/api/sample-resumes`).then(
+    (res) =>
+      res.json() as Promise<{
+        data: (Tables<"resumes"> & {
+          resume_metadata: Tables<"resume_metadata">;
+        })[];
+      }>
+  );
 
-//   return posts.data.map(
-//     (
-//       post: Tables<"resumes"> & { resume_metadata: Tables<"resume_metadata"> }
-//     ) => ({
-//       slug: post.resume_metadata.slug,
-//     })
-//   );
-// }
+  return posts.data.map(
+    (
+      post: Tables<"resumes"> & { resume_metadata: Tables<"resume_metadata"> }
+    ) => ({
+      slug: post.resume_metadata.slug,
+    })
+  );
+}
 
 export default async function SamplesResumesPage({
   params,
