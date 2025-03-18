@@ -4,6 +4,24 @@ import { Tables } from "@/utils/supabase/database.types";
 import ScrollProgressBar from "../../components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@supabase/supabase-js";
+
+export async function generateStaticParams() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
+  const posts = await fetch(`${baseUrl}/api/demo-jobs`).then((res) =>
+    res.json()
+  );
+
+  return posts.data.map((post: Tables<"demo_jobs">) => ({
+    slug: post.slug,
+  }));
+}
+
+// Add this export for static generation configuration
+export const revalidate = 86400; // Revalidate every 24 hours (86400 seconds)
+
+export const dynamicParams = true;
 
 type DemoJobWithQuestions = Tables<"demo_jobs"> & {
   demo_job_questions: Tables<"demo_job_questions">[];
