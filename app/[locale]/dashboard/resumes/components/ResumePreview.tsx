@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { usePathname } from "next/navigation";
 
 interface ResumePreviewProps {
   loading: boolean;
@@ -46,6 +47,7 @@ interface ResumePreviewProps {
   onShowLimitDialog?: () => void;
   isFreemiumEnabled: boolean;
   isLocked: boolean;
+  removeMaxHeight?: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -76,6 +78,7 @@ export default function ResumePreview({
   hasReachedFreemiumLimit,
   isFreemiumEnabled,
   isLocked,
+  removeMaxHeight,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
@@ -86,6 +89,8 @@ export default function ResumePreview({
   const isTestResume = TEST_RESUME_IDS.includes(resumeId);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
+  const pathname = usePathname();
+  const isSampleResume = pathname?.includes("sample-resumes");
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -668,68 +673,72 @@ export default function ResumePreview({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-end mb-4 gap-2 mt-1">
-        {!isTestResume && (
-          <>
-            {!isEditMode && (
-              <Button
-                onClick={handleEditClick}
-                className="flex items-center gap-2"
-                variant="outline"
-              >
-                <Edit2 className="h-4 w-4" />
-                {t("editResume")}
-              </Button>
-            )}
-            {isEditMode && (
-              <Button
-                className="flex items-center gap-2"
-                onClick={() => handleSaveResume(resume, resumeId)}
-              >
-                <Save className="h-4 w-4" />
-                {t("saveChanges")}
-              </Button>
-            )}
-          </>
-        )}
-        <Button
-          onClick={downloadAsPdf}
-          disabled={downloading}
-          className="flex items-center gap-2"
-        >
-          {downloading ? (
+      {!isSampleResume && (
+        <div className="flex justify-end mb-4 gap-2 mt-1">
+          {!isTestResume && (
             <>
-              <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
-              {t("downloading")}
-            </>
-          ) : (
-            <>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              {t("downloadResume")}
+              {!isEditMode && (
+                <Button
+                  onClick={handleEditClick}
+                  className="flex items-center gap-2"
+                  variant="outline"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  {t("editResume")}
+                </Button>
+              )}
+              {isEditMode && (
+                <Button
+                  className="flex items-center gap-2"
+                  onClick={() => handleSaveResume(resume, resumeId)}
+                >
+                  <Save className="h-4 w-4" />
+                  {t("saveChanges")}
+                </Button>
+              )}
             </>
           )}
-        </Button>
-      </div>
+          <Button
+            onClick={downloadAsPdf}
+            disabled={downloading}
+            className="flex items-center gap-2"
+          >
+            {downloading ? (
+              <>
+                <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                {t("downloading")}
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                {t("downloadResume")}
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       <div
         ref={resumeRef}
         data-pdf-content
-        className="flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 max-h-[750px]"
+        className={`flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 ${
+          !removeMaxHeight ? "max-h-[750px]" : ""
+        }`}
       >
         {/* Basic Information Section */}
         {isEditMode ? (

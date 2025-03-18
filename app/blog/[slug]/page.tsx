@@ -4,8 +4,6 @@ import { Tables } from "@/utils/supabase/database.types";
 import ScrollProgressBar from "../../components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@supabase/supabase-js";
-import Image from "next/image";
 
 export async function generateStaticParams() {
   const baseUrl =

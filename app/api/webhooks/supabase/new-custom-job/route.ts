@@ -38,7 +38,7 @@ const verifyWebhookRequest = (request: Request): boolean => {
 
 export const POST = async (request: AxiomRequest) => {
   const logger = request.log.with({
-    route: "webhooks/supabase/new-custom-job",
+    path: "/api/webhooks/supabase/new-custom-job",
   });
 
   try {
