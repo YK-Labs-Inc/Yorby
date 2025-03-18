@@ -255,9 +255,10 @@ export default async function BlogPage({
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const demoJob = await getDemoJobBySlug(params.slug);
+  const { slug } = await params;
+  const demoJob = await getDemoJobBySlug(slug);
 
   if (!demoJob) {
     return {
