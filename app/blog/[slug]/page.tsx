@@ -4,6 +4,31 @@ import { Tables } from "@/utils/supabase/database.types";
 import ScrollProgressBar from "../../components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@supabase/supabase-js";
+
+export async function generateStaticParams() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  );
+  const { data: posts, error } = await supabase
+    .from("demo_jobs")
+    .select("slug");
+
+  if (error) {
+    console.error("Error fetching slugs:", error);
+    return [];
+  }
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
+// Add this export for static generation configuration
+export const revalidate = 86400; // Revalidate every 24 hours (86400 seconds)
+
+export const dynamicParams = true;
 
 type DemoJobWithQuestions = Tables<"demo_jobs"> & {
   demo_job_questions: Tables<"demo_job_questions">[];
