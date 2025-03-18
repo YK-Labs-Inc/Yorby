@@ -11,18 +11,17 @@ export default function SampleResume({
   resumeId: string;
 }) {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <ResumePreview
-          loading={false}
-          resume={resumeData}
-          setResume={() => {}}
-          resumeId={resumeId}
-          hasReachedFreemiumLimit={false}
-          isFreemiumEnabled={false}
-          isLocked={true}
-        />
-      </div>
+    <div className="w-full">
+      <ResumePreview
+        loading={false}
+        resume={resumeData}
+        setResume={() => {}}
+        resumeId={resumeId}
+        hasReachedFreemiumLimit={false}
+        isFreemiumEnabled={false}
+        isLocked={true}
+        removeMaxHeight={true}
+      />
     </div>
   );
 }

@@ -47,6 +47,7 @@ interface ResumePreviewProps {
   onShowLimitDialog?: () => void;
   isFreemiumEnabled: boolean;
   isLocked: boolean;
+  removeMaxHeight?: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -77,6 +78,7 @@ export default function ResumePreview({
   hasReachedFreemiumLimit,
   isFreemiumEnabled,
   isLocked,
+  removeMaxHeight,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [downloading, setDownloading] = useState<boolean>(false);
@@ -734,7 +736,9 @@ export default function ResumePreview({
       <div
         ref={resumeRef}
         data-pdf-content
-        className="flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 max-h-[750px]"
+        className={`flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 ${
+          !removeMaxHeight ? "max-h-[750px]" : ""
+        }`}
       >
         {/* Basic Information Section */}
         {isEditMode ? (
