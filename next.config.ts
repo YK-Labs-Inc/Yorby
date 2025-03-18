@@ -7,69 +7,6 @@ const withNextIntl = createNextIntlPlugin();
 const isProduction = process.env.NODE_ENV === "production";
 
 let nextConfig = {
-  rewrites: async () => {
-    return {
-      beforeFiles: [
-        {
-          source: "/blog",
-          destination: "https://perfectinterview.feather.blog/blog",
-        },
-        {
-          source: "/blog/:path*",
-          destination: "https://perfectinterview.feather.blog/blog/:path*",
-        },
-        {
-          source: "/_feather",
-          destination: "https://perfectinterview.feather.blog/_feather",
-        },
-        {
-          source: "/_feather/:path*",
-          destination: "https://perfectinterview.feather.blog/_feather/:path*",
-        },
-      ],
-    };
-  },
-  headers: async () => {
-    return [
-      {
-        source: "/blog",
-        headers: [
-          {
-            key: "X-Forwarded-Host",
-            value: "www.perfectinterview.ai",
-          },
-        ],
-      },
-      {
-        source: "/blog/:slug*",
-        headers: [
-          {
-            key: "X-Forwarded-Host",
-            value: "www.perfectinterview.ai",
-          },
-        ],
-      },
-      {
-        source: "/_feather",
-        headers: [
-          {
-            key: "X-Forwarded-Host",
-            value: "www.perfectinterview.ai",
-          },
-        ],
-      },
-
-      {
-        source: "/_feather/:slug*",
-        headers: [
-          {
-            key: "X-Forwarded-Host",
-            value: "www.perfectinterview.ai",
-          },
-        ],
-      },
-    ];
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",

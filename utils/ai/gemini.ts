@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "../supabase/server";
 type BaseParams = {
   systemPrompt?: string;
   loggingContext?: Record<string, any>;
+  enableLogging?: boolean;
 };
 
 type MessagesOnlyParams = BaseParams & {
@@ -36,6 +37,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
   systemPrompt,
   schema,
   loggingContext = {},
+  enableLogging = true,
 }: GenerateObjectParams<T>): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
   const supabase = await createSupabaseServerClient();
@@ -56,7 +58,11 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
     });
     await logger.flush();
     const jsonResponse = result.object;
-    logger.with({ jsonResponse }).info("Primary model completed successfully");
+    if (enableLogging) {
+      logger
+        .with({ jsonResponse })
+        .info("Primary model completed successfully");
+    }
     return jsonResponse;
   } catch (error) {
     logger.error(`Primary model failed, trying fallback model`, {
@@ -75,13 +81,16 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
         system: systemPrompt,
         schema,
       });
-
-      logger.info("Fallback model completed successfully");
+      if (enableLogging) {
+        logger.info("Fallback model completed successfully");
+      }
       await logger.flush();
       const jsonResponse = result.object;
-      logger
-        .with({ jsonResponse })
-        .info("Fallback model completed successfully");
+      if (enableLogging) {
+        logger
+          .with({ jsonResponse })
+          .info("Fallback model completed successfully");
+      }
       return jsonResponse;
     } catch (fallbackError) {
       logger.error("Both primary and fallback models failed", {
