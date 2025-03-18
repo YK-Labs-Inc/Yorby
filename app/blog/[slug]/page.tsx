@@ -6,9 +6,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export async function generateStaticParams() {
-  const posts = await fetch("/api/demo-jobs").then((res) => res.json());
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
+  const posts = await fetch(`${baseUrl}/api/demo-jobs`).then((res) =>
+    res.json()
+  );
 
-  return posts.map((post: Tables<"demo_jobs">) => ({
+  return posts.data.map((post: Tables<"demo_jobs">) => ({
     slug: post.slug,
   }));
 }
