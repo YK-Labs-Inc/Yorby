@@ -7,20 +7,13 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@supabase/supabase-js";
 
 export async function generateStaticParams() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
+  const posts = await fetch(`${baseUrl}/api/demo-jobs`).then((res) =>
+    res.json()
   );
-  const { data: posts, error } = await supabase
-    .from("demo_jobs")
-    .select("slug");
 
-  if (error) {
-    console.error("Error fetching slugs:", error);
-    return [];
-  }
-
-  return posts.map((post) => ({
+  return posts.data.map((post: Tables<"demo_jobs">) => ({
     slug: post.slug,
   }));
 }
