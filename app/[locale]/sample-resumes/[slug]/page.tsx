@@ -7,35 +7,14 @@ import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 
-type ResumeMetadata = {
-  id: string;
-  slug: string;
-  resumes: {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-    location: string | null;
-    resume_sections: any[];
-    created_at: string;
-    updated_at: string;
-    user_id: string;
-    title: string;
-    summary: string | null;
-  };
-};
-
 export const revalidate = 86400; // Revalidate every 24 hours
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
-  const posts = await fetch(`${baseUrl}/api/sample-resumes`).then(
-    (res) =>
-      res.json() as Promise<{
-        data: Tables<"resume_metadata">[];
-      }>
+  const posts = await fetch(`${baseUrl}/api/sample-resumes`).then((res) =>
+    res.json()
   );
 
   return posts.data.map((post: Tables<"resume_metadata">) => ({
@@ -51,7 +30,7 @@ export default async function SamplesResumesPage({
   const { slug } = await params;
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = (await supabase
+  const { data, error } = await supabase
     .from("resume_metadata")
     .select(
       `*,
@@ -69,7 +48,7 @@ export default async function SamplesResumesPage({
       `
     )
     .eq("slug", slug)
-    .single()) as { data: ResumeMetadata | null; error: any };
+    .single();
 
   if (error) {
     throw new Error(error.message);
@@ -400,7 +379,7 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data, error } = (await supabase
+  const { data, error } = await supabase
     .from("resume_metadata")
     .select(
       `*,
@@ -410,7 +389,7 @@ export async function generateMetadata({
       `
     )
     .eq("slug", slug)
-    .single()) as { data: ResumeMetadata | null; error: any };
+    .single();
 
   if (error || !data?.resumes) {
     return {
