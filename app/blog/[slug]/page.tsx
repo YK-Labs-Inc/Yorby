@@ -51,9 +51,10 @@ async function getDemoJobBySlug(
 export default async function BlogPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const demoJob = await getDemoJobBySlug(params.slug);
+  const { slug } = await params;
+  const demoJob = await getDemoJobBySlug(slug);
 
   if (!demoJob) {
     notFound();
