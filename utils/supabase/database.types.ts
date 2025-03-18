@@ -290,6 +290,7 @@ export type Database = {
           answer_guidelines: string
           created_at: string
           custom_job_id: string
+          good_answers: string[] | null
           id: string
           question: string
         }
@@ -297,6 +298,7 @@ export type Database = {
           answer_guidelines: string
           created_at?: string
           custom_job_id: string
+          good_answers?: string[] | null
           id?: string
           question: string
         }
@@ -304,6 +306,7 @@ export type Database = {
           answer_guidelines?: string
           created_at?: string
           custom_job_id?: string
+          good_answers?: string[] | null
           id?: string
           question?: string
         }
@@ -325,6 +328,7 @@ export type Database = {
           id: string
           job_description: string
           job_title: string
+          slug: string | null
         }
         Insert: {
           company_description?: string | null
@@ -333,6 +337,7 @@ export type Database = {
           id?: string
           job_description: string
           job_title: string
+          slug?: string | null
         }
         Update: {
           company_description?: string | null
@@ -341,6 +346,7 @@ export type Database = {
           id?: string
           job_description?: string
           job_title?: string
+          slug?: string | null
         }
         Relationships: []
       }
@@ -719,6 +725,47 @@ export type Database = {
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "resume_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_metadata: {
+        Row: {
+          company_description: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          job_description: string
+          job_title: string
+          resume_id: string
+          slug: string | null
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description: string
+          job_title: string
+          resume_id: string
+          slug?: string | null
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          job_description?: string
+          job_title?: string
+          resume_id?: string
+          slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_metadata_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
             referencedColumns: ["id"]
           },
         ]
