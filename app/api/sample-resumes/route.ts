@@ -1,26 +1,64 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { Tables } from "@/utils/supabase/database.types";
 
-export async function GET() {
+const PAGE_SIZE = 500;
+
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createSupabaseServerClient();
 
-    const { data, error } = await supabase
-      .from("resumes")
-      .select("*, resume_metadata(*)")
-      .eq("user_id", "7823eb9a-62fc-4bbf-bd58-488f117c24e8");
+    // First, get the total count
+    const { count, error: countError } = await supabase
+      .from("resume_metadata")
+      .select("*", { count: "exact", head: true });
 
-    if (error) {
+    if (countError) {
+      console.error("Error getting count:", countError);
       return NextResponse.json(
         { error: "Failed to fetch sample resumes" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ data });
+    if (!count) {
+      return NextResponse.json({ data: [] });
+    }
+
+    // Calculate number of pages needed
+    const totalPages = Math.ceil(count / PAGE_SIZE);
+    const allSampleResumes: Tables<"resume_metadata">[] = [];
+
+    // Fetch all pages
+    for (let page = 0; page < totalPages; page++) {
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data: sampleResumes, error } = await supabase
+        .from("resume_metadata")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        console.error(`Error fetching page ${page + 1}:`, error);
+        return NextResponse.json(
+          { error: "Failed to fetch sample resumes" },
+          { status: 500 }
+        );
+      }
+
+      allSampleResumes.push(...sampleResumes);
+    }
+
+    return NextResponse.json({
+      data: allSampleResumes,
+      totalCount: count,
+    });
   } catch (error) {
+    console.error("Unexpected error:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

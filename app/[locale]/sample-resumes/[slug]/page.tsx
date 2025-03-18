@@ -25,8 +25,8 @@ type ResumeMetadata = {
   };
 };
 
-export const revalidate = 86400; // Revalidate every 24 hours
-export const dynamicParams = true;
+// export const revalidate = 86400; // Revalidate every 24 hours
+// export const dynamicParams = true;
 
 // export async function generateStaticParams() {
 //   const baseUrl =
@@ -34,19 +34,13 @@ export const dynamicParams = true;
 //   const posts = await fetch(`${baseUrl}/api/sample-resumes`).then(
 //     (res) =>
 //       res.json() as Promise<{
-//         data: (Tables<"resumes"> & {
-//           resume_metadata: Tables<"resume_metadata">;
-//         })[];
+//         data: Tables<"resume_metadata">[];
 //       }>
 //   );
 
-//   return posts.data.map(
-//     (
-//       post: Tables<"resumes"> & { resume_metadata: Tables<"resume_metadata"> }
-//     ) => ({
-//       slug: post.resume_metadata.slug,
-//     })
-//   );
+//   return posts.data.map((post: Tables<"resume_metadata">) => ({
+//     slug: post.slug,
+//   }));
 // }
 
 export default async function SamplesResumesPage({
