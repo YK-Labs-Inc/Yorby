@@ -330,6 +330,7 @@ export default function ResumeBuilder({
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const [editCount, setEditCount] = useState<number>(0);
@@ -695,6 +696,8 @@ export default function ResumeBuilder({
       await sendInterviewMessage();
       setIsInterviewing(false);
     }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    textareaRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -903,6 +906,7 @@ export default function ResumeBuilder({
                 ) : (
                   <div className="relative transition-all duration-300 hover:transform hover:scale-[1.01] p-4">
                     <Textarea
+                      ref={textareaRef}
                       placeholder={t("typeYourResponse")}
                       value={textInput}
                       onChange={handleTextInputChange}
