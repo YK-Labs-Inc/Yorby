@@ -11,8 +11,8 @@ if (typeof window !== "undefined") {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_API_HOST,
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     person_profiles: "always",
-    capture_pageview: false, // Disable automatic pageview capture, as we capture manually
-    autocapture: false,
+    capture_pageview: true, // Disable automatic pageview capture, as we capture manually
+    autocapture: true,
     capture_pageleave: true,
   });
 }

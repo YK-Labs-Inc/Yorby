@@ -1155,7 +1155,10 @@
         "unlocking": "잠금 해제 중..."
       },
       "remainingEdits": "{total}번의 무료 편집 중 {remaining}번 남음"
-    }
+    },
+    "titleV2": "자기 자신에 대해 조금만 이야기해주세요.",
+    "descriptionV2": "저희가 완벽하게 맞춤화된 이력서를 만들어 드릴게요.",
+    "voice": "목소리"
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1206,5 +1209,34 @@
     "manageSubscription": "구독 관리",
     "appearance": "외모",
     "signOut": "로그아웃"
+  },
+  "landingPageV4": {
+    "title": "어떻게 하면 당신이 직업을 구할 수 있도록 도울 수 있을까요?",
+    "options": {
+      "resume": {
+        "id": "이력서",
+        "title": "이력서 만들기",
+        "description": {
+          "line1": "몇 분 안에 완벽하게 포맷된 이력서를 만드세요.",
+          "line2": "저희 AI 어시스턴트에게 말씀만 하시면, 나머지는 저희가 알아서 처리해 드립니다."
+        }
+      },
+      "interview": {
+        "id": "인터뷰",
+        "title": "면접 준비 📝",
+        "description": {
+          "line1": "면접 보시는 직무와 이전 직무 경험에 대해 말씀해 주시면 맞춤형 면접 질문을 만들어 드립니다. 😊",
+          "line2": "준비가 되면 AI 면접관과 모의 면접을 통해 실제와 같은 면접 연습을 할 수 있습니다."
+        }
+      },
+      "assistant": {
+        "id": "조수",
+        "title": "인터뷰 Copilot",
+        "description": {
+          "line1": "인터뷰 코파일럿은 인터뷰 내용을 듣고 실시간으로 질문에 답변할 수 있도록 도와줍니다.",
+          "line2": "면접에서 모든 질문에 답을 할 수 있도록 준비하세요."
+        }
+      }
+    }
   }
 }

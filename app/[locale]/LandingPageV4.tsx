@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Users, MessageSquare } from "lucide-react";
 import ResumeBuilder from "./dashboard/resumes/components/ResumeBuilder";
+import { InterviewCopilotCreationForm } from "./dashboard/interview-copilots/InterviewCopilotCreationForm";
+import JobCreationComponent from "./JobCreationComponent";
+import { useTranslations } from "next-intl";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LandingPageV4({
   user,
@@ -19,28 +23,53 @@ export default function LandingPageV4({
   isFreemiumEnabled: boolean;
   resumeBuilderRequiresEmail: boolean;
 }) {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    searchParams.get("option")
+  );
+  const t = useTranslations("landingPageV4");
+
+  const updateOption = (optionId: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("option", optionId);
+    router.push(`?${params.toString()}`);
+    setSelectedOption(optionId);
+  };
+
+  // Update selected option when URL changes
+  useEffect(() => {
+    const option = searchParams.get("option");
+    setSelectedOption(option);
+  }, [searchParams]);
 
   const options = [
     {
-      id: "resume",
-      title: "Craft Your Resume",
+      id: t("options.resume.id"),
+      title: t("options.resume.title"),
       icon: FileText,
-      description: "Build a professional resume in minutes",
+      description: [
+        t("options.resume.description.line1"),
+        t("options.resume.description.line2"),
+      ],
     },
     {
-      id: "interview",
-      title: "Prep For Your Interview",
+      id: t("options.interview.id"),
+      title: t("options.interview.title"),
       icon: Users,
-      description:
-        "Go through mock interviews with our AI interviewer and get feedback on your performance",
+      description: [
+        t("options.interview.description.line1"),
+        t("options.interview.description.line2"),
+      ],
     },
     {
-      id: "assistant",
-      title: "Crush Your Interview",
+      id: t("options.assistant.id"),
+      title: t("options.assistant.title"),
       icon: MessageSquare,
-      description:
-        "Our Interview Copilot listens in on your interview and helps you answer questions",
+      description: [
+        t("options.assistant.description.line1"),
+        t("options.assistant.description.line2"),
+      ],
     },
   ];
 
@@ -56,24 +85,32 @@ export default function LandingPageV4({
         resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
       />
     );
+  } else if (selectedOption === "interview") {
+    return (
+      <div className="p-4">
+        <JobCreationComponent />{" "}
+      </div>
+    );
+  } else if (selectedOption === "assistant") {
+    return (
+      <div className="p-4">
+        <InterviewCopilotCreationForm />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-white">
       <main className="container mx-auto px-4 py-16">
         <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
-          I'm an assistant whose only goal is to help you land a job.
+          {t("title")}
         </h1>
-
-        <h2 className="text-2xl md:text-3xl text-center text-gray-600 mt-8 mb-16">
-          How can I help?
-        </h2>
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {options.map((option) => (
             <button
               key={option.id}
-              onClick={() => setSelectedOption(option.id)}
+              onClick={() => updateOption(option.id)}
               className={`
                 p-6 rounded-xl border-2 transition-all duration-200
                 ${
@@ -87,7 +124,11 @@ export default function LandingPageV4({
               <h3 className="text-xl font-semibold mb-2 text-gray-900">
                 {option.title}
               </h3>
-              <p className="text-gray-600">{option.description}</p>
+              {option.description.map((description: string, index: number) => (
+                <p key={index} className="text-gray-600 mb-2">
+                  {description}
+                </p>
+              ))}
             </button>
           ))}
         </div>
