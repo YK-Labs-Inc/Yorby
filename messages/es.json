@@ -1155,7 +1155,10 @@
         "unlocking": "Desbloqueando..."
       },
       "remainingEdits": "{quedan} {remaining} de {total} ediciones gratuitas restantes"
-    }
+    },
+    "titleV2": "Cuéntanos un poco sobre ti 😊",
+    "descriptionV2": "Y crearemos un currículum personalizado y perfectamente formateado para ti.",
+    "voice": "Voz"
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1206,5 +1209,34 @@
     "manageSubscription": "Gestionar suscripción",
     "appearance": "Apariencia",
     "signOut": "Cerrar sesión"
+  },
+  "landingPageV4": {
+    "title": "¿Cómo podemos ayudarte a conseguir un trabajo?",
+    "options": {
+      "resume": {
+        "id": "currículum vitae",
+        "title": "Crear un Currículum Vitae",
+        "description": {
+          "line1": "Crea un currículum perfectamente formateado en minutos.",
+          "line2": "Simplemente habla con nuestro asistente de IA y nosotros nos encargaremos del resto."
+        }
+      },
+      "interview": {
+        "id": "entrevista",
+        "title": "Prepárate Para Tu Entrevista",
+        "description": {
+          "line1": "Cuéntanos sobre el trabajo para el que te entrevistan + tu experiencia laboral previa, y crearemos un conjunto personalizado de preguntas para la entrevista.",
+          "line2": "Cuando estés listo/a, puedes hacer entrevistas simuladas con nuestro entrevistador de IA para obtener práctica de entrevista realista."
+        }
+      },
+      "assistant": {
+        "id": "asistente",
+        "title": "Copiloto de Entrevistas",
+        "description": {
+          "line1": "Nuestro Copiloto de Entrevistas escucha en tu entrevista y te ayuda a responder preguntas en tiempo real.",
+          "line2": "Ten una respuesta para cada pregunta en la entrevista."
+        }
+      }
+    }
   }
 }

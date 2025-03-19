@@ -1155,7 +1155,10 @@
         "unlocking": "Déverrouillage..."
       },
       "remainingEdits": "{remaining} modifications gratuites restantes sur {total} ✨"
-    }
+    },
+    "titleV2": "Parlez-nous un peu de vous 😊",
+    "descriptionV2": "Et nous créerons un CV personnalisé parfaitement mis en forme pour vous.",
+    "voice": "Voix"
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1206,5 +1209,34 @@
     "manageSubscription": "Gérer l'abonnement",
     "appearance": "Apparence",
     "signOut": "Déconnexion"
+  },
+  "landingPageV4": {
+    "title": "Comment pouvons-nous vous aider à trouver un emploi ?",
+    "options": {
+      "resume": {
+        "id": "CV",
+        "title": "Créer un CV",
+        "description": {
+          "line1": "Créez un CV parfaitement formaté en quelques minutes.",
+          "line2": "Parlez simplement à notre assistant IA, et nous nous occupons du reste."
+        }
+      },
+      "interview": {
+        "id": "Entretien",
+        "title": "Préparez votre entretien d'embauche 💼",
+        "description": {
+          "line1": "Parlez-nous du poste pour lequel vous passez un entretien + votre expérience professionnelle antérieure, et nous créerons un ensemble personnalisé de questions d'entretien pour vous.",
+          "line2": "Quand vous êtes prêt(e), vous pouvez faire des entretiens blancs avec notre intervieweur IA pour vous entraîner à des entretiens réalistes."
+        }
+      },
+      "assistant": {
+        "id": "assistant",
+        "title": "Entrevue Copilot",
+        "description": {
+          "line1": "Notre copilote d'entretien écoute votre entretien et vous aide à répondre aux questions en temps réel.",
+          "line2": "Ayez une réponse à chaque question de l'entretien."
+        }
+      }
+    }
   }
 }

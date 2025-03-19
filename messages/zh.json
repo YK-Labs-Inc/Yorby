@@ -1155,7 +1155,10 @@
         "unlocking": "正在解锁..."
       },
       "remainingEdits": "剩余 {remaining} 个，共 {total} 个免费编辑次数 📝"
-    }
+    },
+    "titleV2": "请简单介绍一下你自己。",
+    "descriptionV2": "我们会为您打造一份格式完美的定制简历。",
+    "voice": "声音 (shēng yīn)"
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1206,5 +1209,34 @@
     "manageSubscription": "管理订阅",
     "appearance": "外貌",
     "signOut": "登出"
+  },
+  "landingPageV4": {
+    "title": "我们能怎样帮你找到工作？",
+    "options": {
+      "resume": {
+        "id": "简历",
+        "title": "打造简历",
+        "description": {
+          "line1": "几分钟内打造完美格式的简历。",
+          "line2": "只需和我们的AI助手聊聊，剩下的交给我们就好啦。"
+        }
+      },
+      "interview": {
+        "id": "面试",
+        "title": "为你的面试做准备 💼",
+        "description": {
+          "line1": "请告诉我们您面试的职位 + 您的过往工作经验，我们会为您量身定制一套面试问题。",
+          "line2": "准备好后，你可以和我们的AI面试官进行模拟面试，获得真实的面试练习。"
+        }
+      },
+      "assistant": {
+        "id": "助理",
+        "title": "面试 Copilot",
+        "description": {
+          "line1": "我们的面试副驾驶会在面试时监听，并实时帮助您回答问题。",
+          "line2": "对面试中的每个问题都有答案。"
+        }
+      }
+    }
   }
 }
