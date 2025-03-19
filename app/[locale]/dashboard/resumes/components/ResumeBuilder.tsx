@@ -47,7 +47,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Turnstile } from "@marsidev/react-turnstile";
-import path from "path";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -346,10 +345,10 @@ export default function ResumeBuilder({
   );
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
+  console.log("pathname", pathname);
   const isChatToResumePage = pathname.includes("/chat-to-resume");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
-  console.log("error", error);
   // Handle unlock success
   useEffect(() => {
     if (unlockState?.success && resumeId) {
@@ -448,18 +447,6 @@ export default function ResumeBuilder({
     },
     [resumeId]
   );
-
-  console.log("user", user);
-
-  useEffect(() => {
-    if (messages.length > 1 && !user && captchaToken) {
-      const formData = new FormData();
-      formData.set("captchaToken", captchaToken);
-      formData.set("currentPath", pathname);
-      console.log("verifying new user");
-      verifyAnonymousUser(formData);
-    }
-  }, [messages, user, captchaToken]);
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
@@ -715,6 +702,13 @@ export default function ResumeBuilder({
       await sendInterviewMessage();
       setIsInterviewing(false);
     }
+
+    if (!user && captchaToken) {
+      const formData = new FormData();
+      formData.set("captchaToken", captchaToken);
+      formData.set("currentPath", pathname);
+      verifyAnonymousUser(formData);
+    }
     await new Promise((resolve) => setTimeout(resolve, 500));
     textareaRef.current?.focus();
   };
@@ -842,14 +836,16 @@ export default function ResumeBuilder({
           }`}
         >
           {/* Title Section */}
-          <div className="flex-none mb-4 space-y-1">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-center">
-              {t("titleV2")}
-            </h1>
-            <p className="text-lg text-gray-500 dark:text-gray-400 text-center">
-              {t("descriptionV2")}
-            </p>
-          </div>
+          {!shouldShowSplitView && (
+            <div className="flex-none mb-4 space-y-1">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-center">
+                {t("titleV2")}
+              </h1>
+              <p className="text-lg text-gray-500 dark:text-gray-400 text-center">
+                {t("descriptionV2")}
+              </p>
+            </div>
+          )}
 
           <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
             {/* Chat messages */}
@@ -944,18 +940,19 @@ export default function ResumeBuilder({
                     />
                     <div className="flex justify-end space-x-3 px-1">
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant={"secondary"}
                         type="button"
-                        className="h-9 w-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center"
+                        className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
                         onClick={handleRecordingToggle}
                         disabled={
                           isGenerating ||
                           isInterviewing ||
-                          (isLocked && !isFreemiumEnabled)
+                          (isLocked && !isFreemiumEnabled) ||
+                          (!user && !captchaToken)
                         }
                       >
                         <Mic className="h-4 w-4" />
+                        {t("voice")}
                       </Button>
                       <Button
                         type="button"

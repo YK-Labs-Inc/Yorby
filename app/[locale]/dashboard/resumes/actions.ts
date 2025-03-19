@@ -351,7 +351,6 @@ export async function verifyAnonymousUser(formData: FormData) {
     function: "verifyAnonymousUser",
     captchaToken,
   });
-  // try {
   const { data, error } = await supabase.auth.signInAnonymously({
     options: {
       captchaToken,
