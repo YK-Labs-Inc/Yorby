@@ -353,7 +353,7 @@ export default function ResumeBuilder({
   const [_, startTransition] = useTransition();
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
-  const isChatToResumePage = pathname.includes("/chat-to-resume");
+  const showDemoCTA = pathname.includes("/dashboard/resumes");
 
   // Handle unlock success
   useEffect(() => {
@@ -787,50 +787,47 @@ export default function ResumeBuilder({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {!resume &&
-        messages.length === 1 &&
-        !isDemoDismissed &&
-        !isChatToResumePage && (
-          <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
-            <CardContent className="px-6 py-8 relative">
-              <button
-                onClick={() => setIsDemoDismissed(true)}
-                className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Close demo card"
+      {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
+        <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+          <CardContent className="px-6 py-8 relative">
+            <button
+              onClick={() => setIsDemoDismissed(true)}
+              className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Close demo card"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-foreground">
-                    {t("demoTitle")}
-                  </h2>
-                  <p className="text-muted-foreground max-w-lg">
-                    {t("demoDescription")}
-                  </p>
-                </div>
-                <Link href="/resume-builder-demo" className="shrink-0">
-                  <Button size="lg" className="gap-2">
-                    <PlayCircle className="w-5 h-5" />
-                    {t("demoCta")}
-                  </Button>
-                </Link>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("demoTitle")}
+                </h2>
+                <p className="text-muted-foreground max-w-lg">
+                  {t("demoDescription")}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <Link href="/resume-builder-demo" className="shrink-0">
+                <Button size="lg" className="gap-2">
+                  <PlayCircle className="w-5 h-5" />
+                  {t("demoCta")}
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {verifyAnonymousUserState?.error && (
         <FormMessage message={{ error: verifyAnonymousUserState.error }} />
       )}

@@ -13,6 +13,7 @@ import { useTransition } from "react";
 import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
 import { handleSignOut } from "./actions";
 import { useTranslations } from "next-intl";
+import { usePostHog } from "posthog-js/react";
 
 interface UserMenuProps {
   email: string;
@@ -22,6 +23,7 @@ interface UserMenuProps {
 export function UserMenu({ email, hasSubscription }: UserMenuProps) {
   const [_, startTransition] = useTransition();
   const t = useTranslations("userMenu");
+  const posthog = usePostHog();
 
   const handleManageSubscription = () => {
     startTransition(async () => {
@@ -49,7 +51,12 @@ export function UserMenu({ email, hasSubscription }: UserMenuProps) {
             <DropdownMenuSeparator />
           </>
         )}
-        <form action={handleSignOut}>
+        <form
+          action={(data) => {
+            handleSignOut(data);
+            posthog.reset();
+          }}
+        >
           <DropdownMenuItem asChild>
             <Button variant="ghost" className="w-full" type="submit">
               {t("signOut")}
