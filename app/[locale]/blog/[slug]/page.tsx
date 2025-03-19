@@ -1,9 +1,9 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { notFound } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
-import ScrollProgressBar from "../../components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import ScrollProgressBar from "@/app/components/ScrollProgressBar";
 
 export async function generateStaticParams() {
   const baseUrl =
