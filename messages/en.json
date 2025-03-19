@@ -1207,5 +1207,34 @@
     "manageSubscription": "Manage Subscription",
     "appearance": "Appearance",
     "signOut": "Sign Out"
+  },
+  "landingPageV4": {
+    "title": "How can we help you get a job?",
+    "options": {
+      "resume": {
+        "id": "resume",
+        "title": "Build a Resume",
+        "description": {
+          "line1": "Buid a perfectly formatted resume in minutes.",
+          "line2": "Just talk to our AI assistant, and we'll take care of the rest."
+        }
+      },
+      "interview": {
+        "id": "interview",
+        "title": "Prep For Your Interview",
+        "description": {
+          "line1": "Tell us about the job you're interviewing for + your previous work experience, and we'll create a personalized set of interview questions for you.",
+          "line2": "When you're ready, you can do mock interviews with our AI interviewer to get realistic interview practice."
+        }
+      },
+      "assistant": {
+        "id": "assistant",
+        "title": "Interview Copilot",
+        "description": {
+          "line1": "Our Interview Copilot listens in on your interview and helps you answer questions in real-time.",
+          "line2": "Have an answer for every question in the interview."
+      }
+      }
+    }
   }
 }
