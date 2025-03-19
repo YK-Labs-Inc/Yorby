@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { encodedRedirect } from "@/utils/utils";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
