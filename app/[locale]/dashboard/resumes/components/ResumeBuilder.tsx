@@ -6,6 +6,7 @@ import {
   useRef,
   useActionState,
   useCallback,
+  useTransition,
 } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -343,12 +344,17 @@ export default function ResumeBuilder({
       error: "",
     }
   );
+  const [verifyAnonymousUserState, verifyAnonymousUserAction] = useActionState(
+    verifyAnonymousUser,
+    {
+      error: "",
+    }
+  );
+  const [_, startTransition] = useTransition();
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
-  console.log("pathname", pathname);
   const isChatToResumePage = pathname.includes("/chat-to-resume");
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
+
   // Handle unlock success
   useEffect(() => {
     if (unlockState?.success && resumeId) {
@@ -707,7 +713,9 @@ export default function ResumeBuilder({
       const formData = new FormData();
       formData.set("captchaToken", captchaToken);
       formData.set("currentPath", pathname);
-      verifyAnonymousUser(formData);
+      startTransition(() => {
+        verifyAnonymousUserAction(formData);
+      });
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
     textareaRef.current?.focus();
@@ -823,7 +831,9 @@ export default function ResumeBuilder({
             </CardContent>
           </Card>
         )}
-      {error && <FormMessage message={{ error }} />}
+      {verifyAnonymousUserState?.error && (
+        <FormMessage message={{ error: verifyAnonymousUserState.error }} />
+      )}
       <div
         className={`flex-1 grid ${
           shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"

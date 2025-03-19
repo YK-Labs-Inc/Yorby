@@ -342,7 +342,7 @@ export const fetchResume = async (resumeId: string) => {
   return resumeData;
 };
 
-export async function verifyAnonymousUser(formData: FormData) {
+export async function verifyAnonymousUser(prevState: any, formData: FormData) {
   const captchaToken = formData.get("captchaToken") as string;
   const currentPath = formData.get("currentPath") as string;
   const supabase = await createSupabaseServerClient();
@@ -360,7 +360,7 @@ export async function verifyAnonymousUser(formData: FormData) {
   if (error || !data) {
     logger.error("Error verifying anonymous user", { error });
     await logger.flush();
-    redirect(`${currentPath}?error=${encodeURIComponent(t("errors.generic"))}`);
+    return { error: t("errors.generic") };
   } else {
     revalidatePath(currentPath);
   }
