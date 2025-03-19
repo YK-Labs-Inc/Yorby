@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export async function saveResumeServerAction(
   prevState: { error?: string },
@@ -343,30 +344,26 @@ export const fetchResume = async (resumeId: string) => {
 
 export async function verifyAnonymousUser(prevState: any, formData: FormData) {
   const captchaToken = formData.get("captchaToken") as string;
+  const currentPath = formData.get("currentPath") as string;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("resumeBuilder");
   const logger = new Logger().with({
     function: "verifyAnonymousUser",
     captchaToken,
   });
-  try {
-    const { data, error } = await supabase.auth.signInAnonymously({
-      options: {
-        captchaToken,
-      },
-    });
+  const { data, error } = await supabase.auth.signInAnonymously({
+    options: {
+      captchaToken,
+    },
+  });
 
-    if (error || !data) {
-      logger.error("Error verifying anonymous user", { error });
-      await logger.flush();
-      return { error: t("errors.generic") };
-    }
-  } catch (error) {
+  if (error || !data) {
     logger.error("Error verifying anonymous user", { error });
     await logger.flush();
     return { error: t("errors.generic") };
+  } else {
+    revalidatePath(currentPath);
   }
-  redirect("/dashboard/resumes");
 }
 
 export const trackResumeEdit = async (resumeId: string) => {

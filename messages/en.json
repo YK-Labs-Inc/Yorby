@@ -986,7 +986,9 @@
   },
   "resumeBuilder": {
     "title": "Chat To Resume",
+    "titleV2": "Tell us a little bit about yourself",
     "description": "I'll help you build a professional resume by asking you a series of questions. Just answer in conversational style, and I'll take care of formatting your resume.",
+    "descriptionV2": "And we'll create a perfectly formatted custom resume for you",
     "landingPage": {
       "title": "You Yap. We'll Build Your Resume.",
       "description": "Talk to our AI assistant, tell us a little bit about yourself, and we'll create a perfectly formatted custom resume for you.",
@@ -1153,7 +1155,8 @@
         "unlocking": "Unlocking..."
       },
       "remainingEdits": "{remaining} of {total} free edits remaining"
-    }
+    },
+    "voice": "Voice"
   },
   "interviewCopilotDemo": {
     "session": {

@@ -156,7 +156,7 @@ export function AppSidebar({
               </SidebarGroup>
             )}
 
-            {isResumeBuilderEnabled && (
+            {resumes.length > 0 && (
               <SidebarGroup className="mt-6">
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">
