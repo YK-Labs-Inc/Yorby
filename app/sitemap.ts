@@ -12,27 +12,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const allSampleResumes = await fetchAllSampleResumes();
 
     // Create sitemap entries
-    const blogEntries = allDemoJobs.map((job) => ({
+    const blogEntries: MetadataRoute.Sitemap = allDemoJobs.map((job) => ({
       url: `${baseUrl}/blog/${job.slug}`,
       lastModified: new Date().toISOString(),
-      changeFrequency: "weekly" as const,
+      changeFrequency: "weekly",
       priority: 0.7,
     }));
 
-    const sampleResumesEntries = allSampleResumes.map((resume) => ({
-      url: `${baseUrl}/en/sample-resumes/${resume.slug}`,
-      lastModified: new Date().toISOString(),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
+    const sampleResumesEntries: MetadataRoute.Sitemap = allSampleResumes.map(
+      (resume) => ({
+        url: `${baseUrl}/en/sample-resumes/${resume.slug}`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      })
+    );
 
     // Add other important pages
-    const staticPages = [
+    const staticPages: MetadataRoute.Sitemap = [
       {
         url: baseUrl,
         lastModified: new Date().toISOString(),
-        changeFrequency: "daily" as const,
+        changeFrequency: "daily",
         priority: 1.0,
+      },
+      {
+        url: `${baseUrl}/blog`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: "daily",
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/en/sample-resumes`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: "daily",
+        priority: 0.8,
       },
     ];
 
