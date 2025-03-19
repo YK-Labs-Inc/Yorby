@@ -6,7 +6,6 @@ import {
   useRef,
   useActionState,
   useCallback,
-  ReactNode,
 } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { FormMessage, Message } from "@/components/form-message";
@@ -30,6 +29,7 @@ import {
   unlockResume,
   trackResumeEdit,
   getResumeEditCount,
+  verifyAnonymousUser,
 } from "../actions";
 import { User } from "@supabase/supabase-js";
 import { linkAnonymousAccount } from "@/components/auth/actions";
@@ -46,6 +46,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Turnstile } from "@marsidev/react-turnstile";
+import path from "path";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -342,7 +344,12 @@ export default function ResumeBuilder({
       error: "",
     }
   );
-
+  const [captchaToken, setCaptchaToken] = useState<string>("");
+  const pathname = usePathname();
+  const isChatToResumePage = pathname.includes("/chat-to-resume");
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  console.log("error", error);
   // Handle unlock success
   useEffect(() => {
     if (unlockState?.success && resumeId) {
@@ -441,6 +448,18 @@ export default function ResumeBuilder({
     },
     [resumeId]
   );
+
+  console.log("user", user);
+
+  useEffect(() => {
+    if (messages.length > 1 && !user && captchaToken) {
+      const formData = new FormData();
+      formData.set("captchaToken", captchaToken);
+      formData.set("currentPath", pathname);
+      console.log("verifying new user");
+      verifyAnonymousUser(formData);
+    }
+  }, [messages, user, captchaToken]);
 
   useEffect(() => {
     // If resumeId is provided, fetch the resume data
@@ -766,47 +785,51 @@ export default function ResumeBuilder({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {!resume && messages.length === 1 && !isDemoDismissed && (
-        <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
-          <CardContent className="px-6 py-8 relative">
-            <button
-              onClick={() => setIsDemoDismissed(true)}
-              className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Close demo card"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+      {!resume &&
+        messages.length === 1 &&
+        !isDemoDismissed &&
+        !isChatToResumePage && (
+          <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+            <CardContent className="px-6 py-8 relative">
+              <button
+                onClick={() => setIsDemoDismissed(true)}
+                className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Close demo card"
               >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-foreground">
-                  {t("demoTitle")}
-                </h2>
-                <p className="text-muted-foreground max-w-lg">
-                  {t("demoDescription")}
-                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {t("demoTitle")}
+                  </h2>
+                  <p className="text-muted-foreground max-w-lg">
+                    {t("demoDescription")}
+                  </p>
+                </div>
+                <Link href="/resume-builder-demo" className="shrink-0">
+                  <Button size="lg" className="gap-2">
+                    <PlayCircle className="w-5 h-5" />
+                    {t("demoCta")}
+                  </Button>
+                </Link>
               </div>
-              <Link href="/resume-builder-demo" className="shrink-0">
-                <Button size="lg" className="gap-2">
-                  <PlayCircle className="w-5 h-5" />
-                  {t("demoCta")}
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      {error && <FormMessage message={{ error }} />}
       <div
         className={`flex-1 grid ${
           shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
@@ -820,11 +843,11 @@ export default function ResumeBuilder({
         >
           {/* Title Section */}
           <div className="flex-none mb-4 space-y-1">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              {t("title")}
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-center">
+              {t("titleV2")}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t("description")}
+            <p className="text-lg text-gray-500 dark:text-gray-400 text-center">
+              {t("descriptionV2")}
             </p>
           </div>
 
@@ -943,7 +966,8 @@ export default function ResumeBuilder({
                           (!textInput.trim() && !isRecording) ||
                           isGenerating ||
                           isInterviewing ||
-                          (isLocked && !isFreemiumEnabled)
+                          (isLocked && !isFreemiumEnabled) ||
+                          (!user && !captchaToken)
                         }
                       >
                         <Send className="h-4 w-4" />
@@ -954,6 +978,16 @@ export default function ResumeBuilder({
               </AnimatePresence>
             </div>
           </Card>
+          {!user && (
+            <div className="flex justify-center mt-4">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={(token) => {
+                  setCaptchaToken(token);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Resume preview column - shown when resume exists or generating */}
