@@ -57,7 +57,8 @@ export function AppSidebar({
   const authError = searchParams.get("authError");
   const authSuccess = searchParams.get("authSuccess");
   const pathname = usePathname();
-  const hideSidebar = pathname.includes("sample-resumes");
+  const hideSidebar =
+    pathname.includes("sample-resumes") || pathname.includes("blog");
 
   useEffect(() => {
     if (authError || authSuccess) {

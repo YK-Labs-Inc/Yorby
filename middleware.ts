@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 export const config = {
   matcher: [
     // Skip static files, API routes, sitemaps and blog
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|blog|_feather|ingest|_axiom|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|m4a|mp4|mp3)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|_feather|ingest|_axiom|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|m4a|mp4|mp3)$).*)",
     // Language paths remain unchanged
     "/(en)/:path*",
   ],
