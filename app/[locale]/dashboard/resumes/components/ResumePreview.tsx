@@ -18,7 +18,14 @@ import {
 } from "lucide-react";
 import { saveResume } from "../actions";
 import React from "react";
-import html2pdf from "html2pdf.js";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  PDFDownloadLink,
+} from "@react-pdf/renderer";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import {
   Card,
@@ -68,6 +75,120 @@ const TEST_RESUME_IDS = [
   "4cbdd2c8-a96b-4d3c-bd32-d9b89d924153",
   "0d4a08c1-4054-4c45-b12f-500081499cad",
 ];
+
+// Add PDF styles after imports
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontFamily: "Helvetica",
+  },
+  header: {
+    marginBottom: 20,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  contactInfo: {
+    fontSize: 10,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    borderBottom: 1,
+    paddingBottom: 3,
+  },
+  detailItem: {
+    marginBottom: 8,
+  },
+  detailTitle: {
+    fontSize: 11,
+    fontWeight: "bold",
+  },
+  detailSubtitle: {
+    fontSize: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 2,
+  },
+  bulletPoint: {
+    fontSize: 10,
+    marginLeft: 15,
+    marginTop: 2,
+  },
+  listItem: {
+    fontSize: 10,
+    marginLeft: 5,
+    marginTop: 2,
+  },
+});
+
+// Add ResumePDF component after styles
+const ResumePDF = ({ resume }: { resume: ResumeDataType }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.name}>{resume.name}</Text>
+        <View style={styles.contactInfo}>
+          {resume.email && <Text>{resume.email}</Text>}
+          {resume.phone && <Text>• {resume.phone}</Text>}
+          {resume.location && <Text>• {resume.location}</Text>}
+        </View>
+      </View>
+
+      {resume.resume_sections.map((section, index) => (
+        <View key={index} style={styles.section}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+
+          {section.resume_list_items.length > 0 ? (
+            <View>
+              {section.resume_list_items.map((item, itemIndex) => (
+                <Text key={itemIndex} style={styles.listItem}>
+                  • {item.content}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <View>
+              {section.resume_detail_items.map((item, itemIndex) => (
+                <View key={itemIndex} style={styles.detailItem}>
+                  {item.title && (
+                    <Text style={styles.detailTitle}>{item.title}</Text>
+                  )}
+                  {(item.subtitle || item.date_range) && (
+                    <View style={styles.detailSubtitle}>
+                      {item.subtitle && <Text>{item.subtitle}</Text>}
+                      {item.date_range && <Text>{item.date_range}</Text>}
+                    </View>
+                  )}
+                  {item.resume_item_descriptions && (
+                    <View>
+                      {item.resume_item_descriptions.map(
+                        (point, pointIndex) => (
+                          <Text key={pointIndex} style={styles.bulletPoint}>
+                            • {point.description}
+                          </Text>
+                        )
+                      )}
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      ))}
+    </Page>
+  </Document>
+);
 
 export default function ResumePreview({
   loading,
@@ -126,98 +247,13 @@ export default function ResumePreview({
     setIsEditMode(false);
   };
 
-  const downloadAsPdf = async () => {
-    if (!resume || !resumeRef.current) return;
-
+  const downloadAsPdf = () => {
+    if (!resume) return;
     setDownloading(true);
-    try {
-      // Force light mode for PDF generation
-      const currentTheme = document.documentElement.classList.contains("dark");
-      if (currentTheme) {
-        document.documentElement.classList.remove("dark");
-      }
 
-      // Clone the resume div to avoid modifying the actual DOM
-      const element = resumeRef.current.cloneNode(true) as HTMLElement;
-
-      // Remove any buttons or interactive elements from the clone
-      element.querySelectorAll("button").forEach((button) => button.remove());
-
-      // Set white background explicitly and optimize for PDF generation
-      element.style.backgroundColor = "white";
-      element.style.border = "none";
-      element.style.padding = "10px 10px 20px 10px";
-      // A4 size in mm (210mm x 297mm), accounting for margins
-      element.style.width = "190mm";
-      element.style.margin = "auto";
-      element.style.minHeight = "297mm";
-      element.style.height = "fit-content";
-      element.style.position = "relative";
-      element.style.maxWidth = "100%";
-      element.style.wordWrap = "break-word";
-
-      // Configure pdf options
-      const opt = {
-        margin: [10, 10, 20, 10],
-        filename: `${resume.name.replace(/\s+/g, "_")}_Resume.pdf`,
-        image: { type: "jpeg", quality: 1 },
-        html2canvas: {
-          scale: 4,
-          useCORS: true,
-          letterRendering: true,
-          scrollY: 0,
-          windowWidth: element.scrollWidth,
-          windowHeight: element.scrollHeight + 40,
-          logging: false,
-          removeContainer: true,
-          onclone: (clonedDoc: Document) => {
-            const clonedElement = clonedDoc.querySelector(
-              "[data-pdf-content]"
-            ) as HTMLElement;
-            if (clonedElement) {
-              clonedElement.style.height = "auto";
-              clonedElement.style.overflow = "visible";
-              clonedElement.style.width = "190mm";
-              clonedElement.style.margin = "auto";
-              clonedElement.style.maxWidth = "100%";
-              clonedElement.style.wordWrap = "break-word";
-              clonedElement.style.padding = "10px 10px 20px 10px";
-            }
-          },
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "a4",
-          orientation: "portrait",
-          compress: true,
-          putOnlyUsedFonts: true,
-          precision: 16,
-          floatPrecision: 16,
-          hotfixes: ["px_scaling"],
-        },
-        pagebreak: {
-          mode: ["avoid-all", "css", "legacy"],
-          before: ".page-break",
-          avoid: ["tr", "td", ".description-item"],
-          after: [".avoid-break-after"],
-          allowTags: ["DIV", "P", "LI", "UL"],
-        },
-      };
-
-      // Generate PDF with page numbers
-      const worker = html2pdf();
-      worker.from(element).set(opt).save();
-
-      // Restore dark mode if it was enabled
-      if (currentTheme) {
-        document.documentElement.classList.add("dark");
-      }
-    } catch (error) {
-      logError("Error generating PDF", { error });
-      alert(t("downloadError"));
-    } finally {
-      setDownloading(false);
-    }
+    // The download will be handled by PDFDownloadLink
+    // This function is now just for setting the downloading state
+    setTimeout(() => setDownloading(false), 100);
   };
 
   const updateBasicInfo = (field: keyof ResumeDataType, value: string) => {
@@ -698,38 +734,44 @@ export default function ResumePreview({
               )}
             </>
           )}
-          <Button
-            onClick={downloadAsPdf}
-            disabled={downloading}
-            className="flex items-center gap-2"
+          <PDFDownloadLink
+            document={<ResumePDF resume={resume} />}
+            fileName={`${resume.name.replace(/\s+/g, "_")}_Resume.pdf`}
           >
-            {downloading ? (
-              <>
-                <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
-                {t("downloading")}
-              </>
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                {t("downloadResume")}
-              </>
+            {({ loading }: { loading: boolean }) => (
+              <Button
+                disabled={loading || downloading}
+                className="flex items-center gap-2"
+              >
+                {loading || downloading ? (
+                  <>
+                    <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                    {t("downloading")}
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    {t("downloadResume")}
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
+          </PDFDownloadLink>
         </div>
       )}
 
