@@ -34,42 +34,44 @@ export default async function InterviewCopilotsPage() {
   const userCredits = await fetchUserCredits(user.id);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Demo Section */}
-      <Card className="mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
-        <CardContent className="px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-foreground">
-                {t("demo.title")}
-              </h2>
-              <p className="text-muted-foreground max-w-lg">
-                {t("demo.description")}
-              </p>
+    <div className="min-h-screen pb-16">
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Demo Section */}
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+          <CardContent className="px-6 py-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("demo.title")}
+                </h2>
+                <p className="text-muted-foreground max-w-lg">
+                  {t("demo.description")}
+                </p>
+              </div>
+              <Link href="/interview-copilot-demo" className="shrink-0">
+                <Button size="lg" className="gap-2">
+                  <PlayCircle className="w-5 h-5" />
+                  {t("demo.button")}
+                </Button>
+              </Link>
             </div>
-            <Link href="/interview-copilot-demo" className="shrink-0">
-              <Button size="lg" className="gap-2">
-                <PlayCircle className="w-5 h-5" />
-                {t("demo.button")}
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Creation Form Section */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t("createNew.title")}</h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          {t("credits.subtitle", { credits: userCredits })}
-        </p>
+        {/* Creation Form Section */}
+        <div>
+          <h1 className="text-3xl font-bold">{t("createNew.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            {t("credits.subtitle", { credits: userCredits })}
+          </p>
+        </div>
+
+        <Card>
+          <CardContent className="px-4 py-6">
+            <InterviewCopilotCreationForm />
+          </CardContent>
+        </Card>
       </div>
-
-      <Card>
-        <CardContent className="px-2 py-4">
-          <InterviewCopilotCreationForm />
-        </CardContent>
-      </Card>
     </div>
   );
 }

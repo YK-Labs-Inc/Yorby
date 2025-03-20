@@ -48,6 +48,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Turnstile } from "@marsidev/react-turnstile";
+import MobileWarning from "./MobileWarning";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -59,43 +60,21 @@ export type ResumeDataType = Tables<"resumes"> & {
 };
 
 const LockedResumeOverlay = ({
-  hasCredits,
-  requiredCredits,
   resumeId,
-  onUnlock,
   resume,
-  resumeBuilderRequiresEmail,
   user,
-  isSubscriptionVariant,
 }: {
-  hasCredits: boolean;
-  requiredCredits: number;
   resumeId: string;
-  onUnlock: (resumeId: string) => void;
   resume: ResumeDataType;
-  resumeBuilderRequiresEmail: boolean;
   user: User;
-  isSubscriptionVariant: boolean;
 }) => {
   const t = useTranslations("resumeBuilder");
-  const [unlockState, unlockAction, unlockPending] = useActionState(
-    unlockResume,
-    { error: "" }
-  );
   const [
     linkAnonymousAccountState,
     linkAnonymousAccountAction,
     linkAnonymousAccountPending,
   ] = useActionState(linkAnonymousAccount, { error: "" });
 
-  useEffect(() => {
-    if (unlockState?.success) {
-      onUnlock(resumeId);
-    }
-  }, [unlockState?.success]);
-
-  const firstSection = resume.resume_sections[0];
-  const showEmailForm = resumeBuilderRequiresEmail && !user.email;
   let linkAnonymousAccountMessage: Message | undefined;
   if (linkAnonymousAccountState?.error) {
     linkAnonymousAccountMessage = { error: linkAnonymousAccountState.error };
@@ -107,117 +86,6 @@ const LockedResumeOverlay = ({
 
   return (
     <div className="relative flex-grow overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border h-full">
-      {/* Preview Section */}
-      <div className="absolute inset-0">
-        <div className="p-6">
-          {/* Contact Information */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {resume.name}
-            </h1>
-            <div className="flex flex-wrap gap-2 text-sm mt-1 text-gray-600 dark:text-gray-300">
-              {resume.email && <span>{resume.email}</span>}
-              {resume.phone && <span>• {resume.phone}</span>}
-              {resume.location && <span>• {resume.location}</span>}
-            </div>
-          </div>
-
-          {/* First Section Preview */}
-          {firstSection && (
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold border-b pb-1 mb-2 text-gray-900 dark:text-white">
-                {firstSection.title}
-              </h2>
-              {firstSection.resume_list_items.length > 0 ? (
-                <div className="flex flex-col flex-wrap gap-0.5">
-                  {firstSection.resume_list_items
-                    .slice(0, 3)
-                    .map((skill, index) => (
-                      <span
-                        key={index}
-                        className="text-sm px-2 text-gray-600 dark:text-gray-300"
-                      >
-                        {skill.content}
-                      </span>
-                    ))}
-                  {firstSection.resume_list_items.length > 3 && (
-                    <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      ...
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {firstSection.resume_detail_items
-                    .slice(0, 1)
-                    .map((item, index) => (
-                      <div key={index} className="text-sm">
-                        {item.title && (
-                          <div className="font-medium text-gray-800 dark:text-gray-200">
-                            {item.title}
-                          </div>
-                        )}
-                        {item.subtitle && (
-                          <div className="flex justify-between text-gray-600 dark:text-gray-300">
-                            <div>{item.subtitle}</div>
-                            {item.date_range && <div>{item.date_range}</div>}
-                          </div>
-                        )}
-                        {item.resume_item_descriptions &&
-                          item.resume_item_descriptions.length > 0 && (
-                            <div className="mt-1">
-                              <ul className="space-y-1">
-                                {item.resume_item_descriptions
-                                  .slice(0, 2)
-                                  .map((point, pointIndex) => (
-                                    <li
-                                      key={pointIndex}
-                                      className="flex items-center text-gray-600 dark:text-gray-300 before:content-['•'] before:mr-2 pl-0 list-none"
-                                    >
-                                      {point.description}
-                                    </li>
-                                  ))}
-                                {item.resume_item_descriptions.length > 2 && (
-                                  <li className="text-sm text-gray-500 dark:text-gray-400">
-                                    ...
-                                  </li>
-                                )}
-                              </ul>
-                            </div>
-                          )}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Gradient Overlay - Adjusted to start fading earlier */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white/95 dark:via-gray-800/70 dark:to-gray-800/95 pointer-events-none"
-          style={{
-            background: `linear-gradient(to bottom, 
-                 transparent 0%, 
-                 rgba(255, 255, 255, 0.7) 40%, 
-                 rgba(255, 255, 255, 0.95) 70%
-               )`,
-            backgroundColor: "transparent",
-          }}
-        />
-
-        {/* Blur Overlay - Adjusted to align with gradient */}
-        <div
-          className="absolute inset-0 bg-white/30 dark:bg-gray-800/30 backdrop-blur-[2px] pointer-events-none"
-          style={{
-            maskImage: "linear-gradient(to bottom, transparent 30%, black 70%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 30%, black 70%)",
-          }}
-        />
-      </div>
-
-      {/* Lock UI */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="p-6 flex flex-col items-center justify-center space-y-6 text-center max-w-md">
           <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center backdrop-blur-md">
@@ -228,78 +96,40 @@ const LockedResumeOverlay = ({
               {t("locked.title")}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              {showEmailForm
-                ? t("locked.descriptionEmailForm")
-                : isSubscriptionVariant
-                  ? t("locked.subscriptionDescription")
-                  : hasCredits
-                    ? t("locked.descriptionWithCredits", {
-                        credits: requiredCredits,
-                      })
-                    : t("locked.descriptionNoCredits", {
-                        credits: requiredCredits,
-                      })}
+              {t("locked.descriptionEmailForm")}
             </p>
           </div>
-          {showEmailForm ? (
-            <div className="md mx-auto w-full text-left">
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-                <h2 className="text-lg font-semibold mb-2">
-                  {t("form.title")}
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  {t("form.description")}
-                </p>
-                <form action={linkAnonymousAccountAction} className="space-y-4">
-                  <Label htmlFor="email">{t("form.email.label")}</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder={t("form.email.placeholder")}
-                    required
-                  />
-                  <input
-                    type="hidden"
-                    name="redirectTo"
-                    value={`/dashboard/resumes/${resumeId}`}
-                  />
-                  <SubmitButton disabled={linkAnonymousAccountPending}>
-                    {linkAnonymousAccountPending
-                      ? t("form.pending")
-                      : t("form.submit")}
-                  </SubmitButton>
-                </form>
-              </div>
-              {linkAnonymousAccountMessage && (
-                <FormMessage message={linkAnonymousAccountMessage} />
-              )}
+          <div className="md mx-auto w-full text-left">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+              <h2 className="text-lg font-semibold mb-2">{t("form.title")}</h2>
+              <p className="text-muted-foreground mb-6">
+                {t("form.description")}
+              </p>
+              <form action={linkAnonymousAccountAction} className="space-y-4">
+                <Label htmlFor="email">{t("form.email.label")}</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder={t("form.email.placeholder")}
+                  required
+                />
+                <input
+                  type="hidden"
+                  name="redirectTo"
+                  value={`/dashboard/resumes/${resumeId}`}
+                />
+                <SubmitButton disabled={linkAnonymousAccountPending}>
+                  {linkAnonymousAccountPending
+                    ? t("form.pending")
+                    : t("form.submit")}
+                </SubmitButton>
+              </form>
             </div>
-          ) : (
-            <>
-              {isSubscriptionVariant ? (
-                <Link href="/purchase">
-                  <Button>{t("locked.subscriptionCTA")}</Button>
-                </Link>
-              ) : hasCredits ? (
-                <form action={unlockAction}>
-                  <input type="hidden" name="resumeId" value={resumeId} />
-                  <Button type="submit" disabled={unlockPending}>
-                    {unlockPending
-                      ? t("locked.unlocking")
-                      : t("locked.unlockButton", { credits: requiredCredits })}
-                  </Button>
-                </form>
-              ) : (
-                <Link href="/purchase">
-                  <Button>{t("locked.purchaseButton")}</Button>
-                </Link>
-              )}
-              {unlockState?.error && (
-                <FormMessage message={{ error: unlockState.error }} />
-              )}
-            </>
-          )}
+            {linkAnonymousAccountMessage && (
+              <FormMessage message={linkAnonymousAccountMessage} />
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -324,7 +154,8 @@ export default function ResumeBuilder({
   isFreemiumEnabled: boolean;
 }) {
   const t = useTranslations("resumeBuilder");
-  const [isDemoDismissed, setIsDemoDismissed] = useState(false);
+  const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [textInput, setTextInput] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -354,6 +185,22 @@ export default function ResumeBuilder({
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileView = window.innerWidth < 768; // 768px is the standard md breakpoint
+      setIsMobileView(isMobileView);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener("resize", checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Handle unlock success
   useEffect(() => {
@@ -785,8 +632,17 @@ export default function ResumeBuilder({
     }
   };
 
+  // If user is not anonymous (has email) and is on mobile, only show mobile warning
+  if (isMobileView && user && !user.is_anonymous) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        <MobileWarning />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
         <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
           <CardContent className="px-6 py-8 relative">
@@ -838,9 +694,9 @@ export default function ResumeBuilder({
       >
         {/* Chat UI column - always shown */}
         <div
-          className={`m-1 flex flex-col h-full overflow-hidden ${
+          className={`md:flex flex-col h-full overflow-hidden ${
             shouldShowSplitView ? "" : "lg:col-span-2 max-w-3xl mx-auto w-full"
-          }`}
+          } ${user?.is_anonymous ? "hidden" : ""}`}
         >
           {/* Title Section */}
           {!shouldShowSplitView && (
@@ -1016,20 +872,11 @@ export default function ResumeBuilder({
                   </motion.div>
                 </div>
               ) : resume && resumeId && user ? (
-                !isFreemiumEnabled &&
-                resume.locked_status === "locked" &&
-                !hasSubscription ? (
+                user.is_anonymous ? (
                   <LockedResumeOverlay
-                    hasCredits={credits >= 1}
-                    requiredCredits={1}
                     resumeId={resumeId}
-                    onUnlock={() => {
-                      fetchResumeData(resumeId);
-                    }}
                     resume={resume}
-                    resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
                     user={user}
-                    isSubscriptionVariant={isSubscriptionVariant}
                   />
                 ) : (
                   <ResumePreview

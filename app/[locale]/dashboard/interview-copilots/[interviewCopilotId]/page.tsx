@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "@/app/[locale]/dashboard/jobs/[jobId]/actions";
 import PostHogClient from "@/app/posthog";
+import MobileWarning from "./MobileWarning";
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -175,15 +176,20 @@ export default async function Page({
           </div>
         ) : (
           <>
-            {isLocked ? (
-              <LockedInterviewCopilotComponent
-                interviewCopilot={interviewCopilot}
-                userCredits={userCredits}
-                isSubscriptionVariant={isSubscriptionVariant}
-              />
-            ) : (
-              <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
-            )}
+            <div className="hidden md:block">
+              {isLocked ? (
+                <LockedInterviewCopilotComponent
+                  interviewCopilot={interviewCopilot}
+                  userCredits={userCredits}
+                  isSubscriptionVariant={isSubscriptionVariant}
+                />
+              ) : (
+                <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
+              )}
+            </div>
+            <div className="block md:hidden">
+              <MobileWarning />
+            </div>
           </>
         )}
       </div>
