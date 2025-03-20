@@ -642,7 +642,7 @@ export default function ResumeBuilder({
   }
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
         <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
           <CardContent className="px-6 py-8 relative">
