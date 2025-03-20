@@ -1158,7 +1158,12 @@
     },
     "titleV2": "Parlez-nous un peu de vous 😊",
     "descriptionV2": "Et nous créerons un CV personnalisé parfaitement mis en forme pour vous.",
-    "voice": "Voix"
+    "voice": "Voix",
+    "mobileWarning": {
+      "title": "Expérience Bureau Recommandée",
+      "description": "Pour une expérience optimale de création de CV, nous vous recommandons d'utiliser un ordinateur de bureau. Notre outil de création de CV possède des fonctionnalités de mise en forme avancées qui fonctionnent mieux sur des écrans plus grands.",
+      "button": "Continue quand même"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

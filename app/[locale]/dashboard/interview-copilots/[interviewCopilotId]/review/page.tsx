@@ -3,6 +3,7 @@ import InterviewCopilotReviewClientComponent from "./InterviewCopilotReviewClien
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import MobileWarning from "../MobileWarning";
 
 const fetchInterviewCopilotStatus = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -70,11 +71,16 @@ export default async function ReviewPage({
   const data = await fetchInterviewCopilotData(interviewCopilotId);
 
   return (
-    <div className="container mx-auto py-6">
-      <InterviewCopilotReviewClientComponent
-        questionsAndAnswers={data.questionsAndAnswers}
-        recordingUrl={data.recordingUrl ?? ""}
-      />
-    </div>
+    <>
+      <div className="container mx-auto py-6 md:hidden min-h-screen flex justify-center items-center">
+        <MobileWarning />
+      </div>
+      <div className="container mx-auto py-6 hidden md:block">
+        <InterviewCopilotReviewClientComponent
+          questionsAndAnswers={data.questionsAndAnswers}
+          recordingUrl={data.recordingUrl ?? ""}
+        />
+      </div>
+    </>
   );
 }

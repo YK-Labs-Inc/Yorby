@@ -1158,7 +1158,12 @@
     },
     "titleV2": "请简单介绍一下你自己。",
     "descriptionV2": "我们会为您打造一份格式完美的定制简历。",
-    "voice": "声音 (shēng yīn)"
+    "voice": "声音 (shēng yīn)",
+    "mobileWarning": {
+      "title": "推荐桌面体验 💻",
+      "description": "为了获得最佳的简历制作体验，我们建议您使用台式电脑。我们的简历制作工具拥有高级格式设置功能，在大屏幕上效果最佳。",
+      "button": "繼續前進吧 🚀"
+    }
   },
   "interviewCopilotDemo": {
     "session": {
