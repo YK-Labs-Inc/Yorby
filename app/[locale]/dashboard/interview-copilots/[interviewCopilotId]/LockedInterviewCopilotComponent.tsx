@@ -40,7 +40,7 @@ export default function LockedInterviewCopilotComponent({
   const [showDialog, setShowDialog] = React.useState(false);
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
@@ -199,6 +199,6 @@ export default function LockedInterviewCopilotComponent({
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

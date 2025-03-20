@@ -91,11 +91,6 @@ export default async function Page({
   }
 
   const posthog = PostHogClient();
-  const isAnonymousAccountLinkingEnabled =
-    (await posthog.getFeatureFlag(
-      "optional-anonymous-account-linking",
-      user.id
-    )) === "control";
 
   if (interviewCopilot?.status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
@@ -142,7 +137,7 @@ export default async function Page({
       <div
         className={`max-w-4xl mx-auto space-y-8 ${isAnonymous ? "h-full md:h-auto" : ""}`}
       >
-        {isAnonymous && isAnonymousAccountLinkingEnabled ? (
+        {isAnonymous ? (
           <div className="md mx-auto w-full">
             {(!formMessage || "error" in formMessage) && (
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
