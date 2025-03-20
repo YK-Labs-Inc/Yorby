@@ -16,7 +16,7 @@ import {
   ReactNode,
   FunctionComponent,
 } from "react";
-
+import { useAxiomLogging } from "./AxiomLoggingContext";
 interface DeepgramContextType {
   connection: LiveClient | null;
   connectToDeepgram: (options: LiveSchema, endpoint?: string) => Promise<void>;
@@ -47,6 +47,7 @@ const DeepgramContextProvider: FunctionComponent<
   const [connectionState, setConnectionState] = useState<SOCKET_STATES>(
     SOCKET_STATES.closed
   );
+  const { logError } = useAxiomLogging();
 
   /**
    * Connects to the Deepgram speech recognition service and sets up a live transcription session.
@@ -68,6 +69,13 @@ const DeepgramContextProvider: FunctionComponent<
 
       conn.addListener(LiveTranscriptionEvents.Close, () => {
         setConnectionState(SOCKET_STATES.closed);
+      });
+
+      conn.addListener(LiveTranscriptionEvents.Error, (error) => {
+        logError("Deepgram error", {
+          error,
+        });
+        alert("Sorry, something went wrong. Please try again.");
       });
 
       setConnection(conn);
