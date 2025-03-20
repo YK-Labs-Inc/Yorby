@@ -1158,7 +1158,12 @@
     },
     "titleV2": "Cuéntanos un poco sobre ti 😊",
     "descriptionV2": "Y crearemos un currículum personalizado y perfectamente formateado para ti.",
-    "voice": "Voz"
+    "voice": "Voz",
+    "mobileWarning": {
+      "title": "Experiencia de escritorio recomendada",
+      "description": "Para la mejor experiencia de creación de currículums, recomendamos usar una computadora de escritorio. Nuestro creador de currículums tiene funciones de formato avanzadas que funcionan mejor en pantallas más grandes.",
+      "button": "Continuar de todas formas"
+    }
   },
   "interviewCopilotDemo": {
     "session": {
