@@ -4,20 +4,48 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+declare global {
+  interface Window {
+    fbq: any;
+  }
+}
+
 interface RedirectMessageProps {
   success: boolean;
   redirectPath: string;
+  sessionData?: {
+    isSubscription: boolean;
+    amount: number;
+    currency: string;
+    contentIds: string[];
+  };
 }
 
 export default function RedirectMessage({
   success,
   redirectPath,
+  sessionData,
 }: RedirectMessageProps) {
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
   const t = useTranslations("purchase");
 
   useEffect(() => {
+    // Track purchase event only on successful purchase
+    if (success && sessionData && typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", "Purchase", {
+        currency: sessionData.currency,
+        value: sessionData.amount,
+        content_ids: sessionData.contentIds,
+      });
+      if (sessionData.isSubscription) {
+        window.fbq("track", "Subscribe", {
+          currency: sessionData.currency,
+          value: sessionData.amount,
+          content_ids: sessionData.contentIds,
+        });
+      }
+    }
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -30,7 +58,7 @@ export default function RedirectMessage({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router, redirectPath]);
+  }, [router, redirectPath, success, sessionData]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

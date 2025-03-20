@@ -19,7 +19,9 @@ export default async function PurchaseConfirmation({
   }
 
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items"],
+    });
 
     if (session.payment_status !== "paid") {
       logger.error("Payment not completed", {
@@ -38,7 +40,26 @@ export default async function PurchaseConfirmation({
       sessionId,
     });
 
-    return <RedirectMessage success={true} redirectPath="/dashboard/jobs" />;
+    // Determine if subscription based on session mode
+    const isSubscription = session.mode === "subscription";
+    const amount = session.amount_total ? session.amount_total / 100 : 0;
+    const contentIds =
+      session.line_items?.data
+        .map((item) => item.price?.id || "")
+        .filter(Boolean) || [];
+
+    return (
+      <RedirectMessage
+        success={true}
+        redirectPath="/dashboard/jobs"
+        sessionData={{
+          isSubscription,
+          amount,
+          currency: session.currency?.toUpperCase() || "USD",
+          contentIds,
+        }}
+      />
+    );
   } catch (error) {
     logger.error("Error verifying session", {
       error: error instanceof Error ? error.message : "Unknown error",
