@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Create sitemap entries
     const blogEntries: MetadataRoute.Sitemap = allDemoJobs.map((job) => ({
-      url: `${baseUrl}/en/blog/${job.slug}`,
+      url: `${baseUrl}/blog/${job.slug}`,
       lastModified: new Date().toISOString(),
       changeFrequency: "weekly",
       priority: 0.7,
