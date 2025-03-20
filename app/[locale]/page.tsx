@@ -35,15 +35,13 @@ export default async function Home() {
       )) === "test";
   }
   return (
-    <div className="flex flex-col gap-6 max-w-[1080px] mx-auto justify-center min-h-screen items-center">
-      <LandingPageV4
-        user={user}
-        hasSubscription={hasSubscription}
-        credits={credits}
-        isSubscriptionVariant={isSubscriptionVariant}
-        isFreemiumEnabled={isFreemiumEnabled}
-        resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
-      />
-    </div>
+    <LandingPageV4
+      user={user}
+      hasSubscription={hasSubscription}
+      credits={credits}
+      isSubscriptionVariant={isSubscriptionVariant}
+      isFreemiumEnabled={isFreemiumEnabled}
+      resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
+    />
   );
 }
