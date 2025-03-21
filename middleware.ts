@@ -27,11 +27,11 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 
   if (shouldRedirect) {
     // Preserve the pathname and search params
-    const url = new URL(request.url);
     const redirectUrl = new URL("https://perfectinterview.ai/chat-to-resume");
-    redirectUrl.pathname = url.pathname;
-    redirectUrl.search = url.search;
-
+    logger.info("Redirecting to new domain", {
+      hostname,
+      redirectUrl,
+    });
     return Response.redirect(redirectUrl.toString(), 301);
   }
 
