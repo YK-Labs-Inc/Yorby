@@ -7,9 +7,33 @@ import { routing } from "./i18n/routing";
 // Create the next-intl middleware
 const intlMiddleware = createIntlMiddleware(routing);
 
+// Domains that should be redirected
+const REDIRECT_DOMAINS = [
+  "chattoresume",
+  "chat2resume",
+  "yap2resume",
+  "yaptoresume",
+];
+
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
   logger.middleware(request);
+
+  // Check if the current domain needs to be redirected
+  const hostname = request.headers.get("host") || "";
+  const shouldRedirect = REDIRECT_DOMAINS.some((domain) =>
+    hostname.includes(domain)
+  );
+
+  if (shouldRedirect) {
+    // Preserve the pathname and search params
+    const url = new URL(request.url);
+    const redirectUrl = new URL("https://perfectinterview.ai/chat-to-resume");
+    redirectUrl.pathname = url.pathname;
+    redirectUrl.search = url.search;
+
+    return Response.redirect(redirectUrl.toString(), 301);
+  }
 
   // Handle next-intl middleware first
   const response = await intlMiddleware(request);
