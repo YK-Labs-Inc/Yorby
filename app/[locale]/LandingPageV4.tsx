@@ -7,6 +7,7 @@ import { InterviewCopilotCreationForm } from "./dashboard/interview-copilots/Int
 import JobCreationComponent from "./JobCreationComponent";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function LandingPageV4({
   user,
@@ -100,8 +101,8 @@ export default function LandingPageV4({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <main className="container mx-auto px-4 py-16">
+    <div className="min-h-screen bg-white flex flex-col">
+      <main className="container mx-auto px-4 py-16 flex-grow">
         <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
           {t("title")}
         </h1>
@@ -133,6 +134,20 @@ export default function LandingPageV4({
           ))}
         </div>
       </main>
+      <footer className="w-full flex flex-col items-center justify-center border-t mx-auto text-center text-xs gap-4 py-16">
+        <div className="flex items-center gap-8">
+          <p>© 2025 YK Labs. All rights reserved.</p>
+        </div>
+        <div className="flex items-center gap-4 text-gray-600">
+          <Link href={`/privacy-policy`} className="hover:text-gray-900">
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link href={`/terms-of-service`} className="hover:text-gray-900">
+            Terms of Service
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }
