@@ -15,14 +15,12 @@ export default function LandingPageV4({
   credits,
   isSubscriptionVariant,
   isFreemiumEnabled,
-  resumeBuilderRequiresEmail,
 }: {
   user: any;
   hasSubscription: boolean;
   credits: number;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
-  resumeBuilderRequiresEmail: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -83,7 +81,6 @@ export default function LandingPageV4({
         user={user}
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
-        resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
       />
     );
   } else if (selectedOption === "interview") {

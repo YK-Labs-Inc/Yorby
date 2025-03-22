@@ -46,9 +46,6 @@ export default async function ResumePage({
   }
   const hasSubscription = await fetchHasSubscription(user.id);
   const credits = await fetchUserCredits(user.id);
-  const resumeBuilderRequiresEmail =
-    (await posthog.getFeatureFlag("resume-builder-require-email", user.id)) ===
-    "test";
   const isSubscriptionVariant =
     (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
     "test";
@@ -62,7 +59,6 @@ export default async function ResumePage({
       hasSubscription={hasSubscription}
       credits={credits}
       user={user}
-      resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
       isSubscriptionVariant={isSubscriptionVariant}
       isFreemiumEnabled={isFreemiumEnabled}
     />
