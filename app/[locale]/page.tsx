@@ -17,7 +17,6 @@ export default async function Home() {
   let credits = 0;
   let isSubscriptionVariant = false;
   let isFreemiumEnabled = false;
-  let resumeBuilderRequiresEmail = false;
 
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id);
@@ -28,11 +27,6 @@ export default async function Home() {
     isFreemiumEnabled =
       (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
       "test";
-    resumeBuilderRequiresEmail =
-      (await posthog.getFeatureFlag(
-        "resume-builder-require-email",
-        user.id
-      )) === "test";
   }
   return (
     <LandingPageV4
@@ -41,7 +35,6 @@ export default async function Home() {
       credits={credits}
       isSubscriptionVariant={isSubscriptionVariant}
       isFreemiumEnabled={isFreemiumEnabled}
-      resumeBuilderRequiresEmail={resumeBuilderRequiresEmail}
     />
   );
 }
