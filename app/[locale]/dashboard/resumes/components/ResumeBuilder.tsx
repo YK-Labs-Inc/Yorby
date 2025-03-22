@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import ResumePreview from "./ResumePreview";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mic, Send, Lock, PlayCircle } from "lucide-react";
+import { Mic, Send, Lock, PlayCircle, Volume2, VolumeX } from "lucide-react";
 import { useVoiceRecording } from "./useVoiceRecording";
 import VoiceRecordingOverlay from "./VoiceRecordingOverlay";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -49,6 +49,13 @@ import {
 } from "@/components/ui/dialog";
 import { Turnstile } from "@marsidev/react-turnstile";
 import MobileWarning from "./MobileWarning";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -59,15 +66,7 @@ export type ResumeDataType = Tables<"resumes"> & {
   })[];
 };
 
-const LockedResumeOverlay = ({
-  resumeId,
-  resume,
-  user,
-}: {
-  resumeId: string;
-  resume: ResumeDataType;
-  user: User;
-}) => {
+const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   const t = useTranslations("resumeBuilder");
   const [
     linkAnonymousAccountState,
@@ -141,7 +140,6 @@ export default function ResumeBuilder({
   hasSubscription,
   credits,
   user,
-  resumeBuilderRequiresEmail,
   isSubscriptionVariant,
   isFreemiumEnabled,
 }: {
@@ -149,7 +147,6 @@ export default function ResumeBuilder({
   hasSubscription: boolean;
   credits: number;
   user: User | null;
-  resumeBuilderRequiresEmail: boolean;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
 }) {
@@ -186,6 +183,22 @@ export default function ResumeBuilder({
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
 
+  // Add new state for text-to-speech
+  const [isTtsEnabled, setIsTtsEnabled] = useState<boolean>(false);
+  const [selectedVoice, setSelectedVoice] = useState<string>("alloy");
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => {
       const isMobileView = window.innerWidth < 768; // 768px is the standard md breakpoint
@@ -209,6 +222,13 @@ export default function ResumeBuilder({
       fetchResumeData(resumeId);
     }
   }, [unlockState?.success, resumeId]);
+
+  // Add useEffect to handle playback speed changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed]);
 
   const shouldShowSplitView = resumeId || isGenerating;
   const isLocked = Boolean(
@@ -331,7 +351,22 @@ export default function ResumeBuilder({
     t,
   });
 
+  const stopAudioPlayback = useCallback(() => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    } catch (e) {
+      console.error("Error in stopAudioPlayback:", e);
+    } finally {
+      setIsPlaying(false);
+    }
+  }, []);
+
   const handleRecordingToggle = async () => {
+    // Stop any playing audio when starting to record
+    stopAudioPlayback();
+
     if (isRecording) {
       stopRecording();
       setIsRecording(false);
@@ -350,6 +385,84 @@ export default function ResumeBuilder({
   const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextInput(e.target.value);
   };
+
+  const speakMessage = async (text: string) => {
+    if (!isTtsEnabled || isPlaying) return;
+
+    try {
+      setIsPlaying(true);
+
+      // Create a new audio element if it doesn't exist
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+      }
+
+      const audio = audioRef.current;
+      audio.playbackRate = playbackSpeed;
+
+      // Clean up previous audio
+      audio.pause();
+      if (audio.src) {
+        URL.revokeObjectURL(audio.src);
+      }
+
+      // Set up audio event handlers
+      audio.onended = () => {
+        setIsPlaying(false);
+        if (audio.src) {
+          URL.revokeObjectURL(audio.src);
+        }
+      };
+
+      audio.onerror = (e) => {
+        logError("Audio playback error:", { error: e });
+        setIsPlaying(false);
+        if (audio.src) {
+          URL.revokeObjectURL(audio.src);
+        }
+      };
+
+      // Fetch audio
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          voice: selectedVoice,
+          model: "tts-1",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate speech: ${response.statusText}`);
+      }
+
+      // Create blob from response and set as audio source
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      audio.src = url;
+      await audio.play();
+    } catch (error) {
+      console.error("TTS Error:", error);
+      setIsPlaying(false);
+    }
+  };
+
+  // Update the messages state setter to include TTS
+  const addMessageWithTTS = useCallback(
+    async (messageToTranscribe: string) => {
+      await speakMessage(messageToTranscribe);
+      setMessages((prev) => [...prev.slice(0, -1)]);
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: messageToTranscribe,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    },
+    [isTtsEnabled, selectedVoice, isPlaying]
+  );
 
   const sendInterviewMessage = async (
     transcription?: string,
@@ -398,16 +511,16 @@ export default function ResumeBuilder({
       const data = await response.json();
       const { interviewIsComplete, interviewerResponse } = data;
 
-      // Remove the temporary "..." message
-      setMessages((prev) => prev.slice(0, -1));
-
-      // Add the AI response as a new message
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: interviewerResponse,
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      if (isTtsEnabled) {
+        await addMessageWithTTS(interviewerResponse);
+      } else {
+        setMessages((prev) => prev.slice(0, -1));
+        const aiMessage: CoreAssistantMessage = {
+          role: "assistant",
+          content: interviewerResponse,
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      }
 
       // If interview is complete, set resume as ready and generate it
       if (interviewIsComplete) {
@@ -479,9 +592,6 @@ export default function ResumeBuilder({
         }),
       });
 
-      // Remove the temporary loading message
-      setMessages((prev) => prev.slice(0, -1));
-
       if (response.status === 429) {
         setMessages((prev) => [
           ...prev,
@@ -499,12 +609,16 @@ export default function ResumeBuilder({
 
       const data = await response.json();
       const { updatedResume, aiResponse } = data;
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: aiResponse,
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      if (isTtsEnabled) {
+        await addMessageWithTTS(aiResponse);
+      } else {
+        setMessages((prev) => prev.slice(0, -1));
+        const aiMessage: CoreAssistantMessage = {
+          role: "assistant",
+          content: aiResponse,
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      }
       setResume(updatedResume);
       void saveResume(updatedResume, resumeId);
     } catch (error) {
@@ -537,6 +651,8 @@ export default function ResumeBuilder({
   };
 
   const sendMessage = async () => {
+    stopAudioPlayback();
+
     if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
       setShowLimitDialog(true);
       return;
@@ -641,6 +757,13 @@ export default function ResumeBuilder({
     );
   }
 
+  // Also update the cleanup effect to use the new function
+  useEffect(() => {
+    return () => {
+      stopAudioPlayback();
+    };
+  }, [stopAudioPlayback]);
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
@@ -732,15 +855,19 @@ export default function ResumeBuilder({
                           : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transform hover:scale-[1.02]"
                       }`}
                     >
-                      {(message as any).isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <LoadingSpinner variant="muted" />
+                      <div className="flex flex-col gap-2">
+                        <div className="flex-grow">
+                          {(message as any).isLoading ? (
+                            <div className="flex items-center justify-center">
+                              <LoadingSpinner variant="muted" />
+                            </div>
+                          ) : (
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {message.content as string}
+                            </ReactMarkdown>
+                          )}
                         </div>
-                      ) : (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.content as string}
-                        </ReactMarkdown>
-                      )}
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -801,37 +928,92 @@ export default function ResumeBuilder({
                         (isLocked && !isFreemiumEnabled)
                       }
                     />
-                    <div className="flex justify-end space-x-3 px-1">
-                      <Button
-                        variant={"secondary"}
-                        type="button"
-                        className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
-                        onClick={handleRecordingToggle}
-                        disabled={
-                          isGenerating ||
-                          isInterviewing ||
-                          (isLocked && !isFreemiumEnabled) ||
-                          (!user && !captchaToken)
-                        }
-                      >
-                        <Mic className="h-4 w-4" />
-                        {t("voice")}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="icon"
-                        className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
-                        onClick={handleSendButtonClick}
-                        disabled={
-                          (!textInput.trim() && !isRecording) ||
-                          isGenerating ||
-                          isInterviewing ||
-                          (isLocked && !isFreemiumEnabled) ||
-                          (!user && !captchaToken)
-                        }
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
+                    <div className="flex justify-between items-center space-x-3 px-1">
+                      <div className="flex items-center space-x-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          type="button"
+                          className="h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+                          onClick={() => setIsTtsEnabled(!isTtsEnabled)}
+                        >
+                          {isTtsEnabled ? (
+                            <Volume2 className="h-4 w-4 text-gray-500" />
+                          ) : (
+                            <VolumeX className="h-4 w-4 text-gray-500" />
+                          )}
+                        </Button>
+                        {isTtsEnabled && (
+                          <>
+                            <Select
+                              value={selectedVoice}
+                              onValueChange={setSelectedVoice}
+                            >
+                              <SelectTrigger className="w-[140px] h-9 rounded-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="alloy">Alloy</SelectItem>
+                                <SelectItem value="echo">Echo</SelectItem>
+                                <SelectItem value="fable">Fable</SelectItem>
+                                <SelectItem value="onyx">Onyx</SelectItem>
+                                <SelectItem value="nova">Nova</SelectItem>
+                                <SelectItem value="shimmer">Shimmer</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Select
+                              value={String(playbackSpeed)}
+                              onValueChange={(value) =>
+                                setPlaybackSpeed(parseFloat(value))
+                              }
+                            >
+                              <SelectTrigger className="w-[80px] h-9 rounded-full">
+                                <SelectValue
+                                  placeholder={`${playbackSpeed}x`}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0.5">0.5x</SelectItem>
+                                <SelectItem value="1">1.0x</SelectItem>
+                                <SelectItem value="1.5">1.5x</SelectItem>
+                                <SelectItem value="2">2.0x</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex space-x-3">
+                        <Button
+                          variant="secondary"
+                          type="button"
+                          className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
+                          onClick={handleRecordingToggle}
+                          disabled={
+                            isGenerating ||
+                            isInterviewing ||
+                            (isLocked && !isFreemiumEnabled) ||
+                            (!user && !captchaToken)
+                          }
+                        >
+                          <Mic className="h-4 w-4" />
+                          {t("voice")}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="icon"
+                          className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
+                          onClick={handleSendButtonClick}
+                          disabled={
+                            (!textInput.trim() && !isRecording) ||
+                            isGenerating ||
+                            isInterviewing ||
+                            (isLocked && !isFreemiumEnabled) ||
+                            (!user && !captchaToken)
+                          }
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -873,11 +1055,7 @@ export default function ResumeBuilder({
                 </div>
               ) : resume && resumeId && user ? (
                 user.is_anonymous ? (
-                  <LockedResumeOverlay
-                    resumeId={resumeId}
-                    resume={resume}
-                    user={user}
-                  />
+                  <LockedResumeOverlay resumeId={resumeId} />
                 ) : (
                   <ResumePreview
                     resume={resume}

@@ -1,13 +1,9 @@
-import OpenAI from "openai";
 import { AxiomRequest, withAxiom } from "next-axiom";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { generateStreamingTTS } from "@/utils/ai/gemini";
 
 // We'll use alloy by default as it's a good balance of quality and speed
 const DEFAULT_VOICE = "alloy";
-const DEFAULT_MODEL = "tts-1";
+const DEFAULT_MODEL = "gpt-4o-mini-tts";
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
@@ -32,30 +28,29 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     logger.info("Starting text to speech", { voice, model });
 
-    const response = await openai.audio.speech.create({
-      model,
+    // Get the audio buffer from OpenAI
+    const response = await generateStreamingTTS({
+      text,
       voice,
-      input: text,
-      response_format: "mp3",
+      model,
     });
-
-    // Get the audio data as an ArrayBuffer
     const audioData = await response.arrayBuffer();
 
     // Create headers for streaming audio
     const headers = new Headers();
     headers.set("Content-Type", "audio/mpeg");
     headers.set("Transfer-Encoding", "chunked");
-
     logger.info("Text to speech complete");
+    await logger.flush();
 
-    // Return the streaming response
+    // Return audio response
     return new Response(audioData, {
       headers,
       status: 200,
     });
   } catch (error: any) {
     logger.error("Text to speech error:", { error: error.message });
+    await logger.flush();
     return new Response(
       JSON.stringify({ error: "Failed to generate speech" }),
       { status: 500 }
