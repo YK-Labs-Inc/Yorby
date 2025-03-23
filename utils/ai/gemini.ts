@@ -6,6 +6,7 @@ import { withTracing } from "@posthog/ai";
 import { posthog } from "../tracking/serverUtils";
 import { createSupabaseServerClient } from "../supabase/server";
 import { OpenAI } from "@posthog/ai";
+import { Speechify } from "@speechify/api-sdk";
 
 type BaseParams = {
   systemPrompt?: string;
@@ -27,13 +28,6 @@ type MutuallyExclusiveParams = MessagesOnlyParams | PromptOnlyParams;
 
 type GenerateObjectParams<T extends z.ZodType> = MutuallyExclusiveParams & {
   schema: T;
-};
-
-// Add TTS types and function
-type TTSOptions = {
-  text: string;
-  voice: "alloy" | "onyx";
-  model: "gpt-4o-mini-tts";
 };
 
 /**
@@ -233,20 +227,63 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
 export const generateStreamingTTS = async ({
   text,
   voice,
-  model,
-}: TTSOptions) => {
+  provider,
+  speakingStyle,
+}: {
+  text: string;
+  voice: string;
+  provider: "openai" | "speechify";
+  speakingStyle?: string;
+}) => {
+  try {
+    if (provider === "openai") {
+      return generateOpenAITTS({ text, voice });
+    } else if (provider === "speechify") {
+      return generateSpeechifyTTS({ text, voice });
+    }
+  } catch (error: any) {
+    throw new Error(`Failed to generate speech: ${error.message}`);
+  }
+};
+
+const generateOpenAITTS = async ({
+  text,
+  voice,
+}: {
+  text: string;
+  voice: string;
+}): Promise<ReadableStream<Uint8Array>> => {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!,
     posthog,
   });
-  try {
-    return await openai.audio.speech.create({
-      model,
-      voice,
-      input: text,
-      response_format: "mp3",
-    });
-  } catch (error: any) {
-    throw new Error(`Failed to generate speech: ${error.message}`);
+  const response = await openai.audio.speech.create({
+    model: "gpt-4o-mini-tts",
+    voice: voice as "alloy" | "onyx",
+    input: text,
+    response_format: "mp3",
+  });
+
+  if (!response.body) {
+    throw new Error("Failed to generate speech: Response body is null");
   }
+
+  return response.body;
+};
+
+const generateSpeechifyTTS = async ({
+  text,
+  voice,
+}: {
+  text: string;
+  voice: string;
+}) => {
+  const speechify = new Speechify({
+    apiKey: process.env.SPEECHIFY_API_KEY!,
+  });
+  return await speechify.audioStream({
+    input: text,
+    voiceId: voice,
+    audioFormat: "mp3",
+  });
 };

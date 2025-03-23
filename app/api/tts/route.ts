@@ -1,50 +1,62 @@
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { generateStreamingTTS } from "@/utils/ai/gemini";
+import { NextResponse } from "next/server";
 
-// We'll use alloy by default as it's a good balance of quality and speed
 const DEFAULT_VOICE = "alloy";
 const DEFAULT_MODEL = "gpt-4o-mini-tts";
 
+const VOICE_MAP = {
+  alloy: "alloy",
+  onyx: "onyx",
+  lbj: process.env.SPEECHIFY_LEBRON_JAMES_VOICE_ID,
+};
+
 export const POST = withAxiom(async (request: AxiomRequest) => {
-  const logger = request.log.with({
+  let logger = request.log.with({
     method: request.method,
     path: "/api/tts",
   });
 
   try {
-    const {
+    const { text, voiceId, provider, speakingStyle } =
+      (await request.json()) as {
+        text: string;
+        voiceId?: "alloy" | "onyx" | "lbj";
+        provider?: "openai" | "speechify";
+        speakingStyle?: string;
+      };
+    logger = logger.with({
+      voiceId,
+      provider,
+      speakingStyle,
       text,
-      voice = DEFAULT_VOICE,
-      model = DEFAULT_MODEL,
-    } = await request.json();
+    });
 
     if (!text) {
-      logger.error("Text is required");
-      await logger.flush();
+      logger.error("Missing text");
       return new Response(JSON.stringify({ error: "Text is required" }), {
         status: 400,
       });
     }
 
-    logger.info("Starting text to speech", { voice, model });
+    logger.info("Starting text to speech generation");
 
     // Get the audio buffer from OpenAI
     const response = await generateStreamingTTS({
       text,
-      voice,
-      model,
+      voice: VOICE_MAP[voiceId || DEFAULT_VOICE]!,
+      provider: provider || "openai",
+      speakingStyle,
     });
-    const audioData = await response.arrayBuffer();
 
     // Create headers for streaming audio
     const headers = new Headers();
     headers.set("Content-Type", "audio/mpeg");
     headers.set("Transfer-Encoding", "chunked");
     logger.info("Text to speech complete");
-    await logger.flush();
 
     // Return audio response
-    return new Response(audioData, {
+    return new NextResponse(response, {
       headers,
       status: 200,
     });

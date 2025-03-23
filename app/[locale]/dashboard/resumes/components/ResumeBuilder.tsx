@@ -66,6 +66,41 @@ export type ResumeDataType = Tables<"resumes"> & {
   })[];
 };
 
+interface VoiceOption {
+  voiceId: string;
+  title: string;
+  provider: "openai" | "speechify";
+  speakingStyle?: string;
+}
+
+const VOICE_OPTIONS: VoiceOption[] = [
+  {
+    voiceId: "alloy",
+    title: "Alloy",
+    provider: "openai",
+  },
+  {
+    voiceId: "onyx",
+    title: "Onyx",
+    provider: "openai",
+  },
+  {
+    voiceId: "lbj",
+    title: "LeBron James",
+    provider: "speechify",
+    speakingStyle: `
+    Rewrite the text in a style of a middle age (30-40) year old black man who is a world famous
+    basketball player and is known for using a lot of AAVE and slang. He likes to talk with
+    a lot of wisdom and life lessons as he is the world's greatest basketball player.
+
+    Use your knowledge of LeBron James to make sure the text is written in a way that is true to his personality.
+
+    However, do not make the text overly wordy compared to the original text. Try your best to keep the transformed
+    text length to be in the same general length as the original text.
+     `,
+  },
+];
+
 const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   const t = useTranslations("resumeBuilder");
   const [
@@ -386,6 +421,45 @@ export default function ResumeBuilder({
     setTextInput(e.target.value);
   };
 
+  const transformText = async (text: string): Promise<string> => {
+    // Find the selected voice option
+    const selectedVoiceOption = VOICE_OPTIONS.find(
+      (voice) => voice.voiceId === selectedVoice
+    );
+    if (!selectedVoiceOption) {
+      throw new Error("Selected voice not found");
+    }
+
+    // Return original text if no speaking style
+    if (!selectedVoiceOption.speakingStyle) {
+      return text;
+    }
+
+    try {
+      const transformResponse = await fetch("/api/transform-text", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          speakingStyle: selectedVoiceOption.speakingStyle,
+        }),
+      });
+
+      if (!transformResponse.ok) {
+        logError(`Failed to transform text: ${transformResponse.statusText}`);
+        return text;
+      }
+
+      const { transformedText } = await transformResponse.json();
+      return transformedText;
+    } catch (error) {
+      logError("Text transformation error:", { error });
+      return text;
+    }
+  };
+
   const speakMessage = async (text: string) => {
     if (!isTtsEnabled || isPlaying) return;
 
@@ -422,6 +496,14 @@ export default function ResumeBuilder({
         }
       };
 
+      // Find the selected voice option
+      const selectedVoiceOption = VOICE_OPTIONS.find(
+        (voice) => voice.voiceId === selectedVoice
+      );
+      if (!selectedVoiceOption) {
+        throw new Error("Selected voice not found");
+      }
+
       // Fetch audio
       const response = await fetch("/api/tts", {
         method: "POST",
@@ -430,8 +512,8 @@ export default function ResumeBuilder({
         },
         body: JSON.stringify({
           text,
-          voice: selectedVoice,
-          model: "tts-1",
+          voiceId: selectedVoiceOption.voiceId,
+          provider: selectedVoiceOption.provider,
         }),
       });
 
@@ -445,7 +527,8 @@ export default function ResumeBuilder({
       audio.src = url;
       await audio.play();
     } catch (error) {
-      console.error("TTS Error:", error);
+      logError("TTS Error:", { error });
+      alert("Sorry, something went wrong. Please try again.");
       setIsPlaying(false);
     }
   };
@@ -453,11 +536,12 @@ export default function ResumeBuilder({
   // Update the messages state setter to include TTS
   const addMessageWithTTS = useCallback(
     async (messageToTranscribe: string) => {
-      await speakMessage(messageToTranscribe);
+      const transformedText = await transformText(messageToTranscribe);
+      await speakMessage(transformedText);
       setMessages((prev) => [...prev.slice(0, -1)]);
       const aiMessage: CoreAssistantMessage = {
         role: "assistant",
-        content: messageToTranscribe,
+        content: transformedText,
       };
       setMessages((prev) => [...prev, aiMessage]);
     },
@@ -953,12 +1037,14 @@ export default function ResumeBuilder({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="alloy">Alloy</SelectItem>
-                                <SelectItem value="echo">Echo</SelectItem>
-                                <SelectItem value="fable">Fable</SelectItem>
-                                <SelectItem value="onyx">Onyx</SelectItem>
-                                <SelectItem value="nova">Nova</SelectItem>
-                                <SelectItem value="shimmer">Shimmer</SelectItem>
+                                {VOICE_OPTIONS.map((voice) => (
+                                  <SelectItem
+                                    key={voice.voiceId}
+                                    value={voice.voiceId}
+                                  >
+                                    {voice.title}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <Select
