@@ -15,7 +15,7 @@ export default async function Login({
   } = await supabase.auth.getUser();
   const signUpT = await getTranslations("signUp");
   // If user is already signed in, show the already signed in UI
-  if (user) {
+  if (user && !user.is_anonymous) {
     return (
       <div className="container max-w-md mx-auto pt-20">
         <div className="space-y-6">
