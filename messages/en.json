@@ -1167,6 +1167,11 @@
       "title": "Desktop Experience Recommended",
       "description": "For the best resume building experience, we recommend using a desktop computer. Our resume builder has advanced formatting features that work best on larger screens.",
       "button": "Continue Anyway"
+    },
+    "startScreen": {
+      "enableVoice": "Enable Voice Mode",
+      "selectVoice": "Select Voice",
+      "startButton": "Start Building Resume"
     }
   },
   "interviewCopilotDemo": {

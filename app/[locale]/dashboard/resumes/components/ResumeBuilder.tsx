@@ -43,6 +43,10 @@ import {
 } from "@/components/ui/dialog";
 import { Turnstile } from "@marsidev/react-turnstile";
 import MobileWarning from "./MobileWarning";
+import { ChatUI } from "@/app/components/chat";
+import { TtsProvider, useTts } from "@/app/context/TtsContext";
+import { VOICE_OPTIONS } from "@/app/types/tts";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -50,8 +54,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChatUI } from "@/app/components/chat";
-import { TtsProvider, useTts } from "@/app/context/TtsContext";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -131,6 +133,105 @@ const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   );
 };
 
+const StartScreen = ({
+  onStart,
+  initialVoice,
+  onVoiceChange,
+  initialTtsEnabled,
+  onTtsEnabledChange,
+}: {
+  onStart: () => void;
+  initialVoice?: string;
+  onVoiceChange: (voiceId: string) => void;
+  initialTtsEnabled: boolean;
+  onTtsEnabledChange: (enabled: boolean) => void;
+}) => {
+  const t = useTranslations("resumeBuilder");
+  const [ttsEnabled, setTtsEnabled] = useState(initialTtsEnabled);
+  const [selectedVoiceId, setSelectedVoiceId] = useState(
+    initialVoice || "alloy"
+  );
+
+  const handleStart = () => {
+    onTtsEnabledChange(ttsEnabled);
+    onVoiceChange(selectedVoiceId);
+    onStart();
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <Card className="w-full max-w-lg">
+        <CardContent className="pt-6 space-y-8">
+          <div className="text-center space-y-2">
+            {initialVoice ? (
+              <>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {
+                    VOICE_OPTIONS.find(
+                      (voice) => voice.voiceId === initialVoice
+                    )?.title
+                  }{" "}
+                  To Resume
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t("descriptionV2")}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  {t("titleV2")}
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t("descriptionV2")}
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tts-toggle">{t("startScreen.enableVoice")}</Label>
+              <Switch
+                id="tts-toggle"
+                checked={ttsEnabled}
+                onCheckedChange={(checked) => setTtsEnabled(checked)}
+              />
+            </div>
+
+            {ttsEnabled && (
+              <div className="space-y-2">
+                <Label htmlFor="voice-select">
+                  {t("startScreen.selectVoice")}
+                </Label>
+                <Select
+                  value={selectedVoiceId}
+                  onValueChange={setSelectedVoiceId}
+                >
+                  <SelectTrigger id="voice-select">
+                    <SelectValue placeholder="Select a voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VOICE_OPTIONS.map((voice) => (
+                      <SelectItem key={voice.voiceId} value={voice.voiceId}>
+                        {voice.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <Button onClick={handleStart} className="w-full">
+              {t("startScreen.startButton")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const ResumeBuilderComponent = ({
   resumeId,
   hasSubscription,
@@ -138,6 +239,7 @@ const ResumeBuilderComponent = ({
   user,
   isSubscriptionVariant,
   isFreemiumEnabled,
+  persona,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -145,6 +247,7 @@ const ResumeBuilderComponent = ({
   user: User | null;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
+  persona?: string;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
@@ -153,12 +256,13 @@ const ResumeBuilderComponent = ({
   const [isInterviewing, setIsInterviewing] = useState<boolean>(false);
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const [editCount, setEditCount] = useState<number>(0);
   const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
-  const MAX_FREE_EDITS = 2;
+  const MAX_FREE_EDITS = 0;
   const [unlockState, unlockAction, unlockPending] = useActionState(
     unlockResume,
     {
@@ -175,7 +279,23 @@ const ResumeBuilderComponent = ({
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
-  const { isTtsEnabled, selectedVoice, transformText, speakMessage } = useTts();
+  const {
+    isTtsEnabled,
+    selectedVoice,
+    speakMessage,
+    setSelectedVoice,
+    setIsTtsEnabled,
+  } = useTts();
+
+  const handleVoiceChange = useCallback(
+    (voiceId: string) => {
+      const voice = VOICE_OPTIONS.find((v) => v.voiceId === voiceId);
+      if (voice) {
+        setSelectedVoice(voice);
+      }
+    },
+    [setSelectedVoice]
+  );
 
   useEffect(() => {
     const checkMobile = () => {
@@ -207,24 +327,53 @@ const ResumeBuilderComponent = ({
   );
   const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
-  // Initialize the conversation with the first AI message
   useEffect(() => {
-    if (resumeId) {
-      setMessages([
-        {
-          role: "assistant",
-          content: t("editResumeInitialMessage"),
-        },
-      ]);
-    } else {
-      setMessages([
-        {
-          role: "assistant",
-          content: t("createResumeInitialMessage"),
-        },
-      ]);
+    const selectedVoice = VOICE_OPTIONS.find(
+      (voice) => voice.voiceId === persona
+    );
+    let initialMessage = resumeId
+      ? t("editResumeInitialMessage")
+      : t("createResumeInitialMessage");
+
+    // If we have a selected voice with a speaking style, modify the message accordingly
+    if (selectedVoice?.speakingStyle) {
+      if (selectedVoice.voiceId === "dg") {
+        initialMessage = `Listen up, buttercup! You want a killer resume? I need the intel.
+
+  Name. Email. Work and education history – the REAL stuff, the grit. And your damn skills – what makes you a weapon?
+
+  Spit it out. I ain't got all day to coddle you. Give me the raw data, and we'll forge something that'll make them take notice. Then, we'll keep grinding until it's perfect.
+
+  No excuses. Let's GO.
+
+  Stay hard!
+        `;
+      } else if (selectedVoice.voiceId === "lbj") {
+        initialMessage = `Yo, what up, fam? You tryna get that next-level resume, huh? Aight, I feel you. But look, ain't nothin' in this world just gon' fall in your lap. You gotta put in that work, you gotta grind for it.
+
+So, lemme get the details. Name, email, your work and school history – the real journey. And them skills you bringin'.
+
+Give it to me straight up. We gon' cook somethin' solid, then keep workin' till it's straight fire.
+
+Stay focused, stay hungry. Let's get it.
+        `;
+      } else if (selectedVoice.voiceId === "cw") {
+        initialMessage = `You wanna make a super cool professional resume? That sounds like fun!  But first, unnie needs to know a little bit about you, okay? 
+
+Could you tell me your name? And maybe your email address so we can stay in touch? Oh! And what about your work history and where you went to school? And also, what are some of the amazing skills you have? You must have so many! 
+
+Once I have all that information, I can try my best to make a really great first draft of your resume for you! Then, we can keep working on it together to make it absolutely perfect! 
+        `;
+      }
     }
-  }, [resumeId]);
+
+    setMessages([
+      {
+        role: "assistant",
+        content: initialMessage,
+      },
+    ]);
+  }, [resumeId, persona, t, hasStarted]);
 
   // Fetch initial edit count
   useEffect(() => {
@@ -575,6 +724,18 @@ const ResumeBuilderComponent = ({
     }
   };
 
+  if (!hasStarted && !resumeId) {
+    return (
+      <StartScreen
+        onStart={() => setHasStarted(true)}
+        initialVoice={persona}
+        onVoiceChange={handleVoiceChange}
+        initialTtsEnabled={Boolean(persona)}
+        onTtsEnabledChange={setIsTtsEnabled}
+      />
+    );
+  }
+
   // If user is not anonymous (has email) and is on mobile, only show mobile warning
   if (isMobileView && user && !user.is_anonymous) {
     return (
@@ -775,6 +936,7 @@ export default function ResumeBuilder({
   user,
   isSubscriptionVariant,
   isFreemiumEnabled,
+  persona,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -782,9 +944,13 @@ export default function ResumeBuilder({
   user: User | null;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
+  persona?: string;
 }) {
   return (
-    <TtsProvider>
+    <TtsProvider
+      initialVoice={VOICE_OPTIONS.find((voice) => voice.voiceId === persona)}
+      initialTtsEnabled={Boolean(persona)}
+    >
       <ResumeBuilderComponent
         resumeId={resumeId}
         hasSubscription={hasSubscription}
@@ -792,6 +958,7 @@ export default function ResumeBuilder({
         user={user}
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
+        persona={persona}
       />
     </TtsProvider>
   );

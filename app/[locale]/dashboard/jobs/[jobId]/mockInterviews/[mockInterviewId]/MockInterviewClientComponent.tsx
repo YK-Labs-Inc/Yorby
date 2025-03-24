@@ -5,12 +5,8 @@ import InterviewSetup from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews
 import ActiveInterview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/ActiveInterviewComponent";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
-import {
-  TtsProvider,
-  useTts,
-  VOICE_OPTIONS,
-  VoiceOption,
-} from "@/app/context/TtsContext";
+import { TtsProvider, useTts } from "@/app/context/TtsContext";
+import { VOICE_OPTIONS } from "@/app/types/tts";
 
 interface MediaDevice {
   deviceId: string;

@@ -26,7 +26,6 @@ import {
   StyleSheet,
   PDFDownloadLink,
 } from "@react-pdf/renderer";
-import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import {
   Card,
   CardHeader,
@@ -209,7 +208,6 @@ export default function ResumePreview({
   const [showReassurance, setShowReassurance] = useState<boolean>(false);
   const isTestResume = TEST_RESUME_IDS.includes(resumeId);
   const resumeRef = useRef<HTMLDivElement>(null);
-  const { logError } = useAxiomLogging();
   const pathname = usePathname();
   const isSampleResume = pathname?.includes("sample-resumes");
 
@@ -245,15 +243,6 @@ export default function ResumePreview({
       });
     }
     setIsEditMode(false);
-  };
-
-  const downloadAsPdf = () => {
-    if (!resume) return;
-    setDownloading(true);
-
-    // The download will be handled by PDFDownloadLink
-    // This function is now just for setting the downloading state
-    setTimeout(() => setDownloading(false), 100);
   };
 
   const updateBasicInfo = (field: keyof ResumeDataType, value: string) => {
@@ -734,44 +723,69 @@ export default function ResumePreview({
               )}
             </>
           )}
-          <PDFDownloadLink
-            document={<ResumePDF resume={resume} />}
-            fileName={`${resume.name.replace(/\s+/g, "_")}_Resume.pdf`}
-          >
-            {({ loading }: { loading: boolean }) => (
-              <Button
-                disabled={loading || downloading}
-                className="flex items-center gap-2"
+          {isLocked && isFreemiumEnabled && hasReachedFreemiumLimit ? (
+            <Button
+              className="flex items-center gap-2"
+              onClick={() => onShowLimitDialog?.()}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
               >
-                {loading || downloading ? (
-                  <>
-                    <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
-                    {t("downloading")}
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-4 w-4"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    {t("downloadResume")}
-                  </>
-                )}
-              </Button>
-            )}
-          </PDFDownloadLink>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              {t("downloadResume")}
+            </Button>
+          ) : (
+            <PDFDownloadLink
+              document={<ResumePDF resume={resume} />}
+              fileName={`${resume.name.replace(/\s+/g, "_")}_Resume.pdf`}
+            >
+              {({ loading }: { loading: boolean }) => (
+                <Button
+                  disabled={loading || downloading}
+                  className="flex items-center gap-2"
+                >
+                  {loading || downloading ? (
+                    <>
+                      <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                      {t("downloading")}
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      {t("downloadResume")}
+                    </>
+                  )}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
         </div>
       )}
 
@@ -780,7 +794,7 @@ export default function ResumePreview({
         data-pdf-content
         className={`flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 ${
           !removeMaxHeight ? "max-h-[750px]" : ""
-        }`}
+        } ${isLocked ? "select-none" : ""}`}
       >
         {/* Basic Information Section */}
         {isEditMode ? (
