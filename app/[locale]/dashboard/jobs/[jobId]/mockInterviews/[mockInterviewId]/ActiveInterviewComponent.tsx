@@ -10,7 +10,7 @@ import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
 import { CoreMessage, CoreAssistantMessage } from "ai";
 import { ChatUI } from "@/app/components/chat";
-import { TtsProvider, useTts, VoiceOption } from "@/app/context/TtsContext";
+import { useTts } from "@/app/context/TtsContext";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
