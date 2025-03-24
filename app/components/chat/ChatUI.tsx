@@ -26,6 +26,7 @@ import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/V
 import { useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface ChatUIProps {
   messages: CoreMessage[];
@@ -68,6 +69,7 @@ export function ChatUI({
     stopAudioPlayback,
     speakMessage,
   } = useTts();
+  const { logError } = useAxiomLogging();
 
   const {
     startRecording,
@@ -101,7 +103,7 @@ export function ChatUI({
   useEffect(() => {
     if (
       isTtsEnabled &&
-      messages.length > 0 &&
+      messages.length === 1 &&
       messages[0].role === "assistant"
     ) {
       handlePlayMessage(messages[0].content as string, 0);
@@ -161,7 +163,7 @@ export function ChatUI({
       });
       setGeneratingAudioIndex(null);
     } catch (error) {
-      console.error("Error playing message:", error);
+      logError("Error playing message:", { error });
       setPlayingMessageIndex(null);
       setGeneratingAudioIndex(null);
     }
