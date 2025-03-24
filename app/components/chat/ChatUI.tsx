@@ -23,7 +23,8 @@ import ReactMarkdown from "react-markdown";
 import { CoreMessage } from "ai";
 import { useVoiceRecording } from "@/app/[locale]/dashboard/resumes/components/useVoiceRecording";
 import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/VoiceRecordingOverlay";
-import { useTts, VOICE_OPTIONS } from "@/app/context/TtsContext";
+import { useTts } from "@/app/context/TtsContext";
+import { VOICE_OPTIONS } from "@/app/types/tts";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ChatUIProps {
@@ -95,6 +96,17 @@ export function ChatUI({
       stopAudioPlayback();
     };
   }, [stopAudioPlayback]);
+
+  // Auto-play first message if TTS is enabled
+  useEffect(() => {
+    if (
+      isTtsEnabled &&
+      messages.length > 0 &&
+      messages[0].role === "assistant"
+    ) {
+      handlePlayMessage(messages[0].content as string, 0);
+    }
+  }, [messages, isTtsEnabled]);
 
   const handleRecordingToggle = async () => {
     stopAudioPlayback();
