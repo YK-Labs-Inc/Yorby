@@ -5,7 +5,9 @@ import Chatwoot from "./ChatwootWidget";
 
 export default function ChatwootWrapper() {
   const pathname = usePathname();
-  const shouldShowChatwoot = !pathname.includes("sample-resumes");
+  const shouldShowChatwoot =
+    !pathname.includes("sample-resumes") &&
+    !pathname.includes("mockInterviews");
 
   if (!shouldShowChatwoot) {
     return null;

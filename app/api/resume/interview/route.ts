@@ -9,8 +9,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     route: "/api/resume/interview",
   });
   try {
-    const { messages } = (await req.json()) as {
+    const { messages, speakingStyle } = (await req.json()) as {
       messages: CoreMessage[];
+      speakingStyle?: string;
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -28,7 +29,14 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     // Create a system prompt for the interview process
     const systemPrompt = `
-    You are an AI interviewer helping users create a professional resume. Your job is to have a conversation with them to gather all necessary information for a complete resume.
+    You are an AI interviewer helping users create a professional resume. Your job is to have a conversation with them to gather all necessary information for a complete resume.${
+      speakingStyle
+        ? `
+    
+    IMPORTANT: All of your responses should be written in the following speaking style:
+    ${speakingStyle}`
+        : ""
+    }
       
     Your goal is to obtain the following information from the user in the order provided:
     - Name

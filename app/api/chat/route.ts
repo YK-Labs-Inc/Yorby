@@ -9,6 +9,7 @@ interface ChatRequestBody {
   mockInterviewId: string;
   isInitialMessage?: boolean;
   history?: CoreMessage[];
+  speakingStyle?: string;
 }
 
 export async function POST(request: Request) {
@@ -24,12 +25,14 @@ export async function POST(request: Request) {
       mockInterviewId,
       history = [],
       isInitialMessage = false,
+      speakingStyle,
     } = (await request.json()) as ChatRequestBody;
     logger = logger.with({
       message,
       mockInterviewId,
       history,
       isInitialMessage,
+      speakingStyle,
     });
 
     if (!isInitialMessage) {
@@ -65,6 +68,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const systemPrompt = `${mockInterview.interview_prompt}${
+      speakingStyle
+        ? `
+
+    IMPORTANT: All of your responses should be written in the following speaking style:
+    ${speakingStyle}`
+        : ""
+    }`;
+
     const messages = [
       ...history,
       {
@@ -73,7 +85,7 @@ export async function POST(request: Request) {
       },
     ];
     const response = await generateTextWithFallback({
-      systemPrompt: mockInterview.interview_prompt,
+      systemPrompt,
       messages,
       loggingContext: {
         mockInterviewId,

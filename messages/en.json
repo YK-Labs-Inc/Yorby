@@ -273,6 +273,11 @@
         "stopRecording": "Stop Recording",
         "playRecording": "Play Test Recording"
       },
+      "voice": {
+        "label": "AI Voice",
+        "select": "Select voice",
+        "description": "Choose the voice that will be used for the AI interviewer's responses"
+      },
       "speakers": {
         "label": "Speakers (Output)",
         "select": "Select speakers",
@@ -1242,5 +1247,13 @@
       }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "Type your response...",
+    "voice": "Voice",
+    "pleaseSelectAMicrophone": "Please select a microphone",
+    "micPermissionError": "Please grant permission to access your microphone",
+    "recordingError": "Error recording your response. Please try again.",
+    "transcribing": "Transcribing..."
   }
 }

@@ -260,7 +260,12 @@
         "test": "테스트 스피커",
         "testing": "플레이중..."
       },
-      "startButton": "면접 시작"
+      "startButton": "면접 시작",
+      "voice": {
+        "label": "AI 음성",
+        "select": "음성 선택",
+        "description": "AI 면접관 응답에 사용될 음성을 선택하세요"
+      }
     },
     "active": {
       "replayButton": "마지막 응답 다시 보기",
@@ -1163,7 +1168,8 @@
       "title": "데스크톱 환경 권장 🖥️",
       "description": "최상의 이력서 작성 경험을 위해 데스크톱 컴퓨터 사용을 권장합니다. 저희 이력서 작성기는 큰 화면에서 가장 잘 작동하는 고급 서식 기능을 제공합니다.",
       "button": "어쨌든 계속 👍"
-    }
+    },
+    "generatingAudio": "오디오 생성 중..."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1243,5 +1249,13 @@
         }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "여기에 응답을 입력하세요...",
+    "voice": "목소리",
+    "pleaseSelectAMicrophone": "마이크를 선택해주세요.",
+    "micPermissionError": "마이크에 대한 접근 권한을 허용해 주세요.",
+    "recordingError": "응답을 녹음하는 데 오류가 발생했습니다. 다시 시도해 주세요.",
+    "transcribing": "기록 중..."
   }
 }

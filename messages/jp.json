@@ -260,7 +260,12 @@
         "test": "テストスピーカー",
         "testing": "プレイ中..."
       },
-      "startButton": "面接開始"
+      "startButton": "面接開始",
+      "voice": {
+        "label": "AI音声",
+        "select": "音声を選択",
+        "description": "AI面接官の応答に使用する声を選択してください。"
+      }
     },
     "active": {
       "replayButton": "最後の応答を再生",
@@ -1163,7 +1168,8 @@
       "title": "デスクトップエクスペリエンスを推奨 💻",
       "description": "最高の履歴書作成体験のためには、デスクトップコンピューターのご利用をお勧めします。当社の履歴書ビルダーは、大画面で最適に動作する高度な書式設定機能を備えています。",
       "button": "とにかく続ける"
-    }
+    },
+    "generatingAudio": "オーディオを生成中..."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1243,5 +1249,13 @@
         }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "ここに回答を入力してください...",
+    "voice": "声",
+    "pleaseSelectAMicrophone": "マイクを選択してください。",
+    "micPermissionError": "マイクへのアクセスを許可してください。",
+    "recordingError": "応答の録音にエラーが発生しました。もう一度お試しください。",
+    "transcribing": "転写中…"
   }
 }
