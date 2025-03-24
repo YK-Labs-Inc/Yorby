@@ -260,7 +260,12 @@
         "test": "Haut-parleurs de test",
         "testing": "Joue…"
       },
-      "startButton": "Commencer l'entretien"
+      "startButton": "Commencer l'entretien",
+      "voice": {
+        "label": "Voix IA",
+        "select": "Sélectionner la voix",
+        "description": "Choisissez la voix qui sera utilisée pour les réponses de l'interviewer IA."
+      }
     },
     "active": {
       "replayButton": "Rejouer la dernière réponse",
@@ -1163,7 +1168,8 @@
       "title": "Expérience Bureau Recommandée",
       "description": "Pour une expérience optimale de création de CV, nous vous recommandons d'utiliser un ordinateur de bureau. Notre outil de création de CV possède des fonctionnalités de mise en forme avancées qui fonctionnent mieux sur des écrans plus grands.",
       "button": "Continue quand même"
-    }
+    },
+    "generatingAudio": "Génération audio..."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1243,5 +1249,13 @@
         }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "Tapez votre réponse...",
+    "voice": "Voix",
+    "pleaseSelectAMicrophone": "Veuillez sélectionner un microphone.",
+    "micPermissionError": "Veuillez autoriser l'accès à votre microphone 🙏",
+    "recordingError": "Erreur lors de l'enregistrement de votre réponse. Veuillez réessayer.",
+    "transcribing": "Transcription en cours..."
   }
 }

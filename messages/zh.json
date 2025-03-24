@@ -260,7 +260,12 @@
         "test": "测试扬声器",
         "testing": "玩耍中..."
       },
-      "startButton": "开始面试"
+      "startButton": "开始面试",
+      "voice": {
+        "label": "人工智能语音",
+        "select": "选择声音",
+        "description": "选择将用于AI面试官回复的声音"
+      }
     },
     "active": {
       "replayButton": "重新播放最后回复",
@@ -1163,7 +1168,8 @@
       "title": "推荐桌面体验 💻",
       "description": "为了获得最佳的简历制作体验，我们建议您使用台式电脑。我们的简历制作工具拥有高级格式设置功能，在大屏幕上效果最佳。",
       "button": "繼續前進吧 🚀"
-    }
+    },
+    "generatingAudio": "正在生成音频..."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1243,5 +1249,13 @@
         }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "输入你的回复...",
+    "voice": "声音 (shēng yīn)",
+    "pleaseSelectAMicrophone": "请选择麦克风🎤",
+    "micPermissionError": "请允许访问您的麦克风🎤",
+    "recordingError": "录制你的回复时出错。请重试。",
+    "transcribing": "正在转录..."
   }
 }

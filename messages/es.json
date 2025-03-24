@@ -260,7 +260,12 @@
         "test": "Altavoces de prueba",
         "testing": "Jugando..."
       },
-      "startButton": "Comenzar Entrevista"
+      "startButton": "Comenzar Entrevista",
+      "voice": {
+        "label": "Voz de IA",
+        "select": "Seleccionar voz",
+        "description": "Elige la voz que se utilizará para las respuestas del entrevistador de IA."
+      }
     },
     "active": {
       "replayButton": "Repetir la última respuesta",
@@ -1163,7 +1168,8 @@
       "title": "Experiencia de escritorio recomendada",
       "description": "Para la mejor experiencia de creación de currículums, recomendamos usar una computadora de escritorio. Nuestro creador de currículums tiene funciones de formato avanzadas que funcionan mejor en pantallas más grandes.",
       "button": "Continuar de todas formas"
-    }
+    },
+    "generatingAudio": "Generando audio..."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1243,5 +1249,13 @@
         }
       }
     }
+  },
+  "chat": {
+    "typeYourResponse": "Escribe tu respuesta...",
+    "voice": "Voz",
+    "pleaseSelectAMicrophone": "Por favor, selecciona un micrófono.",
+    "micPermissionError": "Por favor, concede permiso para acceder a tu micrófono.",
+    "recordingError": "Error al grabar tu respuesta. Por favor, inténtalo de nuevo.",
+    "transcribing": "Transcribiendo..."
   }
 }
