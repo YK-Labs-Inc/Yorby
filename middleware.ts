@@ -15,12 +15,42 @@ const REDIRECT_DOMAINS = [
   "yaptoresume",
 ];
 
+const PERSONA_REDIRECT_DOMAINS = [
+  "lebron2resume",
+  "chaewon2resume",
+  "goggins2resume",
+];
+
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
   logger.middleware(request);
 
   // Check if the current domain needs to be redirected
   const hostname = request.headers.get("host") || "";
+
+  const isPersonaResumeRedirect = PERSONA_REDIRECT_DOMAINS.some((domain) =>
+    hostname.includes(domain)
+  );
+
+  if (isPersonaResumeRedirect) {
+    if (hostname.includes("lebron2resume")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/chat-to-resume/lbj`).toString(),
+        301
+      );
+    } else if (hostname.includes("chaewong2resume")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/chat-to-resume/cw`).toString(),
+        301
+      );
+    } else if (hostname.includes("goggins2resume")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/chat-to-resume/dw`).toString(),
+        301
+      );
+    }
+  }
+
   const shouldRedirect = REDIRECT_DOMAINS.some((domain) =>
     hostname.includes(domain)
   );
