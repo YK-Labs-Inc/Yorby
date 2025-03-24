@@ -5,12 +5,19 @@ import InterviewSetup from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews
 import ActiveInterview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/ActiveInterviewComponent";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
+import {
+  TtsProvider,
+  useTts,
+  VOICE_OPTIONS,
+  VoiceOption,
+} from "@/app/context/TtsContext";
+
 interface MediaDevice {
   deviceId: string;
   label: string;
 }
 
-export default function MockInterviewClientComponent({
+const MockInterviewComponent = ({
   jobId,
   mockInterviewId,
   messageHistory,
@@ -18,20 +25,16 @@ export default function MockInterviewClientComponent({
   jobId: string;
   mockInterviewId: string;
   messageHistory: Tables<"mock_interview_messages">[];
-}) {
+}) => {
   const [videoDevices, setVideoDevices] = useState<MediaDevice[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDevice[]>([]);
-  const [audioOutputDevices, setAudioOutputDevices] = useState<MediaDevice[]>(
-    []
-  );
   const [selectedVideo, setSelectedVideo] = useState<string>("");
   const [selectedAudio, setSelectedAudio] = useState<string>("");
-  const [selectedAudioOutput, setSelectedAudioOutput] = useState<string>("");
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isTestingOutput, setIsTestingOutput] = useState(false);
   const [hasStartedInterview, setHasStartedInterview] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [testRecording, setTestRecording] = useState<Blob | null>(null);
+  const { selectedVoice, setSelectedVoice } = useTts();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const { logError } = useAxiomLogging();
 
@@ -61,21 +64,12 @@ export default function MockInterviewClientComponent({
             deviceId: device.deviceId,
             label: device.label,
           }));
-        const audioOutputs = devices
-          .filter((device) => device.kind === "audiooutput")
-          .map((device) => ({
-            deviceId: device.deviceId,
-            label: device.label,
-          }));
 
         setVideoDevices(videos);
         setAudioDevices(audios);
-        setAudioOutputDevices(audioOutputs);
 
         if (videos.length > 0) setSelectedVideo(videos[0].deviceId);
         if (audios.length > 0) setSelectedAudio(audios[0].deviceId);
-        if (audioOutputs.length > 0)
-          setSelectedAudioOutput(audioOutputs[0].deviceId);
       } catch (error: any) {
         logError("Error accessing media devices:", { error: error.message });
       }
@@ -179,14 +173,6 @@ export default function MockInterviewClientComponent({
 
     const audioElement = new Audio(URL.createObjectURL(testRecording));
 
-    if ("setSinkId" in audioElement) {
-      try {
-        await audioElement.setSinkId(selectedAudioOutput);
-      } catch (err: any) {
-        logError("Error setting audio output device:", { error: err.message });
-      }
-    }
-
     audioElement.onended = () => {
       setTestRecording(null);
       URL.revokeObjectURL(audioElement.src);
@@ -195,50 +181,21 @@ export default function MockInterviewClientComponent({
     audioElement.play();
   };
 
-  const testAudioOutput = async () => {
-    if (isTestingOutput) return;
-
-    setIsTestingOutput(true);
-    try {
-      const audioElement = new Audio("/assets/testaudio.mp3");
-
-      if ("setSinkId" in audioElement) {
-        try {
-          await audioElement.setSinkId(selectedAudioOutput);
-        } catch (err) {
-          logError("Error setting audio output device:", { error: err });
-        }
-      }
-
-      audioElement.onended = () => {
-        setIsTestingOutput(false);
-      };
-
-      await audioElement.play();
-    } catch (error: any) {
-      logError("Error testing audio output:", { error: error.message });
-      setIsTestingOutput(false);
-    }
-  };
-
   if (!hasStartedInterview) {
     return (
       <InterviewSetup
         videoDevices={videoDevices}
         audioDevices={audioDevices}
-        audioOutputDevices={audioOutputDevices}
         selectedVideo={selectedVideo}
         selectedAudio={selectedAudio}
-        selectedAudioOutput={selectedAudioOutput}
         stream={stream}
-        isTestingOutput={isTestingOutput}
         isRecording={isRecording}
         jobId={jobId}
+        selectedVoice={selectedVoice}
+        onVoiceChange={setSelectedVoice}
         startInterviewAction={() => setHasStartedInterview(true)}
         onVideoChange={setSelectedVideo}
         onAudioChange={setSelectedAudio}
-        onAudioOutputChange={setSelectedAudioOutput}
-        onTestAudioOutput={testAudioOutput}
         onStartTestRecording={startTestRecording}
         onStopTestRecording={stopTestRecording}
       />
@@ -250,8 +207,19 @@ export default function MockInterviewClientComponent({
       mockInterviewId={mockInterviewId}
       messageHistory={messageHistory}
       jobId={jobId}
-      selectedAudioOutputId={selectedAudioOutput}
       stream={stream}
     />
+  );
+};
+
+export default function MockInterviewClientComponent(props: {
+  jobId: string;
+  mockInterviewId: string;
+  messageHistory: Tables<"mock_interview_messages">[];
+}) {
+  return (
+    <TtsProvider initialVoice={VOICE_OPTIONS[0]} initialTtsEnabled={true}>
+      <MockInterviewComponent {...props} />
+    </TtsProvider>
   );
 }

@@ -80,50 +80,11 @@ const rateLimits = {
   }),
 };
 
-export const POST = withAxiom(async (req: AxiomRequest) => {
-  const { resume, userMessage, isDemo } = (await req.json()) as {
-    resume: string;
-    userMessage: string;
-    isDemo: boolean;
-  };
-  const logger = req.log.with({
-    resume,
-    userMessage,
-    path: "api/resume/edit",
-  });
-  try {
-    // const isRateLimited = isDemo
-    //   ? await checkIsRateLimitedDemo(req)
-    //   : await checkIsRateLimited(req);
-    // if (isRateLimited) {
-    //   logger.info("Rate limit exceeded", {
-    //     isDemo,
-    //   });
-    //   return NextResponse.json(
-    //     { error: "Rate limit exceeded" },
-    //     { status: 429 }
-    //   );
-    // }
-
-    const { updatedResume, aiResponse } = await updateResume(
-      JSON.stringify(resume),
-      userMessage
-    );
-    logger.info("Resume updated", {
-      updatedResume: JSON.stringify(updatedResume),
-      aiResponse,
-    });
-    return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
-  } catch (error) {
-    logger.error("Failed to update resume", { error });
-    return NextResponse.json(
-      { error: "Failed to update resume" },
-      { status: 500 }
-    );
-  }
-});
-
-const updateResume = async (resume: string, userMessage: string) => {
+const updateResume = async (
+  resume: string,
+  userMessage: string,
+  speakingStyle?: string
+) => {
   const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
     
@@ -137,11 +98,22 @@ const updateResume = async (resume: string, userMessage: string) => {
       "updatedResumeJSON": string //updated resume in JSON format,
       "aiResponse": string //response to the user about the changes you made
     }
+${
+  speakingStyle
+    ? `
+
+    IMPORTANT: Your aiResponse to the user should be written in the following speaking style
+    but the updatedResumeJSON should be written in a professional manner to maximize
+    the chances of the user getting the job they want and passing the ATS.
+
+    ${speakingStyle}`
+    : ""
+}
 
     The updatedResumeJSON must be a valid JSON object. Return only the updated resume in the same exact JSON format
     as the original resume and nothing else.
 
-    The updatedResumseJSON response will be parsed as JSON so make sure your response is a valid JSON without any modifications necessary.
+    The updatedResumeJSON response will be parsed as JSON so make sure your response is a valid JSON without any modifications necessary.
     
     Here is the resume:
     ${resume}
@@ -161,6 +133,41 @@ const updateResume = async (resume: string, userMessage: string) => {
   const { updatedResumeJSON, aiResponse } = result;
   return { updatedResume: updatedResumeJSON, aiResponse };
 };
+
+export const POST = withAxiom(async (req: AxiomRequest) => {
+  const { resume, userMessage, isDemo, speakingStyle } = (await req.json()) as {
+    resume: string;
+    userMessage: string;
+    isDemo: boolean;
+    speakingStyle?: string;
+  };
+  const logger = req.log.with({
+    resume,
+    userMessage,
+    path: "api/resume/edit",
+    speakingStyle,
+    isDemo,
+  });
+  try {
+    const { updatedResume, aiResponse } = await updateResume(
+      JSON.stringify(resume),
+      userMessage,
+      speakingStyle
+    );
+
+    logger.info("Resume updated", {
+      updatedResume: JSON.stringify(updatedResume),
+      aiResponse,
+    });
+    return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
+  } catch (error) {
+    logger.error("Failed to update resume", { error });
+    return NextResponse.json(
+      { error: "Failed to update resume" },
+      { status: 500 }
+    );
+  }
+});
 
 const checkIsRateLimited = async (req: AxiomRequest) => {
   const ip = ipAddress(req);

@@ -11,18 +11,13 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import ResumePreview from "./ResumePreview";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mic, Send, Lock, PlayCircle, Volume2, VolumeX } from "lucide-react";
-import { useVoiceRecording } from "./useVoiceRecording";
-import VoiceRecordingOverlay from "./VoiceRecordingOverlay";
+import { Lock, PlayCircle } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import remarkGfm from "remark-gfm";
-import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
+import { usePathname, useRouter } from "next/navigation";
 import { FormMessage, Message } from "@/components/form-message";
 import { Link } from "@/i18n/routing";
 import {
@@ -38,7 +33,6 @@ import { SubmitButton } from "@/components/submit-button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CoreAssistantMessage, CoreMessage } from "ai";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import * as Sentry from "@sentry/nextjs";
 import {
   Dialog,
@@ -56,6 +50,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ChatUI } from "@/app/components/chat";
+import { TtsProvider, useTts } from "@/app/context/TtsContext";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -65,41 +61,6 @@ export type ResumeDataType = Tables<"resumes"> & {
     })[];
   })[];
 };
-
-interface VoiceOption {
-  voiceId: string;
-  title: string;
-  provider: "openai" | "speechify";
-  speakingStyle?: string;
-}
-
-const VOICE_OPTIONS: VoiceOption[] = [
-  {
-    voiceId: "alloy",
-    title: "Alloy",
-    provider: "openai",
-  },
-  {
-    voiceId: "onyx",
-    title: "Onyx",
-    provider: "openai",
-  },
-  {
-    voiceId: "lbj",
-    title: "LeBron James",
-    provider: "speechify",
-    speakingStyle: `
-    Rewrite the text in a style of a middle age (30-40) year old black man who is a world famous
-    basketball player and is known for using a lot of AAVE and slang. He likes to talk with
-    a lot of wisdom and life lessons as he is the world's greatest basketball player.
-
-    Use your knowledge of LeBron James to make sure the text is written in a way that is true to his personality.
-
-    However, do not make the text overly wordy compared to the original text. Try your best to keep the transformed
-    text length to be in the same general length as the original text.
-     `,
-  },
-];
 
 const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   const t = useTranslations("resumeBuilder");
@@ -170,7 +131,7 @@ const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   );
 };
 
-export default function ResumeBuilder({
+const ResumeBuilderComponent = ({
   resumeId,
   hasSubscription,
   credits,
@@ -184,18 +145,15 @@ export default function ResumeBuilder({
   user: User | null;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
-}) {
+}) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [textInput, setTextInput] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isInterviewing, setIsInterviewing] = useState<boolean>(false);
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const [editCount, setEditCount] = useState<number>(0);
@@ -217,22 +175,7 @@ export default function ResumeBuilder({
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
-
-  // Add new state for text-to-speech
-  const [isTtsEnabled, setIsTtsEnabled] = useState<boolean>(false);
-  const [selectedVoice, setSelectedVoice] = useState<string>("alloy");
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  const { isTtsEnabled, selectedVoice, transformText, speakMessage } = useTts();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -257,13 +200,6 @@ export default function ResumeBuilder({
       fetchResumeData(resumeId);
     }
   }, [unlockState?.success, resumeId]);
-
-  // Add useEffect to handle playback speed changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackSpeed;
-    }
-  }, [playbackSpeed]);
 
   const shouldShowSplitView = resumeId || isGenerating;
   const isLocked = Boolean(
@@ -368,191 +304,40 @@ export default function ResumeBuilder({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const {
-    startRecording,
-    stopRecording,
-    cancelRecording,
-    isProcessing,
-    audioDevices,
-    selectedAudio,
-    setSelectedAudio,
-  } = useVoiceRecording({
-    onTranscription: (transcription: string) => {
-      if (transcription.trim()) {
-        setTextInput(transcription);
-        setIsRecording(false);
-      }
-    },
-    t,
-  });
-
-  const stopAudioPlayback = useCallback(() => {
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    } catch (e) {
-      console.error("Error in stopAudioPlayback:", e);
-    } finally {
-      setIsPlaying(false);
+  const handleSendMessage = async (message: string) => {
+    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
+      setShowLimitDialog(true);
+      return;
     }
-  }, []);
 
-  const handleRecordingToggle = async () => {
-    // Stop any playing audio when starting to record
-    stopAudioPlayback();
-
-    if (isRecording) {
-      stopRecording();
-      setIsRecording(false);
+    if (resumeId) {
+      setIsGenerating(true);
+      await sendEditMessage(message);
+      if (isFreemiumEnabled && !hasSubscription) {
+        await trackResumeEdit(resumeId);
+        setEditCount((prev) => prev + 1);
+      }
+      setIsGenerating(false);
     } else {
-      try {
-        // Start recording, using the microphone directly
-        await startRecording();
-        setIsRecording(true);
-      } catch (error) {
-        console.error("Failed to start recording:", error);
-        logError("Voice recording toggle error:", { error });
-      }
-    }
-  };
-
-  const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextInput(e.target.value);
-  };
-
-  const transformText = async (text: string): Promise<string> => {
-    // Find the selected voice option
-    const selectedVoiceOption = VOICE_OPTIONS.find(
-      (voice) => voice.voiceId === selectedVoice
-    );
-    if (!selectedVoiceOption) {
-      throw new Error("Selected voice not found");
+      setIsInterviewing(true);
+      await sendInterviewMessage(message);
+      setIsInterviewing(false);
     }
 
-    // Return original text if no speaking style
-    if (!selectedVoiceOption.speakingStyle) {
-      return text;
-    }
-
-    try {
-      const transformResponse = await fetch("/api/transform-text", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-          speakingStyle: selectedVoiceOption.speakingStyle,
-        }),
+    if (!user && captchaToken) {
+      const formData = new FormData();
+      formData.set("captchaToken", captchaToken);
+      formData.set("currentPath", pathname);
+      startTransition(() => {
+        verifyAnonymousUserAction(formData);
       });
-
-      if (!transformResponse.ok) {
-        logError(`Failed to transform text: ${transformResponse.statusText}`);
-        return text;
-      }
-
-      const { transformedText } = await transformResponse.json();
-      return transformedText;
-    } catch (error) {
-      logError("Text transformation error:", { error });
-      return text;
     }
   };
-
-  const speakMessage = async (text: string) => {
-    if (!isTtsEnabled || isPlaying) return;
-
-    try {
-      setIsPlaying(true);
-
-      // Create a new audio element if it doesn't exist
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-      }
-
-      const audio = audioRef.current;
-      audio.playbackRate = playbackSpeed;
-
-      // Clean up previous audio
-      audio.pause();
-      if (audio.src) {
-        URL.revokeObjectURL(audio.src);
-      }
-
-      // Set up audio event handlers
-      audio.onended = () => {
-        setIsPlaying(false);
-        if (audio.src) {
-          URL.revokeObjectURL(audio.src);
-        }
-      };
-
-      audio.onerror = (e) => {
-        logError("Audio playback error:", { error: e });
-        setIsPlaying(false);
-        if (audio.src) {
-          URL.revokeObjectURL(audio.src);
-        }
-      };
-
-      // Find the selected voice option
-      const selectedVoiceOption = VOICE_OPTIONS.find(
-        (voice) => voice.voiceId === selectedVoice
-      );
-      if (!selectedVoiceOption) {
-        throw new Error("Selected voice not found");
-      }
-
-      // Fetch audio
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-          voiceId: selectedVoiceOption.voiceId,
-          provider: selectedVoiceOption.provider,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate speech: ${response.statusText}`);
-      }
-
-      // Create blob from response and set as audio source
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      audio.src = url;
-      await audio.play();
-    } catch (error) {
-      logError("TTS Error:", { error });
-      alert("Sorry, something went wrong. Please try again.");
-      setIsPlaying(false);
-    }
-  };
-
-  // Update the messages state setter to include TTS
-  const addMessageWithTTS = useCallback(
-    async (messageToTranscribe: string) => {
-      const transformedText = await transformText(messageToTranscribe);
-      await speakMessage(transformedText);
-      setMessages((prev) => [...prev.slice(0, -1)]);
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: transformedText,
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-    },
-    [isTtsEnabled, selectedVoice, isPlaying]
-  );
 
   const sendInterviewMessage = async (
-    transcription?: string,
+    messageContent: string,
     retryCount = 0
   ) => {
-    const messageContent = transcription || textInput;
     if (!messageContent.trim() || isGenerating) return;
 
     // Add user message to chat
@@ -565,7 +350,6 @@ export default function ResumeBuilder({
     ];
 
     setMessages(updatedMessages);
-    setTextInput("");
 
     // Add a temporary message to indicate AI is thinking
     setMessages((prev) => [
@@ -584,7 +368,10 @@ export default function ResumeBuilder({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages: updatedMessages }),
+        body: JSON.stringify({
+          messages: updatedMessages,
+          speakingStyle: selectedVoice.speakingStyle,
+        }),
       });
 
       if (!response.ok) {
@@ -596,15 +383,15 @@ export default function ResumeBuilder({
       const { interviewIsComplete, interviewerResponse } = data;
 
       if (isTtsEnabled) {
-        await addMessageWithTTS(interviewerResponse);
-      } else {
-        setMessages((prev) => prev.slice(0, -1));
-        const aiMessage: CoreAssistantMessage = {
-          role: "assistant",
-          content: interviewerResponse,
-        };
-        setMessages((prev) => [...prev, aiMessage]);
+        await speakMessage(interviewerResponse);
       }
+
+      setMessages((prev) => prev.slice(0, -1));
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: interviewerResponse,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
 
       // If interview is complete, set resume as ready and generate it
       if (interviewIsComplete) {
@@ -639,12 +426,11 @@ export default function ResumeBuilder({
     }
   };
 
-  const sendEditMessage = async (retryCount = 0) => {
+  const sendEditMessage = async (messageContent: string, retryCount = 0) => {
     if (!resumeId) {
       logError("No resume found");
       throw new Error("No resume found");
     }
-    const messageContent = textInput.trim();
 
     const updatedMessages: CoreMessage[] = [
       ...messages,
@@ -655,7 +441,6 @@ export default function ResumeBuilder({
     ];
 
     setMessages(updatedMessages);
-    setTextInput("");
 
     // Add a temporary message to indicate AI is thinking
     setMessages((prev) => [
@@ -673,6 +458,7 @@ export default function ResumeBuilder({
         body: JSON.stringify({
           resume: resume,
           userMessage: messageContent,
+          speakingStyle: selectedVoice.speakingStyle,
         }),
       });
 
@@ -693,16 +479,18 @@ export default function ResumeBuilder({
 
       const data = await response.json();
       const { updatedResume, aiResponse } = data;
+
       if (isTtsEnabled) {
-        await addMessageWithTTS(aiResponse);
-      } else {
-        setMessages((prev) => prev.slice(0, -1));
-        const aiMessage: CoreAssistantMessage = {
-          role: "assistant",
-          content: aiResponse,
-        };
-        setMessages((prev) => [...prev, aiMessage]);
+        await speakMessage(aiResponse);
       }
+
+      setMessages((prev) => prev.slice(0, -1));
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: aiResponse,
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+
       setResume(updatedResume);
       void saveResume(updatedResume, resumeId);
     } catch (error) {
@@ -717,7 +505,7 @@ export default function ResumeBuilder({
             content: t("errors.resumeGenerationRetryMessage"),
           },
         ]);
-        return sendEditMessage(retryCount + 1);
+        return sendEditMessage(messageContent, retryCount + 1);
       }
 
       const aiMessage: CoreAssistantMessage = {
@@ -727,51 +515,6 @@ export default function ResumeBuilder({
 
       setMessages((prev) => [...prev, aiMessage]);
       Sentry.captureException(error);
-    }
-  };
-
-  const handleSendButtonClick = () => {
-    sendMessage();
-  };
-
-  const sendMessage = async () => {
-    stopAudioPlayback();
-
-    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
-      setShowLimitDialog(true);
-      return;
-    }
-
-    if (resumeId) {
-      setIsGenerating(true);
-      await sendEditMessage();
-      if (isFreemiumEnabled && !hasSubscription) {
-        await trackResumeEdit(resumeId);
-        setEditCount((prev) => prev + 1);
-      }
-      setIsGenerating(false);
-    } else {
-      setIsInterviewing(true);
-      await sendInterviewMessage();
-      setIsInterviewing(false);
-    }
-
-    if (!user && captchaToken) {
-      const formData = new FormData();
-      formData.set("captchaToken", captchaToken);
-      formData.set("currentPath", pathname);
-      startTransition(() => {
-        verifyAnonymousUserAction(formData);
-      });
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    textareaRef.current?.focus();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
     }
   };
 
@@ -840,13 +583,6 @@ export default function ResumeBuilder({
       </div>
     );
   }
-
-  // Also update the cleanup effect to use the new function
-  useEffect(() => {
-    return () => {
-      stopAudioPlayback();
-    };
-  }, [stopAudioPlayback]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -918,193 +654,15 @@ export default function ResumeBuilder({
           )}
 
           <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
-            {/* Chat messages */}
-            <div className="flex-1 overflow-y-auto space-y-6 p-4 rounded-xl custom-scrollbar min-h-0">
-              <AnimatePresence>
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex ${
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-2xl p-4 shadow-sm transition-all duration-300 ${
-                        message.role === "user"
-                          ? "bg-gray-900 text-white dark:bg-gray-700 transform hover:scale-[1.02]"
-                          : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transform hover:scale-[1.02]"
-                      }`}
-                    >
-                      <div className="flex flex-col gap-2">
-                        <div className="flex-grow">
-                          {(message as any).isLoading ? (
-                            <div className="flex items-center justify-center">
-                              <LoadingSpinner variant="muted" />
-                            </div>
-                          ) : (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {message.content as string}
-                            </ReactMarkdown>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              <div ref={messagesEndRef} />
-            </div>
-
-            <div className="w-full relative">
-              <AnimatePresence>
-                {isRecording ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                  >
-                    <VoiceRecordingOverlay
-                      isOpen={true}
-                      onClose={() => {
-                        cancelRecording();
-                        setIsRecording(false);
-                      }}
-                      onConfirm={() => {
-                        stopRecording();
-                        setIsRecording(false);
-                      }}
-                      audioDevices={audioDevices}
-                      selectedAudio={selectedAudio}
-                      onSelectAudio={(deviceId) => setSelectedAudio(deviceId)}
-                    />
-                  </motion.div>
-                ) : isProcessing ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="w-full p-6 rounded-xl border dark:bg-gray-800/50 dark:border-gray-700 bg-white/50 flex items-center justify-center"
-                  >
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800 dark:border-gray-700 dark:border-t-white" />
-                      <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {t("processing") || "Transcribing..."}
-                      </span>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="relative transition-all duration-300 hover:transform hover:scale-[1.01] p-4">
-                    <Textarea
-                      ref={textareaRef}
-                      placeholder={t("typeYourResponse")}
-                      value={textInput}
-                      onChange={handleTextInputChange}
-                      onKeyDown={handleKeyDown}
-                      className="resize-none w-full p-4 rounded-xl border bg-white/80 dark:bg-gray-800/80 dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 transition-all duration-300 mb-2"
-                      rows={3}
-                      disabled={
-                        isGenerating ||
-                        isInterviewing ||
-                        (isLocked && !isFreemiumEnabled)
-                      }
-                    />
-                    <div className="flex justify-between items-center space-x-3 px-1">
-                      <div className="flex items-center space-x-3">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          type="button"
-                          className="h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
-                          onClick={() => setIsTtsEnabled(!isTtsEnabled)}
-                        >
-                          {isTtsEnabled ? (
-                            <Volume2 className="h-4 w-4 text-gray-500" />
-                          ) : (
-                            <VolumeX className="h-4 w-4 text-gray-500" />
-                          )}
-                        </Button>
-                        {isTtsEnabled && (
-                          <>
-                            <Select
-                              value={selectedVoice}
-                              onValueChange={setSelectedVoice}
-                            >
-                              <SelectTrigger className="w-[140px] h-9 rounded-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {VOICE_OPTIONS.map((voice) => (
-                                  <SelectItem
-                                    key={voice.voiceId}
-                                    value={voice.voiceId}
-                                  >
-                                    {voice.title}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select
-                              value={String(playbackSpeed)}
-                              onValueChange={(value) =>
-                                setPlaybackSpeed(parseFloat(value))
-                              }
-                            >
-                              <SelectTrigger className="w-[80px] h-9 rounded-full">
-                                <SelectValue
-                                  placeholder={`${playbackSpeed}x`}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="0.5">0.5x</SelectItem>
-                                <SelectItem value="1">1.0x</SelectItem>
-                                <SelectItem value="1.5">1.5x</SelectItem>
-                                <SelectItem value="2">2.0x</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex space-x-3">
-                        <Button
-                          variant="secondary"
-                          type="button"
-                          className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
-                          onClick={handleRecordingToggle}
-                          disabled={
-                            isGenerating ||
-                            isInterviewing ||
-                            (isLocked && !isFreemiumEnabled) ||
-                            (!user && !captchaToken)
-                          }
-                        >
-                          <Mic className="h-4 w-4" />
-                          {t("voice")}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="icon"
-                          className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
-                          onClick={handleSendButtonClick}
-                          disabled={
-                            (!textInput.trim() && !isRecording) ||
-                            isGenerating ||
-                            isInterviewing ||
-                            (isLocked && !isFreemiumEnabled) ||
-                            (!user && !captchaToken)
-                          }
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </AnimatePresence>
-            </div>
+            <ChatUI
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              isProcessing={isGenerating || isInterviewing}
+              isDisabled={
+                (isLocked && !isFreemiumEnabled) || (!user && !captchaToken)
+              }
+              showTtsControls={true}
+            />
           </Card>
           {!user && (
             <div className="flex justify-center mt-4">
@@ -1207,5 +765,34 @@ export default function ResumeBuilder({
         </DialogContent>
       </Dialog>
     </div>
+  );
+};
+
+export default function ResumeBuilder({
+  resumeId,
+  hasSubscription,
+  credits,
+  user,
+  isSubscriptionVariant,
+  isFreemiumEnabled,
+}: {
+  resumeId?: string;
+  hasSubscription: boolean;
+  credits: number;
+  user: User | null;
+  isSubscriptionVariant: boolean;
+  isFreemiumEnabled: boolean;
+}) {
+  return (
+    <TtsProvider>
+      <ResumeBuilderComponent
+        resumeId={resumeId}
+        hasSubscription={hasSubscription}
+        credits={credits}
+        user={user}
+        isSubscriptionVariant={isSubscriptionVariant}
+        isFreemiumEnabled={isFreemiumEnabled}
+      />
+    </TtsProvider>
   );
 }

@@ -1,42 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import { Mic, MicOff } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import EndInterviewModal from "./EndInterviewModal";
 import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
-import remarkGfm from "remark-gfm";
-import ReactMarkdown from "react-markdown";
-import { CoreMessage } from "ai";
-import { motion, AnimatePresence } from "framer-motion";
-import { useVoiceRecording } from "@/app/[locale]/dashboard/resumes/components/useVoiceRecording";
-import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/VoiceRecordingOverlay";
+import { CoreMessage, CoreAssistantMessage } from "ai";
+import { ChatUI } from "@/app/components/chat";
+import { TtsProvider, useTts, VoiceOption } from "@/app/context/TtsContext";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
   stream: MediaStream | null;
   messageHistory: Tables<"mock_interview_messages">[];
   jobId: string;
-  selectedAudioOutputId: string;
 }
 
-export default function ActiveInterview({
+export default function ActiveInterviewComponent({
   mockInterviewId,
   stream,
   messageHistory,
   jobId,
-  selectedAudioOutputId,
 }: ActiveInterviewProps) {
   const t = useTranslations("mockInterview.active");
   const [messages, setMessages] = useState<CoreMessage[]>(
@@ -45,84 +32,63 @@ export default function ActiveInterview({
       content: message.text,
     }))
   );
-  const [isProcessingAIResponse, setsProcessingAIResponse] = useState(false);
-  const [isProcessingUserResponse, setsProcessingUserResponse] =
-    useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(
-    null
-  );
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState("1");
+  const [isProcessingAIResponse, setIsProcessingAIResponse] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [firstQuestionAudioIsInitialized, setFirstQuestionAudioIsInitialized] =
     useState(messageHistory.length > 0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const videoRecorderRef = useRef<MediaRecorder | null>(null);
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEndModal, setShowEndModal] = useState(false);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
-  const [textInput, setTextInput] = useState<string>("");
   const user = useUser();
   const session = useSession();
-
-  const {
-    startRecording,
-    stopRecording,
-    cancelRecording,
-    isProcessing,
-    audioDevices,
-    selectedAudio,
-    setSelectedAudio,
-  } = useVoiceRecording({
-    onTranscription: (transcription: string) => {
-      if (transcription.trim()) {
-        setTextInput(transcription);
-        setIsRecording(false);
-      }
-    },
-    t,
-  });
+  const { isTtsEnabled, selectedVoice, speakMessage, stopAudioPlayback } =
+    useTts();
+  console.log("isTtsEnabled", isTtsEnabled);
 
   useEffect(() => {
     if (!isInitialized) {
       setIsInitialized(true);
     }
   }, []);
-  // useEffect above and below is a workaround because something is causing
-  // component to unmout and causing interviewinitialization to happen twice
+
   useEffect(() => {
     if (isInitialized && messages.length === 0) {
-      sendMessage({ message: "begin the interview", isInitialMessage: true });
+      handleSendMessage("begin the interview");
     } else {
       setFirstQuestionAudioIsInitialized(true);
     }
   }, [isInitialized]);
 
-  const handlePlaybackSpeedChange = (value: string) => {
-    setPlaybackSpeed(value);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = parseFloat(value);
-    }
-  };
-
-  const sendMessage = async ({
-    message,
-    isInitialMessage = false,
-  }: {
-    message: string;
-    isInitialMessage?: boolean;
-  }) => {
+  const handleSendMessage = async (message: string) => {
     try {
-      if (!isInitialMessage) {
-        setsProcessingUserResponse(false);
-        setMessages((prev) => [...prev, { role: "user", content: message }]);
-        setTextInput(""); // Clear text input after sending message
+      setIsProcessingAIResponse(true);
+      const prevMessages = [...messages];
+
+      // Add user message to chat
+      const updatedMessages: CoreMessage[] = [
+        ...prevMessages,
+        {
+          role: "user",
+          content: message,
+        },
+      ];
+
+      if (prevMessages.length > 0) {
+        setMessages(updatedMessages);
       }
-      setsProcessingAIResponse(true);
+
+      // Add a temporary message to indicate AI is thinking
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "",
+          isLoading: true,
+        },
+      ]);
 
       // Send message to chat endpoint
       const chatResponse = await fetch("/api/chat", {
@@ -133,8 +99,9 @@ export default function ActiveInterview({
         body: JSON.stringify({
           message,
           mockInterviewId,
-          history: messages,
-          isInitialMessage,
+          history: prevMessages,
+          isInitialMessage: messages.length === 0,
+          speakingStyle: selectedVoice.speakingStyle,
         }),
       });
 
@@ -155,86 +122,33 @@ export default function ActiveInterview({
 
       const { response: aiResponse } = await chatResponse.json();
 
-      // Add messages to history
-      const newAiMessage: CoreMessage = {
+      if (isTtsEnabled) {
+        await speakMessage(aiResponse);
+      }
+
+      setMessages((prev) => prev.slice(0, -1));
+      const aiMessage: CoreAssistantMessage = {
         role: "assistant",
         content: aiResponse,
       };
+      setMessages((prev) => [...prev, aiMessage]);
 
-      // Convert AI response to speech
-      const ttsResponse = await fetch("/api/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: aiResponse,
-        }),
-      });
-
-      if (!ttsResponse.ok) {
-        throw new Error("Failed to generate speech");
-      }
-
-      if (isInitialMessage) {
+      if (messages.length === 0) {
         setFirstQuestionAudioIsInitialized(true);
       }
-
-      // Create audio blob from response
-      const audioBlob = await ttsResponse.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      // Create and play audio
-      if (currentAudio) {
-        currentAudio.pause();
-        URL.revokeObjectURL(currentAudio.src);
-      }
-
-      const audio = new Audio(audioUrl);
-      // @ts-ignore - setSinkId exists but TypeScript doesn't know about it
-      if (audio.setSinkId && selectedAudioOutputId) {
-        try {
-          // @ts-ignore
-          await audio.setSinkId(selectedAudioOutputId);
-        } catch (error: any) {
-          logError("Error setting audio output device:", {
-            error: error.message,
-          });
-        }
-      }
-      audio.onended = () => setIsPlaying(false);
-      audio.playbackRate = parseFloat(playbackSpeed);
-      setCurrentAudio(audio);
-      audioRef.current = audio;
-      setMessages((prev) => [...prev, newAiMessage]);
-      await audio.play();
-      setIsPlaying(true);
     } catch (error: any) {
       logError("Error in interview:", { error: error.message });
+      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Sorry, there was an error processing your message. Please try again.",
+        },
+      ]);
     } finally {
-      setsProcessingAIResponse(false);
-    }
-  };
-
-  const replayLastResponse = () => {
-    if (audioRef.current && !isPlaying) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const handleRecordingToggle = async () => {
-    if (isRecording) {
-      stopRecording();
-      setIsRecording(false);
-    } else {
-      try {
-        await startRecording();
-        setIsRecording(true);
-      } catch (error) {
-        logError("Voice recording toggle error:", { error });
-      }
+      setIsProcessingAIResponse(false);
     }
   };
 
@@ -274,37 +188,9 @@ export default function ActiveInterview({
     }
   }, [firstQuestionAudioIsInitialized]);
 
-  const pauseAudioPlayback = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
   const endInterview = () => {
     stopVideoRecording();
-    pauseAudioPlayback();
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isRecording, isProcessingAIResponse]);
-
-  const handleTextInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextInput(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      if (textInput.trim()) {
-        sendMessage({ message: textInput });
-      }
-    }
+    stopAudioPlayback();
   };
 
   if (!user || !session) {
@@ -351,157 +237,14 @@ export default function ActiveInterview({
 
         {/* Chat Interface */}
         <div className="flex flex-col gap-4 w-1/2 h-full">
-          <div className="flex-1 overflow-auto space-y-4 min-h-0 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    msg.role === "user"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 dark:bg-gray-800"
-                  }`}
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content as string}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            ))}
-            {isProcessingUserResponse && (
-              <div className="flex justify-end">
-                <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-blue-500/50">
-                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
-                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0.2s_infinite]" />
-                  <div className="w-2 h-2 bg-white rounded-full animate-[pulse_1s_ease-in-out_0.4s_infinite]" />
-                </div>
-              </div>
-            )}
-            {isProcessingAIResponse && !isProcessingUserResponse && (
-              <div className="flex justify-start">
-                <div className="flex gap-1 max-w-[80%] rounded-lg p-3 bg-gray-200/50 dark:bg-gray-800/50">
-                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0s_infinite]" />
-                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0.2s_infinite]" />
-                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-[pulse_1s_ease-in-out_0.4s_infinite]" />
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Unified Input UI */}
-          <div className="flex flex-col gap-4">
-            <div className="relative">
-              {isProcessing ? (
-                <div className="w-full p-6 rounded-lg border dark:bg-gray-800 dark:border-gray-700 bg-white/50 flex items-center justify-center min-h-[120px]">
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-800 dark:border-gray-700 dark:border-t-white" />
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      {t("transcribing")}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <textarea
-                    placeholder={t("typeYourResponse")}
-                    value={textInput}
-                    onChange={handleTextInputChange}
-                    onKeyDown={handleKeyDown}
-                    className="w-full p-3 pr-24 rounded-lg border resize-none dark:bg-gray-800 dark:border-gray-700"
-                    rows={3}
-                    disabled={isRecording || isProcessingAIResponse}
-                  />
-                  <div className="absolute bottom-3 right-3 flex space-x-2">
-                    <AnimatePresence>
-                      {isRecording ? (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 20 }}
-                          className="absolute bottom-full right-0 mb-2 w-[400px]"
-                        >
-                          <VoiceRecordingOverlay
-                            isOpen={true}
-                            onClose={() => {
-                              cancelRecording();
-                              setIsRecording(false);
-                            }}
-                            onConfirm={() => {
-                              stopRecording();
-                              setIsRecording(false);
-                            }}
-                            audioDevices={audioDevices}
-                            selectedAudio={selectedAudio}
-                            onSelectAudio={(deviceId) =>
-                              setSelectedAudio(deviceId)
-                            }
-                          />
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      type="button"
-                      className={`h-8 w-8 rounded-full ${
-                        isRecording ? "text-red-500" : "text-gray-500"
-                      }`}
-                      onClick={handleRecordingToggle}
-                      disabled={isProcessingAIResponse}
-                    >
-                      {isRecording ? (
-                        <MicOff className="h-4 w-4" />
-                      ) : (
-                        <Mic className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="h-8"
-                      onClick={() => sendMessage({ message: textInput })}
-                      disabled={
-                        (!textInput.trim() && !isRecording) ||
-                        isProcessingAIResponse
-                      }
-                    >
-                      {t("send")}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex gap-2 items-center">
-            <Button
-              onClick={replayLastResponse}
-              disabled={!currentAudio || isPlaying || isProcessingAIResponse}
-              variant="outline"
-            >
-              {t("replayButton")}
-            </Button>
-            <Select
-              value={playbackSpeed}
-              onValueChange={handlePlaybackSpeedChange}
-            >
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Speed" />
-              </SelectTrigger>
-              <SelectContent>
-                {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
-                  <SelectItem key={speed} value={speed.toString()}>
-                    {speed}x
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
+            <ChatUI
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              isProcessing={isProcessingAIResponse}
+              showTtsControls={true}
+              className="h-full"
+            />
           </div>
         </div>
       </div>
