@@ -22,7 +22,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const { text, voiceId, provider, speakingStyle } =
       (await request.json()) as {
         text: string;
-        voiceId?: "alloy" | "onyx" | "lbj" | "dg";
+        voiceId?: "alloy" | "onyx" | "lbj" | "dg" | "cw";
         provider?: "openai" | "speechify";
         speakingStyle?: string;
       };
