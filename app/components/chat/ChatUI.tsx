@@ -103,7 +103,7 @@ export function ChatUI({
   useEffect(() => {
     if (
       isTtsEnabled &&
-      messages.length > 0 &&
+      messages.length === 1 &&
       messages[0].role === "assistant"
     ) {
       handlePlayMessage(messages[0].content as string, 0);
