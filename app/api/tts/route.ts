@@ -3,12 +3,13 @@ import { generateStreamingTTS } from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 
 const DEFAULT_VOICE = "alloy";
-const DEFAULT_MODEL = "gpt-4o-mini-tts";
 
 const VOICE_MAP = {
   alloy: "alloy",
   onyx: "onyx",
   lbj: process.env.SPEECHIFY_LEBRON_JAMES_VOICE_ID,
+  dg: process.env.SPEECHIFY_DAVID_GOGGINS_VOICE_ID,
+  cw: process.env.SPEECHIFY_CHAEWON_VOICE_ID,
 };
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
@@ -21,7 +22,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const { text, voiceId, provider, speakingStyle } =
       (await request.json()) as {
         text: string;
-        voiceId?: "alloy" | "onyx" | "lbj";
+        voiceId?: "alloy" | "onyx" | "lbj" | "dg";
         provider?: "openai" | "speechify";
         speakingStyle?: string;
       };
