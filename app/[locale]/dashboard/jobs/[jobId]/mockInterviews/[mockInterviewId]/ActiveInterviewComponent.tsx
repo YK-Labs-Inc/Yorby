@@ -46,7 +46,6 @@ export default function ActiveInterviewComponent({
   const session = useSession();
   const { isTtsEnabled, selectedVoice, speakMessage, stopAudioPlayback } =
     useTts();
-  console.log("isTtsEnabled", isTtsEnabled);
 
   useEffect(() => {
     if (!isInitialized) {

@@ -80,7 +80,6 @@ export function TtsProvider({
   initialVoice = VOICE_OPTIONS[0],
   initialTtsEnabled = false,
 }: TtsProviderProps) {
-  console.log("initialTttsenabled", initialTtsEnabled);
   const [isTtsEnabled, setIsTtsEnabled] = useState<boolean>(initialTtsEnabled);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(initialVoice);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
