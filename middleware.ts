@@ -21,12 +21,40 @@ const PERSONA_REDIRECT_DOMAINS = [
   "goggins2resume",
 ];
 
+const PERSONA_INTERVIEW_REDIRECT_DOMAINS = [
+  "lebronmockinterview",
+  "chaewonmockinterview",
+  "gogginsmockinterview",
+];
+
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
   logger.middleware(request);
 
   // Check if the current domain needs to be redirected
   const hostname = request.headers.get("host") || "";
+
+  const isPersonaInterviewRedirect = PERSONA_INTERVIEW_REDIRECT_DOMAINS.some(
+    (domain) => hostname.includes(domain)
+  );
+  if (isPersonaInterviewRedirect) {
+    if (hostname.includes("lebronmockinterview")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/mock-interviews/lbj`).toString(),
+        301
+      );
+    } else if (hostname.includes("chaewonmockinterview")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/mock-interviews/cw`).toString(),
+        301
+      );
+    } else if (hostname.includes("gogginsmockinterview")) {
+      return Response.redirect(
+        new URL(`https://perfectinterview.ai/mock-interviews/dw`).toString(),
+        301
+      );
+    }
+  }
 
   const isPersonaResumeRedirect = PERSONA_REDIRECT_DOMAINS.some((domain) =>
     hostname.includes(domain)

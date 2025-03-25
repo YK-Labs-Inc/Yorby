@@ -8,7 +8,7 @@ import { Tables } from "@/utils/supabase/database.types";
 import EndInterviewModal from "./EndInterviewModal";
 import { useSession } from "@/context/UserContext";
 import { useUser } from "@/context/UserContext";
-import { CoreMessage, CoreAssistantMessage } from "ai";
+import { CoreMessage } from "ai";
 import { ChatUI } from "@/app/components/chat";
 import { useTts } from "@/app/context/TtsContext";
 
@@ -44,8 +44,7 @@ export default function ActiveInterviewComponent({
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const user = useUser();
   const session = useSession();
-  const { isTtsEnabled, selectedVoice, speakMessage, stopAudioPlayback } =
-    useTts();
+  const { selectedVoice, stopAudioPlayback } = useTts();
 
   useEffect(() => {
     if (!isInitialized) {
@@ -62,34 +61,27 @@ export default function ActiveInterviewComponent({
   }, [isInitialized]);
 
   const handleSendMessage = async (message: string) => {
+    setIsProcessingAIResponse(true);
+    const prevMessages = [...messages];
+    let updatedMessages: CoreMessage[] =
+      prevMessages.length > 0
+        ? [
+            ...prevMessages,
+            {
+              role: "user",
+              content: message,
+            },
+          ]
+        : [];
     try {
-      setIsProcessingAIResponse(true);
-      const prevMessages = [...messages];
-
-      // Add user message to chat
-      const updatedMessages: CoreMessage[] = [
-        ...prevMessages,
-        {
-          role: "user",
-          content: message,
-        },
-      ];
-
-      if (prevMessages.length > 0) {
-        setMessages(updatedMessages);
-      }
-
-      // Add a temporary message to indicate AI is thinking
-      setMessages((prev) => [
-        ...prev,
+      updatedMessages = [
+        ...updatedMessages,
         {
           role: "assistant",
           content: "",
-          isLoading: true,
         },
-      ]);
-
-      // Send message to chat endpoint
+      ];
+      setMessages(updatedMessages);
       const chatResponse = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -108,46 +100,50 @@ export default function ActiveInterviewComponent({
         logError("Failed to send message", {
           error: chatResponse.statusText,
         });
-        setMessages((prev) => [
-          ...prev,
+        updatedMessages = [
+          ...updatedMessages,
           {
             role: "assistant",
             content:
               "Sorry, I couldn't process your message. Could you please send it again?",
           },
-        ]);
-        return;
+        ];
+        setMessages(updatedMessages);
+        return {
+          message: updatedMessages[updatedMessages.length - 1]
+            .content as string,
+          index: updatedMessages.length - 1,
+        };
       }
-
       const { response: aiResponse } = await chatResponse.json();
-
-      if (isTtsEnabled) {
-        await speakMessage(aiResponse);
-      }
-
-      setMessages((prev) => prev.slice(0, -1));
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: aiResponse,
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-
+      updatedMessages = [
+        ...updatedMessages.slice(0, -1),
+        {
+          role: "assistant",
+          content: aiResponse,
+        },
+      ];
+      setMessages(updatedMessages);
       if (messages.length === 0) {
         setFirstQuestionAudioIsInitialized(true);
       }
     } catch (error: any) {
       logError("Error in interview:", { error: error.message });
-      setMessages((prev) => prev.slice(0, -1));
-      setMessages((prev) => [
-        ...prev,
+      updatedMessages = [
+        ...updatedMessages,
         {
           role: "assistant",
           content:
             "Sorry, there was an error processing your message. Please try again.",
         },
-      ]);
+      ];
+      setMessages(updatedMessages);
     } finally {
       setIsProcessingAIResponse(false);
+      return {
+        message: updatedMessages[updatedMessages.length - 1].content as string,
+        index: updatedMessages.length - 1,
+      };
     }
   };
 

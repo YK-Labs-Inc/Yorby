@@ -139,18 +139,19 @@ const StartScreen = ({
   onVoiceChange,
   initialTtsEnabled,
   onTtsEnabledChange,
+  selectedVoiceId,
+  onSelectedVoiceIdChange,
 }: {
   onStart: () => void;
   initialVoice?: string;
   onVoiceChange: (voiceId: string) => void;
   initialTtsEnabled: boolean;
   onTtsEnabledChange: (enabled: boolean) => void;
+  selectedVoiceId: string;
+  onSelectedVoiceIdChange: (voiceId: string) => void;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [ttsEnabled, setTtsEnabled] = useState(initialTtsEnabled);
-  const [selectedVoiceId, setSelectedVoiceId] = useState(
-    initialVoice || "alloy"
-  );
 
   const handleStart = () => {
     onTtsEnabledChange(ttsEnabled);
@@ -206,7 +207,7 @@ const StartScreen = ({
                 </Label>
                 <Select
                   value={selectedVoiceId}
-                  onValueChange={setSelectedVoiceId}
+                  onValueChange={onSelectedVoiceIdChange}
                 >
                   <SelectTrigger id="voice-select">
                     <SelectValue placeholder="Select a voice" />
@@ -257,6 +258,9 @@ const ResumeBuilderComponent = ({
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [resume, setResume] = useState<ResumeDataType | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>(
+    persona || "alloy"
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { logError } = useAxiomLogging();
   const router = useRouter();
@@ -279,13 +283,7 @@ const ResumeBuilderComponent = ({
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
-  const {
-    isTtsEnabled,
-    selectedVoice,
-    speakMessage,
-    setSelectedVoice,
-    setIsTtsEnabled,
-  } = useTts();
+  const { selectedVoice, setSelectedVoice, setIsTtsEnabled } = useTts();
 
   const handleVoiceChange = useCallback(
     (voiceId: string) => {
@@ -329,7 +327,7 @@ const ResumeBuilderComponent = ({
 
   useEffect(() => {
     const selectedVoice = VOICE_OPTIONS.find(
-      (voice) => voice.voiceId === persona
+      (voice) => voice.voiceId === selectedVoiceId
     );
     let initialMessage = resumeId
       ? t("editResumeInitialMessage")
@@ -373,7 +371,7 @@ Once I have all that information, I can try my best to make a really great first
         content: initialMessage,
       },
     ]);
-  }, [resumeId, persona, t, hasStarted]);
+  }, [resumeId, persona, t, hasStarted, selectedVoiceId]);
 
   // Fetch initial edit count
   useEffect(() => {
@@ -432,7 +430,7 @@ Once I have all that information, I can try my best to make a really great first
 
         setResume(sortedData);
       } catch (error) {
-        console.error("Error fetching resume data:", error);
+        logError("Error fetching resume data:", { error });
         setResume(null);
       } finally {
         setIsGenerating(false);
@@ -459,9 +457,10 @@ Once I have all that information, I can try my best to make a really great first
       return;
     }
 
+    let messagesResponse: { message: string; index: number };
     if (resumeId) {
       setIsGenerating(true);
-      await sendEditMessage(message);
+      messagesResponse = await sendEditMessage(message);
       if (isFreemiumEnabled && !hasSubscription) {
         await trackResumeEdit(resumeId);
         setEditCount((prev) => prev + 1);
@@ -469,7 +468,7 @@ Once I have all that information, I can try my best to make a really great first
       setIsGenerating(false);
     } else {
       setIsInterviewing(true);
-      await sendInterviewMessage(message);
+      messagesResponse = await sendInterviewMessage(message);
       setIsInterviewing(false);
     }
 
@@ -481,16 +480,14 @@ Once I have all that information, I can try my best to make a really great first
         verifyAnonymousUserAction(formData);
       });
     }
+    return messagesResponse;
   };
 
   const sendInterviewMessage = async (
     messageContent: string,
     retryCount = 0
   ) => {
-    if (!messageContent.trim() || isGenerating) return;
-
-    // Add user message to chat
-    const updatedMessages: CoreMessage[] = [
+    let updatedMessages: CoreMessage[] = [
       ...messages,
       {
         role: "user",
@@ -500,15 +497,15 @@ Once I have all that information, I can try my best to make a really great first
 
     setMessages(updatedMessages);
 
-    // Add a temporary message to indicate AI is thinking
-    setMessages((prev) => [
-      ...prev,
+    updatedMessages = [
+      ...updatedMessages,
       {
         role: "assistant",
         content: "",
-        isLoading: true,
       },
-    ]);
+    ];
+
+    setMessages(updatedMessages);
 
     try {
       // Send to backend for processing
@@ -530,17 +527,12 @@ Once I have all that information, I can try my best to make a really great first
       // Parse the JSON response
       const data = await response.json();
       const { interviewIsComplete, interviewerResponse } = data;
-
-      if (isTtsEnabled) {
-        await speakMessage(interviewerResponse);
-      }
-
-      setMessages((prev) => prev.slice(0, -1));
       const aiMessage: CoreAssistantMessage = {
         role: "assistant",
         content: interviewerResponse,
       };
-      setMessages((prev) => [...prev, aiMessage]);
+      updatedMessages = [...updatedMessages.slice(0, -1), aiMessage];
+      setMessages(updatedMessages);
 
       // If interview is complete, set resume as ready and generate it
       if (interviewIsComplete) {
@@ -563,25 +555,23 @@ Once I have all that information, I can try my best to make a really great first
         return sendInterviewMessage(messageContent, retryCount + 1);
       }
 
-      // Update the last message to show the error
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: t("errors.resumeGenerationError"),
-        },
-      ]);
+      const aiMessage: CoreAssistantMessage = {
+        role: "assistant",
+        content: t("errors.resumeGenerationError"),
+      };
+      updatedMessages = [...updatedMessages, aiMessage];
+      setMessages(updatedMessages);
       Sentry.captureException(error);
+    } finally {
+      return {
+        message: updatedMessages[updatedMessages.length - 1].content as string,
+        index: updatedMessages.length - 1,
+      };
     }
   };
 
   const sendEditMessage = async (messageContent: string, retryCount = 0) => {
-    if (!resumeId) {
-      logError("No resume found");
-      throw new Error("No resume found");
-    }
-
-    const updatedMessages: CoreMessage[] = [
+    let updatedMessages: CoreMessage[] = [
       ...messages,
       {
         role: "user",
@@ -590,18 +580,20 @@ Once I have all that information, I can try my best to make a really great first
     ];
 
     setMessages(updatedMessages);
-
-    // Add a temporary message to indicate AI is thinking
-    setMessages((prev) => [
-      ...prev,
+    updatedMessages = [
+      ...updatedMessages,
       {
         role: "assistant",
         content: "",
-        isLoading: true,
       },
-    ]);
+    ];
+    setMessages(updatedMessages);
 
     try {
+      if (!resumeId) {
+        logError("No resume found");
+        throw new Error("No resume found");
+      }
       const response = await fetch("/api/resume/edit", {
         method: "POST",
         body: JSON.stringify({
@@ -612,16 +604,19 @@ Once I have all that information, I can try my best to make a really great first
       });
 
       if (response.status === 429) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant" as const,
-            content:
-              t("errors.rateLimitMessage") ||
-              "You've been rate limited — please try again in an hour.",
-          },
-        ]);
-        return;
+        const aiMessage: CoreAssistantMessage = {
+          role: "assistant",
+          content:
+            t("errors.rateLimitMessage") ||
+            "You've been rate limited — please try again in an hour.",
+        };
+        updatedMessages = [...updatedMessages, aiMessage];
+        setMessages(updatedMessages);
+        return {
+          message: updatedMessages[updatedMessages.length - 1]
+            .content as string,
+          index: updatedMessages.length - 1,
+        };
       } else if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
@@ -629,17 +624,12 @@ Once I have all that information, I can try my best to make a really great first
       const data = await response.json();
       const { updatedResume, aiResponse } = data;
 
-      if (isTtsEnabled) {
-        await speakMessage(aiResponse);
-      }
-
-      setMessages((prev) => prev.slice(0, -1));
       const aiMessage: CoreAssistantMessage = {
         role: "assistant",
         content: aiResponse,
       };
-      setMessages((prev) => [...prev, aiMessage]);
-
+      updatedMessages = [...updatedMessages.slice(0, -1), aiMessage];
+      setMessages(updatedMessages);
       setResume(updatedResume);
       void saveResume(updatedResume, resumeId);
     } catch (error) {
@@ -661,9 +651,14 @@ Once I have all that information, I can try my best to make a really great first
         role: "assistant",
         content: t("errors.resumeEditError"),
       };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      updatedMessages = [...updatedMessages, aiMessage];
+      setMessages(updatedMessages);
       Sentry.captureException(error);
+    } finally {
+      return {
+        message: updatedMessages[updatedMessages.length - 1].content as string,
+        index: updatedMessages.length - 1,
+      };
     }
   };
 
@@ -732,6 +727,8 @@ Once I have all that information, I can try my best to make a really great first
         onVoiceChange={handleVoiceChange}
         initialTtsEnabled={Boolean(persona)}
         onTtsEnabledChange={setIsTtsEnabled}
+        selectedVoiceId={selectedVoiceId}
+        onSelectedVoiceIdChange={setSelectedVoiceId}
       />
     );
   }
