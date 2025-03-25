@@ -203,10 +203,7 @@ export default async function RootLayout({
                           isSubscriptionVariant={isSubscriptionVariant}
                         />
                         <SidebarTrigger />
-                        <main className="w-full">
-                          {children}
-                          <Chatwoot />
-                        </main>
+                        <main className="w-full">{children}</main>
                       </OnboardingProvider>
                     </SidebarProvider>
                   </DeepgramContextProvider>

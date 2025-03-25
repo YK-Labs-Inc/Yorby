@@ -304,8 +304,40 @@ export function ChatUI({
                 rows={3}
                 disabled={isDisabled || isProcessing || isRecording}
               />
-              <div className="flex justify-between items-center space-x-3 px-1">
-                <div className="flex items-center space-x-3">
+              <div className="flex flex-col space-y-3 px-1">
+                {/* Primary Actions Row */}
+                <div className="flex items-center justify-between space-x-3">
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
+                    onClick={handleRecordingToggle}
+                    disabled={isDisabled || isProcessing}
+                  >
+                    {isRecording ? (
+                      <MicOff className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                    {t("voice")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
+                    onClick={handleSendMessage}
+                    disabled={
+                      isDisabled ||
+                      (!textInput.trim() && !isRecording) ||
+                      isProcessing
+                    }
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* TTS Controls Row */}
+                <div className="flex items-center space-x-3 border-t dark:border-gray-700 pt-3">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -380,35 +412,6 @@ export function ChatUI({
                       </Select>
                     </>
                   )}
-                </div>
-                <div className="flex space-x-3">
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={handleRecordingToggle}
-                    disabled={isDisabled || isProcessing}
-                  >
-                    {isRecording ? (
-                      <MicOff className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                    {t("voice")}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    className="h-9 w-9 rounded-full bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-all duration-300 flex items-center justify-center"
-                    onClick={handleSendMessage}
-                    disabled={
-                      isDisabled ||
-                      (!textInput.trim() && !isRecording) ||
-                      isProcessing
-                    }
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             </>
