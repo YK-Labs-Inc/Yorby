@@ -542,6 +542,7 @@
   "signIn": {
     "title": "Sign In",
     "description": "We will send you a magic link to sign in to your account.",
+    "autoCreateAccount": "Don't have an account? No worries - we'll automatically create one for you when you enter your email.",
     "form": {
       "email": {
         "label": "Email",

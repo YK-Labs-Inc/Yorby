@@ -549,7 +549,8 @@
       },
       "submit": "サインイン",
       "submitting": "サインイン中..."
-    }
+    },
+    "autoCreateAccount": "アカウントをお持ちでないですか？ご心配なく - メールアドレスを入力すると、自動的にアカウントが作成されます。"
   },
   "interviewCopilots": {
     "title": "インタビューコパイロット",
@@ -1169,7 +1170,12 @@
       "description": "最高の履歴書作成体験のためには、デスクトップコンピューターのご利用をお勧めします。当社の履歴書ビルダーは、大画面で最適に動作する高度な書式設定機能を備えています。",
       "button": "とにかく続ける"
     },
-    "generatingAudio": "オーディオを生成中..."
+    "generatingAudio": "オーディオを生成中...",
+    "startScreen": {
+      "enableVoice": "ボイスモードを有効にする",
+      "selectVoice": "音声を選択",
+      "startButton": "履歴書の作成を開始する🚀"
+    }
   },
   "interviewCopilotDemo": {
     "session": {
