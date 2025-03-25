@@ -36,7 +36,6 @@ export function useVoiceRecording({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   // Get available audio devices - but don't run automatically on mount
   const initializeRecording = async (): Promise<string | false> => {
@@ -156,7 +155,6 @@ export function useVoiceRecording({
       logError("Error processing audio:", { error });
     } finally {
       setIsProcessing(false);
-      audioChunksRef.current = [];
     }
   };
 
@@ -188,17 +186,16 @@ export function useVoiceRecording({
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
-      audioChunksRef.current = [];
-
-      // Handle data from microphone
+      // Handle data from microphone - this will be called once when recording stops
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+          // Process audio once we have all chunks (which is now, since this only fires once)
+          await processAudio([event.data]);
         }
       };
 
-      // Start recording with 500ms intervals
-      mediaRecorder.start(500);
+      // Start recording (without time parameter, so it will only call ondataavailable when stopped)
+      mediaRecorder.start();
     } catch (error) {
       logError("Failed to start recording:", { error });
       alert(messages.micPermissionError);
@@ -225,14 +222,11 @@ export function useVoiceRecording({
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-
-    // Clear audio chunks
-    audioChunksRef.current = [];
   };
 
   const stopRecording = async () => {
     try {
-      // Stop media recorder
+      // Stop media recorder - this will trigger ondataavailable
       if (
         mediaRecorderRef.current &&
         mediaRecorderRef.current.state === "recording"
@@ -251,9 +245,6 @@ export function useVoiceRecording({
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
-
-      // Process the audio immediately
-      await processAudio(audioChunksRef.current);
     } catch (error) {
       alert(messages.recordingError);
       setIsProcessing(false);

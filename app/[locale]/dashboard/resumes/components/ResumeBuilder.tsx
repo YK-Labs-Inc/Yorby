@@ -42,7 +42,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Turnstile } from "@marsidev/react-turnstile";
-import MobileWarning from "./MobileWarning";
 import { ChatUI } from "@/app/components/chat";
 import { TtsProvider, useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
@@ -141,6 +140,9 @@ const StartScreen = ({
   onTtsEnabledChange,
   selectedVoiceId,
   onSelectedVoiceIdChange,
+  user,
+  setCaptchaToken,
+  captchaToken,
 }: {
   onStart: () => void;
   initialVoice?: string;
@@ -149,6 +151,9 @@ const StartScreen = ({
   onTtsEnabledChange: (enabled: boolean) => void;
   selectedVoiceId: string;
   onSelectedVoiceIdChange: (voiceId: string) => void;
+  user: User | null;
+  setCaptchaToken: (token: string) => void;
+  captchaToken: string;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [ttsEnabled, setTtsEnabled] = useState(initialTtsEnabled);
@@ -160,7 +165,7 @@ const StartScreen = ({
   };
 
   return (
-    <div className="h-full flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-lg">
         <CardContent className="pt-6 space-y-8">
           <div className="text-center space-y-2">
@@ -223,12 +228,26 @@ const StartScreen = ({
               </div>
             )}
 
-            <Button onClick={handleStart} className="w-full">
+            <Button
+              onClick={handleStart}
+              className="w-full"
+              disabled={!captchaToken}
+            >
               {t("startScreen.startButton")}
             </Button>
           </div>
         </CardContent>
       </Card>
+      {!user && (
+        <div className="flex justify-center mt-4">
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => {
+              setCaptchaToken(token);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -729,6 +748,9 @@ Once I have all that information, I can try my best to make a really great first
         onTtsEnabledChange={setIsTtsEnabled}
         selectedVoiceId={selectedVoiceId}
         onSelectedVoiceIdChange={setSelectedVoiceId}
+        user={user}
+        setCaptchaToken={setCaptchaToken}
+        captchaToken={captchaToken}
       />
     );
   }
@@ -817,16 +839,6 @@ Once I have all that information, I can try my best to make a really great first
               showTtsControls={true}
             />
           </Card>
-          {!user && (
-            <div className="flex justify-center mt-4">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) => {
-                  setCaptchaToken(token);
-                }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Resume preview column - shown when resume exists or generating */}
