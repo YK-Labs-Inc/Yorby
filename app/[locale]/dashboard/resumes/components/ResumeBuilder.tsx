@@ -733,20 +733,11 @@ Once I have all that information, I can try my best to make a really great first
     );
   }
 
-  // If user is not anonymous (has email) and is on mobile, only show mobile warning
-  if (isMobileView && user && !user.is_anonymous) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <MobileWarning />
-      </div>
-    );
-  }
-
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
-        <Card className="mx-12 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
-          <CardContent className="px-6 py-8 relative">
+        <Card className="mx-4 md:mx-12 my-4 md:my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+          <CardContent className="px-4 md:px-6 py-6 md:py-8 relative">
             <button
               onClick={() => setIsDemoDismissed(true)}
               className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -766,17 +757,17 @@ Once I have all that information, I can try my best to make a really great first
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-foreground">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground">
                   {t("demoTitle")}
                 </h2>
                 <p className="text-muted-foreground max-w-lg">
                   {t("demoDescription")}
                 </p>
               </div>
-              <Link href="/resume-builder-demo" className="shrink-0">
-                <Button size="lg" className="gap-2">
+              <Link href="/resume-builder-demo" className="w-full md:w-auto">
+                <Button size="lg" className="gap-2 w-full md:w-auto">
                   <PlayCircle className="w-5 h-5" />
                   {t("demoCta")}
                 </Button>
@@ -790,28 +781,32 @@ Once I have all that information, I can try my best to make a really great first
       )}
       <div
         className={`flex-1 grid ${
-          shouldShowSplitView ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
-        } gap-8 p-8 overflow-hidden max-w-[2000px] mx-auto w-full h-full`}
+          shouldShowSplitView
+            ? "grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8"
+            : "grid-cols-1"
+        } p-4 md:p-8 overflow-hidden max-w-[2000px] mx-auto w-full h-full`}
       >
         {/* Chat UI column - always shown */}
         <div
-          className={`md:flex flex-col h-full overflow-hidden ${
-            shouldShowSplitView ? "" : "lg:col-span-2 max-w-3xl mx-auto w-full"
+          className={`flex flex-col h-full overflow-hidden ${
+            shouldShowSplitView
+              ? "order-1 lg:order-1"
+              : "lg:col-span-2 max-w-3xl mx-auto w-full"
           } ${user?.is_anonymous ? "hidden" : ""}`}
         >
           {/* Title Section */}
           {!shouldShowSplitView && (
-            <div className="flex-none mb-4 space-y-1">
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white text-center">
+            <div className="flex-none mb-4 space-y-1 px-4">
+              <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white text-center">
                 {t("titleV2")}
               </h1>
-              <p className="text-lg text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-base md:text-lg text-gray-500 dark:text-gray-400 text-center">
                 {t("descriptionV2")}
               </p>
             </div>
           )}
 
-          <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
+          <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg md:rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
             <ChatUI
               messages={messages}
               onSendMessage={handleSendMessage}
@@ -839,7 +834,7 @@ Once I have all that information, I can try my best to make a really great first
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col h-full overflow-hidden"
+            className="flex flex-col h-full overflow-hidden order-2 lg:order-2"
           >
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {isGenerating && !resume ? (
@@ -850,7 +845,7 @@ Once I have all that information, I can try my best to make a really great first
                     className="text-center space-y-4"
                   >
                     <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-gray-300 border-t-gray-900 dark:border-gray-600 dark:border-t-gray-300" />
-                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100">
                       {t("generation.title")}
                     </p>
                   </motion.div>
@@ -879,7 +874,7 @@ Once I have all that information, I can try my best to make a really great first
 
       {/* Add the limit reached dialog */}
       <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t("freemium.limitReached.title")}</DialogTitle>
             <DialogDescription>
@@ -894,22 +889,34 @@ Once I have all that information, I can try my best to make a really great first
                     })}
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-6 flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
+          <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowLimitDialog(false)}
+              className="w-full sm:w-auto"
+            >
               {t("freemium.limitReached.cancel")}
             </Button>
             {isSubscriptionVariant ? (
-              <Link href="/purchase">
-                <Button>{t("freemium.limitReached.upgrade")}</Button>
+              <Link href="/purchase" className="w-full sm:w-auto">
+                <Button className="w-full">
+                  {t("freemium.limitReached.upgrade")}
+                </Button>
               </Link>
             ) : credits < 1 ? (
-              <Link href="/purchase">
-                <Button>{t("freemium.limitReached.purchaseCredits")}</Button>
+              <Link href="/purchase" className="w-full sm:w-auto">
+                <Button className="w-full">
+                  {t("freemium.limitReached.purchaseCredits")}
+                </Button>
               </Link>
             ) : (
-              <form action={unlockAction}>
+              <form action={unlockAction} className="w-full sm:w-auto">
                 <input type="hidden" name="resumeId" value={resumeId} />
-                <Button type="submit" disabled={unlockPending}>
+                <Button
+                  type="submit"
+                  disabled={unlockPending}
+                  className="w-full"
+                >
                   {unlockPending
                     ? t("freemium.limitReached.unlocking")
                     : t("freemium.limitReached.unlockWithCredit")}

@@ -194,14 +194,13 @@ export default function ActiveInterviewComponent({
 
   if (!firstQuestionAudioIsInitialized) {
     return (
-      <div className="h-screen flex flex-col gap-6 max-w-[1080px] mx-auto justify-center items-center">
+      <div className="h-screen flex flex-col gap-6 max-w-[1080px] mx-auto justify-center items-center p-4 md:p-6">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4  border-t-transparent rounded-full animate-spin" />
-          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" />
+          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 text-center">
             {t("loading.title")}
           </h2>
-
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-gray-500 dark:text-gray-400 text-center">
             {t("loading.description")}
           </p>
         </div>
@@ -210,15 +209,20 @@ export default function ActiveInterviewComponent({
   }
 
   return (
-    <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-6">
+    <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
       <div className="flex justify-end mb-4">
-        <Button onClick={() => setShowEndModal(true)} variant="destructive">
+        <Button
+          onClick={() => setShowEndModal(true)}
+          variant="destructive"
+          className="w-full sm:w-auto"
+        >
           {t("endInterview")}
         </Button>
       </div>
-      <div className="flex-1 flex justify-between items-start gap-6 min-h-0">
+
+      <div className="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-4 md:gap-6 min-h-0 max-h-[calc(100vh-8rem)]">
         {/* Video Feed */}
-        <div className="flex flex-col gap-4 w-1/2 h-full">
+        <div className="w-full lg:w-1/2">
           <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
             <video
               ref={videoRef}
@@ -231,8 +235,8 @@ export default function ActiveInterviewComponent({
         </div>
 
         {/* Chat Interface */}
-        <div className="flex flex-col gap-4 w-1/2 h-full">
-          <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
+        <div className="w-full lg:w-1/2 h-[calc(100vh-20rem)] lg:h-full">
+          <div className="h-full bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
             <ChatUI
               messages={messages}
               onSendMessage={handleSendMessage}
@@ -243,6 +247,7 @@ export default function ActiveInterviewComponent({
           </div>
         </div>
       </div>
+
       <EndInterviewModal
         isOpen={showEndModal}
         onClose={() => setShowEndModal(false)}

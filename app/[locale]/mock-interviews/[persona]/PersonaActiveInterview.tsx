@@ -139,16 +139,25 @@ export default function PersonaActiveInterview({
 
   return (
     <>
-      <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-6">
+      <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
         <div className="flex justify-end mb-4">
-          <Button onClick={endInterview} variant="destructive">
+          <Button
+            onClick={endInterview}
+            variant="destructive"
+            className="w-full sm:w-auto"
+          >
             {t("endInterview")}
           </Button>
         </div>
-        <div className="flex-1 flex justify-between items-start gap-6 min-h-0">
+
+        <div className="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-4 md:gap-6 min-h-0">
           {/* Video Feed and CTA Card Column */}
-          <div className="flex flex-col gap-4 w-1/2 h-full">
-            <div className="flex-1 flex flex-col gap-4">
+          <div
+            className={`flex flex-col gap-4 w-full lg:w-1/2 ${showEndModal ? "h-full" : "h-auto"}`}
+          >
+            <div
+              className={`${showEndModal ? "flex-1" : ""} flex flex-col gap-4`}
+            >
               <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
                 <video
                   ref={videoRef}
@@ -162,8 +171,10 @@ export default function PersonaActiveInterview({
               {showEndModal && (
                 <Card className="w-full">
                   <CardHeader>
-                    <CardTitle>Interview Complete!</CardTitle>
-                    <CardDescription className="pt-4">
+                    <CardTitle className="text-lg md:text-xl">
+                      Interview Complete!
+                    </CardTitle>
+                    <CardDescription className="pt-4 text-sm md:text-base">
                       Great job completing the mock interview! To unlock
                       unlimited personalized mock interviews tailored to
                       specific jobs and your resume, sign up for
@@ -183,7 +194,9 @@ export default function PersonaActiveInterview({
           </div>
 
           {/* Chat Interface */}
-          <div className="flex flex-col gap-4 w-1/2 h-full">
+          <div
+            className={`flex flex-col gap-4 w-full lg:w-1/2 ${showEndModal ? "h-[400px] lg:h-full" : "flex-1"}`}
+          >
             <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
               <ChatUI
                 messages={messages}

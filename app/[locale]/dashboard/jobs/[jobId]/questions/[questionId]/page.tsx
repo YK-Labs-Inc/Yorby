@@ -59,7 +59,7 @@ export default async function Page({
 
   return (
     <>
-      <div className="max-w-[1080px] w-full mx-auto p-6 space-y-6">
+      <div className="max-w-[1080px] w-full mx-auto p-2 md:p-6 space-y-6">
         <Link
           href={`/dashboard/jobs/${jobId}`}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"

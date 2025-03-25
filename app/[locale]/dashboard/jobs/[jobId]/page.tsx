@@ -130,7 +130,7 @@ export default async function JobPage({
 
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center p-8 gap-6 ${
+      className={`w-full flex flex-col justify-center items-center p-2 md:p-8 gap-6 ${
         isAnonymous ? "" : "h-full md:h-auto"
       }`}
     >
@@ -175,52 +175,47 @@ export default async function JobPage({
           {formMessage && <FormMessage message={formMessage} />}
         </div>
       ) : (
-        <>
-          <div className="hidden md:flex flex-col gap-6 w-full">
-            <div className="flex items-center justify-between w-full">
-              <Tabs value={view} className="w-full">
-                <TabsList>
-                  <Link href={`?view=practice`} className="w-full">
-                    <TabsTrigger value="practice" className="w-full">
-                      Practice Questions
-                    </TabsTrigger>
-                  </Link>
-                  <Link href={`?view=mock`} className="w-full">
-                    <TabsTrigger value="mock" className="w-full">
-                      Mock Interview
-                    </TabsTrigger>
-                  </Link>
-                </TabsList>
-              </Tabs>
-              {view === "practice" && !isLocked && (
-                <GenerateInterviewQuestionsButton jobId={jobId} />
-              )}
-            </div>
-            {view === "practice" && (
-              <PracticeQuestions
-                jobId={jobId}
-                questions={job.custom_job_questions}
-                isLocked={isLocked}
-                userCredits={userCredits}
-                currentPage={currentPage}
-                numFreeQuestions={3}
-                isSubscriptionVariant={isSubscriptionVariant}
-              />
-            )}
-            {view === "mock" && (
-              <MockInterview
-                jobId={jobId}
-                filter={filter}
-                userCredits={userCredits}
-                isLocked={isLocked}
-                isSubscriptionVariant={isSubscriptionVariant}
-              />
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col md:flex-row items-start gap-2 md:items-center justify-between w-full">
+            <Tabs value={view} className="w-full">
+              <TabsList>
+                <Link href={`?view=practice`} className="w-full">
+                  <TabsTrigger value="practice" className="w-full">
+                    Practice Questions
+                  </TabsTrigger>
+                </Link>
+                <Link href={`?view=mock`} className="w-full">
+                  <TabsTrigger value="mock" className="w-full">
+                    Mock Interview
+                  </TabsTrigger>
+                </Link>
+              </TabsList>
+            </Tabs>
+            {view === "practice" && !isLocked && (
+              <GenerateInterviewQuestionsButton jobId={jobId} />
             )}
           </div>
-          <div className="md:hidden w-full flex flex-col justify-center items-center">
-            <MobileWarning />
-          </div>
-        </>
+          {view === "practice" && (
+            <PracticeQuestions
+              jobId={jobId}
+              questions={job.custom_job_questions}
+              isLocked={isLocked}
+              userCredits={userCredits}
+              currentPage={currentPage}
+              numFreeQuestions={3}
+              isSubscriptionVariant={isSubscriptionVariant}
+            />
+          )}
+          {view === "mock" && (
+            <MockInterview
+              jobId={jobId}
+              filter={filter}
+              userCredits={userCredits}
+              isLocked={isLocked}
+              isSubscriptionVariant={isSubscriptionVariant}
+            />
+          )}
+        </div>
       )}
     </div>
   );
