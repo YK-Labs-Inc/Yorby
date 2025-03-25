@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
       );
     } else if (hostname.includes("gogginsmockinterview")) {
       return Response.redirect(
-        new URL(`https://perfectinterview.ai/mock-interviews/dw`).toString(),
+        new URL(`https://perfectinterview.ai/mock-interviews/dg`).toString(),
         301
       );
     }
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
       );
     } else if (hostname.includes("goggins2resume")) {
       return Response.redirect(
-        new URL(`https://perfectinterview.ai/chat-to-resume/dw`).toString(),
+        new URL(`https://perfectinterview.ai/chat-to-resume/dg`).toString(),
         301
       );
     }
