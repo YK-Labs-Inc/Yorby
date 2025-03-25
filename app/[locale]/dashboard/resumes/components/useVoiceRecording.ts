@@ -1,5 +1,5 @@
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 const MAX_INLINE_SIZE = 3.5 * 1024 * 1024; // 3.5MB in bytes
@@ -17,7 +17,6 @@ export function useVoiceRecording({
   const [audioDevices, setAudioDevices] = useState<
     { deviceId: string; label: string }[]
   >([]);
-  const [shouldProcessAudio, setShouldProcessAudio] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const { logError } = useAxiomLogging();
 
@@ -37,7 +36,7 @@ export function useVoiceRecording({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Get available audio devices - but don't run automatically on mount
   const initializeRecording = async (): Promise<string | false> => {
@@ -76,6 +75,91 @@ export function useVoiceRecording({
     }
   };
 
+  const processAudio = async (audioChunks: Blob[]) => {
+    if (audioChunks.length === 0) {
+      logError("No audio chunks to process");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // Create audio blob
+      const audioBlob = new Blob(audioChunks, {
+        type: "audio/webm",
+      });
+
+      // Get current user and session
+      const supabase = createSupabaseBrowserClient();
+      if (audioBlob.size < MAX_INLINE_SIZE) {
+        const formData = new FormData();
+        formData.append("audioFileToTranscribe", audioBlob);
+        formData.append("source", "resume-builder");
+
+        const response = await fetch("/api/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          if (response.status === 400) {
+            alert(messages.recordingError);
+          } else {
+            throw new Error(`Transcription failed: ${response.status}`);
+          }
+        }
+
+        const { transcription } = (await response.json()) as {
+          transcription: string;
+        };
+        onTranscription(transcription);
+      } else {
+        const filePath = `${crypto.randomUUID()}.webm`;
+
+        // Upload to Supabase storage
+        const { error: uploadError } = await supabase.storage
+          .from("temp-audio-recordings")
+          .upload(filePath, audioBlob);
+
+        if (uploadError) {
+          logError("Error uploading audio file:", { error: uploadError });
+          return;
+        }
+
+        // Send file path to transcription API
+        const formData = new FormData();
+        formData.append("filePath", filePath);
+        formData.append("source", "resume-builder");
+
+        const response = await fetch("/api/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          if (response.status === 400) {
+            alert(messages.recordingError);
+          } else {
+            throw new Error(`Transcription failed: ${response.status}`);
+          }
+        }
+
+        const { transcription } = (await response.json()) as {
+          transcription: string;
+        };
+        onTranscription(transcription);
+
+        // Clean up - delete the temporary file
+        await supabase.storage.from("temp-audio-recordings").remove([filePath]);
+      }
+    } catch (error) {
+      logError("Error processing audio:", { error });
+    } finally {
+      setIsProcessing(false);
+      audioChunksRef.current = [];
+    }
+  };
+
   // Start recording audio
   const startRecording = async () => {
     try {
@@ -91,9 +175,6 @@ export function useVoiceRecording({
         return;
       }
 
-      // Reset the processing flag when starting a new recording
-      setShouldProcessAudio(false);
-
       // Initialize media stream with selected audio device
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -107,17 +188,17 @@ export function useVoiceRecording({
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
-      setAudioChunks([]);
+      audioChunksRef.current = [];
 
       // Handle data from microphone
       mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
-          setAudioChunks((prev) => [...prev, event.data]);
+          audioChunksRef.current.push(event.data);
         }
       };
 
-      // Start recording
-      mediaRecorder.start();
+      // Start recording with 500ms intervals
+      mediaRecorder.start(500);
     } catch (error) {
       logError("Failed to start recording:", { error });
       alert(messages.micPermissionError);
@@ -125,9 +206,6 @@ export function useVoiceRecording({
   };
 
   const cancelRecording = () => {
-    // Ensure audio won't be processed
-    setShouldProcessAudio(false);
-
     // Stop the recording without processing
     if (
       mediaRecorderRef.current &&
@@ -149,14 +227,11 @@ export function useVoiceRecording({
     }
 
     // Clear audio chunks
-    setAudioChunks([]);
+    audioChunksRef.current = [];
   };
 
   const stopRecording = async () => {
     try {
-      // Set flag to process the audio
-      setShouldProcessAudio(true);
-
       // Stop media recorder
       if (
         mediaRecorderRef.current &&
@@ -176,107 +251,14 @@ export function useVoiceRecording({
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
+
+      // Process the audio immediately
+      await processAudio(audioChunksRef.current);
     } catch (error) {
       alert(messages.recordingError);
       setIsProcessing(false);
-      setShouldProcessAudio(false);
     }
   };
-
-  useEffect(() => {
-    const processAudio = async () => {
-      // Only process audio if shouldProcessAudio is true and we have chunks
-      if (shouldProcessAudio && audioChunks.length > 0) {
-        setIsProcessing(true);
-
-        try {
-          // Create audio blob
-          const audioBlob = new Blob(audioChunks, {
-            type: "audio/webm",
-          });
-
-          // Get current user and session
-          const supabase = createSupabaseBrowserClient();
-          if (audioBlob.size < MAX_INLINE_SIZE) {
-            const formData = new FormData();
-            formData.append("audioFileToTranscribe", audioBlob);
-            formData.append("source", "resume-builder");
-
-            const response = await fetch("/api/transcribe", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              if (response.status === 400) {
-                alert(messages.recordingError);
-              } else {
-                throw new Error(`Transcription failed: ${response.status}`);
-              }
-            }
-
-            const { transcription } = (await response.json()) as {
-              transcription: string;
-            };
-            onTranscription(transcription);
-          } else {
-            const filePath = `${crypto.randomUUID()}.webm`;
-
-            // Upload to Supabase storage
-            const { error: uploadError } = await supabase.storage
-              .from("temp-audio-recordings")
-              .upload(filePath, audioBlob);
-
-            if (uploadError) {
-              logError("Error uploading audio file:", { error: uploadError });
-              return;
-            }
-
-            // Send file path to transcription API
-            const formData = new FormData();
-            formData.append("filePath", filePath);
-            formData.append("source", "resume-builder");
-
-            const response = await fetch("/api/transcribe", {
-              method: "POST",
-              body: formData,
-            });
-
-            if (!response.ok) {
-              if (response.status === 400) {
-                alert(messages.recordingError);
-              } else {
-                throw new Error(`Transcription failed: ${response.status}`);
-              }
-            }
-
-            const { transcription } = (await response.json()) as {
-              transcription: string;
-            };
-            onTranscription(transcription);
-
-            // Clean up - delete the temporary file
-            await supabase.storage
-              .from("temp-audio-recordings")
-              .remove([filePath]);
-          }
-        } catch (error) {
-          logError("Error processing audio:", { error });
-        } finally {
-          setIsProcessing(false);
-          setShouldProcessAudio(false);
-          setAudioChunks([]);
-        }
-      }
-    };
-
-    processAudio();
-  }, [
-    audioChunks,
-    shouldProcessAudio,
-    onTranscription,
-    messages.recordingError,
-  ]);
 
   return {
     startRecording,

@@ -792,7 +792,7 @@ Once I have all that information, I can try my best to make a really great first
             shouldShowSplitView
               ? "order-1 lg:order-1"
               : "lg:col-span-2 max-w-3xl mx-auto w-full"
-          }`}
+          } ${user?.is_anonymous && resumeId ? "hidden" : ""}`}
         >
           {/* Title Section */}
           {!shouldShowSplitView && (
