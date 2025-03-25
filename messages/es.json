@@ -549,7 +549,8 @@
       },
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión..."
-    }
+    },
+    "autoCreateAccount": "¿No tienes una cuenta? No te preocupes: crearemos una automáticamente para ti cuando ingreses tu correo electrónico."
   },
   "interviewCopilots": {
     "title": "Copilotos de entrevistas",
@@ -1169,7 +1170,12 @@
       "description": "Para la mejor experiencia de creación de currículums, recomendamos usar una computadora de escritorio. Nuestro creador de currículums tiene funciones de formato avanzadas que funcionan mejor en pantallas más grandes.",
       "button": "Continuar de todas formas"
     },
-    "generatingAudio": "Generando audio..."
+    "generatingAudio": "Generando audio...",
+    "startScreen": {
+      "enableVoice": "Activar el Modo de Voz",
+      "selectVoice": "Seleccionar voz",
+      "startButton": "Comienza a crear un currículum"
+    }
   },
   "interviewCopilotDemo": {
     "session": {

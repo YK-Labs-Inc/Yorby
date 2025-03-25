@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { VoiceOption } from "@/app/types/tts";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MediaDevice {
   deviceId: string;
@@ -38,6 +39,7 @@ export default function PersonaMockInterviewSetup({
 }: PersonaMockInterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
   const [captchaToken, setCaptchaToken] = useState<string>("");
+  const isMobile = useIsMobile();
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -46,42 +48,44 @@ export default function PersonaMockInterviewSetup({
       </h1>
 
       <div className="space-y-6 max-w-lg mx-auto">
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <Label htmlFor="microphone">{t("microphone.label")}</Label>
-              <select
-                id="microphone"
-                value={selectedAudio}
-                onChange={(e) => onAudioChange(e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                {audioDevices.map((device) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label}
-                  </option>
-                ))}
-              </select>
-
-              <div className="mt-4 space-y-2">
-                <Button
-                  onClick={
-                    isRecording ? onStopTestRecording : onStartTestRecording
-                  }
-                  disabled={!stream}
-                  variant="secondary"
-                  className={`w-full ${
-                    isRecording ? "bg-red-500 hover:bg-red-600" : ""
-                  }`}
+        {!isMobile && (
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <Label htmlFor="microphone">{t("microphone.label")}</Label>
+                <select
+                  id="microphone"
+                  value={selectedAudio}
+                  onChange={(e) => onAudioChange(e.target.value)}
+                  className="w-full p-2 border rounded-md"
                 >
-                  {isRecording
-                    ? t("microphone.stopRecording")
-                    : t("microphone.testRecording")}
-                </Button>
+                  {audioDevices.map((device) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="mt-4 space-y-2">
+                  <Button
+                    onClick={
+                      isRecording ? onStopTestRecording : onStartTestRecording
+                    }
+                    disabled={!stream}
+                    variant="secondary"
+                    className={`w-full ${
+                      isRecording ? "bg-red-500 hover:bg-red-600" : ""
+                    }`}
+                  >
+                    {isRecording
+                      ? t("microphone.stopRecording")
+                      : t("microphone.testRecording")}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent className="p-6">

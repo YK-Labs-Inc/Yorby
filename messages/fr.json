@@ -549,7 +549,8 @@
       },
       "submit": "Se connecter",
       "submitting": "Connexion en cours..."
-    }
+    },
+    "autoCreateAccount": "Vous n'avez pas de compte ? Pas de soucis - nous en créerons automatiquement un pour vous lorsque vous entrerez votre adresse e-mail."
   },
   "interviewCopilots": {
     "title": "Copilotes d'entretien",
@@ -1169,7 +1170,12 @@
       "description": "Pour une expérience optimale de création de CV, nous vous recommandons d'utiliser un ordinateur de bureau. Notre outil de création de CV possède des fonctionnalités de mise en forme avancées qui fonctionnent mieux sur des écrans plus grands.",
       "button": "Continue quand même"
     },
-    "generatingAudio": "Génération audio..."
+    "generatingAudio": "Génération audio...",
+    "startScreen": {
+      "enableVoice": "Activer le mode vocal",
+      "selectVoice": "Sélectionner une voix",
+      "startButton": "Commencer à Créer un CV"
+    }
   },
   "interviewCopilotDemo": {
     "session": {
