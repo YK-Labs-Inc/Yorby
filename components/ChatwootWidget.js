@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Script from "next/script";
 
 export default function Chatwoot() {
+  const pathname = usePathname();
+  const [shouldShowChatwoot, setShouldShowChatwoot] = useState(false);
+  useEffect(() => {
+    setShouldShowChatwoot(
+      !pathname.includes("sample-resumes") &&
+        !pathname.includes("mockInterviews") &&
+        !pathname.includes("mock-interviews")
+    );
+  }, [pathname]);
+
   useEffect(() => {
     window.chatwootSettings = {
       hideMessageBubble: false,
@@ -12,6 +23,10 @@ export default function Chatwoot() {
       type: "standard", // [standard, expanded_bubble]
     };
   }, []);
+
+  if (!shouldShowChatwoot) {
+    return null;
+  }
   return (
     <Script
       id="chatwoot-sdk"

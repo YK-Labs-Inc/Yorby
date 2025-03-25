@@ -699,13 +699,13 @@ export default function ResumePreview({
   return (
     <div className="flex flex-col h-full">
       {!isSampleResume && (
-        <div className="flex justify-end mb-4 gap-2 mt-1">
+        <div className="flex flex-col sm:flex-row justify-end mb-4 gap-2 mt-1">
           {!isTestResume && (
             <>
               {!isEditMode && (
                 <Button
                   onClick={handleEditClick}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto"
                   variant="outline"
                 >
                   <Edit2 className="h-4 w-4" />
@@ -714,7 +714,7 @@ export default function ResumePreview({
               )}
               {isEditMode && (
                 <Button
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto"
                   onClick={() => handleSaveResume(resume, resumeId)}
                 >
                   <Save className="h-4 w-4" />
@@ -725,7 +725,7 @@ export default function ResumePreview({
           )}
           {isLocked && isFreemiumEnabled && hasReachedFreemiumLimit ? (
             <Button
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
               onClick={() => onShowLimitDialog?.()}
             >
               <svg
@@ -750,11 +750,12 @@ export default function ResumePreview({
             <PDFDownloadLink
               document={<ResumePDF resume={resume} />}
               fileName={`${resume.name.replace(/\s+/g, "_")}_Resume.pdf`}
+              className="w-full sm:w-auto"
             >
               {({ loading }: { loading: boolean }) => (
                 <Button
                   disabled={loading || downloading}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full"
                 >
                   {loading || downloading ? (
                     <>
@@ -792,7 +793,7 @@ export default function ResumePreview({
       <div
         ref={resumeRef}
         data-pdf-content
-        className={`flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-6 ${
+        className={`flex-grow overflow-auto bg-white dark:bg-gray-800 rounded-md shadow-sm border p-4 sm:p-6 ${
           !removeMaxHeight ? "max-h-[750px]" : ""
         } ${isLocked ? "select-none" : ""}`}
       >
@@ -803,12 +804,12 @@ export default function ResumePreview({
               <Input
                 value={resume.name}
                 onChange={(e) => updateBasicInfo("name", e.target.value)}
-                className="text-2xl font-bold"
+                className="text-xl sm:text-2xl font-bold"
                 placeholder={t("form.placeholders.name")}
               />
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <Input
                   value={resume.email || ""}
                   onChange={(e) => updateBasicInfo("email", e.target.value)}
@@ -829,7 +830,7 @@ export default function ResumePreview({
           </Card>
         ) : (
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">{resume.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold">{resume.name}</h1>
             <div className="flex flex-wrap gap-2 text-sm mt-1">
               {resume.email && <span>{resume.email}</span>}
               {resume.phone && <span>• {resume.phone}</span>}
@@ -838,8 +839,8 @@ export default function ResumePreview({
           </div>
         )}
 
-        {resume.resume_sections.map((section, sectionIndex) => {
-          return isEditMode ? (
+        {resume.resume_sections.map((section, sectionIndex) =>
+          isEditMode ? (
             <Card key={sectionIndex} className="mb-4">
               <CardHeader className="flex flex-col space-y-2">
                 <div className="flex flex-row items-center justify-between">
@@ -849,7 +850,7 @@ export default function ResumePreview({
                       updateSection(sectionIndex, "title", e.target.value)
                     }
                     placeholder={t("form.placeholders.title")}
-                    className="text-lg font-semibold flex-1"
+                    className="text-base sm:text-lg font-semibold flex-1"
                   />
                   <div className="flex gap-1 ml-2">
                     <Button
@@ -875,7 +876,7 @@ export default function ResumePreview({
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 {section.resume_list_items.length > 0 ? (
                   <div className="space-y-2">
                     {section.resume_list_items.map((item, itemIndex) => (
@@ -894,7 +895,7 @@ export default function ResumePreview({
                               newItems
                             );
                           }}
-                          className="flex-1"
+                          className="flex-1 text-sm"
                         />
                         <div className="flex gap-1">
                           <Button
@@ -941,7 +942,7 @@ export default function ResumePreview({
                     {section.resume_detail_items.map((item, itemIndex) => (
                       <div key={itemIndex} className="text-sm">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                             <Input
                               value={item.title}
                               onChange={(e) =>
@@ -986,21 +987,8 @@ export default function ResumePreview({
                                 <ChevronDown className="h-4 w-4" />
                               </Button>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                deleteDetailItem(sectionIndex, itemIndex)
-                              }
-                              disabled={
-                                section.resume_detail_items.length === 1
-                              }
-                              type="button"
-                            >
-                              <X className="h-4 w-4 text-red-500" />
-                            </Button>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <Input
                               value={item.subtitle || ""}
                               onChange={(e) =>
@@ -1012,7 +1000,6 @@ export default function ResumePreview({
                                 )
                               }
                               placeholder={t("form.placeholders.subtitle")}
-                              className="flex-1"
                             />
                             <Input
                               value={item.date_range || ""}
@@ -1025,9 +1012,10 @@ export default function ResumePreview({
                                 )
                               }
                               placeholder={t("form.placeholders.dateRange")}
-                              className="w-1/3"
                             />
                           </div>
+                        </div>
+                        <div className="mt-2 space-y-2">
                           {item.resume_item_descriptions.map(
                             (description, descriptionIndex) => (
                               <div
@@ -1106,53 +1094,16 @@ export default function ResumePreview({
                               </div>
                             )
                           )}
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              addNewDetailItemDescription(
-                                sectionIndex,
-                                itemIndex
-                              )
-                            }
-                          >
-                            <Plus className="h-4 w-4" />
-                            {t("form.newItem")}
-                          </Button>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-between pt-4 border-t">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteSection(sectionIndex)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t("deleteSection")}
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (section.resume_list_items.length > 0) {
-                      addNewListItem(sectionIndex);
-                    } else {
-                      addNewDetailItem(sectionIndex);
-                    }
-                  }}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {getSectionCTA(section.title)}
-                </Button>
-              </CardFooter>
             </Card>
           ) : (
             <div key={sectionIndex} className="mb-6">
-              <h2 className="text-lg font-semibold border-b pb-1 mb-2">
+              <h2 className="text-base sm:text-lg font-semibold border-b pb-1 mb-2">
                 {section.title}
               </h2>
               {section.resume_list_items.length > 0 ? (
@@ -1171,19 +1122,19 @@ export default function ResumePreview({
                         <div className="font-medium">{item.title}</div>
                       )}
                       {item.subtitle && (
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                           <div>{item.subtitle}</div>
                           {item.date_range && <div>{item.date_range}</div>}
                         </div>
                       )}
                       {item.resume_item_descriptions && (
-                        <div className="mt-1">
-                          <ul className="list-disc pl-5 space-y-1">
+                        <div className="mt-2">
+                          <ul className="list-disc pl-4 sm:pl-5 space-y-1">
                             {item.resume_item_descriptions.map(
                               (point, pointIndex) => (
                                 <li
                                   key={pointIndex}
-                                  className="flex items-center before:content-['•'] before:mr-2 pl-0 list-none"
+                                  className="flex items-center before:content-['•'] before:mr-2 pl-0 list-none text-sm"
                                 >
                                   {point.description}
                                 </li>
@@ -1197,8 +1148,8 @@ export default function ResumePreview({
                 </div>
               )}
             </div>
-          );
-        })}
+          )
+        )}
 
         {/* Add New Section Button */}
         {isEditMode && (

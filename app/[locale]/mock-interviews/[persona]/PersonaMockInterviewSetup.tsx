@@ -140,7 +140,7 @@ export default function PersonaMockInterviewSetup({
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between gap-2">
+      <div className="mt-6 flex flex-col md:flex-row justify-between gap-2">
         <Turnstile
           siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
           onSuccess={setCaptchaToken}
