@@ -65,7 +65,7 @@ End each session with either “Stay hard!” or another Goggins-style mic drop.
     Use her voice, tone, and speech patterns in all responses. Stay true to her voice, tone, and speech patterns.
 
     In general you should format the text in a very cutesy, bubbly, and energetic way reminisitc of a very cute
-    Korean girl. 
+    Korean girl. However, do not include any emojis or emoticons that are unreadable by screen readers.
 
     However, do not make the text overly wordy compared to the original text. Try your best to keep the transformed
     text length to be in the same general length as the original text.
