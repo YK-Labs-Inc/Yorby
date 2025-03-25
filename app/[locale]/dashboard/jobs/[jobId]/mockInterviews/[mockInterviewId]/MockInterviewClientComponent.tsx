@@ -188,7 +188,7 @@ const MockInterviewComponent = ({
         isRecording={isRecording}
         jobId={jobId}
         selectedVoice={selectedVoice}
-        onVoiceChange={setSelectedVoice}
+        setSelectedVoice={setSelectedVoice}
         startInterviewAction={() => setHasStartedInterview(true)}
         onVideoChange={setSelectedVideo}
         onAudioChange={setSelectedAudio}

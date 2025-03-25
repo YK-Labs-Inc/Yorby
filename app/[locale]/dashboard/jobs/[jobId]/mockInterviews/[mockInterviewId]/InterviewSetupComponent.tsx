@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
 interface MediaDevice {
@@ -22,7 +22,7 @@ interface InterviewSetupProps {
   startInterviewAction: (formData: FormData) => void;
   onVideoChange: (deviceId: string) => void;
   onAudioChange: (deviceId: string) => void;
-  onVoiceChange: (voice: VoiceOption) => void;
+  setSelectedVoice: Dispatch<SetStateAction<VoiceOption>>;
   onStartTestRecording: () => void;
   onStopTestRecording: () => void;
 }
@@ -36,10 +36,10 @@ export default function InterviewSetup({
   isRecording,
   jobId,
   selectedVoice,
+  setSelectedVoice,
   startInterviewAction,
   onVideoChange,
   onAudioChange,
-  onVoiceChange,
   onStartTestRecording,
   onStopTestRecording,
 }: InterviewSetupProps) {
@@ -137,7 +137,7 @@ export default function InterviewSetup({
                       (v) => v.voiceId === e.target.value
                     );
                     if (voice) {
-                      onVoiceChange(voice);
+                      setSelectedVoice(voice);
                     }
                   }}
                   className="w-full p-2 border rounded-md"

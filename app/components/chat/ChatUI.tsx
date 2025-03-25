@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, SetStateAction, Dispatch } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import {
@@ -30,7 +30,9 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface ChatUIProps {
   messages: CoreMessage[];
-  onSendMessage: (message: string) => Promise<void>;
+  onSendMessage: (
+    message: string
+  ) => Promise<{ message: string; index: number } | undefined>;
   isProcessing?: boolean;
   isDisabled?: boolean;
   className?: string;
@@ -51,14 +53,15 @@ export function ChatUI({
   const t = useTranslations("chat");
   const [textInput, setTextInput] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
-  const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(
-    null
-  );
   const [generatingAudioIndex, setGeneratingAudioIndex] = useState<
     number | null
   >(null);
+  const [playingMessageIndex, setPlayingMessageIndex] = useState<number | null>(
+    null
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isPlaying = useRef<boolean>(false);
   const {
     isTtsEnabled,
     setIsTtsEnabled,
@@ -99,19 +102,10 @@ export function ChatUI({
     };
   }, [stopAudioPlayback]);
 
-  // Auto-play first message if TTS is enabled
-  useEffect(() => {
-    if (
-      isTtsEnabled &&
-      messages.length === 1 &&
-      messages[0].role === "assistant"
-    ) {
-      handlePlayMessage(messages[0].content as string, 0);
-    }
-  }, [messages, isTtsEnabled]);
-
   const handleRecordingToggle = async () => {
     stopAudioPlayback();
+    setPlayingMessageIndex(null);
+    isPlaying.current = false;
 
     if (isRecording) {
       stopRecording();
@@ -128,10 +122,21 @@ export function ChatUI({
 
   const handleSendMessage = async () => {
     if (!textInput.trim() || isProcessing) return;
-
+    stopAudioPlayback();
+    setPlayingMessageIndex(null);
     const messageToSend = textInput;
     setTextInput("");
-    await onSendMessage(messageToSend);
+    const sendMessageResponse = await onSendMessage(messageToSend);
+    if (isTtsEnabled && sendMessageResponse) {
+      isPlaying.current = true;
+      setPlayingMessageIndex(sendMessageResponse.index);
+      await speakMessage(sendMessageResponse.message, {
+        onPlaybackEnd: () => {
+          setPlayingMessageIndex(null);
+          isPlaying.current = false;
+        },
+      });
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -146,6 +151,7 @@ export function ChatUI({
     if (playingMessageIndex === index) {
       stopAudioPlayback();
       setPlayingMessageIndex(null);
+      isPlaying.current = false;
       return;
     }
 
@@ -156,9 +162,11 @@ export function ChatUI({
     try {
       setGeneratingAudioIndex(index);
       setPlayingMessageIndex(index);
+      isPlaying.current = true;
       await speakMessage(message, {
         onPlaybackEnd: () => {
           setPlayingMessageIndex(null);
+          isPlaying.current = false;
         },
       });
       setGeneratingAudioIndex(null);
@@ -166,8 +174,22 @@ export function ChatUI({
       logError("Error playing message:", { error });
       setPlayingMessageIndex(null);
       setGeneratingAudioIndex(null);
+      isPlaying.current = false;
     }
   };
+
+  // Auto-play first message if TTS is enabled
+  useEffect(() => {
+    if (
+      isTtsEnabled &&
+      messages.length === 1 &&
+      messages[0].role === "assistant" &&
+      !isPlaying.current &&
+      messages[0].content
+    ) {
+      handlePlayMessage(messages[0].content as string, 0);
+    }
+  }, [messages, isTtsEnabled]);
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -193,7 +215,7 @@ export function ChatUI({
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex-grow">
-                    {(message as any).isLoading ? (
+                    {message.content === "" ? (
                       <div className="flex items-center justify-center">
                         <LoadingSpinner variant="muted" />
                       </div>
