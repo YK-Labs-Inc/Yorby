@@ -203,7 +203,7 @@ Let's start with something easy! Could you tell me a little bit about yourself? 
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
-              <Link href="/sign-up" className="w-full">
+              <Link href="/sign-in" className="w-full">
                 <Button className="w-full" size="lg">
                   Sign Up Now
                 </Button>
