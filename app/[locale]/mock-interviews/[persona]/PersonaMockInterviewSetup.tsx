@@ -4,8 +4,9 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VoiceOption } from "@/app/types/tts";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 interface MediaDevice {
   deviceId: string;
@@ -43,6 +44,7 @@ export default function PersonaMockInterviewSetup({
 }: PersonaMockInterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -138,8 +140,16 @@ export default function PersonaMockInterviewSetup({
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button size="lg" disabled={!stream} onClick={startInterview}>
+      <div className="mt-6 flex justify-between gap-2">
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          onSuccess={setCaptchaToken}
+        />
+        <Button
+          size="lg"
+          disabled={!stream || !captchaToken}
+          onClick={startInterview}
+        >
           {t("startButton")}
         </Button>
       </div>
