@@ -18,9 +18,7 @@ interface PersonaMockInterviewClientProps {
 export function PersonaMockInterviewClientInternal({
   selectedVoice,
 }: PersonaMockInterviewClientProps) {
-  const [videoDevices, setVideoDevices] = useState<MediaDevice[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDevice[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<string>("");
   const [selectedAudio, setSelectedAudio] = useState<string>("");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -33,20 +31,12 @@ export function PersonaMockInterviewClientInternal({
       try {
         // Request permission and get initial stream
         const initialStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
           audio: true,
         });
         setStream(initialStream);
 
         // Enumerate all media devices
         const devices = await navigator.mediaDevices.enumerateDevices();
-
-        const videoInputs = devices
-          .filter((device) => device.kind === "videoinput")
-          .map((device) => ({
-            deviceId: device.deviceId,
-            label: device.label || `Camera ${device.deviceId.slice(0, 5)}...`,
-          }));
 
         const audioInputs = devices
           .filter((device) => device.kind === "audioinput")
@@ -56,11 +46,9 @@ export function PersonaMockInterviewClientInternal({
               device.label || `Microphone ${device.deviceId.slice(0, 5)}...`,
           }));
 
-        setVideoDevices(videoInputs);
         setAudioDevices(audioInputs);
 
         // Set initial selected devices
-        if (videoInputs.length) setSelectedVideo(videoInputs[0].deviceId);
         if (audioInputs.length) setSelectedAudio(audioInputs[0].deviceId);
       } catch (error) {
         console.error("Error accessing media devices:", error);
@@ -76,28 +64,9 @@ export function PersonaMockInterviewClientInternal({
     };
   }, []);
 
-  const handleVideoChange = async (deviceId: string) => {
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { deviceId: { exact: deviceId } },
-        audio: { deviceId: { exact: selectedAudio } },
-      });
-
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-
-      setStream(newStream);
-      setSelectedVideo(deviceId);
-    } catch (error) {
-      console.error("Error switching video device:", error);
-    }
-  };
-
   const handleAudioChange = async (deviceId: string) => {
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { deviceId: { exact: selectedVideo } },
         audio: { deviceId: { exact: deviceId } },
       });
 
@@ -170,14 +139,11 @@ export function PersonaMockInterviewClientInternal({
 
   return (
     <PersonaMockInterviewSetup
-      videoDevices={videoDevices}
       audioDevices={audioDevices}
-      selectedVideo={selectedVideo}
       selectedAudio={selectedAudio}
       stream={stream}
       isRecording={isRecording}
       selectedVoice={selectedVoice}
-      onVideoChange={handleVideoChange}
       onAudioChange={handleAudioChange}
       onStartTestRecording={handleStartTestRecording}
       onStopTestRecording={handleStopTestRecording}

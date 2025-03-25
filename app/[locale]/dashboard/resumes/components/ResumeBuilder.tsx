@@ -160,7 +160,7 @@ const StartScreen = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="h-full flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-lg">
         <CardContent className="pt-6 space-y-8">
           <div className="text-center space-y-2">
@@ -734,7 +734,7 @@ Once I have all that information, I can try my best to make a really great first
   }
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {!resume && messages.length === 1 && !isDemoDismissed && showDemoCTA && (
         <Card className="mx-4 md:mx-12 my-4 md:my-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
           <CardContent className="px-4 md:px-6 py-6 md:py-8 relative">

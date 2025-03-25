@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { CoreMessage, CoreAssistantMessage } from "ai";
+import { CoreMessage } from "ai";
 import { ChatUI } from "@/app/components/chat";
 import { useTts } from "@/app/context/TtsContext";
 import { PersonaMockInterviewAIResponse } from "@/app/api/personas/mock-interview/route";
@@ -27,24 +27,64 @@ export default function PersonaActiveInterview({
   const t = useTranslations("mockInterview.active");
   const [messages, setMessages] = useState<CoreMessage[]>([]);
   const [isProcessingAIResponse, setIsProcessingAIResponse] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const { logError } = useAxiomLogging();
   const [showEndModal, setShowEndModal] = useState(false);
   const { selectedVoice, stopAudioPlayback } = useTts();
   const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream]);
-
-  useEffect(() => {
     if (messages.length === 0 && !isInitialized.current) {
-      handleSendMessage("begin the interview");
+      let initialMessage = t("initialMessage");
+
+      // Customize initial message based on persona's speaking style
+      if (selectedVoice?.speakingStyle) {
+        if (selectedVoice.voiceId === "dg") {
+          initialMessage = `Alright, listen up! This is your mock interview, and I don't sugarcoat anything.
+
+I'm going to grill you with real questions – the kind that separate the warriors from the wannabes.
+
+Remember: 
+- No BS answers
+- Stay focused
+- Show me your mental toughness
+
+You better be ready to bring your A-game. This isn't practice; this is preparation for war.
+
+First question: Who the hell are you and what makes you think you can handle this? Show me what you're made of!`;
+        } else if (selectedVoice.voiceId === "lbj") {
+          initialMessage = `Yo, what's good? Let's keep it real in this interview.
+
+I'm about to hit you with some questions that'll test what you're made of. This ain't just about what's on your resume – it's about your mindset, your hustle, your drive.
+
+Remember:
+- Keep it authentic
+- Show me your passion
+- Let's see that champion mentality
+
+First up, I wanna hear your story. Break it down for me - who are you and what's your journey been like? Let's get it!`;
+        } else if (selectedVoice.voiceId === "cw") {
+          initialMessage = `Hi there! I'm so excited to interview you today! 
+
+I know interviews can be a bit nerve-wracking, but don't worry – we're going to have a nice conversation about your experience and skills. I want to get to know the real you!
+
+Remember:
+- Just be yourself
+- Take your time with answers
+- Feel free to ask questions
+
+Let's start with something easy! Could you tell me a little bit about yourself? I'd love to hear your story!`;
+        }
+      }
+
+      setMessages([
+        {
+          role: "assistant",
+          content: initialMessage,
+        },
+      ]);
       isInitialized.current = true;
     }
-  }, [messages]);
+  }, [messages, selectedVoice, t]);
 
   const handleSendMessage = async (message: string) => {
     setIsProcessingAIResponse(true);
@@ -138,77 +178,50 @@ export default function PersonaActiveInterview({
   };
 
   return (
-    <>
-      <div className="h-screen flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={endInterview}
-            variant="destructive"
-            className="w-full sm:w-auto"
-          >
-            {t("endInterview")}
-          </Button>
-        </div>
+    <div className="h-[calc(100vh-5rem)] flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
+      <div className="flex justify-end mb-4">
+        <Button
+          onClick={endInterview}
+          variant="destructive"
+          className="w-full sm:w-auto"
+        >
+          {t("endInterview")}
+        </Button>
+      </div>
 
-        <div className="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-4 md:gap-6 min-h-0">
-          {/* Video Feed and CTA Card Column */}
-          <div
-            className={`flex flex-col gap-4 w-full lg:w-1/2 ${showEndModal ? "h-full" : "h-auto"}`}
-          >
-            <div
-              className={`${showEndModal ? "flex-1" : ""} flex flex-col gap-4`}
-            >
-              <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover transform scale-x-[-1]"
-                />
-              </div>
+      <div className="flex-1 flex flex-col min-h-0">
+        {showEndModal ? (
+          <Card className="w-full mb-4">
+            <CardHeader>
+              <CardTitle className="text-lg md:text-xl">
+                Interview Complete!
+              </CardTitle>
+              <CardDescription className="pt-4 text-sm md:text-base">
+                Great job completing the mock interview! To unlock unlimited
+                personalized mock interviews tailored to specific jobs and your
+                resume, sign up for PerfectInterview today.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-center">
+              <Link href="/sign-up" className="w-full">
+                <Button className="w-full" size="lg">
+                  Sign Up Now
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+        ) : null}
 
-              {showEndModal && (
-                <Card className="w-full">
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl">
-                      Interview Complete!
-                    </CardTitle>
-                    <CardDescription className="pt-4 text-sm md:text-base">
-                      Great job completing the mock interview! To unlock
-                      unlimited personalized mock interviews tailored to
-                      specific jobs and your resume, sign up for
-                      PerfectInterview today.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex justify-center">
-                    <Link href="/sign-up" className="w-full">
-                      <Button className="w-full" size="lg">
-                        Sign Up Now
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              )}
-            </div>
-          </div>
-
-          {/* Chat Interface */}
-          <div
-            className={`flex flex-col gap-4 w-full lg:w-1/2 ${showEndModal ? "h-[400px] lg:h-full" : "flex-1"}`}
-          >
-            <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
-              <ChatUI
-                messages={messages}
-                onSendMessage={handleSendMessage}
-                isProcessing={isProcessingAIResponse}
-                showTtsControls={true}
-                className="h-full"
-              />
-            </div>
-          </div>
+        <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
+          <ChatUI
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isProcessing={isProcessingAIResponse}
+            showTtsControls={true}
+            className="h-full"
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }

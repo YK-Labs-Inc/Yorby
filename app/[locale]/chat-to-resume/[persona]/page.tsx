@@ -3,6 +3,8 @@ import { posthog } from "@/utils/tracking/serverUtils";
 import { fetchUserCredits } from "../../dashboard/resumes/actions";
 import { fetchHasSubscription } from "../../dashboard/resumes/actions";
 import ResumeBuilder from "../../dashboard/resumes/components/ResumeBuilder";
+import { PathHeader } from "@/components/marketing/PathHeader";
+
 export default async function ChatToResume({
   params,
 }: {
@@ -29,13 +31,18 @@ export default async function ChatToResume({
   }
 
   return (
-    <ResumeBuilder
-      hasSubscription={hasSubscription}
-      credits={credits}
-      user={user}
-      isSubscriptionVariant={isSubscriptionVariant}
-      isFreemiumEnabled={isFreemiumEnabled}
-      persona={persona}
-    />
+    <>
+      {!user && <PathHeader />}
+      <div className="h-[calc(100vh-64px)] flex flex-col">
+        <ResumeBuilder
+          hasSubscription={hasSubscription}
+          credits={credits}
+          user={user}
+          isSubscriptionVariant={isSubscriptionVariant}
+          isFreemiumEnabled={isFreemiumEnabled}
+          persona={persona}
+        />
+      </div>
+    </>
   );
 }

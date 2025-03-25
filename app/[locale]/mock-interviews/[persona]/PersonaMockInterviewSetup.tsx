@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { VoiceOption } from "@/app/types/tts";
 import { Turnstile } from "@marsidev/react-turnstile";
 
@@ -14,14 +14,11 @@ interface MediaDevice {
 }
 
 interface PersonaMockInterviewSetupProps {
-  videoDevices: MediaDevice[];
   audioDevices: MediaDevice[];
-  selectedVideo: string;
   selectedAudio: string;
   stream: MediaStream | null;
   isRecording: boolean;
   selectedVoice: VoiceOption;
-  onVideoChange: (deviceId: string) => void;
   onAudioChange: (deviceId: string) => void;
   onStartTestRecording: () => void;
   onStopTestRecording: () => void;
@@ -29,28 +26,18 @@ interface PersonaMockInterviewSetupProps {
 }
 
 export default function PersonaMockInterviewSetup({
-  videoDevices,
   audioDevices,
-  selectedVideo,
   selectedAudio,
   stream,
   isRecording,
   selectedVoice,
-  onVideoChange,
   onAudioChange,
   onStartTestRecording,
   onStopTestRecording,
   startInterview,
 }: PersonaMockInterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string>("");
-
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream]);
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -58,100 +45,69 @@ export default function PersonaMockInterviewSetup({
         Mock Interview With {selectedVoice.title}
       </h1>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="space-y-6 max-w-lg mx-auto">
         <Card>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <Label htmlFor="camera">{t("camera.label")}</Label>
+              <Label htmlFor="microphone">{t("microphone.label")}</Label>
               <select
-                id="camera"
-                value={selectedVideo}
-                onChange={(e) => onVideoChange(e.target.value)}
+                id="microphone"
+                value={selectedAudio}
+                onChange={(e) => onAudioChange(e.target.value)}
                 className="w-full p-2 border rounded-md"
               >
-                {videoDevices.map((device) => (
+                {audioDevices.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
                 ))}
               </select>
 
-              <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover transform scale-x-[-1]"
-                />
+              <div className="mt-4 space-y-2">
+                <Button
+                  onClick={
+                    isRecording ? onStopTestRecording : onStartTestRecording
+                  }
+                  disabled={!stream}
+                  variant="secondary"
+                  className={`w-full ${
+                    isRecording ? "bg-red-500 hover:bg-red-600" : ""
+                  }`}
+                >
+                  {isRecording
+                    ? t("microphone.stopRecording")
+                    : t("microphone.testRecording")}
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <Label htmlFor="microphone">{t("microphone.label")}</Label>
-                <select
-                  id="microphone"
-                  value={selectedAudio}
-                  onChange={(e) => onAudioChange(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  {audioDevices.map((device) => (
-                    <option key={device.deviceId} value={device.deviceId}>
-                      {device.label}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="mt-4 space-y-2">
-                  <Button
-                    onClick={
-                      isRecording ? onStopTestRecording : onStartTestRecording
-                    }
-                    disabled={!stream}
-                    variant="secondary"
-                    className={`w-full ${
-                      isRecording ? "bg-red-500 hover:bg-red-600" : ""
-                    }`}
-                  >
-                    {isRecording
-                      ? t("microphone.stopRecording")
-                      : t("microphone.testRecording")}
-                  </Button>
-                </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <Label>{t("voice.label")}</Label>
+              <div className="p-2 border rounded-md bg-gray-50">
+                {selectedVoice.title}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <Label>{t("voice.label")}</Label>
-                <div className="p-2 border rounded-md bg-gray-50">
-                  {selectedVoice.title}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex flex-col md:flex-row justify-between gap-4 items-center">
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={setCaptchaToken}
+          />
+          <Button
+            size="lg"
+            disabled={!stream || !captchaToken}
+            onClick={startInterview}
+            className="w-full md:w-auto"
+          >
+            {t("startButton")}
+          </Button>
         </div>
-      </div>
-
-      <div className="mt-6 flex flex-col md:flex-row justify-between gap-2">
-        <Turnstile
-          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-          onSuccess={setCaptchaToken}
-        />
-        <Button
-          size="lg"
-          disabled={!stream || !captchaToken}
-          onClick={startInterview}
-        >
-          {t("startButton")}
-        </Button>
       </div>
     </div>
   );

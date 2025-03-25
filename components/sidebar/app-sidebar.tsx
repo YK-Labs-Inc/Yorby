@@ -20,7 +20,7 @@ import { UserMenu } from "../auth/user-menu";
 import { LinkAccountModal } from "../auth/link-account-modal";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { OnboardingChecklist } from "../onboarding/OnboardingChecklist";
 import { Tables } from "@/utils/supabase/database.types";
 import {
@@ -56,18 +56,12 @@ export function AppSidebar({
   const t = useTranslations("sidebar");
   const authError = searchParams.get("authError");
   const authSuccess = searchParams.get("authSuccess");
-  const pathname = usePathname();
-  const hideSidebar = pathname.includes("sample-resumes");
 
   useEffect(() => {
     if (authError || authSuccess) {
       setIsAuthOpen(true);
     }
   }, [authError, authSuccess]);
-
-  if (hideSidebar) {
-    return null;
-  }
 
   return (
     <Sidebar>

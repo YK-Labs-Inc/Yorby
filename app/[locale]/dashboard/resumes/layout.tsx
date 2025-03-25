@@ -1,3 +1,4 @@
+import Chatwoot from "@/components/ChatwootWidget";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -13,5 +14,10 @@ export default async function ResumesLayout({
   if (!user) {
     redirect("/sign-in");
   }
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <Chatwoot />
+    </>
+  );
 }
