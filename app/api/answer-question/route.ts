@@ -9,6 +9,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
 import { streamTextResponseWithFallback } from "@/utils/ai/gemini";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 export const maxDuration = 300;
@@ -37,6 +38,22 @@ export async function POST(req: NextRequest) {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
     const { job_title, job_description, company_name, company_description } =
       await getInterviewCopilot(interviewCopilotId);
+
+    // Get the current user for tracking
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const userId = user?.id || "anonymous";
+
+    await trackServerEvent({
+      userId,
+      eventName: "interview_copilot_question_answered",
+      args: {
+        interviewCopilotId,
+      },
+    });
+
     const result = await streamTextResponseWithFallback({
       systemPrompt: answerQuestionPrompt({
         question,

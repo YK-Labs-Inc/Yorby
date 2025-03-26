@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
   MonitorUp,
-  LogOut,
   Loader2,
   Settings2,
   HelpCircle,
@@ -55,6 +54,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsChrome } from "@/hooks/use-chrome";
+import { usePostHog } from "posthog-js/react";
 
 const MicrophonePermission = ({
   onPermissionGranted,
@@ -232,6 +232,7 @@ export function Session({
   const [copilotAutoScroll, setCopilotAutoScroll] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showExitWarningModal, setShowExitWarningModal] = useState(false);
+  const posthog = usePostHog();
 
   // Onboarding modal states
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -712,6 +713,9 @@ export function Session({
       return;
     }
     try {
+      posthog.capture("interview_copilot_started", {
+        interviewCopilotId,
+      });
       setupDeepgramRealTimeTranscription();
     } catch (error) {
       logError("Error starting transcription:", { error });
