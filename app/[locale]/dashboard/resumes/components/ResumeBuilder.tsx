@@ -231,7 +231,7 @@ const StartScreen = ({
             <Button
               onClick={handleStart}
               className="w-full"
-              disabled={!captchaToken}
+              disabled={!user && !captchaToken}
             >
               {t("startScreen.startButton")}
             </Button>
