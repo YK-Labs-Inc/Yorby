@@ -1,11 +1,10 @@
-import LandingPageV3 from "./LandingPageV3";
-import LandingPageV4 from "./LandingPageV4";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import {
   fetchUserCredits,
   fetchHasSubscription,
 } from "./dashboard/resumes/actions";
+import LandingPageV5 from "./LandingPageV5";
 
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
@@ -29,7 +28,7 @@ export default async function Home() {
       "test";
   }
   return (
-    <LandingPageV4
+    <LandingPageV5
       user={user}
       hasSubscription={hasSubscription}
       credits={credits}
