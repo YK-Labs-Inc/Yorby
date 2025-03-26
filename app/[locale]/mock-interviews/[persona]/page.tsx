@@ -24,7 +24,7 @@ export default async function MockInterviews({
   } = await supabase.auth.getUser();
 
   return (
-    <div>
+    <div className="min-h-screen">
       {!user && <PathHeader />}
       <PersonaMockInterviewClient selectedVoice={selectedVoice} />
     </div>
