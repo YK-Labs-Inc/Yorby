@@ -6,6 +6,7 @@ import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { ipAddress } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -159,6 +160,21 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       updatedResume: JSON.stringify(updatedResume),
       aiResponse,
     });
+
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const userId = user?.id || "anonymous";
+
+    await trackServerEvent({
+      userId,
+      eventName: "resume_edited",
+      args: {
+        speakingStyle,
+      },
+    });
+
     return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
   } catch (error) {
     logger.error("Failed to update resume", { error });

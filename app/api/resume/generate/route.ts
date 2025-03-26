@@ -5,6 +5,7 @@ import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { CoreMessage } from "ai";
 import { z } from "zod";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
@@ -27,6 +28,13 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     const resumeCoreMessage = await generateResumeCoreMessage(messages, logger);
 
     const resumeId = await saveResumeCoreMessage(resumeCoreMessage, logger);
+
+    const userId = await getCurrentUser();
+    await trackServerEvent({
+      userId,
+      eventName: "resume_generated",
+      args: { resumeId },
+    });
 
     return NextResponse.json({ resumeId });
   } catch (extractionError) {
