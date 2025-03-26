@@ -266,9 +266,12 @@ const SidebarTrigger = React.forwardRef<
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar();
   const pathname = usePathname();
-  const hideSidebar = pathname?.includes("/chat-to-resume");
+  const isMobile = useIsMobile();
+  const hideSidebar =
+    pathname?.includes("/chat-to-resume") ||
+    pathname.includes("mock-interviews");
 
-  if (hideSidebar) {
+  if (hideSidebar && isMobile) {
     return null;
   }
 
