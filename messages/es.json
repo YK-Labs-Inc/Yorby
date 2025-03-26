@@ -1263,5 +1263,70 @@
     "micPermissionError": "Por favor, concede permiso para acceder a tu micrófono.",
     "recordingError": "Error al grabar tu respuesta. Por favor, inténtalo de nuevo.",
     "transcribing": "Transcribiendo..."
+  },
+  "LandingPageV5": {
+    "hero": {
+      "title": "Creamos herramientas para ayudarte a conseguir un trabajo.",
+      "description": "Crea currículums perfectos, realiza entrevistas de práctica y obtén asistencia para entrevistas en tiempo real con nuestro conjunto de herramientas.",
+      "button": "Empezar",
+      "trustBadge": "Con la confianza de {userCount} personas que buscan empleo"
+    },
+    "bottomCTA": {
+      "title": "Empieza Gratis 🚀",
+      "description": "Con Perfect Interview, puedes maximizar tus posibilidades de ser contratado.",
+      "button": "Empieza Ya"
+    },
+    "demoFeatures": {
+      "title": "Prueba Nuestras Herramientas Impulsadas por IA 🚀",
+      "subtitle": "Comienza gratis y ¡potencia tu búsqueda de empleo hoy mismo!",
+      "options": {
+        "resume": {
+          "title": "Constructor de currículums"
+        },
+        "interview": {
+          "title": "Entrevista simulada"
+        },
+        "assistant": {
+          "title": "Copiloto de entrevistas"
+        }
+      }
+    },
+    "ourFeatures": {
+      "title": "Nuestras Herramientas Impulsadas por IA",
+      "subtitle": "Tres herramientas poderosas para ayudarte en cada etapa de tu búsqueda de empleo.",
+      "chatToResume": {
+        "title": "Chat para currículum vitae",
+        "description": "Crea un currículum perfecto a través de una conversación natural.",
+        "features": {
+          "0": "Entrada de voz natural o texto",
+          "1": "Formato impulsado por IA",
+          "2": "Edición continua",
+          "3": "Plantillas optimizadas para ATS"
+        },
+        "button": "Probar Demo del Creador de Currículums"
+      },
+      "mockInterview": {
+        "title": "Entrevista simulada",
+        "description": "Practica con preguntas de entrevista generadas por IA.",
+        "features": {
+          "0": "Preguntas específicas del trabajo.",
+          "1": "Retroalimentación en tiempo real",
+          "2": "Análisis de rendimiento",
+          "3": "Sesiones de práctica ilimitadas"
+        },
+        "button": "Prueba la Demo de Entrevista Simulada"
+      },
+      "interviewCopilot": {
+        "title": "Copiloto de Entrevistas",
+        "description": "Asistencia en tiempo real durante entrevistas reales.",
+        "features": {
+          "0": "Transcripción en vivo",
+          "1": "Detección de preguntas",
+          "2": "Sugerencias de respuesta",
+          "3": "Integración de documentos"
+        },
+        "button": "Prueba la demo de Co-pilot para entrevistas"
+      }
+    }
   }
 }

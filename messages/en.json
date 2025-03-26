@@ -1288,6 +1288,43 @@
           "title": "Interview Co-pilot"
         }
       }
+    },
+    "ourFeatures": {
+      "title": "Our AI-Powered Tools",
+      "subtitle": "Three powerful tools to help you at every stage of your job search journey",
+      "chatToResume": {
+        "title": "Chat to Resume",
+        "description": "Create a perfect resume through natural conversation",
+        "features": [
+          "Natural voice or text input",
+          "AI-powered formatting",
+          "Continuous editing",
+          "ATS-optimized templates"
+        ],
+        "button": "Try Resume Builder Demo"
+      },
+      "mockInterview": {
+        "title": "Mock Interview",
+        "description": "Practice with AI-generated interview questions",
+        "features": [
+          "Job-specific questions",
+          "Real-time feedback",
+          "Performance analysis",
+          "Unlimited practice sessions"
+        ],
+        "button": "Try Mock Interview Demo"
+      },
+      "interviewCopilot": {
+        "title": "Interview Co-pilot",
+        "description": "Real-time assistance during actual interviews",
+        "features": [
+          "Live transcription",
+          "Question detection",
+          "Answer suggestions",
+          "Document integration"
+        ],
+        "button": "Try Interview Co-pilot Demo"
+      }
     }
   }
 }

@@ -1263,5 +1263,70 @@
     "micPermissionError": "请允许访问您的麦克风🎤",
     "recordingError": "录制你的回复时出错。请重试。",
     "transcribing": "正在转录..."
+  },
+  "LandingPageV5": {
+    "hero": {
+      "title": "我们打造工具，助您找到工作。",
+      "description": "使用我们的工具套件，创建完美的简历，进行模拟面试，并获得实时的面试辅助。",
+      "button": "开始使用",
+      "trustBadge": "受到 {userCount} 位求职者的信赖"
+    },
+    "bottomCTA": {
+      "title": "免费开始使用",
+      "description": "使用Perfect Interview，您可以最大限度地提高被聘用的机会。",
+      "button": "现在开始"
+    },
+    "demoFeatures": {
+      "title": "试试我们的AI赋能工具 🚀",
+      "subtitle": "免费开始，今天就🚀加速你的求职之旅！",
+      "options": {
+        "resume": {
+          "title": "简历制作工具"
+        },
+        "interview": {
+          "title": "模拟面试"
+        },
+        "assistant": {
+          "title": "面试副驾驶"
+        }
+      }
+    },
+    "ourFeatures": {
+      "title": "我们的AI驱动工具 🚀",
+      "subtitle": "在求职旅程的每个阶段助您一臂之力的三个强大工具",
+      "chatToResume": {
+        "title": "聊天转简历",
+        "description": "通过自然对话打造完美简历 📝✨",
+        "features": {
+          "0": "自然语音或文本输入",
+          "1": "AI驱动的格式化",
+          "2": "持续编辑",
+          "3": "针对ATS优化的模板"
+        },
+        "button": "试试简历生成器演示 🚀"
+      },
+      "mockInterview": {
+        "title": "模拟面试",
+        "description": "使用人工智能生成的面试问题进行练习 🧠",
+        "features": {
+          "0": "特定职位问题",
+          "1": "实时反馈",
+          "2": "表现分析",
+          "3": "无限练习 ♾️"
+        },
+        "button": "尝试模拟面试演示 🚀"
+      },
+      "interviewCopilot": {
+        "title": "面试副驾驶 🚀",
+        "description": "面试时的实时协助",
+        "features": {
+          "0": "实时转录",
+          "1": "问题检测",
+          "2": "答案建议",
+          "3": "文档整合"
+        },
+        "button": "尝试 Interview Co-pilot 演示 🚀"
+      }
+    }
   }
 }

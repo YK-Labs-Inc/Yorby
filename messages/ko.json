@@ -1263,5 +1263,70 @@
     "micPermissionError": "마이크에 대한 접근 권한을 허용해 주세요.",
     "recordingError": "응답을 녹음하는 데 오류가 발생했습니다. 다시 시도해 주세요.",
     "transcribing": "기록 중..."
+  },
+  "LandingPageV5": {
+    "hero": {
+      "title": "저희는 여러분이 취업하는 데 도움이 되는 도구를 만듭니다.",
+      "description": "완벽한 이력서를 만들고, 모의 면접을 연습하고, 저희 툴 모음으로 실시간 면접 지원을 받으세요.",
+      "button": "시작하기",
+      "trustBadge": "{userCount}명의 구직자가 신뢰합니다"
+    },
+    "bottomCTA": {
+      "title": "무료로 시작하세요 🚀",
+      "description": "Perfect Interview와 함께라면, 채용될 확률을 극대화할 수 있습니다.",
+      "button": "지금 시작하세요"
+    },
+    "demoFeatures": {
+      "title": "AI 기반 도구를 사용해 보세요 ✨",
+      "subtitle": "무료로 시작하고 오늘 바로 구직 활동을 강화하세요🚀",
+      "options": {
+        "resume": {
+          "title": "이력서 작성기"
+        },
+        "interview": {
+          "title": "모의 면접"
+        },
+        "assistant": {
+          "title": "면접 코파일럿"
+        }
+      }
+    },
+    "ourFeatures": {
+      "title": "AI 기반 도구 🤖",
+      "subtitle": "취업 여정의 모든 단계를 도와줄 세 가지 강력한 도구 🚀💼🔑",
+      "chatToResume": {
+        "title": "채팅으로 이력서 만들기",
+        "description": "자연스러운 대화를 통해 완벽한 이력서를 만들어 보세요.",
+        "features": {
+          "0": "자연스러운 음성 또는 텍스트 입력",
+          "1": "AI 기반 서식 지정",
+          "2": "계속 편집",
+          "3": "ATS 최적화 템플릿"
+        },
+        "button": "이력서 작성기 데모 체험해보기"
+      },
+      "mockInterview": {
+        "title": "모의 면접",
+        "description": "AI 생성 면접 질문으로 연습하세요 🤖",
+        "features": {
+          "0": "직무 관련 질문",
+          "1": "실시간 피드백",
+          "2": "성능 분석",
+          "3": "무제한 연습 세션 ♾️"
+        },
+        "button": "모의 인터뷰 데모 체험해 보세요"
+      },
+      "interviewCopilot": {
+        "title": "면접 코파일럿 🧑‍✈️",
+        "description": "실제 인터뷰 중 실시간 지원",
+        "features": {
+          "0": "실시간 받아쓰기",
+          "1": "질문 감지",
+          "2": "답변 제안 💡",
+          "3": "문서 통합"
+        },
+        "button": "인터뷰 코파일럿 데모 사용해보기 🚀"
+      }
+    }
   }
 }
