@@ -1275,7 +1275,7 @@
       "button": "Start Now"
     },
     "demoFeatures": {
-      "title": "Try Our AI-Powered Tools",
+      "title": "Try Our Tools",
       "subtitle": "Start for free and supercharge your job search today",
       "options": {
         "resume": {
@@ -1290,15 +1290,15 @@
       }
     },
     "ourFeatures": {
-      "title": "Our AI-Powered Tools",
+      "title": "Our Tools",
       "subtitle": "Three powerful tools to help you at every stage of your job search journey",
       "chatToResume": {
         "title": "Chat to Resume",
         "description": "Create a perfect resume through natural conversation",
-        "features": [
+        "featuresV2": [
           "Natural voice or text input",
-          "AI-powered formatting",
-          "Continuous editing",
+          "Perfect formatting",
+          "Unlimited edits",
           "ATS-optimized templates"
         ],
         "button": "Try Resume Builder Demo"
@@ -1306,22 +1306,21 @@
       "mockInterview": {
         "title": "Mock Interview",
         "description": "Practice with AI-generated interview questions",
-        "features": [
+        "featuresV2": [
           "Job-specific questions",
           "Real-time feedback",
           "Performance analysis",
-          "Unlimited practice sessions"
+          "Unlimited mock interviews"
         ],
         "button": "Try Mock Interview Demo"
       },
       "interviewCopilot": {
         "title": "Interview Co-pilot",
         "description": "Real-time assistance during actual interviews",
-        "features": [
-          "Live transcription",
-          "Question detection",
-          "Answer suggestions",
-          "Document integration"
+        "featuresV2": [
+          "Answers questions for you in real-time",
+          "100% Undetectable",
+          "Unlimited Interview Copilots"
         ],
         "button": "Try Interview Co-pilot Demo"
       }

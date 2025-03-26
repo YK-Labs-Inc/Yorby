@@ -1303,7 +1303,13 @@
           "2": "Edición continua",
           "3": "Plantillas optimizadas para ATS"
         },
-        "button": "Probar Demo del Creador de Currículums"
+        "button": "Probar Demo del Creador de Currículums",
+        "featuresV2": {
+          "0": "Entrada de voz o texto natural",
+          "1": "Formato perfecto",
+          "2": "Ediciones ilimitadas",
+          "3": "Plantillas optimizadas para ATS"
+        }
       },
       "mockInterview": {
         "title": "Entrevista simulada",
@@ -1314,7 +1320,13 @@
           "2": "Análisis de rendimiento",
           "3": "Sesiones de práctica ilimitadas"
         },
-        "button": "Prueba la Demo de Entrevista Simulada"
+        "button": "Prueba la Demo de Entrevista Simulada",
+        "featuresV2": {
+          "0": "Preguntas específicas del trabajo",
+          "1": "Retroalimentación en tiempo real",
+          "2": "Análisis de rendimiento",
+          "3": "Entrevistas simuladas ilimitadas"
+        }
       },
       "interviewCopilot": {
         "title": "Copiloto de Entrevistas",
@@ -1325,7 +1337,12 @@
           "2": "Sugerencias de respuesta",
           "3": "Integración de documentos"
         },
-        "button": "Prueba la demo de Co-pilot para entrevistas"
+        "button": "Prueba la demo de Co-pilot para entrevistas",
+        "featuresV2": {
+          "0": "Responde a tus preguntas en tiempo real.",
+          "1": "100% Indetectable",
+          "2": "Copilotos de Entrevista Ilimitados"
+        }
       }
     }
   }

@@ -1303,7 +1303,13 @@
           "2": "Édition continue",
           "3": "Modèles optimisés pour les ATS"
         },
-        "button": "Essayez la Démo de Créateur de CV"
+        "button": "Essayez la Démo de Créateur de CV",
+        "featuresV2": {
+          "0": "Voix naturelle ou saisie de texte",
+          "1": "Formatage parfait",
+          "2": "Modifications illimitées",
+          "3": "Modèles optimisés pour les ATS"
+        }
       },
       "mockInterview": {
         "title": "Entretien simulé",
@@ -1314,7 +1320,13 @@
           "2": "Analyse des performances",
           "3": "Séances d'entraînement illimitées"
         },
-        "button": "Essayez la démo d'entretien simulé"
+        "button": "Essayez la démo d'entretien simulé",
+        "featuresV2": {
+          "0": "Questions spécifiques à l'emploi",
+          "1": "Retour d'information en temps réel",
+          "2": "Analyse des performances",
+          "3": "Entretiens blancs illimités"
+        }
       },
       "interviewCopilot": {
         "title": "Co-pilote d'entretien",
@@ -1325,7 +1337,12 @@
           "2": "Suggestions de réponses",
           "3": "Intégration de documents"
         },
-        "button": "Essayez la démo du copilote d'entretien"
+        "button": "Essayez la démo du copilote d'entretien",
+        "featuresV2": {
+          "0": "Répond à vos questions en temps réel.",
+          "1": "100% Indétectable",
+          "2": "Copilotes d'entretiens illimités"
+        }
       }
     }
   }

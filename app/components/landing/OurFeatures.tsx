@@ -16,7 +16,7 @@ export default function OurFetures() {
 
   // Helper function to get features array with proper typing
   const getFeatures = (key: string): string[] => {
-    return t.raw(`${key}.features`) as string[];
+    return t.raw(`${key}.featuresV2`) as string[];
   };
 
   return (
