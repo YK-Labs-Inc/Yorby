@@ -26,17 +26,15 @@ export default async function ChatToResume() {
   }
 
   return (
-    <>
+    <div className="h-screen flex flex-col">
       {!user && <PathHeader />}
-      <div className="h-[calc(100vh-64px)] flex flex-col">
-        <ResumeBuilder
-          hasSubscription={hasSubscription}
-          credits={credits}
-          user={user}
-          isSubscriptionVariant={isSubscriptionVariant}
-          isFreemiumEnabled={isFreemiumEnabled}
-        />
-      </div>
-    </>
+      <ResumeBuilder
+        hasSubscription={hasSubscription}
+        credits={credits}
+        user={user}
+        isSubscriptionVariant={isSubscriptionVariant}
+        isFreemiumEnabled={isFreemiumEnabled}
+      />
+    </div>
   );
 }
