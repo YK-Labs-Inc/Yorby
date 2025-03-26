@@ -12,6 +12,7 @@ export function useVoiceRecording({
   onTranscription,
   t,
 }: UseVoiceRecordingProps) {
+  const MEDIA_RECORDER_TIMESLICE = 100; // 100ms timeslice for frequent data capture
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [selectedAudio, setSelectedAudio] = useState<string>("");
   const [audioDevices, setAudioDevices] = useState<
@@ -19,6 +20,8 @@ export function useVoiceRecording({
   >([]);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const { logError } = useAxiomLogging();
+  const shouldProcessAudioRef = useRef<boolean>(false);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Default messages for when translation function isn't provided
   const messages = {
@@ -161,6 +164,9 @@ export function useVoiceRecording({
   // Start recording audio
   const startRecording = async () => {
     try {
+      // Reset audio chunks at the start of recording
+      audioChunksRef.current = [];
+
       // First initialize recording if not already done
       const initializedAudioDevice = await initializeRecording();
       if (initializedAudioDevice === false) return;
@@ -173,6 +179,9 @@ export function useVoiceRecording({
         return;
       }
 
+      // Set the flag to true when starting a new recording
+      shouldProcessAudioRef.current = true;
+
       // Initialize media stream with selected audio device
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -182,20 +191,35 @@ export function useVoiceRecording({
 
       streamRef.current = stream;
 
-      // Set up media recorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
-      // Handle data from microphone - this will be called once when recording stops
-      mediaRecorder.ondataavailable = async (event) => {
+      mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          // Process audio once we have all chunks (which is now, since this only fires once)
-          await processAudio([event.data]);
+          audioChunksRef.current.push(event.data);
         }
       };
 
-      // Start recording (without time parameter, so it will only call ondataavailable when stopped)
-      mediaRecorder.start();
+      mediaRecorder.onstop = async () => {
+        if (
+          shouldProcessAudioRef.current &&
+          audioChunksRef.current.length > 0
+        ) {
+          await processAudio(audioChunksRef.current);
+        }
+        // Clear the chunks after processing or when cancelled
+        audioChunksRef.current = [];
+      };
+
+      mediaRecorder.onerror = (event) => {
+        logError("MediaRecorder error:", { error: event.error });
+        alert(
+          "Sorry, something went wrong. Please refresh the page and try again."
+        );
+      };
+
+      // Start recording with minimum reliable timeslice for maximum audio capture frequency
+      mediaRecorder.start(MEDIA_RECORDER_TIMESLICE);
     } catch (error) {
       logError("Failed to start recording:", { error });
       alert(messages.micPermissionError);
@@ -203,6 +227,9 @@ export function useVoiceRecording({
   };
 
   const cancelRecording = () => {
+    // Set the flag to false to prevent processing
+    shouldProcessAudioRef.current = false;
+
     // Stop the recording without processing
     if (
       mediaRecorderRef.current &&
@@ -226,6 +253,9 @@ export function useVoiceRecording({
 
   const stopRecording = async () => {
     try {
+      // Ensure the flag is true when stopping normally
+      shouldProcessAudioRef.current = true;
+
       // Stop media recorder - this will trigger ondataavailable
       if (
         mediaRecorderRef.current &&

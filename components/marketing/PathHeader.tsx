@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 export function PathHeader() {
   return (
-    <div className="w-full border-b h-16">
+    <div className="w-full border-b h-16 bg-background z-50">
       <div className="h-full max-w-screen-xl mx-auto px-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <img
