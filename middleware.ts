@@ -66,7 +66,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
         new URL(`https://perfectinterview.ai/chat-to-resume/lbj`).toString(),
         301
       );
-    } else if (hostname.includes("chaewong2resume")) {
+    } else if (hostname.includes("chaewon2resume")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/chat-to-resume/cw`).toString(),
         301
