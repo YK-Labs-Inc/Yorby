@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { VoiceOption } from "@/app/types/tts";
+import { VOICE_OPTIONS, VoiceOption } from "@/app/types/tts";
 import PersonaMockInterviewSetup from "./PersonaMockInterviewSetup";
 import PersonaActiveInterview from "./PersonaActiveInterview";
 import { TtsProvider } from "@/app/context/TtsContext";
@@ -12,11 +12,11 @@ interface MediaDevice {
 }
 
 interface PersonaMockInterviewClientProps {
-  selectedVoice: VoiceOption;
+  selectedVoice?: VoiceOption;
 }
 
 export function PersonaMockInterviewClientInternal({
-  selectedVoice,
+  selectedVoice = VOICE_OPTIONS[0],
 }: PersonaMockInterviewClientProps) {
   const [audioDevices, setAudioDevices] = useState<MediaDevice[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string>("");
@@ -153,7 +153,7 @@ export function PersonaMockInterviewClientInternal({
 }
 
 export default function PersonaMockInterviewClient({
-  selectedVoice,
+  selectedVoice = VOICE_OPTIONS[0],
 }: PersonaMockInterviewClientProps) {
   return (
     <TtsProvider initialTtsEnabled={true} initialVoice={selectedVoice}>

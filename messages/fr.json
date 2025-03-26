@@ -1263,5 +1263,70 @@
     "micPermissionError": "Veuillez autoriser l'accès à votre microphone 🙏",
     "recordingError": "Erreur lors de l'enregistrement de votre réponse. Veuillez réessayer.",
     "transcribing": "Transcription en cours..."
+  },
+  "LandingPageV5": {
+    "hero": {
+      "title": "Nous créons des outils pour vous aider à trouver un emploi.",
+      "description": "Créez des CV parfaits, passez des entretiens d'entraînement et bénéficiez d'une assistance d'entretien en temps réel grâce à notre suite d'outils.",
+      "button": "Commencer",
+      "trustBadge": "Approuvé par {userCount} chercheurs d'emploi."
+    },
+    "bottomCTA": {
+      "title": "Commencer gratuitement",
+      "description": "Avec Perfect Interview, vous pouvez maximiser vos chances d'être embauché(e) 🚀.",
+      "button": "Commencer maintenant"
+    },
+    "demoFeatures": {
+      "title": "Essayez nos outils optimisés par l'IA.",
+      "subtitle": "Commencez gratuitement et boostez votre recherche d'emploi dès aujourd'hui 🚀",
+      "options": {
+        "resume": {
+          "title": "Créateur de CV"
+        },
+        "interview": {
+          "title": "Entretien simulé"
+        },
+        "assistant": {
+          "title": "Co-pilote d'entretien"
+        }
+      }
+    },
+    "ourFeatures": {
+      "title": "Nos outils propulsés par l'IA 🤖",
+      "subtitle": "Trois outils puissants pour vous aider à chaque étape de votre recherche d'emploi 🚀",
+      "chatToResume": {
+        "title": "Discutez pour reprendre 💬",
+        "description": "Créez un CV parfait grâce à une conversation naturelle.",
+        "features": {
+          "0": "Entrée vocale ou textuelle naturelle",
+          "1": "Mise en forme assistée par l'IA",
+          "2": "Édition continue",
+          "3": "Modèles optimisés pour les ATS"
+        },
+        "button": "Essayez la Démo de Créateur de CV"
+      },
+      "mockInterview": {
+        "title": "Entretien simulé",
+        "description": "Entraînez-vous avec des questions d'entretien générées par l'IA 🤖.",
+        "features": {
+          "0": "Questions spécifiques à l'emploi",
+          "1": "Retour d'information en temps réel",
+          "2": "Analyse des performances",
+          "3": "Séances d'entraînement illimitées"
+        },
+        "button": "Essayez la démo d'entretien simulé"
+      },
+      "interviewCopilot": {
+        "title": "Co-pilote d'entretien",
+        "description": "Assistance en temps réel pendant les entretiens d'embauche.",
+        "features": {
+          "0": "Transcription en direct",
+          "1": "Détection de question",
+          "2": "Suggestions de réponses",
+          "3": "Intégration de documents"
+        },
+        "button": "Essayez la démo du copilote d'entretien"
+      }
+    }
   }
 }
