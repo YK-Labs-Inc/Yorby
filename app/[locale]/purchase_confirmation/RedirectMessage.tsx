@@ -36,13 +36,11 @@ export default function RedirectMessage({
       window.fbq("track", "Purchase", {
         currency: sessionData.currency,
         value: sessionData.amount,
-        content_ids: sessionData.contentIds,
       });
       if (sessionData.isSubscription) {
         window.fbq("track", "Subscribe", {
           currency: sessionData.currency,
           value: sessionData.amount,
-          content_ids: sessionData.contentIds,
         });
       }
     }

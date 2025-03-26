@@ -27,7 +27,6 @@ export const SubscriptionPricingCard = ({ product }: { product: Product }) => {
       window.fbq("track", "InitiateCheckout", {
         currency: "USD",
         value: product.totalPrice || 0,
-        content_ids: [product.prices[0].id],
         num_items: product.months || 1,
       });
     }
