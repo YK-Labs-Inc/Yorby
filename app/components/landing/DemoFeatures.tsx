@@ -23,21 +23,21 @@ export default function DemoFeatures({
   isFreemiumEnabled: boolean;
 }) {
   const [selectedOption, setSelectedOption] = useState<string | null>("resume");
-  const t = useTranslations("landingPageV4");
+  const t = useTranslations("LandingPageV5.demoFeatures");
 
   const options = [
     {
-      id: t("options.resume.id"),
+      id: "resume",
       title: t("options.resume.title"),
       icon: FileText,
     },
     {
-      id: t("options.interview.id"),
+      id: "interview",
       title: t("options.interview.title"),
       icon: Users,
     },
     {
-      id: t("options.assistant.id"),
+      id: "assistant",
       title: t("options.assistant.title"),
       icon: MessageSquare,
     },
@@ -71,7 +71,7 @@ export default function DemoFeatures({
   };
 
   return (
-    <div className="w-full max-w-[1080px] mx-auto mt-4 px-4">
+    <div className="w-full max-w-[1080px] mx-auto px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -85,11 +85,9 @@ export default function DemoFeatures({
           className="text-center mb-8"
         >
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
-            Try Our Tools For Free
+            {t("title")}
           </h2>
-          <p className="text-muted-foreground text-lg">
-            Start for free and supercharge your job search today
-          </p>
+          <p className="text-muted-foreground text-lg">{t("subtitle")}</p>
         </motion.div>
 
         <Tabs

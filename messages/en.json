@@ -1261,5 +1261,33 @@
     "micPermissionError": "Please grant permission to access your microphone",
     "recordingError": "Error recording your response. Please try again.",
     "transcribing": "Transcribing..."
+  },
+  "LandingPageV5": {
+    "hero": {
+      "title": "We Make Tools To Help You Get A Job",
+      "description": "Create perfect resumes, go through practice interviews, and get real-time interview assistance with our suite of tools.",
+      "button": "Get Started",
+      "trustBadge": "Trusted by {userCount} job seekers"
+    },
+    "bottomCTA": {
+      "title": "Get Started For Free",
+      "description": "With Perfect Interview, you can maximize your chances of getting hired",
+      "button": "Start Now"
+    },
+    "demoFeatures": {
+      "title": "Try Our AI-Powered Tools",
+      "subtitle": "Start for free and supercharge your job search today",
+      "options": {
+        "resume": {
+          "title": "Resume Builder"
+        },
+        "interview": {
+          "title": "Mock Interview"
+        },
+        "assistant": {
+          "title": "Interview Co-pilot"
+        }
+      }
+    }
   }
 }
