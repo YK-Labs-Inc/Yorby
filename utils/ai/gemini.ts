@@ -12,6 +12,7 @@ type BaseParams = {
   systemPrompt?: string;
   loggingContext?: Record<string, any>;
   enableLogging?: boolean;
+  userId?: string;
 };
 
 type MessagesOnlyParams = BaseParams & {
@@ -40,15 +41,20 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
   schema,
   loggingContext = {},
   enableLogging = true,
+  userId,
 }: GenerateObjectParams<T>): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let posthogDistinctId = userId;
+  if (!posthogDistinctId) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    posthogDistinctId = user?.id;
+  }
   try {
     const model = withTracing(google("gemini-2.0-flash"), posthog, {
-      posthogDistinctId: user?.id,
+      posthogDistinctId,
       posthogProperties: loggingContext,
     });
     const result = await generateObject({
@@ -73,7 +79,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
     await logger.flush();
     try {
       const model = withTracing(google("gemini-1.5-flash"), posthog, {
-        posthogDistinctId: user?.id,
+        posthogDistinctId,
         posthogProperties: loggingContext,
       });
       const result = await generateObject({
@@ -115,15 +121,20 @@ export const generateTextWithFallback = async ({
   prompt,
   systemPrompt,
   loggingContext = {},
+  userId,
 }: MutuallyExclusiveParams): Promise<string> => {
   const logger = new Logger().with(loggingContext);
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let posthogDistinctId = userId;
+  if (!posthogDistinctId) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    posthogDistinctId = user?.id;
+  }
   try {
     const model = withTracing(google("gemini-2.0-flash"), posthog, {
-      posthogDistinctId: user?.id,
+      posthogDistinctId,
       posthogProperties: loggingContext,
     });
     const { text } = await generateText({
@@ -142,7 +153,7 @@ export const generateTextWithFallback = async ({
     await logger.flush();
     try {
       const model = withTracing(google("gemini-1.5-flash"), posthog, {
-        posthogDistinctId: user?.id,
+        posthogDistinctId,
         posthogProperties: loggingContext,
       });
       const { text } = await generateText({
@@ -177,10 +188,22 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
   prompt,
   systemPrompt,
   loggingContext = {},
+  userId,
 }: MutuallyExclusiveParams): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
+  let posthogDistinctId = userId;
+  if (!posthogDistinctId) {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    posthogDistinctId = user?.id;
+  }
   try {
-    const model = google("gemini-2.0-flash");
+    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+      posthogDistinctId,
+      posthogProperties: loggingContext,
+    });
     const result = streamText({
       model,
       messages,
@@ -197,7 +220,10 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
     await logger.flush();
 
     try {
-      const model = google("gemini-1.5-flash");
+      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+        posthogDistinctId,
+        posthogProperties: loggingContext,
+      });
       const result = streamText({
         model,
         messages,
