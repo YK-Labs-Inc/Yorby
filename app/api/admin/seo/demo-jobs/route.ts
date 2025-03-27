@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { createAdminClient } from "@/utils/supabase/server";
-import { Client } from "@notionhq/client";
-import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { promises as fs } from "fs";
 import path from "path";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { z } from "zod";
+import { Tables } from "@/utils/supabase/database.types";
 
 // Use require for csv-parse as it doesn't have TypeScript types
 const { parse } = require("csv-parse/sync");
@@ -22,7 +21,11 @@ interface ProcessingResult {
   success: boolean;
   error?: string;
   message?: string;
+  demoJobId?: string;
+  resumeId?: string;
 }
+
+const DEMO_USER_ID = "7823eb9a-62fc-4bbf-bd58-488f117c24e8";
 
 // Helper function to process a batch of jobs
 const processBatch = async (batch: JobRecord[], logger: any) => {
@@ -73,16 +76,43 @@ const processBatch = async (batch: JobRecord[], logger: any) => {
         const existingCompanyJob = companySpecificJobResult?.data;
 
         // Process jobs that don't exist
-        const tasks: Promise<void>[] = [];
+        const results: ProcessingResult[] = [];
 
         if (!existingGenericJob) {
           logger.info("Processing generic job", { normalizedJobTitle });
-          tasks.push(
-            generateDemoJobQuestions({
+          try {
+            // Generate demo job questions and create job entry
+            const demoJobId = await generateDemoJobQuestions({
               jobTitle: normalizedJobTitle,
               jobDescription,
-            })
-          );
+            });
+
+            // Generate resume for the job
+            const genericJob = {
+              id: demoJobId,
+              job_title: normalizedJobTitle,
+              job_description: jobDescription,
+              company_name: null,
+              company_description: null,
+              created_at: new Date().toISOString(),
+              slug: null,
+            };
+
+            const { resumeId } = await generateResumeFromJob(genericJob);
+
+            results.push({
+              success: true,
+              demoJobId,
+              resumeId,
+            });
+          } catch (error) {
+            const e = error instanceof Error ? error : new Error(String(error));
+            logger.error("Error processing generic job", { error: e.message });
+            results.push({
+              success: false,
+              error: e.message,
+            });
+          }
         }
 
         if (cleanedCompanyName && companyDescription && !existingCompanyJob) {
@@ -90,22 +120,50 @@ const processBatch = async (batch: JobRecord[], logger: any) => {
             normalizedJobTitle,
             cleanedCompanyName,
           });
-          tasks.push(
-            generateDemoJobQuestions({
+          try {
+            // Generate demo job questions and create job entry
+            const demoJobId = await generateDemoJobQuestions({
               jobTitle: normalizedJobTitle,
               jobDescription,
               companyName: cleanedCompanyName,
               companyDescription,
-            })
-          );
+            });
+
+            // Generate resume for the job
+            const companyJob = {
+              id: demoJobId,
+              job_title: normalizedJobTitle,
+              job_description: jobDescription,
+              company_name: cleanedCompanyName,
+              company_description: companyDescription,
+              created_at: new Date().toISOString(),
+              slug: null,
+            };
+
+            const { resumeId } = await generateResumeFromJob(companyJob);
+
+            results.push({
+              success: true,
+              demoJobId,
+              resumeId,
+            });
+          } catch (error) {
+            const e = error instanceof Error ? error : new Error(String(error));
+            logger.error("Error processing company-specific job", {
+              error: e.message,
+            });
+            results.push({
+              success: false,
+              error: e.message,
+            });
+          }
         }
 
-        if (tasks.length > 0) {
-          await Promise.all(tasks);
-          return { success: true };
-        } else {
+        if (results.length === 0) {
           return { success: true, message: "Jobs already exist" };
         }
+
+        return results[0]; // Return the first result since we process one job at a time
       } catch (e) {
         const error = e instanceof Error ? e : new Error(String(e));
         logger.error("Error processing job", { error: error.message });
@@ -236,6 +294,7 @@ const normalizeJobTitle = async (jobTitle: string) => {
       normalizedTitle: z.string(),
     }),
     systemPrompt,
+    userId: DEMO_USER_ID,
   });
   const { normalizedTitle } = result;
   return normalizedTitle;
@@ -321,12 +380,13 @@ const generateDemoJobQuestions = async ({
           path: "api/resume/generate",
           dataToExtract: "interview questions",
         },
+        userId: DEMO_USER_ID,
       });
 
       const { questions } = result;
 
       try {
-        // If we get here, both the API call and JSON parsing succeeded
+        // Create demo job and write questions to DB
         const demoJobId = await createDemoJob({
           jobTitle,
           jobDescription,
@@ -341,53 +401,9 @@ const generateDemoJobQuestions = async ({
           questions,
         });
 
-        if (!isCompanySpecific) {
-          // Format for generic jobs
-          const kebabCaseSlug = jobTitle
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-          const title = `${jobTitle} Practice Interview Questions`;
-          const metaDescription = `Here are some practice interview questions for ${jobTitle} job interview.`;
-          const metaTitle = `${jobTitle} Practice Interview Questions`;
-
-          await writeDemoJobToNotion({
-            title,
-            slug: `${kebabCaseSlug}-practice-interview-questions`,
-            metaDescription,
-            metaTitle,
-            blogIntro: metaDescription,
-            questions: questions.slice(0, 4),
-            demoJobId,
-          });
-        } else if (companyName) {
-          // Format for company-specific jobs
-          const kebabCaseSlug = `${companyName}-${jobTitle}`
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-          const title = `${companyName} ${jobTitle} Practice Interview Questions`;
-          const metaDescription = `Here are some practice interview questions for a ${jobTitle} job interview at ${companyName}`;
-          const metaTitle = `${companyName} ${jobTitle} Practice Interview Questions`;
-
-          await writeDemoJobToNotion({
-            title,
-            slug: `${kebabCaseSlug}-practice-interview-questions`,
-            metaDescription,
-            metaTitle,
-            blogIntro: metaDescription,
-            questions: questions.slice(0, 5),
-            demoJobId,
-          });
-        }
-
-        return; // Success! Exit the function
-      } catch (e) {
-        // JSON parsing failed, throw error to trigger retry
-        const parseError = e instanceof Error ? e : new Error(String(e));
-        throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+        return demoJobId;
+      } catch (error) {
+        throw new Error(`Failed to save demo job: ${error}`);
       }
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
@@ -404,6 +420,8 @@ const generateDemoJobQuestions = async ({
       await new Promise((resolve) => setTimeout(resolve, backoff + jitter));
     }
   }
+
+  throw new Error("Failed to generate demo job questions after all retries");
 };
 
 const createDemoJob = async ({
@@ -454,218 +472,6 @@ const writeDemoJobQuestionsToDb = async ({
   }
 };
 
-const writeDemoJobToNotion = async ({
-  title,
-  slug,
-  metaDescription,
-  metaTitle,
-  blogIntro,
-  questions,
-  demoJobId,
-}: {
-  title: string;
-  slug: string;
-  metaDescription: string;
-  metaTitle: string;
-  blogIntro: string;
-  questions: {
-    question: string;
-    answerGuidelines: string;
-    correctExampleAnswers: string[];
-    incorrectExampleAnswers: string[];
-  }[];
-  demoJobId: string;
-}) => {
-  const databaseId = "18271566997b813b822ef00c7aa00c3a";
-  const notion = new Client({
-    auth: process.env.NOTION_API_KEY!,
-  });
-  const questionBlocks: BlockObjectRequest[] = questions.flatMap(
-    (question, index) => {
-      const blocks: BlockObjectRequest[] = [];
-
-      // Add CTA blocks before the second question
-      if (index === 1) {
-        blocks.push(
-          {
-            object: "block" as const,
-            quote: {
-              rich_text: [
-                {
-                  text: {
-                    content:
-                      "Want to practice answering these questions? Try our AI-powered mock interviews that provides instant feedback on your answers.\n\n",
-                  },
-                },
-                {
-                  text: {
-                    content: "Click here to practice these interview questions",
-                    link: {
-                      url: `https://perfectinterview.ai/clone-demo-job/${demoJobId}`,
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          {
-            object: "block" as const,
-            divider: {},
-          }
-        );
-      }
-
-      // Add question blocks
-      blocks.push(
-        {
-          object: "block" as const,
-          heading_2: {
-            rich_text: [
-              {
-                text: {
-                  content: `Question #${index + 1}: ${question.question}`,
-                },
-              },
-            ],
-          },
-        },
-        {
-          object: "block" as const,
-          heading_3: {
-            rich_text: [
-              {
-                text: {
-                  content: "Answer Guideline",
-                },
-              },
-            ],
-          },
-        },
-        {
-          object: "block" as const,
-          paragraph: {
-            rich_text: [{ text: { content: question.answerGuidelines } }],
-          },
-        },
-        {
-          object: "block" as const,
-          heading_3: {
-            rich_text: [{ text: { content: "Examples of Good Answers" } }],
-          },
-        },
-        ...question.correctExampleAnswers.map((answer) => ({
-          object: "block" as const,
-          numbered_list_item: {
-            rich_text: [{ text: { content: answer } }],
-          },
-        }))
-        // {
-        //   object: "block" as const,
-        //   heading_3: {
-        //     rich_text: [{ text: { content: "Examples of Bad Answers" } }],
-        //   },
-        // },
-        // ...question.incorrectExampleAnswers.map((answer) => ({
-        //   object: "block" as const,
-        //   numbered_list_item: {
-        //     rich_text: [{ text: { content: answer } }],
-        //   },
-        // }))
-      );
-
-      if (index !== questions.length - 1) {
-        blocks.push({
-          object: "block" as const,
-          divider: {},
-        });
-      }
-
-      return blocks;
-    }
-  );
-  await notion.pages.create({
-    parent: {
-      type: "database_id",
-      database_id: databaseId,
-    },
-    properties: {
-      Name: {
-        title: [
-          {
-            text: {
-              content: title,
-            },
-          },
-        ],
-      },
-      Slug: {
-        rich_text: [
-          {
-            text: {
-              content: slug,
-            },
-          },
-        ],
-      },
-      "Ready to Publish": {
-        checkbox: true,
-      },
-      "Hide Cover": {
-        checkbox: true,
-      },
-      "Meta Description": {
-        rich_text: [
-          {
-            text: {
-              content: metaDescription,
-            },
-          },
-        ],
-      },
-      "Meta Title": {
-        rich_text: [
-          {
-            text: {
-              content: metaTitle,
-            },
-          },
-        ],
-      },
-    },
-    children: [
-      {
-        object: "block",
-        heading_1: {
-          rich_text: [
-            {
-              text: {
-                content: title,
-              },
-            },
-          ],
-        },
-      },
-      {
-        object: "block",
-        paragraph: {
-          rich_text: [
-            {
-              text: {
-                content: blogIntro,
-              },
-            },
-          ],
-        },
-      },
-      {
-        object: "block",
-        divider: {},
-      },
-      ...questionBlocks,
-    ],
-  });
-};
-
 const cleanupText = async (text: string) => {
   const prompt = [
     `Clean up and format the following text as a proper English title/name. 
@@ -685,7 +491,398 @@ const cleanupText = async (text: string) => {
       path: "api/resume/generate",
       dataToExtract: "cleaned text",
     },
+    userId: DEMO_USER_ID,
   });
 
   return result.cleanedText;
+};
+
+const generateResumeFromJob = async (job: Tables<"demo_jobs">) => {
+  const isGenericJob = !job.company_name;
+  const prompt = `
+    You are an expert resume writer. ${
+      isGenericJob
+        ? `You are creating a resume for a generic ${job.job_title} position, not tied to any specific company. 
+         Use the provided job description as an example/inspiration to understand the typical requirements and responsibilities for this role.
+         Create a resume that would be suitable for similar ${job.job_title} positions across different companies.`
+        : `You are creating a resume for a ${job.job_title} position at a company named ${job.company_name}.`
+    }
+
+    ${
+      isGenericJob
+        ? `The provided job description is an example to help you understand what employers typically look for in this role.
+         Use it as inspiration to create a resume that would be suitable for similar positions at other companies.`
+        : `The resume should be specifically tailored for this company and role.`
+    }
+
+    The candidate should be a strong candidate for the job requirements and qualifications. However, don't make it too perfect.
+    The candidate should have some experience that is relevant to the job description, but it should not be exactly the same
+    as no candidate would have exactly the same experience. Create similar experiences with different names and companies.
+    
+    ## Job Title: ${job.job_title}
+    ## Job Description: ${job.job_description}
+    ${isGenericJob ? "" : `## Company: ${job.company_name}`}
+    ${isGenericJob ? "" : `## Company Description: ${job.company_description}`}
+
+    Create a candidate profile that includes:
+    1. Personal information (name, location - make these realistic but fictional)
+    2. Education history that matches the job requirements
+    3. Work experience that demonstrates the required skills and experience
+    4. Relevant skills mentioned in or implied by the job description
+
+    ${
+      isGenericJob
+        ? `Since this is a generic resume, create work experiences at well-known companies in the industry, 
+         showing progression and growth in roles similar to ${job.job_title}.`
+        : `Create work experiences that would particularly appeal to ${job.company_name} and align with their needs.`
+    }
+
+    Return the date in only YYYY format for the education history — do not return the months.
+    Return all dates in MM/YYYY format for the work experience.
+    Make the experience and qualifications strong but believable.
+
+    For each work experience section, only include 4 description per work experience. Use your expertise as a resume writer to create realistic descriptions
+    that demonstrate impact and results that will impress any hiring manager.
+
+    When generating the skills section, generate only 2-3 categories of skills.
+    `;
+
+  const [personalInfo, educationHistory, workExperience, skills] =
+    await Promise.all([
+      generateObjectWithFallback({
+        systemPrompt: prompt,
+        prompt: "Generate only the personal information section.",
+        schema: z.object({
+          name: z.string(),
+          email: z.string().nullable(),
+          phone: z.string().nullable(),
+          location: z.string(),
+        }),
+        loggingContext: {
+          path: "api/admin/seo/demo-job-resumes",
+          dataToExtract: "personal information",
+        },
+        userId: DEMO_USER_ID,
+      }),
+
+      generateObjectWithFallback({
+        systemPrompt: prompt,
+        prompt: "Generate only the education history section.",
+        schema: z.array(
+          z.object({
+            name: z.string(),
+            degree: z.string(),
+            startDate: z.string(),
+            endDate: z.string(),
+            gpa: z.string().nullable(),
+            additionalInfo: z.array(z.string()),
+          })
+        ),
+        loggingContext: {
+          path: "api/admin/seo/demo-job-resumes",
+          dataToExtract: "education",
+        },
+        userId: DEMO_USER_ID,
+      }),
+
+      generateObjectWithFallback({
+        systemPrompt: prompt,
+        prompt: "Generate only the work experience section.",
+        schema: z.array(
+          z.object({
+            companyName: z.string(),
+            jobTitle: z.string(),
+            startDate: z.string(),
+            endDate: z.string(),
+            description: z.array(z.string()),
+          })
+        ),
+        loggingContext: {
+          path: "api/admin/seo/demo-job-resumes",
+          dataToExtract: "work experience",
+        },
+        userId: DEMO_USER_ID,
+      }),
+
+      generateObjectWithFallback({
+        systemPrompt: prompt,
+        prompt: "Generate only the skills section.",
+        schema: z.array(
+          z.object({
+            category: z.string(),
+            skills: z.array(z.string()),
+          })
+        ),
+        loggingContext: {
+          path: "api/admin/seo/demo-job-resumes",
+          dataToExtract: "skills",
+        },
+        userId: DEMO_USER_ID,
+      }),
+    ]);
+
+  const generatedData = {
+    personalInfo,
+    educationHistory,
+    workExperience,
+    skills,
+  };
+
+  // Save the resume to Supabase and get the ID
+  const resumeId = await saveGeneratedResume(
+    generatedData,
+    job.job_title,
+    job.job_description,
+    job.company_name,
+    job.company_description
+  );
+
+  return {
+    resumeId,
+    jobId: job.id,
+    jobTitle: job.job_title,
+    companyName: job.company_name,
+  };
+};
+
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphen
+    .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
+    .replace(/--+/g, "-"); // Replace multiple hyphens with single hyphen
+
+const saveGeneratedResume = async (
+  resumeData: {
+    personalInfo: {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      location: string;
+    };
+    educationHistory: {
+      name: string;
+      degree: string;
+      startDate: string;
+      endDate: string;
+      gpa: string | null;
+      additionalInfo: string[];
+    }[];
+    workExperience: {
+      companyName: string;
+      jobTitle: string;
+      startDate: string;
+      endDate: string;
+      description: string[];
+    }[];
+    skills: {
+      category: string;
+      skills: string[];
+    }[];
+  },
+  jobTitle: string,
+  jobDescription: string | null,
+  companyName?: string | null,
+  companyDescription?: string | null
+) => {
+  const supabase = await createAdminClient();
+
+  // Save resume personal info
+  const { data: resumeData_, error } = await supabase
+    .from("resumes")
+    .insert({
+      title: companyName ? `${jobTitle} at ${companyName}` : jobTitle,
+      name: resumeData.personalInfo.name,
+      email: resumeData.personalInfo.email,
+      phone: resumeData.personalInfo.phone,
+      location: resumeData.personalInfo.location,
+      user_id: DEMO_USER_ID,
+      locked_status: "unlocked",
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const resumeId = resumeData_.id;
+
+  const slugText = companyName ? `${jobTitle} at ${companyName}` : jobTitle;
+
+  // Save resume metadata
+  const { error: metadataError } = await supabase
+    .from("resume_metadata")
+    .insert({
+      resume_id: resumeId,
+      job_title: jobTitle,
+      job_description: jobDescription || "",
+      ...(companyName ? { company_name: companyName } : {}),
+      ...(companyDescription
+        ? { company_description: companyDescription }
+        : {}),
+      slug: generateSlug(slugText),
+    });
+
+  if (metadataError) {
+    throw new Error(metadataError.message);
+  }
+
+  // Save education section
+  if (resumeData.educationHistory.length > 0) {
+    const { data: educationSection, error: eduSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Education",
+        resume_id: resumeId,
+        display_order: 0,
+      })
+      .select("id")
+      .single();
+
+    if (eduSectionError) {
+      throw new Error(eduSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.educationHistory.map(async (education, index) => {
+        const subtitle = education.gpa
+          ? `${education.degree} - ${education.gpa}`
+          : education.degree;
+
+        const { data: detailItem, error: detailError } = await supabase
+          .from("resume_detail_items")
+          .insert({
+            title: education.name,
+            subtitle,
+            date_range: `${education.startDate} - ${education.endDate}`,
+            section_id: educationSection.id,
+            display_order: index,
+          })
+          .select("id")
+          .single();
+
+        if (detailError) {
+          console.error("Failed to insert education detail item", detailError);
+          return;
+        }
+
+        if (education.additionalInfo.length > 0) {
+          await Promise.all(
+            education.additionalInfo.map(async (info, descIndex) => {
+              const { error: descError } = await supabase
+                .from("resume_item_descriptions")
+                .insert({
+                  detail_item_id: detailItem.id,
+                  description: info,
+                  display_order: descIndex,
+                });
+
+              if (descError) {
+                console.error(
+                  "Failed to insert education description",
+                  descError
+                );
+              }
+            })
+          );
+        }
+      })
+    );
+  }
+
+  // Save work experience section
+  if (resumeData.workExperience.length > 0) {
+    const { data: workSection, error: workSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Work Experience",
+        resume_id: resumeId,
+        display_order: 1,
+      })
+      .select("id")
+      .single();
+
+    if (workSectionError) {
+      throw new Error(workSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.workExperience.map(async (experience, index) => {
+        const { data: detailItem, error: detailError } = await supabase
+          .from("resume_detail_items")
+          .insert({
+            title: experience.companyName,
+            subtitle: experience.jobTitle,
+            date_range: `${experience.startDate} - ${experience.endDate}`,
+            section_id: workSection.id,
+            display_order: index,
+          })
+          .select("id")
+          .single();
+
+        if (detailError) {
+          console.error(
+            "Failed to insert work experience detail item",
+            detailError
+          );
+          return;
+        }
+
+        await Promise.all(
+          experience.description.map(async (desc, descIndex) => {
+            const { error: descError } = await supabase
+              .from("resume_item_descriptions")
+              .insert({
+                detail_item_id: detailItem.id,
+                description: desc,
+                display_order: descIndex,
+              });
+
+            if (descError) {
+              console.error(
+                "Failed to insert work experience description",
+                descError
+              );
+            }
+          })
+        );
+      })
+    );
+  }
+
+  // Save skills section
+  if (resumeData.skills.length > 0) {
+    const { data: skillsSection, error: skillsSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Skills",
+        resume_id: resumeId,
+        display_order: 2,
+      })
+      .select("id")
+      .single();
+
+    if (skillsSectionError) {
+      throw new Error(skillsSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.skills.map(async (skillGroup, index) => {
+        const { error: listError } = await supabase
+          .from("resume_list_items")
+          .insert({
+            content: `${skillGroup.category}: ${skillGroup.skills.join(", ")}`,
+            section_id: skillsSection.id,
+            display_order: index,
+          });
+
+        if (listError) {
+          console.error("Failed to insert skills list item", listError);
+        }
+      })
+    );
+  }
+
+  return resumeId;
 };
