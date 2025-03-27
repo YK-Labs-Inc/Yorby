@@ -42,7 +42,9 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             content: [
               {
                 type: "text",
-                text: "Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.",
+                text: `Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks.
+                If you are unable to provide a transcription, please return "Unable to transcribe audio. Please try again.".
+                 `,
               },
               {
                 type: "file",

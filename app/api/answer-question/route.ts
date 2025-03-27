@@ -1,5 +1,4 @@
-import { NextRequest } from "next/server";
-import { Logger } from "next-axiom";
+import { AxiomRequest, withAxiom } from "next-axiom";
 import {
   createSupabaseServerClient,
   downloadFile,
@@ -14,7 +13,7 @@ import { trackServerEvent } from "@/utils/tracking/serverUtils";
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 export const maxDuration = 300;
 
-export async function POST(req: NextRequest) {
+export const POST = withAxiom(async (req: AxiomRequest) => {
   const data = (await req.json()) as {
     interviewCopilotId: string;
     question: string;
@@ -27,7 +26,7 @@ export async function POST(req: NextRequest) {
     responseFormat,
     previousQA = [],
   } = data;
-  let logger = new Logger().with({
+  let logger = req.log.with({
     function: "answerQuestion",
     interviewCopilotId,
     question,
@@ -64,20 +63,22 @@ export async function POST(req: NextRequest) {
         responseFormat,
         previousQA,
       }),
-      messages: files.map((file) => ({
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: "Answer the question based on the information provided.",
-          },
-          {
-            type: "file" as "file",
-            data: file.fileData.fileUri,
-            mimeType: file.fileData.mimeType,
-          },
-        ],
-      })),
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Answer the question based on the information provided.",
+            },
+            ...files.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+      ],
       loggingContext: {
         interviewCopilotId,
         question,
@@ -100,13 +101,12 @@ export async function POST(req: NextRequest) {
         }
       },
     });
-    await logger.flush();
     const headers = new Headers();
     headers.set("Content-Type", "text/plain; charset=utf-8");
+    logger.info("Returning answered question");
     return new Response(stream, { headers });
   } catch (error: unknown) {
     logger.error("Error answering question", { error });
-    await logger.flush();
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : String(error),
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       }
     );
   }
-}
+});
 
 const getInterviewCopilot = async (interviewCopilotId: string) => {
   const supabase = await createSupabaseServerClient();
