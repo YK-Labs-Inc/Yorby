@@ -16,7 +16,7 @@ export async function generateStaticParams() {
     .map((post: Tables<"demo_jobs">) => ({
       slug: post.slug,
     }))
-    .filter((slug: string) => slug);
+    .filter((slug: string) => typeof slug === "string");
 }
 
 // Add this export for static generation configuration
