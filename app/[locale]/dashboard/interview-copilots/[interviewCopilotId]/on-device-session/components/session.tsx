@@ -1540,7 +1540,7 @@ export function Session({
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-medium">{t("transcription.title")}</h2>
                 {isTranscribing && (
-                  <Badge variant="destructive">
+                  <Badge className="px-4 py-2" variant="destructive">
                     {t("transcription.status.transcribing")}
                   </Badge>
                 )}
@@ -1603,19 +1603,16 @@ export function Session({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        {remainingQuestions > 0 ? (
-                          <Badge className="px-4 py-2">
-                            {t("freemium.remainingQuestions", {
-                              count: remainingQuestions,
-                            })}
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="px-4 py-2">
-                            {t("freemium.remainingQuestions", {
-                              count: remainingQuestions,
-                            })}
-                          </Badge>
-                        )}
+                        <Badge
+                          variant={
+                            remainingQuestions > 0 ? "default" : "destructive"
+                          }
+                          className="px-4 py-2"
+                        >
+                          {t("freemium.remainingQuestions", {
+                            count: remainingQuestions,
+                          })}
+                        </Badge>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-[300px]">
                         <p>
@@ -1633,7 +1630,11 @@ export function Session({
                   </TooltipProvider>
                 </div>
               )}
-              {isTranscribing && <Badge>{t("copilot.status.listening")}</Badge>}
+              {isTranscribing && (
+                <Badge className="px-4 py-2">
+                  {t("copilot.status.listening")}
+                </Badge>
+              )}
             </div>
             <div
               ref={copilotRef}
