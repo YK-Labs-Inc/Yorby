@@ -67,7 +67,7 @@ export default function EditableInterviewCopilot({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-4 w-full">
       {/* Header with Title and Edit Controls */}
       <div className="flex-col md:flex-row flex items-start md:items-center justify-between gap-4">
         <div className="flex-1">
@@ -381,6 +381,6 @@ export default function EditableInterviewCopilot({
           </form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

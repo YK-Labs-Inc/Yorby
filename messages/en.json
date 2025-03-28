@@ -727,6 +727,7 @@
       "endInterviewConfirmation": "Are you sure you want to end this interview? This will save and process your recording.",
       "uploading": "Uploading recording",
       "confirm": "Confirm",
+      "reviewCopilot": "Review Interview Copilot",
       "cancel": "Cancel",
       "onboarding": {
         "title": "Interview Copilot Setup Guide",
@@ -777,6 +778,18 @@
         "instruction": "To save your recording, please click the \"End Interview Copilot\" button before leaving.",
         "stayButton": "Stay on Page",
         "leaveButton": "Leave Anyway"
+      },
+      "freemium": { 
+        "remainingQuestions": "{count, plural, =1 {1 question remaining} other {# questions remaining}}",
+        "tooltip": {
+          "description": "As a free user, you get {count, plural, =1 {1 question} other {# questions}} answered in the interview copilot. Upgrade to get unlimited questions answered during your interview sessions.",
+          "upgrade": "Get Unlimited Access"
+        },
+        "limitReached": {
+          "title": "Freemium Limit Reached",
+          "description": "You have reached the limit of {count, plural, =1 {1 question} other {# questions}} answered in the interview copilot on the free plan. Please upgrade to a paid plan to get unlimited access to the Interview Copilot.",
+          "upgrade": "Upgrade"
+        }
       }
     },
     "jobCreation": {

@@ -12,9 +12,11 @@ export async function generateStaticParams() {
     res.json()
   );
 
-  return posts.data.map((post: Tables<"demo_jobs">) => ({
-    slug: post.slug,
-  }));
+  return posts.data
+    .map((post: Tables<"demo_jobs">) => ({
+      slug: post.slug,
+    }))
+    .filter((slug: string) => typeof slug === "string");
 }
 
 // Add this export for static generation configuration

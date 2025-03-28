@@ -55,6 +55,10 @@ import remarkGfm from "remark-gfm";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsChrome } from "@/hooks/use-chrome";
 import { usePostHog } from "posthog-js/react";
+import { Link } from "@/i18n/routing";
+
+// Freemium experience constants
+const FREEMIUM_QUESTION_LIMIT = 3;
 
 const MicrophonePermission = ({
   onPermissionGranted,
@@ -181,8 +185,10 @@ const MicrophonePermission = ({
 
 export function Session({
   interviewCopilotId,
+  isFreemiumExperience,
 }: {
   interviewCopilotId: string;
+  isFreemiumExperience: boolean;
 }) {
   const isMobile = useIsMobile();
   const isChrome = useIsChrome();
@@ -244,6 +250,14 @@ export function Session({
     src: string;
     alt: string;
   } | null>(null);
+  const [remainingQuestions, setRemainingQuestions] = useState(
+    FREEMIUM_QUESTION_LIMIT
+  );
+  const remainingQuestionsRef = useRef(remainingQuestions);
+
+  useEffect(() => {
+    remainingQuestionsRef.current = remainingQuestions;
+  }, [remainingQuestions]);
 
   const totalSteps = 3;
 
@@ -1113,7 +1127,6 @@ export function Session({
 
       while (true) {
         const { done, value } = await reader.read();
-        // Do nothing
         if (done) {
           break;
         }
@@ -1125,11 +1138,29 @@ export function Session({
           )
         );
       }
+
+      // Update remaining questions count for freemium users
+      if (isFreemiumExperience) {
+        const newRemainingQuestions = remainingQuestionsRef.current - 1;
+        setRemainingQuestions(newRemainingQuestions);
+
+        if (newRemainingQuestions <= 0) {
+          endFreemiumCopilotSession();
+        }
+      }
     } catch (error) {
       logError("Error processing question", { error });
       setQuestionsWithAnswers((prev) =>
         prev.filter((q) => q.question !== question)
       );
+    }
+  };
+
+  const endFreemiumCopilotSession = () => {
+    setIsDialogOpen(true);
+
+    if (connection) {
+      disconnectFromDeepgram();
     }
   };
 
@@ -1244,7 +1275,6 @@ export function Session({
                       {t("onboarding.description")}
                     </DialogDescription>
                   </DialogHeader>
-
                   <div className="relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 rounded">
                       <div
@@ -1255,11 +1285,9 @@ export function Session({
                       />
                     </div>
                   </div>
-
                   <div className="mt-6 overflow-y-auto flex-1">
                     {renderStepContent()}
                   </div>
-
                   <DialogFooter className="flex justify-between items-center mt-6 border-t pt-4">
                     <Button
                       variant="ghost"
@@ -1362,9 +1390,17 @@ export function Session({
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{t("endInterview")}</DialogTitle>
+                  <DialogTitle>
+                    {isFreemiumExperience
+                      ? t("freemium.limitReached.title")
+                      : t("endInterview")}
+                  </DialogTitle>
                   <DialogDescription>
-                    {t("endInterviewConfirmation")}
+                    {isFreemiumExperience
+                      ? t("freemium.limitReached.description", {
+                          count: FREEMIUM_QUESTION_LIMIT,
+                        })
+                      : t("endInterviewConfirmation")}
                   </DialogDescription>
                 </DialogHeader>
                 {isUploading && (
@@ -1562,6 +1598,41 @@ export function Session({
           <div className="h-full flex flex-col p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-medium">{t("copilot.title")}</h2>
+              {isFreemiumExperience && (
+                <div className="flex items-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        {remainingQuestions > 0 ? (
+                          <Badge className="px-4 py-2">
+                            {t("freemium.remainingQuestions", {
+                              count: remainingQuestions,
+                            })}
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="px-4 py-2">
+                            {t("freemium.remainingQuestions", {
+                              count: remainingQuestions,
+                            })}
+                          </Badge>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[300px]">
+                        <p>
+                          {t("freemium.tooltip.description", {
+                            count: FREEMIUM_QUESTION_LIMIT,
+                          })}
+                        </p>
+                        <Link href="/purchase">
+                          <Button className="w-full mt-4">
+                            {t("freemium.tooltip.upgrade")}
+                          </Button>
+                        </Link>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
               {isTranscribing && <Badge>{t("copilot.status.listening")}</Badge>}
             </div>
             <div

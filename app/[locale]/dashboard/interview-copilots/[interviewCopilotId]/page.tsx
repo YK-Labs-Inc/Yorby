@@ -172,15 +172,7 @@ export default async function Page({
         ) : (
           <>
             <div className="hidden md:block">
-              {isLocked ? (
-                <LockedInterviewCopilotComponent
-                  interviewCopilot={interviewCopilot}
-                  userCredits={userCredits}
-                  isSubscriptionVariant={isSubscriptionVariant}
-                />
-              ) : (
-                <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
-              )}
+              <EditableInterviewCopilot interviewCopilot={interviewCopilot} />
             </div>
             <div className="block md:hidden">
               <MobileWarning />
