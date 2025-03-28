@@ -38,14 +38,10 @@ export default async function OnDeviceSessionPage({
   if (!user) {
     redirect("/sign-in");
   }
-  const { error, status, deletionStatus, interviewCopilotAccess } =
+  const { error, status, deletionStatus } =
     await fetchInterviewCopilotStatus(interviewCopilotId);
   const hasSubscription = await fetchHasSubscription(user?.id || "");
-  const isLocked = interviewCopilotAccess === "locked" && !hasSubscription;
-  if (isLocked) {
-    redirect(`/dashboard/interview-copilots/${interviewCopilotId}`);
-  }
-
+  const isFreemiumExperience = !hasSubscription;
   if (status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
   }
@@ -64,5 +60,10 @@ export default async function OnDeviceSessionPage({
     );
   }
 
-  return <Session interviewCopilotId={interviewCopilotId} />;
+  return (
+    <Session
+      interviewCopilotId={interviewCopilotId}
+      isFreemiumExperience={isFreemiumExperience}
+    />
+  );
 }
