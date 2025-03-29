@@ -389,34 +389,6 @@ Once I have all that information, I can try my best to make a really great first
         role: "assistant",
         content: initialMessage,
       },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
     ]);
   }, [resumeId, persona, t, hasStarted, selectedVoiceId]);
 
