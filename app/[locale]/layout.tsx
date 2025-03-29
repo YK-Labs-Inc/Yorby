@@ -11,7 +11,6 @@ import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import Chatwoot from "@/components/ChatwootWidget";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { DeepgramContextProvider } from "@/context/DeepgramContext";
