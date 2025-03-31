@@ -90,9 +90,11 @@ export const triageAction = async (
         actions: {
             "action": "create_section" | "delete_section" | "update_section" | "update_contact_info" | "other",
             "actionDetails": string // A detailed explanation of the action that will be taken
-            "aiPerformingActionString": string // A string that the AI will say back to the user when performing the action
+            "aiPerformingActionString": string // A string that the AI will say back to the user when the AI starts performing
+            the action. This should be in the first person and present tense and indicates the start of the action. It should be friendly and concise.
         }[],
-        "response": string // A response to the user's prompt summarizing all of the actions that will be taken
+        "response": string // A response to the user's prompt summarizing all of the actions that will be taken. This should be in
+        the first person and present tense. It should be friendly and concise.
     }
 
     A section is a collection of list items and detail items.
@@ -200,6 +202,7 @@ export const createSection = async (
     {
         "resumeSection": resumeSectionsSchema type,
         "response": string // A summary of the section that was created. Keep the tone of the response casual and friendly and in the first person.
+        the tense should be in past tense indicating an action has been completed.
     }
 
     ## Message History
@@ -312,7 +315,8 @@ export const updateSection = async (
     Return a JSON object with the following fields:
     {
         "resumeSection": resumeSectionsSchema type | null, // The updated section or null if the section does not exist
-        "response": string // A response describing what changes were made to the section
+        "response": string // A response describing what changes were made to the section. Keep the tone of the response casual and friendly and in the first person.
+        the tense should be in past tense indicating an action has been completed.
     }
 
     ## Message History
@@ -371,7 +375,8 @@ export const deleteSection = async (
     Return a JSON object with the following fields:
     {
         "sectionId": string | null, // The ID of the section to delete if it exists, otherwise null
-        "response": string // A response confirming which section will be deleted
+        "response": string // A response confirming which section will be deleted. Keep the tone of the response casual and friendly and in the first person.
+        the tense should be in past tense indicating an action has been completed.
     }
 
     If the secion does not exist, return a null sectionId and a response saying that the section does not exist.
@@ -424,7 +429,8 @@ export const generateConclusionMessage = async (
 
     Return a JSON object with the following fields:
     {
-        "response": string // A friendly, concise summary of all changes made
+        "response": string // A friendly, concise summary of all changes made. Keep the tone of the response casual and friendly and in the first person.
+        the tense should be in past tense indicating an action has been completed. You should then end with a question asking the user if they would like to make any more changes.
     }
 
     ## Action Responses
