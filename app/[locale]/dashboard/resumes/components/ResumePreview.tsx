@@ -201,29 +201,13 @@ export default function ResumePreview({
   removeMaxHeight,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
-  const [downloading, setDownloading] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [showNewSectionDialog, setShowNewSectionDialog] =
     useState<boolean>(false);
-  const [showReassurance, setShowReassurance] = useState<boolean>(false);
   const isTestResume = TEST_RESUME_IDS.includes(resumeId);
   const resumeRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isSampleResume = pathname?.includes("sample-resumes");
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (loading) {
-      timeoutId = setTimeout(() => {
-        setShowReassurance(true);
-      }, 7000);
-    } else {
-      setShowReassurance(false);
-    }
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [loading]);
 
   const handleEditClick = () => {
     if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
@@ -646,52 +630,6 @@ export default function ResumePreview({
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-md shadow-sm border p-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              {t("updating.title")}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              {t("updating.description")}
-            </p>
-            {showReassurance && (
-              <p className="text-gray-600 dark:text-gray-300 mt-2 animate-fade-in">
-                {t("updating.reassurance", {
-                  defaultValue:
-                    "We're still working on it, just a little longer...",
-                })}
-              </p>
-            )}
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="relative mt-12">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="w-32 h-32 rounded-full bg-primary/10 blur-xl"
-              />
-            </div>
-            <div className="relative z-10 flex justify-center">
-              <LoadingSpinner size="xl" className="text-primary" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (!resume) {
     return null;
   }
@@ -723,70 +661,73 @@ export default function ResumePreview({
               )}
             </>
           )}
-          {isLocked && isFreemiumEnabled && hasReachedFreemiumLimit ? (
-            <Button
-              className="flex items-center gap-2 w-full sm:w-auto"
-              onClick={() => onShowLimitDialog?.()}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
+          {!loading &&
+            (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit ? (
+              <Button
+                className="flex items-center gap-2 w-full sm:w-auto"
+                onClick={() => onShowLimitDialog?.()}
               >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              {t("downloadResume")}
-            </Button>
-          ) : (
-            <PDFDownloadLink
-              document={<ResumePDF resume={resume} />}
-              fileName={`${resume.name.replace(/\s+/g, "_")}_Resume.pdf`}
-              className="w-full sm:w-auto"
-            >
-              {({ loading }: { loading: boolean }) => (
-                <Button
-                  disabled={loading || downloading}
-                  className="flex items-center gap-2 w-full"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
                 >
-                  {loading || downloading ? (
-                    <>
-                      <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
-                      {t("downloading")}
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                      </svg>
-                      {t("downloadResume")}
-                    </>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                {t("downloadResume")}
+              </Button>
+            ) : (
+              !isEditMode && (
+                <PDFDownloadLink
+                  document={<ResumePDF resume={resume} />}
+                  fileName={`${resume.name ? resume.name.replace(/\s+/g, "_") : "Resume"}.pdf`}
+                  className="w-full sm:w-auto"
+                >
+                  {({ loading: pdfLoading }: { loading: boolean }) => (
+                    <Button
+                      disabled={pdfLoading}
+                      className="flex items-center gap-2 w-full"
+                    >
+                      {pdfLoading ? (
+                        <>
+                          <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></span>
+                          {t("downloading")}
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4"
+                          >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                          </svg>
+                          {t("downloadResume")}
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              )}
-            </PDFDownloadLink>
-          )}
+                </PDFDownloadLink>
+              )
+            ))}
         </div>
       )}
 
@@ -872,6 +813,14 @@ export default function ResumePreview({
                       className="h-8 w-8"
                     >
                       <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteSection(sectionIndex)}
+                      className="h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
                 </div>

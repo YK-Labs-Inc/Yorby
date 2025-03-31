@@ -1,4 +1,7 @@
-import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import {
+  generateObjectWithFallback,
+  streamObjectWithFallback,
+} from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
@@ -7,6 +10,8 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { ipAddress } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { CoreMessage } from "ai";
+import { ResumeDataType } from "@/app/[locale]/dashboard/resumes/components/ResumeBuilder";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -26,7 +31,7 @@ const resumeDetailItemsSchema = z.object({
   subtitle: z.string().nullable(),
   title: z.string(),
   updated_at: z.string().nullable(),
-  resume_item_descriptions: z.array(resumeItemDescriptionsSchema),
+  resume_item_descriptions: z.array(resumeItemDescriptionsSchema).default([]),
 });
 
 const resumeListItemsSchema = z.object({
@@ -45,8 +50,8 @@ const resumeSectionsSchema = z.object({
   resume_id: z.string(),
   title: z.string(),
   updated_at: z.string().nullable(),
-  resume_list_items: z.array(resumeListItemsSchema),
-  resume_detail_items: z.array(resumeDetailItemsSchema),
+  resume_list_items: z.array(resumeListItemsSchema).default([]),
+  resume_detail_items: z.array(resumeDetailItemsSchema).default([]),
 });
 
 const resumeSchema = z.object({
@@ -61,7 +66,7 @@ const resumeSchema = z.object({
   title: z.string(),
   updated_at: z.string().nullable(),
   user_id: z.string(),
-  resume_sections: z.array(resumeSectionsSchema),
+  resume_sections: z.array(resumeSectionsSchema).default([]),
 });
 
 const redis = Redis.fromEnv();
@@ -82,28 +87,109 @@ const rateLimits = {
 };
 
 const updateResume = async (
-  resume: string,
-  userMessage: string,
+  resume: ResumeDataType,
+  messages: CoreMessage[],
   speakingStyle?: string
 ) => {
   const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
     
     You will be given a resume in JSON format and a comment from the user about what they want to change.
+
+    Resumes have the following schema written in zod:
+
+    ## Resume Schema
+    const resumeItemDescriptionsSchema = z.object({
+      created_at: z.string().nullable(),
+      description: z.string(),
+      detail_item_id: z.string(),
+      display_order: z.number(),
+      id: z.string(),
+      updated_at: z.string().nullable(),
+    });
+
+    const resumeDetailItemsSchema = z.object({
+      created_at: z.string().nullable(),
+      date_range: z.string().nullable(),
+      display_order: z.number(),
+      id: z.string(),
+      section_id: z.string(),
+      subtitle: z.string().nullable(),
+      title: z.string(),
+      updated_at: z.string().nullable(),
+      resume_item_descriptions: z.array(resumeItemDescriptionsSchema).default([]),
+    });
+
+    const resumeListItemsSchema = z.object({
+      content: z.string(),
+      created_at: z.string().nullable(),
+      display_order: z.number(),
+      id: z.string(),
+      section_id: z.string(),
+      updated_at: z.string().nullable(),
+    });
+
+    const resumeSectionsSchema = z.object({
+      created_at: z.string().nullable(),
+      display_order: z.number(),
+      id: z.string(),
+      resume_id: z.string(),
+      title: z.string(),
+      updated_at: z.string().nullable(),
+      resume_list_items: z.array(resumeListItemsSchema).default([]),
+      resume_detail_items: z.array(resumeDetailItemsSchema).default([]),
+    });
+
+    const resumeSchema = z.object({
+      created_at: z.string().nullable(),
+      email: z.string().nullable(),
+      id: z.string(),
+      location: z.string().nullable(),
+      locked_status: z.enum(["locked", "unlocked"]),
+      name: z.string(),
+      phone: z.string().nullable(),
+      summary: z.string().nullable(),
+      title: z.string(),
+      updated_at: z.string().nullable(),
+      user_id: z.string(),
+      resume_sections: z.array(resumeSectionsSchema).default([]),
+    });
+
+    ## Resume Schema Explanation
+    Resumes are made up of sections, and each section is made up of either resume_detail_items or resume_list_items.
+
+    A resume_list_items section is just a list of items that are displayed in a list where each item is represented by
+    a resuemListItem. Common resume_list_items sections are "skills", "accomplishments", "certifications", or any other section
+    that has a list of items that are not detailed and are just a list of items.
+
+    A resume_detail_item section is a section that displays a title, subtitle, date range, and a list of resumeItemDescriptions.
+    An example of this section is a "work experience" section where the title is the company they worked for, subtitle is the job title,
+    date range is the start and end date of the job, and the array of resumeItemDescriptions are the responsibilities and accomplishments of the job.
+    Common resume_detail_item sections are "work experience", "education", "projects" or any other section that has lots of details
+    and additionl information.
+
+    ## Prompt Instructions
     
-    Your job is to update the resume in the JSON format to reflect the changes and then provide a response to the user
-    about the changes you made.
+    Your job is to acknowledge the users request, perform the necessary changes to the resume, and then provide a response to the user
+    about the changes you made. Your responses to the users should be written in a friendly and engaging manner to keep the user
+    engaged and excited about the changes you are making to their resume. Your conclusion message should always ask the user
+    if they would like any more changes made to the resume.
+
+    When editing the resume, make sure to keep the same format and structure of the resume. Do not change the layout of the resume.
+    You should almost always try to only make edits within existing sections of the resume. If you need to add or delete a new section,
+    make sure to ask the user if they would like to add a new section before doing so.
 
     Your response must be in the following format:
     {
-      "updatedResumeJSON": string //updated resume in JSON format,
-      "aiResponse": string //response to the user about the changes you made
+      "introMessage": string //intro message to the user acknowledging the changes you are going to make
+      "updatedResumeJSON": string //updated resume in JSON format that needs to match the resume schema
+      "conclusionMessage": string //response to the user about the changes you made and asking them if they would like to make any more changes
     }
 ${
   speakingStyle
     ? `
 
-    IMPORTANT: Your aiResponse to the user should be written in the following speaking style
+    IMPORTANT: Your introMessage and conclusionMessage to the user should be written in the following speaking style
     but the updatedResumeJSON should be written in a professional manner to maximize
     the chances of the user getting the job they want and passing the ATS.
 
@@ -111,55 +197,52 @@ ${
     : ""
 }
 
-    The updatedResumeJSON must be a valid JSON object. Return only the updated resume in the same exact JSON format
-    as the original resume and nothing else.
+    When returning the updatedResumeJSON, make sure to return the entire resume in the same exact JSON format as the original resume
+    and only change the sections that the user has requested to change. The updatedResumeJSON should be a representation of the
+    entire resume after the changes have been made. It IS NOT acceptable to return only the portion of the resume that was updated
+    or changed.
 
-    The updatedResumeJSON response will be parsed as JSON so make sure your response is a valid JSON without any modifications necessary.
+    Only make the changes if you have >95% confidence that the changes you are making are correct. If you are not
+    confident about the changes you are making, ask the user to clarify their request and keep doing so until
+    you reach your 95% confidence threshold.
     
     Here is the resume:
-    ${resume}
+    ${JSON.stringify(resume)}
     `;
 
-  const result = await generateObjectWithFallback({
-    prompt: userMessage,
+  const result = await streamObjectWithFallback({
+    messages,
     systemPrompt,
     schema: z.object({
+      introMessage: z.string(),
       updatedResumeJSON: resumeSchema,
-      aiResponse: z.string(),
+      conclusionMessage: z.string(),
     }),
     loggingContext: {
       path: "api/resume/edit",
     },
   });
-  const { updatedResumeJSON, aiResponse } = result;
-  return { updatedResume: updatedResumeJSON, aiResponse };
+  return result;
 };
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
-  const { resume, userMessage, isDemo, speakingStyle } = (await req.json()) as {
-    resume: string;
-    userMessage: string;
+  const { resume, messages, isDemo, speakingStyle } = (await req.json()) as {
+    resume: ResumeDataType;
+    messages: CoreMessage[];
     isDemo: boolean;
     speakingStyle?: string;
   };
   const logger = req.log.with({
     resume,
-    userMessage,
+    messages,
     path: "api/resume/edit",
     speakingStyle,
     isDemo,
   });
   try {
-    const { updatedResume, aiResponse } = await updateResume(
-      JSON.stringify(resume),
-      userMessage,
-      speakingStyle
-    );
+    const result = await updateResume(resume, messages, speakingStyle);
 
-    logger.info("Resume updated", {
-      updatedResume: JSON.stringify(updatedResume),
-      aiResponse,
-    });
+    logger.info("Resume updated", {});
 
     const supabase = await createSupabaseServerClient();
     const {
@@ -175,7 +258,24 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       },
     });
 
-    return NextResponse.json({ updatedResume, aiResponse }, { status: 200 });
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result) {
+            // Stringify and encode the chunk into a Uint8Array
+            const encoded = new TextEncoder().encode(JSON.stringify(chunk));
+            controller.enqueue(encoded);
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+    const headers = new Headers();
+    headers.set("Content-Type", "text/plain; charset=utf-8");
+    logger.info("Returning updated resume");
+    return new Response(stream, { headers });
   } catch (error) {
     logger.error("Failed to update resume", { error });
     return NextResponse.json(
