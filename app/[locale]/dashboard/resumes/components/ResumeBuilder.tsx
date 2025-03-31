@@ -53,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useResumeEditAgent } from "../agent/useResumeEdit";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -252,6 +253,62 @@ const StartScreen = ({
   );
 };
 
+const sanitizeResumeData = (
+  resume: Partial<ResumeDataType>
+): ResumeDataType => {
+  if (!resume) return {} as ResumeDataType;
+
+  return {
+    id: resume.id || "",
+    created_at: resume.created_at || null,
+    updated_at: resume.updated_at || null,
+    name: resume.name || "",
+    email: resume.email || null,
+    phone: resume.phone || null,
+    location: resume.location || null,
+    title: resume.title || "",
+    summary: resume.summary || null,
+    user_id: resume.user_id || "",
+    locked_status: resume.locked_status || "locked",
+    resume_sections: (resume.resume_sections || []).map((section) => ({
+      id: section.id || "",
+      created_at: section.created_at || null,
+      updated_at: section.updated_at || null,
+      resume_id: section.resume_id || "",
+      title: section.title || "",
+      display_order: section.display_order || 0,
+      resume_list_items: (section.resume_list_items || []).map((item) => ({
+        id: item.id || "",
+        created_at: item.created_at || null,
+        updated_at: item.updated_at || null,
+        section_id: item.section_id || "",
+        content: item.content || "",
+        display_order: item.display_order || 0,
+      })),
+      resume_detail_items: (section.resume_detail_items || []).map((item) => ({
+        id: item.id || "",
+        created_at: item.created_at || null,
+        updated_at: item.updated_at || null,
+        section_id: item.section_id || "",
+        title: item.title || "",
+        subtitle: item.subtitle || null,
+        date_range: item.date_range || null,
+        display_order: item.display_order || 0,
+        resume_item_descriptions: (item.resume_item_descriptions || []).map(
+          (desc) => ({
+            id: desc.id || "",
+            created_at: desc.created_at || null,
+            updated_at: desc.updated_at || null,
+            detail_item_id: desc.detail_item_id || "",
+            description: desc.description || "",
+            display_order: desc.display_order || 0,
+          })
+        ),
+      })),
+    })),
+  };
+};
+
 const ResumeBuilderComponent = ({
   resumeId,
   hasSubscription,
@@ -303,6 +360,16 @@ const ResumeBuilderComponent = ({
   const pathname = usePathname();
   const showDemoCTA = pathname.includes("/dashboard/resumes");
   const { selectedVoice, setSelectedVoice, setIsTtsEnabled } = useTts();
+  const { sendResumeEdit } = useResumeEditAgent({
+    setMessages,
+    currentResume: resume as ResumeDataType,
+    setResume: (resume: ResumeDataType) => {
+      setResume(resume);
+      if (resumeId) {
+        saveResume(resume, resumeId);
+      }
+    },
+  });
 
   const handleVoiceChange = useCallback(
     (voiceId: string) => {
@@ -479,12 +546,17 @@ Once I have all that information, I can try my best to make a really great first
     let messagesResponse: { message: string; index: number };
     if (resumeId) {
       setIsGenerating(true);
-      messagesResponse = await sendEditMessage(message);
+      await sendResumeEdit([...messages, { role: "user", content: message }]);
       if (isFreemiumEnabled && !hasSubscription) {
         await trackResumeEdit(resumeId);
         setEditCount((prev) => prev + 1);
       }
       setIsGenerating(false);
+      // Return the last message for TTS
+      return {
+        message: messages[messages.length - 1].content as string,
+        index: messages.length - 1,
+      };
     } else {
       setIsInterviewing(true);
       messagesResponse = await sendInterviewMessage(message);
@@ -577,98 +649,6 @@ Once I have all that information, I can try my best to make a really great first
       const aiMessage: CoreAssistantMessage = {
         role: "assistant",
         content: t("errors.resumeGenerationError"),
-      };
-      updatedMessages = [...updatedMessages, aiMessage];
-      setMessages(updatedMessages);
-      Sentry.captureException(error);
-    } finally {
-      return {
-        message: updatedMessages[updatedMessages.length - 1].content as string,
-        index: updatedMessages.length - 1,
-      };
-    }
-  };
-
-  const sendEditMessage = async (messageContent: string, retryCount = 0) => {
-    let updatedMessages: CoreMessage[] = [
-      ...messages,
-      {
-        role: "user",
-        content: messageContent,
-      },
-    ];
-
-    setMessages(updatedMessages);
-    updatedMessages = [
-      ...updatedMessages,
-      {
-        role: "assistant",
-        content: "",
-      },
-    ];
-    setMessages(updatedMessages);
-
-    try {
-      if (!resumeId) {
-        logError("No resume found");
-        throw new Error("No resume found");
-      }
-      const response = await fetch("/api/resume/edit", {
-        method: "POST",
-        body: JSON.stringify({
-          resume: resume,
-          userMessage: messageContent,
-          speakingStyle: selectedVoice.speakingStyle,
-        }),
-      });
-
-      if (response.status === 429) {
-        const aiMessage: CoreAssistantMessage = {
-          role: "assistant",
-          content:
-            t("errors.rateLimitMessage") ||
-            "You've been rate limited — please try again in an hour.",
-        };
-        updatedMessages = [...updatedMessages, aiMessage];
-        setMessages(updatedMessages);
-        return {
-          message: updatedMessages[updatedMessages.length - 1]
-            .content as string,
-          index: updatedMessages.length - 1,
-        };
-      } else if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const { updatedResume, aiResponse } = data;
-
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: aiResponse,
-      };
-      updatedMessages = [...updatedMessages.slice(0, -1), aiMessage];
-      setMessages(updatedMessages);
-      setResume(updatedResume);
-      void saveResume(updatedResume, resumeId);
-    } catch (error) {
-      // Remove the temporary loading message
-      setMessages((prev) => prev.slice(0, -1));
-
-      if (retryCount < 2) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: t("errors.resumeGenerationRetryMessage"),
-          },
-        ]);
-        return sendEditMessage(messageContent, retryCount + 1);
-      }
-
-      const aiMessage: CoreAssistantMessage = {
-        role: "assistant",
-        content: t("errors.resumeEditError"),
       };
       updatedMessages = [...updatedMessages, aiMessage];
       setMessages(updatedMessages);

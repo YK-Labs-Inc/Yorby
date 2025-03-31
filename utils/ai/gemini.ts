@@ -1,6 +1,12 @@
 import { Logger } from "next-axiom";
 import { z } from "zod";
-import { generateObject, CoreMessage, streamText, generateText } from "ai";
+import {
+  generateObject,
+  CoreMessage,
+  streamText,
+  generateText,
+  streamObject,
+} from "ai";
 import { google } from "@ai-sdk/google";
 import { withTracing } from "@posthog/ai";
 import { posthog } from "../tracking/serverUtils";
@@ -286,4 +292,71 @@ const generateSpeechifyTTS = async ({
     voiceId: voice,
     audioFormat: "mp3",
   });
+};
+
+export const streamObjectWithFallback = async <T extends z.ZodType>({
+  messages,
+  prompt,
+  systemPrompt,
+  schema,
+  loggingContext = {},
+  enableLogging = true,
+}: GenerateObjectParams<T>) => {
+  const logger = new Logger().with(loggingContext);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  try {
+    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+      posthogDistinctId: user?.id,
+      posthogProperties: loggingContext,
+    });
+    const result = streamObject({
+      model,
+      messages: messages?.filter((message) => message.content),
+      prompt,
+      system: systemPrompt,
+      schema,
+    });
+    if (enableLogging) {
+      logger.info("Primary model streaming started successfully");
+    }
+    await logger.flush();
+    return result.partialObjectStream;
+  } catch (error) {
+    logger.error(`Primary model failed, trying fallback model`, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await logger.flush();
+
+    try {
+      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+        posthogDistinctId: user?.id,
+        posthogProperties: loggingContext,
+      });
+      const result = streamObject({
+        model,
+        messages: messages?.filter((message) => message.content),
+        prompt,
+        system: systemPrompt,
+        schema,
+      });
+      if (enableLogging) {
+        logger.info("Fallback model streaming started successfully");
+      }
+      await logger.flush();
+      return result.partialObjectStream;
+    } catch (fallbackError) {
+      logger.error("Both primary and fallback models failed", {
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError),
+      });
+      await logger.flush();
+      throw fallbackError;
+    }
+  }
 };
