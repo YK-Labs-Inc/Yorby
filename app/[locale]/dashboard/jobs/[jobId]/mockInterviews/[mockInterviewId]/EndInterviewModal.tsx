@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface EndInterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  videoBlob: Blob | null;
+  videoBlob: Blob[];
   mockInterviewId: string;
   userId: string;
   accessToken: string;
@@ -57,10 +57,10 @@ export default function EndInterviewModal({
     }
   };
 
-  const handleUpload = async (videoBlob: Blob) => {
+  const handleUpload = async (videoBlob: Blob[]) => {
     try {
       setIsUploading(true);
-      const file = new File([videoBlob], `${mockInterviewId}.webm`, {
+      const file = new File(videoBlob, `${mockInterviewId}.webm`, {
         type: "video/webm",
       });
       const filePath = `${userId}/mockInterviews/${mockInterviewId}`;

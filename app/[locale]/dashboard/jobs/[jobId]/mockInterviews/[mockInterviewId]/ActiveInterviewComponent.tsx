@@ -41,7 +41,6 @@ export default function ActiveInterviewComponent({
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
   const [showEndModal, setShowEndModal] = useState(false);
-  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const user = useUser();
   const session = useSession();
   const { selectedVoice, stopAudioPlayback } = useTts();
@@ -155,20 +154,14 @@ export default function ActiveInterviewComponent({
       videoRef.current.srcObject = stream;
     }
     const videoAndAudioRecorder = new MediaRecorder(stream);
-    videoRecorderRef.current = videoAndAudioRecorder;
     videoChunksRef.current = [];
     videoAndAudioRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
         videoChunksRef.current.push(e.data);
       }
     };
-    videoAndAudioRecorder.onstop = async () => {
-      const videoBlob = new Blob(videoChunksRef.current, {
-        type: "video/webm",
-      });
-      setRecordingBlob(videoBlob);
-    };
-    videoAndAudioRecorder.start();
+    videoRecorderRef.current = videoAndAudioRecorder;
+    videoRecorderRef.current.start(100);
   };
 
   const stopVideoRecording = () => {
@@ -251,7 +244,7 @@ export default function ActiveInterviewComponent({
       <EndInterviewModal
         isOpen={showEndModal}
         onClose={() => setShowEndModal(false)}
-        videoBlob={recordingBlob}
+        videoBlob={videoChunksRef.current}
         mockInterviewId={mockInterviewId}
         userId={user.id}
         accessToken={session.access_token}
