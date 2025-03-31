@@ -42,9 +42,9 @@ export default async function OnDeviceSessionPage({
     await fetchInterviewCopilotStatus(interviewCopilotId);
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const isFreemiumExperience = !hasSubscription;
-  if (status === "complete") {
-    redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
-  }
+  // if (status === "complete") {
+  //   redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
+  // }
 
   if (deletionStatus === "deleted") {
     redirect("/dashboard/interview-copilots");

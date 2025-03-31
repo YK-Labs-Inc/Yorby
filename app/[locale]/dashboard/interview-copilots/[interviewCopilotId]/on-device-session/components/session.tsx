@@ -56,6 +56,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsChrome } from "@/hooks/use-chrome";
 import { usePostHog } from "posthog-js/react";
 import { Link } from "@/i18n/routing";
+import { H3 } from "@/components/typography";
 
 // Freemium experience constants
 const FREEMIUM_QUESTION_LIMIT = 3;
@@ -1383,6 +1384,12 @@ export function Session({
           </Dialog>
         </div>
         <div className="flex items-center gap-2">
+          <img
+            src="/assets/dark-logo.png"
+            alt="Perfect Interview"
+            className="w-8 h-8 mr-2"
+          />
+          <H3>Perfect Interview</H3>
           {isTranscribing ? (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
