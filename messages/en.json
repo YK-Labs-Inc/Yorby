@@ -1279,6 +1279,7 @@
     "hero": {
       "title": "We Make Tools To Help You Get A Job",
       "description": "Create perfect resumes, go through practice interviews, and get real-time interview assistance with our suite of tools.",
+      "descriptionV2": "Create perfect resumes, create interview prep material, and get real-time interview assistance with our suite of tools.",
       "button": "Get Started",
       "trustBadge": "Trusted by {userCount} job seekers"
     },
@@ -1295,7 +1296,7 @@
           "title": "Resume Builder"
         },
         "interview": {
-          "title": "Mock Interview"
+          "title": "Interview Prep"
         },
         "assistant": {
           "title": "Interview Co-pilot"
@@ -1317,7 +1318,7 @@
         "button": "Try Resume Builder Demo"
       },
       "mockInterview": {
-        "title": "Mock Interview",
+        "title": "Interview Prep",
         "description": "Practice with AI-generated interview questions",
         "featuresV2": [
           "Job-specific questions",
