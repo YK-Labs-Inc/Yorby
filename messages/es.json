@@ -777,6 +777,19 @@
         "instruction": "Para guardar tu grabación, por favor haz clic en el botón \"End Interview Copilot\" antes de salir.",
         "stayButton": "Quédate en la página.",
         "leaveButton": "Vete de todos modos."
+      },
+      "reviewCopilot": "Copiloto de Entrevistas de Revisión",
+      "freemium": {
+        "remainingQuestions": "{count, plural, =1 {Queda 1 pregunta} other {Quedan # preguntas}}",
+        "tooltip": {
+          "description": "Como usuario gratuito, obtienes {count, plural, =1 {1 pregunta} other {# preguntas}} respondidas en el copiloto de entrevistas. Actualiza para obtener respuestas ilimitadas a tus preguntas durante tus sesiones de entrevista.",
+          "upgrade": "Obtén Acceso Ilimitado"
+        },
+        "limitReached": {
+          "title": "Límite Freemium Alcanzado",
+          "description": "Has alcanzado el límite de {count, plural, =1 {1 pregunta} other {# preguntas}} respondidas en el copiloto de entrevistas en el plan gratuito. Por favor, actualiza a un plan de pago para obtener acceso ilimitado al Copiloto de Entrevistas.",
+          "upgrade": "Mejorar"
+        }
       }
     },
     "jobCreation": {
@@ -1225,7 +1238,10 @@
   "userMenu": {
     "manageSubscription": "Gestionar suscripción",
     "appearance": "Apariencia",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "support": "¿Necesitas ayuda?",
+    "supportMessageIntro": "Si necesitas ayuda, envía un correo electrónico a",
+    "supportMessageConclusion": "y nos pondremos en contacto contigo lo antes posible."
   },
   "landingPageV4": {
     "title": "¿Cómo podemos ayudarte a conseguir un trabajo?",

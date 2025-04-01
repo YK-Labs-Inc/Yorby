@@ -777,6 +777,19 @@
         "instruction": "녹음을 저장하려면 나가기 전에 \"인터뷰 Copilot 종료\" 버튼을 클릭하세요.",
         "stayButton": "페이지에 머무르기",
         "leaveButton": "어쨌든 떠나세요"
+      },
+      "reviewCopilot": "리뷰 인터뷰 코파일럿",
+      "freemium": {
+        "remainingQuestions": "{count, plural, =1 {1개의 질문 남음} other {#개의 질문 남음}}",
+        "tooltip": {
+          "description": "무료 사용자이므로 인터뷰 코파일럿에서 {count, plural, =1 {1개의 질문} other {#개의 질문}}에 대한 답변을 받으실 수 있습니다. 업그레이드하여 인터뷰 세션 동안 무제한으로 질문에 대한 답변을 받아보세요.",
+          "upgrade": "무제한 액세스 받기"
+        },
+        "limitReached": {
+          "title": "무료 이용 제한 도달 🚫",
+          "description": "무료 플랜에서 인터뷰 코파일럿으로 답변할 수 있는 질문 {count, plural, =1 {1개} other {#개}} 제한에 도달했습니다. 인터뷰 코파일럿을 무제한으로 이용하려면 유료 플랜으로 업그레이드하세요.",
+          "upgrade": "업그레이드"
+        }
       }
     },
     "jobCreation": {
@@ -1225,7 +1238,10 @@
   "userMenu": {
     "manageSubscription": "구독 관리",
     "appearance": "외모",
-    "signOut": "로그아웃"
+    "signOut": "로그아웃",
+    "support": "도움이 필요하신가요?",
+    "supportMessageIntro": "도움이 필요하시면 이메일을 보내주세요:",
+    "supportMessageConclusion": "최대한 빨리 답변드리겠습니다."
   },
   "landingPageV4": {
     "title": "어떻게 하면 당신이 직업을 구할 수 있도록 도울 수 있을까요?",
