@@ -777,6 +777,19 @@
         "instruction": "Pour sauvegarder votre enregistrement, veuillez cliquer sur le bouton « End Interview Copilot » avant de quitter.",
         "stayButton": "Rester sur la page",
         "leaveButton": "Pars quand même."
+      },
+      "reviewCopilot": "Copilote d'entretien d'évaluation",
+      "freemium": {
+        "remainingQuestions": "{count, plural, =1 {1 question restante} other {# questions restantes}}",
+        "tooltip": {
+          "description": "En tant qu'utilisateur gratuit, vous obtenez {count, plural, =1 {1 question} other {# questions}} avec une réponse dans le copilote d'entretien. Passez à la version supérieure pour obtenir un nombre illimité de réponses à vos questions pendant vos sessions d'entretien.",
+          "upgrade": "Accès Illimité"
+        },
+        "limitReached": {
+          "title": "Limite Freemium atteinte",
+          "description": "Vous avez atteint la limite de {count, plural, =1 {1 question} other {# questions}} répondues dans le copilote d'entretien du forfait gratuit. Veuillez passer à un forfait payant pour bénéficier d'un accès illimité au copilote d'entretien.",
+          "upgrade": "Mettre à niveau"
+        }
       }
     },
     "jobCreation": {
@@ -1225,7 +1238,10 @@
   "userMenu": {
     "manageSubscription": "Gérer l'abonnement",
     "appearance": "Apparence",
-    "signOut": "Déconnexion"
+    "signOut": "Déconnexion",
+    "support": "Besoin d'aide ?",
+    "supportMessageIntro": "Si vous avez besoin d'aide, envoyez un email à",
+    "supportMessageConclusion": "et nous vous recontacterons dès que possible."
   },
   "landingPageV4": {
     "title": "Comment pouvons-nous vous aider à trouver un emploi ?",

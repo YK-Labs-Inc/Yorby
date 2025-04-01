@@ -777,6 +777,19 @@
         "instruction": "録音を保存するには、退出する前に「End Interview Copilot」ボタンをクリックしてください。",
         "stayButton": "ページに留まる",
         "leaveButton": "とにかく出て行け"
+      },
+      "reviewCopilot": "レビュー面接コパイロット",
+      "freemium": {
+        "remainingQuestions": "{count, plural, =1 {残り質問は1件です} other {残り質問は#件です}}",
+        "tooltip": {
+          "description": "無料ユーザーの場合、面接コパイロットで{count, plural, =1 {1つの質問} other {#つの質問}}に回答できます。アップグレードすると、面接セッション中に無制限の質問に回答できます。",
+          "upgrade": "無制限アクセスを入手しよう✨"
+        },
+        "limitReached": {
+          "title": "フリーミアムの制限に達しました",
+          "description": "無料プランでは、インタビューコパイロットで回答できる質問は上限の{count, plural, =1 {1問} other {#問}}に達しました。インタビューコパイロットを無制限にご利用いただくには、有料プランにアップグレードしてください。",
+          "upgrade": "アップグレード"
+        }
       }
     },
     "jobCreation": {
@@ -1225,7 +1238,10 @@
   "userMenu": {
     "manageSubscription": "サブスクリプションの管理",
     "appearance": "外見",
-    "signOut": "サインアウト"
+    "signOut": "サインアウト",
+    "support": "困っていますか？",
+    "supportMessageIntro": "お困りの際は、メールでご連絡ください：",
+    "supportMessageConclusion": "できるだけ早くご連絡いたします。"
   },
   "landingPageV4": {
     "title": "どのようなお仕事探しのお手伝いができますか？",

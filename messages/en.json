@@ -1236,7 +1236,10 @@
   "userMenu": {
     "manageSubscription": "Manage Subscription",
     "appearance": "Appearance",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "support": "Need Help?",
+    "supportMessageIntro": "If you need help, send an email to",
+    "supportMessageConclusion": "and we'll get back to you as soon as possible."
   },
   "landingPageV4": {
     "title": "How can we help you get a job?",
