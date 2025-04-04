@@ -130,14 +130,11 @@ export const useResumeEditAgent = ({
       ]);
     }
 
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.content !== "" && lastMessage.role !== "assistant") {
-      // Add loading message for the action
-      setMessages?.((messages) => [
-        ...messages,
-        { role: "assistant", content: "" },
-      ]);
-    }
+    // Add loading message for the action
+    setMessages?.((messages) => [
+      ...messages,
+      { role: "assistant", content: "" },
+    ]);
 
     try {
       switch (action.action) {

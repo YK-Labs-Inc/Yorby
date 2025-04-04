@@ -111,10 +111,6 @@ export const useTransformResume = ({
     changes: ResumeTransformationChanges[],
     messages: CoreMessage[]
   ) => {
-    setMessages((messages) => [
-      ...messages,
-      { role: "assistant", content: "" },
-    ]);
     await handleActions({
       actions: changes.map((change) => ({
         action: change.changeType,
@@ -126,7 +122,7 @@ export const useTransformResume = ({
     });
     await saveTransformedResume(messages);
     setMessages((messages) => [
-      ...messages.slice(0, -1),
+      ...messages,
       {
         role: "assistant",
         content:
@@ -138,14 +134,8 @@ export const useTransformResume = ({
   const saveTransformedResume = async (messages: CoreMessage[]) => {
     const supabase = createSupabaseBrowserClient();
 
-    // Generate a unique title based on the original resume and message history
-    const { title } = await generateTransformedResumeTitle(
-      currentResume.title,
-      messages
-    );
-
-    console.log("title", title);
-
+    // Generate a unique title based on the job description from message history
+    const { title } = await generateTransformedResumeTitle(messages);
     const { data, error } = await supabase
       .from("resumes")
       .insert({
@@ -168,6 +158,7 @@ export const useTransformResume = ({
         {
           ...currentResume,
           id: data.id,
+          title,
         },
         data.id
       );
@@ -208,7 +199,7 @@ export const useTransformResume = ({
       currentResume
     );
     setMessages((messages) => [
-      ...messages,
+      ...messages.slice(0, -1),
       { role: "assistant", content: response },
     ]);
     if (isReady) {

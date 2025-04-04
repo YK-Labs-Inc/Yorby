@@ -673,6 +673,7 @@ export const identifyChanges = async (
         "changes": [{ 
             changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume. The change 
             should be very detailed and should be explained in the context of how it would be a better match for the user provided job description. 
+            Provide explanations based off of the job description and the current resume as to why this change is necessary.
             changeId: string // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
             changeType: "create_section" | "delete_section" | "update_section" // The type of change that needs to be made to the resume
         }], // A list of changes that could be made to the resume
@@ -780,11 +781,14 @@ export const handleTransformConversation = async (
       changesToBeMade: [{ 
         changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume
         changeId: string, // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
-        additionalChangeInformation: string | null, // Optional additional information that the user needs to provide to make the change based off of the changeDescription. 
-                                              // If the change does not require additional information, this should be null.
+        additionalChangeInformation: string | null, // Optional additional information that the user provides to make the change based off of the changeDescription. 
+                                                    // If the change does not require additional information, this should be null.
         changeType: "create_section" | "delete_section" | "update_section" // The type of change that needs to be made to the resume
       }] // A list of changes that could be made to the resume
     }
+
+    When responding to the user, make sure to include context from the job description the user included in the chat history as well as context from the current resume
+    to provide extra insight as to why you are asking for certain information.
 
     ## Current Resume
     ${JSON.stringify(currentResume)}
@@ -816,12 +820,10 @@ export const handleTransformConversation = async (
 };
 
 export const generateTransformedResumeTitle = async (
-  originalTitle: string,
   messages: CoreMessage[]
 ) => {
   const logger = new Logger().with({
     function: "generateTransformedResumeTitle",
-    originalTitle,
   });
 
   try {
@@ -835,11 +837,14 @@ export const generateTransformedResumeTitle = async (
       - Company/organization context
       - Responsibilities or requirements
       
-      Then, generate a unique title (max 100 characters) for a transformed resume based on the original resume title 
-      and the job it was transformed for. The title should follow the format: "Original Title - Job Title"
-      Make it clear this is a transformed/tailored version while keeping it professional and concise.
-
-      Original Resume Title: ${originalTitle}
+      Then, generate a professional and descriptive title (max 100 characters) for a resume that will be used for this job.
+      The title should be clear and indicate the target role, optionally including the company name if provided in the job description.
+      
+      Examples of good titles:
+      - "Senior Software Engineer - Google"
+      - "Marketing Manager Resume"
+      - "Product Designer - Healthcare Industry"
+      - "Financial Analyst - JP Morgan"
       
       Message History:
       ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
@@ -860,6 +865,6 @@ export const generateTransformedResumeTitle = async (
   } catch (error) {
     logger.error("Error generating title", { error });
     await logger.flush();
-    return { title: originalTitle }; // Fallback to original title if generation fails
+    return { title: "Resume" }; // Fallback to generic title if generation fails
   }
 };
