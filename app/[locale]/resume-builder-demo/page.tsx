@@ -72,6 +72,7 @@ export default function ResumeBuilderDemo() {
   const [selectedOptions, setSelectedOptions] = useState<Set<number>>(
     new Set()
   );
+  const [isEditMode, setIsEditMode] = useState(false);
   const user = useUser();
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
@@ -640,6 +641,9 @@ export default function ResumeBuilderDemo() {
                 hasReachedFreemiumLimit={false}
                 isFreemiumEnabled={false}
                 isLocked={false}
+                isEditMode={isEditMode}
+                setIsEditMode={setIsEditMode}
+                transformResumeEnabled={false}
               />
             </div>
           </motion.div>
