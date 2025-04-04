@@ -5,6 +5,7 @@ import {
   ResumeActionType,
   handleTransformConversation,
   generateTransformedResumeTitle,
+  generateTransformationSummary,
 } from "./actions";
 import { Dispatch, SetStateAction, useState } from "react";
 import { ResumeDataType } from "../components/ResumeBuilder";
@@ -120,18 +121,21 @@ export const useTransformResume = ({
       messages,
       setMessages,
     });
-    await saveTransformedResume(messages);
+    await saveTransformedResume(messages, changes);
     setMessages((messages) => [
       ...messages,
       {
         role: "assistant",
         content:
-          "I just finished updating your resume — I'm going to take you to the updated resume now",
+          "I just finished updating your resume — I'm going to take you to the updated resume now",
       },
     ]);
   };
 
-  const saveTransformedResume = async (messages: CoreMessage[]) => {
+  const saveTransformedResume = async (
+    messages: CoreMessage[],
+    changesArray: ResumeTransformationChanges[]
+  ) => {
     const supabase = createSupabaseBrowserClient();
 
     // Generate a unique title based on the job description from message history
@@ -162,7 +166,18 @@ export const useTransformResume = ({
         },
         data.id
       );
-      router.push(`/dashboard/resumes/${data.id}`);
+
+      // Generate a summary of changes
+      const { summary } = await generateTransformationSummary(
+        changesArray,
+        messages
+      );
+      const encodedSummary = encodeURIComponent(summary);
+
+      // Redirect with the summary as a search parameter
+      router.push(
+        `/dashboard/resumes/${data.id}?transformSummary=${encodedSummary}`
+      );
     }
   };
 

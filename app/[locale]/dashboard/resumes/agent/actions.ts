@@ -873,3 +873,62 @@ export const generateTransformedResumeTitle = async (
     return { title: "Resume" }; // Fallback to generic title if generation fails
   }
 };
+
+export const generateTransformationSummary = async (
+  changes: {
+    changeDescription: string;
+    changeId: string;
+    changeType: ResumeActionType;
+    additionalChangeInformation?: string | null;
+  }[],
+  messages: CoreMessage[] = []
+) => {
+  const logger = new Logger().with({
+    function: "generateTransformationSummary",
+  });
+
+  try {
+    const { summary } = await generateObjectWithFallback({
+      prompt: `
+      You are an expert resume writer helping users understand how their resume has been optimized.
+      
+      The following changes have been made to a user's resume to better match a job description:
+      ${JSON.stringify(changes)}
+      
+      Here's the conversation history that led to these changes (this contains the job description):
+      ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
+      
+      Create a concise, friendly summary (max 500 characters) that explains the key changes made to the resume.
+      The summary should:
+      1. Start with a warm welcome message like "Welcome to your transformed resume!" or similar
+      2. Briefly mention the most changes that were made to the resume
+      3. Focus on how these changes improve the resume for the target job
+      4. Be encouraging and positive
+      5. Avoid being overly verbose or listing every single change
+      6. Be concise and to the point
+      7. Speak in first person and use the word "I"
+      8. End the message letting the user know that if they want to make any changes to the resume,
+      they can just ask you to do so.
+      
+      Return the summary in JSON format:
+      {
+        "summary": string // The generated summary, max 500 characters
+      }
+      `,
+      schema: z.object({
+        summary: z.string().max(500),
+      }),
+    });
+
+    logger.info("Summary generation completed", { summary });
+    await logger.flush();
+    return { summary };
+  } catch (error) {
+    logger.error("Error generating summary", { error });
+    await logger.flush();
+    return {
+      summary:
+        "Welcome to your transformed resume! I've updated it to better match the job description. Take a look at the changes I made! If you'd like to make any additional adjustments, just let me know.",
+    }; // Fallback to generic summary if generation fails
+  }
+};

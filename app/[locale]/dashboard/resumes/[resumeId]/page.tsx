@@ -12,8 +12,10 @@ import {
 import { posthog } from "@/utils/tracking/serverUtils";
 export default async function ResumePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ resumeId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const t = await getTranslations("resumeBuilder");
   const resumeId = (await params).resumeId;
@@ -56,6 +58,9 @@ export default async function ResumePage({
     "transform-resume-feature",
     user.id
   );
+  const transformSummary = (await searchParams)?.transformSummary as
+    | string
+    | undefined;
   return (
     <ResumeBuilder
       resumeId={resumeId}
@@ -65,6 +70,7 @@ export default async function ResumePage({
       isSubscriptionVariant={isSubscriptionVariant}
       isFreemiumEnabled={isFreemiumEnabled}
       transformResumeEnabled={transformResumeEnabled ?? false}
+      transformSummary={transformSummary}
     />
   );
 }
