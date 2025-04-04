@@ -14,6 +14,7 @@ export default async function ChatToResume() {
   let credits = 0;
   let isSubscriptionVariant = false;
   let isFreemiumEnabled = false;
+  let transformResumeEnabled = false;
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id);
     credits = await fetchUserCredits(user.id);
@@ -23,6 +24,9 @@ export default async function ChatToResume() {
     isFreemiumEnabled =
       (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
       "test";
+    transformResumeEnabled =
+      (await posthog.isFeatureEnabled("transform-resume-feature", user.id)) ??
+      false;
   }
 
   return (
@@ -34,6 +38,7 @@ export default async function ChatToResume() {
         user={user}
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
+        transformResumeEnabled={transformResumeEnabled}
       />
     </div>
   );

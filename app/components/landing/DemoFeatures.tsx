@@ -15,12 +15,14 @@ export default function DemoFeatures({
   credits,
   isSubscriptionVariant,
   isFreemiumEnabled,
+  transformResumeEnabled,
 }: {
   user: any;
   hasSubscription: boolean;
   credits: number;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
+  transformResumeEnabled: boolean;
 }) {
   const [selectedOption, setSelectedOption] = useState<string | null>("resume");
   const t = useTranslations("LandingPageV5.demoFeatures");
@@ -52,6 +54,7 @@ export default function DemoFeatures({
           user={user}
           isSubscriptionVariant={isSubscriptionVariant}
           isFreemiumEnabled={isFreemiumEnabled}
+          transformResumeEnabled={transformResumeEnabled}
         />
       );
     } else if (selectedOption === "interview") {
