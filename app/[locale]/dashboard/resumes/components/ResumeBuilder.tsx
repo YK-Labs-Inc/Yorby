@@ -263,6 +263,7 @@ const ResumeBuilderComponent = ({
   isFreemiumEnabled,
   persona,
   transformResumeEnabled,
+  transformSummary,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -272,6 +273,7 @@ const ResumeBuilderComponent = ({
   isFreemiumEnabled: boolean;
   persona?: string;
   transformResumeEnabled: boolean;
+  transformSummary?: string;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
@@ -363,12 +365,20 @@ const ResumeBuilderComponent = ({
     const selectedVoice = VOICE_OPTIONS.find(
       (voice) => voice.voiceId === selectedVoiceId
     );
-    let initialMessage = resumeId
-      ? t("editResumeInitialMessage")
-      : t("createResumeInitialMessage");
+
+    // Use the transformation summary if available, otherwise use the default messages
+    let initialMessage = "";
+
+    if (transformSummary) {
+      initialMessage = transformSummary;
+    } else if (resumeId) {
+      initialMessage = t("editResumeInitialMessage");
+    } else {
+      initialMessage = t("createResumeInitialMessage");
+    }
 
     // If we have a selected voice with a speaking style, modify the message accordingly
-    if (selectedVoice?.speakingStyle) {
+    if (selectedVoice?.speakingStyle && !transformSummary) {
       if (selectedVoice.voiceId === "dg") {
         initialMessage = `Listen up, buttercup! You want a killer resume? I need the intel.
 
@@ -405,7 +415,7 @@ Once I have all that information, I can try my best to make a really great first
         content: initialMessage,
       },
     ]);
-  }, [resumeId, persona, t, hasStarted, selectedVoiceId]);
+  }, [resumeId, persona, t, hasStarted, selectedVoiceId, transformSummary]);
 
   // Fetch initial edit count
   useEffect(() => {
@@ -903,6 +913,7 @@ export default function ResumeBuilder({
   isFreemiumEnabled,
   persona,
   transformResumeEnabled,
+  transformSummary,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -912,6 +923,7 @@ export default function ResumeBuilder({
   isFreemiumEnabled: boolean;
   persona?: string;
   transformResumeEnabled: boolean;
+  transformSummary?: string;
 }) {
   return (
     <TtsProvider
@@ -927,6 +939,7 @@ export default function ResumeBuilder({
         isFreemiumEnabled={isFreemiumEnabled}
         persona={persona}
         transformResumeEnabled={transformResumeEnabled}
+        transformSummary={transformSummary}
       />
     </TtsProvider>
   );
