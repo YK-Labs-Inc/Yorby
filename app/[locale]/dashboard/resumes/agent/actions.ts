@@ -665,7 +665,7 @@ export const identifyChanges = async (
       Return a discriminated union with either:
       {
         "type": "no_changes",
-        "noChangeResponse": string, // A friendly response explaining that no changes are needed
+        "noChangeResponse": string, // A friendly response explaining that no changes are needed and that the resume is already a strong match for the job description.
       }
       OR
       {
@@ -679,6 +679,11 @@ export const identifyChanges = async (
         }], // A list of changes that could be made to the resume
         "changesRequireAdditionalInformation": boolean // true if the changes require additional information from the user, false otherwise
       }
+
+      Only return resume changes that are truly necessary. Do not return changes that are not required by the job description. Do not return
+      any changes that are unnecessary. For example, if the resume is already a strong match (for example if we were to use
+      a scale of 1-10 where 10 is a perfect resume, if the resume is 7/10 or higher, do not suggest any changes). Only return changes
+      that would improve any large weaknesses in the resume.
 
       ## Message History
       ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
