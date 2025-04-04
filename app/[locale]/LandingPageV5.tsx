@@ -12,6 +12,7 @@ export default function LandingPageV5(props: {
   credits: number;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
+  transformResumeEnabled: boolean;
 }) {
   return (
     <div className="min-h-screen bg-background">

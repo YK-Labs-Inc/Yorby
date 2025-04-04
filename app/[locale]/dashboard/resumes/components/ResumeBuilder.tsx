@@ -54,6 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useResumeEditAgent } from "../agent/useResumeEdit";
+import { H1, H2 } from "@/components/typography";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -253,62 +254,6 @@ const StartScreen = ({
   );
 };
 
-const sanitizeResumeData = (
-  resume: Partial<ResumeDataType>
-): ResumeDataType => {
-  if (!resume) return {} as ResumeDataType;
-
-  return {
-    id: resume.id || "",
-    created_at: resume.created_at || null,
-    updated_at: resume.updated_at || null,
-    name: resume.name || "",
-    email: resume.email || null,
-    phone: resume.phone || null,
-    location: resume.location || null,
-    title: resume.title || "",
-    summary: resume.summary || null,
-    user_id: resume.user_id || "",
-    locked_status: resume.locked_status || "locked",
-    resume_sections: (resume.resume_sections || []).map((section) => ({
-      id: section.id || "",
-      created_at: section.created_at || null,
-      updated_at: section.updated_at || null,
-      resume_id: section.resume_id || "",
-      title: section.title || "",
-      display_order: section.display_order || 0,
-      resume_list_items: (section.resume_list_items || []).map((item) => ({
-        id: item.id || "",
-        created_at: item.created_at || null,
-        updated_at: item.updated_at || null,
-        section_id: item.section_id || "",
-        content: item.content || "",
-        display_order: item.display_order || 0,
-      })),
-      resume_detail_items: (section.resume_detail_items || []).map((item) => ({
-        id: item.id || "",
-        created_at: item.created_at || null,
-        updated_at: item.updated_at || null,
-        section_id: item.section_id || "",
-        title: item.title || "",
-        subtitle: item.subtitle || null,
-        date_range: item.date_range || null,
-        display_order: item.display_order || 0,
-        resume_item_descriptions: (item.resume_item_descriptions || []).map(
-          (desc) => ({
-            id: desc.id || "",
-            created_at: desc.created_at || null,
-            updated_at: desc.updated_at || null,
-            detail_item_id: desc.detail_item_id || "",
-            description: desc.description || "",
-            display_order: desc.display_order || 0,
-          })
-        ),
-      })),
-    })),
-  };
-};
-
 const ResumeBuilderComponent = ({
   resumeId,
   hasSubscription,
@@ -317,6 +262,7 @@ const ResumeBuilderComponent = ({
   isSubscriptionVariant,
   isFreemiumEnabled,
   persona,
+  transformResumeEnabled,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -325,6 +271,7 @@ const ResumeBuilderComponent = ({
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   persona?: string;
+  transformResumeEnabled: boolean;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
@@ -342,6 +289,7 @@ const ResumeBuilderComponent = ({
   const router = useRouter();
   const [editCount, setEditCount] = useState<number>(0);
   const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const MAX_FREE_EDITS = 0;
   const [unlockState, unlockAction, unlockPending] = useActionState(
     unlockResume,
@@ -797,7 +745,25 @@ Once I have all that information, I can try my best to make a really great first
           } ${user?.is_anonymous && resumeId ? "hidden" : ""}`}
         >
           {/* Title Section */}
-          {!shouldShowSplitView && (
+          {shouldShowSplitView ? (
+            isEditMode ? (
+              <Input
+                value={resume?.title || ""}
+                onChange={(e) => {
+                  if (resume) {
+                    setResume({
+                      ...resume,
+                      title: e.target.value,
+                    });
+                  }
+                }}
+                className="text-xl font-semibold mb-4"
+                placeholder={t("form.placeholders.title")}
+              />
+            ) : (
+              <H2>{resume?.title}</H2>
+            )
+          ) : (
             <div className="flex-none mb-4 space-y-1 px-4">
               <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white text-center">
                 {t("titleV2")}
@@ -856,6 +822,9 @@ Once I have all that information, I can try my best to make a really great first
                     onShowLimitDialog={() => setShowLimitDialog(true)}
                     isFreemiumEnabled={isFreemiumEnabled}
                     isLocked={isLocked}
+                    isEditMode={isEditMode}
+                    setIsEditMode={setIsEditMode}
+                    transformResumeEnabled={transformResumeEnabled}
                   />
                 )
               ) : null}
@@ -933,6 +902,7 @@ export default function ResumeBuilder({
   isSubscriptionVariant,
   isFreemiumEnabled,
   persona,
+  transformResumeEnabled,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -941,6 +911,7 @@ export default function ResumeBuilder({
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   persona?: string;
+  transformResumeEnabled: boolean;
 }) {
   return (
     <TtsProvider
@@ -955,6 +926,7 @@ export default function ResumeBuilder({
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
         persona={persona}
+        transformResumeEnabled={transformResumeEnabled}
       />
     </TtsProvider>
   );

@@ -81,6 +81,7 @@ export default function LandingPageV4({
         user={user}
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
+        transformResumeEnabled={false}
       />
     );
   } else if (selectedOption === "interview") {

@@ -26,22 +26,17 @@ import {
   StyleSheet,
   PDFDownloadLink,
 } from "@react-pdf/renderer";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { motion } from "framer-motion";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { Link } from "@/i18n/routing";
 
 interface ResumePreviewProps {
   loading: boolean;
@@ -54,6 +49,9 @@ interface ResumePreviewProps {
   isFreemiumEnabled: boolean;
   isLocked: boolean;
   removeMaxHeight?: boolean;
+  isEditMode: boolean;
+  setIsEditMode: Dispatch<SetStateAction<boolean>>;
+  transformResumeEnabled: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -199,14 +197,19 @@ export default function ResumePreview({
   isFreemiumEnabled,
   isLocked,
   removeMaxHeight,
+  isEditMode,
+  setIsEditMode,
+  transformResumeEnabled,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
-  const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [showNewSectionDialog, setShowNewSectionDialog] =
+    useState<boolean>(false);
+  const [showTransformDialog, setShowTransformDialog] =
     useState<boolean>(false);
   const isTestResume = TEST_RESUME_IDS.includes(resumeId);
   const resumeRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const isSampleResume = pathname?.includes("sample-resumes");
 
   const handleEditClick = () => {
@@ -227,6 +230,14 @@ export default function ResumePreview({
       });
     }
     setIsEditMode(false);
+  };
+
+  const handleTransformClick = () => {
+    if (isLocked && isFreemiumEnabled && hasReachedFreemiumLimit) {
+      onShowLimitDialog?.();
+      return;
+    }
+    setShowTransformDialog(true);
   };
 
   const updateBasicInfo = (field: keyof ResumeDataType, value: string) => {
@@ -640,15 +651,26 @@ export default function ResumePreview({
         <div className="flex flex-col sm:flex-row justify-end mb-4 gap-2 mt-1">
           {!isTestResume && (
             <>
-              {!isEditMode && (
+              {transformResumeEnabled && (
                 <Button
-                  onClick={handleEditClick}
-                  className="flex items-center gap-2 w-full sm:w-auto"
-                  variant="outline"
+                  onClick={handleTransformClick}
+                  className="w-full sm:w-auto"
+                  variant="ai"
                 >
-                  <Edit2 className="h-4 w-4" />
-                  {t("editResume")}
+                  Transform Resume
                 </Button>
+              )}
+              {!isEditMode && (
+                <>
+                  <Button
+                    onClick={handleEditClick}
+                    className="flex items-center gap-2 w-full sm:w-auto"
+                    variant="outline"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    {t("editResume")}
+                  </Button>
+                </>
               )}
               {isEditMode && (
                 <Button
@@ -730,6 +752,24 @@ export default function ResumePreview({
             ))}
         </div>
       )}
+
+      {/* Transform Dialog */}
+      <Dialog open={showTransformDialog} onOpenChange={setShowTransformDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("transform.title")}</DialogTitle>
+            <DialogDescription>{t("transform.description1")}</DialogDescription>
+            <DialogDescription>{t("transform.description2")}</DialogDescription>
+            <DialogDescription>{t("transform.description3")}</DialogDescription>
+            <DialogDescription>{t("transform.description4")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Link href={`/dashboard/resumes/${resumeId}/transform`}>
+              <Button variant="ai">{t("transform.button")}</Button>
+            </Link>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div
         ref={resumeRef}
