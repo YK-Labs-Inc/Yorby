@@ -1186,6 +1186,14 @@
       "enableVoice": "Enable Voice Mode",
       "selectVoice": "Select Voice",
       "startButton": "Start Building Resume"
+    },
+    "transform": {
+      "title": "Transform Your Resume To Match Any Job Description",
+      "description1": "Stop submitting a generic resume to every job you apply to.",
+      "description2": "Instead, submit a resume that is 100% tailored to every single job you apply to so you maximize the chances that you get the interview.",
+      "description3": "All you need to do is upload the job description, and we'll take care of the rest.",
+      "description4": "In the end you will get a perfectly formatted resume that has all of your information, but updated to specifically match the job description.",
+      "button": "Start Transformation"
     }
   },
   "interviewCopilotDemo": {

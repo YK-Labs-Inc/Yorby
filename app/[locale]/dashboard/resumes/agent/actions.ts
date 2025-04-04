@@ -580,3 +580,286 @@ export const handleOtherAction = async (
     };
   }
 };
+
+export const validateJobDescription = async (messages: CoreMessage[]) => {
+  let logger = new Logger().with({
+    function: "validateJobDescription",
+    messages,
+  });
+
+  try {
+    const { isValid, response } = await generateObjectWithFallback({
+      systemPrompt: `
+      You are a helpful assistant that validates whether a user has provided a valid job description or at the bare minimum a job title.
+      
+      You will receive the message history with a user. The most recent user message should contain the job description text.
+      
+      For the following prompt, perform these actions:
+      1) Analyze the text to determine if it appears to be a legitimate job description
+      2) Look for common job description elements like:
+         - Role/position title
+         - Company/organization context
+         - Responsibilities or requirements
+      3) The text doesn't need to be perfectly formatted, but should contain enough information to be recognizable as a job posting
+      4) If the job description is not valid, respond with a friendly message explaining that the job description is not valid and providing guidance on what a job description should include.
+      
+      Return a JSON object with the following fields:
+      {
+          "isValid": boolean, // true if the text appears to be a valid job description
+          "response": string // A friendly response explaining whether the text is valid and why. If invalid, provide guidance on what a job description should include.
+          Keep the tone casual and helpful. Use first person.
+      }
+      `,
+      messages,
+      schema: z.object({
+        isValid: z.boolean(),
+        response: z.string(),
+      }),
+    });
+
+    logger = logger.with({
+      isValid,
+      response,
+    });
+    logger.info("Job description validation completed");
+    await logger.flush();
+    return { isValid, response };
+  } catch (error) {
+    logger.error("Error validating job description", { error });
+    await logger.flush();
+    return {
+      isValid: false,
+      response:
+        "Sorry, something went wrong while validating the job description. Please try again.",
+    };
+  }
+};
+
+export const identifyChanges = async (
+  messages: CoreMessage[],
+  currentResume: ResumeDataType
+) => {
+  let logger = new Logger().with({
+    function: "identifyChanges",
+    messages,
+    currentResume,
+  });
+
+  try {
+    const result = await generateObjectWithFallback({
+      prompt: `
+      You are a helpful assistant that analyzes a resume against a job description to identify necessary changes.
+      
+      You will receive:
+      1. Message history containing the job description
+      2. The current resume data
+      
+      Perform the following actions:
+      1. You are an expert HR recruiter. Analyze the job description and create criteria for what would be a good resume for this job.
+      2. Then, analyze the existing resume and all of its resume_sections and grade the resume against the criteria and identify
+      how the resume could be improved. The one change you should NOT suggest is to add a work summary section. Our resumes
+      WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
+      3. If the resume is already a strong match, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
+      4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume. 
+
+      Return a discriminated union with either:
+      {
+        "type": "no_changes",
+        "noChangeResponse": string, // A friendly response explaining that no changes are needed
+      }
+      OR
+      {
+        "type": "changes_needed",
+        "changes": [{ 
+            changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume. The change 
+            should be very detailed and should be explained in the context of how it would be a better match for the user provided job description. 
+            changeId: string // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
+            changeType: "create_section" | "delete_section" | "update_section" // The type of change that needs to be made to the resume
+        }], // A list of changes that could be made to the resume
+        "changesRequireAdditionalInformation": boolean // true if the changes require additional information from the user, false otherwise
+      }
+
+      ## Message History
+      ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
+
+      ## Current Resume
+      ${JSON.stringify(currentResume)}
+      `,
+      schema: z.discriminatedUnion("type", [
+        z.object({
+          type: z.literal("no_changes"),
+          noChangeResponse: z.string(),
+        }),
+        z.object({
+          type: z.literal("changes_needed"),
+          changes: z.array(
+            z.object({
+              changeDescription: z.string(),
+              changeId: z.string(),
+              changeType: z.enum([
+                "create_section",
+                "delete_section",
+                "update_section",
+              ] as const satisfies readonly ResumeActionType[]),
+            })
+          ),
+          changesRequireAdditionalInformation: z.boolean(),
+        }),
+      ]),
+    });
+
+    logger = logger.with({ result_type: result.type });
+    logger.info("Change identification completed");
+    await logger.flush();
+
+    if (result.type === "no_changes") {
+      return {
+        changes: [],
+        noChangeResponse: result.noChangeResponse,
+        changesRequireAdditionalInformation: false,
+      };
+    } else {
+      return {
+        changes: result.changes,
+        noChangeResponse: "",
+        changesRequireAdditionalInformation:
+          result.changesRequireAdditionalInformation,
+      };
+    }
+  } catch (error) {
+    logger.error("Error identifying changes", { error });
+    await logger.flush();
+    return {
+      changes: [],
+      noChangeResponse:
+        "Sorry, something went wrong while analyzing your resume against the job description. Please try again.",
+    };
+  }
+};
+
+export const handleTransformConversation = async (
+  messages: CoreMessage[],
+  changesToBeMade: {
+    changeDescription: string;
+    changeId: string;
+    changeType: ResumeActionType;
+  }[],
+  currentResume: ResumeDataType
+) => {
+  const logger = new Logger().with({
+    function: "handleTransformConversation",
+    messages,
+    changesToBeMade,
+    currentResume,
+  });
+  const { isReady, response } = await generateObjectWithFallback({
+    systemPrompt: `You are a helpful assistant that chats with a user to get more information
+    about the changes that need to be made to their resume.
+    
+    You will receive:
+    1. The current resume
+    2. A list of changes that need to be made to the resume  
+    3. Current conversation with the user.
+
+    Your job is to analyze the list of changes and ask the user for any additional information that they need to address the changes.
+
+    For example if one of the changes is to add a new work experience to the resume, you should chat back and forth with the user
+    until you get enough information to add the work experience to the resume.
+
+    Not every change will require additional information from the user. Some changes will be clear and direct.
+
+    When you determine that you have enough information to make all of the changes, respond with a message to the user indicating
+    that you have enough information to make the changes and that you will now update the resume. 
+
+    Return a JSON object with the following fields:
+    {
+      isReady: boolean, // true if you have enough information to make the changes, false otherwise
+      response: string, // AI response to the user. This should be in the first person and present tense. It should be friendly and concise.
+                        // In this response you should be asking the user for any additional information that they need to make the changes.
+                        // Or if you have enough information, you should be telling the user that you have enough information to make the changes.
+      changesToBeMade: [{ 
+        changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume
+        changeId: string, // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
+        additionalChangeInformation: string | null, // Optional additional information that the user needs to provide to make the change based off of the changeDescription. 
+                                              // If the change does not require additional information, this should be null.
+        changeType: "create_section" | "delete_section" | "update_section" // The type of change that needs to be made to the resume
+      }] // A list of changes that could be made to the resume
+    }
+
+    ## Current Resume
+    ${JSON.stringify(currentResume)}
+
+    ## Changes to be Made
+    ${JSON.stringify(changesToBeMade)}
+    `,
+    messages,
+    schema: z.object({
+      isReady: z.boolean(),
+      response: z.string(),
+      changesToBeMade: z.array(
+        z.object({
+          changeDescription: z.string(),
+          changeId: z.string(),
+          additionalChangeInformation: z.string().nullable(),
+          changeType: z.enum([
+            "create_section",
+            "delete_section",
+            "update_section",
+          ] as const satisfies readonly ResumeActionType[]),
+        })
+      ),
+    }),
+  });
+  logger.info("Transform conversation completed", { isReady, response });
+  await logger.flush();
+  return { isReady, response };
+};
+
+export const generateTransformedResumeTitle = async (
+  originalTitle: string,
+  messages: CoreMessage[]
+) => {
+  const logger = new Logger().with({
+    function: "generateTransformedResumeTitle",
+    originalTitle,
+  });
+
+  try {
+    const { title } = await generateObjectWithFallback({
+      prompt: `
+      You are an expert at creating concise and descriptive resume titles.
+      
+      First, analyze the message history to find the job description. The job description will be in a user message.
+      Look for a message that contains typical job description elements like:
+      - Role/position title
+      - Company/organization context
+      - Responsibilities or requirements
+      
+      Then, generate a unique title (max 100 characters) for a transformed resume based on the original resume title 
+      and the job it was transformed for. The title should follow the format: "Original Title - Job Title"
+      Make it clear this is a transformed/tailored version while keeping it professional and concise.
+
+      Original Resume Title: ${originalTitle}
+      
+      Message History:
+      ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
+
+      Return the title in JSON format:
+      {
+        "title": string // The generated title, max 100 characters
+      }
+      `,
+      schema: z.object({
+        title: z.string().max(100),
+      }),
+    });
+
+    logger.info("Title generation completed", { title });
+    await logger.flush();
+    return { title };
+  } catch (error) {
+    logger.error("Error generating title", { error });
+    await logger.flush();
+    return { title: originalTitle }; // Fallback to original title if generation fails
+  }
+};

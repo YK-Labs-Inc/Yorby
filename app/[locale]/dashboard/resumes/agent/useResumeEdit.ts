@@ -49,12 +49,12 @@ export const useResumeEditAgent = ({
       }
 
       // Collect all action responses
-      const actionResponses = await handleActions(
+      const actionResponses = await handleActions({
         actions,
         currentResume,
         setMessages,
-        messages
-      );
+        messages,
+      });
 
       // Add loading message for conclusion
       setMessages((messages) => [
@@ -76,16 +76,21 @@ export const useResumeEditAgent = ({
     }
   };
 
-  const handleActions = async (
+  const handleActions = async ({
+    actions,
+    currentResume,
+    setMessages,
+    messages,
+  }: {
     actions: {
       action: ResumeActionType;
       actionDetails: string;
-      aiPerformingActionString: string;
-    }[],
-    currentResume: ResumeDataType,
-    setMessages: Dispatch<SetStateAction<CoreMessage[]>>,
-    messages: CoreMessage[]
-  ): Promise<{ action: ResumeActionType; response: string }[]> => {
+      aiPerformingActionString?: string;
+    }[];
+    currentResume: ResumeDataType;
+    setMessages?: Dispatch<SetStateAction<CoreMessage[]>>;
+    messages: CoreMessage[];
+  }): Promise<{ action: ResumeActionType; response: string }[]> => {
     const actionResponses: { action: ResumeActionType; response: string }[] =
       [];
 
@@ -111,23 +116,28 @@ export const useResumeEditAgent = ({
     action: {
       action: ResumeActionType;
       actionDetails: string;
-      aiPerformingActionString: string;
+      aiPerformingActionString?: string;
     };
     currentResume: ResumeDataType;
-    setMessages: Dispatch<SetStateAction<CoreMessage[]>>;
+    setMessages?: Dispatch<SetStateAction<CoreMessage[]>>;
     messages: CoreMessage[];
   }): Promise<string> => {
     // Add action response message
-    setMessages((messages) => [
-      ...messages,
-      { role: "assistant", content: action.aiPerformingActionString },
-    ]);
+    if (action.aiPerformingActionString) {
+      setMessages?.((messages) => [
+        ...messages,
+        { role: "assistant", content: action.aiPerformingActionString! },
+      ]);
+    }
 
-    // Add loading message for the action
-    setMessages((messages) => [
-      ...messages,
-      { role: "assistant", content: "" },
-    ]);
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.content !== "" && lastMessage.role !== "assistant") {
+      // Add loading message for the action
+      setMessages?.((messages) => [
+        ...messages,
+        { role: "assistant", content: "" },
+      ]);
+    }
 
     try {
       switch (action.action) {
@@ -138,8 +148,9 @@ export const useResumeEditAgent = ({
             currentResume.resume_sections.push(resumeSection);
             setResume(currentResume);
           }
+
           // Replace loading message with create response
-          setMessages((messages) => [
+          setMessages?.((messages) => [
             ...messages.slice(0, -1),
             { role: "assistant", content: createResponse },
           ]);
@@ -161,7 +172,7 @@ export const useResumeEditAgent = ({
             }
           }
           // Replace loading message with delete response
-          setMessages((messages) => [
+          setMessages?.((messages) => [
             ...messages.slice(0, -1),
             { role: "assistant", content: deleteResponse },
           ]);
@@ -180,7 +191,7 @@ export const useResumeEditAgent = ({
             }
           }
           // Replace loading message with update response
-          setMessages((messages) => [
+          setMessages?.((messages) => [
             ...messages.slice(0, -1),
             { role: "assistant", content: updateResponse },
           ]);
@@ -203,7 +214,7 @@ export const useResumeEditAgent = ({
             setResume(currentResume);
           }
           // Replace loading message with update response
-          setMessages((messages) => [
+          setMessages?.((messages) => [
             ...messages.slice(0, -1),
             { role: "assistant", content: updateResponse },
           ]);
@@ -223,7 +234,7 @@ export const useResumeEditAgent = ({
             setResume(currentResume);
           }
           // Replace loading message with update response
-          setMessages((messages) => [
+          setMessages?.((messages) => [
             ...messages.slice(0, -1),
             { role: "assistant", content: updateResponse },
           ]);
@@ -232,10 +243,10 @@ export const useResumeEditAgent = ({
       }
     } catch (error) {
       // If there's an error, remove the loading message
-      setMessages((messages) => messages.slice(0, -1));
+      setMessages?.((messages) => messages.slice(0, -1));
       throw error;
     }
   };
 
-  return { sendResumeEdit };
+  return { handleActions, sendResumeEdit };
 };

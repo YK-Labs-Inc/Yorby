@@ -1,16 +1,34 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import ResumeBuilder from "../components/ResumeBuilder";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { fetchResume } from "../../actions";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { getTranslations } from "next-intl/server";
-import {
-  fetchResume,
-  fetchHasSubscription,
-  fetchUserCredits,
-} from "../actions";
-import { posthog } from "@/utils/tracking/serverUtils";
-export default async function ResumePage({
+import ResumeTransformation from "./ResumeTransformation";
+
+const fetchResumeData = async (resumeId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("resumes")
+    .select(
+      `*, 
+              resume_sections(
+                *, 
+                resume_list_items(*), 
+                resume_detail_items(
+                  *,
+                  resume_item_descriptions(*))
+              )`
+    )
+    .eq("id", resumeId)
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+};
+
+export default async function TransformPage({
   params,
 }: {
   params: Promise<{ resumeId: string }>;
@@ -21,10 +39,12 @@ export default async function ResumePage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) {
     redirect("/sign-in");
   }
-  const resume = await fetchResume(resumeId);
+
+  const resume = await fetchResumeData(resumeId);
   if (!resume) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -44,27 +64,5 @@ export default async function ResumePage({
       </div>
     );
   }
-  const hasSubscription = await fetchHasSubscription(user.id);
-  const credits = await fetchUserCredits(user.id);
-  const isSubscriptionVariant =
-    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-    "test";
-  const isFreemiumEnabled =
-    (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
-    "test";
-  const transformResumeEnabled = await posthog.isFeatureEnabled(
-    "transform-resume-feature",
-    user.id
-  );
-  return (
-    <ResumeBuilder
-      resumeId={resumeId}
-      hasSubscription={hasSubscription}
-      credits={credits}
-      user={user}
-      isSubscriptionVariant={isSubscriptionVariant}
-      isFreemiumEnabled={isFreemiumEnabled}
-      transformResumeEnabled={transformResumeEnabled ?? false}
-    />
-  );
+  return <ResumeTransformation resume={resume} />;
 }

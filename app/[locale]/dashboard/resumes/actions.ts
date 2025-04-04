@@ -5,7 +5,6 @@ import { ResumeDataType } from "./components/ResumeBuilder";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function saveResumeServerAction(
@@ -22,6 +21,7 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
   const logger = new Logger().with({
     function: "saveResume",
   });
+  let errorMessage = "";
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -49,12 +49,13 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
     await insertNewResumeSections(resume_sections, resumeId);
     logger.info("Resume saved");
     await logger.flush();
-    return { error: "" };
   } catch (error) {
     logger.error("Error saving resume", { error });
     await logger.flush();
-    return { error: t("errors.resumeSaveError") };
+    errorMessage = t("errors.resumeSaveError");
   }
+  revalidatePath(`/dashboard/resumes/${resumeId}`);
+  return { error: errorMessage };
 };
 
 const insertNewResumeSections = async (
