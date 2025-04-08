@@ -1194,6 +1194,25 @@
       "description3": "All you need to do is upload the job description, and we'll take care of the rest.",
       "description4": "In the end you will get a perfectly formatted resume that has all of your information, but updated to specifically match the job description.",
       "button": "Start Transformation"
+    },
+    "upload": {
+      "title": "Select or Upload Files",
+      "uploadButton": "Choose Files",
+      "fileTypesHelper": "PDF or DOCX files only",
+      "invalidFileType": "Please upload a PDF or DOCX file",
+      "uploadError": "Error uploading file",
+      "uploading": "Uploading...",
+      "noFiles": "No files uploaded yet",
+      "selectFiles": "Select files to include in your resume",
+      "deleteTitle": "Delete File",
+      "deleteConfirmation": "Are you sure you want to delete this file? This action cannot be undone.",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "deleteError": "Error deleting file",
+      "cancel": "Cancel"
+    },
+    "resumeUpload": {
+      "acknowledgment": "I've reviewed your selected files. Let's work on tailoring your resume for your target role. What kind of position are you interested in?"
     }
   },
   "interviewCopilotDemo": {

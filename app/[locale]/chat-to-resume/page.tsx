@@ -15,6 +15,7 @@ export default async function ChatToResume() {
   let isSubscriptionVariant = false;
   let isFreemiumEnabled = false;
   let transformResumeEnabled = false;
+  let enableResumesFileUpload = false;
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id);
     credits = await fetchUserCredits(user.id);
@@ -27,6 +28,8 @@ export default async function ChatToResume() {
     transformResumeEnabled =
       (await posthog.isFeatureEnabled("transform-resume-feature", user.id)) ??
       false;
+    enableResumesFileUpload =
+      (await posthog.isFeatureEnabled("resume-files-upload", user.id)) ?? false;
   }
 
   return (
@@ -39,6 +42,7 @@ export default async function ChatToResume() {
         isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
         transformResumeEnabled={transformResumeEnabled}
+        enableResumesFileUpload={enableResumesFileUpload}
       />
     </div>
   );

@@ -54,7 +54,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useResumeEditAgent } from "../agent/useResumeEdit";
-import { H1, H2 } from "@/components/typography";
+import { H2 } from "@/components/typography";
+import { FileSelectionModal } from "./FileSelectionModal";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -134,18 +135,7 @@ const LockedResumeOverlay = ({ resumeId }: { resumeId: string }) => {
   );
 };
 
-const StartScreen = ({
-  onStart,
-  initialVoice,
-  onVoiceChange,
-  initialTtsEnabled,
-  onTtsEnabledChange,
-  selectedVoiceId,
-  onSelectedVoiceIdChange,
-  user,
-  setCaptchaToken,
-  captchaToken,
-}: {
+interface StartScreenProps {
   onStart: () => void;
   initialVoice?: string;
   onVoiceChange: (voiceId: string) => void;
@@ -153,10 +143,29 @@ const StartScreen = ({
   onTtsEnabledChange: (enabled: boolean) => void;
   selectedVoiceId: string;
   onSelectedVoiceIdChange: (voiceId: string) => void;
+  selectedFiles: Tables<"user_files">[];
+  onFileSelect: (files: Tables<"user_files">[]) => void;
   user: User | null;
   setCaptchaToken: (token: string) => void;
   captchaToken: string;
-}) => {
+  enableResumesFileUpload: boolean;
+}
+
+const StartScreen = ({
+  enableResumesFileUpload,
+  onStart,
+  initialVoice,
+  onVoiceChange,
+  initialTtsEnabled,
+  onTtsEnabledChange,
+  selectedVoiceId,
+  onSelectedVoiceIdChange,
+  selectedFiles,
+  onFileSelect,
+  user,
+  setCaptchaToken,
+  captchaToken,
+}: StartScreenProps) => {
   const t = useTranslations("resumeBuilder");
   const [ttsEnabled, setTtsEnabled] = useState(initialTtsEnabled);
 
@@ -198,6 +207,13 @@ const StartScreen = ({
           </div>
 
           <div className="space-y-6">
+            {enableResumesFileUpload && (
+              <FileSelectionModal
+                onFileSelect={onFileSelect}
+                selectedFiles={selectedFiles}
+              />
+            )}
+
             <div className="flex items-center justify-between">
               <Label htmlFor="tts-toggle">{t("startScreen.enableVoice")}</Label>
               <Switch
@@ -264,6 +280,7 @@ const ResumeBuilderComponent = ({
   persona,
   transformResumeEnabled,
   transformSummary,
+  enableResumesFileUpload,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -274,6 +291,7 @@ const ResumeBuilderComponent = ({
   persona?: string;
   transformResumeEnabled: boolean;
   transformSummary?: string;
+  enableResumesFileUpload: boolean;
 }) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
@@ -320,6 +338,9 @@ const ResumeBuilderComponent = ({
       }
     },
   });
+  const [selectedFiles, setSelectedFiles] = useState<Tables<"user_files">[]>(
+    []
+  );
 
   const handleVoiceChange = useCallback(
     (voiceId: string) => {
@@ -566,6 +587,10 @@ Once I have all that information, I can try my best to make a really great first
         body: JSON.stringify({
           messages: updatedMessages,
           speakingStyle: selectedVoice.speakingStyle,
+          additionalFiles: selectedFiles.map((file) => ({
+            fileUri: file.google_file_uri,
+            mimeType: file.mime_type,
+          })),
         }),
       });
 
@@ -679,6 +704,7 @@ Once I have all that information, I can try my best to make a really great first
   if (!hasStarted && !resumeId) {
     return (
       <StartScreen
+        enableResumesFileUpload={enableResumesFileUpload}
         onStart={() => setHasStarted(true)}
         initialVoice={persona}
         onVoiceChange={handleVoiceChange}
@@ -686,6 +712,8 @@ Once I have all that information, I can try my best to make a really great first
         onTtsEnabledChange={setIsTtsEnabled}
         selectedVoiceId={selectedVoiceId}
         onSelectedVoiceIdChange={setSelectedVoiceId}
+        selectedFiles={selectedFiles}
+        onFileSelect={setSelectedFiles}
         user={user}
         setCaptchaToken={setCaptchaToken}
         captchaToken={captchaToken}
@@ -914,6 +942,7 @@ export default function ResumeBuilder({
   persona,
   transformResumeEnabled,
   transformSummary,
+  enableResumesFileUpload,
 }: {
   resumeId?: string;
   hasSubscription: boolean;
@@ -921,6 +950,7 @@ export default function ResumeBuilder({
   user: User | null;
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
+  enableResumesFileUpload: boolean;
   persona?: string;
   transformResumeEnabled: boolean;
   transformSummary?: string;
@@ -940,6 +970,7 @@ export default function ResumeBuilder({
         persona={persona}
         transformResumeEnabled={transformResumeEnabled}
         transformSummary={transformSummary}
+        enableResumesFileUpload={enableResumesFileUpload}
       />
     </TtsProvider>
   );

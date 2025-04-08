@@ -6,6 +6,8 @@ import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
 import { revalidatePath } from "next/cache";
+import { UploadResponse } from "@/utils/types";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 
 export async function saveResumeServerAction(
   prevState: { error?: string },
@@ -402,3 +404,134 @@ export const getResumeEditCount = async (resumeId: string) => {
 
   return count || 0;
 };
+
+export async function uploadResumeFile(file: File, userId: string) {
+  const supabase = await createSupabaseServerClient();
+
+  // Upload to Supabase storage
+  const fileName = `${new Date().getTime()}.${file.type.split("/")[1]}`;
+  const filePath = `${userId}/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("user-files")
+    .upload(filePath, file);
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  // Upload to Gemini
+  const blob = new Blob([file], { type: file.type });
+  const formData = new FormData();
+  const metadata = {
+    file: { mimeType: file.type, displayName: fileName },
+  };
+  formData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" })
+  );
+  formData.append("file", blob);
+
+  const geminiResponse = await fetch(
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${process.env.GOOGLE_GENERATIVE_AI_API_KEY}`,
+    { method: "post", body: formData }
+  );
+
+  if (!geminiResponse.ok) {
+    // If Gemini upload fails, clean up the Supabase file
+    await supabase.storage.from("user-files").remove([filePath]);
+    throw new Error(`Failed to upload to Gemini: ${geminiResponse.statusText}`);
+  }
+
+  const geminiUploadResponse = (await geminiResponse.json()) as UploadResponse;
+
+  // Get the Supabase file URL
+  const {
+    data: { publicUrl: fileUri },
+  } = supabase.storage.from("user-files").getPublicUrl(filePath);
+
+  // Insert into user_files table with Gemini information
+  const { error: dbError } = await supabase.from("user_files").insert({
+    user_id: userId,
+    file_path: filePath,
+    bucket_name: "user-files",
+    mime_type: file.type,
+    google_file_name: geminiUploadResponse.file.name,
+    google_file_uri: geminiUploadResponse.file.uri,
+    display_name: file.name,
+  });
+
+  if (dbError) {
+    // If DB insert fails, clean up both uploaded files
+    await supabase.storage.from("user-files").remove([filePath]);
+    // Note: Gemini files are automatically cleaned up after their expiration time
+    throw dbError;
+  }
+}
+
+export async function deleteResumeFile(fileId: string) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not authenticated" };
+  }
+
+  const logger = new Logger().with({
+    fileId,
+    function: "deleteResumeFile",
+  });
+
+  try {
+    // First fetch the file details
+    const { data: file, error: fetchError } = await supabase
+      .from("user_files")
+      .select("*")
+      .eq("id", fileId)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    // Delete from Supabase storage
+    const { error: storageError } = await supabase.storage
+      .from("user-files")
+      .remove([file.file_path]);
+
+    if (storageError) {
+      throw storageError;
+    }
+
+    // Try to delete from Gemini AI
+    try {
+      const fileManager = new GoogleAIFileManager(
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY!
+      );
+      await fileManager.deleteFile(file.google_file_name);
+    } catch (error) {
+      // Log but don't fail if Gemini deletion fails
+      logger.warn("Failed to delete file from Gemini", { error });
+    }
+
+    // Delete from database
+    const { error: dbError } = await supabase
+      .from("user_files")
+      .delete()
+      .eq("id", fileId);
+
+    if (dbError) {
+      throw dbError;
+    }
+
+    logger.info("File deleted successfully");
+    return { success: true };
+  } catch (error: any) {
+    logger.error("Error deleting file", { error: error.message });
+    return { error: "Failed to delete file" };
+  } finally {
+    await logger.flush();
+  }
+}

@@ -58,6 +58,8 @@ export default async function ResumePage({
     "transform-resume-feature",
     user.id
   );
+  const enableResumesFileUpload =
+    (await posthog.isFeatureEnabled("resume-files-upload", user.id)) ?? false;
   const transformSummary = (await searchParams)?.transformSummary as
     | string
     | undefined;
@@ -71,6 +73,7 @@ export default async function ResumePage({
       isFreemiumEnabled={isFreemiumEnabled}
       transformResumeEnabled={transformResumeEnabled ?? false}
       transformSummary={transformSummary}
+      enableResumesFileUpload={enableResumesFileUpload}
     />
   );
 }
