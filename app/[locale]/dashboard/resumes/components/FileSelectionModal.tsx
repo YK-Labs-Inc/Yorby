@@ -2,18 +2,18 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import { Loader2, Upload, Trash2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -36,9 +36,16 @@ import { Progress } from "@/components/ui/progress";
 interface Props {
   onFileSelect: (files: Tables<"user_files">[]) => void;
   selectedFiles: Tables<"user_files">[];
+  mode: "resume" | "context";
+  disabledFiles?: Tables<"user_files">[]; // Files that are selected in the other modal
 }
 
-export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
+export function FileSelectionModal({
+  onFileSelect,
+  selectedFiles,
+  mode,
+  disabledFiles = [],
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
@@ -82,16 +89,21 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
     if (!e.target.files?.length) return;
     const files = Array.from(e.target.files);
 
-    // Validate all files
-    const invalidFile = files.find(
-      (file) =>
-        !file.type.match(
-          "application/pdf|application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-    );
+    // Validate file count based on mode
+    if (mode === "resume" && files.length > 1) {
+      setError(t("upload.singleFileOnly"));
+      return;
+    }
 
+    if (mode === "context" && files.length + existingFiles.length > 10) {
+      setError(t("upload.maxFilesExceeded"));
+      return;
+    }
+
+    // Validate all files are PDFs
+    const invalidFile = files.find((file) => file.type !== "application/pdf");
     if (invalidFile) {
-      setError(t("upload.invalidFileType"));
+      setError(t("upload.pdfOnly"));
       return;
     }
 
@@ -119,7 +131,7 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
         setUploadProgress(((i + 1) / totalFiles) * 100);
       }
     } catch (error) {
-      logError("Error uploading resume:", { error });
+      logError("Error uploading file:", { error });
       setError(t("upload.uploadError"));
     } finally {
       setIsUploading(false);
@@ -165,6 +177,11 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
   };
 
   const toggleFileSelection = (file: Tables<"user_files">) => {
+    // Don't allow selection of disabled files
+    if (disabledFiles.some((f) => f.id === file.id)) {
+      return;
+    }
+
     if (selectedFiles.find((f) => f.id === file.id)) {
       onFileSelect(selectedFiles.filter((f) => f.id !== file.id));
     } else {
@@ -177,13 +194,23 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full">
           <Upload className="w-4 h-4 mr-2" />
-          {t("upload.uploadButton")}
+          {mode === "resume"
+            ? t("upload.uploadResume")
+            : t("upload.uploadContext")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{t("upload.title")}</DialogTitle>
-          <DialogDescription>{t("upload.fileTypesHelper")}</DialogDescription>
+          <DialogTitle>
+            {mode === "resume"
+              ? t("upload.resumeTitle")
+              : t("upload.contextTitle")}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === "resume"
+              ? t("upload.resumeDescription")
+              : t("upload.contextDescription")}
+          </DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -194,7 +221,7 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
         )}
 
         {isFetchingFiles ? (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex items-center justify-center">
             <Loader2 className="w-4 h-4 animate-spin" />
           </div>
         ) : (
@@ -203,11 +230,11 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
             <div className="space-y-4">
               <input
                 type="file"
-                accept=".pdf,.docx"
+                accept=".pdf"
                 onChange={handleFileChange}
                 className="hidden"
                 ref={fileInputRef}
-                multiple
+                multiple={mode === "context"}
               />
               <div className="flex flex-col gap-2">
                 <Button
@@ -225,7 +252,9 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      {t("upload.uploadButton")}
+                      {mode === "resume"
+                        ? t("upload.uploadResume")
+                        : t("upload.uploadContext")}
                     </>
                   )}
                 </Button>
@@ -238,82 +267,94 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {t("upload.fileTypesHelper")}
+                  {mode === "resume"
+                    ? t("upload.singlePdfOnly")
+                    : t("upload.multiPdfHelper")}
                 </p>
               </div>
             </div>
 
             {/* Existing files section */}
             <div className="space-y-2">
-              {existingFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 hover:bg-muted/50"
-                >
+              {existingFiles.map((file) => {
+                const isDisabled = disabledFiles.some((f) => f.id === file.id);
+                return (
                   <div
-                    className="flex items-center gap-2 flex-1 cursor-pointer"
-                    onClick={() => toggleFileSelection(file)}
+                    key={file.id}
+                    className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${
+                      isDisabled
+                        ? "opacity-50 cursor-not-allowed bg-muted"
+                        : "hover:bg-muted/50 cursor-pointer"
+                    }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={selectedFiles.some((f) => f.id === file.id)}
-                      onChange={() => {}}
-                      className="h-4 w-4"
-                    />
-                    <span className="text-sm font-medium truncate">
-                      {file.display_name}
-                    </span>
-                  </div>
-                  <AlertDialog
-                    open={isDeleteDialogOpen}
-                    onOpenChange={setIsDeleteDialogOpen}
-                  >
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        disabled={isDeletingId === file.id}
-                      >
-                        {isDeletingId === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "×"
-                        )}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t("upload.deleteTitle")}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t("upload.deleteConfirmation")}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeletingId === file.id}>
-                          {t("upload.cancel")}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(file.id)}
+                    <div
+                      className="flex items-center gap-2 flex-1"
+                      onClick={() => !isDisabled && toggleFileSelection(file)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedFiles.some((f) => f.id === file.id)}
+                        disabled={isDisabled}
+                        onChange={() => {}}
+                        className="h-4 w-4 disabled:cursor-not-allowed"
+                      />
+                      <span className="text-sm font-medium truncate">
+                        {file.display_name}
+                      </span>
+                    </div>
+                    <AlertDialog
+                      open={isDeleteDialogOpen}
+                      onOpenChange={setIsDeleteDialogOpen}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
                           disabled={isDeletingId === file.id}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           {isDeletingId === file.id ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              {t("upload.deleting")}
-                            </>
+                            <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            t("upload.delete")
+                            "×"
                           )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              ))}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {t("upload.deleteTitle")}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("upload.deleteConfirmation")}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel
+                            disabled={isDeletingId === file.id}
+                          >
+                            {t("upload.cancel")}
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(file.id)}
+                            disabled={isDeletingId === file.id}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            {isDeletingId === file.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {t("upload.deleting")}
+                              </>
+                            ) : (
+                              t("upload.delete")
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                );
+              })}
               {existingFiles.length === 0 && (
                 <div className="text-sm text-muted-foreground text-center py-4">
                   {t("upload.noFiles")}
@@ -322,6 +363,11 @@ export function FileSelectionModal({ onFileSelect, selectedFiles }: Props) {
             </div>
           </div>
         )}
+        <DialogFooter>
+          <Button className="w-full" onClick={() => setIsOpen(false)}>
+            {t("upload.done")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

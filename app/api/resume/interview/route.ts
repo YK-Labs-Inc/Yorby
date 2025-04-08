@@ -3,16 +3,7 @@ import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
 import { CoreMessage } from "ai";
-import { Tables } from "@/utils/supabase/database.types";
-import { GoogleAIFileManager } from "@google/generative-ai/dist/server/server";
-import {
-  createSupabaseServerClient,
-  downloadFile,
-} from "@/utils/supabase/server";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
-import { UploadResponse } from "@/utils/types";
-
-const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
+import { getAllFiles } from "../utils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = req.log.with({
@@ -22,11 +13,13 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     const {
       messages,
       speakingStyle,
-      fileIds = [],
+      existingResumeFileIds = [],
+      additionalFileIds,
     } = (await req.json()) as {
       messages: CoreMessage[];
       speakingStyle?: string;
-      fileIds?: string[];
+      existingResumeFileIds: string[];
+      additionalFileIds: string[];
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -38,6 +31,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
     logger = logger.with({
       messages,
+      existingResumeFileIds,
+      additionalFileIds,
+      speakingStyle,
     });
 
     logger.info("Processing interview conversation");
@@ -61,6 +57,23 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Education
     - Work Experience
     - Skills
+
+  ${
+    existingResumeFileIds.length > 0 &&
+    `You are given a user's previous resume to form your response.
+  
+  There is a strong chance that this resume contains all of the information that you need to create a new resume.
+
+    Acknowledge the user's previous resume and ask them if they would like to add any other additional information
+    in addition to the information provided in the resume or if they would like to just use the existing resume
+    as the basis for a new resume. 
+
+    If they do want to add any additional information, continue the rest of the interview process.
+
+    If they would like to just use the existing resume as the basis for a new resume, then you can move onto return a response 
+    saying that you will use the existing resume as the basis for a new resume and return the interviewIsComplete flag as true.
+  `
+  }
 
     If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
     after the initial resume is created, they can add more information and customize it to their liking.
@@ -97,13 +110,14 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     Conduct the interview in the language of the user.
     `;
-    const additionalFiles = await getAllFiles(fileIds);
+    const existingResumeFiles = await getAllFiles(existingResumeFileIds);
+    const additionalFiles = await getAllFiles(additionalFileIds);
 
     // Send a prompt to continue the conversation
     const result = await generateObjectWithFallback({
       systemPrompt,
       messages:
-        additionalFiles.length > 0
+        additionalFiles.length > 0 || existingResumeFiles.length > 0
           ? [
               {
                 role: "user",
@@ -113,6 +127,11 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
                     text: "Use the following files as additional context to form your responses",
                   },
                   ...additionalFiles.map((file) => ({
+                    type: "file" as "file",
+                    data: file.fileData.fileUri,
+                    mimeType: file.fileData.mimeType,
+                  })),
+                  ...existingResumeFiles.map((file) => ({
                     type: "file" as "file",
                     data: file.fileData.fileUri,
                     mimeType: file.fileData.mimeType,
@@ -149,87 +168,3 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     );
   }
 });
-
-const getAllFiles = async (fileIds: string[]) => {
-  const userFiles = await fetchUserFiles(fileIds);
-  const fileStatuses = await Promise.all(userFiles.map(checkFileExists));
-  return await Promise.all(
-    fileStatuses.map(async ({ file, status }) => {
-      if (!status) {
-        const uploadResponse = await processMissingFile({ file });
-        return {
-          fileData: {
-            fileUri: uploadResponse.file.uri,
-            mimeType: uploadResponse.file.mimeType,
-          },
-        };
-      }
-      return {
-        fileData: {
-          fileUri: file.google_file_uri,
-          mimeType: file.mime_type,
-        },
-      };
-    })
-  );
-};
-
-const fetchUserFiles = async (fileIds: string[]) => {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("user_files")
-    .select("*")
-    .in("id", fileIds);
-  if (error) {
-    throw new Error(error.message);
-  }
-  return data;
-};
-
-const checkFileExists = async (file: Tables<"user_files">) => {
-  try {
-    const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
-    await fileManager.getFile(file.google_file_name);
-    return { file, status: true };
-  } catch {
-    return { file, status: false };
-  }
-};
-
-const processMissingFile = async ({ file }: { file: Tables<"user_files"> }) => {
-  const { display_name, file_path } = file;
-  const data = await downloadFile({
-    filePath: file_path,
-    bucket: "user-files",
-  });
-  const uploadResponse = await uploadFileToGemini({
-    blob: data,
-    displayName: display_name,
-  });
-  await updateFileInDatabase({
-    uploadResponse,
-    fileId: file.id,
-  });
-  return uploadResponse;
-};
-
-const updateFileInDatabase = async ({
-  uploadResponse,
-  fileId,
-}: {
-  uploadResponse: UploadResponse;
-  fileId: string;
-}) => {
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
-    .from("user_files")
-    .update({
-      google_file_uri: uploadResponse.file.uri,
-      google_file_name: uploadResponse.file.name,
-      mime_type: uploadResponse.file.mimeType,
-    })
-    .eq("id", fileId);
-  if (error) {
-    throw new Error(error.message);
-  }
-};

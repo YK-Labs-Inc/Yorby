@@ -143,8 +143,10 @@ interface StartScreenProps {
   onTtsEnabledChange: (enabled: boolean) => void;
   selectedVoiceId: string;
   onSelectedVoiceIdChange: (voiceId: string) => void;
-  selectedFiles: Tables<"user_files">[];
-  onFileSelect: (files: Tables<"user_files">[]) => void;
+  existingResume: Tables<"user_files">[];
+  setExistingResume: (resume: Tables<"user_files">[]) => void;
+  additionalFiles: Tables<"user_files">[];
+  setAdditionalFiles: (files: Tables<"user_files">[]) => void;
   user: User | null;
   setCaptchaToken: (token: string) => void;
   captchaToken: string;
@@ -160,8 +162,10 @@ const StartScreen = ({
   onTtsEnabledChange,
   selectedVoiceId,
   onSelectedVoiceIdChange,
-  selectedFiles,
-  onFileSelect,
+  existingResume,
+  setExistingResume,
+  additionalFiles,
+  setAdditionalFiles,
   user,
   setCaptchaToken,
   captchaToken,
@@ -208,10 +212,56 @@ const StartScreen = ({
 
           <div className="space-y-6">
             {enableResumesFileUpload && (
-              <FileSelectionModal
-                onFileSelect={onFileSelect}
-                selectedFiles={selectedFiles}
-              />
+              <div className="flex flex-col gap-4">
+                <div className="space-y-2">
+                  <FileSelectionModal
+                    onFileSelect={setExistingResume}
+                    selectedFiles={existingResume}
+                    mode="resume"
+                    disabledFiles={additionalFiles}
+                  />
+                  {existingResume.length > 0 && (
+                    <div className="text-sm text-muted-foreground pl-2">
+                      <p className="font-medium">
+                        {t("startScreen.selectedResume")}:
+                      </p>
+                      <p className="truncate">
+                        {existingResume[0].display_name}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <FileSelectionModal
+                    onFileSelect={(files: Tables<"user_files">[]) => {
+                      // Filter out any files that are already selected as the resume
+                      const newFiles = files.filter(
+                        (file) => !existingResume.some((r) => r.id === file.id)
+                      );
+                      setAdditionalFiles(newFiles);
+                    }}
+                    selectedFiles={additionalFiles}
+                    mode="context"
+                    disabledFiles={existingResume}
+                  />
+                  {additionalFiles.length > 0 && (
+                    <div className="text-sm text-muted-foreground pl-2">
+                      <p className="font-medium">
+                        {t("startScreen.selectedContextFiles")} (
+                        {additionalFiles.length}):
+                      </p>
+                      <ul className="list-disc list-inside">
+                        {additionalFiles.map((file) => (
+                          <li key={file.id} className="truncate">
+                            {file.display_name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             <div className="flex items-center justify-between">
@@ -338,7 +388,10 @@ const ResumeBuilderComponent = ({
       }
     },
   });
-  const [selectedFiles, setSelectedFiles] = useState<Tables<"user_files">[]>(
+  const [additionalFiles, setAdditionalFiles] = useState<
+    Tables<"user_files">[]
+  >([]);
+  const [existingResume, setExistingResume] = useState<Tables<"user_files">[]>(
     []
   );
 
@@ -392,6 +445,10 @@ const ResumeBuilderComponent = ({
 
     if (transformSummary) {
       initialMessage = transformSummary;
+    } else if (existingResume.length > 0) {
+      initialMessage = t("existingResumeInitialMessage", {
+        fileName: existingResume[0].display_name,
+      });
     } else if (resumeId) {
       initialMessage = t("editResumeInitialMessage");
     } else {
@@ -399,7 +456,11 @@ const ResumeBuilderComponent = ({
     }
 
     // If we have a selected voice with a speaking style, modify the message accordingly
-    if (selectedVoice?.speakingStyle && !transformSummary) {
+    if (
+      selectedVoice?.speakingStyle &&
+      !transformSummary &&
+      !existingResume.length
+    ) {
       if (selectedVoice.voiceId === "dg") {
         initialMessage = `Listen up, buttercup! You want a killer resume? I need the intel.
 
@@ -436,7 +497,15 @@ Once I have all that information, I can try my best to make a really great first
         content: initialMessage,
       },
     ]);
-  }, [resumeId, persona, t, hasStarted, selectedVoiceId, transformSummary]);
+  }, [
+    resumeId,
+    persona,
+    t,
+    hasStarted,
+    selectedVoiceId,
+    transformSummary,
+    existingResume,
+  ]);
 
   // Fetch initial edit count
   useEffect(() => {
@@ -587,10 +656,8 @@ Once I have all that information, I can try my best to make a really great first
         body: JSON.stringify({
           messages: updatedMessages,
           speakingStyle: selectedVoice.speakingStyle,
-          additionalFiles: selectedFiles.map((file) => ({
-            fileUri: file.google_file_uri,
-            mimeType: file.mime_type,
-          })),
+          existingResumeFileIds: existingResume.map((file) => file.id),
+          additionalFileIds: additionalFiles.map((file) => file.id),
         }),
       });
 
@@ -657,6 +724,8 @@ Once I have all that information, I can try my best to make a really great first
         },
         body: JSON.stringify({
           messages: conversationHistory,
+          existingResumeFileIds: existingResume.map((file) => file.id),
+          additionalFileIds: additionalFiles.map((file) => file.id),
         }),
       });
 
@@ -712,8 +781,10 @@ Once I have all that information, I can try my best to make a really great first
         onTtsEnabledChange={setIsTtsEnabled}
         selectedVoiceId={selectedVoiceId}
         onSelectedVoiceIdChange={setSelectedVoiceId}
-        selectedFiles={selectedFiles}
-        onFileSelect={setSelectedFiles}
+        existingResume={existingResume}
+        setExistingResume={setExistingResume}
+        additionalFiles={additionalFiles}
+        setAdditionalFiles={setAdditionalFiles}
         user={user}
         setCaptchaToken={setCaptchaToken}
         captchaToken={captchaToken}

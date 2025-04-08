@@ -6,15 +6,19 @@ import { getTranslations } from "next-intl/server";
 import { CoreMessage } from "ai";
 import { z } from "zod";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { getAllFiles } from "../utils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
     route: "/api/resume/generate",
   });
   try {
-    const { messages } = (await req.json()) as {
-      messages: CoreMessage[];
-    };
+    const { messages, existingResumeFileIds, additionalFileIds } =
+      (await req.json()) as {
+        messages: CoreMessage[];
+        existingResumeFileIds: string[];
+        additionalFileIds: string[];
+      };
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -23,9 +27,20 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       );
     }
 
-    logger.info("Generating resume from conversation history");
+    const existingResumeFiles = await getAllFiles(existingResumeFileIds);
+    const additionalFiles = await getAllFiles(additionalFileIds);
 
-    const resumeCoreMessage = await generateResumeCoreMessage(messages, logger);
+    logger.info("Generating resume from conversation history", {
+      hasExistingResume: existingResumeFiles.length > 0,
+      numAdditionalFiles: additionalFiles.length,
+    });
+
+    const resumeCoreMessage = await generateResumeCoreMessage(
+      messages,
+      logger,
+      existingResumeFiles,
+      additionalFiles
+    );
 
     const resumeId = await saveResumeCoreMessage(resumeCoreMessage, logger);
 
@@ -347,12 +362,34 @@ const saveResumeSkills = async (
 
 const generateResumeCoreMessage = async (
   messages: CoreMessage[],
-  logger: Logger
+  logger: Logger,
+  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
+  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
-  const personalInfo = await extractPersonalInfo(messages, logger);
-  const educationHistory = await extractEducationHistory(messages, logger);
-  const workExperience = await extractWorkExperience(messages, logger);
-  const skills = await extractSkills(messages, logger);
+  const personalInfo = await extractPersonalInfo(
+    messages,
+    logger,
+    existingResumeFiles,
+    additionalFiles
+  );
+  const educationHistory = await extractEducationHistory(
+    messages,
+    logger,
+    existingResumeFiles,
+    additionalFiles
+  );
+  const workExperience = await extractWorkExperience(
+    messages,
+    logger,
+    existingResumeFiles,
+    additionalFiles
+  );
+  const skills = await extractSkills(
+    messages,
+    logger,
+    existingResumeFiles,
+    additionalFiles
+  );
   return {
     personalInfo,
     educationHistory,
@@ -361,38 +398,58 @@ const generateResumeCoreMessage = async (
   };
 };
 
-const extractPersonalInfo = async (messages: CoreMessage[], logger: Logger) => {
+const extractPersonalInfo = async (
+  messages: CoreMessage[],
+  logger: Logger,
+  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
+  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "personal information",
   });
   try {
     const prompt = `
-  Extract the following information from the conversation:
-  - Name
-  - Email
-  - Phone
-  - Location
+    Extract the following information from the conversation:
+    - Name
+    - Email
+    - Phone
+    - Location
 
 
-  If you are unable to extract the name return a placeholder for that field in the final JSON response.
+    If you are unable to extract the name return a placeholder for that field in the final JSON response.
 
-  If you are unable to extract the email return a null value for the field in the final JSON response.
+    If you are unable to extract the email return a null value for the field in the final JSON response.
 
-  If you are unable to extract the phone return a null value for the field in the final JSON response.
+    If you are unable to extract the phone return a null value for the field in the final JSON response.
 
-  If you are unable to extract the location return a null value for the field in the final JSON response.
+    If you are unable to extract the location return a null value for the field in the final JSON response.
 
-  Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
-  characters are not needed. Just return the raw JSON object string.
-  `;
+    Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
+    characters are not needed. Just return the raw JSON object string.
+    `;
 
     const result = await generateObjectWithFallback({
       systemPrompt: prompt,
       messages: [
         {
           role: "user",
-          content: "Extract the information from the conversation",
+          content: [
+            {
+              type: "text",
+              text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
+            },
+            ...existingResumeFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+            ...additionalFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
         },
         ...messages,
       ],
@@ -428,7 +485,9 @@ const extractPersonalInfo = async (messages: CoreMessage[], logger: Logger) => {
 
 const extractEducationHistory = async (
   messages: CoreMessage[],
-  logger: Logger
+  logger: Logger,
+  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
+  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -470,7 +529,22 @@ const extractEducationHistory = async (
       messages: [
         {
           role: "user",
-          content: "Extract the information from the conversation",
+          content: [
+            {
+              type: "text",
+              text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
+            },
+            ...existingResumeFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+            ...additionalFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
         },
         ...messages,
       ],
@@ -514,7 +588,9 @@ const extractEducationHistory = async (
 
 const extractWorkExperience = async (
   messages: CoreMessage[],
-  logger: Logger
+  logger: Logger,
+  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
+  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -557,7 +633,22 @@ const extractWorkExperience = async (
       messages: [
         {
           role: "user",
-          content: "Extract the information from the conversation",
+          content: [
+            {
+              type: "text",
+              text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
+            },
+            ...existingResumeFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+            ...additionalFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
         },
         ...messages,
       ],
@@ -597,7 +688,12 @@ const extractWorkExperience = async (
   }
 };
 
-const extractSkills = async (messages: CoreMessage[], logger: Logger) => {
+const extractSkills = async (
+  messages: CoreMessage[],
+  logger: Logger,
+  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
+  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
     dataToExtract: "skills",
@@ -627,7 +723,22 @@ const extractSkills = async (messages: CoreMessage[], logger: Logger) => {
       messages: [
         {
           role: "user",
-          content: "Extract the information from the conversation",
+          content: [
+            {
+              type: "text",
+              text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
+            },
+            ...existingResumeFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+            ...additionalFiles.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
         },
         ...messages,
       ],
