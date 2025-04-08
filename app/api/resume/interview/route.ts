@@ -150,7 +150,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   }
 });
 
-export const getAllFiles = async (fileIds: string[]) => {
+const getAllFiles = async (fileIds: string[]) => {
   const userFiles = await fetchUserFiles(fileIds);
   const fileStatuses = await Promise.all(userFiles.map(checkFileExists));
   return await Promise.all(
