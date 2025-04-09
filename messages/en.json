@@ -1185,7 +1185,9 @@
     "startScreen": {
       "enableVoice": "Enable Voice Mode",
       "selectVoice": "Select Voice",
-      "startButton": "Start Building Resume"
+      "startButton": "Start Building Resume",
+      "selectedResume": "Selected Resume",
+      "selectedContextFiles": "Selected Additional Files"
     },
     "transform": {
       "title": "Transform Your Resume To Match Any Job Description",
@@ -1194,7 +1196,36 @@
       "description3": "All you need to do is upload the job description, and we'll take care of the rest.",
       "description4": "In the end you will get a perfectly formatted resume that has all of your information, but updated to specifically match the job description.",
       "button": "Start Transformation"
-    }
+    },
+    "upload": {
+      "uploadResume": "Upload Existing Resume",
+      "uploadContext": "Upload Additional Documents",
+      "resumeTitle": "Upload An Existing Resume",
+      "contextTitle": "Upload Additional Documents",
+      "resumeDescription": "Upload an existing resume or select one from the files below. This will help us quickly create a personalized resume for you.",
+      "contextDescription": "Upload additional documents (up to 10) to help us get information about your previous work experience. This could be project descriptions, certifications, or anything else that would help us get a better understanding of your experience.",
+      "singlePdfOnly": "Only PDF files are accepted. You can upload one file.",
+      "multiPdfHelper": "Only PDF files are accepted. You can upload up to 10 files.",
+      "singleFileOnly": "Please select only one file for your resume.",
+      "maxFilesExceeded": "You can upload a maximum of 10 context files.",
+      "pdfOnly": "Only PDF files are accepted.",
+      "uploadError": "An error occurred while uploading your file.",
+      "deleteError": "An error occurred while deleting your file.",
+      "deleting": "Deleting...",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "deleteTitle": "Delete File",
+      "deleteConfirmation": "Are you sure you want to delete this file? This action cannot be undone.",
+      "noFiles": "No files uploaded yet.",
+      "uploading": "Uploading...",
+      "alreadyInContext": "Already added as additional context",
+      "alreadyAsResume": "Already selected as resume",
+      "done": "Done"
+    },
+    "resumeUpload": {
+      "acknowledgment": "I've reviewed your selected files. Let's work on tailoring your resume for your target role. What kind of position are you interested in?"
+    },
+    "existingResumeInitialMessage": "I see you've uploaded an existing resume ({fileName}). Would you like me to recreate this resume in our system, or would you prefer to add additional information and build a new resume? Let me know how you'd like to proceed."
   },
   "interviewCopilotDemo": {
     "session": {

@@ -2,16 +2,24 @@ import { NextResponse } from "next/server";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
-import { CoreMessage, CoreUserMessage } from "ai";
+import { CoreMessage } from "ai";
+import { getAllFiles } from "../utils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = req.log.with({
     route: "/api/resume/interview",
   });
   try {
-    const { messages, speakingStyle } = (await req.json()) as {
+    const {
+      messages,
+      speakingStyle,
+      existingResumeFileIds = [],
+      additionalFileIds,
+    } = (await req.json()) as {
       messages: CoreMessage[];
       speakingStyle?: string;
+      existingResumeFileIds: string[];
+      additionalFileIds: string[];
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -23,6 +31,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
     logger = logger.with({
       messages,
+      existingResumeFileIds,
+      additionalFileIds,
+      speakingStyle,
     });
 
     logger.info("Processing interview conversation");
@@ -46,6 +57,23 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Education
     - Work Experience
     - Skills
+
+  ${
+    existingResumeFileIds.length > 0 &&
+    `You are given a user's previous resume to form your response.
+  
+  There is a strong chance that this resume contains all of the information that you need to create a new resume.
+
+    Acknowledge the user's previous resume and ask them if they would like to add any other additional information
+    in addition to the information provided in the resume or if they would like to just use the existing resume
+    as the basis for a new resume. 
+
+    If they do want to add any additional information, continue the rest of the interview process.
+
+    If they would like to just use the existing resume as the basis for a new resume, then you can move onto return a response 
+    saying that you will use the existing resume as the basis for a new resume and return the interviewIsComplete flag as true.
+  `
+  }
 
     If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
     after the initial resume is created, they can add more information and customize it to their liking.
@@ -82,27 +110,44 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     Conduct the interview in the language of the user.
     `;
-
-    // Convert messages to Gemini chat format
-    const chatHistory = [
-      {
-        role: "user",
-        parts: [{ text: systemPrompt }],
-      },
-      ...messages.slice(0, -1),
-    ];
+    const existingResumeFiles = await getAllFiles(existingResumeFileIds);
+    const additionalFiles = await getAllFiles(additionalFileIds);
 
     // Send a prompt to continue the conversation
     const result = await generateObjectWithFallback({
       systemPrompt,
-      messages,
+      messages:
+        additionalFiles.length > 0 || existingResumeFiles.length > 0
+          ? [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Use the following files as additional context to form your responses",
+                  },
+                  ...additionalFiles.map((file) => ({
+                    type: "file" as "file",
+                    data: file.fileData.fileUri,
+                    mimeType: file.fileData.mimeType,
+                  })),
+                  ...existingResumeFiles.map((file) => ({
+                    type: "file" as "file",
+                    data: file.fileData.fileUri,
+                    mimeType: file.fileData.mimeType,
+                  })),
+                ],
+              },
+              ...messages,
+            ]
+          : messages,
       schema: z.object({
         interviewIsComplete: z.boolean(),
         interviewerResponse: z.string(),
       }),
       loggingContext: {
         route: "/api/resume/interview",
-        chatHistory,
+        messages,
       },
     });
 

@@ -865,6 +865,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_files: {
+        Row: {
+          bucket_name: string
+          created_at: string
+          display_name: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id: string
+          mime_type: string
+          user_id: string
+        }
+        Insert: {
+          bucket_name: string
+          created_at?: string
+          display_name: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id?: string
+          mime_type: string
+          user_id: string
+        }
+        Update: {
+          bucket_name?: string
+          created_at?: string
+          display_name?: string
+          file_path?: string
+          google_file_name?: string
+          google_file_uri?: string
+          id?: string
+          mime_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

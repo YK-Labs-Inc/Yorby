@@ -17,6 +17,7 @@ export default async function Home() {
   let isSubscriptionVariant = false;
   let isFreemiumEnabled = false;
   let transformResumeEnabled = false;
+  let enableResumesFileUpload = false;
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id);
     credits = await fetchUserCredits(user.id);
@@ -29,6 +30,8 @@ export default async function Home() {
     transformResumeEnabled =
       (await posthog.isFeatureEnabled("transform-resume-feature", user.id)) ??
       false;
+    enableResumesFileUpload =
+      (await posthog.isFeatureEnabled("resume-files-upload", user.id)) ?? false;
   }
   return (
     <LandingPageV5
@@ -38,6 +41,7 @@ export default async function Home() {
       isSubscriptionVariant={isSubscriptionVariant}
       isFreemiumEnabled={isFreemiumEnabled}
       transformResumeEnabled={transformResumeEnabled}
+      enableResumesFileUpload={enableResumesFileUpload}
     />
   );
 }

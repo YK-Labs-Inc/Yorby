@@ -16,6 +16,7 @@ export default function DemoFeatures({
   isSubscriptionVariant,
   isFreemiumEnabled,
   transformResumeEnabled,
+  enableResumesFileUpload,
 }: {
   user: any;
   hasSubscription: boolean;
@@ -23,6 +24,7 @@ export default function DemoFeatures({
   isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   transformResumeEnabled: boolean;
+  enableResumesFileUpload: boolean;
 }) {
   const [selectedOption, setSelectedOption] = useState<string | null>("resume");
   const t = useTranslations("LandingPageV5.demoFeatures");
@@ -55,6 +57,7 @@ export default function DemoFeatures({
           isSubscriptionVariant={isSubscriptionVariant}
           isFreemiumEnabled={isFreemiumEnabled}
           transformResumeEnabled={transformResumeEnabled}
+          enableResumesFileUpload={enableResumesFileUpload}
         />
       );
     } else if (selectedOption === "interview") {
