@@ -17,6 +17,7 @@ export default function SignInForm() {
     error: undefined,
   });
   const [captchaToken, setCaptchaToken] = useState<string>("");
+  const [showCaptcha, setShowCaptcha] = useState<boolean>(true);
   let formMessage: Message | undefined;
   if (state.success) {
     formMessage = { success: state.success };
@@ -51,11 +52,12 @@ export default function SignInForm() {
           </SubmitButton>
           {formMessage && <FormMessage message={formMessage} />}
         </div>
-        <div className="mt-4">
+        <div className={`mt-4 ${showCaptcha ? "" : "hidden"}`}>
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
             onSuccess={(token) => {
               setCaptchaToken(token);
+              setShowCaptcha(false);
             }}
           />
         </div>
