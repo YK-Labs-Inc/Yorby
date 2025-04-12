@@ -26,7 +26,9 @@ export default function DemoFeatures({
   transformResumeEnabled: boolean;
   enableResumesFileUpload: boolean;
 }) {
-  const [selectedOption, setSelectedOption] = useState<string | null>("resume");
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    "interview"
+  );
   const t = useTranslations("LandingPageV5.demoFeatures");
 
   const options = [

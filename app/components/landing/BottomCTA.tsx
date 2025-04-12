@@ -1,9 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import SignInForm from "@/app/[locale]/interview-prep-landing/components/SignInForm";
 
 export const BottomCTA = () => {
   const t = useTranslations("LandingPageV5.bottomCTA");
@@ -21,11 +20,7 @@ export const BottomCTA = () => {
       <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
         {t("description")}
       </p>
-      <Link href="/sign-in">
-        <Button size="lg" className="px-8 py-6 text-lg">
-          {t("button")}
-        </Button>
-      </Link>
+      <SignInForm />
     </motion.div>
   );
 };
