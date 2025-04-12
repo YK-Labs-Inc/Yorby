@@ -9,6 +9,8 @@ import {
   VolumeX,
   Play,
   Square,
+  Paperclip,
+  X,
 } from "lucide-react";
 import {
   Select,
@@ -18,8 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import remarkGfm from "remark-gfm";
-import ReactMarkdown from "react-markdown";
 import { CoreMessage } from "ai";
 import { useVoiceRecording } from "@/app/[locale]/dashboard/resumes/components/useVoiceRecording";
 import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/VoiceRecordingOverlay";
@@ -27,11 +27,13 @@ import { useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import Markdown from "react-markdown";
 
 interface ChatUIProps {
   messages: CoreMessage[];
   onSendMessage: (
-    message: string
+    message: string,
+    files?: File[]
   ) => Promise<{ message: string; index: number } | undefined>;
   isProcessing?: boolean;
   isDisabled?: boolean;
@@ -41,6 +43,7 @@ interface ChatUIProps {
   onTtsPlaybackEnd?: () => void;
   ttsEndpoint?: string;
   transformTextEndpoint?: string;
+  showFileSelector?: boolean;
 }
 
 export function ChatUI({
@@ -49,6 +52,7 @@ export function ChatUI({
   isProcessing = false,
   isDisabled = false,
   className = "",
+  showFileSelector = false,
 }: ChatUIProps) {
   const t = useTranslations("chat");
   const [textInput, setTextInput] = useState<string>("");
@@ -73,6 +77,8 @@ export function ChatUI({
     speakMessage,
   } = useTts();
   const { logError } = useAxiomLogging();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     startRecording,
@@ -120,13 +126,37 @@ export function ChatUI({
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+
+    // Validate all files are PDFs
+    const invalidFile = files.find((file) => file.type !== "application/pdf");
+    if (invalidFile) {
+      // You might want to show an error message here
+      return;
+    }
+
+    setSelectedFiles((prev) => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSendMessage = async () => {
-    if (!textInput.trim() || isProcessing) return;
+    if ((!textInput.trim() && selectedFiles.length === 0) || isProcessing) {
+      return;
+    }
     stopAudioPlayback();
     setPlayingMessageIndex(null);
     const messageToSend = textInput;
     setTextInput("");
-    const sendMessageResponse = await onSendMessage(messageToSend);
+    const sendMessageResponse = await onSendMessage(
+      messageToSend,
+      selectedFiles
+    );
+    setSelectedFiles([]);
     if (isTtsEnabled && sendMessageResponse) {
       isPlaying.current = true;
       setPlayingMessageIndex(sendMessageResponse.index);
@@ -221,9 +251,7 @@ export function ChatUI({
                       </div>
                     ) : (
                       <div className="flex flex-col gap-2">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.content as string}
-                        </ReactMarkdown>
+                        <Markdown>{message.content as string}</Markdown>
                         {message.role === "assistant" && (
                           <Button
                             variant="ghost"
@@ -304,23 +332,73 @@ export function ChatUI({
                 rows={3}
                 disabled={isDisabled || isProcessing || isRecording}
               />
+
+              {/* File attachments section */}
+              {selectedFiles.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex flex-row gap-2 overflow-x-auto pb-2">
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 min-w-[180px] max-w-[200px] flex-shrink-0"
+                      >
+                        <span className="text-sm truncate mr-2">
+                          {file.name}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 flex-shrink-0"
+                          onClick={() => removeFile(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col space-y-3 px-1">
                 {/* Primary Actions Row */}
                 <div className="flex items-center justify-between space-x-3">
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
-                    onClick={handleRecordingToggle}
-                    disabled={isDisabled || isProcessing}
-                  >
-                    {isRecording ? (
-                      <MicOff className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="secondary"
+                      type="button"
+                      className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
+                      onClick={handleRecordingToggle}
+                      disabled={isDisabled || isProcessing}
+                    >
+                      {isRecording ? (
+                        <MicOff className="h-4 w-4" />
+                      ) : (
+                        <Mic className="h-4 w-4" />
+                      )}
+                      {t("voice")}
+                    </Button>
+                    {showFileSelector && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          ref={fileInputRef}
+                          multiple
+                        />
+                        <Button
+                          variant="secondary"
+                          type="button"
+                          className="h-9 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 flex items-center justify-center gap-2"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isDisabled || isProcessing}
+                        >
+                          <Paperclip className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
-                    {t("voice")}
-                  </Button>
+                  </div>
                   <Button
                     type="button"
                     size="icon"
@@ -328,7 +406,9 @@ export function ChatUI({
                     onClick={handleSendMessage}
                     disabled={
                       isDisabled ||
-                      (!textInput.trim() && !isRecording) ||
+                      (!textInput.trim() &&
+                        !isRecording &&
+                        selectedFiles.length === 0) ||
                       isProcessing
                     }
                   >

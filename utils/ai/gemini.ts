@@ -185,11 +185,18 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
   loggingContext = {},
 }: MutuallyExclusiveParams): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   try {
-    const model = google("gemini-2.0-flash");
+    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+      posthogDistinctId: user?.id,
+      posthogProperties: loggingContext,
+    });
     const result = streamText({
       model,
-      messages,
+      messages: messages?.filter((message) => message.content),
       prompt,
       system: systemPrompt,
     });
@@ -203,10 +210,13 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
     await logger.flush();
 
     try {
-      const model = google("gemini-1.5-flash");
+      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+        posthogDistinctId: user?.id,
+        posthogProperties: loggingContext,
+      });
       const result = streamText({
         model,
-        messages,
+        messages: messages?.filter((message) => message.content),
         prompt,
         system: systemPrompt,
       });
