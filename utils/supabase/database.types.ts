@@ -904,19 +904,16 @@ export type Database = {
       user_knowledge_base: {
         Row: {
           created_at: string
-          id: number
           knowledge_base: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          id?: number
           knowledge_base: string
           user_id: string
         }
         Update: {
           created_at?: string
-          id?: number
           knowledge_base?: string
           user_id?: string
         }
