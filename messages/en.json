@@ -1381,5 +1381,28 @@
         "button": "Try Interview Co-pilot Demo"
       }
     }
+  },
+  "knowledgeBase": {
+    "loading": "Loading your knowledge base...",
+    "emptyState": {
+      "title": "No Information Yet",
+      "description": "Your knowledge base is empty. Start chatting with the AI assistant to build up your knowledge base."
+    },
+    "knowledgeBase": {
+      "title": "Your Knowledge Base"
+    },
+    "files": {
+      "title": "Your Uploaded Files",
+      "emptyState": {
+        "title": "No Files Uploaded",
+        "description": "Upload files through the chat interface to store them in your knowledge base."
+      }
+    },
+    "updating": "Updating knowledge base",
+    "edit": "Edit",
+    "save": "Save",
+    "error": {
+      "generic": "Sorry, something went wrong. Please try again."
+    }
   }
 }

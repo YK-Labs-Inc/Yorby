@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+Okay, I've got the start:
+
+*   **Project Name:** Perfect Interview
+*   **Purpose:** A suite of tools to help people land jobs.
+*   **Technology:** Next.js
+*   **Features:**
+    1.  Resume Builder (using a chat interface) — lives in dashboard/resumes path
+    2.  Interview Prep Question Tool (generates questions based on job description and user's uploaded work experience) — lives in dashboard/jobs path
+    3.  Interview copilot feature which is a tool that listens in on interviews in real time and then answers questions based off of the user's previous work experience and other context the useruploads. Lives in dashboard/interviewCopilot path. 
