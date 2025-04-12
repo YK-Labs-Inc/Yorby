@@ -28,6 +28,7 @@ export async function signInWithOTP(prevState: any, formData: FormData) {
   }
 
   return {
-    success: "We sent you a sign-in link to your email — click it to continue.",
+    success:
+      "We sent you a sign-in link to your email. Please click it to continue.",
   };
 }
