@@ -548,9 +548,11 @@
         "placeholder": "Entrez votre adresse e-mail"
       },
       "submit": "Se connecter",
-      "submitting": "Connexion en cours..."
+      "submitting": "Connexion en cours...",
+      "getStarted": "Démarrez gratuitement 🚀"
     },
-    "autoCreateAccount": "Vous n'avez pas de compte ? Pas de soucis - nous en créerons automatiquement un pour vous lorsque vous entrerez votre adresse e-mail."
+    "autoCreateAccount": "Vous n'avez pas de compte ? Pas de soucis - nous en créerons automatiquement un pour vous lorsque vous entrerez votre adresse e-mail.",
+    "enterEmailToGetStarted": "Entrez votre email pour commencer 📧"
   },
   "interviewCopilots": {
     "title": "Copilotes d'entretien",
@@ -1187,8 +1189,47 @@
     "startScreen": {
       "enableVoice": "Activer le mode vocal",
       "selectVoice": "Sélectionner une voix",
-      "startButton": "Commencer à Créer un CV"
-    }
+      "startButton": "Commencer à Créer un CV",
+      "selectedResume": "CV sélectionné",
+      "selectedContextFiles": "Fichiers additionnels sélectionnés"
+    },
+    "transform": {
+      "title": "Transformez votre CV pour qu'il corresponde à n'importe quelle offre d'emploi.",
+      "description1": "Arrête d'envoyer un CV générique à chaque emploi auquel tu postules.",
+      "description2": "Soumettez plutôt un CV 100% personnalisé pour chaque offre d'emploi à laquelle vous postulez, afin de maximiser vos chances d'obtenir un entretien.",
+      "description3": "Il vous suffit de télécharger la description de poste et nous nous occupons du reste.",
+      "description4": "À la fin, vous obtiendrez un CV parfaitement formaté qui contiendra toutes vos informations, mais mis à jour pour correspondre spécifiquement à la description du poste.",
+      "button": "Commencer la transformation"
+    },
+    "upload": {
+      "uploadResume": "Téléverser un CV existant",
+      "uploadContext": "Télécharger des documents supplémentaires",
+      "resumeTitle": "Téléverser un CV existant",
+      "contextTitle": "Télécharger des documents supplémentaires",
+      "resumeDescription": "Téléversez un CV existant ou sélectionnez-en un parmi les fichiers ci-dessous. Cela nous aidera à créer rapidement un CV personnalisé pour vous.",
+      "contextDescription": "Téléversez des documents supplémentaires (jusqu'à 10) pour nous aider à obtenir des informations sur votre expérience professionnelle antérieure. Il peut s'agir de descriptions de projets, de certifications ou de tout autre élément qui nous aiderait à mieux comprendre votre expérience.",
+      "singlePdfOnly": "Seuls les fichiers PDF sont acceptés. Vous pouvez télécharger un seul fichier.",
+      "multiPdfHelper": "Seuls les fichiers PDF sont acceptés. Vous pouvez télécharger jusqu'à 10 fichiers.",
+      "singleFileOnly": "Veuillez sélectionner un seul fichier pour votre CV.",
+      "maxFilesExceeded": "Vous pouvez télécharger un maximum de 10 fichiers contextuels.",
+      "pdfOnly": "Seuls les fichiers PDF sont acceptés.",
+      "uploadError": "Une erreur s'est produite lors du chargement de votre fichier.",
+      "deleteError": "Une erreur s'est produite lors de la suppression de votre fichier.",
+      "deleting": "Suppression...",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "deleteTitle": "Supprimer le fichier",
+      "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer ce fichier ? Cette action est irréversible.",
+      "noFiles": "Aucun fichier n'a encore été téléchargé.",
+      "uploading": "Téléchargement en cours...",
+      "alreadyInContext": "Déjà ajouté comme contexte supplémentaire",
+      "alreadyAsResume": "Déjà sélectionné(e) comme CV",
+      "done": "Fait 👍"
+    },
+    "resumeUpload": {
+      "acknowledgment": "J'ai examiné les fichiers que vous avez sélectionnés. Travaillons à adapter votre CV au poste ciblé. Quel type de poste vous intéresse ?"
+    },
+    "existingResumeInitialMessage": "Je vois que vous avez téléversé un CV existant ({fileName}). Souhaitez-vous que je recrée ce CV dans notre système, ou préférez-vous ajouter des informations supplémentaires et créer un nouveau CV ? Faites-moi savoir comment vous souhaitez procéder."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1285,7 +1326,8 @@
       "title": "Nous créons des outils pour vous aider à trouver un emploi.",
       "description": "Créez des CV parfaits, passez des entretiens d'entraînement et bénéficiez d'une assistance d'entretien en temps réel grâce à notre suite d'outils.",
       "button": "Commencer",
-      "trustBadge": "Approuvé par {userCount} chercheurs d'emploi."
+      "trustBadge": "Approuvé par {userCount} chercheurs d'emploi.",
+      "descriptionV2": "Créez des CV parfaits, préparez vos entretiens et bénéficiez d'une assistance en temps réel avec notre suite d'outils."
     },
     "bottomCTA": {
       "title": "Commencer gratuitement",
@@ -1360,6 +1402,78 @@
           "2": "Copilotes d'entretiens illimités"
         }
       }
+    }
+  },
+  "knowledgeBase": {
+    "loading": "Chargement de votre base de connaissances...",
+    "emptyState": {
+      "title": "Aucune information pour le moment.",
+      "description": "Votre base de connaissances est vide. Commencez à discuter avec l'assistant IA pour enrichir votre base de connaissances."
+    },
+    "knowledgeBase": {
+      "title": "Votre Base de Connaissances"
+    },
+    "files": {
+      "title": "Vos fichiers téléchargés",
+      "emptyState": {
+        "title": "Aucun fichier téléchargé",
+        "description": "Téléversez des fichiers via l'interface de chat pour les stocker dans votre base de connaissances."
+      }
+    },
+    "updating": "Mise à jour de la base de connaissances",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "error": {
+      "generic": "Désolé, une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "interviewPrepLanding": {
+    "hero": {
+      "title": "Écrase ton entretien. Décroche cette offre.",
+      "description": "Un entretien d'embauche en vue ? Découvrez les questions d'entretien à l'avance et améliorez vos chances de décrocher cette offre d'emploi de 200% !",
+      "cta": "Commencer gratuitement",
+      "trustedBy": "Approuvé par plus de 3 000 chercheurs d'emploi."
+    },
+    "features": {
+      "boostConfidence": {
+        "title": "🧠 Boostez votre confiance en vous",
+        "description": "Plus besoin de deviner — Perfect Interview AI prédit les questions auxquelles vous êtes le plus susceptible d'être confronté, afin que vous puissiez entrer en toute confiance et préparé(e)."
+      },
+      "rightAnswers": {
+        "title": "🚀 Dites les bonnes réponses, à chaque fois.",
+        "description": "Fini les réponses fades et oubliables en entretien ! Impressionnez les recruteurs avec nos réponses personnalisées conçues par l'IA, qui racontent une histoire captivante, mettent en valeur vos points forts et vous positionnent comme le candidat idéal pour le poste. ✨"
+      },
+      "practice": {
+        "title": "🎯 Entraînez-vous comme si c'était la réalité.",
+        "description": "Plus besoin de deviner ce qui n'a pas marché. Entraînez-vous à des entretiens blancs avec un feedback IA qui améliore votre présentation, corrige les réponses faibles et renforce votre confiance — pour que vous soyez performant quand ça compte."
+      }
+    },
+    "howItWorks": {
+      "title": "Comment Perfect Interview fonctionne ✨",
+      "subtitle": "Quatre étapes simples pour réussir un entretien d'embauche 👍",
+      "steps": {
+        "upload": {
+          "title": "Télécharger",
+          "description": "Téléchargez votre CV et la description du poste pour obtenir des questions d'entretien personnalisées."
+        },
+        "generate": {
+          "title": "Générer",
+          "description": "Utilisez notre IA pour générer des réponses professionnelles basées sur vos expériences."
+        },
+        "practice": {
+          "title": "Pratique",
+          "description": "Entraînez-vous avec notre simulateur d'entretien basé sur l'IA, avec des simulations d'entretiens réalistes qui donnent l'impression d'être en situation réelle."
+        },
+        "improve": {
+          "title": "Améliorer",
+          "description": "Relisez vos enregistrements d'entretien et obtenez des commentaires sur la façon de perfectionner vos réponses."
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt(e) à réussir votre prochain entretien avec brio ?",
+      "description": "Rejoignez des milliers de demandeurs d'emploi qui ont cartonné leurs entretiens et décroché des offres d'emploi grâce à Perfect Interview AI !",
+      "button": "Commencer Gratuitement"
     }
   }
 }

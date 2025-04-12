@@ -98,7 +98,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   }
 
   logger.info("Redirecting to jobs dashboard");
-  return NextResponse.redirect(`${origin}/dashboard/jobs`);
+  return NextResponse.redirect(`${origin}/onboarding`);
 });
 
 const addUserToBrevo = async ({

@@ -549,8 +549,10 @@
         "placeholder": "Enter your email"
       },
       "submit": "Sign In",
-      "submitting": "Signing in..."
-    }
+      "submitting": "Signing in...",
+      "getStarted": "Get Started For Free"
+    },
+    "enterEmailToGetStarted": "Enter your email to get started"
   },
   "interviewCopilots": {
     "title": "Interview Copilots",
@@ -1403,6 +1405,55 @@
     "save": "Save",
     "error": {
       "generic": "Sorry, something went wrong. Please try again."
+    }
+  },
+  "interviewPrepLanding": {
+    "hero": {
+      "title": "Crush Your Interview. Land that Offer",
+      "description": "Have an interview coming up? Discover interview questions ahead of time and improve your chances of landing that job offer by 200%",
+      "cta": "Get Started Free",
+      "trustedBy": "Trusted by 3,000+ job seekers"
+    },
+    "features": {
+      "boostConfidence": {
+        "title": "🧠 Boost Your Confidence",
+        "description": "No more guessing — Perfect Interview AI predicts the questions you're most likely to face so you can walk in confidently prepared."
+      },
+      "rightAnswers": {
+        "title": "🚀 Say the Right Answers — Every Time",
+        "description": "No more stale, forgettable answers in interviews — Impress hiring managers with our AI-crafted personalized responses that tell a compelling story, highlight your strengths, and position you as the perfect fit for the role."
+      },
+      "practice": {
+        "title": "🎯 Practice Like It's the Real Thing",
+        "description": "No more guessing what went wrong. Run mock interviews with AI feedback that sharpens your delivery, fixes weak answers, and boosts your confidence — so you can perform when it counts."
+      }
+    },
+    "howItWorks": {
+      "title": "How Perfect Interview Works",
+      "subtitle": "Four simple steps to interview success",
+      "steps": {
+        "upload": {
+          "title": "Upload",
+          "description": "Upload your resume and job description to get customized interview questions"
+        },
+        "generate": {
+          "title": "Generate",
+          "description": "Use our AI to generate professional responses based on your experiences"
+        },
+        "practice": {
+          "title": "Practice",
+          "description": "Practice with our AI interviewer with realistic interview simulations that feel like the real thing"
+        },
+        "improve": {
+          "title": "Improve",
+          "description": "Review your interview recordings and get feedback on how to perfect your answers."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Ace Your Next Interview?",
+      "description": "Join thousands of job seekers who have crushed their interviews and landed job offers with Perfect Interview AI",
+      "button": "Get Started Free"
     }
   }
 }

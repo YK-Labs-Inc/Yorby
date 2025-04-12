@@ -548,9 +548,11 @@
         "placeholder": "이메일을 입력하세요"
       },
       "submit": "로그인",
-      "submitting": "로그인 중..."
+      "submitting": "로그인 중...",
+      "getStarted": "무료로 시작하기"
     },
-    "autoCreateAccount": "계정이 없으신가요? 걱정 마세요 - 이메일을 입력하시면 자동으로 계정이 생성됩니다."
+    "autoCreateAccount": "계정이 없으신가요? 걱정 마세요 - 이메일을 입력하시면 자동으로 계정이 생성됩니다.",
+    "enterEmailToGetStarted": "시작하려면 이메일을 입력하세요."
   },
   "interviewCopilots": {
     "title": "인터뷰 코파일럿",
@@ -1187,8 +1189,47 @@
     "startScreen": {
       "enableVoice": "음성 모드 활성화",
       "selectVoice": "음성 선택",
-      "startButton": "이력서 작성 시작 🚀"
-    }
+      "startButton": "이력서 작성 시작 🚀",
+      "selectedResume": "선택된 이력서",
+      "selectedContextFiles": "선택된 추가 파일들"
+    },
+    "transform": {
+      "title": "어떤 직무 설명에도 맞게 이력서를 변환하세요.",
+      "description1": "지원하는 모든 직무에 일반적인 이력서를 제출하는 것을 멈추세요.",
+      "description2": "대신, 면접 기회를 최대한으로 늘리기 위해 지원하는 모든 직무에 100% 맞춤화된 이력서를 제출하세요.",
+      "description3": "필요한 건 채용 공고를 업로드하는 것뿐입니다. 나머지는 저희가 알아서 처리해 드립니다.",
+      "description4": "결국 당신은 모든 정보를 담고 있지만, 채용 공고에 맞춰 특별히 업데이트된 완벽하게 형식화된 이력서를 얻게 될 것입니다.",
+      "button": "변환 시작"
+    },
+    "upload": {
+      "uploadResume": "기존 이력서 업로드",
+      "uploadContext": "추가 서류 업로드",
+      "resumeTitle": "기존 이력서 업로드",
+      "contextTitle": "추가 서류 업로드",
+      "resumeDescription": "기존 이력서를 업로드하거나 아래 파일에서 선택하세요. 맞춤 이력서를 빠르게 만드는 데 도움이 됩니다.",
+      "contextDescription": "추가 문서(최대 10개)를 업로드하여 귀하의 이전 직무 경험에 대한 정보를 얻을 수 있도록 도와주세요. 프로젝트 설명, 자격증 또는 귀하의 경험을 더 잘 이해하는 데 도움이 될 수 있는 모든 것이 포함될 수 있습니다.",
+      "singlePdfOnly": "PDF 파일만 허용됩니다. 하나의 파일을 업로드할 수 있습니다.",
+      "multiPdfHelper": "PDF 파일만 허용됩니다. 최대 10개 파일까지 업로드할 수 있습니다.",
+      "singleFileOnly": "이력서 파일은 하나만 선택해주세요.",
+      "maxFilesExceeded": "최대 10개의 컨텍스트 파일을 업로드할 수 있습니다.",
+      "pdfOnly": "PDF 파일만 허용됩니다.",
+      "uploadError": "파일을 업로드하는 동안 오류가 발생했습니다.",
+      "deleteError": "파일을 삭제하는 동안 오류가 발생했습니다.",
+      "deleting": "삭제 중...",
+      "delete": "삭제",
+      "cancel": "취소",
+      "deleteTitle": "파일 삭제",
+      "deleteConfirmation": "정말로 이 파일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      "noFiles": "아직 업로드된 파일이 없습니다.",
+      "uploading": "업로드 중...",
+      "alreadyInContext": "이미 추가된 추가적인 문맥입니다.",
+      "alreadyAsResume": "이미 이력서로 선택됨",
+      "done": "완료"
+    },
+    "resumeUpload": {
+      "acknowledgment": "선택하신 파일을 검토했습니다. 목표 역할에 맞춰 이력서를 맞춤화해 봅시다. 어떤 종류의 포지션에 관심 있으신가요?"
+    },
+    "existingResumeInitialMessage": "기존 이력서({fileName})를 업로드하신 것을 확인했습니다. 이 이력서를 저희 시스템에 다시 생성하시겠습니까, 아니면 추가 정보를 더하여 새로운 이력서를 작성하시겠습니까? 어떻게 진행하고 싶으신지 알려주세요."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1285,7 +1326,8 @@
       "title": "저희는 여러분이 취업하는 데 도움이 되는 도구를 만듭니다.",
       "description": "완벽한 이력서를 만들고, 모의 면접을 연습하고, 저희 툴 모음으로 실시간 면접 지원을 받으세요.",
       "button": "시작하기",
-      "trustBadge": "{userCount}명의 구직자가 신뢰합니다"
+      "trustBadge": "{userCount}명의 구직자가 신뢰합니다",
+      "descriptionV2": "완벽한 이력서를 만들고, 면접 준비 자료를 만들고, 당사의 툴 모음을 통해 실시간 면접 지원을 받으세요."
     },
     "bottomCTA": {
       "title": "무료로 시작하세요 🚀",
@@ -1360,6 +1402,78 @@
           "2": "무제한 인터뷰 코파일럿🚀"
         }
       }
+    }
+  },
+  "knowledgeBase": {
+    "loading": "지식 기반을 불러오는 중...",
+    "emptyState": {
+      "title": "아직 정보 없음",
+      "description": "지식 기반이 비어 있습니다. AI 어시스턴트와 대화를 시작하여 지식 기반을 구축하세요."
+    },
+    "knowledgeBase": {
+      "title": "지식 베이스"
+    },
+    "files": {
+      "title": "업로드한 파일",
+      "emptyState": {
+        "title": "업로드된 파일 없음",
+        "description": "채팅 인터페이스를 통해 파일을 업로드하여 지식 베이스에 저장하세요."
+      }
+    },
+    "updating": "지식 베이스 업데이트 중...",
+    "edit": "편집",
+    "save": "저장",
+    "error": {
+      "generic": "죄송합니다. 오류가 발생했습니다. 다시 시도해주세요."
+    }
+  },
+  "interviewPrepLanding": {
+    "hero": {
+      "title": "면접 박살내고, 합격 쟁취! 💪",
+      "description": "면접 예정이신가요? 면접 예상 질문을 미리 알아보고 합격률을 200% 향상시키세요!",
+      "cta": "무료로 시작하세요",
+      "trustedBy": "3,000+ 명 이상의 구직자가 신뢰합니다"
+    },
+    "features": {
+      "boostConfidence": {
+        "title": "🧠 자신감 끌어올리기!",
+        "description": "더 이상 추측은 그만 — Perfect Interview AI는 자신감 넘치게 면접에 임할 수 있도록 예상 질문을 예측해 줍니다."
+      },
+      "rightAnswers": {
+        "title": "🚀 항상 정답만 말하세요 — Every Time",
+        "description": "더 이상 뻔하고 잊혀지는 면접 답변은 그만! 🙅‍♀️ AI가 만들어낸 맞춤형 답변으로 채용 담당자에게 깊은 인상을 남기세요. 당신의 강점을 부각하고, 매력적인 스토리를 전달하며, 완벽한 인재로 포지셔닝해드립니다. ✨"
+      },
+      "practice": {
+        "title": "🎯 실전처럼 연습하세요",
+        "description": "더 이상 뭐가 잘못됐는지 추측하지 마세요. AI 피드백으로 모의 면접을 진행하여 전달력을 날카롭게 하고, 부족한 답변을 수정하고, 자신감을 높여 중요한 순간에 제대로 실력 발휘할 수 있도록 도와줍니다."
+      }
+    },
+    "howItWorks": {
+      "title": "Perfect Interview는 어떻게 작동하나요?",
+      "subtitle": "성공적인 면접을 위한 4가지 간단한 단계",
+      "steps": {
+        "upload": {
+          "title": "업로드",
+          "description": "맞춤형 면접 질문을 받으려면 이력서와 채용 공고를 업로드하세요."
+        },
+        "generate": {
+          "title": "생성",
+          "description": "저희 AI를 사용하여 당신의 경험을 바탕으로 전문적인 답변을 생성하세요."
+        },
+        "practice": {
+          "title": "연습",
+          "description": "실제와 똑같은 느낌을 주는 현실적인 인터뷰 시뮬레이션으로 AI 인터뷰 연습을 해보세요."
+        },
+        "improve": {
+          "title": "개선",
+          "description": "인터뷰 녹음본을 검토하고 답변을 완벽하게 하는 방법에 대한 피드백을 받으세요."
+        }
+      }
+    },
+    "cta": {
+      "title": "다음 면접, 제대로 뽀개볼 준비 됐어? 😉",
+      "description": "Perfect Interview AI로 면접을 완벽하게 준비하고 합격한 수천 명의 구직자들과 함께 하세요 🎉",
+      "button": "무료로 시작하세요!"
     }
   }
 }

@@ -548,9 +548,11 @@
         "placeholder": "输入你的电子邮件"
       },
       "submit": "登录",
-      "submitting": "正在登录..."
+      "submitting": "正在登录...",
+      "getStarted": "免费开始使用 🎉"
     },
-    "autoCreateAccount": "还没有账号？别担心 - 当您输入邮箱时，我们会自动为您创建一个账号。"
+    "autoCreateAccount": "还没有账号？别担心 - 当您输入邮箱时，我们会自动为您创建一个账号。",
+    "enterEmailToGetStarted": "输入您的电子邮件以开始使用 📧"
   },
   "interviewCopilots": {
     "title": "面试 Copilots",
@@ -1187,8 +1189,47 @@
     "startScreen": {
       "enableVoice": "启用语音模式",
       "selectVoice": "选择声音",
-      "startButton": "开始制作简历"
-    }
+      "startButton": "开始制作简历",
+      "selectedResume": "已选简历",
+      "selectedContextFiles": "已选择的附加文件"
+    },
+    "transform": {
+      "title": "将您的简历转换为匹配任何职位描述的简历✨",
+      "description1": "别再把千篇一律的简历提交给每个你申请的工作了。",
+      "description2": "相反，请提交一份100%针对您申请的每个职位的定制简历，这样可以最大限度地提高您获得面试机会。",
+      "description3": "你只需要上传职位描述，剩下的交给我们来搞定。",
+      "description4": "最终，你将获得一份格式完美、包含你所有信息，并且专门针对职位描述进行更新的简历。",
+      "button": "开始转变"
+    },
+    "upload": {
+      "uploadResume": "上传现有简历",
+      "uploadContext": "上传更多文件",
+      "resumeTitle": "上传现有简历",
+      "contextTitle": "上传其他文件",
+      "resumeDescription": "上传现有简历或从以下文件中选择一个。这将帮助我们快速为您创建个性化的简历。",
+      "contextDescription": "上传更多文件（最多10个），以帮助我们了解您之前的工作经验。这可以是项目描述、证书或其他任何有助于我们更好了解您经验的资料。",
+      "singlePdfOnly": "只接受PDF文件。您可以上传一个文件。",
+      "multiPdfHelper": "仅接受PDF文件。您最多可以上传10个文件。",
+      "singleFileOnly": "请仅选择一个文件作为您的简历。",
+      "maxFilesExceeded": "您最多可以上传 10 个上下文文件。",
+      "pdfOnly": "只接受PDF文件。",
+      "uploadError": "上传文件时发生错误。",
+      "deleteError": "删除文件时发生错误。",
+      "deleting": "正在删除...",
+      "delete": "删除",
+      "cancel": "取消",
+      "deleteTitle": "删除文件 🗑️",
+      "deleteConfirmation": "你确定要删除这个文件吗？此操作无法撤销。",
+      "noFiles": "尚未上傳任何檔案。",
+      "uploading": "正在上传...",
+      "alreadyInContext": "已经添加为附加背景信息",
+      "alreadyAsResume": "已选为简历 ✅",
+      "done": "完成"
+    },
+    "resumeUpload": {
+      "acknowledgment": "我已经审阅了您选择的文件。我们来一起修改您的简历，使其更符合您的目标职位。您对哪种职位感兴趣呢？"
+    },
+    "existingResumeInitialMessage": "我看到您已上传了一份现有简历（{fileName}）。您希望我把这份简历重新在我们的系统中创建一份，还是希望在此基础上添加更多信息并建立一份新的简历？请告诉我您希望如何操作。"
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1285,7 +1326,8 @@
       "title": "我们打造工具，助您找到工作。",
       "description": "使用我们的工具套件，创建完美的简历，进行模拟面试，并获得实时的面试辅助。",
       "button": "开始使用",
-      "trustBadge": "受到 {userCount} 位求职者的信赖"
+      "trustBadge": "受到 {userCount} 位求职者的信赖",
+      "descriptionV2": "使用我们的工具套件，打造完美的简历，制作面试准备材料，并获得实时面试协助。"
     },
     "bottomCTA": {
       "title": "免费开始使用",
@@ -1360,6 +1402,78 @@
           "2": "无限面试副驾驶 🚀"
         }
       }
+    }
+  },
+  "knowledgeBase": {
+    "loading": "正在加载您的知识库...",
+    "emptyState": {
+      "title": "暂无信息",
+      "description": "你的知识库是空的。开始与AI助手聊天以构建你的知识库。"
+    },
+    "knowledgeBase": {
+      "title": "你的知识库"
+    },
+    "files": {
+      "title": "您上传的文件",
+      "emptyState": {
+        "title": "未上传任何文件",
+        "description": "通过聊天界面上传文件，将其存储在您的知识库中。"
+      }
+    },
+    "updating": "正在更新知识库",
+    "edit": "编辑",
+    "save": "保存",
+    "error": {
+      "generic": "抱歉，出错了。请重试。"
+    }
+  },
+  "interviewPrepLanding": {
+    "hero": {
+      "title": "碾压面试，拿下Offer！ 💪",
+      "description": "面试快到了吗？提前了解面试问题，将获得工作机会的几率提高200%🚀。",
+      "cta": "免费开始使用 🎉",
+      "trustedBy": "受 3,000+ 求职者信赖"
+    },
+    "features": {
+      "boostConfidence": {
+        "title": "🧠 提升你的自信",
+        "description": "别再猜测了——完美面试AI预测你最可能遇到的问题，让你自信满满地走进面试考场。"
+      },
+      "rightAnswers": {
+        "title": "🚀 每次都说出正确的答案 — Every Time",
+        "description": "面试不再是陈腐、乏味的回答——用我们人工智能打造的个性化回复给招聘经理留下深刻印象，这些回复会讲述引人入胜的故事，突出您的优势，并将您定位为该职位的完美人选。"
+      },
+      "practice": {
+        "title": "🎯 像真的一样练习",
+        "description": "告别盲猜错处。通过 AI 反馈进行模拟面试，磨练你的表达，修正薄弱的回答，并增强你的自信——让你在关键时刻发挥出色。"
+      }
+    },
+    "howItWorks": {
+      "title": "完美面试流程指南 📖",
+      "subtitle": "面试成功的四个简单步骤",
+      "steps": {
+        "upload": {
+          "title": "上传",
+          "description": "上传你的简历和职位描述，获取定制化的面试问题 📝💼"
+        },
+        "generate": {
+          "title": "生成",
+          "description": "使用我们的 AI，根据您的经验生成专业回复。"
+        },
+        "practice": {
+          "title": "练习",
+          "description": "使用我们的AI面试官进行练习，逼真的面试模拟感觉就像真的一样。"
+        },
+        "improve": {
+          "title": "改进",
+          "description": "回顾你的面试录音，并获取反馈，以完善你的回答。"
+        }
+      }
+    },
+    "cta": {
+      "title": "准备好在下次面试中取得优异成绩了吗？🚀",
+      "description": "加入成千上万通过 Perfect Interview AI 碾压面试，成功拿到工作 offer 的求职者行列吧！",
+      "button": "免费开始使用 🎉"
     }
   }
 }

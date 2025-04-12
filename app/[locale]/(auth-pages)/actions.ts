@@ -1,7 +1,6 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { encodedRedirect } from "@/utils/utils";
 import { Logger } from "next-axiom";
 
 export async function signInWithOTP(prevState: any, formData: FormData) {
@@ -28,5 +27,7 @@ export async function signInWithOTP(prevState: any, formData: FormData) {
     return { error: error.message };
   }
 
-  return { success: "Check your email for the magic link." };
+  return {
+    success: "We sent you a sign-in link to your email — click it to continue.",
+  };
 }

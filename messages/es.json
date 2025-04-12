@@ -548,9 +548,11 @@
         "placeholder": "Introduce tu correo electrónico"
       },
       "submit": "Iniciar sesión",
-      "submitting": "Iniciando sesión..."
+      "submitting": "Iniciando sesión...",
+      "getStarted": "Comienza gratis 🎉"
     },
-    "autoCreateAccount": "¿No tienes una cuenta? No te preocupes: crearemos una automáticamente para ti cuando ingreses tu correo electrónico."
+    "autoCreateAccount": "¿No tienes una cuenta? No te preocupes: crearemos una automáticamente para ti cuando ingreses tu correo electrónico.",
+    "enterEmailToGetStarted": "Ingresa tu correo electrónico para comenzar"
   },
   "interviewCopilots": {
     "title": "Copilotos de entrevistas",
@@ -1187,8 +1189,47 @@
     "startScreen": {
       "enableVoice": "Activar el Modo de Voz",
       "selectVoice": "Seleccionar voz",
-      "startButton": "Comienza a crear un currículum"
-    }
+      "startButton": "Comienza a crear un currículum",
+      "selectedResume": "Currículum seleccionado",
+      "selectedContextFiles": "Archivos Adicionales Seleccionados"
+    },
+    "transform": {
+      "title": "Transforma tu currículum para que coincida con cualquier descripción de trabajo.",
+      "description1": "Deja de enviar un currículum genérico a cada trabajo al que te postulas.",
+      "description2": "En lugar de eso, envía un currículum que esté 100% adaptado a cada puesto de trabajo al que te postules para que maximices las posibilidades de que te hagan una entrevista.",
+      "description3": "Todo lo que necesitas hacer es subir la descripción del puesto, y nosotros nos encargaremos del resto.",
+      "description4": "Al final obtendrás un currículum perfectamente formateado que tiene toda tu información, pero actualizado para que coincida específicamente con la descripción del trabajo.",
+      "button": "Comenzar Transformación"
+    },
+    "upload": {
+      "uploadResume": "Cargar Currículum Existente",
+      "uploadContext": "Cargar Documentos Adicionales",
+      "resumeTitle": "Subir un Currículum Vitae Existente",
+      "contextTitle": "Subir Documentos Adicionales",
+      "resumeDescription": "Sube un currículum existente o selecciona uno de los archivos a continuación. Esto nos ayudará a crear rápidamente un currículum personalizado para ti.",
+      "contextDescription": "Sube documentos adicionales (hasta 10) para ayudarnos a obtener información sobre tu experiencia laboral previa. Esto podría ser descripciones de proyectos, certificaciones o cualquier otra cosa que nos ayude a comprender mejor tu experiencia.",
+      "singlePdfOnly": "Solo se aceptan archivos PDF. Puedes subir un archivo.",
+      "multiPdfHelper": "Solo se aceptan archivos PDF. Puedes subir hasta 10 archivos.",
+      "singleFileOnly": "Por favor, selecciona solo un archivo para tu currículum.",
+      "maxFilesExceeded": "Puedes subir un máximo de 10 archivos de contexto.",
+      "pdfOnly": "Solo se aceptan archivos PDF.",
+      "uploadError": "Ocurrió un error al subir tu archivo.",
+      "deleteError": "Ocurrió un error al eliminar tu archivo.",
+      "deleting": "Borrando...",
+      "delete": "Borrar",
+      "cancel": "Cancelar",
+      "deleteTitle": "Borrar archivo",
+      "deleteConfirmation": "¿Está seguro de que quiere eliminar este archivo? Esta acción no se puede deshacer.",
+      "noFiles": "Aún no se han subido archivos.",
+      "uploading": "Subiendo...",
+      "alreadyInContext": "Ya agregado como contexto adicional.",
+      "alreadyAsResume": "Ya seleccionado como currículum",
+      "done": "Hecho"
+    },
+    "resumeUpload": {
+      "acknowledgment": "He revisado tus archivos seleccionados. Trabajemos en adaptar tu currículum para el puesto al que aspiras. ¿Qué tipo de posición te interesa?"
+    },
+    "existingResumeInitialMessage": "Veo que has subido un currículum existente ({fileName}). ¿Te gustaría que recreara este currículum en nuestro sistema o prefieres añadir información adicional y crear un nuevo currículum? Avísame cómo te gustaría proceder."
   },
   "interviewCopilotDemo": {
     "session": {
@@ -1285,7 +1326,8 @@
       "title": "Creamos herramientas para ayudarte a conseguir un trabajo.",
       "description": "Crea currículums perfectos, realiza entrevistas de práctica y obtén asistencia para entrevistas en tiempo real con nuestro conjunto de herramientas.",
       "button": "Empezar",
-      "trustBadge": "Con la confianza de {userCount} personas que buscan empleo"
+      "trustBadge": "Con la confianza de {userCount} personas que buscan empleo",
+      "descriptionV2": "Crea currículums perfectos, crea material de preparación para entrevistas y obtén asistencia para entrevistas en tiempo real con nuestro conjunto de herramientas. 🛠️"
     },
     "bottomCTA": {
       "title": "Empieza Gratis 🚀",
@@ -1360,6 +1402,78 @@
           "2": "Copilotos de Entrevista Ilimitados"
         }
       }
+    }
+  },
+  "knowledgeBase": {
+    "loading": "Cargando tu base de conocimiento...",
+    "emptyState": {
+      "title": "Aún no hay información.",
+      "description": "Tu base de conocimientos está vacía. Comienza a chatear con el asistente de IA para construir tu base de conocimientos."
+    },
+    "knowledgeBase": {
+      "title": "Tu Base de Conocimiento"
+    },
+    "files": {
+      "title": "Tus archivos subidos",
+      "emptyState": {
+        "title": "No se han subido archivos.",
+        "description": "Sube archivos a través de la interfaz del chat para almacenarlos en tu base de conocimientos."
+      }
+    },
+    "updating": "Actualizando la base de conocimientos",
+    "edit": "Editar",
+    "save": "Guardar",
+    "error": {
+      "generic": "Lo sentimos, algo salió mal. Por favor, inténtalo de nuevo."
+    }
+  },
+  "interviewPrepLanding": {
+    "hero": {
+      "title": "¡Destroza Tu Entrevista. Consigue Esa Oferta! 💥",
+      "description": "¿Tienes una entrevista próximamente? Descubre las preguntas de la entrevista con anticipación y mejora tus posibilidades de conseguir esa oferta de trabajo en un 200% 🚀",
+      "cta": "Comienza gratis",
+      "trustedBy": "Con la confianza de más de 3,000 buscadores de empleo."
+    },
+    "features": {
+      "boostConfidence": {
+        "title": "🧠 Aumenta tu Confianza",
+        "description": "No más adivinar — Perfect Interview AI predice las preguntas que es más probable que enfrentes para que puedas entrar con confianza y preparado/a."
+      },
+      "rightAnswers": {
+        "title": "🚀 Di las respuestas correctas — Siempre",
+        "description": "No más respuestas obsoletas y olvidables en las entrevistas. Impresiona a los responsables de contratación con nuestras respuestas personalizadas creadas con IA que cuentan una historia convincente, resaltan tus fortalezas y te posicionan como el candidato perfecto para el puesto."
+      },
+      "practice": {
+        "title": "🎯 Practica como si fuera la verdad.",
+        "description": "No más adivinar qué salió mal. Realiza entrevistas simuladas con retroalimentación de IA que perfecciona tu presentación, corrige respuestas débiles y aumenta tu confianza, para que puedas desempeñarte cuando cuente."
+      }
+    },
+    "howItWorks": {
+      "title": "Cómo Funciona Perfect Interview",
+      "subtitle": "Cuatro pasos sencillos para el éxito en la entrevista.",
+      "steps": {
+        "upload": {
+          "title": "Subir",
+          "description": "Sube tu currículum y la descripción del puesto para obtener preguntas de entrevista personalizadas."
+        },
+        "generate": {
+          "title": "Generar",
+          "description": "Usa nuestra IA para generar respuestas profesionales basadas en tus experiencias"
+        },
+        "practice": {
+          "title": "Práctica",
+          "description": "Practica con nuestro entrevistador de IA con simulaciones de entrevistas realistas que se sienten como si fueran de verdad."
+        },
+        "improve": {
+          "title": "Mejorar",
+          "description": "Revisa las grabaciones de tu entrevista y obtén comentarios sobre cómo perfeccionar tus respuestas."
+        }
+      }
+    },
+    "cta": {
+      "title": "¿Listo para Brillar en Tu Próxima Entrevista?",
+      "description": "Únete a miles de solicitantes de empleo que han arrasado en sus entrevistas y han conseguido ofertas de trabajo con Perfect Interview AI. 🎉",
+      "button": "Comienza gratis"
     }
   }
 }
