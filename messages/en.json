@@ -1321,7 +1321,7 @@
   },
   "LandingPageV5": {
     "hero": {
-      "title": "We Make Tools To Help You Get A Job",
+      "titleV2": "Crush Your Interview. Get The Job Offer.",
       "description": "Create perfect resumes, go through practice interviews, and get real-time interview assistance with our suite of tools.",
       "descriptionV2": "Create perfect resumes, create interview prep material, and get real-time interview assistance with our suite of tools.",
       "button": "Get Started",
@@ -1409,7 +1409,7 @@
   },
   "interviewPrepLanding": {
     "hero": {
-      "title": "Crush Your Interview. Land that Offer",
+      "title": "Crush Your Interview. Get The Job Offer.",
       "description": "Have an interview coming up? Discover interview questions ahead of time and improve your chances of landing that job offer by 200%",
       "cta": "Get Started Free",
       "trustedBy": "Trusted by 3,000+ job seekers"

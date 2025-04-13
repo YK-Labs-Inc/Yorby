@@ -19,7 +19,7 @@ export const LandingHero = () => {
         variants={fadeIn}
         transition={{ duration: 0.5 }}
       >
-        {t("title")}
+        {t("titleV2")}
       </motion.h1>
 
       <motion.p

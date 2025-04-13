@@ -1327,7 +1327,8 @@
       "description": "Créez des CV parfaits, passez des entretiens d'entraînement et bénéficiez d'une assistance d'entretien en temps réel grâce à notre suite d'outils.",
       "button": "Commencer",
       "trustBadge": "Approuvé par {userCount} chercheurs d'emploi.",
-      "descriptionV2": "Créez des CV parfaits, préparez vos entretiens et bénéficiez d'une assistance en temps réel avec notre suite d'outils."
+      "descriptionV2": "Créez des CV parfaits, préparez vos entretiens et bénéficiez d'une assistance en temps réel avec notre suite d'outils.",
+      "titleV2": "Écrasez votre entretien. Obtenez l'offre d'emploi."
     },
     "bottomCTA": {
       "title": "Commencer gratuitement",
