@@ -1455,5 +1455,67 @@
       "description": "Join thousands of job seekers who have crushed their interviews and landed job offers with Perfect Interview AI",
       "button": "Get Started Free"
     }
+  },
+  "onboardingV2": {
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Perfect Interview",
+        "description": "All the tools you need to land your dream job",
+        "content": [
+          "Getting a job is hard.",
+          "But we make it easier.",
+          "Here's how..."
+        ]
+      },
+      "knowledgeBase": {
+        "title": "Getting to Know You",
+        "description": "First, we build our knowledge base about you and your career",
+        "content": [
+          "We will create a personalized profile about you and your career so that moving forward, every single tool in our suite is 100% customized to you."
+        ]
+      },
+      "toolkit": {
+        "title": "Your AI-Powered Toolkit",
+        "description": "Three powerful tools at your disposal",
+        "resumeBuilder": {
+          "title": "Resume Builder",
+          "description1": "The fastest way to create a resume.",
+          "description2": "Enter a job description, and we will generate a custom resume for that job to maximize your chances of getting the interview."
+        },
+        "interviewPrep": {
+          "title": "Interview Prep",
+          "description1": "Enter a job description, and then we will generate a list of interview questions based on the job description and your previous work experience.",
+          "description2": "Pracice like it's the real thing by going through our AI-powered mock interviews."
+        },
+        "interviewCopilot": {
+          "title": "Interview Copilot",
+          "description1": "Interview Copilot listens in on your interview and answeres interview questions for you so that you have an answer for every question they ask you.",
+          "description2": "Don't worry, it is 100% undetectable 🤫"
+        }
+      },
+      "testimonials": {
+        "title": "Success Stories",
+        "description": "Join +3,000 job seekers who trust Perfect Interview",
+        "testimonial1": {
+          "quote": "Creating a unique resume that is customized to every job I apply for is incredible. I always knew I should do this, but I was too lazy to do it myself. Perfect Interview does it for me, and it's incredible.",
+          "author": "Sarah M.",
+          "role": "Operations Manager"
+        },
+        "testimonial2": {
+          "quote": "The Interview Copilot feature saved me in my last interview. I didn't know what to say, and I was so nervous. The copilot answered all the questions and made me feel so at ease.",
+          "author": "Michael T.",
+          "role": "Product Manager"
+        },
+        "testimonial3": {
+          "quote": "I am obsessed with the interview prep feature. The practice questions it generates are so helpful, and the mock interview feature really gave me all the confidence in the world going into my job interview.",
+          "author": "Kelly F.",
+          "role": "Designer"
+        }
+      }
+    },
+    "buttons": {
+      "next": "Next",
+      "startKnowledgeBase": "Start Building Knowledge Base"
+    }
   }
 }
