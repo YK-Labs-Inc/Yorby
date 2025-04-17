@@ -1,7 +1,9 @@
 "use server";
 
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
-import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import {
+  generateObjectWithFallback,
+  uploadFileToGemini,
+} from "@/utils/ai/gemini";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
@@ -9,7 +11,6 @@ import {
 } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
-import { SchemaType } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";

@@ -4,9 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
 import { INTERVIEW_COPILOT_REQUIRED_CREDITS } from "@/app/constants/interview_copilots";
+import { uploadFileToGemini } from "@/utils/ai/gemini";
 
 export const createInterviewCopilot = async (
   prevState: any,

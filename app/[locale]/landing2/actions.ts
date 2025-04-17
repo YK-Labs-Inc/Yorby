@@ -6,7 +6,10 @@ import { UploadResponse } from "@/utils/types";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import {
+  generateObjectWithFallback,
+  uploadFileToGemini,
+} from "@/utils/ai/gemini";
 import { z } from "zod";
 
 // Helper function to check if a file is a PDF
@@ -226,30 +229,6 @@ export const uploadFileToSupabase = async ({
     throw error;
   }
   return filePath;
-};
-
-export const uploadFileToGemini = async ({
-  blob,
-  displayName,
-}: {
-  blob: Blob;
-  displayName: string;
-}) => {
-  const formData = new FormData();
-  const metadata = {
-    file: { mimeType: blob.type, displayName: displayName },
-  };
-  formData.append(
-    "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" })
-  );
-  formData.append("file", blob);
-  const res2 = await fetch(
-    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${GEMINI_API_KEY}`,
-    { method: "post", body: formData }
-  );
-  const geminiUploadResponse = (await res2.json()) as UploadResponse;
-  return geminiUploadResponse;
 };
 
 export const writeToDb = async (

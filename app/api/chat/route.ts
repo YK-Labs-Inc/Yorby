@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { CoreMessage } from "ai";
+import { getAllUserMemories } from "../memories/utils";
 
 interface ChatRequestBody {
   message: string;
@@ -58,6 +59,15 @@ export async function POST(request: Request) {
       .eq("id", mockInterviewId)
       .single();
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      logger.error("User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+
     if (mockInterviewError || !mockInterview) {
       logger.error("Error fetching mock interview:", {
         error: mockInterviewError?.message,
@@ -68,6 +78,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const { files, knowledge_base } = await getAllUserMemories(user.id);
+
     const systemPrompt = `${mockInterview.interview_prompt}${
       speakingStyle
         ? `
@@ -77,13 +89,44 @@ export async function POST(request: Request) {
         : ""
     }`;
 
-    const messages = [
-      ...history,
-      {
+    let messages: CoreMessage[] = [];
+
+    if (files.length > 0 || knowledge_base) {
+      messages.push({
         role: "user" as const,
-        content: message,
-      },
-    ];
+        content: [
+          {
+            type: "text" as const,
+            text: knowledge_base
+              ? `
+              Form your response with information from the files attached in this message.
+
+              Here is additionl information about the user who you are chatting with — include this context
+              in your response wherever it is relevant and appropriate:
+
+              ${knowledge_base}
+              `
+              : `Form your response with information from the files attached in this message.`,
+          },
+          ...files.map((file) => ({
+            type: "file" as const,
+            data: file.fileData.fileUri,
+            mimeType: file.fileData.mimeType,
+          })),
+        ],
+      });
+    }
+
+    messages.push(
+      ...[
+        ...history,
+        {
+          role: "user" as const,
+          content: message,
+        },
+      ]
+    );
+
     const response = await generateTextWithFallback({
       systemPrompt,
       messages,

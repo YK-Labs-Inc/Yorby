@@ -1,7 +1,4 @@
-import {
-  generateObjectWithFallback,
-  streamObjectWithFallback,
-} from "@/utils/ai/gemini";
+import { streamObjectWithFallback } from "@/utils/ai/gemini";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
@@ -12,6 +9,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { CoreMessage } from "ai";
 import { ResumeDataType } from "@/app/[locale]/dashboard/resumes/components/ResumeBuilder";
+import { getAllUserMemories } from "../../memories/utils";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -89,7 +87,8 @@ const rateLimits = {
 const updateResume = async (
   resume: ResumeDataType,
   messages: CoreMessage[],
-  speakingStyle?: string
+  speakingStyle?: string,
+  files?: Awaited<ReturnType<typeof getAllUserMemories>>["files"]
 ) => {
   const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
@@ -211,7 +210,26 @@ ${
     `;
 
   const result = await streamObjectWithFallback({
-    messages,
+    messages:
+      files && files.length > 0
+        ? [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Use the following files as additional context to form your responses",
+                },
+                ...files.map((file) => ({
+                  type: "file" as "file",
+                  data: file.fileData.fileUri,
+                  mimeType: file.fileData.mimeType,
+                })),
+              ],
+            },
+            ...messages,
+          ]
+        : messages,
     systemPrompt,
     schema: z.object({
       introMessage: z.string(),
@@ -240,15 +258,46 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     isDemo,
   });
   try {
-    const result = await updateResume(resume, messages, speakingStyle);
-
-    logger.info("Resume updated", {});
-
+    // Get user ID from Supabase
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const userId = user?.id || "anonymous";
+    if (!user) {
+      logger.error("User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+    const userId = user.id;
+
+    // Get user memories and knowledge base
+    const { files, knowledge_base } = await getAllUserMemories(userId);
+
+    let finalMessages = messages;
+    if (knowledge_base) {
+      finalMessages = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Here is additional information about the user's work history and experience — use it to help you edit the resume: 
+            
+            ${knowledge_base}`,
+            },
+          ],
+        },
+        ...messages,
+      ];
+    }
+
+    const result = await updateResume(
+      resume,
+      finalMessages,
+      speakingStyle,
+      files
+    );
+
+    logger.info("Resume updated", {});
 
     await trackServerEvent({
       userId,
