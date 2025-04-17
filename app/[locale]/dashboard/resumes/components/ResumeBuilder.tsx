@@ -212,55 +212,33 @@ const StartScreen = ({
 
           <div className="space-y-6">
             {enableResumesFileUpload && (
-              <div className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <FileSelectionModal
-                    onFileSelect={setExistingResume}
-                    selectedFiles={existingResume}
-                    mode="resume"
-                    disabledFiles={additionalFiles}
-                  />
-                  {existingResume.length > 0 && (
-                    <div className="text-sm text-muted-foreground pl-2">
-                      <p className="font-medium">
-                        {t("startScreen.selectedResume")}:
-                      </p>
-                      <p className="truncate">
-                        {existingResume[0].display_name}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <FileSelectionModal
-                    onFileSelect={(files: Tables<"user_files">[]) => {
-                      // Filter out any files that are already selected as the resume
-                      const newFiles = files.filter(
-                        (file) => !existingResume.some((r) => r.id === file.id)
-                      );
-                      setAdditionalFiles(newFiles);
-                    }}
-                    selectedFiles={additionalFiles}
-                    mode="context"
-                    disabledFiles={existingResume}
-                  />
-                  {additionalFiles.length > 0 && (
-                    <div className="text-sm text-muted-foreground pl-2">
-                      <p className="font-medium">
-                        {t("startScreen.selectedContextFiles")} (
-                        {additionalFiles.length}):
-                      </p>
-                      <ul className="list-disc list-inside">
-                        {additionalFiles.map((file) => (
-                          <li key={file.id} className="truncate">
-                            {file.display_name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+              <div className="space-y-2">
+                <FileSelectionModal
+                  onFileSelect={(files: Tables<"user_files">[]) => {
+                    // Filter out any files that are already selected as the resume
+                    const newFiles = files.filter(
+                      (file) => !existingResume.some((r) => r.id === file.id)
+                    );
+                    setAdditionalFiles(newFiles);
+                  }}
+                  selectedFiles={additionalFiles}
+                  disabledFiles={existingResume}
+                />
+                {additionalFiles.length > 0 && (
+                  <div className="text-sm text-muted-foreground pl-2">
+                    <p className="font-medium">
+                      {t("startScreen.selectedContextFiles")} (
+                      {additionalFiles.length}):
+                    </p>
+                    <ul className="list-disc list-inside">
+                      {additionalFiles.map((file) => (
+                        <li key={file.id} className="truncate">
+                          {file.display_name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
@@ -376,7 +354,7 @@ const ResumeBuilderComponent = ({
   const [_, startTransition] = useTransition();
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
-  const showDemoCTA = pathname.includes("/dashboard/resumes");
+  const showDemoCTA = pathname?.includes("/dashboard/resumes");
   const { selectedVoice, setSelectedVoice, setIsTtsEnabled } = useTts();
   const { sendResumeEdit } = useResumeEditAgent({
     setMessages,
@@ -614,7 +592,7 @@ Once I have all that information, I can try my best to make a really great first
     if (!user && captchaToken) {
       const formData = new FormData();
       formData.set("captchaToken", captchaToken);
-      formData.set("currentPath", pathname);
+      formData.set("currentPath", pathname || "");
       startTransition(() => {
         verifyAnonymousUserAction(formData);
       });

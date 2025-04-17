@@ -405,7 +405,11 @@ export const getResumeEditCount = async (resumeId: string) => {
   return count || 0;
 };
 
-export async function uploadResumeFile(file: File, userId: string) {
+export async function uploadResumeFile(
+  file: File,
+  userId: string,
+  addedToMemory: boolean = false
+) {
   const supabase = await createSupabaseServerClient();
 
   // Upload to Supabase storage
@@ -459,6 +463,7 @@ export async function uploadResumeFile(file: File, userId: string) {
     google_file_name: geminiUploadResponse.file.name,
     google_file_uri: geminiUploadResponse.file.uri,
     display_name: file.name,
+    added_to_memory: addedToMemory,
   });
 
   if (dbError) {

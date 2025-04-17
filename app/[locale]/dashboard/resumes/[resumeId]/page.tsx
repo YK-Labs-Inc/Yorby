@@ -59,7 +59,7 @@ export default async function ResumePage({
     user.id
   );
   const enableResumesFileUpload =
-    (await posthog.isFeatureEnabled("resume-files-upload", user.id)) ?? false;
+    (await posthog.isFeatureEnabled("enable-memories", user.id)) ?? false;
   const transformSummary = (await searchParams)?.transformSummary as
     | string
     | undefined;

@@ -83,6 +83,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         mime_type: file.type,
         google_file_name: uploadResponse.file.name,
         google_file_uri: uploadResponse.file.uri,
+        added_to_memory: true,
       });
 
       if (fileError) {

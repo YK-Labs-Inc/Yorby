@@ -29,21 +29,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 
 interface Props {
   onFileSelect: (files: Tables<"user_files">[]) => void;
   selectedFiles: Tables<"user_files">[];
-  mode: "resume" | "context";
   disabledFiles?: Tables<"user_files">[]; // Files that are selected in the other modal
 }
 
 export function FileSelectionModal({
   onFileSelect,
   selectedFiles,
-  mode,
   disabledFiles = [],
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +54,8 @@ export function FileSelectionModal({
   const [isFetchingFiles, setIsFetchingFiles] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMemoryDialogOpen, setIsMemoryDialogOpen] = useState(false);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { logError } = useAxiomLogging();
   const user = useUser();
@@ -89,13 +89,8 @@ export function FileSelectionModal({
     if (!e.target.files?.length) return;
     const files = Array.from(e.target.files);
 
-    // Validate file count based on mode
-    if (mode === "resume" && files.length > 1) {
-      setError(t("upload.singleFileOnly"));
-      return;
-    }
-
-    if (mode === "context" && files.length + existingFiles.length > 10) {
+    // Validate file count
+    if (files.length + existingFiles.length > 10) {
       setError(t("upload.maxFilesExceeded"));
       return;
     }
@@ -108,34 +103,40 @@ export function FileSelectionModal({
     }
 
     setError("");
+    setCurrentFile(files[0]);
+    setIsMemoryDialogOpen(true);
+  };
+
+  const handleMemoryDecision = async (addToMemory: boolean) => {
+    if (!currentFile || !user) return;
+
     setIsUploading(true);
     setUploadProgress(0);
+    setIsMemoryDialogOpen(false);
 
     try {
-      // Upload files sequentially and track progress
-      const totalFiles = files.length;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        await uploadResumeFile(file, user!.id);
+      await uploadResumeFile(currentFile, user.id, addToMemory);
 
-        // Optimistically update the UI
-        const newFile = {
-          id: `temp-${Date.now()}-${i}`, // Temporary ID
-          display_name: file.name,
-          created_at: new Date().toISOString(),
-          user_id: user!.id,
-        } as Tables<"user_files">;
-        setExistingFiles((prev) => [...prev, newFile]);
+      // Optimistically update the UI
+      const newFile = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        display_name: currentFile.name,
+        created_at: new Date().toISOString(),
+        user_id: user.id,
+        added_to_memory: addToMemory,
+      } as Tables<"user_files">;
+      setExistingFiles((prev) => [...prev, newFile]);
+      onFileSelect([...selectedFiles, newFile]);
 
-        // Update progress
-        setUploadProgress(((i + 1) / totalFiles) * 100);
-      }
+      // Update progress
+      setUploadProgress(100);
     } catch (error) {
       logError("Error uploading file:", { error });
       setError(t("upload.uploadError"));
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      setCurrentFile(null);
       // Clear the input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -189,27 +190,73 @@ export function FileSelectionModal({
     }
   };
 
+  const toggleMemoryStatus = async (file: Tables<"user_files">) => {
+    if (!user) return;
+
+    // Optimistically update the UI
+    const newMemoryStatus = !file.added_to_memory;
+
+    // Update local state
+    setExistingFiles((prev) =>
+      prev.map((f) =>
+        f.id === file.id ? { ...f, added_to_memory: newMemoryStatus } : f
+      )
+    );
+
+    // Also update in selectedFiles if the file is selected
+    if (selectedFiles.some((f) => f.id === file.id)) {
+      onFileSelect(
+        selectedFiles.map((f) =>
+          f.id === file.id ? { ...f, added_to_memory: newMemoryStatus } : f
+        )
+      );
+    }
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase
+        .from("user_files")
+        .update({ added_to_memory: newMemoryStatus })
+        .eq("id", file.id);
+
+      if (error) throw error;
+    } catch (error) {
+      // Revert optimistic update on error
+      setExistingFiles((prev) =>
+        prev.map((f) =>
+          f.id === file.id ? { ...f, added_to_memory: file.added_to_memory } : f
+        )
+      );
+
+      // Also revert in selectedFiles if the file is selected
+      if (selectedFiles.some((f) => f.id === file.id)) {
+        onFileSelect(
+          selectedFiles.map((f) =>
+            f.id === file.id
+              ? { ...f, added_to_memory: file.added_to_memory }
+              : f
+          )
+        );
+      }
+
+      logError("Error toggling memory status:", { error });
+      setError(t("upload.memoryToggleError"));
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full">
           <Upload className="w-4 h-4 mr-2" />
-          {mode === "resume"
-            ? t("upload.uploadResume")
-            : t("upload.uploadContext")}
+          {t("upload.uploadContext")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "resume"
-              ? t("upload.resumeTitle")
-              : t("upload.contextTitle")}
-          </DialogTitle>
+          <DialogTitle>{t("upload.contextTitle")}</DialogTitle>
           <DialogDescription>
-            {mode === "resume"
-              ? t("upload.resumeDescription")
-              : t("upload.contextDescription")}
+            {t("upload.contextDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -234,7 +281,7 @@ export function FileSelectionModal({
                 onChange={handleFileChange}
                 className="hidden"
                 ref={fileInputRef}
-                multiple={mode === "context"}
+                multiple
               />
               <div className="flex flex-col gap-2">
                 <Button
@@ -252,9 +299,7 @@ export function FileSelectionModal({
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      {mode === "resume"
-                        ? t("upload.uploadResume")
-                        : t("upload.uploadContext")}
+                      {t("upload.uploadContext")}
                     </>
                   )}
                 </Button>
@@ -267,9 +312,7 @@ export function FileSelectionModal({
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {mode === "resume"
-                    ? t("upload.singlePdfOnly")
-                    : t("upload.multiPdfHelper")}
+                  {t("upload.multiPdfHelper")}
                 </p>
               </div>
             </div>
@@ -281,14 +324,14 @@ export function FileSelectionModal({
                 return (
                   <div
                     key={file.id}
-                    className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 ${
                       isDisabled
                         ? "opacity-50 cursor-not-allowed bg-muted"
-                        : "hover:bg-muted/50 cursor-pointer"
+                        : "hover:bg-muted/50"
                     }`}
                   >
                     <div
-                      className="flex items-center gap-2 flex-1"
+                      className="flex items-center gap-2 cursor-pointer flex-1"
                       onClick={() => !isDisabled && toggleFileSelection(file)}
                     >
                       <input
@@ -302,24 +345,36 @@ export function FileSelectionModal({
                         {file.display_name}
                       </span>
                     </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Switch
+                        checked={file.added_to_memory}
+                        onCheckedChange={() => toggleMemoryStatus(file)}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {t("upload.addToMemories")}
+                      </span>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      disabled={isDeletingId === file.id}
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      {isDeletingId === file.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "×"
+                      )}
+                    </Button>
+
                     <AlertDialog
                       open={isDeleteDialogOpen}
                       onOpenChange={setIsDeleteDialogOpen}
                     >
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          disabled={isDeletingId === file.id}
-                        >
-                          {isDeletingId === file.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            "×"
-                          )}
-                        </Button>
-                      </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
@@ -369,6 +424,38 @@ export function FileSelectionModal({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Memory Dialog */}
+      <Dialog open={isMemoryDialogOpen} onOpenChange={setIsMemoryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("upload.memoryDialog.title")}</DialogTitle>
+            <DialogDescription>
+              {t("upload.memoryDialog.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              {t("upload.memoryDialog.helpText")}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => handleMemoryDecision(false)}
+              >
+                {t("upload.memoryDialog.skip")}
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => handleMemoryDecision(true)}
+              >
+                {t("upload.memoryDialog.add")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
