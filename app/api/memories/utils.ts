@@ -6,7 +6,7 @@ import {
 } from "@/utils/supabase/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
-import { GoogleAIFileManager } from "@google/generative-ai/dist/server/server";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
