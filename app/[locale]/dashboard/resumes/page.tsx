@@ -28,7 +28,7 @@ export default async function ResumesPage() {
       (await posthog.isFeatureEnabled("transform-resume-feature", user.id)) ??
       false;
     enableResumesFileUpload =
-      (await posthog.isFeatureEnabled("resume-files-upload", user.id)) ?? false;
+      (await posthog.isFeatureEnabled("enable-memories", user.id)) ?? false;
   }
 
   return (

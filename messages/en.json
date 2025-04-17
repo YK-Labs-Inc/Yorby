@@ -1200,12 +1200,12 @@
       "button": "Start Transformation"
     },
     "upload": {
-      "uploadResume": "Upload Existing Resume",
-      "uploadContext": "Upload Additional Documents",
-      "resumeTitle": "Upload An Existing Resume",
-      "contextTitle": "Upload Additional Documents",
+      "uploadResume": "Upload existing resume",
+      "uploadContext": "Upload additional documents",
+      "resumeTitle": "Upload existing resume",
+      "contextTitle": "Upload additional documents",
       "resumeDescription": "Upload an existing resume or select one from the files below. This will help us quickly create a personalized resume for you.",
-      "contextDescription": "Upload additional documents (up to 10) to help us get information about your previous work experience. This could be project descriptions, certifications, or anything else that would help us get a better understanding of your experience.",
+      "contextDescription": "Upload additional documents (up to 10) to help us get information about your previous work experience. These can be project descriptions, certifications, or anything else that would help us better understand your experience.",
       "singlePdfOnly": "Only PDF files are accepted. You can upload one file.",
       "multiPdfHelper": "Only PDF files are accepted. You can upload up to 10 files.",
       "singleFileOnly": "Please select only one file for your resume.",
@@ -1213,16 +1213,27 @@
       "pdfOnly": "Only PDF files are accepted.",
       "uploadError": "An error occurred while uploading your file.",
       "deleteError": "An error occurred while deleting your file.",
+      "memoryToggleError": "An error occurred while updating memory status.",
       "deleting": "Deleting...",
       "delete": "Delete",
       "cancel": "Cancel",
-      "deleteTitle": "Delete File",
+      "deleteTitle": "Delete file",
       "deleteConfirmation": "Are you sure you want to delete this file? This action cannot be undone.",
       "noFiles": "No files uploaded yet.",
       "uploading": "Uploading...",
       "alreadyInContext": "Already added as additional context",
       "alreadyAsResume": "Already selected as resume",
-      "done": "Done"
+      "done": "Done",
+      "inMemory": "Added to saved memories",
+      "notInMemory": "Not in saved memories",
+      "addToMemories": "Add to saved memories",
+      "memoryDialog": {
+        "title": "Add to saved memories?",
+        "description": "Would you like to add this file to your saved memories?",
+        "helpText": "Adding files to your saved memories helps us create better personalized content for your resumes and interview preparation materials.",
+        "skip": "Skip for now",
+        "add": "Add to memories"
+      }
     },
     "resumeUpload": {
       "acknowledgment": "I've reviewed your selected files. Let's work on tailoring your resume for your target role. What kind of position are you interested in?"

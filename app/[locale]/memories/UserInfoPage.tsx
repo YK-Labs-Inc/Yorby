@@ -41,6 +41,7 @@ What would you like to add to your knowledge base today?`,
     const { data: filesData, error } = await supabase
       .from("user_files")
       .select("*")
+      .eq("added_to_memory", true)
       .eq("user_id", user.id);
 
     if (error) {
