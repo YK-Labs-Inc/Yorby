@@ -39,6 +39,7 @@ interface AppSidebarProps {
   isResumeBuilderEnabled: boolean;
   isSubscriptionVariant: boolean;
   resumes: Tables<"resumes">[];
+  isMemoriesEnabled: boolean;
 }
 
 export function AppSidebar({
@@ -50,12 +51,13 @@ export function AppSidebar({
   isResumeBuilderEnabled,
   isSubscriptionVariant,
   resumes,
+  isMemoriesEnabled,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const t = useTranslations("sidebar");
-  const authError = searchParams.get("authError");
-  const authSuccess = searchParams.get("authSuccess");
+  const authError = searchParams?.get("authError");
+  const authSuccess = searchParams?.get("authSuccess");
 
   useEffect(() => {
     if (authError || authSuccess) {
@@ -196,7 +198,11 @@ export function AppSidebar({
           </Link>
         )}
         {user && user.email && (
-          <UserMenu email={user.email} hasSubscription={hasSubscription} />
+          <UserMenu
+            email={user.email}
+            hasSubscription={hasSubscription}
+            isMemoriesEnabled={isMemoriesEnabled}
+          />
         )}{" "}
         {user && user?.is_anonymous && <LinkAccountModal />}
         {!user && (

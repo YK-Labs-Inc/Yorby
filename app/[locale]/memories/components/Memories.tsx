@@ -21,7 +21,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 type ViewType = "knowledgeBase" | "files";
 
-export const KnowledgeBaseView = ({
+export const MemoriesView = ({
   isUpdatingKnowledgeBase,
   setIsUpdatingKnowledgeBase,
   fetchFiles,
