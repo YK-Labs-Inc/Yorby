@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import { Loader2, Upload, Brain, BrainCircuit } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
