@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
+import { uploadFileToGemini } from "@/utils/ai/gemini";
 import { UploadResponse } from "@/utils/types";
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
