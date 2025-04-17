@@ -1280,7 +1280,8 @@
     "signOut": "Sign Out",
     "support": "Need Help?",
     "supportMessageIntro": "If you need help, send an email to",
-    "supportMessageConclusion": "and we'll get back to you as soon as possible."
+    "supportMessageConclusion": "and we'll get back to you as soon as possible.",
+    "memories": "Memories"
   },
   "landingPageV4": {
     "title": "How can we help you get a job?",
@@ -1385,22 +1386,22 @@
     }
   },
   "knowledgeBase": {
-    "loading": "Loading your knowledge base...",
+    "loading": "Loading saved memories...",
     "emptyState": {
       "title": "No Information Yet",
-      "description": "Your knowledge base is empty. Start chatting with the AI assistant to build up your knowledge base."
+      "description": "No saved memories found. Start chatting with the AI assistant to created saved memories."
     },
     "knowledgeBase": {
-      "title": "Your Knowledge Base"
+      "title": "Saved Memories"
     },
     "files": {
       "title": "Your Uploaded Files",
       "emptyState": {
         "title": "No Files Uploaded",
-        "description": "Upload files through the chat interface to store them in your knowledge base."
+        "description": "Upload files through the chat interface to store them in saved memories."
       }
     },
-    "updating": "Updating knowledge base",
+    "updating": "Updating memories",
     "edit": "Edit",
     "save": "Save",
     "error": {
@@ -1469,7 +1470,7 @@
       },
       "knowledgeBase": {
         "title": "Getting to Know You",
-        "description": "First, we build our knowledge base about you and your career",
+        "description": "First, we get to know you and your career",
         "content": [
           "We will create a personalized profile about you and your career so that moving forward, every single tool in our suite is 100% customized to you."
         ]
@@ -1515,7 +1516,7 @@
     },
     "buttons": {
       "next": "Next",
-      "startKnowledgeBase": "Start Building Knowledge Base"
+      "startKnowledgeBase": "Tell Us About Yourself And Your Career"
     }
   }
 }

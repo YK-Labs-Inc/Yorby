@@ -20,22 +20,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 interface UserMenuProps {
   email: string;
   hasSubscription: boolean;
+  isMemoriesEnabled: boolean;
 }
 
-export function UserMenu({ email, hasSubscription }: UserMenuProps) {
+export function UserMenu({
+  email,
+  hasSubscription,
+  isMemoriesEnabled,
+}: UserMenuProps) {
   const [_, startTransition] = useTransition();
   const [showSupportDialog, setShowSupportDialog] = useState(false);
   const t = useTranslations("userMenu");
   const posthog = usePostHog();
+  const router = useRouter();
 
   const handleManageSubscription = () => {
     startTransition(async () => {
       await redirectToStripeCustomerPortal();
     });
+  };
+
+  const handleMemoriesClick = () => {
+    router.push("/memories");
   };
 
   return (
@@ -75,6 +86,15 @@ export function UserMenu({ email, hasSubscription }: UserMenuProps) {
           >
             {t("support")}
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {isMemoriesEnabled && (
+            <DropdownMenuItem
+              onSelect={handleMemoriesClick}
+              className="justify-center"
+            >
+              {t("memories")}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {hasSubscription && (
             <>

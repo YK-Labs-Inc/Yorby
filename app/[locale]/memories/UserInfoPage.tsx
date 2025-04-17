@@ -5,7 +5,7 @@ import { TtsProvider } from "@/app/context/TtsContext";
 import { Card } from "@/components/ui/card";
 import { CoreMessage } from "ai";
 import { useState, useCallback } from "react";
-import { KnowledgeBaseView } from "./components/KnowledgeBaseView";
+import { MemoriesView } from "./components/Memories";
 import { motion } from "framer-motion";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useUser } from "@/context/UserContext";
@@ -55,7 +55,7 @@ What would you like to add to your knowledge base today?`,
   const updateKnowledgeBase = async (newMessages: CoreMessage[]) => {
     try {
       setIsUpdatingKnowledgeBase(true);
-      const response = await fetch("/api/knowledge-base/update", {
+      const response = await fetch("/api/memories/update", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +111,7 @@ What would you like to add to your knowledge base today?`,
       { role: "assistant", content: "" },
     ]);
 
-    const response = await fetch("/api/knowledge-base/chat", {
+    const response = await fetch("/api/memories/chat", {
       method: "POST",
       body: formData,
     });
@@ -197,7 +197,7 @@ What would you like to add to your knowledge base today?`,
           className="flex-1 flex flex-col h-full overflow-hidden min-w-0"
         >
           <Card className="flex-1 overflow-hidden min-h-0">
-            <KnowledgeBaseView
+            <MemoriesView
               isUpdatingKnowledgeBase={isUpdatingKnowledgeBase}
               setIsUpdatingKnowledgeBase={setIsUpdatingKnowledgeBase}
               fetchFiles={fetchFiles}

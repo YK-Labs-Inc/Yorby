@@ -123,6 +123,7 @@ export default async function RootLayout({
   let onboardingState = null;
   let isResumeBuilderEnabled = false;
   let isSubscriptionVariant = false;
+  let isMemoriesEnabled = false;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
@@ -137,6 +138,9 @@ export default async function RootLayout({
     if (isResumeBuilderEnabled) {
       resumes = await fetchResumes(user.id);
     }
+    isMemoriesEnabled = Boolean(
+      await posthog.isFeatureEnabled("enable-memories", user.id)
+    );
   }
 
   const messages = await getMessages();
@@ -200,6 +204,7 @@ export default async function RootLayout({
                           isResumeBuilderEnabled={isResumeBuilderEnabled}
                           resumes={resumes}
                           isSubscriptionVariant={isSubscriptionVariant}
+                          isMemoriesEnabled={isMemoriesEnabled}
                         />
                         <SidebarTrigger />
                         <main className="w-full">{children}</main>
