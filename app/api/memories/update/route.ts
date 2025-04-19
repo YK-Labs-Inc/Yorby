@@ -1,10 +1,13 @@
-import { AxiomRequest, withAxiom } from "next-axiom";
+import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { CoreMessage } from "ai";
 import { getAllUserMemories } from "../utils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
+  let logger = new Logger().with({
+    route: "api/memories/update",
+  });
   const { messages } = (await req.json()) as {
     messages: CoreMessage[];
   };
@@ -20,8 +23,16 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     });
   }
 
+  logger = logger.with({
+    userId: user.id,
+  });
+
   // Fetch user files using getAllUserMemories
   const { files: userFiles } = await getAllUserMemories(user.id);
+
+  logger = logger.with({
+    userFiles: userFiles.length,
+  });
 
   // Get existing knowledge base or create new one
   const { data: existingKnowledgeBase } = await supabase
@@ -31,6 +42,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     .maybeSingle();
 
   const currentKnowledgeBase = existingKnowledgeBase?.knowledge_base || "";
+
+  logger = logger.with({
+    currentKnowledgeBase: currentKnowledgeBase.length,
+  });
 
   // Use LLM to update knowledge base
   const updatedMessages: CoreMessage[] = [
@@ -75,6 +90,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     Return ONLY the updated knowledge base text. Your response should be in markdown format.
     Your response will also be fed into other LLMs as additional context about the user, so make
     sure the markdown formatting is optimized for LLM consumption.
+
+    Do not wrap your response in \`\`\`markdown tags. Just return the markdown text.
     `,
       messages: updatedMessages,
       loggingContext: {
@@ -85,6 +102,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         primaryModel: "gemini-2.5-pro-preview-03-25",
         fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
+    });
+
+    logger = logger.with({
+      updatedKnowledgeBase,
     });
 
     // Create or update knowledge base entry
@@ -98,11 +119,18 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       }
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
+    logger.info("Knowledge base updated");
+
+    return new Response(
+      JSON.stringify({ success: true, updatedKnowledgeBase }),
+      {
+        status: 200,
+      }
+    );
+  } catch (error: unknown) {
+    logger.error("Error updating knowledge base:", {
+      error: error instanceof Error ? error.message : error,
     });
-  } catch (error) {
-    console.error("Error updating knowledge base:", error);
     return new Response(
       JSON.stringify({ error: "Failed to update knowledge base" }),
       {
