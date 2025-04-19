@@ -386,10 +386,6 @@ const ResumeBuilderComponent = ({
   const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
   useEffect(() => {
-    const selectedVoice = VOICE_OPTIONS.find(
-      (voice) => voice.voiceId === selectedVoiceId
-    );
-
     // Use the transformation summary if available, otherwise use the default messages
     let initialMessage = "";
 
@@ -398,7 +394,7 @@ const ResumeBuilderComponent = ({
     } else if (resumeId) {
       initialMessage = t("editResumeInitialMessage");
     }
-    if (!conversationStarted.current) {
+    if (!resumeId && !conversationStarted.current) {
       conversationStarted.current = true;
       handleSendMessage(START_CONVERSATION_MESSAGE);
     } else {
