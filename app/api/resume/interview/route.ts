@@ -75,19 +75,23 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Education
     - Work Experience
     - Skills
+    - Job Description They Are Making a Resume For
 
   ${
     combinedFiles.length > 0 &&
-    `You are provided files that may contain information about a user's previous work history and experience.
+    `You are provided files that contains information about a user's previous work history and experience.
   
-    Analyze the information provided in the files and use the information to help you ask the user questions.
+    Analyze the information provided in the files and determine which of the earlier fields is missing information.
+    If you have all of the information you need, then you can move onto the next field.
   `
   }
 
     ${
       knowledge_base
         ? `Here is additional information about the user's work history and experience:
-${knowledge_base}`
+
+    ## Existing User Knowledge Base
+    ${knowledge_base}`
         : ""
     }
 
@@ -125,6 +129,12 @@ ${knowledge_base}`
     Conduct the interview in a friendly and engaging manner.
 
     Conduct the interview in the language of the user.
+
+    Your response should be written in the following format:
+    {
+      "interviewIsComplete": boolean, // Whether you have gathered all of the information you need
+      "interviewerResponse": string // The next sentence in your interview with the user
+    }
     `;
 
     // Send a prompt to continue the conversation
@@ -138,7 +148,10 @@ ${knowledge_base}`
                 content: [
                   {
                     type: "text",
-                    text: "Use the following files as additional context to form your responses",
+                    text: `Use the following files as additional context to form your responses.
+
+                    Begin the conversation with the user.
+                    `,
                   },
                   ...combinedFiles.map((file) => ({
                     type: "file" as "file",
@@ -157,6 +170,10 @@ ${knowledge_base}`
       loggingContext: {
         route: "/api/resume/interview",
         messages,
+      },
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
     });
 
