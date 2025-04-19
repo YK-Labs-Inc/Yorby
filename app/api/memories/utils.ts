@@ -1,47 +1,78 @@
+import { uploadFileToGemini } from "@/utils/ai/gemini";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   createSupabaseServerClient,
   downloadFile,
 } from "@/utils/supabase/server";
+import { posthog } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { uploadFileToGemini } from "@/utils/ai/gemini";
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
-export const getAllFiles = async (fileIds: string[]) => {
-  const userFiles = await fetchUserFiles(fileIds);
+export const getAllUserMemories = async (userId: string) => {
+  const isMemoriesEnabled = Boolean(
+    await posthog.isFeatureEnabled("enable-memories", userId)
+  );
+  if (!isMemoriesEnabled) {
+    return {
+      files: [],
+      knowledge_base: "",
+    };
+  }
+  const userFiles = await fetchUserFiles(userId);
+  const userKnowledgeBase = await fetchUserKnowledgeBase(userId);
   const fileStatuses = await Promise.all(userFiles.map(checkFileExists));
-  return await Promise.all(
-    fileStatuses.map(async ({ file, status }) => {
-      if (!status) {
-        const uploadResponse = await processMissingFile({ file });
+  return {
+    files: await Promise.all(
+      fileStatuses.map(async ({ file, status }) => {
+        if (!status) {
+          const uploadResponse = await processMissingFile({ file });
+          return {
+            fileData: {
+              fileUri: uploadResponse.file.uri,
+              mimeType: uploadResponse.file.mimeType,
+            },
+          };
+        }
         return {
           fileData: {
-            fileUri: uploadResponse.file.uri,
-            mimeType: uploadResponse.file.mimeType,
+            fileUri: file.google_file_uri,
+            mimeType: file.mime_type,
           },
         };
-      }
-      return {
-        fileData: {
-          fileUri: file.google_file_uri,
-          mimeType: file.mime_type,
-        },
-      };
-    })
-  );
+      })
+    ),
+    knowledge_base: userKnowledgeBase
+      .map((entry) => entry.knowledge_base)
+      .join("\n"),
+  };
 };
 
-const fetchUserFiles = async (fileIds: string[]) => {
+const fetchUserKnowledgeBase = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("user_knowledge_base")
+    .select("knowledge_base")
+    .eq("user_id", userId);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+};
+
+const fetchUserFiles = async (userId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("user_files")
     .select("*")
-    .in("id", fileIds);
+    .eq("added_to_memory", true)
+    .eq("user_id", userId);
+
   if (error) {
     throw new Error(error.message);
   }
+
   return data;
 };
 
@@ -85,10 +116,9 @@ const updateFileInDatabase = async ({
     .update({
       google_file_uri: uploadResponse.file.uri,
       google_file_name: uploadResponse.file.name,
-      mime_type: uploadResponse.file.mimeType,
     })
     .eq("id", fileId);
   if (error) {
-    throw new Error(error.message);
+    throw error;
   }
 };

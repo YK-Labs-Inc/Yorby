@@ -1,5 +1,4 @@
 "use server";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { INTERVIEW_COPILOT_REQUIRED_CREDITS } from "@/app/constants/interview_copilots";
 import { Tables } from "@/utils/supabase/database.types";
 import {
@@ -12,6 +11,7 @@ import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { uploadFileToGemini } from "@/utils/ai/gemini";
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 

@@ -13,6 +13,7 @@ import { posthog } from "../tracking/serverUtils";
 import { createSupabaseServerClient } from "../supabase/server";
 import { OpenAI } from "@posthog/ai";
 import { Speechify } from "@speechify/api-sdk";
+import { UploadResponse } from "../types";
 
 type BaseParams = {
   systemPrompt?: string;
@@ -369,4 +370,29 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
       throw fallbackError;
     }
   }
+};
+
+export const uploadFileToGemini = async ({
+  blob,
+  displayName,
+}: {
+  blob: Blob;
+  displayName: string;
+}) => {
+  const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
+  const formData = new FormData();
+  const metadata = {
+    file: { mimeType: blob.type, displayName: displayName },
+  };
+  formData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" })
+  );
+  formData.append("file", blob);
+  const res2 = await fetch(
+    `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=multipart&key=${GEMINI_API_KEY}`,
+    { method: "post", body: formData }
+  );
+  const geminiUploadResponse = (await res2.json()) as UploadResponse;
+  return geminiUploadResponse;
 };

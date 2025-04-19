@@ -1,8 +1,10 @@
 import { AxiomRequest, withAxiom } from "next-axiom";
-import { streamTextResponseWithFallback } from "@/utils/ai/gemini";
+import {
+  streamTextResponseWithFallback,
+  uploadFileToGemini,
+} from "@/utils/ai/gemini";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { v4 as uuidv4 } from "uuid";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { CoreMessage } from "ai";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {

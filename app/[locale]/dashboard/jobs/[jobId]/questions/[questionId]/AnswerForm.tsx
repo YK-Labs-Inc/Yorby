@@ -61,8 +61,8 @@ export default function AnswerForm({
     cons: string[];
   } | null;
   const searchParams = useSearchParams();
-  const error = searchParams.get("error") as string;
-  const view = searchParams.get("view") || "question";
+  const error = searchParams?.get("error") as string;
+  const view = searchParams?.get("view") || "question";
   let formMessage: Message | null = null;
   if (error) {
     formMessage = {
@@ -70,7 +70,7 @@ export default function AnswerForm({
     };
   }
 
-  const newViewParams = new URLSearchParams(searchParams);
+  const newViewParams = new URLSearchParams(searchParams ?? {});
   newViewParams.set("view", view === "question" ? "submissions" : "question");
 
   return (

@@ -4,6 +4,8 @@ import { AxiomRequest, withAxiom } from "next-axiom";
 import { z } from "zod";
 import { CoreMessage } from "ai";
 import { getAllFiles } from "../utils";
+import { getAllUserMemories } from "../../memories/utils";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = req.log.with({
@@ -13,8 +15,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     const {
       messages,
       speakingStyle,
-      existingResumeFileIds = [],
-      additionalFileIds,
+      additionalFileIds = [],
     } = (await req.json()) as {
       messages: CoreMessage[];
       speakingStyle?: string;
@@ -31,12 +32,29 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
     logger = logger.with({
       messages,
-      existingResumeFileIds,
       additionalFileIds,
       speakingStyle,
     });
 
     logger.info("Processing interview conversation");
+
+    // Get user ID from Supabase
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      logger.error("User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+    const userId = user.id;
+
+    // Get user memories and files
+    const { files: userFiles, knowledge_base } =
+      await getAllUserMemories(userId);
+    const additionalFiles = await getAllFiles(additionalFileIds);
+    const combinedFiles = [...userFiles, ...additionalFiles];
 
     // Create a system prompt for the interview process
     const systemPrompt = `
@@ -59,21 +77,19 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Skills
 
   ${
-    existingResumeFileIds.length > 0 &&
-    `You are given a user's previous resume to form your response.
+    combinedFiles.length > 0 &&
+    `You are provided files that may contain information about a user's previous work history and experience.
   
-  There is a strong chance that this resume contains all of the information that you need to create a new resume.
-
-    Acknowledge the user's previous resume and ask them if they would like to add any other additional information
-    in addition to the information provided in the resume or if they would like to just use the existing resume
-    as the basis for a new resume. 
-
-    If they do want to add any additional information, continue the rest of the interview process.
-
-    If they would like to just use the existing resume as the basis for a new resume, then you can move onto return a response 
-    saying that you will use the existing resume as the basis for a new resume and return the interviewIsComplete flag as true.
+    Analyze the information provided in the files and use the information to help you ask the user questions.
   `
   }
+
+    ${
+      knowledge_base
+        ? `Here is additional information about the user's work history and experience:
+${knowledge_base}`
+        : ""
+    }
 
     If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
     after the initial resume is created, they can add more information and customize it to their liking.
@@ -110,14 +126,12 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     Conduct the interview in the language of the user.
     `;
-    const existingResumeFiles = await getAllFiles(existingResumeFileIds);
-    const additionalFiles = await getAllFiles(additionalFileIds);
 
     // Send a prompt to continue the conversation
     const result = await generateObjectWithFallback({
       systemPrompt,
       messages:
-        additionalFiles.length > 0 || existingResumeFiles.length > 0
+        combinedFiles.length > 0
           ? [
               {
                 role: "user",
@@ -126,12 +140,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
                     type: "text",
                     text: "Use the following files as additional context to form your responses",
                   },
-                  ...additionalFiles.map((file) => ({
-                    type: "file" as "file",
-                    data: file.fileData.fileUri,
-                    mimeType: file.fileData.mimeType,
-                  })),
-                  ...existingResumeFiles.map((file) => ({
+                  ...combinedFiles.map((file) => ({
                     type: "file" as "file",
                     data: file.fileData.fileUri,
                     mimeType: file.fileData.mimeType,

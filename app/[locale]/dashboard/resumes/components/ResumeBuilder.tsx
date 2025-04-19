@@ -143,8 +143,6 @@ interface StartScreenProps {
   onTtsEnabledChange: (enabled: boolean) => void;
   selectedVoiceId: string;
   onSelectedVoiceIdChange: (voiceId: string) => void;
-  existingResume: Tables<"user_files">[];
-  setExistingResume: (resume: Tables<"user_files">[]) => void;
   additionalFiles: Tables<"user_files">[];
   setAdditionalFiles: (files: Tables<"user_files">[]) => void;
   user: User | null;
@@ -162,8 +160,6 @@ const StartScreen = ({
   onTtsEnabledChange,
   selectedVoiceId,
   onSelectedVoiceIdChange,
-  existingResume,
-  setExistingResume,
   additionalFiles,
   setAdditionalFiles,
   user,
@@ -214,15 +210,8 @@ const StartScreen = ({
             {enableResumesFileUpload && (
               <div className="space-y-2">
                 <FileSelectionModal
-                  onFileSelect={(files: Tables<"user_files">[]) => {
-                    // Filter out any files that are already selected as the resume
-                    const newFiles = files.filter(
-                      (file) => !existingResume.some((r) => r.id === file.id)
-                    );
-                    setAdditionalFiles(newFiles);
-                  }}
+                  onFileSelect={setAdditionalFiles}
                   selectedFiles={additionalFiles}
-                  disabledFiles={existingResume}
                 />
                 {additionalFiles.length > 0 && (
                   <div className="text-sm text-muted-foreground pl-2">
@@ -369,9 +358,6 @@ const ResumeBuilderComponent = ({
   const [additionalFiles, setAdditionalFiles] = useState<
     Tables<"user_files">[]
   >([]);
-  const [existingResume, setExistingResume] = useState<Tables<"user_files">[]>(
-    []
-  );
 
   const handleVoiceChange = useCallback(
     (voiceId: string) => {
@@ -423,10 +409,6 @@ const ResumeBuilderComponent = ({
 
     if (transformSummary) {
       initialMessage = transformSummary;
-    } else if (existingResume.length > 0) {
-      initialMessage = t("existingResumeInitialMessage", {
-        fileName: existingResume[0].display_name,
-      });
     } else if (resumeId) {
       initialMessage = t("editResumeInitialMessage");
     } else {
@@ -437,7 +419,7 @@ const ResumeBuilderComponent = ({
     if (
       selectedVoice?.speakingStyle &&
       !transformSummary &&
-      !existingResume.length
+      !additionalFiles.length
     ) {
       if (selectedVoice.voiceId === "dg") {
         initialMessage = `Listen up, buttercup! You want a killer resume? I need the intel.
@@ -482,7 +464,7 @@ Once I have all that information, I can try my best to make a really great first
     hasStarted,
     selectedVoiceId,
     transformSummary,
-    existingResume,
+    additionalFiles,
   ]);
 
   // Fetch initial edit count
@@ -634,7 +616,6 @@ Once I have all that information, I can try my best to make a really great first
         body: JSON.stringify({
           messages: updatedMessages,
           speakingStyle: selectedVoice.speakingStyle,
-          existingResumeFileIds: existingResume.map((file) => file.id),
           additionalFileIds: additionalFiles.map((file) => file.id),
         }),
       });
@@ -702,7 +683,6 @@ Once I have all that information, I can try my best to make a really great first
         },
         body: JSON.stringify({
           messages: conversationHistory,
-          existingResumeFileIds: existingResume.map((file) => file.id),
           additionalFileIds: additionalFiles.map((file) => file.id),
         }),
       });
@@ -759,8 +739,6 @@ Once I have all that information, I can try my best to make a really great first
         onTtsEnabledChange={setIsTtsEnabled}
         selectedVoiceId={selectedVoiceId}
         onSelectedVoiceIdChange={setSelectedVoiceId}
-        existingResume={existingResume}
-        setExistingResume={setExistingResume}
         additionalFiles={additionalFiles}
         setAdditionalFiles={setAdditionalFiles}
         user={user}

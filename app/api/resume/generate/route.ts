@@ -2,23 +2,21 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
-import { getTranslations } from "next-intl/server";
 import { CoreMessage } from "ai";
 import { z } from "zod";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { getAllFiles } from "../utils";
+import { getAllUserMemories } from "../../memories/utils";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
     route: "/api/resume/generate",
   });
   try {
-    const { messages, existingResumeFileIds, additionalFileIds } =
-      (await req.json()) as {
-        messages: CoreMessage[];
-        existingResumeFileIds: string[];
-        additionalFileIds: string[];
-      };
+    const { messages, additionalFileIds = [] } = (await req.json()) as {
+      messages: CoreMessage[];
+      additionalFileIds: string[];
+    };
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -26,25 +24,54 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         { status: 400 }
       );
     }
+    // Get user ID from Supabase
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      logger.error("User not found");
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+    const userId = user.id;
 
-    const existingResumeFiles = await getAllFiles(existingResumeFileIds);
+    // Get user memories and files
+    const { files: userFiles, knowledge_base } =
+      await getAllUserMemories(userId);
     const additionalFiles = await getAllFiles(additionalFileIds);
+    const combinedFiles = [...userFiles, ...additionalFiles];
+
+    let finalMessages = messages;
+    if (knowledge_base) {
+      finalMessages = [
+        ...messages,
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Here is additional information about the user's work history and experience — use it to help you write the resume: 
+            
+            ${knowledge_base}`,
+            },
+          ],
+        },
+      ];
+    }
 
     logger.info("Generating resume from conversation history", {
-      hasExistingResume: existingResumeFiles.length > 0,
       numAdditionalFiles: additionalFiles.length,
+      numUserFiles: userFiles.length,
     });
 
     const resumeCoreMessage = await generateResumeCoreMessage(
-      messages,
+      finalMessages,
       logger,
-      existingResumeFiles,
-      additionalFiles
+      combinedFiles
     );
 
     const resumeId = await saveResumeCoreMessage(resumeCoreMessage, logger);
 
-    const userId = await getCurrentUser();
     await trackServerEvent({
       userId,
       eventName: "resume_generated",
@@ -363,33 +390,24 @@ const saveResumeSkills = async (
 const generateResumeCoreMessage = async (
   messages: CoreMessage[],
   logger: Logger,
-  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
-  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+  combinedFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const personalInfo = await extractPersonalInfo(
     messages,
     logger,
-    existingResumeFiles,
-    additionalFiles
+    combinedFiles
   );
   const educationHistory = await extractEducationHistory(
     messages,
     logger,
-    existingResumeFiles,
-    additionalFiles
+    combinedFiles
   );
   const workExperience = await extractWorkExperience(
     messages,
     logger,
-    existingResumeFiles,
-    additionalFiles
+    combinedFiles
   );
-  const skills = await extractSkills(
-    messages,
-    logger,
-    existingResumeFiles,
-    additionalFiles
-  );
+  const skills = await extractSkills(messages, logger, combinedFiles);
   return {
     personalInfo,
     educationHistory,
@@ -401,8 +419,7 @@ const generateResumeCoreMessage = async (
 const extractPersonalInfo = async (
   messages: CoreMessage[],
   logger: Logger,
-  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
-  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+  combinedFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -439,12 +456,7 @@ const extractPersonalInfo = async (
               type: "text",
               text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
             },
-            ...existingResumeFiles.map((file) => ({
-              type: "file" as "file",
-              data: file.fileData.fileUri,
-              mimeType: file.fileData.mimeType,
-            })),
-            ...additionalFiles.map((file) => ({
+            ...combinedFiles.map((file) => ({
               type: "file" as "file",
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,
@@ -486,8 +498,7 @@ const extractPersonalInfo = async (
 const extractEducationHistory = async (
   messages: CoreMessage[],
   logger: Logger,
-  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
-  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+  combinedFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -534,12 +545,7 @@ const extractEducationHistory = async (
               type: "text",
               text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
             },
-            ...existingResumeFiles.map((file) => ({
-              type: "file" as "file",
-              data: file.fileData.fileUri,
-              mimeType: file.fileData.mimeType,
-            })),
-            ...additionalFiles.map((file) => ({
+            ...combinedFiles.map((file) => ({
               type: "file" as "file",
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,
@@ -589,8 +595,7 @@ const extractEducationHistory = async (
 const extractWorkExperience = async (
   messages: CoreMessage[],
   logger: Logger,
-  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
-  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+  combinedFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -638,12 +643,7 @@ const extractWorkExperience = async (
               type: "text",
               text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
             },
-            ...existingResumeFiles.map((file) => ({
-              type: "file" as "file",
-              data: file.fileData.fileUri,
-              mimeType: file.fileData.mimeType,
-            })),
-            ...additionalFiles.map((file) => ({
+            ...combinedFiles.map((file) => ({
               type: "file" as "file",
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,
@@ -691,8 +691,7 @@ const extractWorkExperience = async (
 const extractSkills = async (
   messages: CoreMessage[],
   logger: Logger,
-  existingResumeFiles: Awaited<ReturnType<typeof getAllFiles>>,
-  additionalFiles: Awaited<ReturnType<typeof getAllFiles>>
+  combinedFiles: Awaited<ReturnType<typeof getAllFiles>>
 ) => {
   const functionLogger = logger.with({
     path: "api/resume/generate",
@@ -728,12 +727,7 @@ const extractSkills = async (
               type: "text",
               text: "Extract the information from the conversation, using the following file(s) as additional context if provided:",
             },
-            ...existingResumeFiles.map((file) => ({
-              type: "file" as "file",
-              data: file.fileData.fileUri,
-              mimeType: file.fileData.mimeType,
-            })),
-            ...additionalFiles.map((file) => ({
+            ...combinedFiles.map((file) => ({
               type: "file" as "file",
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,

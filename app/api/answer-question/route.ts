@@ -5,10 +5,13 @@ import {
 } from "@/utils/supabase/server";
 import { Tables } from "@/utils/supabase/database.types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
-import { uploadFileToGemini } from "@/app/[locale]/landing2/actions";
 import { UploadResponse } from "@/utils/types";
-import { streamTextResponseWithFallback } from "@/utils/ai/gemini";
+import {
+  streamTextResponseWithFallback,
+  uploadFileToGemini,
+} from "@/utils/ai/gemini";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { getAllUserMemories } from "../memories/utils";
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 export const maxDuration = 300;
@@ -35,6 +38,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   });
   try {
     const files = await getAllInterviewCopilotFiles(interviewCopilotId);
+    const { files: userFiles, knowledge_base } =
+      await getAllUserMemories(interviewCopilotId);
+    const combinedFiles = [...files, ...userFiles];
     const { job_title, job_description, company_name, company_description } =
       await getInterviewCopilot(interviewCopilotId);
 
@@ -62,6 +68,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         companyDescription: company_description,
         responseFormat,
         previousQA,
+        knowledgeBase: knowledge_base,
       }),
       messages: [
         {
@@ -71,7 +78,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
               type: "text",
               text: "Answer the question based on the information provided.",
             },
-            ...files.map((file) => ({
+            ...combinedFiles.map((file) => ({
               type: "file" as "file",
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,
@@ -139,6 +146,7 @@ const answerQuestionPrompt = ({
   companyDescription,
   responseFormat,
   previousQA = [],
+  knowledgeBase = "",
 }: {
   question: string;
   jobTitle: string | null;
@@ -147,6 +155,7 @@ const answerQuestionPrompt = ({
   companyDescription: string | null;
   responseFormat: "verbatim" | "bullet";
   previousQA?: Array<{ question: string; answer: string }>;
+  knowledgeBase?: string;
 }) => `
 You are a candidate that is in the middle of a job interview. You are the best interviewee in the world.
 You are going to be provided with an interview question that you must answer.
@@ -162,6 +171,12 @@ Answer the question by following the steps below.
 2. **Consult the user's work history to find relevant information**:
   - The user might upload their resume, cover letter, or other files that are relevant to the interview/their job history.
   If provided, read through the files and extract relevant information that can be used to answer the interview question.
+  ${
+    knowledgeBase
+      ? `- Here is additional information about the user's work history and experience:
+${knowledgeBase}`
+      : ""
+  }
 3. **Answer The Question**: 
   - Using all of your information, answer the question in a way that fits the criteria you created in the first step
   - If this is a follow-up question, ensure your response is consistent with your previous answers and builds upon them naturally.
