@@ -80,15 +80,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     combinedFiles.length > 0 &&
     `You are provided files that may contain information about a user's previous work history and experience.
   
-    There is a strong chance that the files provided contains all of the information that you need to create a new resume.
-
-    Analyze the information provided in the files and ask them if they would like to add any other additional information
-    in addition to the information provided in the files or if they are ready to create the resume immediately.
-
-    If they do want to add any additional information, continue the rest of the interview process.
-
-    If they would like to just use the existing resume as the basis for a new resume, then you can move onto return a response 
-    saying that you will use the existing resume as the basis for a new resume and return the interviewIsComplete flag as true.
+    Analyze the information provided in the files and use the information to help you ask the user questions.
   `
   }
 
