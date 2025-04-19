@@ -15,10 +15,27 @@ import { OpenAI } from "@posthog/ai";
 import { Speechify } from "@speechify/api-sdk";
 import { UploadResponse } from "../types";
 
+export type GeminiModelName =
+  | "gemini-2.5-pro-preview-03-25"
+  | "gemini-2.5-flash-preview-04-17"
+  | "gemini-2.0-flash";
+
+type ModelConfig = {
+  primaryModel?: GeminiModelName;
+  fallbackModel?: GeminiModelName;
+};
+
+// Default model configuration
+const DEFAULT_MODEL_CONFIG: ModelConfig = {
+  primaryModel: "gemini-2.5-flash-preview-04-17",
+  fallbackModel: "gemini-2.0-flash",
+};
+
 type BaseParams = {
   systemPrompt?: string;
   loggingContext?: Record<string, any>;
   enableLogging?: boolean;
+  modelConfig?: ModelConfig;
 };
 
 type MessagesOnlyParams = BaseParams & {
@@ -47,6 +64,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
   schema,
   loggingContext = {},
   enableLogging = true,
+  modelConfig = DEFAULT_MODEL_CONFIG,
 }: GenerateObjectParams<T>): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
   const supabase = await createSupabaseServerClient();
@@ -54,7 +72,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
     data: { user },
   } = await supabase.auth.getUser();
   try {
-    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+    const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
       posthogProperties: loggingContext,
     });
@@ -79,7 +97,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
     });
     await logger.flush();
     try {
-      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+      const model = withTracing(google(modelConfig.fallbackModel!), posthog, {
         posthogDistinctId: user?.id,
         posthogProperties: loggingContext,
       });
@@ -122,6 +140,7 @@ export const generateTextWithFallback = async ({
   prompt,
   systemPrompt,
   loggingContext = {},
+  modelConfig = DEFAULT_MODEL_CONFIG,
 }: MutuallyExclusiveParams): Promise<string> => {
   const logger = new Logger().with(loggingContext);
   const supabase = await createSupabaseServerClient();
@@ -129,7 +148,7 @@ export const generateTextWithFallback = async ({
     data: { user },
   } = await supabase.auth.getUser();
   try {
-    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+    const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
       posthogProperties: loggingContext,
     });
@@ -148,7 +167,7 @@ export const generateTextWithFallback = async ({
     });
     await logger.flush();
     try {
-      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+      const model = withTracing(google(modelConfig.fallbackModel!), posthog, {
         posthogDistinctId: user?.id,
         posthogProperties: loggingContext,
       });
@@ -184,6 +203,7 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
   prompt,
   systemPrompt,
   loggingContext = {},
+  modelConfig = DEFAULT_MODEL_CONFIG,
 }: MutuallyExclusiveParams): Promise<z.infer<T>> => {
   const logger = new Logger().with(loggingContext);
   const supabase = await createSupabaseServerClient();
@@ -191,7 +211,7 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
     data: { user },
   } = await supabase.auth.getUser();
   try {
-    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+    const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
       posthogProperties: loggingContext,
     });
@@ -211,7 +231,7 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
     await logger.flush();
 
     try {
-      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+      const model = withTracing(google(modelConfig.fallbackModel!), posthog, {
         posthogDistinctId: user?.id,
         posthogProperties: loggingContext,
       });
@@ -312,6 +332,7 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
   schema,
   loggingContext = {},
   enableLogging = true,
+  modelConfig = DEFAULT_MODEL_CONFIG,
 }: GenerateObjectParams<T>) => {
   const logger = new Logger().with(loggingContext);
   const supabase = await createSupabaseServerClient();
@@ -320,7 +341,7 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
   } = await supabase.auth.getUser();
 
   try {
-    const model = withTracing(google("gemini-2.0-flash"), posthog, {
+    const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
       posthogProperties: loggingContext,
     });
@@ -343,7 +364,7 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
     await logger.flush();
 
     try {
-      const model = withTracing(google("gemini-1.5-flash"), posthog, {
+      const model = withTracing(google(modelConfig.fallbackModel!), posthog, {
         posthogDistinctId: user?.id,
         posthogProperties: loggingContext,
       });
