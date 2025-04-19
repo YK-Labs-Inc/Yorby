@@ -94,7 +94,6 @@ What would you like to add to your knowledge base today?`,
       const { updatedKnowledgeBase } = await response.json();
       // Set the lifted state
       setKnowledgeBase(updatedKnowledgeBase);
-      console.log("Knowledge base updated successfully.");
     } catch (error) {
       logError("Error updating knowledge base", {
         error: error instanceof Error ? error.message : String(error),
