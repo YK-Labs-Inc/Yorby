@@ -91,11 +91,6 @@ What would you like to add to your knowledge base today?`,
     ];
     setMessages(updatedMessages);
 
-    // Update knowledge base with the new message
-    if (message.trim()) {
-      void updateKnowledgeBase(updatedMessages);
-    }
-
     const formData = new FormData();
     formData.append("messages", JSON.stringify(updatedMessages));
     if (conversationId) {
@@ -117,6 +112,11 @@ What would you like to add to your knowledge base today?`,
       body: formData,
     });
     setGeneratingResponse(false);
+
+    // Update knowledge base with the new message
+    if (message.trim() || (files && files.length > 0)) {
+      void updateKnowledgeBase(updatedMessages);
+    }
 
     // If files were uploaded, refresh the files list
     if (files && files.length > 0) {
