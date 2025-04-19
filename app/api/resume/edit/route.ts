@@ -10,6 +10,7 @@ import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { CoreMessage } from "ai";
 import { ResumeDataType } from "@/app/[locale]/dashboard/resumes/components/ResumeBuilder";
 import { getAllUserMemories } from "../../memories/utils";
+import { Tables } from "@/utils/supabase/database.types";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -88,7 +89,12 @@ const updateResume = async (
   resume: ResumeDataType,
   messages: CoreMessage[],
   speakingStyle?: string,
-  files?: Awaited<ReturnType<typeof getAllUserMemories>>["files"]
+  files?: {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[]
 ) => {
   const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
