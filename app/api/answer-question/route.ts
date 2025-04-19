@@ -92,6 +92,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         responseFormat,
         previousQA,
       },
+      modelConfig: {
+        primaryModel: "gemini-2.0-flash",
+        fallbackModel: "gemini-1.5-flash",
+      },
     });
 
     const stream = new ReadableStream({

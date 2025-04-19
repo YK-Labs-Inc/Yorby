@@ -442,6 +442,9 @@ const extractPersonalInfo = async (
 
     If you are unable to extract the location return a null value for the field in the final JSON response.
 
+    The conversation history might include a job description that the user would like to use to tailor the resume.
+    If you are able to determine the job description, then tailor your response to best fit the job description.
+
     Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
     characters are not needed. Just return the raw JSON object string.
     `;
@@ -474,6 +477,10 @@ const extractPersonalInfo = async (
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "personal information",
+      },
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
     });
 
@@ -531,6 +538,9 @@ const extractEducationHistory = async (
 
     If you are unable to extract the additional information return an empty array for the field in the final JSON response.
 
+    The conversation history might include a job description that the user would like to use to tailor the resume.
+    If you are able to determine the job description, then tailor your response to best fit the job description.
+
     Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
     characters are not needed. Just return the raw JSON object string.
   `;
@@ -567,6 +577,10 @@ const extractEducationHistory = async (
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "personal information",
+      },
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
     });
 
@@ -629,6 +643,9 @@ const extractWorkExperience = async (
     and to create 3-5 blocks of information that will be used to demonstrate what the candidate has done at the job. Format your response to maximize the chances that it will be
     noticed by a hiring manager and that it will pass any resume screening software.
 
+    The conversation history might include a job description that the user would like to use to tailor the resume.
+    If you are able to determine the job description, then tailor your response to best fit the job description.
+
     Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
     characters are not needed. Just return the raw JSON object string.
   `;
@@ -664,6 +681,10 @@ const extractWorkExperience = async (
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "work experience",
+      },
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
     });
 
@@ -712,6 +733,9 @@ const extractSkills = async (
     of the skills.
 
     If you are unable to extract any skills return an empty array in the final JSON response.
+    
+    The conversation history might include a job description that the user would like to use to tailor the resume.
+    If you are able to determine the job description, then tailor your response to best fit the job description.
 
     Your JSON response cannot have any new line characters added to it. It will not be read by a human so the new line
     characters are not needed. Just return the raw JSON object string.
@@ -745,6 +769,10 @@ const extractSkills = async (
       loggingContext: {
         path: "api/resume/generate",
         dataToExtract: "skills",
+      },
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
       },
     });
 

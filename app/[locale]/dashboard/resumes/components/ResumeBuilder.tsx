@@ -151,6 +151,8 @@ interface StartScreenProps {
   enableResumesFileUpload: boolean;
 }
 
+const START_CONVERSATION_MESSAGE = "Begin the conversation with the user.";
+
 const StartScreen = ({
   enableResumesFileUpload,
   onStart,
@@ -312,7 +314,6 @@ const ResumeBuilderComponent = ({
 }) => {
   const t = useTranslations("resumeBuilder");
   const [isDemoDismissed, setIsDemoDismissed] = useState<boolean>(false);
-  const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isInterviewing, setIsInterviewing] = useState<boolean>(false);
   const [messages, setMessages] = useState<CoreMessage[]>([]);
@@ -358,6 +359,7 @@ const ResumeBuilderComponent = ({
   const [additionalFiles, setAdditionalFiles] = useState<
     Tables<"user_files">[]
   >([]);
+  const conversationStarted = useRef(false);
 
   const handleVoiceChange = useCallback(
     (voiceId: string) => {
@@ -368,22 +370,6 @@ const ResumeBuilderComponent = ({
     },
     [setSelectedVoice]
   );
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const isMobileView = window.innerWidth < 768; // 768px is the standard md breakpoint
-      setIsMobileView(isMobileView);
-    };
-
-    // Check on mount
-    checkMobile();
-
-    // Add resize listener
-    window.addEventListener("resize", checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Handle unlock success
   useEffect(() => {
@@ -400,10 +386,6 @@ const ResumeBuilderComponent = ({
   const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
   useEffect(() => {
-    const selectedVoice = VOICE_OPTIONS.find(
-      (voice) => voice.voiceId === selectedVoiceId
-    );
-
     // Use the transformation summary if available, otherwise use the default messages
     let initialMessage = "";
 
@@ -411,52 +393,18 @@ const ResumeBuilderComponent = ({
       initialMessage = transformSummary;
     } else if (resumeId) {
       initialMessage = t("editResumeInitialMessage");
+    }
+    if (!resumeId && !conversationStarted.current) {
+      conversationStarted.current = true;
+      handleSendMessage(START_CONVERSATION_MESSAGE);
     } else {
-      initialMessage = t("createResumeInitialMessage");
+      setMessages([
+        {
+          role: "assistant",
+          content: initialMessage,
+        },
+      ]);
     }
-
-    // If we have a selected voice with a speaking style, modify the message accordingly
-    if (
-      selectedVoice?.speakingStyle &&
-      !transformSummary &&
-      !additionalFiles.length
-    ) {
-      if (selectedVoice.voiceId === "dg") {
-        initialMessage = `Listen up, buttercup! You want a killer resume? I need the intel.
-
-  Name. Email. Work and education history – the REAL stuff, the grit. And your damn skills – what makes you a weapon?
-
-  Spit it out. I ain't got all day to coddle you. Give me the raw data, and we'll forge something that'll make them take notice. Then, we'll keep grinding until it's perfect.
-
-  No excuses. Let's GO.
-
-  Stay hard!
-        `;
-      } else if (selectedVoice.voiceId === "lbj") {
-        initialMessage = `Yo, what up, fam? You tryna get that next-level resume, huh? Aight, I feel you. But look, ain't nothin' in this world just gon' fall in your lap. You gotta put in that work, you gotta grind for it.
-
-So, lemme get the details. Name, email, your work and school history – the real journey. And them skills you bringin'.
-
-Give it to me straight up. We gon' cook somethin' solid, then keep workin' till it's straight fire.
-
-Stay focused, stay hungry. Let's get it.
-        `;
-      } else if (selectedVoice.voiceId === "cw") {
-        initialMessage = `You wanna make a super cool professional resume? That sounds like fun!  But first, unnie needs to know a little bit about you, okay? 
-
-Could you tell me your name? And maybe your email address so we can stay in touch? Oh! And what about your work history and where you went to school? And also, what are some of the amazing skills you have? You must have so many! 
-
-Once I have all that information, I can try my best to make a really great first draft of your resume for you! Then, we can keep working on it together to make it absolutely perfect! 
-        `;
-      }
-    }
-
-    setMessages([
-      {
-        role: "assistant",
-        content: initialMessage,
-      },
-    ]);
   }, [
     resumeId,
     persona,
@@ -592,12 +540,6 @@ Once I have all that information, I can try my best to make a really great first
         role: "user",
         content: messageContent,
       },
-    ];
-
-    setMessages(updatedMessages);
-
-    updatedMessages = [
-      ...updatedMessages,
       {
         role: "assistant",
         content: "",
@@ -631,7 +573,9 @@ Once I have all that information, I can try my best to make a really great first
         role: "assistant",
         content: interviewerResponse,
       };
-      updatedMessages = [...updatedMessages.slice(0, -1), aiMessage];
+      updatedMessages = [...updatedMessages.slice(0, -1), aiMessage].filter(
+        (message) => message.content !== START_CONVERSATION_MESSAGE
+      );
       setMessages(updatedMessages);
 
       // If interview is complete, set resume as ready and generate it
