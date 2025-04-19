@@ -4,7 +4,7 @@ import { ChatUI } from "@/app/components/chat/ChatUI";
 import { TtsProvider } from "@/app/context/TtsContext";
 import { Card } from "@/components/ui/card";
 import { CoreMessage } from "ai";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { MemoriesView } from "./components/Memories";
 import { motion } from "framer-motion";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -33,6 +33,7 @@ What would you like to add to your knowledge base today?`,
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { logError } = useAxiomLogging();
   const user = useUser();
+  const [knowledgeBase, setKnowledgeBase] = useState<string | null>(null);
 
   const fetchFiles = useCallback(async () => {
     if (!user) return;
@@ -53,6 +54,25 @@ What would you like to add to your knowledge base today?`,
     setFiles(filesData);
   }, [user, logError]);
 
+  const fetchKnowledgeBase = useCallback(async () => {
+    if (!user) return;
+    const supabase = createSupabaseBrowserClient();
+    try {
+      const { data: knowledgeBaseData } = await supabase
+        .from("user_knowledge_base")
+        .select("knowledge_base")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      setKnowledgeBase(knowledgeBaseData?.knowledge_base || null);
+    } catch (error) {
+      logError("Error fetching knowledge base", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      setKnowledgeBase(null);
+    }
+  }, [user, logError]);
+
   const updateKnowledgeBase = async (newMessages: CoreMessage[]) => {
     try {
       setIsUpdatingKnowledgeBase(true);
@@ -69,6 +89,12 @@ What would you like to add to your knowledge base today?`,
       if (!response.ok) {
         throw new Error("Failed to update knowledge base");
       }
+
+      // Parse the response to get the updated knowledge base
+      const { updatedKnowledgeBase } = await response.json();
+      // Set the lifted state
+      setKnowledgeBase(updatedKnowledgeBase);
+      console.log("Knowledge base updated successfully.");
     } catch (error) {
       logError("Error updating knowledge base", {
         error: error instanceof Error ? error.message : String(error),
@@ -91,11 +117,6 @@ What would you like to add to your knowledge base today?`,
     ];
     setMessages(updatedMessages);
 
-    // Update knowledge base with the new message
-    if (message.trim()) {
-      void updateKnowledgeBase(updatedMessages);
-    }
-
     const formData = new FormData();
     formData.append("messages", JSON.stringify(updatedMessages));
     if (conversationId) {
@@ -117,6 +138,11 @@ What would you like to add to your knowledge base today?`,
       body: formData,
     });
     setGeneratingResponse(false);
+
+    // Update knowledge base with the new message
+    if (message.trim() || (files && files.length > 0)) {
+      void updateKnowledgeBase(updatedMessages);
+    }
 
     // If files were uploaded, refresh the files list
     if (files && files.length > 0) {
@@ -203,6 +229,9 @@ What would you like to add to your knowledge base today?`,
               setIsUpdatingKnowledgeBase={setIsUpdatingKnowledgeBase}
               fetchFiles={fetchFiles}
               files={files}
+              knowledgeBase={knowledgeBase}
+              setKnowledgeBase={setKnowledgeBase}
+              fetchKnowledgeBase={fetchKnowledgeBase}
             />
           </Card>
         </motion.div>

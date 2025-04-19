@@ -79,7 +79,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
               text: "Answer the question based on the information provided.",
             },
             ...combinedFiles.map((file) => ({
-              type: "file" as "file",
+              type: "file" as const,
               data: file.fileData.fileUri,
               mimeType: file.fileData.mimeType,
             })),

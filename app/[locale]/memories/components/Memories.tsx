@@ -26,14 +26,19 @@ export const MemoriesView = ({
   setIsUpdatingKnowledgeBase,
   fetchFiles,
   files,
+  knowledgeBase,
+  setKnowledgeBase,
+  fetchKnowledgeBase,
 }: {
   isUpdatingKnowledgeBase: boolean;
   setIsUpdatingKnowledgeBase: Dispatch<SetStateAction<boolean>>;
   fetchFiles: () => Promise<void>;
   files: Tables<"user_files">[];
+  knowledgeBase: string | null;
+  setKnowledgeBase: Dispatch<SetStateAction<string | null>>;
+  fetchKnowledgeBase: () => Promise<void>;
 }) => {
   const t = useTranslations("knowledgeBase");
-  const [knowledgeBase, setKnowledgeBase] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeView, setActiveView] = useState<ViewType>("knowledgeBase");
   const user = useUser();
@@ -44,44 +49,37 @@ export const MemoriesView = ({
   const handleFetchFiles = useCallback(async () => {
     if (!user) return;
     try {
-      setIsLoading(true);
       await fetchFiles();
     } catch (error) {
       logError("Error fetching files", {
         error: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setIsLoading(false);
     }
   }, [user, fetchFiles, logError]);
-
-  const fetchKnowledgeBase = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    const userId = user.id;
-    const supabase = createSupabaseBrowserClient();
-
-    const { data: knowledgeBaseData } = await supabase
-      .from("user_knowledge_base")
-      .select("knowledge_base")
-      .eq("user_id", userId)
-      .single();
-
-    setKnowledgeBase(knowledgeBaseData?.knowledge_base || null);
-    setIsLoading(false);
-  }, [user]);
 
   useEffect(() => {
     setEditedKnowledgeBase(knowledgeBase || "");
   }, [knowledgeBase]);
 
   useEffect(() => {
-    if (activeView === "knowledgeBase") {
-      fetchKnowledgeBase();
-    } else if (activeView === "files") {
-      handleFetchFiles();
-    }
-  }, [activeView, fetchKnowledgeBase, handleFetchFiles]);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        if (activeView === "knowledgeBase") {
+          await fetchKnowledgeBase();
+        } else if (activeView === "files") {
+          await handleFetchFiles();
+        }
+      } catch (error) {
+        logError("Error fetching knowledge base", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [activeView, handleFetchFiles, fetchKnowledgeBase]);
 
   const handleDeleteFile = async (file: Tables<"user_files">) => {
     if (!user) return;

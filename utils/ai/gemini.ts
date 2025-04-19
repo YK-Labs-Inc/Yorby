@@ -66,7 +66,10 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
   enableLogging = true,
   modelConfig = DEFAULT_MODEL_CONFIG,
 }: GenerateObjectParams<T>): Promise<z.infer<T>> => {
-  const logger = new Logger().with(loggingContext);
+  const logger = new Logger().with({
+    ...loggingContext,
+    ...modelConfig,
+  });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -142,7 +145,10 @@ export const generateTextWithFallback = async ({
   loggingContext = {},
   modelConfig = DEFAULT_MODEL_CONFIG,
 }: MutuallyExclusiveParams): Promise<string> => {
-  const logger = new Logger().with(loggingContext);
+  const logger = new Logger().with({
+    ...loggingContext,
+    ...modelConfig,
+  });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -205,7 +211,10 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
   loggingContext = {},
   modelConfig = DEFAULT_MODEL_CONFIG,
 }: MutuallyExclusiveParams): Promise<z.infer<T>> => {
-  const logger = new Logger().with(loggingContext);
+  const logger = new Logger().with({
+    ...loggingContext,
+    ...modelConfig,
+  });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -334,7 +343,10 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
   enableLogging = true,
   modelConfig = DEFAULT_MODEL_CONFIG,
 }: GenerateObjectParams<T>) => {
-  const logger = new Logger().with(loggingContext);
+  const logger = new Logger().with({
+    ...loggingContext,
+    ...modelConfig,
+  });
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
