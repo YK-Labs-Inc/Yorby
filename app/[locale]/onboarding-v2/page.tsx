@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
+import { completeOnboarding } from "./actions";
 
 const steps = [
   {
@@ -42,7 +43,9 @@ export default function OnboardingPage() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      router.push("/knowledge-base");
+      completeOnboarding().then(() => {
+        router.push("/memories");
+      });
     }
   };
 

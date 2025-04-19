@@ -2,7 +2,8 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { NextResponse } from "next/server";
 import * as SibApiV3Sdk from "@sendinblue/client";
-import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
+import { User } from "@supabase/supabase-js";
 
 export const GET = withAxiom(async (request: AxiomRequest) => {
   // The `/auth/callback` route is required for the server-side auth flow implemented
@@ -26,6 +27,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   });
 
   const supabase = await createSupabaseServerClient();
+  let user: User | null = null;
 
   if (type === "magiclink") {
     logger.info("Handling magic link");
@@ -46,6 +48,8 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         `${origin}/sign-in?error=Failed to verify magic link. Please try again.`
       );
     }
+    const { data: userData } = await supabase.auth.getUser();
+    user = userData?.user;
   } else if (token && type === "signup" && email) {
     logger.info("Handling user signup");
     const { error } = await supabase.auth.verifyOtp({
@@ -60,7 +64,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       );
     }
     const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
+    user = userData?.user;
     logger = logger.with({ userId: user?.id });
     if (user?.id && email) {
       await addUserToBrevo({
@@ -80,7 +84,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       return NextResponse.redirect(`${origin}/sign-up?error=${error.message}`);
     }
     const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
+    user = userData?.user;
     logger = logger.with({ userId: user?.id });
     logger.info("Handling user email change");
     if (user?.id && email) {
@@ -97,9 +101,37 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     return NextResponse.redirect(`${redirectTo}`);
   }
 
-  logger.info("Redirecting to jobs dashboard");
+  let redirectToOnboardingV2 = false;
+  if (user) {
+    redirectToOnboardingV2 = await getRedirectToOnboardingV2(user);
+  }
+  logger = logger.with({ redirectToOnboardingV2 });
+  if (redirectToOnboardingV2) {
+    logger.info("Redirecting to onboarding-v2");
+    return NextResponse.redirect(`${origin}/onboarding-v2`);
+  }
+  logger.info("Redirecting to onboarding");
   return NextResponse.redirect(`${origin}/onboarding`);
 });
+
+const getRedirectToOnboardingV2 = async (user: User) => {
+  const memoriesEnabled = Boolean(
+    await posthog.isFeatureEnabled("enable-memories", user.id)
+  );
+  if (!memoriesEnabled) {
+    return false;
+  }
+  const userHasFinishedMemoriesOnboarding =
+    await completedMemoriesOnboarding(user);
+  if (userHasFinishedMemoriesOnboarding) {
+    return false;
+  }
+
+  return memoriesEnabled && !userHasFinishedMemoriesOnboarding;
+};
+
+const completedMemoriesOnboarding = async (user: User) =>
+  Boolean(user.app_metadata["completed-memories-onboarding"]);
 
 const addUserToBrevo = async ({
   userId,
