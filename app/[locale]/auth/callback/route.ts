@@ -118,7 +118,6 @@ const getRedirectToOnboardingV2 = async (user: User) => {
   const memoriesEnabled = Boolean(
     await posthog.isFeatureEnabled("enable-memories", user.id)
   );
-  console.log("memoriesEnabled", memoriesEnabled);
   if (!memoriesEnabled) {
     return false;
   }
