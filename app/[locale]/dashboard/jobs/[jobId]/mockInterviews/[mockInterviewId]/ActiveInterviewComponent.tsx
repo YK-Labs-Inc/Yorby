@@ -11,6 +11,7 @@ import { useUser } from "@/context/UserContext";
 import { CoreMessage } from "ai";
 import { ChatUI } from "@/app/components/chat";
 import { useTts } from "@/app/context/TtsContext";
+import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
@@ -44,6 +45,7 @@ export default function ActiveInterviewComponent({
   const user = useUser();
   const session = useSession();
   const { selectedVoice, stopAudioPlayback } = useTts();
+  const { updateKnowledgeBase } = useKnowledgeBase();
 
   useEffect(() => {
     if (!isInitialized) {
@@ -81,6 +83,16 @@ export default function ActiveInterviewComponent({
         },
       ];
       setMessages(updatedMessages);
+
+      // Update knowledge base with user's message
+      void updateKnowledgeBase([
+        ...prevMessages,
+        {
+          role: "user",
+          content: message,
+        },
+      ]);
+
       const chatResponse = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -123,6 +135,10 @@ export default function ActiveInterviewComponent({
         },
       ];
       setMessages(updatedMessages);
+
+      // Update knowledge base with AI's response
+      void updateKnowledgeBase(updatedMessages);
+
       if (messages.length === 0) {
         setFirstQuestionAudioIsInitialized(true);
       }
