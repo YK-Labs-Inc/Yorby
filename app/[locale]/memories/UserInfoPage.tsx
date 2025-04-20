@@ -38,6 +38,7 @@ What would you like to add to your knowledge base today?`,
     isUpdatingKnowledgeBase,
     updateKnowledgeBase,
     setKnowledgeBase,
+    setIsUpdatingKnowledgeBase,
   } = useKnowledgeBase();
 
   const fetchFiles = useCallback(async () => {
@@ -200,7 +201,7 @@ What would you like to add to your knowledge base today?`,
           <Card className="flex-1 overflow-hidden min-h-0">
             <MemoriesView
               isUpdatingKnowledgeBase={isUpdatingKnowledgeBase}
-              setIsUpdatingKnowledgeBase={() => {}}
+              setIsUpdatingKnowledgeBase={setIsUpdatingKnowledgeBase}
               fetchFiles={fetchFiles}
               files={files}
               knowledgeBase={knowledgeBase}
