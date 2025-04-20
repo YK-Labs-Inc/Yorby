@@ -68,6 +68,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
       
     Your goal is to obtain the following information from the user in the order provided:
+    - Job Description They Are Making a Resume For
     - Name
     - Email
     - Phone
@@ -75,7 +76,6 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Education
     - Work Experience
     - Skills
-    - Job Description They Are Making a Resume For
 
   ${
     combinedFiles.length > 0 &&
@@ -172,8 +172,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         messages,
       },
       modelConfig: {
-        primaryModel: "gemini-2.5-pro-preview-03-25",
-        fallbackModel: "gemini-2.5-flash-preview-04-17",
+        primaryModel: "gemini-2.5-flash-preview-04-17",
+        fallbackModel: "gemini-2.0-flash",
       },
     });
 

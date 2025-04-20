@@ -582,8 +582,11 @@ const ResumeBuilderComponent = ({
       if (interviewIsComplete) {
         generateResume([...updatedMessages]);
       }
-    } catch (error) {
-      logError("Error in AI resume conversation:", { error });
+    } catch (error: unknown) {
+      logError("Error in AI resume conversation:", {
+        error: error instanceof Error ? error.message : JSON.stringify(error),
+        messageContent,
+      });
 
       // Remove the temporary loading message
       setMessages((prev) => prev.slice(0, -1));
