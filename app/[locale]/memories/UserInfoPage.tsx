@@ -14,11 +14,7 @@ import { Tables } from "@/utils/supabase/database.types";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { useTranslations } from "next-intl";
 
-const _UserInfoPage = ({
-  isOnboarding = false,
-}: {
-  isOnboarding?: boolean;
-}) => {
+const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const t = useTranslations("knowledgeBase");
   const [generatingResponse, setGeneratingResponse] = useState(false);
   const [files, setFiles] = useState<Tables<"user_files">[]>([]);
@@ -217,9 +213,9 @@ const _UserInfoPage = ({
 };
 
 export default function UserInfoPage({
-  isOnboarding = false,
+  isOnboarding,
 }: {
-  isOnboarding?: boolean;
+  isOnboarding: boolean;
 }) {
   return (
     <TtsProvider>
