@@ -154,7 +154,10 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     
     ## Skills
     - Ask for the skills that they are most proficient in and have experience with
-    - At the end, ask for any additional information about the skills. If they do not have any additional skills, then you can move onto completing the interview.`
+    - At the end, ask for any additional information about the skills. If they do not have any additional skills, then you can move onto completing the interview.
+
+    Once you have gathered all the information you need, thank the user for their time and ask if they have any other information they would like to add.
+    `
         : ""
     }
     `;
