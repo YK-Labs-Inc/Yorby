@@ -4,7 +4,7 @@ import { ChatUI } from "@/app/components/chat/ChatUI";
 import { TtsProvider } from "@/app/context/TtsContext";
 import { Card } from "@/components/ui/card";
 import { CoreMessage } from "ai";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { MemoriesView } from "./components/Memories";
 import { motion } from "framer-motion";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -12,22 +12,18 @@ import { useUser } from "@/context/UserContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
+import { useTranslations } from "next-intl";
 
-const _UserInfoPage = () => {
+const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
+  const t = useTranslations("knowledgeBase");
   const [generatingResponse, setGeneratingResponse] = useState(false);
   const [files, setFiles] = useState<Tables<"user_files">[]>([]);
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
-      content: `Hi there! 👋
-
-I'm your AI career coach. This is your personal knowledge base where we'll store all your career information to help create better resumes and interview prep materials.
-
-What you can do:
-- **Upload files**: Resumes, cover letters, work documents
-- **Chat with me**: Share additional work experience and details
-
-What would you like to add to your knowledge base today?`,
+      content: isOnboarding
+        ? t("initialOnboardingMessage")
+        : t("initialMessage"),
     },
   ]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -94,6 +90,7 @@ What would you like to add to your knowledge base today?`,
 
     const formData = new FormData();
     formData.append("messages", JSON.stringify(updatedMessages));
+    formData.append("isOnboarding", String(isOnboarding));
     if (conversationId) {
       formData.append("conversationId", conversationId);
     }
@@ -215,10 +212,14 @@ What would you like to add to your knowledge base today?`,
   );
 };
 
-export default function UserInfoPage() {
+export default function UserInfoPage({
+  isOnboarding,
+}: {
+  isOnboarding: boolean;
+}) {
   return (
     <TtsProvider>
-      <_UserInfoPage />
+      <_UserInfoPage isOnboarding={isOnboarding} />
     </TtsProvider>
   );
 }
