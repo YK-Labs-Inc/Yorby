@@ -55,7 +55,6 @@ import {
 } from "@/components/ui/select";
 import { useResumeEditAgent } from "../agent/useResumeEdit";
 import { H2 } from "@/components/typography";
-import { FileSelectionModal } from "./FileSelectionModal";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -209,30 +208,6 @@ const StartScreen = ({
           </div>
 
           <div className="space-y-6">
-            {enableResumesFileUpload && (
-              <div className="space-y-2">
-                <FileSelectionModal
-                  onFileSelect={setAdditionalFiles}
-                  selectedFiles={additionalFiles}
-                />
-                {additionalFiles.length > 0 && (
-                  <div className="text-sm text-muted-foreground pl-2">
-                    <p className="font-medium">
-                      {t("startScreen.selectedContextFiles")} (
-                      {additionalFiles.length}):
-                    </p>
-                    <ul className="list-disc list-inside">
-                      {additionalFiles.map((file) => (
-                        <li key={file.id} className="truncate">
-                          {file.display_name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="flex items-center justify-between">
               <Label htmlFor="tts-toggle">{t("startScreen.enableVoice")}</Label>
               <Switch
