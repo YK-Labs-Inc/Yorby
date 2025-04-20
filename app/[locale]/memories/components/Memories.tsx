@@ -190,10 +190,7 @@ export const MemoriesView = ({
       <div className="flex-1 p-4 min-h-0 flex flex-col">
         {activeView === "knowledgeBase" ? (
           <>
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-semibold">
-                {t("knowledgeBase.title")}
-              </h2>
+            <div className="flex justify-end items-center mb-2">
               {!isEditing ? (
                 <Button
                   variant="secondary"
@@ -259,7 +256,6 @@ export const MemoriesView = ({
           </>
         ) : (
           <>
-            <h2 className="text-lg font-semibold mb-4">{t("files.title")}</h2>
             {files.length > 0 ? (
               <Card className="h-full overflow-y-auto">
                 <div className="p-6">
