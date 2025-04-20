@@ -44,7 +44,7 @@ export default function OnboardingPage() {
       setCurrentStep(currentStep + 1);
     } else {
       completeOnboarding().then(() => {
-        router.push("/memories");
+        router.push("/memories?onboarding=true");
       });
     }
   };

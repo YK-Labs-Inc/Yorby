@@ -1424,7 +1424,9 @@
       "error": {
         "updateFailed": "Failed to update memories"
       }
-    }
+    },
+    "initialMessage": "Hi there! 👋\n\nI'm your AI career coach. This is your personal knowledge base where we'll store all your career information to help create better resumes and interview prep materials.\n\nWhat you can do:\n- **Upload files**: Resumes, cover letters, work documents\n- **Chat with me**: Share additional work experience and details\n\nWhat would you like to add to your knowledge base today?",
+    "initialOnboardingMessage": "Hi there! 👋\n\nI'm your AI career coach. I need to get to know you a little better before I can help you in your job search. I'm looking for the following information from you:\n\n- **Name**\n- **Email**\n- **Phone**\n- **Location**\n- **Education**\n- **Work Experience**\n- **Skills**\n\nCan you share this information with me? You can either tell me over chat or upload files like a previous resume or cover letter to help me get to know you better."
   },
   "interviewPrepLanding": {
     "hero": {

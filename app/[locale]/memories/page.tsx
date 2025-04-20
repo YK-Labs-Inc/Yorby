@@ -2,7 +2,11 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import UserInfoPage from "./UserInfoPage";
 
-export default async function AddInfo() {
+export default async function AddInfo({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -12,5 +16,7 @@ export default async function AddInfo() {
     redirect("/login");
   }
 
-  return <UserInfoPage />;
+  const { onboarding } = await searchParams;
+
+  return <UserInfoPage isOnboarding={onboarding === "true"} />;
 }

@@ -14,10 +14,12 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   const messages = JSON.parse(
     formData.get("messages") as string
   ) as CoreMessage[];
+  const isOnboarding = formData.get("isOnboarding") === "true";
   const logger = req.log.with({
     conversationId,
     files,
     messages,
+    isOnboarding,
   });
 
   const supabase = await createSupabaseServerClient();
@@ -118,6 +120,43 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     any other information they would like to add.
 
     Your tone should be friendly and professional and youre response should be concise and to the point.
+
+    ${
+      isOnboarding
+        ? `Your goal is to obtain the following information from the user in the order provided:
+    - Name
+    - Email
+    - Phone
+    - Location
+    - Education
+    - Work Experience
+    - Skills
+
+    If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided.
+
+    As you chat back and forth with the user, ask questions to gather the information you need.
+
+    Ask for each piece of information one at a time.
+
+    I will now provide you with more specific instructions for certain pieces of information.
+
+    ## Education
+    - Ask for the school, degree, graduation year, and GPA
+    - At the end, ask for any additional information about the education. If they respond and indicate that they have no more 
+    information to provide about their education, then you can move onto the work experience section.
+
+    ## Work Experience
+    - Ask for the company, title, start date, end date, and what they did at the company
+    - For each company that they work for, ask them about their responsibilities and accomplishments. This information will be used to generate a list of bullet points for the resume.
+    We will try to generate 3-5 bullet points for each company, so ask for as much information as possible about their responsibilities and accomplishments. If they 
+    do not have any additional information about a company, then move onto the next company.
+    - At the end, ask for any additional information about the work experience. If they do not have any additional work experience, move onto the skills section.
+    
+    ## Skills
+    - Ask for the skills that they are most proficient in and have experience with
+    - At the end, ask for any additional information about the skills. If they do not have any additional skills, then you can move onto completing the interview.`
+        : ""
+    }
     `;
 
   try {
