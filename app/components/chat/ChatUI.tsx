@@ -27,6 +27,7 @@ import { useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import Markdown from "react-markdown";
 
 interface ChatUIProps {
@@ -66,6 +67,7 @@ export function ChatUI({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isPlaying = useRef<boolean>(false);
+  const { updateKnowledgeBase } = useKnowledgeBase();
   const {
     isTtsEnabled,
     setIsTtsEnabled,
@@ -152,6 +154,16 @@ export function ChatUI({
     setPlayingMessageIndex(null);
     const messageToSend = textInput;
     setTextInput("");
+
+    // Create the new message array with the user's message
+    const newMessages = [
+      ...messages,
+      { role: "user" as const, content: messageToSend },
+    ];
+
+    // Update the knowledge base with the new messages
+    void updateKnowledgeBase(newMessages);
+
     const sendMessageResponse = await onSendMessage(
       messageToSend,
       selectedFiles

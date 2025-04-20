@@ -16,6 +16,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import { DeepgramContextProvider } from "@/context/DeepgramContext";
 import { posthog } from "@/utils/tracking/serverUtils";
 import Script from "next/script";
+import { KnowledgeBaseProvider } from "@/app/context/KnowledgeBaseContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -195,19 +197,24 @@ export default async function RootLayout({
                   <DeepgramContextProvider>
                     <SidebarProvider>
                       <OnboardingProvider initialState={onboardingState}>
-                        <AppSidebar
-                          jobs={jobs}
-                          numberOfCredits={numberOfCredits}
-                          hasSubscription={hasSubscription}
-                          user={user}
-                          interviewCopilots={interviewCopilots}
-                          isResumeBuilderEnabled={isResumeBuilderEnabled}
-                          resumes={resumes}
-                          isSubscriptionVariant={isSubscriptionVariant}
+                        <KnowledgeBaseProvider
                           isMemoriesEnabled={isMemoriesEnabled}
-                        />
-                        <SidebarTrigger />
-                        <main className="w-full">{children}</main>
+                        >
+                          <AppSidebar
+                            jobs={jobs}
+                            numberOfCredits={numberOfCredits}
+                            hasSubscription={hasSubscription}
+                            user={user}
+                            interviewCopilots={interviewCopilots}
+                            isResumeBuilderEnabled={isResumeBuilderEnabled}
+                            resumes={resumes}
+                            isSubscriptionVariant={isSubscriptionVariant}
+                            isMemoriesEnabled={isMemoriesEnabled}
+                          />
+                          <SidebarTrigger />
+                          <main className="w-full">{children}</main>
+                          <Toaster />
+                        </KnowledgeBaseProvider>
                       </OnboardingProvider>
                     </SidebarProvider>
                   </DeepgramContextProvider>

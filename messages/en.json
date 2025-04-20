@@ -1417,6 +1417,13 @@
     "save": "Save",
     "error": {
       "generic": "Sorry, something went wrong. Please try again."
+    },
+    "toast": {
+      "memoriesUpdated": "Memories updated",
+      "viewButton": "View Memories",
+      "error": {
+        "updateFailed": "Failed to update memories"
+      }
     }
   },
   "interviewPrepLanding": {

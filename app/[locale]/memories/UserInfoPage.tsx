@@ -11,10 +11,10 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useUser } from "@/context/UserContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types";
+import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 
 const _UserInfoPage = () => {
   const [generatingResponse, setGeneratingResponse] = useState(false);
-  const [isUpdatingKnowledgeBase, setIsUpdatingKnowledgeBase] = useState(false);
   const [files, setFiles] = useState<Tables<"user_files">[]>([]);
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
@@ -33,7 +33,12 @@ What would you like to add to your knowledge base today?`,
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { logError } = useAxiomLogging();
   const user = useUser();
-  const [knowledgeBase, setKnowledgeBase] = useState<string | null>(null);
+  const {
+    knowledgeBase,
+    isUpdatingKnowledgeBase,
+    updateKnowledgeBase,
+    setKnowledgeBase,
+  } = useKnowledgeBase();
 
   const fetchFiles = useCallback(async () => {
     if (!user) return;
@@ -71,37 +76,7 @@ What would you like to add to your knowledge base today?`,
       });
       setKnowledgeBase(null);
     }
-  }, [user, logError]);
-
-  const updateKnowledgeBase = async (newMessages: CoreMessage[]) => {
-    try {
-      setIsUpdatingKnowledgeBase(true);
-      const response = await fetch("/api/memories/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: newMessages,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update knowledge base");
-      }
-
-      // Parse the response to get the updated knowledge base
-      const { updatedKnowledgeBase } = await response.json();
-      // Set the lifted state
-      setKnowledgeBase(updatedKnowledgeBase);
-    } catch (error) {
-      logError("Error updating knowledge base", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsUpdatingKnowledgeBase(false);
-    }
-  };
+  }, [user, logError, setKnowledgeBase]);
 
   const handleSendMessage = async (message: string, files?: File[]) => {
     setGeneratingResponse(true);
@@ -225,7 +200,7 @@ What would you like to add to your knowledge base today?`,
           <Card className="flex-1 overflow-hidden min-h-0">
             <MemoriesView
               isUpdatingKnowledgeBase={isUpdatingKnowledgeBase}
-              setIsUpdatingKnowledgeBase={setIsUpdatingKnowledgeBase}
+              setIsUpdatingKnowledgeBase={() => {}}
               fetchFiles={fetchFiles}
               files={files}
               knowledgeBase={knowledgeBase}
