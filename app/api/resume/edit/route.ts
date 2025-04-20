@@ -245,8 +245,8 @@ ${
       path: "api/resume/edit",
     },
     modelConfig: {
-      primaryModel: "gemini-2.5-pro-preview-03-25",
-      fallbackModel: "gemini-2.5-flash-preview-04-17",
+      primaryModel: "gemini-2.5-flash-preview-04-17",
+      fallbackModel: "gemini-2.0-flash",
     },
   });
   return result;
