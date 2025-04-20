@@ -15,7 +15,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
 import { ToastAction } from "@/components/ui/toast";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface KnowledgeBaseContextType {
@@ -23,6 +22,7 @@ interface KnowledgeBaseContextType {
   isUpdatingKnowledgeBase: boolean;
   updateKnowledgeBase: (newMessages: CoreMessage[]) => Promise<void>;
   setKnowledgeBase: Dispatch<SetStateAction<string | null>>;
+  setIsUpdatingKnowledgeBase: Dispatch<SetStateAction<boolean>>;
 }
 
 const KnowledgeBaseContext = createContext<
@@ -103,6 +103,7 @@ export function KnowledgeBaseProvider({
         isUpdatingKnowledgeBase,
         updateKnowledgeBase,
         setKnowledgeBase,
+        setIsUpdatingKnowledgeBase,
       }}
     >
       {children}

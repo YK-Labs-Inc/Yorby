@@ -136,9 +136,6 @@ export default function ActiveInterviewComponent({
       ];
       setMessages(updatedMessages);
 
-      // Update knowledge base with AI's response
-      void updateKnowledgeBase(updatedMessages);
-
       if (messages.length === 0) {
         setFirstQuestionAudioIsInitialized(true);
       }
