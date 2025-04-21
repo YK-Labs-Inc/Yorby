@@ -384,7 +384,6 @@ const ResumeBuilderComponent = ({
     resumeId,
     persona,
     t,
-    hasStarted,
     selectedVoiceId,
     transformSummary,
     additionalFiles,

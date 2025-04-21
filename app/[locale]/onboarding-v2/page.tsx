@@ -121,7 +121,7 @@ export default function OnboardingPage() {
         );
       case "testimonials":
         return (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-rows-3 md:grid-rows-1 md:grid-cols-3 gap-6">
             <Card className="p-6 hover:shadow-md transition-shadow flex flex-col text-left">
               <p className="text-gray-700 text-sm italic mb-4 flex-grow">
                 "{t("steps.testimonials.testimonial1.quote")}"

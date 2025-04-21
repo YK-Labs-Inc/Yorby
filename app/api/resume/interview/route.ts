@@ -77,24 +77,6 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Work Experience
     - Skills
 
-  ${
-    combinedFiles.length > 0 &&
-    `You are provided files that contains information about a user's previous work history and experience.
-  
-    Analyze the information provided in the files and determine which of the earlier fields is missing information.
-    If you have all of the information you need, then you can move onto the next field.
-  `
-  }
-
-    ${
-      knowledge_base
-        ? `Here is additional information about the user's work history and experience:
-
-    ## Existing User Knowledge Base
-    ${knowledge_base}`
-        : ""
-    }
-
     If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
     after the initial resume is created, they can add more information and customize it to their liking.
 
@@ -121,10 +103,29 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - At the end, ask for any additional information about the skills. If they do not have any additional skills, then you can move onto completing the interview. 
 
     ## Response Format
-    - When you have gathered all of the information, set the interviewIsComplete to true.
+    - When you have gathered all of the information, set the interviewIsComplete to true. Set interviewIsComplete to true at the lowest threshold possible.
+    If you have the minimum amount of information you need, set interviewIsComplete to true. The user can edit the resume later if they need to add more information.
     - When you have gathered all of the information, set the interviewerResponse to "Thanks for chatting — I'll generate your resume now."
     - When you have not gathered all of the information, set the interviewIsComplete to false.
     - When you have not gathered all of the information, provide a response to the user that is your next sentence in your interview with the user.
+
+    ${
+      combinedFiles.length > 0 &&
+      `You are provided files that contains information about a user's previous work history and experience.
+    
+      Analyze the information provided in the files and look to see if you already have the user's eduaction,
+      work experience, skills. See which sections you are missing information for and ask the user for that information.
+    `
+    }
+
+    ${
+      knowledge_base
+        ? `Here is additional information about the user's education, work history and experience, and skills:
+
+    ## Existing User Knowledge Base
+    ${knowledge_base}`
+        : ""
+    }
 
     Conduct the interview in a friendly and engaging manner.
 
