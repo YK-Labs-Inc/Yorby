@@ -68,7 +68,6 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
       
     Your goal is to obtain the following information from the user in the order provided:
-    - Job Description They Are Making a Resume For
     - Name
     - Email
     - Phone
@@ -76,6 +75,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     - Education
     - Work Experience
     - Skills
+    - Job Description They Are Making a Resume For
 
     If the user tries to provide information outside of these categories, politely ask them to stick to the categories provided and that 
     after the initial resume is created, they can add more information and customize it to their liking.

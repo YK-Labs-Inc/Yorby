@@ -648,7 +648,9 @@ export const identifyChanges = async (
   try {
     const result = await generateObjectWithFallback({
       prompt: `
-      You are a helpful assistant that analyzes a resume against a job description to identify necessary changes.
+      You are a helpful assistant who takes a base resume and then updates it so that the resume is hyper-relevant to a job description to improve
+      the chances that the owner of the resume will get an interview. Your goal is to make changes to the resume so that it is a stronger match for the job description,
+      pass any ATS filters, and match any major keywords and responsibilities in the job description.
       
       You will receive:
       1. Message history containing the job description
@@ -659,7 +661,7 @@ export const identifyChanges = async (
       2. Then, analyze the existing resume and all of its resume_sections and grade the resume against the criteria and identify
       how the resume could be improved. The one change you should NOT suggest is to add a work summary section. Our resumes
       WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
-      3. If the resume is already a strong match, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
+      3. If the resume is already a strong match for the job description, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
       4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume. 
 
       Return a discriminated union with either:
@@ -673,7 +675,7 @@ export const identifyChanges = async (
         "changes": [{ 
             changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume. The change 
             should be very detailed and should be explained in the context of how it would be a better match for the user provided job description. 
-            Provide explanations based off of the job description and the current resume as to why this change is necessary.
+            Describe the change in the context of the job description and what changes need to be made to the resume to achieve the goal.
             changeId: string // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
             changeType: "create_section" | "delete_section" | "update_section" // The type of change that needs to be made to the resume
         }], // A list of changes that could be made to the resume
@@ -683,7 +685,7 @@ export const identifyChanges = async (
       Only return resume changes that are truly necessary. Do not return changes that are not required by the job description. Do not return
       any changes that are unnecessary. For example, if the resume is already a strong match (for example if we were to use
       a scale of 1-10 where 10 is a perfect resume, if the resume is 7/10 or higher, do not suggest any changes). Only return changes
-      that would improve any large weaknesses in the resume.
+      that would improve any large, glaring weaknesses in the resume.
 
       ## Message History
       ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
@@ -712,6 +714,10 @@ export const identifyChanges = async (
           changesRequireAdditionalInformation: z.boolean(),
         }),
       ]),
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
+      },
     });
 
     logger = logger.with({ result_type: result.type });
@@ -783,6 +789,7 @@ export const handleTransformConversation = async (
       response: string, // AI response to the user. This should be in the first person and present tense. It should be friendly and concise.
                         // In this response you should be asking the user for any additional information that they need to make the changes.
                         // Or if you have enough information, you should be telling the user that you have enough information to make the changes.
+                        // Return your response in markdown format, but do not wrap your response in \`\`\`markdown tags. Just return the markdown text.
       changesToBeMade: [{ 
         changeDescription: string, // LLM optimized detailed description of the change that needs to be made to the resume
         changeId: string, // A unique identifier for the change that can be used to update the resume. A short, succinct camel case string that is a brief description of the change
@@ -818,6 +825,10 @@ export const handleTransformConversation = async (
         })
       ),
     }),
+    modelConfig: {
+      primaryModel: "gemini-2.5-pro-preview-03-25",
+      fallbackModel: "gemini-2.5-flash-preview-04-17",
+    },
   });
   logger.info("Transform conversation completed", { isReady, response });
   await logger.flush();
