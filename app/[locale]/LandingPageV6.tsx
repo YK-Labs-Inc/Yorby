@@ -12,6 +12,9 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
+import { BottomCTA } from "../components/landing/BottomCTA";
+import Footer from "../components/landing/Footer";
+import OurFeatures from "../components/landing/OurFeatures";
 
 export default function LandingPageV6(props: {
   user: any;
@@ -25,8 +28,10 @@ export default function LandingPageV6(props: {
   return (
     <div className="min-h-screen bg-background">
       <LandingHero />
-      {/* <FeatureHighlightSection /> */}
       <HowItWorksSection />
+      <OurFeatures />
+      <BottomCTA />
+      <Footer />
     </div>
   );
 }
