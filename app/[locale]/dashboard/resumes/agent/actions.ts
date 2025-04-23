@@ -145,6 +145,10 @@ export const triageAction = async (
         ),
         response: z.string(),
       }),
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
+      },
     });
     logger = logger.with({
       actions,
@@ -218,6 +222,10 @@ export const createSection = async (
         resumeSection: resumeSectionsSchema,
         response: z.string(),
       }),
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
+      },
     });
     logger = logger.with({
       resumeSection,
@@ -563,6 +571,10 @@ export const handleOtherAction = async (
         updatedResume: resumeSchema,
         response: z.string(),
       }),
+      modelConfig: {
+        primaryModel: "gemini-2.5-pro-preview-03-25",
+        fallbackModel: "gemini-2.5-flash-preview-04-17",
+      },
     });
     logger = logger.with({
       updatedResume,
