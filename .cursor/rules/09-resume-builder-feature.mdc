@@ -1,0 +1,40 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Resume Builder Feature
+
+Perfect Interview offers a comprehensive Resume Builder feature that helps users create professional resumes tailored for job applications.
+
+## Key Components
+
+- [app/[locale]/dashboard/resumes/components/ResumeBuilder.tsx](mdc:app/[locale]/dashboard/resumes/components/ResumeBuilder.tsx): Main component for building and editing resumes
+- [app/[locale]/dashboard/resumes/components/ResumePreview.tsx](mdc:app/[locale]/dashboard/resumes/components/ResumePreview.tsx): Preview component showing how the resume will look
+- [app/[locale]/dashboard/resumes/actions.ts](mdc:app/[locale]/dashboard/resumes/actions.ts): Server actions for saving, updating, and managing resumes
+
+## Feature Capabilities
+
+- Create and edit resume sections (experience, education, skills, etc.)
+- AI-assisted content generation for resume entries
+- Voice input for resume content
+- Resume file upload and parsing
+- PDF export functionality
+- Professional templates and formatting options
+
+## Database Structure
+
+The resume builder uses a relational data model:
+- Resumes: Base resume information
+- Resume sections: Different sections of the resume (Experience, Education, etc.)
+- Resume detail items: Entries within sections (e.g., job positions, education degrees)
+- Resume item descriptions: Bullet points describing accomplishments within detail items
+- Resume list items: Simple list items within sections (e.g., skills, certifications)
+
+## User Experience
+
+- Intuitive drag-and-drop interface
+- Real-time preview
+- AI suggestions for improving content
+- Voice recording for easier content entry
+- Credits system for premium features

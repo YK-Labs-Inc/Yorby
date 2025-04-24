@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# NextJS App Structure
+
+This project uses Next.js App Router with the following key directories:
+
+## Routing Structure
+
+- [app/[locale]](mdc:app/[locale]): Main app routes with internationalization support
+- [app/api](mdc:app/api): API routes for backend functionality
+- [pages/](mdc:pages): Any legacy pages using the Pages Router (if any exist)
+
+## App Architecture
+
+- [app/context](mdc:app/context): React context providers specific to the app directory
+- [app/components](mdc:app/components): Components that are specific to the app directory
+- [context/](mdc:context): Global context providers used throughout the application
+- [hooks/](mdc:hooks): Custom React hooks
+
+## Configuration
+
+- [next.config.ts](mdc:next.config.ts): Next.js configuration
+- [tailwind.config.ts](mdc:tailwind.config.ts): Tailwind CSS configuration
+- [tsconfig.json](mdc:tsconfig.json): TypeScript configuration
+- [middleware.ts](mdc:middleware.ts): Next.js middleware for handling requests

@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Component Architecture
+
+This project follows a component-based architecture with clear separation of concerns. Components are organized as follows:
+
+## Component Organization
+
+- [components/ui](mdc:components/ui): Reusable UI components based on Shadcn UI
+- [components/layout](mdc:components/layout): Layout components used across the application
+- [components/auth](mdc:components/auth): Authentication-related components
+- [components/common](mdc:components/common): Common components used throughout the app
+- [components/mock-interview](mdc:components/mock-interview): Components specific to the mock interview feature
+- [components/sidebar](mdc:components/sidebar): Sidebar navigation components
+
+## UI Components
+
+The project uses a Shadcn UI component library based on Radix UI primitives:
+
+- [components/ui/button.tsx](mdc:components/ui/button.tsx): Button component
+- [components/ui/dialog.tsx](mdc:components/ui/dialog.tsx): Dialog/modal component
+- [components/ui/toast.tsx](mdc:components/ui/toast.tsx): Toast notification component
+
+## Component Usage Patterns
+
+- Components follow the React functional component pattern with TypeScript
+- Tailwind CSS is used for styling all components
+- ES6 syntax is used throughout the codebase

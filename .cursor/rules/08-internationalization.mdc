@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Internationalization (i18n)
+
+This project supports multiple languages through Next.js internationalization features.
+
+## Implementation
+
+- Uses next-intl for internationalization
+- [app/[locale]](mdc:app/[locale]): Locale parameter in the URL path
+- [i18n/](mdc:i18n): Directory containing translation files
+
+## Supported Languages
+
+- English (default)
+- Other supported languages based on translation files
+
+## Localization Pattern
+
+- Text is never hardcoded in components
+- Translation keys are used with the next-intl hooks/components
+- Dynamic content is formatted according to locale
+
+## Usage
+
+- Use the `useTranslations` hook to access translations
+- Format dates, numbers, and currencies based on locale
+- Handle RTL languages when applicable
+- Translation script in [scripts/translate.js](mdc:scripts/translate.js)

@@ -1,0 +1,50 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Interview Copilot Feature
+
+The Interview Copilot is an advanced feature that provides personalized AI-powered interview assistance based on specific job and company details.
+
+## Key Components
+
+- [app/[locale]/dashboard/interview-copilots/page.tsx](mdc:app/[locale]/dashboard/interview-copilots/page.tsx): Main page for interview copilot creation
+- [app/[locale]/dashboard/interview-copilots/InterviewCopilotCreationForm.tsx](mdc:app/[locale]/dashboard/interview-copilots/InterviewCopilotCreationForm.tsx): Form for creating new copilot sessions
+- [app/[locale]/dashboard/interview-copilots/actions.ts](mdc:app/[locale]/dashboard/interview-copilots/actions.ts): Server actions for copilot functionality
+- [app/[locale]/dashboard/interview-copilots/[interviewCopilotId]](mdc:app/[locale]/dashboard/interview-copilots/[interviewCopilotId]): Individual copilot session pages
+
+## Feature Capabilities
+
+- Create personalized interview sessions for specific job applications
+- Upload resume and job descriptions for context
+- AI-powered interview simulation
+- Real-time feedback during mock interviews
+- Detailed session analysis and improvement suggestions
+
+## Credits System
+
+- Users spend credits to unlock Interview Copilot sessions
+- Requires a specific number of credits per session (defined in constants)
+- Free trial/demo version available
+
+## Integration with Google Gemini
+
+- File upload and processing via Google Gemini API
+- Advanced context understanding using uploaded documents
+- Natural language interview conversation
+
+## User Flow
+
+1. User provides job title, description, company details
+2. User uploads relevant files (resume, job posting, etc.)
+3. System creates a personalized interview copilot session
+4. User interacts with the AI interviewer in a conversational format
+5. System provides feedback and improvement suggestions
+
+## Implementation Details
+
+- Sessions are stored in the database with status tracking
+- File uploads are processed and stored for AI context
+- Credit deduction occurs upon successful session creation
+- Sessions can be revisited and continued

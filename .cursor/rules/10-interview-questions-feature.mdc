@@ -1,0 +1,44 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Interview Questions Feature
+
+The Interview Questions feature helps users practice answering job interview questions specific to their target position.
+
+## Key Components
+
+- [app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/page.tsx](mdc:app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/page.tsx): Main page for answering interview questions
+- [app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/AnswerForm.tsx](mdc:app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/AnswerForm.tsx): Form component for user answers
+- [app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/actions.ts](mdc:app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/actions.ts): Server actions for question functionality
+
+## Feature Capabilities
+
+- Practice answering job-specific interview questions
+- AI-generated sample answers
+- Voice input for spoken responses
+- Answer feedback and scoring
+- Multiple submissions and revision history
+- Guided onboarding for first-time users
+
+## AI Integration
+
+- AI-powered answer generation based on job details and user resume
+- Feedback on user answers with pros and cons
+- Speech-to-text transcription for voice responses
+
+## Workflow
+
+1. User selects a question from their job profile
+2. User can either write their own answer or generate an AI sample answer
+3. User can submit multiple revisions of their answer
+4. System provides feedback on answer quality
+5. User can view their answer history and track improvement
+
+## Implementation Details
+
+- Questions are linked to specific job profiles
+- Answers can be provided via text input or voice recording
+- AI leverages job description and resume files for context
+- Detailed feedback helps users improve their interview responses

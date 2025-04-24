@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Coding Conventions
+
+This project follows specific coding conventions for consistency and maintainability.
+
+## React and TypeScript
+
+- React functional components with TypeScript
+- ES6 syntax throughout the codebase
+- React Hooks for state management and side effects
+- Type definitions for all components and functions
+
+## Component Structure
+
+- One component per file
+- PascalCase for component names
+- Props interfaces defined at the top of the file
+- Named exports for components
+
+## Styling
+
+- Tailwind CSS classes for all styling
+- No CSS-in-JS or separate CSS files
+- Consistent use of Tailwind's design tokens
+- UI component library based on Shadcn UI
+
+## File Organization
+
+- Feature-based organization for components
+- Clear separation between UI components and business logic
+- Shared utilities and hooks in dedicated directories
+- Context providers for global state management
