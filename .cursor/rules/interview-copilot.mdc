@@ -1,0 +1,102 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Interview Copilot Feature
+
+## Directory Structure
+- `/app/dashboard/interviewCopilot`
+  - `page.tsx` - Copilot dashboard
+  - `[sessionId]/page.tsx` - Active interview session
+  - `components/` - Copilot-specific components
+  - `actions/` - Server actions for interview operations
+  - `utils/` - Audio processing and AI utilities
+
+## Core Components
+
+1. **Audio Processing**
+   - Real-time audio capture
+   - Speech-to-text conversion
+   - Background noise reduction
+   - Multi-speaker detection
+
+2. **Interview Analysis**
+   - Question identification
+   - Context understanding
+   - Response suggestion generation
+   - Follow-up tracking
+
+3. **User Interface**
+   - Live transcription display
+   - Suggestion panel
+   - Quick actions
+   - Session controls
+
+## Component Organization
+
+1. **Session Components**
+   - `AudioCapture` - Audio input handling
+   - `Transcription` - Live text display
+   - `SuggestionPanel` - AI suggestions
+   - `SessionControls` - Interview controls
+
+2. **Analysis Components**
+   - `QuestionAnalyzer` - Question processing
+   - `ContextEngine` - Context management
+   - `ResponseGenerator` - Answer generation
+   - `FollowupTracker` - Question tracking
+
+## Real-time Processing
+
+1. **Audio Pipeline**
+   - Input buffering
+   - Stream processing
+   - Latency optimization
+   - Quality monitoring
+
+2. **AI Processing**
+   - Continuous analysis
+   - Context maintenance
+   - Response generation
+   - Suggestion ranking
+
+## Integration Points
+
+1. **Knowledge Base**
+   - Experience retrieval
+   - Skill matching
+   - Achievement reference
+   - Context building
+
+2. **External Services**
+   - Speech recognition API
+   - Natural language processing
+   - Answer verification
+   - Performance analytics
+
+## Best Practices
+
+1. **Performance**
+   - Minimal latency
+   - Efficient processing
+   - Resource management
+   - Battery optimization
+
+2. **Privacy**
+   - Audio data handling
+   - Secure transmission
+   - Data retention
+   - User consent
+
+3. **Reliability**
+   - Connection recovery
+   - State persistence
+   - Error handling
+   - Backup systems
+
+4. **User Experience**
+   - Clear suggestions
+   - Non-intrusive UI
+   - Easy controls
+   - Session review

@@ -1,0 +1,87 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Resume Builder Feature
+
+## Directory Structure
+- `/app/dashboard/resumes`
+  - `page.tsx` - Main resume dashboard
+  - `[resumeId]/page.tsx` - Individual resume editor
+  - `components/` - Resume-specific components
+  - `actions/` - Server actions for resume operations
+
+## Components Organization
+
+1. **Resume Dashboard**
+   - Resume list view
+   - Creation/deletion controls
+   - Search and filtering
+   - Resume templates selection
+
+2. **Resume Editor**
+   - Chat interface for AI-assisted editing
+   - Real-time preview
+   - Section management
+   - Export functionality
+
+3. **Core Components**
+   - `ResumeChat` - AI chat interface
+   - `ResumePreview` - Live preview component
+   - `SectionEditor` - Section-specific editor
+   - `TemplateSelector` - Resume template chooser
+
+## Data Flow
+
+1. **Resume Creation**
+   - Initialize from template
+   - Pull from knowledge base
+   - Generate AI suggestions
+   - Save to database
+
+2. **Resume Editing**
+   - Real-time updates
+   - Versioning system
+   - Autosave functionality
+   - Conflict resolution
+
+3. **Export Options**
+   - PDF generation
+   - Word document export
+   - Plain text format
+   - ATS-friendly versions
+
+## AI Integration
+
+1. **Chat Interface**
+   - Natural language processing
+   - Context-aware suggestions
+   - Professional tone maintenance
+   - Industry-specific recommendations
+
+2. **Content Generation**
+   - Achievement bullet points
+   - Role descriptions
+   - Skill highlights
+   - Summary statements
+
+## Best Practices
+
+1. **Performance**
+   - Lazy loading of sections
+   - Optimistic updates
+   - Debounced saves
+   - Cached previews
+
+2. **Accessibility**
+   - ARIA labels
+   - Keyboard navigation
+   - Screen reader support
+   - High contrast options
+
+3. **Error Handling**
+   - Graceful degradation
+   - Auto-recovery
+   - User notifications
+   - Data backup

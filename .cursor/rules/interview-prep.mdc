@@ -1,0 +1,93 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Interview Prep Feature
+
+## Directory Structure
+- `/app/dashboard/jobs`
+  - `page.tsx` - Jobs dashboard
+  - `[jobId]/prep/page.tsx` - Interview prep interface
+  - `components/` - Interview prep components
+  - `actions/` - Server actions for job/prep operations
+
+## Core Features
+
+1. **Job Management**
+   - Job posting analysis
+   - Required skills extraction
+   - Experience matching
+   - Company research integration
+
+2. **Question Generation**
+   - Technical questions
+   - Behavioral questions
+   - Company-specific questions
+   - Role-specific scenarios
+
+3. **Practice Interface**
+   - Question categories
+   - Difficulty levels
+   - Progress tracking
+   - Performance analytics
+
+## Components Organization
+
+1. **Dashboard Components**
+   - `JobList` - Active job applications
+   - `PrepProgress` - Preparation progress
+   - `SkillsMatch` - Skills gap analysis
+   - `PracticeSession` - Interview practice
+
+2. **Practice Components**
+   - `QuestionCard` - Individual question display
+   - `AnswerRecorder` - Response recording
+   - `FeedbackPanel` - AI feedback interface
+   - `TimingControl` - Response timing
+
+## AI Integration
+
+1. **Question Generation**
+   - Context-aware questions
+   - Industry-specific scenarios
+   - Experience-based difficulty
+   - Dynamic adaptation
+
+2. **Answer Analysis**
+   - Response evaluation
+   - Improvement suggestions
+   - Keyword detection
+   - Confidence scoring
+
+3. **Personalization**
+   - Learning from responses
+   - Difficulty adjustment
+   - Focus area identification
+   - Custom question sets
+
+## Best Practices
+
+1. **Content Quality**
+   - Regular question updates
+   - Industry relevance
+   - Technical accuracy
+   - Clear formatting
+
+2. **User Experience**
+   - Intuitive navigation
+   - Progress indicators
+   - Clear feedback
+   - Session management
+
+3. **Performance**
+   - Efficient question loading
+   - Response time optimization
+   - Smooth transitions
+   - Background processing
+
+4. **Data Management**
+   - Progress persistence
+   - Response history
+   - Analytics tracking
+   - Backup systems
