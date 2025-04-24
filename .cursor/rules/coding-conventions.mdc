@@ -1,0 +1,48 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Coding Conventions
+
+## React/Next.js Conventions
+
+1. **Component Structure**
+   - Use functional components with TypeScript
+   - Follow ES6+ syntax
+   - Place components in `/app/components` directory
+   - Name files using PascalCase (e.g., `UserProfile.tsx`)
+
+2. **Styling**
+   - Use Tailwind CSS exclusively
+   - No CSS modules or styled-components
+   - Follow utility-first approach
+   - Place custom Tailwind configurations in `tailwind.config.js`
+
+3. **State Management**
+   - Use React hooks for local state
+   - Implement context for shared state when needed
+   - Keep state as close to where it's used as possible
+
+4. **Data Fetching**
+   - Use Next.js App Router data fetching patterns
+   - Implement loading and error states
+   - Cache responses appropriately
+   - Use Server Components where possible
+
+5. **Type Safety**
+   - Use TypeScript for all new code
+   - Define interfaces for all props
+   - Use strict type checking
+   - Place shared types in `/types` directory
+
+6. **Authentication**
+   - Handle auth state in layout components
+   - Protect routes appropriately
+   - Use middleware for auth checks
+
+7. **API Routes**
+   - Place in `/app/api` directory
+   - Follow RESTful conventions
+   - Include proper error handling
+   - Validate requests with TypeScript

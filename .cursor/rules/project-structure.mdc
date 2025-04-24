@@ -1,0 +1,45 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Perfect Interview Project Structure
+
+Perfect Interview is a Next.js application designed to help people land jobs through various tools and features.
+
+## Core Features and Directory Structure
+
+1. **Dashboard Layout** - Base layout for authenticated user experience
+   - Path: `/app/dashboard`
+   - Contains shared navigation and layout components
+
+2. **Resume Builder**
+   - Path: `/app/dashboard/resumes`
+   - Chat interface for creating and editing resumes
+   - Uses AI to generate personalized content
+
+3. **Interview Prep Tool**
+   - Path: `/app/dashboard/jobs`
+   - Generates interview questions based on:
+     - Job descriptions
+     - User's work experience
+     - Industry standards
+
+4. **Interview Copilot**
+   - Path: `/app/dashboard/interviewCopilot`
+   - Real-time interview assistance
+   - Processes live interview audio
+   - Provides contextual answers based on user's experience
+
+5. **Knowledge Base**
+   - Path: `/knowledge-base`
+   - Stores user's career and work history
+   - Central source of truth for personalization
+   - Used across all features for context
+
+## Technology Stack
+
+- Framework: Next.js
+- Styling: Tailwind CSS
+- Database: Supabase
+- Authentication: Built-in Next.js authentication
