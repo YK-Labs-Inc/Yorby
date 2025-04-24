@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Interview Feature
+
+The Perfect Interview application provides mock interview functionality as its core feature.
+
+## Mock Interview Components
+
+- [components/mock-interview](mdc:components/mock-interview): Contains all interview-related components
+- Interview session management
+- Question and answer handling
+- Feedback and evaluation components
+
+## AI Integration
+
+- Uses AI models for generating interview questions and feedback
+- Real-time transcription for spoken responses
+- Response evaluation and scoring
+
+## Interview Flow
+
+1. User selects job role and interview type
+2. System generates relevant interview questions
+3. User provides answers (text or voice)
+4. AI evaluates responses and provides feedback
+5. Session results are saved for future reference
+
+## Data Models
+
+- Interview sessions
+- Questions and responses
+- User performance metrics
+- Historical interview data

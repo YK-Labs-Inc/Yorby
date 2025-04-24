@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Overview
+
+Perfect Interview is a NextJS application that helps users practice for job interviews. The project is built with the following key technologies:
+
+- **Next.js 15**: App Router architecture for routing and server components
+- **TypeScript**: For type safety throughout the codebase
+- **Tailwind CSS**: For styling components
+- **Supabase**: For authentication and database
+- **Shadcn UI**: Component library based on Radix UI primitives
+
+## Key Files and Directories
+
+- [package.json](mdc:package.json): Project dependencies and scripts
+- [app/](mdc:app): Main application code using Next.js App Router
+- [components/](mdc:components): Reusable UI components
+- [middleware.ts](mdc:middleware.ts): Request middleware for authentication and routing
+- [next.config.ts](mdc:next.config.ts): Next.js configuration
+
+## CI/CD and Deployment
+
+- Vercel is used for deployment with [vercel.json](mdc:vercel.json) config
+- Sentry integration for error tracking in [sentry.client.config.ts](mdc:sentry.client.config.ts)

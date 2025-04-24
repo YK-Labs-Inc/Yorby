@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Design System
+
+This project uses a consistent design system based on Tailwind CSS and Shadcn UI.
+
+## Styling Approach
+
+- [tailwind.config.ts](mdc:tailwind.config.ts): Tailwind configuration with custom theme extensions
+- Styling is done exclusively with Tailwind classes
+- No CSS modules or separate stylesheets are used
+
+## Theme Configuration
+
+The theme supports both light and dark modes with custom color variables:
+
+- Primary colors: Used for primary actions and brand elements
+- Secondary colors: Used for secondary actions and UI elements
+- Accent colors: Used for highlighting and special UI elements
+- Background/foreground pairs: Used for content areas
+
+## UI Components
+
+The UI components are built on Radix UI primitives with Tailwind styling:
+
+- [components/ui/button.tsx](mdc:components/ui/button.tsx): Button variants (primary, secondary, ghost, etc.)
+- [components/ui/card.tsx](mdc:components/ui/card.tsx): Card components for content containers
+- [components/ui/dialog.tsx](mdc:components/ui/dialog.tsx): Modal dialogs
+
+## Animation
+
+Animation is provided through Tailwind CSS + Framer Motion:
+
+- CSS animations defined in [tailwind.config.ts](mdc:tailwind.config.ts)
+- Complex animations use Framer Motion for smoother transitions

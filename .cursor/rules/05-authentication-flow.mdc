@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Authentication Flow
+
+This project uses Supabase for authentication with Next.js middleware for protected routes.
+
+## Auth Implementation
+
+- [middleware.ts](mdc:middleware.ts): Handles authentication checks on protected routes
+- [components/auth](mdc:components/auth): Contains auth-related components like login/signup forms
+
+## User Session Management
+
+- Supabase Client: Used for handling authentication state
+- Server-side session validation using Supabase SSR utilities
+- Client-side auth state management with React context
+
+## Protected Routes
+
+- Protected routes check for authenticated users via middleware
+- Unauthenticated users are redirected to login pages
+- Role-based access control for specific features
+
+## Auth Components
+
+Key authentication components:
+
+- Login form: Email/password and social login options
+- Signup form: New user registration
+- Password reset: Forgot password flow
+- Account settings: User profile and account management
