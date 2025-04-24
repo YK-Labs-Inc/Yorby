@@ -1425,8 +1425,17 @@
         "updateFailed": "Failed to update memories"
       }
     },
-    "initialMessage": "Hi there! 👋\n\nI'm your AI career coach. This is your personal knowledge base where we'll store all your career information to help create better resumes and interview prep materials.\n\nWhat you can do:\n- **Upload files**: Resumes, cover letters, work documents\n- **Chat with me**: Share additional work experience and details\n\nWhat would you like to add to your knowledge base today?",
-    "initialOnboardingMessage": "Hi there! 👋\n\nI'm your AI career coach. I need to get to know you a little better before I can help you in your job search. I'm looking for the following information from you:\n\n- **Name**\n- **Email**\n- **Phone**\n- **Location**\n- **Education**\n- **Work Experience**\n- **Skills**\n\nCan you share this information with me? You can either tell me over chat or upload files like a previous resume or cover letter to help me get to know you better."
+    "initialMessage": "Hi! I'm here to help you build your knowledge base. Tell me about your work experience, skills, and achievements.",
+    "initialOnboardingMessage": "Hi! Let's build your knowledge base. This will help me create personalized resumes and interview answers for you. Tell me about your work experience, skills, and achievements.",
+    "congratulations": "🎉 Congratulations!",
+    "congratulationsDescription": "You've successfully created your knowledge base! Now you can use this information to build your resume, prepare for interviews, or get real-time help during interviews.",
+    "buildResume": "Build Resume",
+    "buildResumeDescription": "Create a professional resume tailored to your experience",
+    "prepareInterview": "Interview Prep",
+    "prepareInterviewDescription": "Practice with AI-powered mock interviews",
+    "interviewCopilot": "Interview Copilot",
+    "interviewCopilotDescription": "Get real-time help during interviews",
+    "continue": "Continue Building Knowledge Base"
   },
   "interviewPrepLanding": {
     "hero": {
@@ -1496,12 +1505,12 @@
         ]
       },
       "toolkit": {
-        "title": "Your AI-Powered Toolkit",
-        "description": "Three powerful tools at your disposal",
+        "title": "Your Job Search Toolkit",
+        "description": "",
         "resumeBuilder": {
           "title": "Resume Builder",
-          "description1": "The fastest way to create a resume.",
-          "description2": "Enter a job description, and we will generate a custom resume for that job to maximize your chances of getting the interview."
+          "description1": "Build a perfectly formatted resume in minutes, not hours.",
+          "description2": "Maximize your chances of getting the interview by creating a resume that is 100% customized to every job you apply to. Just enter the job description, and we'll handle the rest."
         },
         "interviewPrep": {
           "title": "Interview Prep",
