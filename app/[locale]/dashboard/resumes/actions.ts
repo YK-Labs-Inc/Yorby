@@ -405,7 +405,7 @@ export const getResumeEditCount = async (resumeId: string) => {
   return count || 0;
 };
 
-export async function uploadResumeFile(
+export async function uploadUserFile(
   file: File,
   userId: string,
   addedToMemory: boolean = false

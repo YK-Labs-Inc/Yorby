@@ -19,7 +19,7 @@ import { AlertCircle } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useUser } from "@/context/UserContext";
-import { uploadResumeFile, deleteResumeFile } from "../actions";
+import { uploadUserFile, deleteResumeFile } from "../actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,7 +115,7 @@ export function FileSelectionModal({
     setIsMemoryDialogOpen(false);
 
     try {
-      await uploadResumeFile(currentFile, user.id, addToMemory);
+      await uploadUserFile(currentFile, user.id, addToMemory);
 
       // Optimistically update the UI
       const newFile = {

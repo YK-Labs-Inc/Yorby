@@ -1545,7 +1545,24 @@
     },
     "buttons": {
       "next": "Next",
-      "startKnowledgeBase": "Tell Us About Yourself And Your Career"
-    }
+      "startKnowledgeBase": "Get Started"
+    },
+    "upload": {
+      "title": "Upload Documents",
+      "description": "Upload a resume, cover letter, or other career documents to help us get to know your career history better.",
+      "uploadContext": "Upload Documents",
+      "uploading": "Uploading...",
+      "updatingMemories": "Updating Memories...",
+      "updatingMemoriesProgress": "Processing your documents...",
+      "selectedFiles": "{count, plural, =1 {# file selected} other {# files selected}}",
+      "multiPdfHelper": "Only PDF files are accepted. You can upload up to 10 files.",
+      "maxFilesExceeded": "You can upload a maximum of 10 files.",
+      "pdfOnly": "Only PDF files are accepted.",
+      "uploadError": "An error occurred while uploading your file.",
+      "upload": "Upload"
+    },
+    "congratulations": "🎉 Congratulations!",
+    "congratulationsDescription": "You've successfully uploaded your documents! Now you can try out any of our tools.",
+    "continue": "Continue"
   }
 }
