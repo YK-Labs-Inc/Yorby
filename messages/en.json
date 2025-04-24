@@ -1496,12 +1496,12 @@
         ]
       },
       "toolkit": {
-        "title": "Your AI-Powered Toolkit",
-        "description": "Three powerful tools at your disposal",
+        "title": "Your Job Search Toolkit",
+        "description": "",
         "resumeBuilder": {
           "title": "Resume Builder",
-          "description1": "The fastest way to create a resume.",
-          "description2": "Enter a job description, and we will generate a custom resume for that job to maximize your chances of getting the interview."
+          "description1": "Build a perfectly formatted resume in minutes, not hours.",
+          "description2": "Maximize your chances of getting the interview by creating a resume that is 100% customized to every job you apply to. Just enter the job description, and we'll handle the rest."
         },
         "interviewPrep": {
           "title": "Interview Prep",

@@ -77,6 +77,12 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     const { updatedKnowledgeBase, didUpdateKnowledgeBase } =
       await generateObjectWithFallback({
         systemPrompt: `You are an assistant whose role is to create a career knowledge base for a user.
+
+        The career knowledge base of a user is a collection of information abouthe user's past and current
+        work experiences, education, skills, and other relevant information. It should not include information
+        about jobs that they are applying to or jobs they are interviewing for.
+
+
     You will be provided with the conversation history between a user and another assistant, and 
     it is your duty to analyze the conversation history and update the user's career knowledge base accordingly.
 
@@ -90,6 +96,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     2. Integrating it with existing information
     3. Maintaining a clear, organized structure
     4. Removing any redundant information
+    5. DO NOT include information about target roles or specific jobs they are applying to. This is not relevant to the user's 
+    career knowledge base.
 
     Return ONLY the updated knowledge base text. Your response should be in markdown format.
     Your response will also be fed into other LLMs as additional context about the user, so make
