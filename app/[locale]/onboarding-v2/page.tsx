@@ -12,6 +12,7 @@ import {
   Users,
   Upload,
   Loader2,
+  Wand2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
@@ -146,6 +147,7 @@ export default function OnboardingPage() {
         return (
           <div className="space-y-2">
             <ResumeBuilderCard />
+            <TransformResumeCard />
             <InterviewPrepCard />
             <InterviewCopilotCard />
           </div>
@@ -377,8 +379,8 @@ export default function OnboardingPage() {
       </Dialog>
 
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="bg-background px-6 pt-6 pb-4 border-b">
             <DialogTitle className="text-2xl text-center">
               {t("congratulations")}
             </DialogTitle>
@@ -386,18 +388,23 @@ export default function OnboardingPage() {
               {t("congratulationsDescription")}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-6 py-6">
-            <Link href="/dashboard/resumes">
-              <ResumeBuilderCard />
-            </Link>
-            <Link href="/dashboard/jobs">
-              <InterviewPrepCard />
-            </Link>
-            <Link href="/dashboard/interview-copilots">
-              <InterviewCopilotCard />
-            </Link>
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="grid gap-6 py-6">
+              <Link href="/dashboard/resumes">
+                <ResumeBuilderCard />
+              </Link>
+              <Link href="/dashboard/transform-resume">
+                <TransformResumeCard />
+              </Link>
+              <Link href="/dashboard/jobs">
+                <InterviewPrepCard />
+              </Link>
+              <Link href="/dashboard/interview-copilots">
+                <InterviewCopilotCard />
+              </Link>
+            </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="bg-background px-6 py-4 border-t">
             <Button onClick={handleContinue} className="w-full">
               {t("continue")}
             </Button>
@@ -424,6 +431,28 @@ const ResumeBuilderCard = () => {
         </p>
         <p className="text-gray-600 mb-1">
           {t("steps.toolkit.resumeBuilder.description2")}
+        </p>
+      </div>
+    </Card>
+  );
+};
+
+const TransformResumeCard = () => {
+  const t = useTranslations("onboardingV2");
+  return (
+    <Card className="flex items-center gap-6 p-6">
+      <div className="flex-shrink-0">
+        <Wand2 className="w-8 h-8 text-amber-500" />
+      </div>
+      <div className="flex-grow text-left">
+        <h4 className="text-xl font-semibold text-gray-900 mb-1">
+          {t("steps.toolkit.transformResume.title")}
+        </h4>
+        <p className="text-gray-600 mb-1">
+          {t("steps.toolkit.transformResume.description1")}
+        </p>
+        <p className="text-gray-600">
+          {t("steps.toolkit.transformResume.description2")}
         </p>
       </div>
     </Card>

@@ -696,8 +696,8 @@ export const identifyChanges = async (
 
       Only return resume changes that are truly necessary. Do not return changes that are not required by the job description. Do not return
       any changes that are unnecessary. For example, if the resume is already a strong match (for example if we were to use
-      a scale of 1-10 where 10 is a perfect resume, if the resume is 7/10 or higher, do not suggest any changes). Only return changes
-      that would improve any large, glaring weaknesses in the resume.
+      a scale of 1-10 where 10 is a perfect resume and 1 is a resume that is a horrible match for the job description, if the resume is 5/10 or higher, do not suggest any changes).
+      Only return changes that would improve any large, glaring weaknesses in the resume.
 
       ## Message History
       ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}

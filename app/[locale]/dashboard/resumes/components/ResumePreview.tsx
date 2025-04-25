@@ -52,6 +52,7 @@ interface ResumePreviewProps {
   isEditMode: boolean;
   setIsEditMode: Dispatch<SetStateAction<boolean>>;
   transformResumeEnabled: boolean;
+  readOnly?: boolean;
 }
 
 const reorderItem = (items: any[], fromIndex: number, toIndex: number) => {
@@ -200,6 +201,7 @@ export default function ResumePreview({
   isEditMode,
   setIsEditMode,
   transformResumeEnabled,
+  readOnly = false,
 }: ResumePreviewProps) {
   const t = useTranslations("resumeBuilder");
   const [showNewSectionDialog, setShowNewSectionDialog] =
@@ -647,7 +649,7 @@ export default function ResumePreview({
 
   return (
     <div className="flex flex-col h-full">
-      {!isSampleResume && (
+      {!readOnly && !isSampleResume && (
         <div className="flex flex-col sm:flex-row justify-end mb-4 gap-2 mt-1">
           {!isTestResume && (
             <>

@@ -40,6 +40,7 @@ interface AppSidebarProps {
   isSubscriptionVariant: boolean;
   resumes: Tables<"resumes">[];
   isMemoriesEnabled: boolean;
+  enableTransformResume: boolean;
 }
 
 export function AppSidebar({
@@ -52,6 +53,7 @@ export function AppSidebar({
   isSubscriptionVariant,
   resumes,
   isMemoriesEnabled,
+  enableTransformResume,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -100,6 +102,13 @@ export function AppSidebar({
                 {isResumeBuilderEnabled && (
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard/resumes">{t("createResume")}</Link>
+                  </DropdownMenuItem>
+                )}
+                {enableTransformResume && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/transform-resume">
+                      {t("transformResume")}
+                    </Link>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>

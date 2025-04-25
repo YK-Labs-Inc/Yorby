@@ -408,7 +408,8 @@ export const getResumeEditCount = async (resumeId: string) => {
 export async function uploadUserFile(
   file: File,
   userId: string,
-  addedToMemory: boolean = false
+  addedToMemory: boolean = false,
+  pathToRevalidate?: string
 ) {
   const supabase = await createSupabaseServerClient();
 
@@ -449,11 +450,6 @@ export async function uploadUserFile(
 
   const geminiUploadResponse = (await geminiResponse.json()) as UploadResponse;
 
-  // Get the Supabase file URL
-  const {
-    data: { publicUrl: fileUri },
-  } = supabase.storage.from("user-files").getPublicUrl(filePath);
-
   // Insert into user_files table with Gemini information
   const { error: dbError } = await supabase.from("user_files").insert({
     user_id: userId,
@@ -471,6 +467,10 @@ export async function uploadUserFile(
     await supabase.storage.from("user-files").remove([filePath]);
     // Note: Gemini files are automatically cleaned up after their expiration time
     throw dbError;
+  }
+
+  if (pathToRevalidate) {
+    revalidatePath(pathToRevalidate);
   }
 }
 

@@ -126,6 +126,7 @@ export default async function RootLayout({
   let isResumeBuilderEnabled = false;
   let isSubscriptionVariant = false;
   let isMemoriesEnabled = false;
+  let enableTransformResume = false;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
@@ -142,6 +143,9 @@ export default async function RootLayout({
     }
     isMemoriesEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-memories", user.id)
+    );
+    enableTransformResume = Boolean(
+      await posthog.isFeatureEnabled("transform-resume-feature", user.id)
     );
   }
 
@@ -210,6 +214,7 @@ export default async function RootLayout({
                             resumes={resumes}
                             isSubscriptionVariant={isSubscriptionVariant}
                             isMemoriesEnabled={isMemoriesEnabled}
+                            enableTransformResume={enableTransformResume}
                           />
                           <SidebarTrigger />
                           <main className="w-full">{children}</main>
