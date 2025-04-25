@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import TransformResumeClient from "./components/TransformResumeClient";
 import { Logger } from "next-axiom";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const fetchFiles = async (userId: string) => {
   const logger = new Logger().with({ function: "fetchFiles", userId });
@@ -70,6 +71,12 @@ export default async function TransformResumePage() {
   if (!user) {
     redirect("/sign-in");
   }
+
+  void trackServerEvent({
+    userId: user.id,
+    email: user.email,
+    eventName: "transform-resume-page-viewed",
+  });
 
   const userFiles = await fetchFiles(user.id);
   const resumes = await fetchResumes(user.id);

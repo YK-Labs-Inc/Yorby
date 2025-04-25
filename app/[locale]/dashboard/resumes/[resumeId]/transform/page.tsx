@@ -1,10 +1,10 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { fetchResume } from "../../actions";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import ResumeTransformation from "./ResumeTransformation";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const fetchResumeData = async (resumeId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -43,6 +43,15 @@ export default async function TransformPage({
   if (!user) {
     redirect("/sign-in");
   }
+
+  void trackServerEvent({
+    userId: user.id,
+    email: user.email,
+    eventName: "transform-individual-resume-page-viewed",
+    args: {
+      resumeId,
+    },
+  });
 
   const resume = await fetchResumeData(resumeId);
   if (!resume) {
