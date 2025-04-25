@@ -1511,17 +1511,17 @@
         "resumeBuilder": {
           "title": "Resume Builder",
           "description1": "Build a perfectly formatted resume in minutes, not hours.",
-          "description2": "Build a recruiter-ready resume in minutes that’s optimized for real results — highlighting your strengths, using the right keywords, and formatting it so you actually stand out."
+          "description2": "Build a recruiter-ready resume in minutes that's optimized for real results — highlighting your strengths, using the right keywords, and formatting it so you actually stand out."
         },
         "interviewPrep": {
           "title": "Interview Prep",
           "description1": "Know the questions before the interview starts.",
-          "description2": "Upload the job description and our AI will predict what they’ll ask and will help you craft answers that are sharp, relevant, and confident."
+          "description2": "Upload the job description and our AI will predict what they'll ask and will help you craft answers that are sharp, relevant, and confident."
         },
         "interviewCopilot": {
           "title": "Interview Copilot",
-          "description1": "Our AI Copilot listens to the questions you’re being asked in real time and quietly feeds you the perfect answer based on your resume and job description.",
-          "description2": "No awkward pauses. No rambling. Just smooth, confident responses that make you sound like the best version of yourself. And yes, it’s 100% undetectable."
+          "description1": "Our AI Copilot listens to the questions you're being asked in real time and quietly feeds you the perfect answer based on your resume and job description.",
+          "description2": "No awkward pauses. No rambling. Just smooth, confident responses that make you sound like the best version of yourself. And yes, it's 100% undetectable."
         },
         "transformResume": {
           "title": "Transform Resume",
@@ -1570,5 +1570,50 @@
     "congratulations": "🎉 Congratulations!",
     "congratulationsDescription": "You've successfully uploaded your documents! Now you can try out any of our tools.",
     "continue": "Continue"
+  },
+  "landingPageV6": {
+    "hero": {
+      "title": "Crush Your Interview. Get The Job Offer.",
+      "subtitle": "Make the job search process 10x easier",
+      "trustedBy": "Trusted by +6,000 job seekers"
+    },
+    "howItWorks": {
+      "title": "How Perfect Interview Works",
+      "steps": {
+        "1": {
+          "title": "👋 Tell Us About Yourself",
+          "description": [
+            "Tell us about yourself and your previous work experience",
+            "This helps us create an experience that is 100% personalized to you"
+          ]
+        },
+        "2": {
+          "title": "📄 A Resume That Gets You Interviews",
+          "description": [
+            "Tired of sending out resumes and hearing nothing back? Our AI builds a recruiter-ready resume in minutes that's optimized for real results",
+            "It highlights your strengths, using the right keywords, and formatting it so you actually stand out"
+          ]
+        },
+        "3": {
+          "title": "🧠 Be the Most Prepared Candidate in the Room",
+          "description": [
+            "Know the questions before the interview starts",
+            "Upload the job description and our AI will predict what they'll ask and will help you craft answers that are sharp, relevant, and confident"
+          ]
+        },
+        "4": {
+          "title": "🤖 Never Stumble Through an Interview Again",
+          "description": [
+            "Our AI Copilot listens to the questions you're being asked in real time and quietly feeds you the perfect answer based on your resume and job description",
+            "No awkward pauses. No rambling. Just smooth, confident responses that make you sound like the best version of yourself",
+            "Don't worry it's 100% undetectable 🤫"
+          ]
+        }
+      }
+    },
+    "socialMedia": {
+      "title": "See What Our Users Are Saying",
+      "subtitle": "Join thousands of job seekers who have transformed their interview experience"
+    }
   }
 }

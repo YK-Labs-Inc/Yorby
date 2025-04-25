@@ -15,20 +15,14 @@ import {
 import { BottomCTA } from "../components/landing/BottomCTA";
 import Footer from "../components/landing/Footer";
 import OurFeatures from "../components/landing/OurFeatures";
+import { InstagramEmbed, TikTokEmbed } from "react-social-media-embed";
 
-export default function LandingPageV6(props: {
-  user: any;
-  hasSubscription: boolean;
-  credits: number;
-  isSubscriptionVariant: boolean;
-  isFreemiumEnabled: boolean;
-  transformResumeEnabled: boolean;
-  enableResumesFileUpload: boolean;
-}) {
+export default function LandingPageV6() {
   return (
     <div className="min-h-screen bg-background">
       <LandingHero />
       <HowItWorksSection />
+      <SocialMediaSection />
       <OurFeatures />
       <BottomCTA />
       <Footer />
@@ -42,16 +36,18 @@ const fadeIn = {
 };
 
 export const LandingHero = () => {
+  const t = useTranslations("landingPageV6.hero");
+
   return (
     <div className="w-full max-w-[1080px] mx-auto px-4 pt-16 pb-8 flex flex-col items-center text-center">
       <motion.h1
-        className="text-5xl md:text-6xl font-bold tracking-tight w-[600px]"
+        className="text-5xl md:text-6xl font-bold tracking-tight"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
         transition={{ duration: 0.5 }}
       >
-        Make the job search process 10x easier
+        {t("title")}
       </motion.h1>
 
       <motion.p
@@ -61,11 +57,11 @@ export const LandingHero = () => {
         variants={fadeIn}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        Get your dream job faster with the help of Perfect Interview
+        {t("subtitle")}
       </motion.p>
 
       <motion.div
-        className="flex flex-col sm:flex-row gap-4 mt-4 w-[600px]"
+        className="flex flex-col sm:flex-row gap-4 mt-4"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
@@ -81,84 +77,8 @@ export const LandingHero = () => {
         variants={fadeIn}
         transition={{ duration: 0.5, delay: 0.6 }}
       >
-        Trusted by +6,000 job seekers
+        {t("trustedBy")}
       </motion.p>
-    </div>
-  );
-};
-
-const FeatureHighlightSection = () => {
-  return (
-    <div className="w-full max-w-[1080px] mx-auto px-4 py-16">
-      <div className="grid md:grid-cols-2 gap-8">
-        <motion.div
-          className="bg-card p-6 rounded-lg shadow-md border border-border"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeIn}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {/* Placeholder for Image */}
-          <div className="w-full h-48 bg-muted rounded-md mb-4 flex items-center justify-center text-muted-foreground">
-            [Placeholder Image 1]
-          </div>
-          <h3 className="text-2xl font-semibold mb-2">
-            Customized Resumes For Every Job
-          </h3>
-          <p className="text-muted-foreground">
-            Stop applying to jobs with generic resumes. Maximize your chances of
-            getting the job with a resume custom tailored to each job you're
-            applying to.
-          </p>
-          <p className="text-muted-foreground mt-4">
-            Just enter a job description and we'll build a custom resume for you
-            in seconds.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="bg-card p-6 rounded-lg shadow-md border border-border"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeIn}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          {/* Placeholder for Image */}
-          <div className="w-full h-48 bg-muted rounded-md mb-4 flex items-center justify-center text-muted-foreground">
-            [Placeholder Image 2]
-          </div>
-          <h3 className="text-2xl font-semibold mb-2">
-            Create Practice Interview Questions
-          </h3>
-          <p className="text-muted-foreground">
-            Create practice interview questions for every job you apply to so
-            you are 100% ready for your job interview.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="bg-card p-6 rounded-lg shadow-md border border-border"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={fadeIn}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          {/* Placeholder for Image */}
-          <div className="w-full h-48 bg-muted rounded-md mb-4 flex items-center justify-center text-muted-foreground">
-            [Placeholder Image 2]
-          </div>
-          <h3 className="text-2xl font-semibold mb-2">
-            Mock Interview Practice
-          </h3>
-          <p className="text-muted-foreground">
-            Create practice interview questions for every job you apply to so
-            you are 100% ready for your job interview.
-          </p>
-        </motion.div>
-      </div>
     </div>
   );
 };
@@ -166,40 +86,21 @@ const FeatureHighlightSection = () => {
 const steps = [
   {
     id: 1,
-    title: "Tell Us About Yourself",
-    description: [
-      "Tell us about yourself and your previous work experience",
-      "This helps us create an experience that is 100% personalized to you",
-    ],
     icon: User,
     image: "assets/memories-demo.png",
   },
   {
     id: 2,
-    title: "Build A Custom Resume In Seconds",
-    description: [
-      "Build a custom resume for every job you apply to in seconds",
-      "No more generic resumes that get you ignored by recruiters",
-    ],
     icon: FileText,
     video: "assets/resume-building-demo.mp4",
   },
   {
     id: 3,
-    title: "Prep For The Interview",
-    description: [
-      "Practice with our AI mock interview tool to make sure you're 100% ready for your interview",
-    ],
     icon: MessagesSquare,
     video: "assets/mock-interview-demo.mp4",
   },
   {
     id: 4,
-    title: "Ace The Interview",
-    description: [
-      "Our interview copilot listens in on your interview and answers questions for you",
-      "Don't worry it's 100% undetectable 🤫",
-    ],
     icon: Sparkles,
     video: "assets/interview-copilot-demo.mp4",
   },
@@ -221,26 +122,13 @@ function simpleThrottle<T extends (...args: any[]) => void>(
       inThrottle = true;
       setTimeout(() => {
         inThrottle = false;
-        // If there was a call during the throttle period, run it after
-        if (lastFunc) {
-          // This part is optional for basic throttle, depends on desired behavior
-          // For scroll, we might not need to run the *last* missed call
-        }
       }, limit);
-    } else {
-      // Optional: Track the last call to run it after timeout
-      // clearTimeout(lastFunc!);
-      // lastFunc = setTimeout(() => {
-      //     if (Date.now() - lastRan >= limit) {
-      //         func.apply(context, args);
-      //         lastRan = Date.now();
-      //     }
-      // }, limit - (Date.now() - lastRan));
     }
   };
 }
 
 const HowItWorksSection = () => {
+  const t = useTranslations("landingPageV6.howItWorks");
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -389,7 +277,7 @@ const HowItWorksSection = () => {
         }, 100);
       }
     }, 200)
-  ).current; // Use simpleThrottle
+  ).current;
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -447,13 +335,13 @@ const HowItWorksSection = () => {
         variants={fadeIn}
         transition={{ duration: 0.5 }}
       >
-        How Perfect Interview Works
+        {t("title")}
       </motion.h2>
 
-      <div className="flex flex-col md:flex-row gap-8 md:items-center">
+      <div className="flex flex-col md:flex-row gap-8 md:items-start">
         <motion.div
           key={activeStepIndex}
-          className="md:w-2/3 h-80 md:h-[500px] w-full overflow-hidden rounded-lg shadow-lg bg-muted flex items-center justify-center border border-border order-1 md:order-2"
+          className="md:w-1/2 h-96 md:h-[600px] w-full overflow-hidden rounded-lg shadow-lg bg-muted flex items-center justify-center border border-border order-1 md:order-2"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -481,7 +369,7 @@ const HowItWorksSection = () => {
                   ? `/${activeStep.image}`
                   : activeStep.image
               }
-              alt={`${activeStep.title} illustration`}
+              alt={`${t(`steps.${activeStep.id}.title`)} illustration`}
               className="w-full h-full object-contain cursor-pointer hover:cursor-zoom-in"
               onClick={() =>
                 handleImageClick(
@@ -498,7 +386,7 @@ const HowItWorksSection = () => {
 
         <motion.div
           ref={scrollContainerRef}
-          className="flex flex-row overflow-x-auto snap-x snap-mandatory py-4 px-4 md:px-0 md:flex-col md:gap-4 md:py-0 md:overflow-x-visible md:snap-none order-2 md:order-1"
+          className="md:w-1/2 flex flex-row overflow-x-auto snap-x snap-mandatory py-4 px-4 md:px-0 md:flex-col md:gap-4 md:py-0 md:overflow-x-visible md:snap-none order-2 md:order-1"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
@@ -533,15 +421,19 @@ const HowItWorksSection = () => {
                     transition={{ duration: 0.1, ease: "linear" }}
                   />
 
-                  <h4 className="text-base font-semibold mb-1">{step.title}</h4>
+                  <h4 className="text-base font-semibold mb-1">
+                    {t(`steps.${step.id}.title`)}
+                  </h4>
                   <div
                     className={`text-sm transition-colors duration-300 ${isActive ? "text-foreground" : "text-muted-foreground"}`}
                   >
-                    {step.description.map((line, lineIndex) => (
-                      <span key={lineIndex} className="block mb-1">
-                        {line}
-                      </span>
-                    ))}
+                    {t
+                      .raw(`steps.${step.id}.description`)
+                      .map((line: string, lineIndex: number) => (
+                        <span key={lineIndex} className="block mb-1">
+                          {line}
+                        </span>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -580,6 +472,79 @@ const HowItWorksSection = () => {
           </motion.div>
         </motion.div>
       )}
+    </div>
+  );
+};
+
+const SocialMediaSection = () => {
+  const t = useTranslations("landingPageV6.socialMedia");
+
+  return (
+    <div className="w-full max-w-[1080px] mx-auto px-4 py-16">
+      <motion.div
+        className="text-center mb-8"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeIn}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">{t("title")}</h2>
+        <p className="text-xl text-muted-foreground">{t("subtitle")}</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* First Instagram Post */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeIn}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="w-full overflow-hidden flex justify-center"
+        >
+          <div style={{ width: "100%", maxWidth: "540px" }}>
+            <InstagramEmbed
+              url="https://www.instagram.com/reel/DIbu841BIKf/"
+              width="100%"
+            />
+          </div>
+        </motion.div>
+
+        {/* Second Instagram Post */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeIn}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="w-full overflow-hidden flex justify-center"
+        >
+          <div style={{ width: "100%", maxWidth: "540px" }}>
+            <InstagramEmbed
+              url="https://www.instagram.com/reel/DG3kNHty8CV/"
+              width="100%"
+            />
+          </div>
+        </motion.div>
+
+        {/* TikTok Post */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeIn}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="w-full overflow-hidden flex justify-center"
+        >
+          <div style={{ width: "100%", maxWidth: "325px" }}>
+            <TikTokEmbed
+              url="https://www.tiktok.com/@perfectinterview.ai/video/7467285454807682350"
+              width="100%"
+            />
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
