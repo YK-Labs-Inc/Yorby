@@ -13,9 +13,14 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     route: "/api/resume/generate",
   });
   try {
-    const { messages, additionalFileIds = [] } = (await req.json()) as {
+    const {
+      messages,
+      additionalFileIds = [],
+      resume_name_override,
+    } = (await req.json()) as {
       messages: CoreMessage[];
       additionalFileIds: string[];
+      resume_name_override?: string;
     };
 
     if (!messages || !Array.isArray(messages)) {
@@ -70,7 +75,11 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       combinedFiles
     );
 
-    const resumeId = await saveResumeCoreMessage(resumeCoreMessage, logger);
+    const resumeId = await saveResumeCoreMessage(
+      resumeCoreMessage,
+      logger,
+      resume_name_override
+    );
 
     await trackServerEvent({
       userId,
@@ -122,9 +131,13 @@ const saveResumeCoreMessage = async (
       skills: string[];
     }[];
   },
-  logger: Logger
+  logger: Logger,
+  resume_name_override?: string
 ) => {
-  const resumeId = await saveResumePersonalInfo(resumeCoreMessage.personalInfo);
+  const resumeId = await saveResumePersonalInfo(
+    resumeCoreMessage.personalInfo,
+    resume_name_override
+  );
   await saveResumeEducation(
     resumeId,
     resumeCoreMessage.educationHistory,
@@ -139,18 +152,22 @@ const saveResumeCoreMessage = async (
   return resumeId;
 };
 
-const saveResumePersonalInfo = async (personalInfo: {
-  name: string;
-  email: string | null;
-  phone: string | null;
-  location: string | null;
-}) => {
+const saveResumePersonalInfo = async (
+  personalInfo: {
+    name: string;
+    email: string | null;
+    phone: string | null;
+    location: string | null;
+  },
+  resume_name_override?: string
+) => {
   const supabase = await createSupabaseServerClient();
   const userId = await getCurrentUser();
   const { data, error } = await supabase
     .from("resumes")
     .insert({
-      title: `${new Date().toLocaleDateString()} Resume`,
+      title:
+        resume_name_override || `${new Date().toLocaleDateString()} Resume`,
       name: personalInfo.name,
       email: personalInfo.email,
       phone: personalInfo.phone,

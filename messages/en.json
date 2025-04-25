@@ -332,7 +332,8 @@
     "resumes": "Resumes",
     "resumeBuilder": "Resume Builder",
     "createResume": "Create Resume",
-    "unlockAllAccess": "Unlock Unlimited Access"
+    "unlockAllAccess": "Unlock Unlimited Access",
+    "transformResume": "Transform Resume"
   },
   "upgrade": {
     "locked": {
@@ -1510,17 +1511,22 @@
         "resumeBuilder": {
           "title": "Resume Builder",
           "description1": "Build a perfectly formatted resume in minutes, not hours.",
-          "description2": "Maximize your chances of getting the interview by creating a resume that is 100% customized to every job you apply to. Just enter the job description, and we'll handle the rest."
+          "description2": "Build a recruiter-ready resume in minutes that’s optimized for real results — highlighting your strengths, using the right keywords, and formatting it so you actually stand out."
         },
         "interviewPrep": {
           "title": "Interview Prep",
-          "description1": "Enter a job description, and then we will generate a list of interview questions based on the job description and your previous work experience.",
-          "description2": "Pracice like it's the real thing by going through our AI-powered mock interviews."
+          "description1": "Know the questions before the interview starts.",
+          "description2": "Upload the job description and our AI will predict what they’ll ask and will help you craft answers that are sharp, relevant, and confident."
         },
         "interviewCopilot": {
           "title": "Interview Copilot",
-          "description1": "Interview Copilot listens in on your interview and answeres interview questions for you so that you have an answer for every question they ask you.",
-          "description2": "Don't worry, it is 100% undetectable 🤫"
+          "description1": "Our AI Copilot listens to the questions you’re being asked in real time and quietly feeds you the perfect answer based on your resume and job description.",
+          "description2": "No awkward pauses. No rambling. Just smooth, confident responses that make you sound like the best version of yourself. And yes, it’s 100% undetectable."
+        },
+        "transformResume": {
+          "title": "Transform Resume",
+          "description1": "Stop applying to jobs with a generic resume that gets ignored",
+          "description2": "Enter any job description and then we will transform your resume to be 100% customized to the job, improving your chances of getting the interview."
         }
       },
       "testimonials": {
