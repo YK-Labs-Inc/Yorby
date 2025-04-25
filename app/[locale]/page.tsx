@@ -39,15 +39,5 @@ export default async function Home({
     enableResumesFileUpload =
       (await posthog.isFeatureEnabled("enable-memories", user.id)) ?? false;
   }
-  return (
-    <LandingPageV6
-      user={user}
-      hasSubscription={hasSubscription}
-      credits={credits}
-      isSubscriptionVariant={isSubscriptionVariant}
-      isFreemiumEnabled={isFreemiumEnabled}
-      transformResumeEnabled={transformResumeEnabled}
-      enableResumesFileUpload={enableResumesFileUpload}
-    />
-  );
+  return <LandingPageV6 />;
 }
