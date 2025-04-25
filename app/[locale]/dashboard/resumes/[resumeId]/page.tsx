@@ -9,7 +9,7 @@ import {
   fetchHasSubscription,
   fetchUserCredits,
 } from "../actions";
-import { posthog } from "@/utils/tracking/serverUtils";
+import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
 export default async function ResumePage({
   params,
   searchParams,
@@ -63,6 +63,14 @@ export default async function ResumePage({
   const transformSummary = (await searchParams)?.transformSummary as
     | string
     | undefined;
+  if (transformSummary) {
+    void trackServerEvent({
+      userId: user.id,
+      email: user.email,
+      eventName: "transformed-resume",
+      args: { resumeId },
+    });
+  }
   return (
     <ResumeBuilder
       resumeId={resumeId}
