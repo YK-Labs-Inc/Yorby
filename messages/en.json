@@ -1367,10 +1367,10 @@
         "title": "Chat to Resume",
         "description": "Create a perfect resume through natural conversation",
         "featuresV2": [
-          "Natural voice or text input",
-          "Perfect formatting",
-          "Unlimited edits",
-          "ATS-optimized templates"
+          "Chat naturally with AI",
+          "Perfectly formatted resume",
+          "Transform your resume to any job description",
+          "Unlimited ATS-optimized resume"
         ],
         "button": "Try Resume Builder Demo"
       },
@@ -1379,8 +1379,8 @@
         "description": "Practice with AI-generated interview questions",
         "featuresV2": [
           "Job-specific questions",
-          "Real-time feedback",
-          "Performance analysis",
+          "Generate answers based on your personal work history",
+          "Feedback and performance insights",
           "Unlimited mock interviews"
         ],
         "button": "Try Mock Interview Demo"
@@ -1426,7 +1426,7 @@
         "updateFailed": "Failed to update memories"
       }
     },
-    "initialMessage": "Hi! I'm here to help you build your knowledge base. Tell me about your work experience, skills, and achievements.",
+    "initialMessage": "Hi there! 👋\n\nI'm your AI career coach. This is your personal knowledge base where we'll store all your career information to help create better resumes and interview prep materials.\n\nWhat you can do:\n- **Upload files**: Resumes, cover letters, work documents\n- **Chat with me**: Share additional work experience and details\n\nWhat would you like to add to your knowledge base today?",
     "initialOnboardingMessage": "Hi! Let's build your knowledge base. This will help me create personalized resumes and interview answers for you. Tell me about your work experience, skills, and achievements.",
     "congratulations": "🎉 Congratulations!",
     "congratulationsDescription": "You've successfully created your knowledge base! Now you can use this information to build your resume, prepare for interviews, or get real-time help during interviews.",
@@ -1574,17 +1574,17 @@
   "landingPageV6": {
     "hero": {
       "title": "Crush Your Interview. Get The Job Offer.",
-      "subtitle": "Make the job search process 10x easier",
+      "subtitle": "Make the job search process 10x easier with our suite of tools designed to help you land and ace your interviews",
       "trustedBy": "Trusted by +6,000 job seekers"
     },
     "howItWorks": {
-      "title": "How Perfect Interview Works",
+      "title": "Land Your Next Job With Perfect Interview",
       "steps": {
         "1": {
-          "title": "👋 Tell Us About Yourself",
+          "title": "👋 We Learn About You And Your Career",
           "description": [
-            "Tell us about yourself and your previous work experience",
-            "This helps us create an experience that is 100% personalized to you"
+            "We learn about you and your career so that we can create an experience that is 100% personalized to you",
+            "This helps our tools create the best possible experience for you"
           ]
         },
         "2": {
@@ -1612,7 +1612,7 @@
       }
     },
     "socialMedia": {
-      "title": "See What Our Users Are Saying",
+      "title": "Follow Us On Social Media",
       "subtitle": "Join thousands of job seekers who have transformed their interview experience"
     }
   },

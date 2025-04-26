@@ -21,9 +21,7 @@ const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
-      content: isOnboarding
-        ? t("initialOnboardingMessage")
-        : t("initialMessage"),
+      content: t("initialMessage"),
     },
   ]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -110,11 +108,6 @@ const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
       body: formData,
     });
     setGeneratingResponse(false);
-
-    // Update knowledge base with the new message
-    if (message.trim() || (files && files.length > 0)) {
-      void updateKnowledgeBase(updatedMessages);
-    }
 
     // If files were uploaded, refresh the files list
     if (files && files.length > 0) {
