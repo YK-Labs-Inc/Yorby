@@ -161,13 +161,13 @@ export function ChatUI({
       { role: "user" as const, content: messageToSend },
     ];
 
-    // Update the knowledge base with the new messages
-    void updateKnowledgeBase(newMessages);
-
     const sendMessageResponse = await onSendMessage(
       messageToSend,
       selectedFiles
     );
+
+    // Update the knowledge base with the new messages
+    void updateKnowledgeBase(newMessages);
     setSelectedFiles([]);
     if (isTtsEnabled && sendMessageResponse) {
       isPlaying.current = true;

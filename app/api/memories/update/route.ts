@@ -26,6 +26,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
   logger = logger.with({
     userId: user.id,
+    messages,
   });
 
   // Fetch user files using getAllUserMemories

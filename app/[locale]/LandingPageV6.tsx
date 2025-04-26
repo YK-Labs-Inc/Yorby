@@ -87,7 +87,7 @@ const steps = [
   {
     id: 1,
     icon: User,
-    image: "assets/memories-demo.png",
+    video: "assets/memories-demo.mp4",
   },
   {
     id: 2,
@@ -97,7 +97,7 @@ const steps = [
   {
     id: 3,
     icon: MessagesSquare,
-    video: "assets/mock-interview-demo.mp4",
+    video: "assets/interview-prep-demo.mp4",
   },
   {
     id: 4,
@@ -360,26 +360,6 @@ const HowItWorksSection = () => {
               muted
               playsInline
               controls
-            />
-          )}
-          {activeStep.image && (
-            <motion.img
-              src={
-                activeStep.image.startsWith("assets/")
-                  ? `/${activeStep.image}`
-                  : activeStep.image
-              }
-              alt={`${t(`steps.${activeStep.id}.title`)} illustration`}
-              className="w-full h-full object-contain cursor-pointer hover:cursor-zoom-in"
-              onClick={() =>
-                handleImageClick(
-                  activeStep.image.startsWith("assets/")
-                    ? `/${activeStep.image}`
-                    : activeStep.image
-                )
-              }
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
             />
           )}
         </motion.div>
