@@ -1615,5 +1615,31 @@
       "title": "See What Our Users Are Saying",
       "subtitle": "Join thousands of job seekers who have transformed their interview experience"
     }
+  },
+  "referrals": {
+    "title": "Your Referral Code",
+    "description": "Share your email address with friends and colleagues. For every 3 friends you refer, you'll get 1 month free - and there's no limit!",
+    "progress": {
+      "title": "Progress to next free month",
+      "count": "{referralCount}/{referralsNeeded} referrals"
+    },
+    "page": {
+      "title": "Your Referrals",
+      "signInRequired": "Please sign in to view your referrals.",
+      "error": "Error loading referrals. Please try again later.",
+      "emptyState": {
+        "title": "No Referrals Yet",
+        "description": "Start sharing your referral code with friends and colleagues. For every 3 friends you refer you get 1 month free!",
+        "steps": {
+          "share": "Share your referral code with your network",
+          "signup": "They sign up using your referral code (no purchase necessary)",
+          "reward": "Get 1 month free after 3 successful referrals"
+        }
+      },
+      "table": {
+        "referredUser": "Referred User",
+        "dateReferred": "Date Referred"
+      }
+    }
   }
 }
