@@ -60,6 +60,7 @@ export default function OnboardingPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string>("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
   const router = useRouter();
   const t = useTranslations("onboardingV2");
   const user = useUser();
@@ -126,6 +127,19 @@ export default function OnboardingPage() {
 
   const handleContinue = () => {
     router.push("/memories");
+  };
+
+  // Handler for skipping upload
+  const handleSkip = () => {
+    setShowFileUpload(false);
+    setShowSkipWarning(true);
+  };
+
+  // Handler for confirming skip
+  const handleConfirmSkip = async () => {
+    setShowSkipWarning(false);
+    setShowSuccessModal(true);
+    void completeOnboarding();
   };
 
   const renderStepContent = (step: string) => {
@@ -355,7 +369,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col gap-2">
             <Button
               onClick={handleUpload}
               disabled={
@@ -373,6 +387,50 @@ export default function OnboardingPage() {
               ) : (
                 t("upload.upload")
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleSkip}
+              className="w-full text-gray-500 hover:text-gray-700"
+              disabled={isUploading || isUpdatingMemories}
+            >
+              Skip for now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Skip warning dialog */}
+      <Dialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("upload.skipWarning.title")}</DialogTitle>
+            <DialogDescription>
+              {t("upload.skipWarning.description1")}
+              <br />
+              <br />
+              <span className="font-semibold">
+                {t("upload.skipWarning.description2")}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSkipWarning(false);
+                setShowFileUpload(true);
+              }}
+              className="w-full"
+            >
+              {t("upload.skipWarning.goBack")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmSkip}
+              className="w-full"
+            >
+              {t("upload.skipWarning.skipAnyway")}
             </Button>
           </DialogFooter>
         </DialogContent>
