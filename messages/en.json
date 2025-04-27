@@ -469,7 +469,85 @@
     "errors": {
       "generic": "Something went wrong — please try again.",
       "login": "You must be logged in to purchase credits"
-    }
+    },
+    "productVideoCarousel": {
+      "heading": "See Perfect Interview in Action",
+      "resumeBuilder": {
+        "title": "Resume Builder",
+        "description": "Use our AI-powered resume builder to craft a professional, tailored resume that gets noticed by top employers."
+      },
+      "practiceQuestions": {
+        "title": "Practice Real Interview Questions",
+        "description": "Simulate real interviews with job-specific questions and get instant, actionable feedback from our AI."
+      },
+      "copilot": {
+        "title": "Master Interviews with Copilot",
+        "description": "Experience a personalized, conversational AI interview copilot that helps you practice, improve, and ace your interviews."
+      }
+    },
+    "trustBadges": {
+      "guarantee": "7-Day Money-Back Guarantee",
+      "secure": "Secure Payment",
+      "cancel": "Cancel Anytime"
+    },
+    "countdownTimer": {
+      "offerEnds": "Offer ends in:"
+    },
+    "testimonials": {
+      "heading": "What Our Users Say",
+      "0": {
+        "name": "Emily Chen",
+        "title": "Financial Analyst",
+        "company": "JPMorgan Chase",
+        "quote": "Perfect Interview gave me the confidence to ace my finance interviews. The mock questions were spot on and the resume builder helped me stand out in a competitive field."
+      },
+      "1": {
+        "name": "Miguel Torres",
+        "title": "Supply Chain Manager",
+        "company": "FedEx",
+        "quote": "The practice interviews and instant feedback made a huge difference. I felt prepared for every scenario in my supply chain interviews."
+      },
+      "2": {
+        "name": "Peter Kang",
+        "title": "Restaurant Manager",
+        "company": "Olive Garden",
+        "quote": "I loved how the AI tailored questions to my experience in hospitality. The resume builder made my achievements shine and helped me land my new role."
+      },
+      "3": {
+        "name": "Robert Johnson",
+        "title": "Operations Manager",
+        "company": "Walmart",
+        "quote": "Perfect Interview's tools helped me prepare for tough operations questions and gave me the edge I needed to get promoted. Highly recommend for anyone in management!"
+      }
+    },
+    "faq": {
+      "heading": "Frequently Asked Questions",
+      "0": {
+        "q": "What do I get with a subscription?",
+        "a": "You get unlimited access to all features: resume builder, AI-powered interview questions, mock interviews, and Interview Copilot sessions."
+      },
+      "1": {
+        "q": "Can I cancel anytime?",
+        "a": "Yes! You can cancel your subscription at any time from your account dashboard. You'll keep access until the end of your billing period."
+      },
+      "2": {
+        "q": "Is there a money-back guarantee?",
+        "a": "Absolutely. If you're not satisfied, contact us within 7 days of starting your subscription for a full refund — no questions asked."
+      },
+      "3": {
+        "q": "How secure is my payment?",
+        "a": "All payments are processed securely with industry-standard encryption. We never store your payment details."
+      },
+      "4": {
+        "q": "Will my data be private?",
+        "a": "Yes, your data is private and will never be shared without your consent. You control your information at all times."
+      }
+    },
+    "hero": {
+      "title": "Land Your Dream Job with AI-Powered Interview Prep",
+      "subtitle": "Unlimited AI-powered interview prep, resume builder, and personalized feedback—risk free."
+    },
+    "mostPopularBadge": "Most Popular"
   },
   "accountLinking": {
     "title": "Sign Up To Save Your Interview Prep",

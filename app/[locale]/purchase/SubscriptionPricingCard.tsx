@@ -16,8 +16,16 @@ declare global {
   }
 }
 
-export const SubscriptionPricingCard = ({ product }: { product: Product }) => {
-  const isPopular = product.months === 3;
+export const SubscriptionPricingCard = ({
+  product,
+  highlight = false,
+  badge,
+}: {
+  product: Product;
+  highlight?: boolean;
+  badge?: string;
+}) => {
+  const isPopular = highlight || product.months === 3;
   const monthlyPrice = product.totalPrice! / (product.months || 1);
   const t = useTranslations("purchase");
 
@@ -40,13 +48,13 @@ export const SubscriptionPricingCard = ({ product }: { product: Product }) => {
       key={product.totalPrice}
       className={`relative flex flex-col rounded-2xl ${
         isPopular
-          ? "border-2 border-indigo-600 dark:border-indigo-400"
+          ? "border-4 border-indigo-600 dark:border-indigo-400 shadow-2xl scale-105 z-10"
           : "border border-gray-200 dark:border-gray-700"
-      } bg-white dark:bg-gray-800 p-8 shadow-sm`}
+      } bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-200`}
     >
-      {isPopular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 dark:bg-indigo-500 px-4 py-1 text-sm font-semibold text-white">
-          {t("cta.mostPopular")}
+      {(badge || isPopular) && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 dark:bg-indigo-500 px-4 py-1 text-sm font-semibold text-white shadow-lg">
+          {badge || t("cta.mostPopular")}
         </div>
       )}
       <div className="mb-8">
