@@ -361,7 +361,6 @@ const ResumeBuilderComponent = ({
   const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
   useEffect(() => {
-    console.log("conversationStarted.current", conversationStarted.current);
     if (conversationStarted.current) {
       return;
     }
