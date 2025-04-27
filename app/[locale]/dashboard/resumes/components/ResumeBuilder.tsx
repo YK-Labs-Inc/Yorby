@@ -361,6 +361,10 @@ const ResumeBuilderComponent = ({
   const hasReachedFreemiumLimit = editCount >= MAX_FREE_EDITS;
 
   useEffect(() => {
+    console.log("conversationStarted.current", conversationStarted.current);
+    if (conversationStarted.current) {
+      return;
+    }
     // Use the transformation summary if available, otherwise use the default messages
     let initialMessage = "";
 
@@ -370,7 +374,6 @@ const ResumeBuilderComponent = ({
       initialMessage = t("editResumeInitialMessage");
     }
     if (!resumeId && !conversationStarted.current) {
-      conversationStarted.current = true;
       handleSendMessage(START_CONVERSATION_MESSAGE);
     } else {
       setMessages([
@@ -380,6 +383,7 @@ const ResumeBuilderComponent = ({
         },
       ]);
     }
+    conversationStarted.current = true;
   }, [
     resumeId,
     persona,
