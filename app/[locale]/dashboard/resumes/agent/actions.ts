@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ResumeDataType } from "../components/ResumeBuilder";
 import { Logger } from "next-axiom";
 import { CoreMessage } from "ai";
+import { getAllUserMemories } from "@/app/api/memories/utils";
 
 export type ResumeActionType =
   | "create_section"
@@ -78,10 +79,15 @@ export const triageAction = async (
     messages,
     currentResume,
   });
-  try {
-    const { actions, response } = await generateObjectWithFallback({
-      prompt: `
-    You are a helpful assistant that triages user messages into actions.
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
+  const initialMessage = `
+    You are a helpful assistant that triages user messages into actions to edit a resume.
+
+    Along with the user messages, you will receive an optional list of files and an optional
+    block of text that represents a user's knowledge base about the user's career and experiences.
+    If necessary, use the files and knowledge base to provide additional context for any changes that need to be made.
 
     From the following message history, determine the actions that need to be taken on the resume. 
 
@@ -126,9 +132,31 @@ export const triageAction = async (
     ## Message History
     ${messages.map((message) => `${message.role}: ${message.content}`).join("\n")}
 
+    ## Knowledge Base
+    ${knowledge_base}
+
     ## Current Resume
     ${JSON.stringify(currentResume)}
-    `,
+    `;
+  try {
+    const { actions, response } = await generateObjectWithFallback({
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text" as const,
+              text: initialMessage,
+            },
+            ...files.map((file) => ({
+              type: "file" as const,
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+        ...messages,
+      ],
       schema: z.object({
         actions: z.array(
           z.object({
@@ -177,12 +205,23 @@ export const createSection = async (
     messages,
     currentResume,
   });
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
   try {
     const { resumeSection, response } = await generateObjectWithFallback({
-      prompt: `
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text" as const,
+              text: `
     You are a helpful assistant that is going to create a new section for a resume.
 
     You will receive the message history with a user, the current resume, and the details of the action that will be taken.
+    You will also receive files and a knowledge base that contain information about the user's career and experiences.
+    If necessary, use the files and knowledge base to provide additional context for any changes that need to be made.
 
     For the following prompt, perform the following actions to create a section in a resume:
 
@@ -217,7 +256,19 @@ export const createSection = async (
 
     ## Current Resume
     ${JSON.stringify(currentResume)}
+
+    ## Knowledge Base
+    ${knowledge_base}
     `,
+            },
+            ...files.map((file) => ({
+              type: "file" as const,
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+      ],
       schema: z.object({
         resumeSection: resumeSectionsSchema,
         response: z.string(),
@@ -254,13 +305,23 @@ export const updateSection = async (
     messages,
     currentResume,
   });
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
   try {
     const { resumeSection, response } = await generateObjectWithFallback({
-      prompt: `
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text" as const,
+              text: `
     You are a helpful assistant that updates an existing section in a resume.
 
     You will receive the message history with a user, the current resume, and the details of the action that will be taken.
-
+    You will also receive files and a knowledge base that contain information about the user's career and experiences.
+    If necessary, use the files and knowledge base to provide additional context for any changes that need to be made.
     For the following prompt, perform these actions to update a section in the resume:
 
     0) Read the actionDetails, understand what the user wants to update in the resume, and extract the necessary information
@@ -335,7 +396,19 @@ export const updateSection = async (
 
     ## Current Resume
     ${JSON.stringify(currentResume)}
+
+    ## Knowledge Base
+    ${knowledge_base}
     `,
+            },
+            ...files.map((file) => ({
+              type: "file" as const,
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+      ],
       schema: z.object({
         resumeSection: resumeSectionsSchema.nullable(),
         response: z.string(),
@@ -541,16 +614,27 @@ export const handleOtherAction = async (
     messages,
     currentResume,
   });
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
   try {
     const { updatedResume, response } = await generateObjectWithFallback({
-      prompt: `
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text" as const,
+              text: `
     You are a helpful assistant that handles miscellaneous resume updates that don't fit into other specific actions.
 
     You will receive the message history with a user, the current resume, and the details of the action that will be taken.
+    You will also receive files and a knowledge base that contain information about the user's career and experiences.
 
     For the following prompt, perform these actions:
     1) Read the actionDetails and understand what changes need to be made to the resume
     2) Make only the necessary changes to the resume while preserving all other existing data
+    3) Use the knowledge base and files to provide additional context for any changes that need to be made
 
     Return a JSON object with the following fields:
     {
@@ -566,7 +650,19 @@ export const handleOtherAction = async (
 
     ## Current Resume
     ${JSON.stringify(currentResume)}
+
+    ## Knowledge Base
+    ${knowledge_base}
     `,
+            },
+            ...files.map((file) => ({
+              type: "file" as const,
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+      ],
       schema: z.object({
         updatedResume: resumeSchema,
         response: z.string(),
@@ -619,7 +715,8 @@ export const validateJobDescription = async (messages: CoreMessage[]) => {
       {
           "isValid": boolean, // true if the text appears to be a valid job description
           "response": string // A friendly response explaining whether the text is valid and why. If invalid, provide guidance on what a job description should include.
-          Keep the tone casual and helpful. Use first person.
+          Keep the tone casual and helpful. Use first person. If the text is a valid job description, acknowledge that it is valid and tell the user that you 
+          are going to begin identifying changes that can be made to the resume to match the job description.
       }
       `,
       messages,
@@ -656,10 +753,10 @@ export const identifyChanges = async (
     messages,
     currentResume,
   });
-
-  try {
-    const result = await generateObjectWithFallback({
-      prompt: `
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
+  const initialMessage = `
       You are a helpful assistant who takes a base resume and then updates it so that the resume is hyper-relevant to a job description to improve
       the chances that the owner of the resume will get an interview. Your goal is to make changes to the resume so that it is a stronger match for the job description,
       pass any ATS filters, and match any major keywords and responsibilities in the job description.
@@ -667,6 +764,8 @@ export const identifyChanges = async (
       You will receive:
       1. Message history containing the job description
       2. The current resume data
+      3. A list of files that the user has uploaded that contains information about the user's career and experiences (optional)
+      4. A block of text that represents a user's knowledge base about the user's career and experiences (optional)
       
       Perform the following actions:
       1. You are an expert HR recruiter. Analyze the job description and create criteria for what would be a good resume for this job.
@@ -675,6 +774,9 @@ export const identifyChanges = async (
       WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
       3. If the resume is already a strong match for the job description, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
       4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume. 
+      Prioritize improvements that can be made from the files and knowledge base that contain information about the user's career and experiences.  
+      We want to minimize the amount of additional information we need to ask the user for. Only return improvements that require additional
+      information from the user if it is absolutely necessary and the resume transformation could not be completed without it.
 
       Return a discriminated union with either:
       {
@@ -704,7 +806,28 @@ export const identifyChanges = async (
 
       ## Current Resume
       ${JSON.stringify(currentResume)}
-      `,
+
+      ## Knowledge Base
+      ${knowledge_base}
+      `;
+  try {
+    const result = await generateObjectWithFallback({
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text" as const,
+              text: initialMessage,
+            },
+            ...files.map((file) => ({
+              type: "file" as const,
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+      ],
       schema: z.discriminatedUnion("type", [
         z.object({
           type: z.literal("no_changes"),
@@ -776,16 +899,22 @@ export const handleTransformConversation = async (
     changesToBeMade,
     currentResume,
   });
-  const { isReady, response } = await generateObjectWithFallback({
-    systemPrompt: `You are a helpful assistant that chats with a user to get more information
+  const { files, knowledge_base } = await getAllUserMemories(
+    currentResume.user_id
+  );
+  const initialMessage = `You are a helpful assistant that chats with a user to get more information
     about the changes that need to be made to their resume.
     
     You will receive:
     1. The current resume
     2. A list of changes that need to be made to the resume  
     3. Current conversation with the user.
+    4. A list of files that the user has uploaded that contains information about the user's career and experiences (optional)
+    5. A block of text that represents a user's knowledge base about the user's career and experiences (optional)
 
     Your job is to analyze the list of changes and ask the user for any additional information that they need to address the changes.
+
+    As you chat with the user, you should pull information from the files and knowledge base to provide context for the changes.
 
     For example if one of the changes is to add a new work experience to the resume, you should chat back and forth with the user
     until you get enough information to add the work experience to the resume.
@@ -819,8 +948,28 @@ export const handleTransformConversation = async (
 
     ## Changes to be Made
     ${JSON.stringify(changesToBeMade)}
-    `,
-    messages,
+
+    ## Knowledge Base
+    ${knowledge_base}
+    `;
+  const { isReady, response } = await generateObjectWithFallback({
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text" as const,
+            text: initialMessage,
+          },
+          ...files.map((file) => ({
+            type: "file" as const,
+            data: file.fileData.fileUri,
+            mimeType: file.fileData.mimeType,
+          })),
+        ],
+      },
+      ...messages,
+    ],
     schema: z.object({
       isReady: z.boolean(),
       response: z.string(),
