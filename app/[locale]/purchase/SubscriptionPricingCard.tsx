@@ -220,7 +220,7 @@ export const SubscriptionPricingCard = ({
             </span>
           </div>
           {/* Flash Sale badge inside the card, under the timer */}
-          <div className="mt-2 mb-2 rounded-full bg-red-600 dark:bg-red-500 px-4 py-1 text-sm font-semibold text-white shadow-lg">
+          <div className="mt-2 mb-2 rounded-full bg-red-600 dark:bg-red-500 px-4 py-1 text-sm font-semibold text-white shadow-lg animate-jiggle">
             {t("subscriptionCard.flashSale")}
           </div>
         </div>
