@@ -20,6 +20,8 @@ export interface Product extends Omit<Stripe.Product, "description"> {
   totalPrice?: number;
   credits?: number;
   months?: number; // Added for subscription products
+  increasedPrice?: number | null; // Added for flash sale pricing
+  increasedPriceId?: string | null; // Added for flash sale pricing
 }
 
 const CREDIT_PRICES = {
@@ -40,14 +42,17 @@ const CREDIT_PRICES = {
 const SUBSCRIPTION_PRICES = {
   monthly: {
     priceId: process.env.STRIPE_MONTHLY_PRICE_ID!,
+    increasedPriceId: process.env.STRIPE_INCREASED_MONTHLY_PRICE_ID!,
     months: 1,
   },
   threeMonth: {
     priceId: process.env.STRIPE_3_MONTH_PRICE_ID!,
+    increasedPriceId: process.env.STRIPE_INCREASED_3_MONTH_PRICE_ID!,
     months: 3,
   },
   sixMonth: {
     priceId: process.env.STRIPE_6_MONTH_PRICE_ID!,
+    increasedPriceId: process.env.STRIPE_INCREASED_6_MONTH_PRICE_ID!,
     months: 6,
   },
 } as const;
@@ -62,15 +67,24 @@ export async function getProducts(userId: string) {
     const isTestVariant =
       (await posthog.getFeatureFlag("subscription-price-test-1", userId)) ===
       "test";
+    const isFlashPricing =
+      (await posthog.getFeatureFlag("flash-pricing", userId)) === "test";
 
     // Determine which price IDs to fetch based on the variant
     const priceIds = isTestVariant
       ? Object.values(SUBSCRIPTION_PRICES).map(({ priceId }) => priceId)
       : Object.values(CREDIT_PRICES).map(({ priceId }) => priceId);
 
+    // If flash pricing is enabled, also fetch the increased prices
+    const additionalPriceIds = isFlashPricing
+      ? Object.values(SUBSCRIPTION_PRICES).map(
+          ({ increasedPriceId }) => increasedPriceId
+        )
+      : [];
+
     // Fetch all prices in parallel with expanded product data
     const prices = await Promise.all(
-      priceIds.map((priceId) =>
+      [...priceIds, ...additionalPriceIds].map((priceId) =>
         stripe.prices.retrieve(priceId, { expand: ["product"] })
       )
     );
@@ -86,7 +100,7 @@ export async function getProducts(userId: string) {
 
       // Create subscription products
       productsWithPrices = Object.entries(SUBSCRIPTION_PRICES).map(
-        ([key, { months }]) => {
+        ([key, { months, increasedPriceId }]) => {
           const price = prices.find(
             (p) =>
               p.id ===
@@ -95,6 +109,12 @@ export async function getProducts(userId: string) {
           )!;
           const product = price.product as Stripe.Product;
           const totalPrice = price.unit_amount! / 100;
+
+          // If flash pricing is enabled, get the increased price
+          let increasedPrice = null;
+          if (isFlashPricing) {
+            increasedPrice = prices.find((p) => p.id === increasedPriceId)!;
+          }
 
           // Calculate savings compared to paying month-by-month
           let savings = null;
@@ -113,6 +133,10 @@ export async function getProducts(userId: string) {
             pricePerCredit: null,
             savings,
             months,
+            increasedPrice: increasedPrice
+              ? increasedPrice.unit_amount! / 100
+              : null,
+            increasedPriceId,
           } as Product;
         }
       );
@@ -149,6 +173,7 @@ export async function getProducts(userId: string) {
             totalPrice,
             pricePerCredit: totalPrice / credits,
             savings,
+            increasedPriceId: null,
           } as Product;
         }
       );
