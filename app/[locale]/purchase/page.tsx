@@ -5,10 +5,11 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import SignUpForm from "./components/SignUpForm";
 import { SubscriptionPricingCard } from "./SubscriptionPricingCard";
 import TrustBadges from "./components/TrustBadges";
-import CountdownTimer from "./components/CountdownTimer";
 import ProductVideoCarousel from "./components/ProductVideoCarousel";
 import Testimonials from "./components/Testimonials";
 import FAQSection from "./components/FAQSection";
+import { posthog } from "@/utils/tracking/serverUtils";
+import { isWithin24Hours } from "./utils";
 
 export default async function PurchasePage({
   searchParams,
@@ -32,8 +33,16 @@ export default async function PurchasePage({
       </div>
     );
   }
-
+  const isFlashPricingEnabled =
+    (await posthog.getFeatureFlag("flash-pricing", user.id)) === "test";
+  const userSignedUpWithin24Hours = isWithin24Hours(user.created_at);
+  const showFlashPricingUI = isFlashPricingEnabled && userSignedUpWithin24Hours;
   const { products } = await getProducts(user.id);
+  const monthlyProduct = products.find((p: any) => p.months === 1);
+  const baselineMonthlyPrice =
+    typeof monthlyProduct?.increasedPrice === "number"
+      ? monthlyProduct.increasedPrice
+      : undefined;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 py-8 px-2">
@@ -46,8 +55,14 @@ export default async function PurchasePage({
           <p className="text-xl text-gray-700 dark:text-gray-300 mb-4">
             {t("hero.subtitle")}
           </p>
+          {showFlashPricingUI && (
+            <div className="mb-6">
+              <div className="inline-block bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-4 py-2 rounded-full text-sm font-semibold">
+                {t("flashSale.limitedTimeOffer")}
+              </div>
+            </div>
+          )}
           <TrustBadges />
-          {/* <CountdownTimer /> */}
         </div>
 
         {/* Pricing Cards */}
@@ -60,6 +75,11 @@ export default async function PurchasePage({
                 product={JSON.parse(JSON.stringify(product))}
                 highlight={idx === 1}
                 badge={idx === 1 ? t("mostPopularBadge") : undefined}
+                isFlashPricingEnabled={isFlashPricingEnabled}
+                baselineMonthlyPrice={baselineMonthlyPrice}
+                showFlashPricingUI={showFlashPricingUI}
+                userSignedUpWithin24Hours={userSignedUpWithin24Hours}
+                userSignUpTimestamp={user.created_at}
               />
             ))}
           </div>

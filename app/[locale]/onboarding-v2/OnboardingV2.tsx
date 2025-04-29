@@ -69,7 +69,19 @@ const steps = [
   },
 ];
 
-export default function OnboardingPage({ products }: { products: Product[] }) {
+export default function OnboardingPage({
+  products,
+  isFlashPricingEnabled,
+  showFlashPricingUI,
+  userSignedUpWithin24Hours,
+  userSignUpTimestamp,
+}: {
+  products: Product[];
+  isFlashPricingEnabled: boolean;
+  showFlashPricingUI: boolean;
+  userSignedUpWithin24Hours: boolean;
+  userSignUpTimestamp: string;
+}) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -281,7 +293,15 @@ export default function OnboardingPage({ products }: { products: Product[] }) {
           </div>
         );
       case "purchase":
-        return <PurchaseScreen products={products} />;
+        return (
+          <PurchaseScreen
+            products={products}
+            isFlashPricingEnabled={isFlashPricingEnabled}
+            showFlashPricingUI={showFlashPricingUI}
+            userSignedUpWithin24Hours={userSignedUpWithin24Hours}
+            userSignUpTimestamp={userSignUpTimestamp}
+          />
+        );
       case "upload":
         return null;
       default:
@@ -665,8 +685,27 @@ const InterviewCopilotCard = () => {
   );
 };
 
-const PurchaseScreen = ({ products }: { products: Product[] }) => {
+const PurchaseScreen = ({
+  products,
+  isFlashPricingEnabled,
+  showFlashPricingUI,
+  userSignedUpWithin24Hours,
+  userSignUpTimestamp,
+}: {
+  products: Product[];
+  isFlashPricingEnabled: boolean;
+  showFlashPricingUI: boolean;
+  userSignedUpWithin24Hours: boolean;
+  userSignUpTimestamp: string;
+}) => {
   const t = useTranslations("purchase");
+
+  const monthlyProduct = products.find((p: any) => p.months === 1);
+  const baselineMonthlyPrice =
+    typeof monthlyProduct?.increasedPrice === "number"
+      ? monthlyProduct.increasedPrice
+      : undefined;
+
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 py-2 px-2">
       <TrustBadges />
@@ -679,6 +718,11 @@ const PurchaseScreen = ({ products }: { products: Product[] }) => {
               highlight={idx === 1}
               badge={idx === 1 ? t("mostPopularBadge") : undefined}
               cancelledPurchaseRedirectUrl="/onboarding-v2?step=purchase"
+              isFlashPricingEnabled={isFlashPricingEnabled}
+              baselineMonthlyPrice={baselineMonthlyPrice}
+              showFlashPricingUI={showFlashPricingUI}
+              userSignedUpWithin24Hours={userSignedUpWithin24Hours}
+              userSignUpTimestamp={userSignUpTimestamp}
             />
           ))}
         </div>
