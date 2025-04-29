@@ -332,7 +332,8 @@
     "resumes": "CVs",
     "resumeBuilder": "Créateur de CV",
     "createResume": "Créer un CV",
-    "unlockAllAccess": "Débloquez l'Accès Illimité"
+    "unlockAllAccess": "Débloquez l'Accès Illimité",
+    "transformResume": "Transformer CV"
   },
   "upgrade": {
     "locked": {
@@ -403,7 +404,13 @@
         "title": "Illimité Annuel",
         "description": "Pour les professionnels et les personnes recherchant fréquemment un emploi",
         "highlight": "Crédits illimités",
-        "titleV2": "Crédits Illimités"
+        "titleV2": "Crédits Illimités",
+        "highlights": {
+          "0": "Créer des CV illimités ♾️",
+          "1": "Transformer des CV Illimités",
+          "2": "Créer un nombre illimité de questions d'entretien",
+          "3": "Créer des copilotes d'entretien illimités 🚀"
+        }
       }
     },
     "cta": {
@@ -468,6 +475,99 @@
     "errors": {
       "generic": "Une erreur s'est produite. Veuillez réessayer.",
       "login": "Vous devez être connecté(e) pour acheter des crédits."
+    },
+    "productVideoCarousel": {
+      "heading": "Voir Perfect Interview en action",
+      "resumeBuilder": {
+        "title": "Créateur de CV",
+        "description": "Utilisez notre créateur de CV assisté par l'IA pour élaborer un CV professionnel et personnalisé qui attire l'attention des meilleurs employeurs."
+      },
+      "practiceQuestions": {
+        "title": "Entraînez-vous avec de vraies questions d'entretien 💼",
+        "description": "Simulez de véritables entretiens avec des questions spécifiques à l'emploi et obtenez des commentaires instantanés et exploitables de notre IA."
+      },
+      "copilot": {
+        "title": "Entretiens de Maîtrise avec Copilot 🏆",
+        "description": "Découvrez un copilote d'entretien IA personnalisé et conversationnel qui vous aide à vous entraîner, à vous améliorer et à réussir vos entretiens haut la main. 😎"
+      }
+    },
+    "trustBadges": {
+      "guarantee": "Garantie de remboursement de 7 jours",
+      "secure": "Paiement sécurisé",
+      "cancel": "Annulez à tout moment."
+    },
+    "countdownTimer": {
+      "offerEnds": "L'offre se termine dans :"
+    },
+    "testimonials": {
+      "0": {
+        "name": "Emily Chen",
+        "title": "Analyste financier",
+        "company": "JPMorgan Chase",
+        "quote": "Perfect Interview m'a donné la confiance nécessaire pour réussir mes entretiens financiers haut la main. Les simulations de questions étaient parfaites et le créateur de CV m'a aidé à me démarquer dans un domaine concurrentiel."
+      },
+      "1": {
+        "name": "Miguel Torres",
+        "title": "Gestionnaire de la chaîne d'approvisionnement",
+        "company": "FedEx",
+        "quote": "Les entretiens blancs et le feedback instantané ont fait une énorme différence. Je me suis senti préparé à chaque scénario lors de mes entretiens sur la chaîne d'approvisionnement."
+      },
+      "2": {
+        "name": "Pierre Kang",
+        "title": "Directeur/Directrice de restaurant",
+        "company": "Olive Garden",
+        "quote": "J'ai adoré la façon dont l'IA a adapté les questions à mon expérience dans l'hôtellerie. Le créateur de CV a fait briller mes réalisations et m'a aidé à décrocher mon nouveau poste. ✨"
+      },
+      "3": {
+        "name": "Robert Johnson",
+        "title": "Gestionnaire des opérations",
+        "company": "Walmart",
+        "quote": "Les outils de Perfect Interview m'ont aidé à me préparer aux questions difficiles sur les opérations et m'ont donné l'avantage dont j'avais besoin pour obtenir une promotion. Je recommande vivement à tous ceux qui sont dans le management ! 👍"
+      },
+      "heading": "Ce que disent nos utilisateurs"
+    },
+    "faq": {
+      "0": {
+        "q": "Qu'est-ce que j'obtiens avec un abonnement ?",
+        "a": "Vous bénéficiez d'un accès illimité à toutes les fonctionnalités : créateur de CV, questions d'entretien basées sur l'IA, simulations d'entretien et sessions Interview Copilot."
+      },
+      "1": {
+        "q": "Puis-je annuler à tout moment ?",
+        "a": "Oui ! Vous pouvez annuler votre abonnement à tout moment depuis votre tableau de bord. Vous conserverez l'accès jusqu'à la fin de votre période de facturation."
+      },
+      "2": {
+        "q": "Existe-t-il une garantie de remboursement ?",
+        "a": "Absolument. Si vous n'êtes pas satisfait, contactez-nous dans les 7 jours suivant le début de votre abonnement pour un remboursement complet — sans poser de questions."
+      },
+      "3": {
+        "q": "Dans quelle mesure mon paiement est-il sécurisé ?",
+        "a": "Tous les paiements sont traités de manière sécurisée grâce à un cryptage conforme aux normes de l'industrie. Nous ne conservons jamais vos informations de paiement."
+      },
+      "4": {
+        "q": "Mes données resteront-elles privées ?",
+        "a": "Oui, vos données sont privées et ne seront jamais partagées sans votre consentement. Vous contrôlez vos informations à tout moment."
+      },
+      "heading": "Foire aux Questions"
+    },
+    "hero": {
+      "title": "Décrochez le job de vos rêves avec une préparation d'entretien boostée à l'IA 🚀",
+      "subtitle": "Préparation illimitée aux entretiens, créateur de CV et feedback personnalisé propulsés par l'IA, le tout sans risque."
+    },
+    "mostPopularBadge": "Le plus populaire",
+    "flashSale": {
+      "limitedTimeOffer": "🎉 Vente Flash : Offre à Durée Limitée ! 🎉"
+    },
+    "subscriptionCard": {
+      "monthly": "Mensuel",
+      "nMonths": "{count} Mois",
+      "monthlySubscription": "Abonnement mensuel",
+      "nMonthSubscription": "Abonnement de {count} mois",
+      "perMonth": "par mois",
+      "savePercentPerMonth": "Économisez {percent}% par mois.",
+      "savePercent": "Économisez {percent}%",
+      "savePercentFor24Hours": "Économisez {percent}% pendant 24 heures.",
+      "timeRemaining": "Temps restant :",
+      "flashSale": "🔥 Vente Flash"
     }
   },
   "accountLinking": {
@@ -1224,7 +1324,18 @@
       "uploading": "Téléchargement en cours...",
       "alreadyInContext": "Déjà ajouté comme contexte supplémentaire",
       "alreadyAsResume": "Déjà sélectionné(e) comme CV",
-      "done": "Fait 👍"
+      "done": "Fait 👍",
+      "memoryToggleError": "Une erreur s'est produite lors de la mise à jour de l'état de la mémoire.",
+      "inMemory": "Ajouté aux souvenirs enregistrés ✅",
+      "notInMemory": "Pas dans les souvenirs enregistrés.",
+      "addToMemories": "Ajouter aux souvenirs enregistrés",
+      "memoryDialog": {
+        "title": "Ajouter aux souvenirs enregistrés ?",
+        "description": "Voulez-vous ajouter ce fichier à vos souvenirs enregistrés ?",
+        "helpText": "Ajouter des fichiers à vos souvenirs enregistrés nous aide à créer un contenu personnalisé de meilleure qualité pour vos CV et vos supports de préparation aux entretiens.",
+        "skip": "Passer pour l'instant",
+        "add": "Ajouter aux souvenirs ✨"
+      }
     },
     "resumeUpload": {
       "acknowledgment": "J'ai examiné les fichiers que vous avez sélectionnés. Travaillons à adapter votre CV au poste ciblé. Quel type de poste vous intéresse ?"
@@ -1282,7 +1393,8 @@
     "signOut": "Déconnexion",
     "support": "Besoin d'aide ?",
     "supportMessageIntro": "Si vous avez besoin d'aide, envoyez un email à",
-    "supportMessageConclusion": "et nous vous recontacterons dès que possible."
+    "supportMessageConclusion": "et nous vous recontacterons dès que possible.",
+    "memories": "Souvenirs"
   },
   "landingPageV4": {
     "title": "Comment pouvons-nous vous aider à trouver un emploi ?",
@@ -1426,7 +1538,25 @@
     "save": "Enregistrer",
     "error": {
       "generic": "Désolé, une erreur s'est produite. Veuillez réessayer."
-    }
+    },
+    "toast": {
+      "memoriesUpdated": "Souvenirs mis à jour",
+      "viewButton": "Voir les souvenirs",
+      "error": {
+        "updateFailed": "Échec de la mise à jour des souvenirs."
+      }
+    },
+    "initialMessage": "Salut ! 👋\n\nJe suis ton coach de carrière IA. Ceci est ta base de connaissances personnelle où nous allons stocker toutes tes informations de carrière pour t'aider à créer de meilleurs CV et supports de préparation d'entretien.\n\nCe que tu peux faire :\n- **Importer des fichiers** : CV, lettres de motivation, documents de travail\n- **Discuter avec moi** : Partager des expériences et des détails professionnels supplémentaires\n\nQu'aimerais-tu ajouter à ta base de connaissances aujourd'hui ?",
+    "initialOnboardingMessage": "Salut ! Construisons ta base de connaissances. Cela m'aidera à créer des CV et des réponses d'entretien personnalisés pour toi. Parle-moi de ton expérience professionnelle, de tes compétences et de tes réalisations. 😊",
+    "congratulations": "🎉 Félicitations !",
+    "congratulationsDescription": "Vous avez créé votre base de connaissances avec succès ! Vous pouvez maintenant utiliser ces informations pour créer votre CV, vous préparer aux entretiens ou obtenir de l'aide en temps réel pendant les entretiens.",
+    "buildResume": "Créer un CV",
+    "buildResumeDescription": "Crée un CV professionnel adapté à ton expérience.",
+    "prepareInterview": "Préparation d'entretien",
+    "prepareInterviewDescription": "Entraînez-vous avec des entretiens simulés propulsés par l'IA 🚀",
+    "interviewCopilot": "Entretien Copilot",
+    "interviewCopilotDescription": "Obtenez de l'aide en temps réel pendant les entretiens.",
+    "continue": "Continuer à développer la base de connaissances."
   },
   "interviewPrepLanding": {
     "hero": {
@@ -1475,6 +1605,184 @@
       "title": "Prêt(e) à réussir votre prochain entretien avec brio ?",
       "description": "Rejoignez des milliers de demandeurs d'emploi qui ont cartonné leurs entretiens et décroché des offres d'emploi grâce à Perfect Interview AI !",
       "button": "Commencer Gratuitement"
+    }
+  },
+  "onboardingV2": {
+    "steps": {
+      "welcome": {
+        "title": "Bienvenue chez Perfect Interview 😊",
+        "description": "Tous les outils dont vous avez besoin pour décrocher l'emploi de vos rêves.",
+        "content": {
+          "0": "Trouver un emploi, c'est difficile.",
+          "1": "Mais nous facilitons les choses.",
+          "2": "Voici comment..."
+        }
+      },
+      "knowledgeBase": {
+        "title": "Apprendre à vous connaître 😊",
+        "description": "D'abord, nous apprenons à vous connaître, vous et votre carrière 😊",
+        "content": {
+          "0": "Nous allons créer un profil personnalisé sur vous et votre carrière afin que, à l'avenir, chaque outil de notre suite soit 100 % personnalisé pour vous."
+        }
+      },
+      "toolkit": {
+        "title": "Votre boîte à outils pour la recherche d'emploi",
+        "description": "D'accord, envoyez-moi le texte à traduire ! 😊",
+        "resumeBuilder": {
+          "title": "Créateur de CV",
+          "description1": "Créez un CV parfaitement formaté en quelques minutes, pas en quelques heures.",
+          "description2": "Créez un CV prêt pour les recruteurs en quelques minutes, optimisé pour des résultats concrets — mettant en évidence vos forces, utilisant les bons mots-clés et le formatant de manière à ce qu'il se démarque réellement."
+        },
+        "interviewPrep": {
+          "title": "Préparation aux entretiens",
+          "description1": "Connaissez les questions avant le début de l'entretien.",
+          "description2": "Téléverse la description de poste et notre IA prédira les questions posées et t'aidera à élaborer des réponses pertinentes, percutantes et sûres d'elles. 😉"
+        },
+        "interviewCopilot": {
+          "title": "Entrevue Copilot",
+          "description1": "Notre copilote IA écoute les questions qui vous sont posées en temps réel et vous souffle discrètement la réponse parfaite en se basant sur votre CV et la description du poste.",
+          "description2": "Pas de pauses embarrassantes. Pas de digressions. Juste des réponses fluides et assurées qui vous font paraître comme la meilleure version de vous-même. Et oui, c'est 100% indétectable."
+        },
+        "transformResume": {
+          "title": "Transformer CV",
+          "description1": "Arrête de postuler à des emplois avec un CV générique qui est ignoré.",
+          "description2": "Entrez une description de poste et nous transformerons ensuite votre CV pour qu'il soit personnalisé à 100 % à cet emploi, améliorant ainsi vos chances d'obtenir l'entretien."
+        }
+      },
+      "testimonials": {
+        "title": "Réussites ✨",
+        "description": "Rejoignez +3 000 chercheurs d'emploi qui font confiance à Perfect Interview",
+        "testimonial1": {
+          "quote": "Créer un CV unique et personnalisé pour chaque emploi auquel je postule, c'est incroyable. J'ai toujours su que je devrais le faire, mais j'étais trop paresseux pour le faire moi-même. Perfect Interview le fait pour moi, et c'est incroyable.",
+          "author": "Sarah M.",
+          "role": "Responsable des opérations"
+        },
+        "testimonial2": {
+          "quote": "La fonctionnalité Interview Copilot m'a sauvé lors de mon dernier entretien. Je ne savais pas quoi dire, et j'étais tellement nerveux. Le copilote a répondu à toutes les questions et m'a mis tellement à l'aise.",
+          "author": "Michael T.",
+          "role": "Chef de produit"
+        },
+        "testimonial3": {
+          "quote": "Je suis obsédé par la fonctionnalité de préparation aux entretiens. Les questions d'entraînement qu'elle génère sont tellement utiles, et la fonctionnalité d'entretien simulé m'a vraiment donné toute la confiance du monde avant mon entretien d'embauche.",
+          "author": "Kelly F.",
+          "role": "Designer"
+        }
+      },
+      "purchase": {
+        "title": "Accédez en illimité à l'entretien parfait",
+        "description": "Garantie de remboursement de 7 jours — essayez sans risque à 100 % 👌"
+      },
+      "upload": {
+        "title": "Parlez-nous de vous.",
+        "description": "Téléchargez un CV existant pour que nous puissions mieux connaître votre parcours professionnel."
+      }
+    },
+    "buttons": {
+      "next": "Suivant",
+      "startKnowledgeBase": "Commencer"
+    },
+    "upload": {
+      "title": "Télécharger des documents",
+      "description": "Téléchargez un CV, une lettre de motivation ou d'autres documents relatifs à votre carrière pour nous aider à mieux connaître votre parcours professionnel.",
+      "uploadContext": "Télécharger des documents",
+      "uploading": "Téléchargement en cours...",
+      "updatingMemories": "Mise à jour des souvenirs...",
+      "updatingMemoriesProgress": "Traitement de vos documents...",
+      "selectedFiles": "{count, plural, =1 {# fichier sélectionné} other {# fichiers sélectionnés}}",
+      "multiPdfHelper": "Seuls les fichiers PDF sont acceptés. Vous pouvez télécharger jusqu'à 10 fichiers.",
+      "maxFilesExceeded": "Vous pouvez télécharger un maximum de 10 fichiers.",
+      "pdfOnly": "Seuls les fichiers PDF sont acceptés.",
+      "uploadError": "Une erreur s'est produite lors du chargement de votre fichier.",
+      "upload": "Télécharger",
+      "skipWarning": {
+        "title": "Êtes-vous sûr(e) de vouloir passer ?",
+        "description1": "Ignorer le téléchargement de documents peut entraîner une expérience moins personnalisée. Nos outils – Créateur de CV, Copilote d'entretien et Préparation à l'entretien – utilisent votre expérience professionnelle antérieure pour créer un contenu sur mesure. Sans votre CV ni vos documents de carrière, vous recevrez des éléments plus génériques.",
+        "description2": "Vous pouvez toujours télécharger des documents plus tard en allant dans Paramètres → Souvenirs.",
+        "goBack": "Retour",
+        "skipAnyway": "Omettre quand même."
+      },
+      "skip": "À sauter pour l'instant."
+    },
+    "skipPurchase": {
+      "title": "Êtes-vous sûr de ne pas vouloir passer à la version supérieure ?",
+      "description": "Vous bénéficiez d'un accès illimité à Perfect Interview lorsque vous passez à la version supérieure. Nous offrons une garantie de remboursement de 7 jours, vous pouvez donc l'essayer sans risque et obtenir un remboursement si vous n'êtes pas satisfait — sans poser de questions.",
+      "goBack": "Retour",
+      "skipAnyway": "Passer quand même"
+    },
+    "congratulations": "🎉 Félicitations !",
+    "congratulationsDescription": "Vous avez téléchargé vos documents avec succès ! Vous pouvez maintenant essayer n'importe lequel de nos outils.",
+    "continueToMemories": "Continuez à ajouter des souvenirs.",
+    "skipUpgrade": "Mettre à niveau plus tard"
+  },
+  "landingPageV6": {
+    "hero": {
+      "title": "Écrasez votre entretien. Obtenez l'offre d'emploi.",
+      "subtitle": "Facilitez 10x votre recherche d'emploi avec notre suite d'outils conçus pour vous aider à décrocher et à réussir vos entretiens 🚀.",
+      "trustedBy": "Approuvé par +6 000 chercheurs d'emploi"
+    },
+    "howItWorks": {
+      "title": "Décrochez votre prochain emploi avec un entretien parfait.",
+      "steps": {
+        "1": {
+          "title": "👋 Nous en apprenons davantage sur vous et votre carrière.",
+          "description": {
+            "0": "Nous en apprenons davantage sur vous et votre carrière afin de créer une expérience 100% personnalisée pour vous.",
+            "1": "Cela aide nos outils à créer la meilleure expérience possible pour vous."
+          }
+        },
+        "2": {
+          "title": "📄 Un CV qui vous décroche des entretiens",
+          "description": {
+            "0": "Fatigué d'envoyer des CV et de n'avoir aucune réponse ? Notre IA crée en quelques minutes un CV prêt à être envoyé aux recruteurs, optimisé pour des résultats concrets 🚀.",
+            "1": "Générez un CV en un clic qui met en avant vos points forts en utilisant les bons mots-clés et en le formatant pour que vous vous démarquiez vraiment ✨."
+          }
+        },
+        "3": {
+          "title": "🧠 Soyez le candidat le mieux préparé de toute la salle",
+          "description": {
+            "0": "Connaître les questions avant le début de l'entretien",
+            "1": "Téléchargez la description de poste et notre IA prédira ce qu'ils demanderont et vous aidera à élaborer des réponses pointues, pertinentes et confiantes ✨."
+          }
+        },
+        "4": {
+          "title": "🤖 Ne trébuchez plus jamais lors d'un entretien.",
+          "description": {
+            "0": "Notre copilote IA écoute les questions qu'on vous pose en temps réel et vous souffle discrètement la réponse parfaite en se basant sur votre CV et la description du poste.",
+            "1": "Pas de pauses embarrassantes. Pas de digressions. Juste des réponses fluides et assurées qui vous font paraître comme la meilleure version de vous-même.",
+            "2": "Ne t'inquiète pas, c'est 100% indétectable 🤫"
+          }
+        }
+      }
+    },
+    "socialMedia": {
+      "title": "Suivez-nous sur les réseaux sociaux 👍",
+      "subtitle": "Rejoignez des milliers de chercheurs d'emploi qui ont transformé leur expérience d'entretien !"
+    }
+  },
+  "referrals": {
+    "title": "Votre code de parrainage",
+    "description": "Partagez votre adresse e-mail avec vos amis et collègues. Pour chaque tranche de 3 amis que vous parrainez, vous obtiendrez 1 mois gratuit - et il n'y a pas de limite !",
+    "progress": {
+      "title": "Passer au prochain mois gratuit",
+      "count": "{referralCount}/{referralsNeeded} parrainages"
+    },
+    "page": {
+      "title": "Vos recommandations.",
+      "signInRequired": "Veuillez vous connecter pour voir vos parrainages.",
+      "error": "Erreur lors du chargement des parrainages. Veuillez réessayer plus tard.",
+      "emptyState": {
+        "title": "Pas encore de parrainages.",
+        "description": "Commencez à partager votre code de parrainage avec vos amis et collègues. Pour chaque tranche de 3 amis parrainés, vous obtenez 1 mois gratuit !",
+        "steps": {
+          "share": "Partagez votre code de parrainage avec votre réseau.",
+          "signup": "Ils s'inscrivent en utilisant votre code de parrainage (aucun achat nécessaire)",
+          "reward": "Obtenez 1 mois gratuit après 3 parrainages réussis 🎉!"
+        }
+      },
+      "table": {
+        "referredUser": "Utilisateur parrainé",
+        "dateReferred": "Date de référence"
+      }
     }
   }
 }

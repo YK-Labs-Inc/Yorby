@@ -332,7 +332,8 @@
     "resumes": "简历",
     "resumeBuilder": "简历制作器",
     "createResume": "创建简历",
-    "unlockAllAccess": "解锁无限访问 🔓"
+    "unlockAllAccess": "解锁无限访问 🔓",
+    "transformResume": "转换简历"
   },
   "upgrade": {
     "locked": {
@@ -403,7 +404,13 @@
         "title": "无限年度",
         "description": "面向专业人士和经常求职者",
         "highlight": "无限积分",
-        "titleV2": "无限额度 ♾️"
+        "titleV2": "无限额度 ♾️",
+        "highlights": {
+          "0": "创建无限简历 📝",
+          "1": "转变无限简历 🚀",
+          "2": "创建无限的面试问题 ♾️",
+          "3": "创建无限面试副驾驶 🚀"
+        }
       }
     },
     "cta": {
@@ -468,6 +475,99 @@
     "errors": {
       "generic": "出错了，请重试。",
       "login": "您必须登录才能购买积分。"
+    },
+    "productVideoCarousel": {
+      "heading": "观看完美面试实况 🎬",
+      "resumeBuilder": {
+        "title": "简历制作器",
+        "description": "使用我们的人工智能简历生成器，打造一份专业的、量身定制的简历，让顶级雇主注意到你。"
+      },
+      "practiceQuestions": {
+        "title": "练习真实面试问题",
+        "description": "使用我们的人工智能，模拟真实的面试场景，获得针对具体职位的面试问题，并获得即时、可执行的反馈。"
+      },
+      "copilot": {
+        "title": "掌握 Copilot 的访谈 🎤",
+        "description": "体验个性化的、对话式AI面试副驾驶，助您练习、提升并成功通过面试。🚀"
+      }
+    },
+    "trustBadges": {
+      "guarantee": "7天退款保证",
+      "secure": "安全支付",
+      "cancel": "随时取消"
+    },
+    "countdownTimer": {
+      "offerEnds": "优惠截止时间："
+    },
+    "testimonials": {
+      "0": {
+        "name": "陈艾米丽",
+        "title": "金融分析师",
+        "company": "摩根大通 (Mó gēn dà tōng)",
+        "quote": "Perfect Interview 给了我自信，让我能成功通过金融面试。模拟问题非常精准，简历制作工具也帮助我在竞争激烈的领域脱颖而出。💯"
+      },
+      "1": {
+        "name": "米格尔·托雷斯",
+        "title": "供应链经理",
+        "company": "联邦快递",
+        "quote": "模拟面试和即时反馈帮助很大。我觉得我为供应链面试中的每一种情况都做好了准备。"
+      },
+      "2": {
+        "name": "康彼得",
+        "title": "餐厅经理",
+        "company": "橄榄花园 (Gǎnlǎn Huāyuán)",
+        "quote": "我喜欢AI如何根据我在酒店业的经验量身定制问题。简历生成器让我的成就熠熠生辉，并帮助我找到了新的工作。✨"
+      },
+      "3": {
+        "name": "罗伯特·约翰逊",
+        "title": "运营经理",
+        "company": "沃尔玛 (Wòěrmǎ)",
+        "quote": "Perfect Interview 的工具帮助我准备了棘手的运营问题，并给了我晋升所需的优势。强烈推荐给所有管理人员！👍"
+      },
+      "heading": "用户评价🗣️"
+    },
+    "faq": {
+      "0": {
+        "q": "订阅能获得什么？",
+        "a": "您可以无限制地访问所有功能：简历制作工具、AI驱动的面试问题、模拟面试和面试副驾驶会话。"
+      },
+      "1": {
+        "q": "我可以随时取消吗？",
+        "a": "是的！您可以随时从您的帐户仪表板取消您的订阅。您将保留访问权限直到您的结算周期结束。"
+      },
+      "2": {
+        "q": "有退款保证吗？",
+        "a": "当然。如果您不满意，请在订阅开始后的 7 天内联系我们，我们将全额退款——无需任何理由。"
+      },
+      "3": {
+        "q": "我的支付安全吗？",
+        "a": "所有付款均通过行业标准加密安全处理。我们绝不存储您的付款详情。"
+      },
+      "4": {
+        "q": "我的数据会是私密的吗？",
+        "a": "是的，您的数据是私密的，未经您的同意绝不会被分享。您始终掌控着您的信息。"
+      },
+      "heading": "常见问题 🤔"
+    },
+    "hero": {
+      "title": "用人工智能面试准备助你获得梦寐以求的工作 🚀",
+      "subtitle": "无限次AI驱动的面试准备、简历制作以及个性化反馈——零风险。"
+    },
+    "mostPopularBadge": "最受欢迎 🏆",
+    "flashSale": {
+      "limitedTimeOffer": "🎉 限时抢购：限时优惠！🎉"
+    },
+    "subscriptionCard": {
+      "monthly": "月度",
+      "nMonths": "{count} 个月",
+      "monthlySubscription": "月度订阅",
+      "nMonthSubscription": "{count}个月订阅",
+      "perMonth": "每月",
+      "savePercentPerMonth": "每月节省 {percent}%",
+      "savePercent": "节省 {percent}%",
+      "savePercentFor24Hours": "节省{percent}%，持续24小时",
+      "timeRemaining": "剩余时间：",
+      "flashSale": "🔥 限时抢购"
     }
   },
   "accountLinking": {
@@ -1224,7 +1324,18 @@
       "uploading": "正在上传...",
       "alreadyInContext": "已经添加为附加背景信息",
       "alreadyAsResume": "已选为简历 ✅",
-      "done": "完成"
+      "done": "完成",
+      "memoryToggleError": "更新内存状态时发生错误。",
+      "inMemory": "已添加到已保存的回忆中 💾",
+      "notInMemory": "不在已保存的记忆中",
+      "addToMemories": "添加到已保存的回忆 💾",
+      "memoryDialog": {
+        "title": "添加到已保存的记忆中吗？",
+        "description": "你想将此文件添加到你的已保存记忆中吗？",
+        "helpText": "将文件添加到您保存的记忆中，有助于我们为您的简历和面试准备材料创建更好的个性化内容。",
+        "skip": "暂时跳过 🏃‍♀️",
+        "add": "添加到回忆 💭"
+      }
     },
     "resumeUpload": {
       "acknowledgment": "我已经审阅了您选择的文件。我们来一起修改您的简历，使其更符合您的目标职位。您对哪种职位感兴趣呢？"
@@ -1282,7 +1393,8 @@
     "signOut": "登出",
     "support": "需要帮助？",
     "supportMessageIntro": "如果您需要帮助，请发送电子邮件至",
-    "supportMessageConclusion": "我们会尽快回复您。"
+    "supportMessageConclusion": "我们会尽快回复您。",
+    "memories": "回忆 💭"
   },
   "landingPageV4": {
     "title": "我们能怎样帮你找到工作？",
@@ -1426,7 +1538,25 @@
     "save": "保存",
     "error": {
       "generic": "抱歉，出错了。请重试。"
-    }
+    },
+    "toast": {
+      "memoriesUpdated": "记忆已更新 ✅",
+      "viewButton": "查看回忆 📷",
+      "error": {
+        "updateFailed": "更新记忆失败 😔"
+      }
+    },
+    "initialMessage": "嗨，你好！👋\n\n我是你的AI职业教练。这里是你的个人知识库，我们会在这里存储你所有的职业信息，以帮助你创建更好的简历和面试准备材料。\n\n你可以做：\n- **上传文件**: 简历、求职信、工作文档\n- **和我聊天**: 分享更多工作经验和细节\n\n今天你想往你的知识库里添加什么呢？",
+    "initialOnboardingMessage": "嗨！让我们构建你的知识库。这将帮助我为你创建个性化的简历和面试答案。请告诉我你的工作经验、技能和成就。",
+    "congratulations": "🎉 恭喜！",
+    "congratulationsDescription": "您已成功创建您的知识库！现在您可以使用这些信息来构建你的简历，准备面试，或者在面试期间获得实时帮助。",
+    "buildResume": "创建简历",
+    "buildResumeDescription": "根据您的经验打造一份专业的简历。",
+    "prepareInterview": "面试准备",
+    "prepareInterviewDescription": "使用AI驱动的模拟面试进行练习",
+    "interviewCopilot": "面试 Copilot",
+    "interviewCopilotDescription": "面试时获得实时帮助",
+    "continue": "继续构建知识库"
   },
   "interviewPrepLanding": {
     "hero": {
@@ -1475,6 +1605,184 @@
       "title": "准备好在下次面试中取得优异成绩了吗？🚀",
       "description": "加入成千上万通过 Perfect Interview AI 碾压面试，成功拿到工作 offer 的求职者行列吧！",
       "button": "免费开始使用 🎉"
+    }
+  },
+  "onboardingV2": {
+    "steps": {
+      "welcome": {
+        "title": "欢迎来到 Perfect Interview 😊",
+        "description": "助你找到理想工作的一切工具 🚀",
+        "content": {
+          "0": "找工作很难。",
+          "1": "但我们让它更简单。",
+          "2": "这是这样..."
+        }
+      },
+      "knowledgeBase": {
+        "title": "了解你 🤗",
+        "description": "首先，我们来了解您和您的职业生涯。",
+        "content": {
+          "0": "我们会创建一个关于您和您职业生涯的个性化档案，以便今后我们套件中的每一个工具都能100%为您定制。"
+        }
+      },
+      "toolkit": {
+        "title": "你的求职工具包 🧰",
+        "description": "好的。",
+        "resumeBuilder": {
+          "title": "简历制作工具",
+          "description1": "几分钟搞定完美简历，无需花费数小时。",
+          "description2": "几分钟内打造一份招聘人员认可的简历，针对实际效果进行优化——突出你的优势，使用正确的关键词，并进行格式化，让你真正脱颖而出。✨"
+        },
+        "interviewPrep": {
+          "title": "面试准备",
+          "description1": "面试开始前先了解问题。",
+          "description2": "上传职位描述，我们的AI将预测他们会问什么，并帮助你打造清晰、相关且自信的回答。🚀"
+        },
+        "interviewCopilot": {
+          "title": "面试 Copilot",
+          "description1": "我们的AI副驾驶实时倾听你被问到的问题，并根据你的简历和职位描述悄悄地为你提供完美的答案。",
+          "description2": "没有尴尬的停顿。不跑题，不啰嗦。只有流畅、自信的回答，让你听起来像最好的自己。而且，它是100%无法检测的。"
+        },
+        "transformResume": {
+          "title": "转换简历 📝",
+          "description1": "别再用会被忽略的通用简历海投了🛑",
+          "description2": "请输入任何职位描述，然后我们将把你的简历转换成100%为你应聘的职位量身定制的版本，提高你获得面试的机会。"
+        }
+      },
+      "testimonials": {
+        "title": "成功案例 🎉",
+        "description": "加入超过3,000名求职者，他们信任Perfect Interview。",
+        "testimonial1": {
+          "quote": "为我申请的每个职位定制一份独特的简历真是太棒了。我一直都知道我应该这样做，但我太懒了不想自己做。Perfect Interview帮我做了，真是太棒了。🤩",
+          "author": "莎拉·M.",
+          "role": "运营经理"
+        },
+        "testimonial2": {
+          "quote": "面试 Copilot 功能在我上次面试中救了我。我不知道该说什么，而且非常紧张。Copilot 回答了所有问题，让我感觉很轻松。",
+          "author": "迈克尔·T.",
+          "role": "产品经理"
+        },
+        "testimonial3": {
+          "quote": "我太喜欢面试准备功能了。它生成的练习题非常有用，而且模拟面试功能真的给了我参加工作面试的信心。🤩",
+          "author": "凯莉 F.",
+          "role": "设计师"
+        }
+      },
+      "purchase": {
+        "title": "获得无限访问完美面试的机会",
+        "description": "7天退款保证 — 100% 零风险试用"
+      },
+      "upload": {
+        "title": "请告诉我们关于你自己。",
+        "description": "上传现有简历，以便我们更好地了解您的职业经历。"
+      }
+    },
+    "buttons": {
+      "next": "下一个",
+      "startKnowledgeBase": "开始吧"
+    },
+    "upload": {
+      "title": "上传文件 📤",
+      "description": "请上传简历、求职信或其他职业相关文件，以便我们更好地了解您的职业经历。",
+      "uploadContext": "上传文件 📤",
+      "uploading": "正在上传...",
+      "updatingMemories": "正在更新记忆...",
+      "updatingMemoriesProgress": "正在处理您的文件...",
+      "selectedFiles": "{count, 复数, =1 {已选择 # 个文件} 其他 {已选择 # 个文件}}",
+      "multiPdfHelper": "只接受PDF文件。您最多可以上传10个文件。",
+      "maxFilesExceeded": "你最多可以上传10个文件。",
+      "pdfOnly": "只接受PDF文件。",
+      "uploadError": "上传您的文件时发生错误。",
+      "upload": "上传",
+      "skipWarning": {
+        "title": "你确定要跳过吗？",
+        "description1": "跳过上传文档可能会导致个性化体验降低。我们的工具——简历制作器、面试副驾和面试准备——会使用您以往的工作经验来创建定制内容。如果没有您的简历或职业文件，您将收到更通用的材料。",
+        "description2": "你可以稍后通过进入设置 → 回忆上传文件。",
+        "goBack": "返回",
+        "skipAnyway": "跳过 ⏩"
+      },
+      "skip": "现在跳过 ⏭️"
+    },
+    "skipPurchase": {
+      "title": "你确定不想升级吗？",
+      "description": "升级后，您将获得无限次使用 Perfect Interview 的权限。我们提供 7 天退款保证，您可以零风险试用，如果不满意可以获得退款——无需任何理由。",
+      "goBack": "返回",
+      "skipAnyway": "跳过反正"
+    },
+    "congratulations": "🎉 恭喜！",
+    "congratulationsDescription": "您已成功上传您的文件！现在您可以尝试使用我们的任何工具了。",
+    "continueToMemories": "继续添加回忆 💖",
+    "skipUpgrade": "稍后升级"
+  },
+  "landingPageV6": {
+    "hero": {
+      "title": "碾碎面试。拿下工作机会。🚀",
+      "subtitle": "使用我们的一系列工具，让求职过程轻松10倍，助你成功获得并完美通过面试🚀。",
+      "trustedBy": "受超过6,000名求职者信赖"
+    },
+    "howItWorks": {
+      "title": "用完美的面试赢得您的下一份工作 🚀",
+      "steps": {
+        "1": {
+          "title": "👋 我们了解你和你的职业",
+          "description": {
+            "0": "我们会了解您和您的职业生涯，以便为您打造100%个性化的体验。",
+            "1": "这有助于我们的工具为你创造最佳体验。"
+          }
+        },
+        "2": {
+          "title": "📄 一份能为你赢得面试的简历",
+          "description": {
+            "0": "厌倦了发简历却石沉大海？我们的人工智能可以在几分钟内构建一份符合招聘人员要求的简历，并针对实际结果进行优化。",
+            "1": "一键生成简历，使用合适的关键词突出你的优势，并进行格式化，让你真正脱颖而出 ✨"
+          }
+        },
+        "3": {
+          "title": "成为房间里准备最充分的候选人 🧠",
+          "description": {
+            "0": "面试前了解问题。",
+            "1": "上传职位描述，我们的AI将预测他们会问什么，并帮助你打造精炼、相关且自信的回答。"
+          }
+        },
+        "4": {
+          "title": "🤖 面试不再磕磕绊绊",
+          "description": {
+            "0": "我们的AI副驾驶会实时倾听你被问到的问题，并根据你的简历和职位描述悄悄地为你提供完美的答案。",
+            "1": "没有尴尬的停顿。没有冗长的闲聊。只有流畅、自信的回答，让你听起来像最好的自己。",
+            "2": "别担心，100%无法检测到🤫"
+          }
+        }
+      }
+    },
+    "socialMedia": {
+      "title": "在社交媒体上关注我们",
+      "subtitle": "加入成千上万已经改变面试求职体验的求职者吧"
+    }
+  },
+  "referrals": {
+    "title": "你的推荐码",
+    "description": "分享你的电子邮件地址给朋友和同事。每推荐3位朋友，你将获得1个月的免费使用 - 而且没有上限哦! 🎉",
+    "progress": {
+      "title": "进入下一个免费月",
+      "count": "{referralCount}/{referralsNeeded} 个推荐"
+    },
+    "page": {
+      "title": "你的推荐",
+      "signInRequired": "请登录以查看您的推荐。",
+      "error": "加载推荐失败。请稍后重试。",
+      "emptyState": {
+        "title": "还没有推荐 🙁",
+        "description": "开始分享你的推荐码给朋友和同事吧。每成功推荐3位朋友，即可获得1个月免费使用时长！",
+        "steps": {
+          "share": "与你的好友分享你的推荐码 🤝",
+          "signup": "他们使用你的推荐码注册 (无需购买) 😉",
+          "reward": "成功推荐 3 位好友后，即可免费获得 1 个月使用期！"
+        }
+      },
+      "table": {
+        "referredUser": "被推荐用户",
+        "dateReferred": "转介日期"
+      }
     }
   }
 }

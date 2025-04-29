@@ -332,7 +332,8 @@
     "resumes": "Currículums",
     "resumeBuilder": "Constructor de Currículums",
     "createResume": "Crear currículum vitae",
-    "unlockAllAccess": "Desbloquea el Acceso Ilimitado"
+    "unlockAllAccess": "Desbloquea el Acceso Ilimitado",
+    "transformResume": "Transformar Currículum Vitae"
   },
   "upgrade": {
     "locked": {
@@ -403,7 +404,13 @@
         "title": "Anual Ilimitado",
         "description": "Para profesionales y personas que buscan empleo con frecuencia",
         "highlight": "Créditos ilimitados",
-        "titleV2": "Créditos ilimitados"
+        "titleV2": "Créditos ilimitados",
+        "highlights": {
+          "0": "Crea Currículums Ilimitados 🚀",
+          "1": "Transforma Currículums Ilimitados",
+          "2": "Crea Preguntas de Entrevista Ilimitadas",
+          "3": "Crea Copilotos de Entrevista Ilimitados 🤖"
+        }
       }
     },
     "cta": {
@@ -468,6 +475,99 @@
     "errors": {
       "generic": "Algo salió mal — por favor, inténtalo de nuevo.",
       "login": "Debes iniciar sesión para comprar créditos."
+    },
+    "productVideoCarousel": {
+      "heading": "Ver Perfect Interview en acción",
+      "resumeBuilder": {
+        "title": "Creador de Currículums",
+        "description": "Usa nuestro creador de currículums impulsado por IA para elaborar un currículum profesional y personalizado que llame la atención de los mejores empleadores."
+      },
+      "practiceQuestions": {
+        "title": "Practica Preguntas Reales de Entrevista",
+        "description": "Simula entrevistas reales con preguntas específicas para el puesto y obtén retroalimentación instantánea y práctica de nuestra IA."
+      },
+      "copilot": {
+        "title": "Entrevistas maestras con Copilot",
+        "description": "Experimenta un copiloto de entrevistas con IA personalizado y conversacional que te ayuda a practicar, mejorar y ¡triunfar en tus entrevistas!"
+      }
+    },
+    "trustBadges": {
+      "guarantee": "Garantía de devolución de dinero de 7 días",
+      "secure": "Pago Seguro",
+      "cancel": "Cancelar en cualquier momento"
+    },
+    "countdownTimer": {
+      "offerEnds": "La oferta termina en:"
+    },
+    "testimonials": {
+      "0": {
+        "name": "Emily Chen",
+        "title": "Analista financiero",
+        "company": "JPMorgan Chase",
+        "quote": "Perfect Interview me dio la confianza para superar con éxito mis entrevistas de finanzas. Las preguntas de práctica fueron muy acertadas y el creador de currículums me ayudó a destacar en un campo competitivo."
+      },
+      "1": {
+        "name": "Miguel Torres",
+        "title": "Gerente de Cadena de Suministro",
+        "company": "FedEx",
+        "quote": "Las entrevistas de práctica y la retroalimentación instantánea hicieron una gran diferencia. Me sentí preparado para cada escenario en mis entrevistas de cadena de suministro."
+      },
+      "2": {
+        "name": "Peter Kang",
+        "title": "Gerente de Restaurante",
+        "company": "Olive Garden",
+        "quote": "Me encantó cómo la IA adaptó las preguntas a mi experiencia en hostelería. El creador de currículums hizo que mis logros brillaran y me ayudó a conseguir mi nuevo puesto."
+      },
+      "3": {
+        "name": "Robert Johnson",
+        "title": "Gerente de Operaciones",
+        "company": "Walmart",
+        "quote": "Las herramientas de Perfect Interview me ayudaron a prepararme para preguntas difíciles de operaciones y me dieron la ventaja que necesitaba para ascender. ¡Lo recomiendo mucho para cualquier persona en gerencia!"
+      },
+      "heading": "Lo que dicen nuestros usuarios"
+    },
+    "faq": {
+      "0": {
+        "q": "¿Qué obtengo con una suscripción?",
+        "a": "Obtienes acceso ilimitado a todas las funciones: creador de currículums, preguntas de entrevista impulsadas por IA, entrevistas de simulación y sesiones de Interview Copilot."
+      },
+      "1": {
+        "q": "¿Puedo cancelar en cualquier momento?",
+        "a": "¡Sí! Puedes cancelar tu suscripción en cualquier momento desde el panel de control de tu cuenta. Mantendrás el acceso hasta el final de tu período de facturación."
+      },
+      "2": {
+        "q": "¿Hay garantía de devolución de dinero?",
+        "a": "Absolutamente. Si no estás satisfecho, contáctanos dentro de los 7 días posteriores al inicio de tu suscripción para obtener un reembolso completo, sin preguntas."
+      },
+      "3": {
+        "q": "¿Qué tan seguro es mi pago?",
+        "a": "Todos los pagos se procesan de forma segura con encriptación estándar de la industria. Nunca almacenamos los detalles de tu pago."
+      },
+      "4": {
+        "q": "¿Serán privados mis datos?",
+        "a": "Sí, tus datos son privados y nunca serán compartidos sin tu consentimiento. Tú controlas tu información en todo momento."
+      },
+      "heading": "Preguntas Frecuentes ❓"
+    },
+    "hero": {
+      "title": "Consigue el trabajo de tus sueños con preparación para entrevistas impulsada por IA 🚀",
+      "subtitle": "Preparación ilimitada para entrevistas con tecnología de IA, creador de currículums y comentarios personalizados, sin riesgo alguno."
+    },
+    "mostPopularBadge": "Lo más popular",
+    "flashSale": {
+      "limitedTimeOffer": "🎉 ¡Venta Flash: ¡Oferta por tiempo limitado! 🎉"
+    },
+    "subscriptionCard": {
+      "monthly": "Mensual",
+      "nMonths": "{count} Meses",
+      "monthlySubscription": "Suscripción mensual",
+      "nMonthSubscription": "Suscripción de {count} meses",
+      "perMonth": "al mes",
+      "savePercentPerMonth": "Ahorra {percent}% al mes",
+      "savePercent": "Ahorra {percent}%",
+      "savePercentFor24Hours": "Ahorra {percent}% por 24 horas",
+      "timeRemaining": "Tiempo restante:",
+      "flashSale": "🔥 Venta Flash"
     }
   },
   "accountLinking": {
@@ -1224,7 +1324,18 @@
       "uploading": "Subiendo...",
       "alreadyInContext": "Ya agregado como contexto adicional.",
       "alreadyAsResume": "Ya seleccionado como currículum",
-      "done": "Hecho"
+      "done": "Hecho",
+      "memoryToggleError": "Ocurrió un error al actualizar el estado de la memoria.",
+      "inMemory": "Añadido a los recuerdos guardados",
+      "notInMemory": "No está en los recuerdos guardados",
+      "addToMemories": "Añadir a recuerdos guardados.",
+      "memoryDialog": {
+        "title": "¿Añadir a los recuerdos guardados?",
+        "description": "¿Quieres añadir este archivo a tus recuerdos guardados?",
+        "helpText": "Añadir archivos a tus recuerdos guardados nos ayuda a crear mejor contenido personalizado para tus currículums y materiales de preparación para entrevistas.",
+        "skip": "Saltar por ahora",
+        "add": "Añadir a recuerdos"
+      }
     },
     "resumeUpload": {
       "acknowledgment": "He revisado tus archivos seleccionados. Trabajemos en adaptar tu currículum para el puesto al que aspiras. ¿Qué tipo de posición te interesa?"
@@ -1282,7 +1393,8 @@
     "signOut": "Cerrar sesión",
     "support": "¿Necesitas ayuda?",
     "supportMessageIntro": "Si necesitas ayuda, envía un correo electrónico a",
-    "supportMessageConclusion": "y nos pondremos en contacto contigo lo antes posible."
+    "supportMessageConclusion": "y nos pondremos en contacto contigo lo antes posible.",
+    "memories": "Recuerdos"
   },
   "landingPageV4": {
     "title": "¿Cómo podemos ayudarte a conseguir un trabajo?",
@@ -1426,7 +1538,25 @@
     "save": "Guardar",
     "error": {
       "generic": "Lo sentimos, algo salió mal. Por favor, inténtalo de nuevo."
-    }
+    },
+    "toast": {
+      "memoriesUpdated": "Recuerdos actualizados",
+      "viewButton": "Ver recuerdos",
+      "error": {
+        "updateFailed": "Error al actualizar los recuerdos."
+      }
+    },
+    "initialMessage": "¡Hola! 👋\n\nSoy tu coach profesional de IA. Esta es tu base de conocimientos personal donde almacenaremos toda tu información profesional para ayudarte a crear mejores currículums y materiales de preparación para entrevistas.\n\nQué puedes hacer:\n- **Subir archivos**: Currículums, cartas de presentación, documentos de trabajo\n- **Chatear conmigo**: Compartir experiencia laboral y detalles adicionales\n\n¿Qué te gustaría agregar a tu base de conocimientos hoy?",
+    "initialOnboardingMessage": "¡Hola! Construyamos tu base de conocimiento. Esto me ayudará a crear currículums y respuestas a entrevistas personalizadas para ti. Cuéntame sobre tu experiencia laboral, habilidades y logros.",
+    "congratulations": "🎉 ¡Felicidades!",
+    "congratulationsDescription": "¡Has creado tu base de conocimientos con éxito! Ahora puedes usar esta información para crear tu currículum, prepararte para entrevistas u obtener ayuda en tiempo real durante las entrevistas.",
+    "buildResume": "Crear currículum vitae",
+    "buildResumeDescription": "Crea un currículum profesional adaptado a tu experiencia.",
+    "prepareInterview": "Preparación para la entrevista",
+    "prepareInterviewDescription": "Practica con entrevistas simuladas impulsadas por IA 🤖",
+    "interviewCopilot": "Entrevista Copilot",
+    "interviewCopilotDescription": "Obtén ayuda en tiempo real durante las entrevistas.",
+    "continue": "Continuar Construyendo la Base de Conocimiento"
   },
   "interviewPrepLanding": {
     "hero": {
@@ -1475,6 +1605,184 @@
       "title": "¿Listo para Brillar en Tu Próxima Entrevista?",
       "description": "Únete a miles de solicitantes de empleo que han arrasado en sus entrevistas y han conseguido ofertas de trabajo con Perfect Interview AI. 🎉",
       "button": "Comienza gratis"
+    }
+  },
+  "onboardingV2": {
+    "steps": {
+      "welcome": {
+        "title": "Bienvenido/a a Perfect Interview",
+        "description": "Todas las herramientas que necesitas para conseguir el trabajo de tus sueños.",
+        "content": {
+          "0": "Conseguir un trabajo es difícil.",
+          "1": "Pero nosotros lo hacemos más fácil.",
+          "2": "Así es como..."
+        }
+      },
+      "knowledgeBase": {
+        "title": "Conociéndote 😊",
+        "description": "Primero, te conocemos a ti y a tu carrera.",
+        "content": {
+          "0": "Crearemos un perfil personalizado sobre ti y tu carrera para que, en adelante, cada herramienta en nuestro paquete esté 100% personalizada para ti."
+        }
+      },
+      "toolkit": {
+        "title": "Tu Kit de Herramientas para la Búsqueda de Empleo",
+        "description": "¡Hola! 👋 ¿Cómo estás? 😊",
+        "resumeBuilder": {
+          "title": "Creador de Currículums",
+          "description1": "Crea un currículum perfectamente formateado en minutos, no en horas.",
+          "description2": "Crea un currículum listo para reclutadores en minutos que está optimizado para resultados reales: destacando tus fortalezas, usando las palabras clave correctas y dándole formato para que realmente destaques."
+        },
+        "interviewPrep": {
+          "title": "Preparación para la entrevista",
+          "description1": "Conoce las preguntas antes de que comience la entrevista.",
+          "description2": "Sube la descripción del puesto y nuestra IA predecirá qué te preguntarán y te ayudará a elaborar respuestas que sean agudas, relevantes y seguras. 🚀"
+        },
+        "interviewCopilot": {
+          "title": "Entrevista Copilot",
+          "description1": "Nuestro Copiloto de IA escucha las preguntas que te hacen en tiempo real y te proporciona silenciosamente la respuesta perfecta basada en tu currículum y la descripción del puesto.",
+          "description2": "Sin pausas incómodas. Sin divagaciones. Solo respuestas fluidas y seguras que te hacen sonar como la mejor versión de ti mismo. Y sí, es 100% indetectable."
+        },
+        "transformResume": {
+          "title": "Transformar Currículum Vitae",
+          "description1": "Deja de postularte a empleos con un currículum genérico que se ignora 😒.",
+          "description2": "Ingresa cualquier descripción de trabajo y luego transformaremos tu currículum para que esté 100% personalizado al trabajo, mejorando tus posibilidades de obtener la entrevista."
+        }
+      },
+      "testimonials": {
+        "title": "Historias de éxito",
+        "description": "Únete a +3,000 personas que buscan empleo y confían en Perfect Interview",
+        "testimonial1": {
+          "quote": "Crear un currículum único que se adapte a cada trabajo al que postulo es increíble. Siempre supe que debía hacer esto, pero era demasiado vago para hacerlo yo mismo. Perfect Interview lo hace por mí, y es increíble.",
+          "author": "Sarah M.",
+          "role": "Gerente de Operaciones"
+        },
+        "testimonial2": {
+          "quote": "La función Copiloto de Entrevistas me salvó en mi última entrevista. No sabía qué decir, y estaba muy nervioso/a. El copiloto respondió a todas las preguntas y me hizo sentir muy tranquilo/a.",
+          "author": "Michael T.",
+          "role": "Gerente de Producto"
+        },
+        "testimonial3": {
+          "quote": "Estoy obsesionado/a con la función de preparación para entrevistas. Las preguntas de práctica que genera son muy útiles, y la función de entrevista simulada realmente me dio toda la confianza del mundo para mi entrevista de trabajo.",
+          "author": "Kelly F.",
+          "role": "Diseñador"
+        }
+      },
+      "purchase": {
+        "title": "Obtén Acceso Ilimitado a Perfect Interview",
+        "description": "Garantía de devolución de dinero de 7 días: pruébalo 100% sin riesgo 💯"
+      },
+      "upload": {
+        "title": "Cuéntanos sobre ti",
+        "description": "Sube un currículum vitae existente para que podamos conocer mejor tu trayectoria profesional 😊"
+      }
+    },
+    "buttons": {
+      "next": "Próximo",
+      "startKnowledgeBase": "Empezar"
+    },
+    "upload": {
+      "title": "Subir Documentos",
+      "description": "Sube un currículum, carta de presentación u otros documentos profesionales para ayudarnos a conocer mejor tu historial laboral.",
+      "uploadContext": "Subir Documentos",
+      "uploading": "Subiendo...",
+      "updatingMemories": "Actualizando recuerdos...",
+      "updatingMemoriesProgress": "Procesando tus documentos...",
+      "selectedFiles": "{count, plural, =1 {# archivo seleccionado} other {# archivos seleccionados}}",
+      "multiPdfHelper": "Solo se aceptan archivos PDF. Puedes subir hasta 10 archivos.",
+      "maxFilesExceeded": "Puedes subir un máximo de 10 archivos.",
+      "pdfOnly": "Solo se aceptan archivos PDF.",
+      "uploadError": "Ocurrió un error al cargar tu archivo.",
+      "upload": "Subir",
+      "skipWarning": {
+        "title": "¿Estás seguro de que quieres omitir?",
+        "description1": "Omitir la carga de documentos puede resultar en una experiencia menos personalizada. Nuestras herramientas—Creador de currículums, Copiloto de entrevistas y Preparación para entrevistas—usan tu experiencia laboral previa para crear contenido a medida. Sin tu currículum o documentos de carrera, recibirás material más genérico.",
+        "description2": "Siempre puedes subir documentos más tarde yendo a Configuración → Recuerdos.",
+        "goBack": "Volver Atrás",
+        "skipAnyway": "Saltar de todos modos"
+      },
+      "skip": "Omitir por ahora"
+    },
+    "skipPurchase": {
+      "title": "¿Estás seguro de que no quieres actualizar?",
+      "description": "Obtienes acceso ilimitado a Perfect Interview cuando te actualizas. Tenemos una garantía de devolución de dinero de 7 días, así que puedes probarlo sin riesgo y obtener un reembolso si no estás contento, sin preguntas.",
+      "goBack": "Volver Atrás",
+      "skipAnyway": "Saltar de todos modos"
+    },
+    "congratulations": "🎉 ¡Felicidades!",
+    "congratulationsDescription": "¡Has subido tus documentos con éxito! Ahora puedes probar cualquiera de nuestras herramientas.",
+    "continueToMemories": "Continuar añadiendo a los recuerdos.",
+    "skipUpgrade": "Mejorar más tarde"
+  },
+  "landingPageV6": {
+    "hero": {
+      "title": "¡Aplasta Tu Entrevista. Consigue La Oferta De Trabajo. 👍🎉",
+      "subtitle": "Facilita 10 veces el proceso de búsqueda de empleo con nuestro conjunto de herramientas diseñadas para ayudarte a conseguir y superar tus entrevistas.",
+      "trustedBy": "Con la confianza de más de 6,000 personas que buscan empleo."
+    },
+    "howItWorks": {
+      "title": "Consigue Tu Próximo Trabajo Con Una Entrevista Perfecta 🚀",
+      "steps": {
+        "1": {
+          "title": "👋 Aprendemos sobre ti y tu carrera",
+          "description": {
+            "0": "Aprendemos sobre ti y tu carrera para que podamos crear una experiencia que sea 100% personalizada para ti.",
+            "1": "Esto ayuda a nuestras herramientas a crear la mejor experiencia posible para ti."
+          }
+        },
+        "2": {
+          "title": "📄 Un Currículum Que Consigue Entrevistas",
+          "description": {
+            "0": "¿Cansado de enviar currículums y no recibir respuesta? Nuestra IA crea un currículum listo para reclutadores en minutos, optimizado para resultados reales 🚀",
+            "1": "Genera un currículum vitae en un clic que destaque tus fortalezas usando las palabras clave correctas y dándole el formato adecuado para que realmente sobresalgas ✨"
+          }
+        },
+        "3": {
+          "title": "🧠 Sé el Candidato Más Preparado en la Sala",
+          "description": {
+            "0": "Conoce las preguntas antes de que empiece la entrevista.",
+            "1": "Sube la descripción del puesto y nuestra IA predecirá lo que preguntarán y te ayudará a elaborar respuestas que sean precisas, relevantes y seguras. 🚀"
+          }
+        },
+        "4": {
+          "title": "🤖 Nunca más tropieces en una entrevista.",
+          "description": {
+            "0": "Nuestro copiloto de IA escucha las preguntas que te hacen en tiempo real y te proporciona silenciosamente la respuesta perfecta basándose en tu currículum y la descripción del puesto.",
+            "1": "Sin pausas incómodas. Sin divagaciones. Solo respuestas fluidas y seguras que te hacen sonar como la mejor versión de ti mismo.",
+            "2": "No te preocupes, es 100% indetectable 🤫"
+          }
+        }
+      }
+    },
+    "socialMedia": {
+      "title": "Síguenos en las Redes Sociales",
+      "subtitle": "Únete a miles de personas que buscan empleo y que han transformado su experiencia en entrevistas ✨."
+    }
+  },
+  "referrals": {
+    "title": "Tu Código de Referido",
+    "description": "Comparte tu dirección de correo electrónico con amigos y colegas. Por cada 3 amigos que invites, ¡obtendrás 1 mes gratis, y no hay límite!",
+    "progress": {
+      "title": "Progreso al próximo mes gratis",
+      "count": "{referralCount}/{referralsNeeded} referidos"
+    },
+    "page": {
+      "title": "Tus Referidos",
+      "signInRequired": "Por favor, inicia sesión para ver tus referidos.",
+      "error": "Error al cargar las referencias. Por favor, inténtalo de nuevo más tarde.",
+      "emptyState": {
+        "title": "Aún no hay referencias.",
+        "description": "Comienza a compartir tu código de referidos con amigos y colegas. ¡Por cada 3 amigos que refieras, obtienes 1 mes gratis!",
+        "steps": {
+          "share": "Comparte tu código de referido con tu red",
+          "signup": "Se registran usando tu código de referido (no es necesario comprar nada)",
+          "reward": "Obtén 1 mes gratis después de 3 referencias exitosas 👍"
+        }
+      },
+      "table": {
+        "referredUser": "Usuario referido",
+        "dateReferred": "Fecha de Referido"
+      }
     }
   }
 }
