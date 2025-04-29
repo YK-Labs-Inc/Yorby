@@ -757,7 +757,7 @@ export const identifyChanges = async (
     currentResume.user_id
   );
   const initialMessage = `
-      You are a helpful assistant who takes a base resume and then updates it so that the resume is hyper-relevant to a job description to improve
+      You are a helpful assistant who takes a base resume and then transforms it so that the resume is hyper-relevant to a job description to improve
       the chances that the owner of the resume will get an interview. Your goal is to make changes to the resume so that it is a stronger match for the job description,
       pass any ATS filters, and match any major keywords and responsibilities in the job description.
       
@@ -773,8 +773,11 @@ export const identifyChanges = async (
       how the resume could be improved. The one change you should NOT suggest is to add a work summary section. Our resumes
       WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
       3. If the resume is already a strong match for the job description, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
-      4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume. 
-      Prioritize improvements that can be made from the files and knowledge base that contain information about the user's career and experiences.  
+      4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume to
+      make it a better match for the job description.
+      Prioritize improvements that can be made from the files and knowledge base that contain information about the user's career and experiences.
+      The changes should be specific and detailed. For example, indicate which previous work experience should be added and which previous work experience should be removed.
+      Don't just include all of the previous work experience in the changes. Only include the work experience that is most relevant to the job description.
       We want to minimize the amount of additional information we need to ask the user for. Only return improvements that require additional
       information from the user if it is absolutely necessary and the resume transformation could not be completed without it.
 
