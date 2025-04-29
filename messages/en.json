@@ -419,7 +419,12 @@
         "title": "Unlimited Annual",
         "titleV2": "Unlimited Credits",
         "description": "For professionals and frequent job seekers",
-        "highlight": "Create Unlimited Resumes, Interview Questions, and Interview Copilots"
+        "highlights": [
+          "Create Unlimited Resumes",
+          "Transform Unlimited Resumes",
+          "Create Unlimited Interview Questions",
+          "Create Unlimited Interview Copilots"
+        ]
       }
     },
     "cta": {
@@ -1625,6 +1630,14 @@
           "author": "Kelly F.",
           "role": "Designer"
         }
+      },
+      "purchase": {
+        "title": "Get Unlimited Access To Perfect Interview",
+        "description": "7-day money-back guarantee — try it 100% risk-free"
+      },
+      "upload": {
+        "title": "Tell Us About Yourself",
+        "description": "Upload an existing resume so we can get to know your career history better"
       }
     },
     "buttons": {
@@ -1650,11 +1663,19 @@
         "description2": "You can always upload documents later by going to Settings → Memories.",
         "goBack": "Go Back",
         "skipAnyway": "Skip Anyway"
-      }
+      },
+      "skip": "Skip for now"
+    },
+    "skipPurchase": {
+      "title": "Are You Sure You Don't Want To Upgrade?",
+      "description": "You get unlimited access to Perfect Interview when you upgrade. We have a 7-day money-back guarantee, so you can try it out risk-free and get a refund if you're not happy — no questions asked.",
+      "goBack": "Go Back",
+      "skipAnyway": "Skip Anyway"
     },
     "congratulations": "🎉 Congratulations!",
     "congratulationsDescription": "You've successfully uploaded your documents! Now you can try out any of our tools.",
-    "continue": "Continue"
+    "continueToMemories": "Continue Adding To Memories",
+    "skipUpgrade": "Upgrade Later"
   },
   "landingPageV6": {
     "hero": {
