@@ -3,8 +3,6 @@
 import { useTranslations } from "next-intl";
 import { createCheckoutSession, Product } from "./actions";
 import { useEffect, useState } from "react";
-import { useUser } from "@/context/UserContext";
-import { isWithin24Hours } from "./utils";
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -170,7 +168,6 @@ export const SubscriptionPricingCard = ({
                 })}
           </span>
         </div>
-        {/* Only show per month price and percent saved for multi-month subscriptions */}
         {(product.months || 0) > 1 && baselineMonthlyPrice && (
           <>
             <p className="mt-1 text-sm font-bold text-green-600 dark:text-green-400">
@@ -190,7 +187,6 @@ export const SubscriptionPricingCard = ({
             </p>
           </>
         )}
-        {/* Only show discount lines for monthly plan */}
         {product.months === 1 && (
           <>
             {showSavings && savingsPercent && savingsPercent > 0 && (
@@ -201,7 +197,7 @@ export const SubscriptionPricingCard = ({
               </p>
             )}
             {showFlashPricingUI && product.increasedPrice && (
-              <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
+              <p className="mt-1 text-sm text-green-600 dark:text-green-400 font-bold">
                 {t("subscriptionCard.savePercentFor24Hours", {
                   percent: calculateDiscount(),
                 })}
