@@ -1,11 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { getProducts } from "./actions";
-import CreditUsageModal from "./components/CreditUsageModal";
 import { FormMessage } from "@/components/form-message";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { posthog } from "@/utils/tracking/serverUtils";
 import SignUpForm from "./components/SignUpForm";
-import { CreditPricingCards } from "./CreditPricingCards";
 import { SubscriptionPricingCard } from "./SubscriptionPricingCard";
 import TrustBadges from "./components/TrustBadges";
 import CountdownTimer from "./components/CountdownTimer";
@@ -36,32 +33,7 @@ export default async function PurchasePage({
     );
   }
 
-  // Get pricing experiment variant
-  const isSubscriptionVariant =
-    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-    "test";
-
-  let resumeBuilderEnabled = false;
-  if (user) {
-    resumeBuilderEnabled =
-      (await posthog.isFeatureEnabled("enable-resume-builder", user.id)) ??
-      false;
-  }
-
   const { products } = await getProducts(user.id);
-
-  // Sanitize products for client components
-  const plainProducts = JSON.parse(JSON.stringify(products));
-
-  // Filter products based on experiment variant
-  const filteredProducts = isSubscriptionVariant
-    ? plainProducts.filter((product: any) => product.credits === -1)
-    : plainProducts.filter((product: any) => product.credits !== -1);
-
-  // Deduplicate by price id (first price in product.prices)
-  const uniqueProducts = Array.from(
-    new Map(filteredProducts.map((p: any) => [p.prices[0]?.id, p])).values()
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 py-8 px-2">
@@ -82,19 +54,14 @@ export default async function PurchasePage({
         <div className="mt-12">
           {error && <FormMessage message={{ error }} />}
           <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2">
-            {isSubscriptionVariant ? (
-              uniqueProducts.map((product: any, idx: number) => (
-                <SubscriptionPricingCard
-                  key={product.prices[0]?.id}
-                  product={product}
-                  highlight={idx === 1}
-                  badge={idx === 1 ? t("mostPopularBadge") : undefined}
-                />
-              ))
-            ) : (
-              // Control variant: Show credit options
-              <CreditPricingCards products={plainProducts} />
-            )}
+            {products.map((product: any, idx: number) => (
+              <SubscriptionPricingCard
+                key={product.prices[0]?.id}
+                product={JSON.parse(JSON.stringify(product))}
+                highlight={idx === 1}
+                badge={idx === 1 ? t("mostPopularBadge") : undefined}
+              />
+            ))}
           </div>
         </div>
 

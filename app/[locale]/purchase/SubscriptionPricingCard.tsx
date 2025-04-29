@@ -20,10 +20,12 @@ export const SubscriptionPricingCard = ({
   product,
   highlight = false,
   badge,
+  cancelledPurchaseRedirectUrl,
 }: {
   product: Product;
   highlight?: boolean;
   badge?: string;
+  cancelledPurchaseRedirectUrl?: string;
 }) => {
   const isPopular = highlight || product.months === 3;
   const monthlyPrice = product.totalPrice! / (product.months || 1);
@@ -63,7 +65,7 @@ export const SubscriptionPricingCard = ({
         </h3>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex flex-col items-start text-gray-900 dark:text-white">
           <div className="flex items-baseline">
             <span className="text-4xl font-bold tracking-tight">
@@ -90,16 +92,35 @@ export const SubscriptionPricingCard = ({
       </div>
 
       <div className="mb-8 flex-1">
-        <div className="flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
-          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {t(`products.unlimited.highlight`)}
-          </span>
-        </div>
+        <ul className="flex flex-col gap-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 px-4 list-disc list-inside">
+          {(
+            t.raw("products.unlimited.highlights") as string[] | undefined
+          )?.map((highlight, idx) => (
+            <li
+              key={idx}
+              className="text-sm font-medium text-gray-900 dark:text-gray-100"
+            >
+              {highlight}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <form action={handleSubmit}>
+        {cancelledPurchaseRedirectUrl && (
+          <input
+            type="hidden"
+            name="cancelledPurchaseRedirectUrl"
+            value={cancelledPurchaseRedirectUrl}
+          />
+        )}
         <input type="hidden" name="priceId" value={product.prices[0].id} />
         <input type="hidden" name="isSubscription" value="true" />
+        <input
+          type="hidden"
+          name="cancelledPurchaseRedirectUrl"
+          value={cancelledPurchaseRedirectUrl || "purchase"}
+        />
         <button
           type="submit"
           className={`mt-8 block w-full rounded-md px-3 py-3 text-center text-sm font-semibold text-white ${
