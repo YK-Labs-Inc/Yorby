@@ -58,15 +58,11 @@ export default async function PurchasePage({
           {showFlashPricingUI && (
             <div className="mb-6">
               <div className="inline-block bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-4 py-2 rounded-full text-sm font-semibold">
-                🎉 Flash Sale: Limited Time Offer! 🎉
+                {t("flashSale.limitedTimeOffer")}
               </div>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Special pricing available for the next 24 hours
-              </p>
             </div>
           )}
           <TrustBadges />
-          {/* <CountdownTimer /> */}
         </div>
 
         {/* Pricing Cards */}

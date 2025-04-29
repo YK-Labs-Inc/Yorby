@@ -106,17 +106,11 @@ export const SubscriptionPricingCard = ({
   const displayPrice = showFlashPricingUI
     ? product.totalPrice
     : product.increasedPrice || product.totalPrice;
-  console.log("displayPrice: ", displayPrice);
-  console.log("isFlashPricingEnabled: ", isFlashPricingEnabled);
-  console.log("userSignedUpWithin24Hours: ", userSignedUpWithin24Hours);
-  console.log("product.prices[0].id: ", product.prices[0].id);
-  console.log("product.increasedPriceId: ", product.increasedPriceId);
   const priceId = isFlashPricingEnabled
     ? userSignedUpWithin24Hours
       ? product.prices[0].id
       : product.increasedPriceId || product.prices[0].id
     : product.prices[0].id;
-  console.log("priceId: ", priceId);
 
   // Only show savings for multi-month plans
   const showSavings = (product.months || 0) > 1 && baselineMonthlyPrice;
@@ -144,7 +138,9 @@ export const SubscriptionPricingCard = ({
       )}
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          {product.months === 1 ? "Monthly" : `${product.months} Months`}{" "}
+          {product.months === 1
+            ? t("subscriptionCard.monthly")
+            : t("subscriptionCard.nMonths", { count: product.months })}
         </h3>
       </div>
 
@@ -168,26 +164,29 @@ export const SubscriptionPricingCard = ({
           </div>
           <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {product.months === 1
-              ? "Monthly subscription"
-              : `${product.months}-month subscription`}
+              ? t("subscriptionCard.monthlySubscription")
+              : t("subscriptionCard.nMonthSubscription", {
+                  count: product.months,
+                })}
           </span>
         </div>
         {/* Only show per month price and percent saved for multi-month subscriptions */}
         {(product.months || 0) > 1 && baselineMonthlyPrice && (
           <>
             <p className="mt-1 text-sm font-bold text-green-600 dark:text-green-400">
-              {formatPrice(displayPrice! / (product.months || 1))} per month
+              {formatPrice(displayPrice! / (product.months || 1))}{" "}
+              {t("subscriptionCard.perMonth")}
             </p>
             <p className="text-sm font-bold text-green-600 dark:text-green-400">
-              Save{" "}
-              {Math.round(
-                100 -
-                  (displayPrice! /
-                    (product.months || 1) /
-                    baselineMonthlyPrice) *
-                    100
-              )}
-              % per month
+              {t("subscriptionCard.savePercentPerMonth", {
+                percent: Math.round(
+                  100 -
+                    (displayPrice! /
+                      (product.months || 1) /
+                      baselineMonthlyPrice) *
+                      100
+                ),
+              })}
             </p>
           </>
         )}
@@ -196,12 +195,16 @@ export const SubscriptionPricingCard = ({
           <>
             {showSavings && savingsPercent && savingsPercent > 0 && (
               <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
-                Save {savingsPercent}%
+                {t("subscriptionCard.savePercent", {
+                  percent: savingsPercent,
+                })}
               </p>
             )}
             {showFlashPricingUI && product.increasedPrice && (
               <p className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
-                Save {calculateDiscount()}% for 24 hours
+                {t("subscriptionCard.savePercentFor24Hours", {
+                  percent: calculateDiscount(),
+                })}
               </p>
             )}
           </>
@@ -212,13 +215,13 @@ export const SubscriptionPricingCard = ({
         <div className="mb-4 flex flex-col items-center">
           <div className="w-full flex justify-center">
             <span className="font-mono text-base font-bold text-red-600 flex gap-x-4 whitespace-nowrap">
-              Time remaining:{" "}
+              {t("subscriptionCard.timeRemaining")}
               <span className="whitespace-nowrap">{timeRemaining}</span>
             </span>
           </div>
           {/* Flash Sale badge inside the card, under the timer */}
           <div className="mt-2 mb-2 rounded-full bg-red-600 dark:bg-red-500 px-4 py-1 text-sm font-semibold text-white shadow-lg">
-            🔥 Flash Sale
+            {t("subscriptionCard.flashSale")}
           </div>
         </div>
       )}

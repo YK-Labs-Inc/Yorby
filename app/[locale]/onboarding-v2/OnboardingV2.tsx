@@ -700,13 +700,11 @@ const PurchaseScreen = ({
 }) => {
   const t = useTranslations("purchase");
 
-  // Find the monthly product (months === 1)
   const monthlyProduct = products.find((p: any) => p.months === 1);
-  // Determine the baseline monthly price to use for savings calculation
-  let baselineMonthlyPrice = monthlyProduct?.totalPrice;
-  if (!isFlashPricingEnabled && monthlyProduct?.increasedPrice) {
-    baselineMonthlyPrice = monthlyProduct.increasedPrice;
-  }
+  const baselineMonthlyPrice =
+    typeof monthlyProduct?.increasedPrice === "number"
+      ? monthlyProduct.increasedPrice
+      : undefined;
 
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 py-2 px-2">
