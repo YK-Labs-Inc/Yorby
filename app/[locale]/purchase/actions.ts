@@ -271,6 +271,7 @@ export async function createCheckoutSession(formData: FormData) {
     userId,
     args: {
       priceId,
+      purchaseSource: cancelledPurchaseRedirectUrl ?? "/purchase",
     },
   });
   redirect(sessionUrl);
