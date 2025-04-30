@@ -1,10 +1,53 @@
-import { Database } from "@/utils/supabase/database.types";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import {
+  createAdminClient,
+  createSupabaseServerClient,
+} from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { ReferralCodeSection } from "./referral-code-section";
 import { getTranslations } from "next-intl/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { redirect } from "next/navigation";
+import { User } from "@supabase/supabase-js";
+
+const fetchReferralCode = async (user: User) => {
+  const logger = new Logger().with({
+    page: "ReferralsPage",
+    action: "generateReferralCodeIfNecessary",
+    userId: user.id,
+  });
+  const supabase = await createSupabaseServerClient();
+  const { data: referralCode, error } = await supabase
+    .from("referral_codes")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("Error fetching referral:", { error });
+    await logger.flush();
+    return null;
+  }
+
+  if (referralCode) {
+    return referralCode.id;
+  }
+
+  const { data: newReferralCode, error: newReferralCodeError } = await supabase
+    .from("referral_codes")
+    .insert({ user_id: user.id })
+    .select("id")
+    .single();
+
+  if (newReferralCodeError) {
+    logger.error("Error creating referral code:", {
+      error: newReferralCodeError,
+    });
+    await logger.flush();
+    return null;
+  }
+
+  return newReferralCode.id;
+};
 
 export default async function ReferralsPage() {
   const t = await getTranslations("referrals.page");
@@ -36,12 +79,24 @@ export default async function ReferralsPage() {
     );
   }
 
+  const referralCode = await fetchReferralCode(user);
+
+  if (!referralCode) {
+    logger.error("Error fetching referral code");
+    await logger.flush();
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-red-600">{t("error")}</p>
+      </div>
+    );
+  }
+
   logger = logger.with({ userId: user.id });
 
   const { data: referrals, error } = await supabase
     .from("referrals")
     .select("*")
-    .eq("referrer_id", user.id)
+    .eq("referral_code_id", referralCode)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -54,6 +109,27 @@ export default async function ReferralsPage() {
     );
   }
 
+  const referralsWithReferrerEmail = (
+    await Promise.all(
+      referrals.map(async (referral) => {
+        const supabaseAdmin = await createAdminClient();
+        const { data: referrerData, error: referrerError } =
+          await supabaseAdmin.auth.admin.getUserById(referral.id);
+        if (referrerError) {
+          logger.error("Error fetching referrer data:", {
+            error: referrerError,
+          });
+          await logger.flush();
+          return null;
+        }
+        return {
+          ...referral,
+          referrer_email: referrerData?.user?.email,
+        };
+      })
+    )
+  ).filter((referral) => referral !== null);
+
   const referralCount = referrals?.length || 0;
 
   return (
@@ -61,8 +137,8 @@ export default async function ReferralsPage() {
       <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
 
       <ReferralCodeSection
-        email={user.email || null}
         referralCount={referralCount}
+        referralCode={referralCode}
       />
 
       {/* Referrals Table or Empty State */}
@@ -158,20 +234,16 @@ export default async function ReferralsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {referrals.map(
-                (
-                  referral: Database["public"]["Tables"]["referrals"]["Row"]
-                ) => (
-                  <tr key={referral.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {referral.referred_email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(referral.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                )
-              )}
+              {referralsWithReferrerEmail.map((referral) => (
+                <tr key={referral.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {referral.referrer_email}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(referral.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -592,29 +592,46 @@ export type Database = {
           },
         ]
       }
+      referral_codes: {
+        Row: {
+          id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string
           id: string
-          referred_email: string
-          referred_id: string
-          referrer_id: string
+          referral_code_id: string
         }
         Insert: {
           created_at?: string
-          id?: string
-          referred_email: string
-          referred_id: string
-          referrer_id: string
+          id: string
+          referral_code_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          referred_email?: string
-          referred_id?: string
-          referrer_id?: string
+          referral_code_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       resume_detail_items: {
         Row: {
