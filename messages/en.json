@@ -567,6 +567,18 @@
       "savePercentFor24Hours": "Save {percent}% for 24 hours",
       "timeRemaining": "Time remaining:",
       "flashSale": "🔥 Flash Sale"
+    },
+    "referral": {
+      "title": "Have a Referral Code?",
+      "description": "Enter your referral code to get a special discount on your purchase.",
+      "placeholder": "Enter referral code",
+      "redeem": "Redeem",
+      "redeeming": "Redeeming...",
+      "error": {
+        "empty": "Please enter a referral code",
+        "invalid": "Invalid referral code",
+        "generic": "An error occurred while redeeming your code"
+      }
     }
   },
   "accountLinking": {
@@ -1391,7 +1403,8 @@
     "support": "Need Help?",
     "supportMessageIntro": "If you need help, send an email to",
     "supportMessageConclusion": "and we'll get back to you as soon as possible.",
-    "memories": "Memories"
+    "memories": "Memories",
+    "referrals": "Referrals"
   },
   "landingPageV4": {
     "title": "How can we help you get a job?",
@@ -1653,6 +1666,11 @@
       "upload": {
         "title": "Tell Us About Yourself",
         "description": "Upload an existing resume so we can get to know your career history better"
+      },
+      "referral": {
+        "title": "Referral Program",
+        "description": "Share with friends and get rewards",
+        "content": "Invite your friends to join Perfect Interview and earn rewards for each successful referral. Share your unique referral link and get benefits when your friends sign up."
       }
     },
     "buttons": {
@@ -1740,6 +1758,7 @@
   "referrals": {
     "title": "Your Referral Code",
     "description": "Share your email address with friends and colleagues. For every 3 friends you refer, you'll get 1 month free - and there's no limit!",
+    "referralLink": "Your Referral Link",
     "progress": {
       "title": "Progress to next free month",
       "count": "{referralCount}/{referralsNeeded} referrals"
@@ -1952,6 +1971,18 @@
       "savePercentFor24Hours": "Save {percent}% for 24 hours",
       "timeRemaining": "Time remaining:",
       "flashSale": "🔥 Flash Sale"
+    },
+    "referral": {
+      "title": "Have a Referral Code?",
+      "description": "Enter your referral code to get a special discount on your purchase.",
+      "placeholder": "Enter referral code",
+      "redeem": "Redeem",
+      "redeeming": "Redeeming...",
+      "error": {
+        "empty": "Please enter a referral code",
+        "invalid": "Invalid referral code",
+        "generic": "An error occurred while redeeming your code"
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ import { posthog } from "@/utils/tracking/serverUtils";
 import Script from "next/script";
 import { KnowledgeBaseProvider } from "@/app/context/KnowledgeBaseContext";
 import { Toaster } from "@/components/ui/toaster";
+import { ReferralProvider } from "../context/referral-context";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -127,6 +128,7 @@ export default async function RootLayout({
   let isSubscriptionVariant = false;
   let isMemoriesEnabled = false;
   let enableTransformResume = false;
+  let referralsEnabled = false;
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
@@ -146,6 +148,9 @@ export default async function RootLayout({
     );
     enableTransformResume = Boolean(
       await posthog.isFeatureEnabled("transform-resume-feature", user.id)
+    );
+    referralsEnabled = Boolean(
+      await posthog.isFeatureEnabled("enable-referrals", user.id)
     );
   }
 
@@ -196,34 +201,37 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <UserProvider user={user} session={session}>
-                <AxiomWebVitals />
-                <AxiomLoggingProvider user={user}>
-                  <DeepgramContextProvider>
-                    <SidebarProvider>
-                      <OnboardingProvider initialState={onboardingState}>
-                        <KnowledgeBaseProvider
-                          isMemoriesEnabled={isMemoriesEnabled}
-                        >
-                          <AppSidebar
-                            jobs={jobs}
-                            numberOfCredits={numberOfCredits}
-                            hasSubscription={hasSubscription}
-                            user={user}
-                            interviewCopilots={interviewCopilots}
-                            isResumeBuilderEnabled={isResumeBuilderEnabled}
-                            resumes={resumes}
-                            isSubscriptionVariant={isSubscriptionVariant}
+                <ReferralProvider>
+                  <AxiomWebVitals />
+                  <AxiomLoggingProvider user={user}>
+                    <DeepgramContextProvider>
+                      <SidebarProvider>
+                        <OnboardingProvider initialState={onboardingState}>
+                          <KnowledgeBaseProvider
                             isMemoriesEnabled={isMemoriesEnabled}
-                            enableTransformResume={enableTransformResume}
-                          />
-                          <SidebarTrigger />
-                          <main className="w-full">{children}</main>
-                          <Toaster />
-                        </KnowledgeBaseProvider>
-                      </OnboardingProvider>
-                    </SidebarProvider>
-                  </DeepgramContextProvider>
-                </AxiomLoggingProvider>
+                          >
+                            <AppSidebar
+                              jobs={jobs}
+                              numberOfCredits={numberOfCredits}
+                              hasSubscription={hasSubscription}
+                              user={user}
+                              interviewCopilots={interviewCopilots}
+                              isResumeBuilderEnabled={isResumeBuilderEnabled}
+                              resumes={resumes}
+                              isSubscriptionVariant={isSubscriptionVariant}
+                              isMemoriesEnabled={isMemoriesEnabled}
+                              enableTransformResume={enableTransformResume}
+                              referralsEnabled={referralsEnabled}
+                            />
+                            <SidebarTrigger />
+                            <main className="w-full">{children}</main>
+                            <Toaster />
+                          </KnowledgeBaseProvider>
+                        </OnboardingProvider>
+                      </SidebarProvider>
+                    </DeepgramContextProvider>
+                  </AxiomLoggingProvider>
+                </ReferralProvider>
               </UserProvider>
             </ThemeProvider>
           </IntlProvider>

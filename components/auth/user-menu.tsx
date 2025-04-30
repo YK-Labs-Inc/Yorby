@@ -26,12 +26,14 @@ interface UserMenuProps {
   email: string;
   hasSubscription: boolean;
   isMemoriesEnabled: boolean;
+  referralsEnabled: boolean;
 }
 
 export function UserMenu({
   email,
   hasSubscription,
   isMemoriesEnabled,
+  referralsEnabled,
 }: UserMenuProps) {
   const [_, startTransition] = useTransition();
   const [showSupportDialog, setShowSupportDialog] = useState(false);
@@ -47,6 +49,10 @@ export function UserMenu({
 
   const handleMemoriesClick = () => {
     router.push("/memories");
+  };
+
+  const handleReferralsClick = () => {
+    router.push("/referrals");
   };
 
   return (
@@ -86,6 +92,15 @@ export function UserMenu({
           >
             {t("support")}
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {referralsEnabled && (
+            <DropdownMenuItem
+              onSelect={handleReferralsClick}
+              className="justify-center"
+            >
+              {t("referrals")}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {isMemoriesEnabled && (
             <DropdownMenuItem

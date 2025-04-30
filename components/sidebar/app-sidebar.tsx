@@ -41,6 +41,7 @@ interface AppSidebarProps {
   resumes: Tables<"resumes">[];
   isMemoriesEnabled: boolean;
   enableTransformResume: boolean;
+  referralsEnabled: boolean;
 }
 
 export function AppSidebar({
@@ -54,6 +55,7 @@ export function AppSidebar({
   resumes,
   isMemoriesEnabled,
   enableTransformResume,
+  referralsEnabled,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -211,6 +213,7 @@ export function AppSidebar({
             email={user.email}
             hasSubscription={hasSubscription}
             isMemoriesEnabled={isMemoriesEnabled}
+            referralsEnabled={referralsEnabled}
           />
         )}{" "}
         {user && user?.is_anonymous && <LinkAccountModal />}

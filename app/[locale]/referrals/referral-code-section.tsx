@@ -2,22 +2,25 @@
 
 import { CopyButton } from "@/components/ui/copy-button";
 import { useTranslations } from "next-intl";
+import { generateReferralLink } from "@/utils/referral";
 
 interface ReferralCodeSectionProps {
-  email: string | null;
+  referralCode: string | null;
   referralCount: number;
 }
 
 export function ReferralCodeSection({
-  email,
+  referralCode,
   referralCount,
 }: ReferralCodeSectionProps) {
   const t = useTranslations("referrals");
 
-  if (!email) return null;
+  if (!referralCode) return null;
 
   const referralsNeeded = 3;
   const progress = Math.min((referralCount / referralsNeeded) * 100, 100);
+  const referralLink = generateReferralLink(referralCode);
+  const decodedLink = referralLink ? decodeURIComponent(referralLink) : null;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
@@ -38,11 +41,20 @@ export function ReferralCodeSection({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex-1 bg-gray-50 rounded-md p-3 border border-gray-200">
-          <code className="text-sm text-gray-900">{email}</code>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("referralLink")}
+          </label>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 bg-gray-50 rounded-md p-3 border border-gray-200">
+              <code className="text-sm text-gray-900 break-all">
+                {decodedLink}
+              </code>
+            </div>
+            <CopyButton text={referralLink || ""} />
+          </div>
         </div>
-        <CopyButton text={email} />
       </div>
     </div>
   );
