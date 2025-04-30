@@ -12,7 +12,7 @@ import { User } from "@supabase/supabase-js";
 const fetchReferralCode = async (user: User) => {
   const logger = new Logger().with({
     page: "ReferralsPage",
-    action: "generateReferralCodeIfNecessary",
+    action: "fetchReferralCode",
     userId: user.id,
   });
   const supabase = await createSupabaseServerClient();
