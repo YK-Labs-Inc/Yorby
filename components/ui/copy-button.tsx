@@ -4,15 +4,17 @@ import { useState } from "react";
 
 interface CopyButtonProps {
   text: string;
+  onCopy?: () => void;
 }
 
-export function CopyButton({ text }: CopyButtonProps) {
+export function CopyButton({ text, onCopy }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      if (onCopy) onCopy();
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);

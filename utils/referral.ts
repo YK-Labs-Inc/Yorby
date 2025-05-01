@@ -1,8 +1,8 @@
-export const generateReferralLink = (email: string) => {
-  if (!email) return null;
+export const generateReferralLink = (code: string) => {
+  if (!code) return null;
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://perfectinterview.com";
-  return `${baseUrl}/sign-up?ref=${encodeURIComponent(email)}`;
+  return `${baseUrl}?ref=${encodeURIComponent(code)}`;
 };
 
 export const getReferralCodeFromUrl = () => {
