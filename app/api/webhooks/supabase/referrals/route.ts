@@ -25,7 +25,7 @@ const verifyWebhookRequest = (request: Request): boolean => {
   );
 };
 
-export const POST = async (request: AxiomRequest) => {
+export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
     path: "/api/webhooks/supabase/referrals",
   });
@@ -355,4 +355,4 @@ export const POST = async (request: AxiomRequest) => {
       { status: 500 }
     );
   }
-};
+});
