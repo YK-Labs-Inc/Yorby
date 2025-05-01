@@ -13,7 +13,6 @@ import {
   Upload,
   Loader2,
   Wand2,
-  Copy,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
@@ -33,10 +32,8 @@ import { uploadUserFile } from "@/app/[locale]/dashboard/resumes/actions";
 import Link from "next/link";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { Product } from "../purchase/actions";
-import { FormMessage } from "@/components/form-message";
 import TrustBadges from "../purchase/components/TrustBadges";
 import { SubscriptionPricingCard } from "../purchase/SubscriptionPricingCard";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
 import React from "react";
 
 const steps = [
