@@ -1693,7 +1693,8 @@
         "title": "Programme de parrainage",
         "description": "Partagez avec vos amis et obtenez des récompenses 🎉",
         "content": "Invitez vos amis à rejoindre Perfect Interview et gagnez des récompenses pour chaque parrainage réussi. Partagez votre lien de parrainage unique et obtenez des avantages lorsque vos amis s'inscrivent."
-      }
+      },
+      "purchaseThankYou": "Votre mise à niveau est maintenant active !"
     },
     "buttons": {
       "next": "Suivant",
