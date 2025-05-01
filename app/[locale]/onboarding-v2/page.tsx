@@ -1,12 +1,72 @@
 import OnboardingV2 from "./OnboardingV2";
 import { getProducts } from "@/app/[locale]/purchase/actions";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import {
+  createAdminClient,
+  createSupabaseServerClient,
+} from "@/utils/supabase/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { redirect } from "next/navigation";
 import { isWithin24Hours } from "@/app/[locale]/purchase/utils";
 import { cookies } from "next/headers";
 import { Logger } from "next-axiom";
 import { User } from "@supabase/supabase-js";
+import { Resend } from "resend";
+import { SuccessfulReferralTemplate } from "@/components/email/SuccessfulReferralTemplate";
+
+async function getReferrerUserEmail(
+  referralCode: string
+): Promise<string | null> {
+  const logger = new Logger().with({
+    page: "OnboardingV2Page",
+    action: "getReferrerUserEmail",
+    referralCode,
+  });
+  const supabase = await createAdminClient();
+  const { data: referrerCode, error: referrerCodeError } = await supabase
+    .from("referral_codes")
+    .select("user_id")
+    .eq("id", referralCode)
+    .maybeSingle();
+
+  if (referrerCodeError || !referrerCode?.user_id) {
+    logger.error("Could not find referrer user_id", {
+      error: referrerCodeError,
+    });
+    await logger.flush();
+    return null;
+  }
+  const userId = referrerCode.user_id;
+  const { data: referrerUser, error: referrerUserError } =
+    await supabase.auth.admin.getUserById(userId);
+  const referrerEmail = referrerUser?.user?.email;
+
+  if (referrerUserError || !referrerEmail) {
+    logger.error("Could not find referrer email", {
+      error: referrerUserError,
+    });
+    await logger.flush();
+    return null;
+  }
+  return referrerEmail;
+}
+
+async function sendReferralNotificationEmail(
+  referrerEmail: string,
+  logger: Logger
+) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    await resend.emails.send({
+      from: "Perfect Interview <noreply@transactional.perfectinterview.ai>",
+      to: [referrerEmail],
+      subject: "You just referred a new user!",
+      react: <SuccessfulReferralTemplate />,
+    });
+    logger.info("Referral email sent to referrer", { referrerEmail });
+  } catch (emailError) {
+    logger.error("Error sending referral email", { error: emailError });
+  }
+}
 
 async function handleReferralCode(user: User, referralCode: string) {
   const supabase = await createSupabaseServerClient();
@@ -46,6 +106,11 @@ async function handleReferralCode(user: User, referralCode: string) {
       await logger.flush();
       return;
     }
+
+    const referrerEmail = await getReferrerUserEmail(referralCode);
+    if (!referrerEmail) return;
+
+    await sendReferralNotificationEmail(referrerEmail, logger);
 
     logger.info("Successfully recorded referral");
   } catch (error) {

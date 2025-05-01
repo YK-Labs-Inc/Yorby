@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
-import { AxiomRequest, withAxiom } from "next-axiom";
+import { AxiomRequest, Logger, withAxiom } from "next-axiom";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Tables } from "@/utils/supabase/database.types";
+import { Resend } from "resend";
+import SuccessfulRewardRedemption from "@/components/email/SuccessfulRewardRedemption";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -24,6 +26,38 @@ const verifyWebhookRequest = (request: Request): boolean => {
     `Bearer ${process.env.SUPABASE_WEBHOOK_SECRET!}`
   );
 };
+
+async function sendSuccessfulRewardRedemptionEmail(userId: string) {
+  const logger = new Logger().with({
+    page: "sendSuccessfulRewardRedemptionEmail",
+    userId,
+  });
+  try {
+    const supabase = await createAdminClient();
+    // Fetch the user's email
+    const { data: userData, error: userError } =
+      await supabase.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email;
+    if (userEmail) {
+      const resend = new Resend(process.env.RESEND_API_KEY!);
+      await resend.emails.send({
+        from: "Perfect Interview <noreply@transactional.perfectinterview.ai>",
+        to: [userEmail],
+        subject: "You just earned a free month!",
+        react: SuccessfulRewardRedemption(),
+      });
+      logger.info("Sent successful referral redemption email", { userEmail });
+    } else {
+      logger.warn("No email found for user to send redemption email", {
+        userId,
+      });
+    }
+  } catch (emailError) {
+    logger.error("Error sending successful referral redemption email", {
+      error: emailError,
+    });
+  }
+}
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
@@ -330,6 +364,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           );
         }
       }
+      await sendSuccessfulRewardRedemptionEmail(referralCode.user_id);
     } else {
       logger.info("No new rewards to redeem", {
         userId: referralCode.user_id,

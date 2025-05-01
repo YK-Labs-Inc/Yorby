@@ -1,0 +1,74 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Referral Feature Rule
+
+**Purpose:**  
+Ensure the referral system is robust, secure, and provides a seamless user experience for both referrers and referred users, while maintaining data integrity and correct reward logic.
+
+---
+
+## 1. Database & Schema
+- All referral logic must use the `referral_codes`, `referrals`, and `referral_redemptions` tables as defined in `@database.types.ts`.
+- Each user can have only one referral code (`referral_codes`), and all redemptions are tracked in `referral_redemptions` by user ID.
+
+---
+
+## 2. Referral Code Generation & Fetching
+- When a user visits the referral page, check if a referral code exists for their user ID.
+  - If it exists, return the code.
+  - If not, create a new code and return it.
+- Never create duplicate referral codes for a single user.
+
+---
+
+## 3. Referral Recording
+- On onboarding or signup, if a referral code is present:
+  - Insert a new row into `referrals` with the referred user's ID and the referrer's code.
+  - Do not insert if a referral already exists for that user.
+
+---
+
+## 4. Reward Redemption Logic
+- The webhook at `app/api/webhooks/supabase/referrals/route.ts` is the single source of truth for reward redemption.
+- For every 3 successful referrals, the referrer receives 1 month of free subscription.
+- If the user has an active Stripe subscription, extend it by 1 month per 3 referrals.
+- If the user does not have an active subscription, create one with a 1-month trial per 3 referrals.
+- Use the `referral_redemptions` table to track the total number of months redeemed per user.
+- Always use upsert logic to increment the redemption count, never overwrite or reset it.
+
+---
+
+## 5. Idempotency & Race Conditions
+- All reward logic must be idempotent:
+  - Never grant more months than the number of eligible referrals.
+  - Use upsert and atomic operations to prevent race conditions.
+- Always check the current redemption count before granting new rewards.
+
+---
+
+## 6. Security & Validation
+- All webhook endpoints must validate the Supabase webhook secret.
+- Never trust client-provided referral codes or user IDs without validation.
+- Log all errors and suspicious activity for auditability.
+
+---
+
+## 7. User Experience
+- Users should always be able to see:
+  - Their referral code.
+  - The number of successful referrals.
+  - The number of months they have earned and redeemed.
+- Never expose other users' referral or redemption data.
+
+---
+
+## 8. Testing
+- All referral and redemption logic must be covered by integration tests.
+- Test edge cases: duplicate referrals, simultaneous signups, and Stripe failures.
+
+---
+
+**End of Rule**

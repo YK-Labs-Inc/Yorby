@@ -32,9 +32,9 @@ import { uploadUserFile } from "@/app/[locale]/dashboard/resumes/actions";
 import Link from "next/link";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { Product } from "../purchase/actions";
-import { FormMessage } from "@/components/form-message";
 import TrustBadges from "../purchase/components/TrustBadges";
 import { SubscriptionPricingCard } from "../purchase/SubscriptionPricingCard";
+import React from "react";
 
 const steps = [
   {
@@ -69,6 +69,46 @@ const steps = [
   },
 ];
 
+function ReferralNudgeDialog({
+  open,
+  onNext,
+}: {
+  open: boolean;
+  onNext: () => void;
+}) {
+  const t = useTranslations("onboardingV2.referralNudgeDialog");
+  return (
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent
+        hideClose
+        className="bg-white border border-black text-black"
+      >
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold text-black text-center">
+            {t("title")}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="text-center my-4">
+          <p className="mb-4 text-base text-black">{t("description")}</p>
+          <Link
+            href="/referrals"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mb-4"
+          >
+            <Button className="w-full">{t("dashboardLink")}</Button>
+          </Link>
+        </div>
+        <DialogFooter>
+          <Button className="w-full" variant="outline" onClick={onNext}>
+            {t("next", { default: "Next" })}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function OnboardingPage({
   products,
   isFlashPricingEnabled,
@@ -92,6 +132,8 @@ export default function OnboardingPage({
   const [error, setError] = useState<string>("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [showReferralNudge, setShowReferralNudge] = useState(false);
+  const [showReferralNudgeDialog, setShowReferralNudgeDialog] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("onboardingV2");
@@ -199,11 +241,18 @@ export default function OnboardingPage({
 
   const handleConfirmSkipPurchase = () => {
     setShowSkipPurchaseDialog(false);
-    const nextStep = currentStep + 1;
-    setCurrentStep(nextStep);
+    setShowReferralNudgeDialog(true);
+  };
+
+  // Handler for when user clicks Next in referral dialog
+  const handleReferralNudgeNext = () => {
+    setShowReferralNudgeDialog(false);
+    // Progress to upload step
+    const uploadStepIndex = steps.findIndex((s) => s.title === "upload");
+    setCurrentStep(uploadStepIndex);
     // Update URL with new step
     const url = new URL(window.location.href);
-    url.searchParams.set("step", steps[nextStep].searchParam);
+    url.searchParams.set("step", steps[uploadStepIndex].searchParam);
     router.push(url.pathname + url.search);
   };
 
@@ -551,6 +600,11 @@ export default function OnboardingPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ReferralNudgeDialog
+        open={showReferralNudgeDialog}
+        onNext={handleReferralNudgeNext}
+      />
 
       <Dialog
         open={showSuccessModal}

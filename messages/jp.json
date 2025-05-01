@@ -568,6 +568,18 @@
       "savePercentFor24Hours": "{percent}%オフ、24時間限定⏳",
       "timeRemaining": "残り時間：",
       "flashSale": "🔥 フラッシュセール"
+    },
+    "referral": {
+      "title": "紹介コードをお持ちですか？",
+      "description": "紹介コードを入力して、購入時に特別割引を受けましょう。",
+      "placeholder": "紹介コードを入力してください",
+      "redeem": "引き換える",
+      "redeeming": "引き換え中...",
+      "error": {
+        "empty": "紹介コードを入力してください",
+        "invalid": "無効な紹介コードです。",
+        "generic": "コードの引き換え中にエラーが発生しました。"
+      }
     }
   },
   "accountLinking": {
@@ -1394,7 +1406,8 @@
     "support": "困っていますか？",
     "supportMessageIntro": "お困りの際は、メールでご連絡ください：",
     "supportMessageConclusion": "できるだけ早くご連絡いたします。",
-    "memories": "思い出"
+    "memories": "思い出",
+    "referrals": "紹介"
   },
   "landingPageV4": {
     "title": "どのようなお仕事探しのお手伝いができますか？",
@@ -1675,6 +1688,11 @@
       "upload": {
         "title": "自己紹介をお願いします。",
         "description": "あなたの職務経歴をより良く知るために、既存の履歴書をアップロードしてください。"
+      },
+      "referral": {
+        "title": "紹介プログラム",
+        "description": "友達とシェアして、報酬をゲットしよう！",
+        "content": "友達をPerfect Interviewに招待して、紹介が成功するたびに報酬を獲得しましょう！ あなたのユニークな紹介リンクをシェアして、友達がサインアップすると特典が得られます。"
       }
     },
     "buttons": {
@@ -1712,7 +1730,13 @@
     "congratulations": "🎉 おめでとうございます！",
     "congratulationsDescription": "ドキュメントのアップロードが完了しました！🎉 これで、当社のツールを自由にお試しいただけます。",
     "continueToMemories": "思い出を積み重ね続けよう ✨",
-    "skipUpgrade": "後でアップグレード"
+    "skipUpgrade": "後でアップグレード",
+    "referralNudgeDialog": {
+      "title": "お友達紹介3人ごとに1ヶ月無料！",
+      "description": "Perfect Interviewに友達を招待しましょう。あなたの紹介コードを使って3人の友達がサインアップするごとに、1ヶ月間無料でアクセスできます。制限はありません！ 🎉",
+      "dashboardLink": "友達を紹介しよう！",
+      "next": "次へ"
+    }
   },
   "landingPageV6": {
     "hero": {
@@ -1783,6 +1807,7 @@
         "referredUser": "紹介されたユーザー",
         "dateReferred": "紹介日"
       }
-    }
+    },
+    "referralLink": "紹介リンク"
   }
 }

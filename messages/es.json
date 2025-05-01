@@ -568,6 +568,18 @@
       "savePercentFor24Hours": "Ahorra {percent}% por 24 horas",
       "timeRemaining": "Tiempo restante:",
       "flashSale": "🔥 Venta Flash"
+    },
+    "referral": {
+      "title": "¿Tienes un código de referido?",
+      "description": "Ingresa tu código de referido para obtener un descuento especial en tu compra.",
+      "placeholder": "Ingresa el código de referido",
+      "redeem": "Canjear",
+      "redeeming": "Canjeando...",
+      "error": {
+        "empty": "Por favor, introduce un código de referencia.",
+        "invalid": "Código de referido no válido",
+        "generic": "Ocurrió un error al canjear tu código."
+      }
     }
   },
   "accountLinking": {
@@ -1394,7 +1406,8 @@
     "support": "¿Necesitas ayuda?",
     "supportMessageIntro": "Si necesitas ayuda, envía un correo electrónico a",
     "supportMessageConclusion": "y nos pondremos en contacto contigo lo antes posible.",
-    "memories": "Recuerdos"
+    "memories": "Recuerdos",
+    "referrals": "Recomendaciones"
   },
   "landingPageV4": {
     "title": "¿Cómo podemos ayudarte a conseguir un trabajo?",
@@ -1675,6 +1688,11 @@
       "upload": {
         "title": "Cuéntanos sobre ti",
         "description": "Sube un currículum vitae existente para que podamos conocer mejor tu trayectoria profesional 😊"
+      },
+      "referral": {
+        "title": "Programa de Referidos",
+        "description": "Comparte con amigos y obtén recompensas.",
+        "content": "Invita a tus amigos a unirse a Perfect Interview y gana recompensas por cada referido exitoso. Comparte tu enlace de referido único y obtén beneficios cuando tus amigos se registren."
       }
     },
     "buttons": {
@@ -1712,7 +1730,13 @@
     "congratulations": "🎉 ¡Felicidades!",
     "congratulationsDescription": "¡Has subido tus documentos con éxito! Ahora puedes probar cualquiera de nuestras herramientas.",
     "continueToMemories": "Continuar añadiendo a los recuerdos.",
-    "skipUpgrade": "Mejorar más tarde"
+    "skipUpgrade": "Mejorar más tarde",
+    "referralNudgeDialog": {
+      "title": "¡Obtén 1 Mes Gratis por Cada 3 Referidos!",
+      "description": "Invita a tus amigos a Perfect Interview. Por cada 3 amigos que se registren usando tu código de referido, obtendrás 1 mes de acceso gratuito. ¡No hay límite!",
+      "dashboardLink": "Comienza a recomendar amigos 🎉",
+      "next": "Siguiente"
+    }
   },
   "landingPageV6": {
     "hero": {
@@ -1783,6 +1807,7 @@
         "referredUser": "Usuario referido",
         "dateReferred": "Fecha de Referido"
       }
-    }
+    },
+    "referralLink": "Tu Enlace de Referido"
   }
 }

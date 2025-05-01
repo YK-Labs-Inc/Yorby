@@ -1708,7 +1708,13 @@
     "congratulations": "🎉 Congratulations!",
     "congratulationsDescription": "You've successfully uploaded your documents! Now you can try out any of our tools.",
     "continueToMemories": "Continue Adding To Memories",
-    "skipUpgrade": "Upgrade Later"
+    "skipUpgrade": "Upgrade Later",
+    "referralNudgeDialog": {
+      "title": "Get 1 Month Free for Every 3 Referrals!",
+      "description": "Invite your friends to Perfect Interview. For every 3 friends who sign up using your referral code, you'll get 1 month of free access. There's no limit!",
+      "dashboardLink": "Start Referring Friends",
+      "next": "Next"
+    }
   },
   "landingPageV6": {
     "hero": {
