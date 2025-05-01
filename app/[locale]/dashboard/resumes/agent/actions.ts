@@ -78,6 +78,7 @@ export const triageAction = async (
     function: "triageAction",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
@@ -204,6 +205,7 @@ export const createSection = async (
     function: "createSection",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
@@ -304,6 +306,7 @@ export const updateSection = async (
     function: "updateSection",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
@@ -439,6 +442,7 @@ export const deleteSection = async (
     function: "deleteSection",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   try {
     const { sectionId, response } = await generateObjectWithFallback({
@@ -543,6 +547,7 @@ export const updateContactInfo = async (
     function: "updateContactInfo",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   try {
     const { updatedResume, response } = await generateObjectWithFallback({
@@ -613,6 +618,7 @@ export const handleOtherAction = async (
     function: "handleOtherAction",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
@@ -752,6 +758,7 @@ export const identifyChanges = async (
     function: "identifyChanges",
     messages,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
@@ -768,18 +775,23 @@ export const identifyChanges = async (
       4. A block of text that represents a user's knowledge base about the user's career and experiences (optional)
       
       Perform the following actions:
-      1. You are an expert HR recruiter. Analyze the job description and create criteria for what would be a good resume for this job.
-      2. Then, analyze the existing resume and all of its resume_sections and grade the resume against the criteria and identify
-      how the resume could be improved. The one change you should NOT suggest is to add a work summary section. Our resumes
-      WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
+      1. Analyze the existing resume and its contents and determine what changes can be made to the resume to make it a stronger match for the job description.
+      2. The one change you should NOT suggest is to add a work summary section. Our resumes WILL NOT HAVE A WORK SUMMARY SECTION so do not suggest this change.
       3. If the resume is already a strong match for the job description, return a response with type: "no_changes" and a friendly noChangeResponse message explaining that no changes are needed.
       4. If the resume could be improved, return a response with type: "changes_needed" and a list of improvements that could be made to the resume to
-      make it a better match for the job description.
-      Prioritize improvements that can be made from the files and knowledge base that contain information about the user's career and experiences.
-      The changes should be specific and detailed. For example, indicate which previous work experience should be added and which previous work experience should be removed.
-      Don't just include all of the previous work experience in the changes. Only include the work experience that is most relevant to the job description.
-      We want to minimize the amount of additional information we need to ask the user for. Only return improvements that require additional
-      information from the user if it is absolutely necessary and the resume transformation could not be completed without it.
+      make it a better match for the job description. 
+      
+      When suggesting changes, prioritize improvements that can be made from the files and knowledge base that
+      contain information about the user's career and experiences. When suggesting these changes, make them very specific about which information
+      to pull from the files and knowledge base. For example, suggest specific work experience or skills that are mentioned in the files and knowledge base
+      to be added to the resume. Only suggest job changes that are relevant to the job description — do not suggest changes that do not make
+      the resume a stronger match for the job description. For example, if an individual has work experience in finance and marketing, if the job
+      description they provided is a marketing role, do not suggest adding the finance work experience to the resume and only suggest the marketing work experience.
+      You should prioritize quality of changes instead of quantity of changes. Do not just dump all of the information from the files and knowledge base into the resume.
+      Only suggest changes that are truly necessary to make the resume a stronger match for the job description.
+      
+      You should only suggest changes that are not rooted in information found from the files and knowledge base if the user does not have ANY
+      relevant experience in their files and knowledge base that is relevant to the job description. This is a last resort option.
 
       Return a discriminated union with either:
       {
@@ -859,16 +871,24 @@ export const identifyChanges = async (
     });
 
     logger = logger.with({ result_type: result.type });
-    logger.info("Change identification completed");
-    await logger.flush();
 
     if (result.type === "no_changes") {
+      logger.info("No changes needed", {
+        noChangeResponse: result.noChangeResponse,
+      });
+      await logger.flush();
       return {
         changes: [],
         noChangeResponse: result.noChangeResponse,
         changesRequireAdditionalInformation: false,
       };
     } else {
+      logger.info("Changes needed", {
+        changes: result.changes,
+        changesRequireAdditionalInformation:
+          result.changesRequireAdditionalInformation,
+      });
+      await logger.flush();
       return {
         changes: result.changes,
         noChangeResponse: "",
@@ -901,6 +921,7 @@ export const handleTransformConversation = async (
     messages,
     changesToBeMade,
     currentResume,
+    userId: currentResume.user_id,
   });
   const { files, knowledge_base } = await getAllUserMemories(
     currentResume.user_id
