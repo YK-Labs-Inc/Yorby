@@ -277,7 +277,7 @@ export async function createCheckoutSession(formData: FormData) {
   redirect(sessionUrl);
 }
 
-export const redirectToStripeCustomerPortal = async () => {
+export const redirectToStripeCustomerPortal = async (returnUrl: string) => {
   const logger = new Logger();
   logger.with({
     function: "redirectToStripeCustomerPortal",
@@ -304,7 +304,7 @@ export const redirectToStripeCustomerPortal = async () => {
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: `${(await headers()).get("origin")}/dashboard/jobs`,
+      return_url: returnUrl,
     });
     if (session.url) {
       sessionUrl = session.url;

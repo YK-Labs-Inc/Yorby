@@ -568,6 +568,18 @@
       "savePercentFor24Hours": "{percent}% 24시간 동안 할인!",
       "timeRemaining": "남은 시간:",
       "flashSale": "🔥 초특가 세일"
+    },
+    "referral": {
+      "title": "추천인 코드가 있으신가요?",
+      "description": "추천인 코드를 입력하고 특별 할인을 받으세요!",
+      "placeholder": "추천인 코드 입력",
+      "redeem": "사용",
+      "redeeming": "적용 중...",
+      "error": {
+        "empty": "추천인 코드를 입력해주세요",
+        "invalid": "유효하지 않은 추천 코드입니다.",
+        "generic": "코드를 사용하던 중 오류가 발생했습니다"
+      }
     }
   },
   "accountLinking": {
@@ -1394,7 +1406,8 @@
     "support": "도움이 필요하신가요?",
     "supportMessageIntro": "도움이 필요하시면 이메일을 보내주세요:",
     "supportMessageConclusion": "최대한 빨리 답변드리겠습니다.",
-    "memories": "추억들"
+    "memories": "추억들",
+    "referrals": "추천 🤝"
   },
   "landingPageV4": {
     "title": "어떻게 하면 당신이 직업을 구할 수 있도록 도울 수 있을까요?",
@@ -1675,6 +1688,11 @@
       "upload": {
         "title": "자기소개를 해주세요.",
         "description": "기존 이력서를 업로드하여 귀하의 경력 사항을 더 잘 알 수 있도록 해주세요."
+      },
+      "referral": {
+        "title": "추천 프로그램",
+        "description": "친구들과 공유하고 보상을 받으세요 🎁",
+        "content": "친구들을 Perfect Interview에 초대하고 성공적인 추천마다 보상을 받으세요! 고유한 추천 링크를 공유하고 친구들이 가입하면 혜택을 누리세요."
       }
     },
     "buttons": {
@@ -1712,7 +1730,13 @@
     "congratulations": "🎉 축하해요!",
     "congratulationsDescription": "성공적으로 문서를 업로드했습니다! 이제 저희의 도구를 사용해 보세요.",
     "continueToMemories": "계속 추억을 더하세요",
-    "skipUpgrade": "나중에 업그레이드하세요"
+    "skipUpgrade": "나중에 업그레이드하세요",
+    "referralNudgeDialog": {
+      "title": "친구 3명 초대 시 1개월 무료!",
+      "description": "Perfect Interview에 친구를 초대하세요. 추천 코드를 사용하여 가입하는 친구 3명마다 1개월 무료 이용 혜택을 드립니다. 제한은 없습니다!",
+      "dashboardLink": "친구 추천 시작하기",
+      "next": "다음"
+    }
   },
   "landingPageV6": {
     "hero": {
@@ -1783,6 +1807,7 @@
         "referredUser": "추천 사용자",
         "dateReferred": "의뢰 날짜"
       }
-    }
+    },
+    "referralLink": "회원님의 추천 링크"
   }
 }

@@ -568,6 +568,18 @@
       "savePercentFor24Hours": "Économisez {percent}% pendant 24 heures.",
       "timeRemaining": "Temps restant :",
       "flashSale": "🔥 Vente Flash"
+    },
+    "referral": {
+      "title": "Avez-vous un code de parrainage ?",
+      "description": "Entrez votre code de parrainage pour obtenir une réduction spéciale sur votre achat.",
+      "placeholder": "Entrez le code de parrainage",
+      "redeem": "Utiliser un code",
+      "redeeming": "Récupération en cours...",
+      "error": {
+        "empty": "Veuillez entrer un code de parrainage.",
+        "invalid": "Code de parrainage invalide",
+        "generic": "Une erreur s'est produite lors de l'utilisation de votre code."
+      }
     }
   },
   "accountLinking": {
@@ -1394,7 +1406,8 @@
     "support": "Besoin d'aide ?",
     "supportMessageIntro": "Si vous avez besoin d'aide, envoyez un email à",
     "supportMessageConclusion": "et nous vous recontacterons dès que possible.",
-    "memories": "Souvenirs"
+    "memories": "Souvenirs",
+    "referrals": "Parrainages"
   },
   "landingPageV4": {
     "title": "Comment pouvons-nous vous aider à trouver un emploi ?",
@@ -1675,6 +1688,11 @@
       "upload": {
         "title": "Parlez-nous de vous.",
         "description": "Téléchargez un CV existant pour que nous puissions mieux connaître votre parcours professionnel."
+      },
+      "referral": {
+        "title": "Programme de parrainage",
+        "description": "Partagez avec vos amis et obtenez des récompenses 🎉",
+        "content": "Invitez vos amis à rejoindre Perfect Interview et gagnez des récompenses pour chaque parrainage réussi. Partagez votre lien de parrainage unique et obtenez des avantages lorsque vos amis s'inscrivent."
       }
     },
     "buttons": {
@@ -1712,7 +1730,13 @@
     "congratulations": "🎉 Félicitations !",
     "congratulationsDescription": "Vous avez téléchargé vos documents avec succès ! Vous pouvez maintenant essayer n'importe lequel de nos outils.",
     "continueToMemories": "Continuez à ajouter des souvenirs.",
-    "skipUpgrade": "Mettre à niveau plus tard"
+    "skipUpgrade": "Mettre à niveau plus tard",
+    "referralNudgeDialog": {
+      "title": "Obtenez 1 mois gratuit pour chaque 3 parrainages !",
+      "description": "Invitez vos amis à Perfect Interview. Pour chaque tranche de 3 amis qui s'inscrivent en utilisant votre code de parrainage, vous obtiendrez 1 mois d'accès gratuit. Il n'y a pas de limite !",
+      "dashboardLink": "Commencez à parrainer des amis ✨",
+      "next": "Suivant"
+    }
   },
   "landingPageV6": {
     "hero": {
@@ -1783,6 +1807,7 @@
         "referredUser": "Utilisateur parrainé",
         "dateReferred": "Date de référence"
       }
-    }
+    },
+    "referralLink": "Votre lien de parrainage"
   }
 }

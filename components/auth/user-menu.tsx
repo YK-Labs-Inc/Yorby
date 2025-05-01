@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface UserMenuProps {
   email: string;
@@ -40,10 +40,14 @@ export function UserMenu({
   const t = useTranslations("userMenu");
   const posthog = usePostHog();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleManageSubscription = () => {
+    if (!pathname) {
+      return;
+    }
     startTransition(async () => {
-      await redirectToStripeCustomerPortal();
+      await redirectToStripeCustomerPortal(pathname);
     });
   };
 
