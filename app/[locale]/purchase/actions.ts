@@ -286,6 +286,7 @@ export const redirectToStripeCustomerPortal = async (returnUrl: string) => {
     function: "redirectToStripeCustomerPortal",
   });
   const supabase = await createSupabaseServerClient();
+  const origin = (await headers()).get("origin");
   let sessionUrl = "";
   try {
     const {
@@ -307,7 +308,7 @@ export const redirectToStripeCustomerPortal = async (returnUrl: string) => {
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: returnUrl,
+      return_url: `${origin}${returnUrl}`,
     });
     if (session.url) {
       sessionUrl = session.url;
