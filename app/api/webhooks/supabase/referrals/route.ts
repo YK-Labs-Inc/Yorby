@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
-import { AxiomRequest } from "next-axiom";
+import { AxiomRequest, withAxiom } from "next-axiom";
 import { createAdminClient } from "@/utils/supabase/server";
 import { Tables } from "@/utils/supabase/database.types";
 
