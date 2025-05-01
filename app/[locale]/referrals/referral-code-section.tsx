@@ -3,6 +3,8 @@
 import { CopyButton } from "@/components/ui/copy-button";
 import { useTranslations } from "next-intl";
 import { generateReferralLink } from "@/utils/referral";
+import { usePostHog } from "posthog-js/react";
+import { useUser } from "@/context/UserContext";
 
 interface ReferralCodeSectionProps {
   referralCode: string | null;
@@ -14,6 +16,8 @@ export function ReferralCodeSection({
   referralCount,
 }: ReferralCodeSectionProps) {
   const t = useTranslations("referrals");
+  const posthog = usePostHog();
+  const user = useUser();
 
   if (!referralCode) return null;
 
@@ -52,7 +56,17 @@ export function ReferralCodeSection({
                 {decodedLink}
               </code>
             </div>
-            <CopyButton text={referralLink || ""} />
+            <CopyButton
+              text={referralLink || ""}
+              onCopy={() => {
+                if (posthog && user?.id && referralCode) {
+                  posthog.capture("referral_link_copied", {
+                    userId: user.id,
+                    referralCode,
+                  });
+                }
+              }}
+            />
           </div>
         </div>
       </div>
