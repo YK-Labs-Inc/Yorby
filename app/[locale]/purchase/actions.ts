@@ -205,7 +205,10 @@ export async function createCheckoutSession(formData: FormData) {
   const isSubscription = (formData.get("isSubscription") as string) === "true";
   const cancelledPurchaseRedirectUrl = formData.get(
     "cancelledPurchaseRedirectUrl"
-  ) as string | null;
+  ) as string;
+  const successfulPurchaseRedirectUrl = formData.get(
+    "successfulPurchaseRedirectUrl"
+  ) as string;
   const t = await getTranslations("purchase");
   let logger = new Logger().with({
     priceId,
@@ -246,8 +249,8 @@ export async function createCheckoutSession(formData: FormData) {
         quantity: 1,
       },
     ],
-    success_url: `${origin}/purchase_confirmation?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/${cancelledPurchaseRedirectUrl || "purchase"}`,
+    success_url: `${origin}${successfulPurchaseRedirectUrl}${successfulPurchaseRedirectUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}${cancelledPurchaseRedirectUrl}`,
     metadata,
     allow_promotion_codes: true,
     subscription_data: isSubscription

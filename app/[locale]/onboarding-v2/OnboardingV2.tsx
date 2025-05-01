@@ -358,9 +358,23 @@ export default function OnboardingPage({
     }
   };
 
+  const sessionId = searchParams?.get("session_id");
+  const isUploadStep = steps[currentStep].title === "upload";
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-16">
+        {isUploadStep && sessionId && (
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-900 rounded-lg px-6 py-4 shadow-sm">
+              <div className="flex flex-col text-center w-full">
+                <span className="text-green-800 text-base mt-1">
+                  🎉 {t("steps.purchaseThankYou")}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -772,6 +786,7 @@ const PurchaseScreen = ({
               highlight={idx === 1}
               badge={idx === 1 ? t("mostPopularBadge") : undefined}
               cancelledPurchaseRedirectUrl="/onboarding-v2?step=purchase"
+              successfulPurchaseRedirectUrl="/onboarding-v2?step=upload"
               isFlashPricingEnabled={isFlashPricingEnabled}
               baselineMonthlyPrice={baselineMonthlyPrice}
               showFlashPricingUI={showFlashPricingUI}
