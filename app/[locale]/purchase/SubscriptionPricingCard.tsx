@@ -35,6 +35,7 @@ export const SubscriptionPricingCard = ({
   highlight = false,
   badge,
   cancelledPurchaseRedirectUrl,
+  successfulPurchaseRedirectUrl,
   isFlashPricingEnabled,
   baselineMonthlyPrice,
   showFlashPricingUI,
@@ -50,6 +51,7 @@ export const SubscriptionPricingCard = ({
   showFlashPricingUI: boolean;
   userSignedUpWithin24Hours: boolean;
   userSignUpTimestamp: string;
+  successfulPurchaseRedirectUrl?: string;
 }) => {
   const isPopular = highlight || product.months === 3;
   const t = useTranslations("purchase");
@@ -250,7 +252,12 @@ export const SubscriptionPricingCard = ({
         <input
           type="hidden"
           name="cancelledPurchaseRedirectUrl"
-          value={cancelledPurchaseRedirectUrl || "purchase"}
+          value={cancelledPurchaseRedirectUrl || "/purchase"}
+        />
+        <input
+          type="hidden"
+          name="successfulPurchaseRedirectUrl"
+          value={successfulPurchaseRedirectUrl || "/purchase_confirmation"}
         />
         <button
           type="submit"

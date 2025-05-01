@@ -1693,7 +1693,8 @@
         "title": "추천 프로그램",
         "description": "친구들과 공유하고 보상을 받으세요 🎁",
         "content": "친구들을 Perfect Interview에 초대하고 성공적인 추천마다 보상을 받으세요! 고유한 추천 링크를 공유하고 친구들이 가입하면 혜택을 누리세요."
-      }
+      },
+      "purchaseThankYou": "업그레이드가 활성화되었습니다!"
     },
     "buttons": {
       "next": "다음",

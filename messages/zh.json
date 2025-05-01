@@ -1693,7 +1693,8 @@
         "title": "推荐计划",
         "description": "分享给朋友，获取奖励🎉",
         "content": "邀请你的朋友加入Perfect Interview，每次成功推荐即可获得奖励。分享你的专属推荐链接，你的朋友注册后你也能获得福利。"
-      }
+      },
+      "purchaseThankYou": "你的升级已激活！"
     },
     "buttons": {
       "next": "下一个",

@@ -1693,7 +1693,8 @@
         "title": "Programa de Referidos",
         "description": "Comparte con amigos y obtén recompensas.",
         "content": "Invita a tus amigos a unirse a Perfect Interview y gana recompensas por cada referido exitoso. Comparte tu enlace de referido único y obtén beneficios cuando tus amigos se registren."
-      }
+      },
+      "purchaseThankYou": "¡Tu mejora ahora está activa!"
     },
     "buttons": {
       "next": "Próximo",

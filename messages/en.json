@@ -1671,7 +1671,8 @@
         "title": "Referral Program",
         "description": "Share with friends and get rewards",
         "content": "Invite your friends to join Perfect Interview and earn rewards for each successful referral. Share your unique referral link and get benefits when your friends sign up."
-      }
+      },
+      "purchaseThankYou": "Your upgrade is now active!"
     },
     "buttons": {
       "next": "Next",
