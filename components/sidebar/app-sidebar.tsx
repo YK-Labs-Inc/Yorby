@@ -123,23 +123,22 @@ export function AppSidebar({
       <SidebarContent>
         {user && (
           <>
-            {/* Jobs Section */}
-            <SidebarGroup>
-              {jobs.length > 0 && (
+            {jobs.length > 0 && (
+              <SidebarGroup>
                 <div className="px-4 py-2">
                   <h4 className="text-sm font-semibold text-muted-foreground">
-                    {t("jobs")}
+                    {t("interviewPrep")}
                   </h4>
                 </div>
-              )}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {jobs.map((job) => (
-                    <SidebarMenuItemClient key={job.id} job={job} />
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {jobs.map((job) => (
+                      <SidebarMenuItemClient key={job.id} job={job} />
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
             {/* Interview Copilots Section */}
             {interviewCopilots.length > 0 && (

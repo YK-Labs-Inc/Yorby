@@ -141,7 +141,10 @@
   },
   "jobPage": {
     "generateQuestions": "Generate More Questions",
-    "generatingQuestions": "Generating questions..."
+    "generatingQuestions": "Generating questions...",
+    "uploadQuestions": "Upload Questions",
+    "uploadQuestionsWithJobTitle": "Upload questions to {job_title}",
+    "uploadQuestionsSuccess": "Your questions have been added! You can now start practicing them."
   },
   "waitlist": {
     "title": "Perfect Your Next Interview",
@@ -334,7 +337,8 @@
     "resumeBuilder": "Resume Builder",
     "createResume": "Create Resume",
     "unlockAllAccess": "Unlock Unlimited Access",
-    "transformResume": "Transform Resume"
+    "transformResume": "Transform Resume",
+    "interviewPrep": "Interview Prep"
   },
   "upgrade": {
     "locked": {

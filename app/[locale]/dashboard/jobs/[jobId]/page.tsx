@@ -12,20 +12,11 @@ import { getTranslations } from "next-intl/server";
 import { FormMessage, Message } from "@/components/form-message";
 import { GenerateInterviewQuestionsButton } from "./GenerateInterviewQuestionsButton";
 import { Button } from "@/components/ui/button";
-import { FileText, Monitor } from "lucide-react";
+import { FileText } from "lucide-react";
 import { redirect } from "next/navigation";
 import PostHogClient from "@/app/posthog";
-
-const MobileWarning = async () => {
-  const t = await getTranslations("mobileWarning");
-  return (
-    <div className="flex flex-col items-center justify-center p-8 text-center gap-4 rounded-lg border bg-card text-card-foreground shadow-sm">
-      <Monitor className="h-12 w-12 text-muted-foreground" />
-      <h2 className="text-xl font-semibold">{t("title")}</h2>
-      <p className="text-muted-foreground">{t("description")}</p>
-    </div>
-  );
-};
+import { QuestionGenerationDropdown } from "./QuestionGenerationDropdown";
+import PracticeQuestionsClientWrapper from "./PracticeQuestionsClientWrapper";
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -99,9 +90,6 @@ export default async function JobPage({
   const job = await fetchJob(jobId, hasSubscription);
   const userCredits = await fetchUserCredits(job.user_id);
   const view = ((await searchParams)?.view as string) || "practice";
-  const filter =
-    ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
-    "all";
   const currentPage = parseInt((await searchParams)?.page as string) || 1;
   const successMessage = (await searchParams)?.success as string | undefined;
   const errorMessage = (await searchParams)?.error as string | undefined;
@@ -127,6 +115,14 @@ export default async function JobPage({
       "subscription-price-test-1",
       user.id || ""
     )) === "test";
+  const userSubmittedQuestionsEnabled = await posthog.isFeatureEnabled(
+    "user-submitted-questions",
+    user.id
+  );
+
+  const filter =
+    ((await searchParams)?.filter as "all" | "complete" | "in_progress") ||
+    "all";
 
   return (
     <div
@@ -191,12 +187,16 @@ export default async function JobPage({
                 </Link>
               </TabsList>
             </Tabs>
-            {view === "practice" && !isLocked && (
-              <GenerateInterviewQuestionsButton jobId={jobId} />
-            )}
+            {view === "practice" &&
+              !isLocked &&
+              (userSubmittedQuestionsEnabled ? (
+                <QuestionGenerationDropdown jobId={jobId} />
+              ) : (
+                <GenerateInterviewQuestionsButton jobId={jobId} />
+              ))}
           </div>
           {view === "practice" && (
-            <PracticeQuestions
+            <PracticeQuestionsClientWrapper
               jobId={jobId}
               questions={job.custom_job_questions}
               isLocked={isLocked}
