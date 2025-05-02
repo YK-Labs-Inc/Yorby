@@ -262,7 +262,9 @@ export function ChatUI({
                         <LoadingSpinner variant="muted" />
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-2">
+                      <div
+                        className={`flex flex-col gap-2 ${message.role === "user" ? "prose-white" : "prose"}`}
+                      >
                         <Markdown>{message.content as string}</Markdown>
                         {message.role === "assistant" && (
                           <Button
