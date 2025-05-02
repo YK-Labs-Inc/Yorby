@@ -3,12 +3,6 @@ import { redirect } from "next/navigation";
 import UploadQuestionsClient from "./UploadQuestionsClient";
 import { Logger } from "next-axiom";
 
-interface Props {
-  params: {
-    jobId: string;
-  };
-}
-
 const fetchJob = async (jobId: string) => {
   const logger = new Logger().with({ jobId });
   const supabase = await createSupabaseServerClient();
@@ -25,7 +19,11 @@ const fetchJob = async (jobId: string) => {
   return data;
 };
 
-export default async function UploadQuestionsPage({ params }: Props) {
+export default async function UploadQuestionsPage({
+  params,
+}: {
+  params: Promise<{ jobId: string }>;
+}) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -34,10 +32,11 @@ export default async function UploadQuestionsPage({ params }: Props) {
   if (!user) {
     redirect("/sign-in");
   }
+  const jobId = (await params).jobId;
 
-  const job = await fetchJob(params.jobId);
+  const job = await fetchJob(jobId);
   if (!job) {
     redirect("/dashboard");
   }
-  return <UploadQuestionsClient jobId={params.jobId} job={job} />;
+  return <UploadQuestionsClient jobId={jobId} job={job} />;
 }
