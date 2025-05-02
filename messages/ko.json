@@ -333,7 +333,8 @@
     "resumeBuilder": "이력서 작성기",
     "createResume": "이력서 만들기",
     "unlockAllAccess": "무제한 액세스 잠금 해제 🔓",
-    "transformResume": "이력서 변환 🔄"
+    "transformResume": "이력서 변환 🔄",
+    "addInterviewPrep": "면접 준비 자료 만들기 📝"
   },
   "upgrade": {
     "locked": {

@@ -333,7 +333,8 @@
     "resumeBuilder": "Constructor de Currículums",
     "createResume": "Crear currículum vitae",
     "unlockAllAccess": "Desbloquea el Acceso Ilimitado",
-    "transformResume": "Transformar Currículum Vitae"
+    "transformResume": "Transformar Currículum Vitae",
+    "addInterviewPrep": "Crear Preparación para Entrevistas"
   },
   "upgrade": {
     "locked": {

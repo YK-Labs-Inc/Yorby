@@ -333,7 +333,8 @@
     "resumeBuilder": "履歴書作成ツール",
     "createResume": "履歴書を作成 📝",
     "unlockAllAccess": "無制限アクセスをアンロック🔓",
-    "transformResume": "履歴書を変換する"
+    "transformResume": "履歴書を変換する",
+    "addInterviewPrep": "面接対策を作成する"
   },
   "upgrade": {
     "locked": {

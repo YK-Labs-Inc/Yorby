@@ -321,6 +321,7 @@
   },
   "sidebar": {
     "addJob": "Create Interview Questions",
+    "addInterviewPrep": "Create Interview Prep",
     "signInToStart": "Sign in to save your custom interview prep",
     "signIn": "Sign In",
     "numberOfCredits": "{numberOfCredits} Credits",

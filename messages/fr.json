@@ -333,7 +333,8 @@
     "resumeBuilder": "Créateur de CV",
     "createResume": "Créer un CV",
     "unlockAllAccess": "Débloquez l'Accès Illimité",
-    "transformResume": "Transformer CV"
+    "transformResume": "Transformer CV",
+    "addInterviewPrep": "Créer une Préparation d'Entretien"
   },
   "upgrade": {
     "locked": {

@@ -333,7 +333,8 @@
     "resumeBuilder": "简历制作器",
     "createResume": "创建简历",
     "unlockAllAccess": "解锁无限访问 🔓",
-    "transformResume": "转换简历"
+    "transformResume": "转换简历",
+    "addInterviewPrep": "创建面试准备"
   },
   "upgrade": {
     "locked": {
