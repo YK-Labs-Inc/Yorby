@@ -36,6 +36,21 @@ async function getDemoJobBySlug(
   return demoJob as DemoJobWithQuestions;
 }
 
+const getDemoJobResumeSlug = async (demoJobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data: resumeMeta, error: resumeMetaError } = await supabase
+    .from("resume_metadata")
+    .select("slug")
+    .eq("demo_job_id", demoJobId)
+    .maybeSingle();
+
+  if (resumeMetaError || !resumeMeta) {
+    return null;
+  }
+
+  return resumeMeta.slug;
+};
+
 export default async function BlogPage({
   params,
 }: {
@@ -47,6 +62,8 @@ export default async function BlogPage({
   if (!demoJob) {
     notFound();
   }
+
+  const resumeSlug = await getDemoJobResumeSlug(demoJob.id);
 
   const title = demoJob.company_name
     ? `${demoJob.company_name} ${demoJob.job_title} Practice Interview Questions`
@@ -94,6 +111,14 @@ export default async function BlogPage({
               <p className="text-xl text-gray-600 leading-relaxed">
                 {description}
               </p>
+              {/* Link to Sample Resume if available */}
+              {resumeSlug && (
+                <Link href={`/sample-resumes/${resumeSlug}`}>
+                  <Button size="lg" className="mt-6 bg-black hover:bg-gray-900">
+                    View Sample Resume
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

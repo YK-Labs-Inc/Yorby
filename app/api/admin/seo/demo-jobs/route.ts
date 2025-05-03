@@ -131,7 +131,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     const fileContent = await fs.readFile(csvPath, "utf-8");
 
     // Parse CSV with header row mapping and type casting
-    const records = parse(fileContent, {
+    let records = parse(fileContent, {
       columns: true, // Use first row as headers
       skip_empty_lines: true,
       trim: true, // Trim whitespace from values
@@ -139,15 +139,9 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }) as JobRecord[];
 
     // Validate required fields
-    const invalidRecords = records.filter(
-      (record) => !record.jobTitle || !record.jobDescription
+    records = records.filter(
+      (record) => record.jobTitle && record.jobDescription
     );
-
-    if (invalidRecords.length > 0) {
-      throw new Error(
-        `Found ${invalidRecords.length} records with missing required fields`
-      );
-    }
 
     logger.info(`Found ${records.length} valid jobs to process`);
 
@@ -380,6 +374,12 @@ const generateDemoJobQuestions = async ({
             blogIntro: metaDescription,
             questions: questions.slice(0, 5),
             demoJobId,
+          });
+          await generateResumeFromJob({
+            demoJobId,
+            jobTitle,
+            jobDescription,
+            companyName,
           });
         }
 
@@ -689,3 +689,408 @@ const cleanupText = async (text: string) => {
 
   return result.cleanedText;
 };
+
+const saveGeneratedResume = async ({
+  resumeData,
+  resumeMetadata,
+  jobTitle,
+  jobDescription,
+  companyName,
+  companyDescription,
+}: {
+  resumeData: {
+    personalInfo: {
+      name: string;
+      email: string | null;
+      phone: string | null;
+      location: string;
+    };
+    educationHistory: {
+      name: string;
+      degree: string;
+      startDate: string;
+      endDate: string;
+      gpa: string | null;
+      additionalInfo: string[];
+    }[];
+    workExperience: {
+      companyName: string;
+      jobTitle: string;
+      startDate: string;
+      endDate: string;
+      description: string[];
+    }[];
+    skills: {
+      category: string;
+      skills: string[];
+    }[];
+  };
+  resumeMetadata: {
+    demo_job_id: string;
+    important_skills: string[];
+    important_work_experience: string[];
+  };
+  jobTitle: string;
+  jobDescription: string | null;
+  companyName?: string | null;
+  companyDescription?: string | null;
+}) => {
+  const supabase = await createAdminClient();
+
+  // Save resume personal info
+  const { data: resumeData_, error } = await supabase
+    .from("resumes")
+    .insert({
+      title: companyName ? `${jobTitle} at ${companyName}` : jobTitle,
+      name: resumeData.personalInfo.name,
+      email: resumeData.personalInfo.email,
+      phone: resumeData.personalInfo.phone,
+      location: resumeData.personalInfo.location,
+      user_id: "7823eb9a-62fc-4bbf-bd58-488f117c24e8",
+      locked_status: "unlocked",
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const resumeId = resumeData_.id;
+
+  const slugText = companyName ? `${jobTitle} at ${companyName}` : jobTitle;
+
+  // Save resume metadata
+  const { error: metadataError } = await supabase
+    .from("resume_metadata")
+    .insert({
+      resume_id: resumeId,
+      job_title: jobTitle,
+      job_description: jobDescription || "",
+      ...(companyName ? { company_name: companyName } : {}),
+      ...(companyDescription
+        ? { company_description: companyDescription }
+        : {}),
+      slug: generateSlug(slugText),
+      ...resumeMetadata,
+    });
+
+  if (metadataError) {
+    throw new Error(metadataError.message);
+  }
+
+  // Save education section
+  if (resumeData.educationHistory.length > 0) {
+    const { data: educationSection, error: eduSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Education",
+        resume_id: resumeId,
+        display_order: 0,
+      })
+      .select("id")
+      .single();
+
+    if (eduSectionError) {
+      throw new Error(eduSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.educationHistory.map(async (education, index) => {
+        const subtitle = education.gpa
+          ? `${education.degree} - ${education.gpa}`
+          : education.degree;
+
+        const { data: detailItem, error: detailError } = await supabase
+          .from("resume_detail_items")
+          .insert({
+            title: education.name,
+            subtitle,
+            date_range: `${education.startDate} - ${education.endDate}`,
+            section_id: educationSection.id,
+            display_order: index,
+          })
+          .select("id")
+          .single();
+
+        if (detailError) {
+          console.error("Failed to insert education detail item", detailError);
+          return;
+        }
+
+        if (education.additionalInfo.length > 0) {
+          await Promise.all(
+            education.additionalInfo.map(async (info, descIndex) => {
+              const { error: descError } = await supabase
+                .from("resume_item_descriptions")
+                .insert({
+                  detail_item_id: detailItem.id,
+                  description: info,
+                  display_order: descIndex,
+                });
+
+              if (descError) {
+                console.error(
+                  "Failed to insert education description",
+                  descError
+                );
+              }
+            })
+          );
+        }
+      })
+    );
+  }
+
+  // Save work experience section
+  if (resumeData.workExperience.length > 0) {
+    const { data: workSection, error: workSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Work Experience",
+        resume_id: resumeId,
+        display_order: 1,
+      })
+      .select("id")
+      .single();
+
+    if (workSectionError) {
+      throw new Error(workSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.workExperience.map(async (experience, index) => {
+        const { data: detailItem, error: detailError } = await supabase
+          .from("resume_detail_items")
+          .insert({
+            title: experience.companyName,
+            subtitle: experience.jobTitle,
+            date_range: `${experience.startDate} - ${experience.endDate}`,
+            section_id: workSection.id,
+            display_order: index,
+          })
+          .select("id")
+          .single();
+
+        if (detailError) {
+          console.error(
+            "Failed to insert work experience detail item",
+            detailError
+          );
+          return;
+        }
+
+        await Promise.all(
+          experience.description.map(async (desc, descIndex) => {
+            const { error: descError } = await supabase
+              .from("resume_item_descriptions")
+              .insert({
+                detail_item_id: detailItem.id,
+                description: desc,
+                display_order: descIndex,
+              });
+
+            if (descError) {
+              console.error(
+                "Failed to insert work experience description",
+                descError
+              );
+            }
+          })
+        );
+      })
+    );
+  }
+
+  // Save skills section
+  if (resumeData.skills.length > 0) {
+    const { data: skillsSection, error: skillsSectionError } = await supabase
+      .from("resume_sections")
+      .insert({
+        title: "Skills",
+        resume_id: resumeId,
+        display_order: 2,
+      })
+      .select("id")
+      .single();
+
+    if (skillsSectionError) {
+      throw new Error(skillsSectionError.message);
+    }
+
+    await Promise.all(
+      resumeData.skills.map(async (skillGroup, index) => {
+        const { error: listError } = await supabase
+          .from("resume_list_items")
+          .insert({
+            content: `${skillGroup.category}: ${skillGroup.skills.join(", ")}`,
+            section_id: skillsSection.id,
+            display_order: index,
+          });
+
+        if (listError) {
+          console.error("Failed to insert skills list item", listError);
+        }
+      })
+    );
+  }
+
+  return resumeId;
+};
+
+const generateResumeFromJob = async ({
+  jobTitle,
+  jobDescription,
+  companyName,
+  demoJobId,
+}: {
+  jobTitle: string;
+  jobDescription: string;
+  companyName: string;
+  demoJobId: string;
+}) => {
+  const prompt = `
+    ## Job Title: ${jobTitle}
+    ## Company: ${companyName}
+    ## Job Description: ${jobDescription}
+
+    Create a candidate profile that includes:
+    1. Personal information (name, location - make these realistic but fictional)
+    2. Education history that matches the job requirements
+    3. Work experience that demonstrates the required skills and experience
+    4. Relevant skills mentioned in or implied by the job description
+
+    Return the date in only YYYY format for the education history — do not return the months.
+
+    Return all dates in MM/YYYY format for the work experience.
+
+    Make the experience and qualifications strong but believable.
+
+    For each work experience section, only include 4 description per work experience. Use your expertise as a resume writer to create realistic descriptions
+    that demonstrate impact and results that will impress any hiring manager.
+
+    When generating the skills section, generate only 2-3 categories of skills.
+    `;
+
+  const [
+    personalInfo,
+    educationHistory,
+    workExperience,
+    skills,
+    importantSkills,
+    importantWorkExperience,
+  ] = await Promise.all([
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: "Generate only the personal information section.",
+      schema: z.object({
+        name: z.string(),
+        email: z.string().nullable(),
+        phone: z.string().nullable(),
+        location: z.string(),
+      }),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "personal information",
+      },
+    }),
+
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: "Generate only the education history section.",
+      schema: z.array(
+        z.object({
+          name: z.string(),
+          degree: z.string(),
+          startDate: z.string(),
+          endDate: z.string(),
+          gpa: z.string().nullable(),
+          additionalInfo: z.array(z.string()),
+        })
+      ),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "education",
+      },
+    }),
+
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: "Generate only the work experience section.",
+      schema: z.array(
+        z.object({
+          companyName: z.string(),
+          jobTitle: z.string(),
+          startDate: z.string(),
+          endDate: z.string(),
+          description: z.array(z.string()),
+        })
+      ),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "work experience",
+      },
+    }),
+
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: "Generate only the skills section.",
+      schema: z.array(
+        z.object({
+          category: z.string(),
+          skills: z.array(z.string()),
+        })
+      ),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "skills",
+      },
+    }),
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: `From job description, identify and generate some important skills that would be relevant
+        for a candidate to have when applying to this job. Return as many skills as you can but limit it to 10.`,
+      schema: z.array(z.string()),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "important skills",
+      },
+    }),
+    generateObjectWithFallback({
+      systemPrompt: prompt,
+      prompt: `From job description, identify and generate some important work experience that would be relevant
+        for a candidate to have when applying to this job. Return as many work experiences as you can but limit it to 10.`,
+      schema: z.array(z.string()),
+      loggingContext: {
+        path: "api/admin/seo/demo-job-resumes",
+        dataToExtract: "important work experience",
+      },
+    }),
+  ]);
+
+  const generatedData = {
+    personalInfo,
+    educationHistory,
+    workExperience,
+    skills,
+  };
+
+  await saveGeneratedResume({
+    resumeData: generatedData,
+    jobTitle,
+    jobDescription,
+    companyName,
+    resumeMetadata: {
+      demo_job_id: demoJobId,
+      important_skills: importantSkills,
+      important_work_experience: importantWorkExperience,
+    },
+  });
+};
+
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphen
+    .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
+    .replace(/--+/g, "-"); // Replace multiple hyphens with single hyphen

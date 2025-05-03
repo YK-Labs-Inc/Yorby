@@ -796,7 +796,10 @@ export type Database = {
           company_description: string | null
           company_name: string | null
           created_at: string
+          demo_job_id: string | null
           id: string
+          important_skills: string[] | null
+          important_work_experience: string[] | null
           job_description: string
           job_title: string
           resume_id: string
@@ -806,7 +809,10 @@ export type Database = {
           company_description?: string | null
           company_name?: string | null
           created_at?: string
+          demo_job_id?: string | null
           id?: string
+          important_skills?: string[] | null
+          important_work_experience?: string[] | null
           job_description: string
           job_title: string
           resume_id: string
@@ -816,13 +822,23 @@ export type Database = {
           company_description?: string | null
           company_name?: string | null
           created_at?: string
+          demo_job_id?: string | null
           id?: string
+          important_skills?: string[] | null
+          important_work_experience?: string[] | null
           job_description?: string
           job_title?: string
           resume_id?: string
           slug?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "resume_metadata_demo_job_id_fkey"
+            columns: ["demo_job_id"]
+            isOneToOne: false
+            referencedRelation: "demo_jobs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "resume_metadata_resume_id_fkey"
             columns: ["resume_id"]
