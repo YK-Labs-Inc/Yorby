@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { z } from "zod";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
+import { revalidatePath } from "next/cache";
 
 const SaveQuestionsSchema = z.object({
   jobId: z.string(),
@@ -90,6 +91,9 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       })
     );
     await supabase.from("custom_job_questions").insert(insertData);
+
+    // Revalidate the job questions page (hardcoded locale)
+    revalidatePath(`/en/dashboard/jobs/${jobId}`);
 
     logger.info("Questions saved", { jobId, questions });
     return NextResponse.json({

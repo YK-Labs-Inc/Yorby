@@ -111,17 +111,9 @@ function _UploadQuestionsClient({ jobId, job }: Props) {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="flex-1 grid grid-cols-1 p-4 md:p-8 overflow-hidden max-w-[2000px] mx-auto w-full h-full">
-        <div className="flex flex-col h-full overflow-hidden lg:col-span-2 max-w-3xl mx-auto w-full">
-          <div className="flex-none mb-4 space-y-1 px-4">
-            <H2 className="text-center">
-              {t("uploadQuestionsWithJobTitle", {
-                job_title: job.job_title,
-              })}
-            </H2>
-          </div>
-
+    <div className="flex flex-col w-full overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="flex-1 grid grid-cols-1 p-4 md:p-8 overflow-hidden max-w-[2000px] mx-auto w-full">
+        <div className="flex flex-col overflow-hidden lg:col-span-2 max-w-3xl mx-auto w-full">
           <Card className="flex-1 bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg md:rounded-2xl shadow-lg flex flex-col border-0 transition-all duration-300 overflow-hidden min-h-0">
             <ChatUI
               messages={messages}
