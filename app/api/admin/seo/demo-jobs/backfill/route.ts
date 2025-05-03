@@ -6,131 +6,81 @@ import { z } from "zod";
 export const POST = async (req: Request) => {
   try {
     const supabase = await createAdminClient();
+    // --- Link resume_metadata to demo_jobs by slug ---
     const pageSize = 100;
-    let allMetadata: Tables<"resume_metadata">[] = [];
     let page = 0;
     let hasMore = true;
-    let totalSuccess = 0;
-    let totalFail = 0;
-
+    let allMetas: {
+      id: string;
+      job_title: string;
+      company_name: string | null;
+      demo_job_id: string | null;
+    }[] = [];
+    // Step 1: Fetch all resume_metadata entries where demo_job_id is null
     while (hasMore) {
-      const { data, error } = await supabase
+      const { data: metas, error: fetchError } = await supabase
         .from("resume_metadata")
-        .select("*")
+        .select("id, job_title, company_name, demo_job_id")
         .is("demo_job_id", null)
         .range(page * pageSize, (page + 1) * pageSize - 1);
-
-      if (error) {
-        // Optionally handle error here
+      if (fetchError) {
+        return new Response(JSON.stringify({ error: fetchError.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (!metas || metas.length === 0) {
+        hasMore = false;
         break;
       }
-
-      if (data && data.length > 0) {
-        allMetadata = [...allMetadata, ...data];
-        page++;
-      } else {
-        hasMore = false;
-      }
+      allMetas = allMetas.concat(metas);
+      page++;
     }
 
-    // Process in batches of 100
-    for (let i = 0; i < allMetadata.length; i += 100) {
-      const batch = allMetadata.slice(i, i + 100);
-      console.log(
-        `Processing batch ${Math.floor(i / 100) + 1} (${batch.length} entries)`
-      );
-      // For each entry in the batch, generate both fields in parallel
-      const batchResults = await Promise.all(
+    // Step 2: Process allMetas in batches of 100
+    let updatedCount = 0;
+    let skippedCount = 0;
+    for (let i = 0; i < allMetas.length; i += 100) {
+      const batch = allMetas.slice(i, i + 100);
+      await Promise.all(
         batch.map(async (meta) => {
-          if (!meta.company_name) return null; // skip if no company_name
-          const prompt = `\n## Job Title: ${meta.job_title}\n${meta.company_name ? `## Company: ${meta.company_name}` : ""}\n${meta.company_description ? `## Company Description: ${meta.company_description}` : ""}\n## Job Description: ${meta.job_description}`;
-
-          const [important_skills, important_work_experience] =
-            await Promise.all([
-              generateObjectWithFallback({
-                systemPrompt: prompt,
-                prompt: `From job description, identify and generate some important skills that would be relevant for a candidate to have when applying to this job. Return as many skills as you can but limit it to 10.`,
-                schema: z.array(z.string()),
-                loggingContext: {
-                  path: "api/admin/seo/demo-job-resumes",
-                  dataToExtract: "important skills",
-                },
-              }),
-              generateObjectWithFallback({
-                systemPrompt: prompt,
-                prompt: `From job description, identify and generate some important work experience that would be relevant for a candidate to have when applying to this job. Return as many work experiences as you can but limit it to 10.`,
-                schema: z.array(z.string()),
-                loggingContext: {
-                  path: "api/admin/seo/demo-job-resumes",
-                  dataToExtract: "important work experience",
-                },
-              }),
-            ]);
-
-          // Generate the slug
-          const kebabCaseSlug = `${meta.company_name}-${meta.job_title}`
+          // Generate slugText
+          const slugText = meta.company_name
+            ? `${meta.job_title} at ${meta.company_name}`
+            : meta.job_title;
+          // Slugify
+          const slug = slugText
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-          // Find the demo_job_id
+            .replace(/^-+|-+$/g, "")
+            .replace(/--+/g, "-");
+          // Find demo_job by slug
           const { data: demoJob, error: demoJobError } = await supabase
             .from("demo_jobs")
             .select("id")
-            .eq("slug", kebabCaseSlug)
+            .eq("slug", slug)
             .maybeSingle();
-
           if (demoJobError || !demoJob) {
-            return {
-              id: meta.id,
-              important_skills,
-              important_work_experience,
-            };
+            skippedCount++;
+            return;
           }
-
-          return {
-            id: meta.id,
-            important_skills,
-            important_work_experience,
-            demo_job_id: demoJob.id,
-          };
+          // Update resume_metadata with demo_job_id
+          const { error: updateError } = await supabase
+            .from("resume_metadata")
+            .update({ demo_job_id: demoJob.id })
+            .eq("id", meta.id);
+          if (!updateError) {
+            updatedCount++;
+          } else {
+            skippedCount++;
+          }
         })
       );
-
-      // Filter out nulls (skipped entries)
-      const validResults = batchResults.filter(Boolean) as {
-        id: string;
-        important_skills: string[];
-        important_work_experience: string[];
-        demo_job_id?: string;
-      }[];
-
-      if (validResults.length > 0) {
-        const updateResults = await Promise.all(
-          validResults.map((result) =>
-            supabase
-              .from("resume_metadata")
-              .update({
-                important_skills: result.important_skills,
-                important_work_experience: result.important_work_experience,
-                demo_job_id: result.demo_job_id,
-              })
-              .eq("id", result.id)
-          )
-        );
-        // Count successes and failures
-        updateResults.forEach((res) => {
-          if (res.error) {
-            totalFail++;
-          } else {
-            totalSuccess++;
-          }
-        });
-      }
     }
+    // --- End resume_metadata linking logic ---
 
     return new Response(
-      JSON.stringify({ success: totalSuccess, failed: totalFail }),
+      JSON.stringify({ updated: updatedCount, skipped: skippedCount }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
