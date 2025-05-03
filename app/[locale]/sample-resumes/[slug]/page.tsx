@@ -88,28 +88,6 @@ export default async function SamplesResumesPage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white border-b z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <img
-                src="/assets/dark-logo.png"
-                alt="Perfect Interview"
-                className="w-8 h-8 mr-2"
-              />
-              <span className="text-xl font-semibold">Perfect Interview</span>
-            </Link>
-            <Link href="/chat-to-resume?utm_source=sample_resumes">
-              <Button size="lg" className="bg-black hover:bg-gray-900">
-                Create Your Resume
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Add margin-top to account for fixed header */}
       <div className="pt-16">
         <ScrollProgressBar />
 
