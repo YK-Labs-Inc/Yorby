@@ -141,7 +141,11 @@
   },
   "jobPage": {
     "generateQuestions": "더 많은 질문 생성",
-    "generatingQuestions": "질문 생성 중..."
+    "generatingQuestions": "질문 생성 중...",
+    "uploadQuestions": "질문 업로드",
+    "uploadQuestionsWithJobTitle": "{직책}에 질문 업로드하기",
+    "uploadQuestionsSuccess": "질문들이 추가되었습니다! 이제 연습을 시작할 수 있습니다.",
+    "addQuestions": "질문 더 추가하기"
   },
   "waitlist": {
     "title": "다음 면접 완벽하게 준비하기",

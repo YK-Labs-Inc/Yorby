@@ -10,6 +10,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { TtsProvider } from "@/app/context/TtsContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { QuestionsResponse } from "@/app/api/questions/parse/route";
+import { revalidateJobQuestions } from "./actions";
 
 interface Props {
   jobId: string;
@@ -91,6 +92,7 @@ function _UploadQuestionsClient({ jobId, job }: Props) {
             ...prev.slice(0, -1),
             { role: "assistant", content: t(saveData.messageKey) },
           ]);
+          revalidateJobQuestions(jobId);
         }
       }
     } catch (error) {

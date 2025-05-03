@@ -141,7 +141,11 @@
   },
   "jobPage": {
     "generateQuestions": "生成更多问题",
-    "generatingQuestions": "正在生成问题..."
+    "generatingQuestions": "正在生成问题...",
+    "uploadQuestions": "上传问题",
+    "uploadQuestionsWithJobTitle": "上传问题至 {job_title}",
+    "uploadQuestionsSuccess": "你的问题已添加完毕！现在可以开始练习了。",
+    "addQuestions": "添加更多问题 ➕"
   },
   "waitlist": {
     "title": "完美你的下次面试",
