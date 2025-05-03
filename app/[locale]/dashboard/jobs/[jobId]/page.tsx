@@ -2,7 +2,6 @@ import { H1 } from "@/components/typography";
 import { Link } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PracticeQuestions from "./PracticeQuestions";
 import MockInterview from "./MockInterview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -190,7 +189,7 @@ export default async function JobPage({
             {view === "practice" &&
               !isLocked &&
               (userSubmittedQuestionsEnabled ? (
-                <QuestionGenerationDropdown jobId={jobId} />
+                <QuestionGenerationDropdown jobId={jobId} job={job} />
               ) : (
                 <GenerateInterviewQuestionsButton jobId={jobId} />
               ))}
