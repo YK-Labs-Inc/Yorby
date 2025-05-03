@@ -5,7 +5,6 @@ import ScrollProgressBar from "../../../components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
-import { Tables } from "@/utils/supabase/database.types";
 
 type ResumeMetadata = {
   id: string;
@@ -23,25 +22,9 @@ type ResumeMetadata = {
     title: string;
     summary: string | null;
   };
+  important_skills?: string[];
+  important_work_experience?: string[];
 };
-
-// export const revalidate = 86400; // Revalidate every 24 hours
-// export const dynamicParams = true;
-
-// export async function generateStaticParams() {
-//   const baseUrl =
-//     process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
-//   const posts = await fetch(`${baseUrl}/api/sample-resumes`).then(
-//     (res) =>
-//       res.json() as Promise<{
-//         data: Tables<"resume_metadata">[];
-//       }>
-//   );
-
-//   return posts.data.map((post: Tables<"resume_metadata">) => ({
-//     slug: post.slug,
-//   }));
-// }
 
 export default async function SamplesResumesPage({
   params,
@@ -105,28 +88,6 @@ export default async function SamplesResumesPage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white border-b z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <img
-                src="/assets/dark-logo.png"
-                alt="Perfect Interview"
-                className="w-8 h-8 mr-2"
-              />
-              <span className="text-xl font-semibold">Perfect Interview</span>
-            </Link>
-            <Link href="/chat-to-resume?utm_source=sample_resumes">
-              <Button size="lg" className="bg-black hover:bg-gray-900">
-                Create Your Resume
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Add margin-top to account for fixed header */}
       <div className="pt-16">
         <ScrollProgressBar />
 
@@ -157,6 +118,22 @@ export default async function SamplesResumesPage({
                   </h2>
                   <nav className="space-y-1">
                     {[
+                      ...(data.important_skills?.length
+                        ? [
+                            {
+                              title: "Important Skills",
+                              id: "important-skills",
+                            },
+                          ]
+                        : []),
+                      ...(data.important_work_experience?.length
+                        ? [
+                            {
+                              title: "Important Work Experience",
+                              id: "important-work-experience",
+                            },
+                          ]
+                        : []),
                       {
                         title: "How To Format A Resume",
                         id: "format",
@@ -205,7 +182,6 @@ export default async function SamplesResumesPage({
               <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm w-full">
                 <SampleResume resumeData={resumeData} resumeId={resume.id} />
               </div>
-
               {/* Bottom CTA Section */}
               <div className="mt-20 py-16 border-t border-gray-100">
                 <div className="text-center max-w-2xl mx-auto">
@@ -226,6 +202,43 @@ export default async function SamplesResumesPage({
 
               {/* Resume Analysis Section */}
               <div className="space-y-12">
+                {/* Important Skills Section */}
+                {(data.important_skills?.length ?? 0) > 0 && (
+                  <section
+                    id="important-skills"
+                    className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm"
+                  >
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                      Important Skills for {resumeData.title}
+                    </h3>
+                    <ul className="list-disc pl-6 text-gray-700 space-y-2">
+                      {(data.important_skills ?? []).map(
+                        (skill: string, idx: number) => (
+                          <li key={idx}>{skill}</li>
+                        )
+                      )}
+                    </ul>
+                  </section>
+                )}
+
+                {/* Important Work Experience Section */}
+                {(data.important_work_experience?.length ?? 0) > 0 && (
+                  <section
+                    id="important-work-experience"
+                    className="scroll-mt-24 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm"
+                  >
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                      Important Work Experience for {resumeData.title}
+                    </h3>
+                    <ul className="list-disc pl-6 text-gray-700 space-y-2">
+                      {(data.important_work_experience ?? []).map(
+                        (exp: string, idx: number) => (
+                          <li key={idx}>{exp}</li>
+                        )
+                      )}
+                    </ul>
+                  </section>
+                )}
                 {/* Clean, Simple Formatting */}
                 <section
                   id="format"
