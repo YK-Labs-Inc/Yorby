@@ -141,7 +141,11 @@
   },
   "jobPage": {
     "generateQuestions": "さらに質問を生成する",
-    "generatingQuestions": "質問を生成しています..."
+    "generatingQuestions": "質問を生成しています...",
+    "uploadQuestions": "質問をアップロード",
+    "uploadQuestionsWithJobTitle": "{job_title}に質問をアップロード",
+    "uploadQuestionsSuccess": "質問が追加されました！早速練習を始めましょう。",
+    "addQuestions": "質問をもっと追加する"
   },
   "waitlist": {
     "title": "次の面接を完璧に💯",

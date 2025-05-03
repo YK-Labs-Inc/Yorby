@@ -38,7 +38,10 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
 Your response should include:
 - questions: the current list of parsed/cleaned questions
-- message: a friendly message (either asking for confirmation or confirming readiness), **and always include the questions as a numbered markdown list at the top of the message, so the user can easily review each question.**
+- message: a friendly message (either asking for confirmation or confirming readiness) — when 
+the message is ready to be saved, respond with a message similar to "Great! I will save the questions now",
+**include the questions as a numbered markdown list at the top of the message when the questions are not ready to be saved,
+so the user can easily review each question. When the questions are ready to be saved, do not include the questions in the message.**
 - isReady: true only if the user has confirmed the questions are ready to save, otherwise false.
 
 For example, your message should look like this:

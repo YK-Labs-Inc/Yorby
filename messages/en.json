@@ -144,7 +144,8 @@
     "generatingQuestions": "Generating questions...",
     "uploadQuestions": "Upload Questions",
     "uploadQuestionsWithJobTitle": "Upload questions to {job_title}",
-    "uploadQuestionsSuccess": "Your questions have been added! You can now start practicing them."
+    "uploadQuestionsSuccess": "Your questions have been added! You can now start practicing them.",
+    "addQuestions": "Add More Questions"
   },
   "waitlist": {
     "title": "Perfect Your Next Interview",
@@ -1994,6 +1995,24 @@
         "empty": "Please enter a referral code",
         "invalid": "Invalid referral code",
         "generic": "An error occurred while redeeming your code"
+      }
+    }
+  },
+  "practiceQuestions": {
+    "filters": {
+      "button": "Filters",
+      "title": "Filter Questions",
+      "answered": "Answered",
+      "unanswered": "Unanswered",
+      "aiGenerated": "AI Generated",
+      "userGenerated": "User Generated",
+      "sortBy": "Sort By",
+      "newestFirst": "Newest first",
+      "oldestFirst": "Oldest first",
+      "apply": "Apply",
+      "emptyState": {
+        "title": "No questions found",
+        "description": "Try adjusting your filters or generating new questions."
       }
     }
   }

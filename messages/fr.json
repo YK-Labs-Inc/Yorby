@@ -141,7 +141,11 @@
   },
   "jobPage": {
     "generateQuestions": "Générer plus de questions",
-    "generatingQuestions": "Générer des questions..."
+    "generatingQuestions": "Générer des questions...",
+    "uploadQuestions": "Télécharger des questions",
+    "uploadQuestionsWithJobTitle": "Télécharger des questions pour {job_title}",
+    "uploadQuestionsSuccess": "Vos questions ont été ajoutées ! Vous pouvez maintenant commencer à vous entraîner.",
+    "addQuestions": "Ajouter d'autres questions"
   },
   "waitlist": {
     "title": "Perfectionnez votre prochain entretien",

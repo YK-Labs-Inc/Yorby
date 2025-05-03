@@ -472,3 +472,7 @@ const generateMoreCustomJobQuestions = async ({
   });
   revalidatePath(`/dashboard/jobs/${customJobId}`);
 };
+
+export const revalidateJobQuestions = async (jobId: string) => {
+  revalidatePath(`/dashboard/jobs/${jobId}`);
+};

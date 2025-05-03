@@ -141,7 +141,11 @@
   },
   "jobPage": {
     "generateQuestions": "Generar Más Preguntas",
-    "generatingQuestions": "Generando preguntas..."
+    "generatingQuestions": "Generando preguntas...",
+    "uploadQuestions": "Subir Preguntas",
+    "uploadQuestionsWithJobTitle": "Subir preguntas a {job_title}",
+    "uploadQuestionsSuccess": "¡Tus preguntas han sido añadidas! Ya puedes empezar a practicarlas.",
+    "addQuestions": "Añadir Más Preguntas"
   },
   "waitlist": {
     "title": "Perfecciona tu próxima entrevista",

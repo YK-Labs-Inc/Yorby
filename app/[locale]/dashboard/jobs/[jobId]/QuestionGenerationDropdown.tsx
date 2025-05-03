@@ -32,7 +32,7 @@ export function QuestionGenerationDropdown({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="gap-2">
-            {t("generateQuestions")}
+            {t("addQuestions")}
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -56,7 +56,7 @@ export function QuestionGenerationDropdown({
       </DropdownMenu>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl w-full p-0 bg-transparent border-0 shadow-none">
-          <div className="w-full max-h-[70vh] h-auto flex items-center justify-center overflow-y-auto">
+          <div className="w-full max-h-[80vh] h-auto flex items-center justify-center overflow-y-auto">
             <UploadQuestionsClient jobId={jobId} job={job} />
           </div>
         </DialogContent>

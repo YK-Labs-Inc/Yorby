@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import LockedJobComponent from "./LockedJobComponent";
 import { CheckCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface Question {
   id: string;
@@ -61,6 +62,8 @@ export default function PracticeQuestions({
     useState(showUserGenerated);
   const [localSortOrder, setLocalSortOrder] = useState(sortOrder);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const t = useTranslations("practiceQuestions.filters");
 
   // Sync local state with props when filters change externally
   useEffect(() => {
@@ -135,8 +138,6 @@ export default function PracticeQuestions({
     }
   });
 
-  const firstQuestion = filteredQuestions[0];
-
   // Pagination logic should use filteredQuestions:
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(filteredQuestions.length / ITEMS_PER_PAGE);
@@ -158,12 +159,12 @@ export default function PracticeQuestions({
             onClick={() => setDropdownOpen((open) => !open)}
             type="button"
           >
-            Filters
+            {t("button")}
           </button>
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 p-4 flex flex-col gap-2">
               <div className="font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                Filter Questions
+                {t("title")}
               </div>
               <div className="flex flex-col gap-1 mb-2">
                 <label className="flex items-center gap-2">
@@ -172,7 +173,7 @@ export default function PracticeQuestions({
                     checked={localAnswered}
                     onChange={() => setLocalAnswered((v) => !v)}
                   />
-                  <span>Answered</span>
+                  <span>{t("answered")}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -180,7 +181,7 @@ export default function PracticeQuestions({
                     checked={localUnanswered}
                     onChange={() => setLocalUnanswered((v) => !v)}
                   />
-                  <span>Unanswered</span>
+                  <span>{t("unanswered")}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -188,7 +189,7 @@ export default function PracticeQuestions({
                     checked={localAIGenerated}
                     onChange={() => setLocalAIGenerated((v) => !v)}
                   />
-                  <span>AI Generated</span>
+                  <span>{t("aiGenerated")}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -196,11 +197,11 @@ export default function PracticeQuestions({
                     checked={localUserGenerated}
                     onChange={() => setLocalUserGenerated((v) => !v)}
                   />
-                  <span>User Generated</span>
+                  <span>{t("userGenerated")}</span>
                 </label>
               </div>
               <div className="font-semibold text-gray-800 dark:text-gray-100 mt-2 mb-1">
-                Sort By
+                {t("sortBy")}
               </div>
               <label className="flex items-center gap-2">
                 <input
@@ -210,7 +211,7 @@ export default function PracticeQuestions({
                   checked={localSortOrder === "desc"}
                   onChange={() => setLocalSortOrder("desc")}
                 />
-                <span>Newest first</span>
+                <span>{t("newestFirst")}</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -220,14 +221,14 @@ export default function PracticeQuestions({
                   checked={localSortOrder === "asc"}
                   onChange={() => setLocalSortOrder("asc")}
                 />
-                <span>Oldest first</span>
+                <span>{t("oldestFirst")}</span>
               </label>
               <button
                 className="mt-4 w-full bg-primary text-primary-foreground font-semibold py-2 px-4 rounded hover:bg-primary/90"
                 onClick={handleApply}
                 type="button"
               >
-                Apply
+                {t("apply")}
               </button>
             </div>
           )}
@@ -237,10 +238,10 @@ export default function PracticeQuestions({
       {filteredQuestions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
           <div className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-2">
-            No questions found
+            {t("emptyState.title")}
           </div>
           <div className="text-gray-500 dark:text-gray-400 mb-4">
-            Try adjusting your filters or generating new questions.
+            {t("emptyState.description")}
           </div>
         </div>
       ) : (
@@ -280,27 +281,6 @@ export default function PracticeQuestions({
             </>
           ) : (
             <>
-              {startIndex === 0 && (
-                <Link
-                  key={firstQuestion.id}
-                  href={`/dashboard/jobs/${jobId}/questions/${firstQuestion.id}`}
-                  className="rounded p-4 transition-colors flex items-center gap-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/20 dark:hover:bg-gray-800/30"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
-                    01
-                  </span>
-                  <span className="font-medium text-gray-900 dark:text-gray-200">
-                    {firstQuestion.question}
-                  </span>
-                  {firstQuestion.custom_job_question_submissions?.length >
-                    0 && (
-                    <CheckCircle className="ml-auto h-5 w-5 text-green-500 dark:text-green-400" />
-                  )}
-                </Link>
-              )}
-
               {currentQuestions.map((question, index) => (
                 <Link
                   key={question.id}
@@ -315,7 +295,7 @@ export default function PracticeQuestions({
                   target="_blank"
                 >
                   <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
-                    {(startIndex + index + 2).toString().padStart(2, "0")}
+                    {(startIndex + index + 1).toString().padStart(2, "0")}
                   </span>
                   <span className="font-medium text-gray-900 dark:text-gray-200">
                     {question.question}
