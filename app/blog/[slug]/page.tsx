@@ -26,14 +26,13 @@ async function getDemoJobBySlug(
       )
     `
     )
-    .eq("slug", slug)
-    .single();
+    .eq("slug", slug);
 
-  if (error || !demoJob) {
+  if (error || !demoJob || demoJob.length === 0) {
     return null;
   }
 
-  return demoJob as DemoJobWithQuestions;
+  return demoJob[0] as DemoJobWithQuestions;
 }
 
 const getDemoJobResumeSlug = async (demoJobId: string) => {
