@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -132,7 +132,6 @@ export default function OnboardingPage({
   const [error, setError] = useState<string>("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
-  const [showReferralNudge, setShowReferralNudge] = useState(false);
   const [showReferralNudgeDialog, setShowReferralNudgeDialog] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -140,6 +139,14 @@ export default function OnboardingPage({
   const user = useUser();
   const { logError } = useAxiomLogging();
   const { updateKnowledgeBase } = useKnowledgeBase();
+  const hasSentRegistrationEvent = useRef(false);
+
+  useEffect(() => {
+    if (user && !hasSentRegistrationEvent.current) {
+      hasSentRegistrationEvent.current = true;
+      window.fbq("track", "CompleteRegistration");
+    }
+  }, [user]);
 
   // Handle initial step based on URL
   useEffect(() => {
