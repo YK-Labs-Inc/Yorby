@@ -4,14 +4,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import SignInForm from "@/app/[locale]/interview-prep-landing/components/SignInForm";
 import { useState, useEffect, useRef } from "react";
-import {
-  X,
-  UploadCloud,
-  FileText,
-  MessagesSquare,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { X, FileText, MessagesSquare, Sparkles, User } from "lucide-react";
 import { BottomCTA } from "../components/landing/BottomCTA";
 import Footer from "../components/landing/Footer";
 import OurFeatures from "../components/landing/OurFeatures";
@@ -19,7 +12,7 @@ import { InstagramEmbed, TikTokEmbed } from "react-social-media-embed";
 
 export default function LandingPageV6() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pr-4">
       <LandingHero />
       <HowItWorksSection />
       <SocialMediaSection />
@@ -187,11 +180,20 @@ const HowItWorksSection = () => {
         clearTimeout(programmaticScrollTimeoutRef.current);
       }
 
-      stepRefs.current[activeStepIndex]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "start",
-      });
+      // Center the active step horizontally in the scroll container
+      const container = scrollContainerRef.current;
+      const stepEl = stepRefs.current[activeStepIndex];
+      if (container && stepEl) {
+        const scrollLeft =
+          stepEl.offsetLeft -
+          container.offsetLeft -
+          container.clientWidth / 2 +
+          stepEl.clientWidth / 2;
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: "smooth",
+        });
+      }
 
       programmaticScrollTimeoutRef.current = setTimeout(() => {
         isProgrammaticScroll.current = false;
