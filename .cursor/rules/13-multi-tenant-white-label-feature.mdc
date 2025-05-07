@@ -1,0 +1,108 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Multi-Tenant Coaching Architecture for Perfect Interview
+
+## 1. Overview & Goals
+
+This document outlines the architecture and functionality for the multi-tenant coaching feature in Perfect Interview. The primary goal is to enable career coaches to use the Perfect Interview platform as a white-label solution, allowing them to manage their own curriculum and provide it to their students.
+
+**Key Objectives:**
+
+*   **Coach-Managed Curriculum:** Coaches can create, upload, and manage their own sets of interview questions and job profiles (referred to as "curricula").
+*   **Student Access:** Students (who are regular platform users) can be granted access to one or more coaches' curricula.
+*   **Centralized User Identity:** All users (coaches and students) will use a single login to the main Perfect Interview platform.
+*   **White-Labeling (Phase 1 - Custom Domains):** Coaches can optionally use their own custom domain (e.g., `portal.coachdomain.com`) for their branded access.
+*   **Data Isolation:** Ensure that each coach's data (curriculum, student associations) is isolated and only accessible by authorized individuals.
+
+## 2. Key Entities & Data Model (ERD Aspect)
+
+The multi-tenant architecture introduces new tables and modifies existing ones. These changes are defined in the Supabase schema, viewable in `[database.types.ts](mdc:utils/supabase/database.types.ts)`, and implemented via SQL migrations stored in `supabase/migrations/`.
+
+### 2.1. `coaches` Table
+
+*   **Purpose:** Stores information about each career coach (tenant). This table is central to identifying and managing individual coach tenants.
+*   **Key Columns:**
+    *   `id` (uuid, PK): Unique identifier for the coach entity.
+    *   `user_id` (uuid, FK to `auth.users`): Links the coach entity to a specific user account in Supabase Authentication. This user is considered the "coach admin." This relationship is 1:1 (a user can be one coach entity). `ON DELETE CASCADE` ensures that if the coach's auth user is deleted, their coach record is also deleted.
+    *   `name` (text): The display name of the coach or their organization.
+    *   `custom_domain` (text, unique): The optional custom domain configured by the coach (e.g., `coach.example.com`).
+    *   `branding_settings` (jsonb): Stores branding information like logo URLs, theme colors, etc.
+*   **Relationships:**
+    *   One-to-one with `auth.users` (via `user_id`).
+
+### 2.2. `user_coach_access` Table
+
+*   **Purpose:** A junction table that establishes a many-to-many relationship between platform users (students) and coaches. It defines which students have access to which coach's curriculum.
+*   **Key Columns:**
+    *   `user_id` (uuid, FK to `auth.users`): The ID of the student.
+    *   `coach_id` (uuid, FK to `coaches`): The ID of the coach.
+    *   Composite Primary Key: (`user_id`, `coach_id`).
+*   **Relationships:**
+    *   Many-to-many between `users` (implicitly from `auth.users`) and `coaches`.
+
+### 2.3. `custom_jobs` Table (Modified for Tenancy)
+
+*   **Purpose:** This existing table is used by individual users (B2C) to create custom job profiles and practice questions. For the multi-tenant feature, it will also store the curricula created by coaches.
+*   **Key Modification:**
+    *   `coach_id` (uuid, nullable, FK to `coaches`):
+        *   If `NULL`: The `custom_job` belongs to an individual B2C user (identified by the existing `user_id` column on this table). This maintains existing B2C functionality.
+        *   If NOT `NULL`: The `custom_job` is part of a coach's curriculum. The `coach_id` links it to the specific coach. The `user_id` column on this table should then point to the coach's `user_id` (the owner of the curriculum).
+*   **Relationships:**
+    *   Optionally one-to-many from `coaches` to `custom_jobs` (a coach can have many custom jobs).
+*   **Inherited Tenancy:** Tables related to `custom_jobs` (e.g., `custom_job_questions`, `custom_job_categories`, `custom_job_mock_interviews`) will implicitly inherit their tenancy through their relationship with a `custom_job` record. Access to these child records will be determined by access to the parent `custom_job`.
+
+## 3. Core Functionality & User Flows (PRD Aspect)
+
+### 3.1. Coach Workflow
+
+1.  **Onboarding:** A platform user is designated as a coach, resulting in an entry in the `coaches` table linked to their `auth.users.id`.
+2.  **Curriculum Management:**
+    *   The coach accesses a dedicated section of the platform.
+    *   They create/manage `custom_jobs`. When a coach creates a `custom_job`, their `coach_id` (from `coaches.id`) and their `user_id` (from `auth.users.id`) are set on the `custom_job` record.
+    *   They add questions, guidelines, etc., to these `custom_jobs`.
+3.  **Student Management:**
+    *   The coach can associate existing platform users (students) with their coaching services by creating entries in the `user_coach_access` table (linking a `user_id` to their `coach_id`).
+4.  **Custom Domain (Optional):**
+    *   The coach can request a custom domain.
+    *   Admins configure this domain in Vercel, pointing to the Perfect Interview application.
+
+### 3.2. Student (User) Workflow
+
+1.  **Login:** Students log in using their standard Perfect Interview account.
+2.  **Accessing Coach Curriculum:**
+    *   If a student is linked to one or more coaches via `user_coach_access`, the UI will present them with an option to access the curricula from these coaches.
+    *   When a student selects a coach's curriculum, they can view and interact with the `custom_jobs` (and associated questions/mock interviews) created by that coach.
+3.  **Mock Interviews:** Students can perform mock interviews using the question sets provided by their assigned coach(es).
+
+### 3.3. System Mechanisms
+
+1.  **Tenant Identification (for Custom Domains):**
+    *   Requests to custom domains are handled by `[middleware.ts](mdc:middleware.ts)`.
+    *   The middleware inspects the hostname to identify the `coach_id` by looking up the `custom_domain` in the `coaches` table.
+    *   This `coach_id` is then used to scope data fetching and operations for that request.
+2.  **Data Scoping & Authorization:**
+    *   All database queries for coach-specific data (e.g., `custom_jobs` where `coach_id` is not null) must be filtered by the `coach_id`.
+    *   API endpoints and server actions will use the identified `coach_id` (from middleware or user's selection) to ensure they operate on the correct tenant's data.
+
+## 4. Data Segregation & Security (Row Level Security - RLS)
+
+Data isolation between tenants and between tenants and B2C users is enforced using Supabase's Row Level Security (RLS) policies.
+
+*   **`coaches` Table:**
+    *   A coach can only manage (select, update, potentially insert/delete based on defined policies) their own record in the `coaches` table (where `coaches.user_id` matches `auth.uid()`).
+*   **`user_coach_access` Table:**
+    *   Coaches can manage entries where `user_coach_access.coach_id` matches their own `coaches.id`.
+    *   Students can manage (create/delete) entries where `user_coach_access.user_id` matches their `auth.uid()`, allowing them to enroll or unenroll from a coach's curriculum (if the system is designed this way).
+*   **`custom_jobs` Table:**
+    *   **Coaches:** Can perform all operations on `custom_jobs` where `custom_jobs.coach_id` matches their `coaches.id` AND `custom_jobs.user_id` matches their `auth.uid()`.
+    *   **Students:** Can `SELECT` (read) `custom_jobs` where the `custom_jobs.coach_id` corresponds to a coach they are linked to via `user_coach_access`.
+    *   **B2C Users:** Existing RLS policies should allow users to manage their own `custom_jobs` where `coach_id` IS `NULL` AND `user_id` = `auth.uid()`.
+*   **Related Tables (e.g., `custom_job_questions`):** Access is typically inherited based on access to the parent `custom_job`.
+
+## 5. Current Scope (Initial Implementation)
+
+*   The multi-tenant logic described above is currently scoped to the `custom_jobs` feature and its related tables.
+*   The `interview_copilots` feature is **excluded** from multi-tenancy in this initial phase and will continue to operate under its existing B2C RLS rules.

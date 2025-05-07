@@ -7,8 +7,63 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      coaches: {
+        Row: {
+          branding_settings: Json | null
+          created_at: string
+          custom_domain: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          branding_settings?: Json | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          branding_settings?: Json | null
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       custom_job_categories: {
         Row: {
           category: string
@@ -257,6 +312,7 @@ export type Database = {
       }
       custom_jobs: {
         Row: {
+          coach_id: string | null
           company_description: string | null
           company_name: string | null
           created_at: string
@@ -267,6 +323,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          coach_id?: string | null
           company_description?: string | null
           company_name?: string | null
           created_at?: string
@@ -277,6 +334,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          coach_id?: string | null
           company_description?: string | null
           company_name?: string | null
           created_at?: string
@@ -286,7 +344,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["custom_job_access"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "custom_jobs_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       demo_job_questions: {
         Row: {
@@ -943,6 +1009,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_coach_access: {
+        Row: {
+          coach_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_coach_access_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_files: {
         Row: {
           added_to_memory: boolean
@@ -1179,6 +1271,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       custom_job_access: ["locked", "unlocked"],
@@ -1192,3 +1287,4 @@ export const Constants = {
     },
   },
 } as const
+

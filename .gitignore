@@ -47,3 +47,5 @@ next-env.d.ts
 
 # CSV files
 *.csv
+
+/app/\[locale\]/local-testing-auth
