@@ -28,6 +28,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
 
   const supabase = await createSupabaseServerClient();
   let user: User | null = null;
+  let userInitiallySignedUp = false;
 
   if (type === "magiclink") {
     logger.info("Handling magic link");
@@ -50,9 +51,8 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     }
     const { data: userData } = await supabase.auth.getUser();
     user = userData?.user;
-    console.log("Checking if user exists", user?.id, user?.email);
     if (user?.id && user.email) {
-      await addUserToBrevo({
+      userInitiallySignedUp = await addUserToBrevo({
         userId: user.id,
         email: user.email,
         logger,
@@ -75,7 +75,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     user = userData?.user;
     logger = logger.with({ userId: user?.id });
     if (user?.id && email) {
-      await addUserToBrevo({
+      userInitiallySignedUp = await addUserToBrevo({
         userId: user.id,
         email,
         logger,
@@ -96,7 +96,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     logger = logger.with({ userId: user?.id });
     logger.info("Handling user email change");
     if (user?.id && email) {
-      await addUserToBrevo({
+      userInitiallySignedUp = await addUserToBrevo({
         userId: user.id,
         email,
         logger,
@@ -107,6 +107,13 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   if (redirectTo) {
     logger.info("Redirecting to", { redirectTo });
     return NextResponse.redirect(`${redirectTo}`);
+  }
+
+  if (userInitiallySignedUp) {
+    logger.info(
+      "User initially signed up. Redirecting to confirm-initial-login"
+    );
+    return NextResponse.redirect(`${origin}/confirm-initial-login`);
   }
 
   let redirectToOnboardingV2 = false;
@@ -151,7 +158,6 @@ const addUserToBrevo = async ({
   logger: Logger;
 }) => {
   try {
-    console.log("adding user to brevo", email);
     let apiInstance = new SibApiV3Sdk.ContactsApi();
     const brevoApiKey = process.env.BREVO_API_KEY;
     if (!brevoApiKey) {
@@ -166,6 +172,7 @@ const addUserToBrevo = async ({
       logger.info("Contact already exists in Brevo. Skipping creation.", {
         email,
       });
+      return false;
     } catch (error: any) {
       // Brevo throws an error if the contact does not exist
       logger.error("Brevo contact not found. Proceeding to create.", {
@@ -186,11 +193,13 @@ const addUserToBrevo = async ({
           email,
         },
       });
+      return true;
     }
   } catch (error: any) {
     // This outer catch handles errors from API key setup or if createContact itself fails
     // when called in the "else" block above or if the initial getContactInfo check error was re-thrown.
     logger.error("Failed to add user to Brevo", { error, email });
+    return false;
   }
 };
 
