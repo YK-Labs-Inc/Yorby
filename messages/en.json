@@ -2015,5 +2015,10 @@
         "description": "Try adjusting your filters or generating new questions."
       }
     }
+  },
+  "notFoundPage": {
+    "title": "404 - Page Not Found",
+    "message": "Sorry, the page you are looking for does not exist.",
+    "goHomeLink": "Go back home"
   }
 }

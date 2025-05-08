@@ -1816,5 +1816,28 @@
       }
     },
     "referralLink": "你的推荐链接"
+  },
+  "practiceQuestions": {
+    "filters": {
+      "button": "滤镜",
+      "title": "筛选问题",
+      "answered": "已回复",
+      "unanswered": "未回复",
+      "aiGenerated": "人工智能生成",
+      "userGenerated": "用户生成",
+      "sortBy": "排序方式",
+      "newestFirst": "最新发布",
+      "oldestFirst": "最老的优先",
+      "apply": "申请",
+      "emptyState": {
+        "title": "未找到问题",
+        "description": "尝试调整你的筛选条件或生成新的问题。"
+      }
+    }
+  },
+  "notFoundPage": {
+    "title": "404 - 页面未找到",
+    "message": "抱歉，您要查找的页面不存在。",
+    "goHomeLink": "回家吧"
   }
 }

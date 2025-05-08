@@ -1816,5 +1816,28 @@
       }
     },
     "referralLink": "Votre lien de parrainage"
+  },
+  "practiceQuestions": {
+    "filters": {
+      "button": "Filtres",
+      "title": "Filtrer les questions",
+      "answered": "Répondu",
+      "unanswered": "Sans réponse",
+      "aiGenerated": "Généré par l'IA",
+      "userGenerated": "Généré par l'utilisateur",
+      "sortBy": "Trier par",
+      "newestFirst": "Le plus récent en premier",
+      "oldestFirst": "Le plus ancien en premier",
+      "apply": "Appliquer",
+      "emptyState": {
+        "title": "Aucune question trouvée",
+        "description": "Essayez d'ajuster vos filtres ou de générer de nouvelles questions."
+      }
+    }
+  },
+  "notFoundPage": {
+    "title": "404 - Page non trouvée",
+    "message": "Désolé(e), la page que vous recherchez n'existe pas.",
+    "goHomeLink": "Retourne à la maison 🏠"
   }
 }

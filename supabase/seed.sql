@@ -211,6 +211,77 @@ VALUES
     current_timestamp
   );
 
+-- Entry for coach@test.com in the coaches table
+INSERT INTO public.coaches (
+    id,
+    user_id,
+    name,
+    slug,
+    created_at,
+    updated_at,
+    branding_settings,
+    custom_domain
+  )
+VALUES
+  (
+    uuid_generate_v4(),
+    (SELECT id FROM auth.users WHERE email = 'coach@test.com'),
+    'Test Coach',
+    'test-coach',
+    current_timestamp,
+    current_timestamp,
+    NULL,
+    NULL
+  );
+
+-- Add a custom job and questions for coach@test.com
+WITH coach_user AS (
+  SELECT id AS user_id FROM auth.users WHERE email = 'coach@test.com'
+),
+coach_profile AS (
+  SELECT id AS coach_id FROM public.coaches WHERE user_id = (SELECT user_id FROM coach_user)
+),
+inserted_custom_job AS (
+  INSERT INTO public.custom_jobs (
+      id,
+      coach_id,
+      user_id, -- This is the coach's auth.users.id
+      job_title,
+      job_description,
+      company_name,
+      company_description,
+      status,
+      created_at
+    )
+  SELECT
+    uuid_generate_v4(),
+    (SELECT coach_id FROM coach_profile),
+    (SELECT user_id FROM coach_user),
+    'Coach''s Sample Job',
+    'This is a sample job description for the curriculum created by Test Coach.',
+    'Coach Solutions Inc.',
+    'A leading provider of interview coaching.',
+    'unlocked',
+    current_timestamp
+  RETURNING id
+)
+INSERT INTO public.custom_job_questions (
+    id,
+    custom_job_id,
+    question,
+    answer_guidelines,
+    question_type, -- Assuming question_type enum type
+    created_at
+  )
+SELECT
+  uuid_generate_v4(),
+  (SELECT id FROM inserted_custom_job),
+  'Sample Question ' || s.i || ' for Coach''s Job',
+  'Guidelines for Sample Question ' || s.i || '. Focus on clarity and structure.',
+  'ai_generated',
+  current_timestamp
+FROM generate_series(1, 10) AS s(i);
+
 -- User: student@test.com (no subscription)
 INSERT INTO auth.users (
     instance_id,
