@@ -50,6 +50,14 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     }
     const { data: userData } = await supabase.auth.getUser();
     user = userData?.user;
+    console.log("Checking if user exists", user?.id, user?.email);
+    if (user?.id && user.email) {
+      await addUserToBrevo({
+        userId: user.id,
+        email: user.email,
+        logger,
+      });
+    }
   } else if (token && type === "signup" && email) {
     logger.info("Handling user signup");
     const { error } = await supabase.auth.verifyOtp({
@@ -143,6 +151,7 @@ const addUserToBrevo = async ({
   logger: Logger;
 }) => {
   try {
+    console.log("adding user to brevo", email);
     let apiInstance = new SibApiV3Sdk.ContactsApi();
     const brevoApiKey = process.env.BREVO_API_KEY;
     if (!brevoApiKey) {
@@ -150,22 +159,40 @@ const addUserToBrevo = async ({
     }
     apiInstance.setApiKey(SibApiV3Sdk.ContactsApiApiKeys.apiKey, brevoApiKey);
 
-    let createContact = new SibApiV3Sdk.CreateContact();
-
-    createContact.email = email;
-    createContact.listIds = [6];
-
-    await apiInstance.createContact(createContact);
-    logger.info("Added contact to Brevo");
-    await trackServerEvent({
-      userId,
-      email,
-      eventName: "user_sign_up",
-      args: {
+    try {
+      // Check if contact already exists
+      logger.info("Checking if contact exists in Brevo", { email });
+      await apiInstance.getContactInfo(email);
+      logger.info("Contact already exists in Brevo. Skipping creation.", {
         email,
-      },
-    });
+      });
+    } catch (error: any) {
+      // Brevo throws an error if the contact does not exist
+      logger.error("Brevo contact not found. Proceeding to create.", {
+        error,
+        email,
+      });
+      let createContact = new SibApiV3Sdk.CreateContact();
+      createContact.email = email;
+      createContact.listIds = [6]; // Ensure this list ID is correct
+
+      await apiInstance.createContact(createContact);
+      logger.info("Added contact to Brevo", { email });
+      await trackServerEvent({
+        userId,
+        email,
+        eventName: "user_sign_up", // Or a different event if you want to distinguish these cases
+        args: {
+          email,
+        },
+      });
+    }
   } catch (error: any) {
-    logger.error("Failed to add user to Brevo", { error });
+    // This outer catch handles errors from API key setup or if createContact itself fails
+    // when called in the "else" block above or if the initial getContactInfo check error was re-thrown.
+    logger.error("Failed to add user to Brevo", { error, email });
   }
 };
+
+// https://perfectinterview.ai/auth/callback?token_hash=pkce_cb6ff3e43bab76dab90cbc214e7c4779aa705277ace0a94e73d82d63&type=magiclink
+// localhost:3000/auth/callback?token_hash=pkce_6fe277bb4af898acf3c432f0c5a96197c45591c1b5560fc57b9e5349&type=magiclink
