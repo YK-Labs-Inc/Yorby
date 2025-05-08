@@ -1,0 +1,47 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 14. Coaching Feature Page Structure
+
+This document outlines the planned page structure for the multi-tenant coaching feature in Perfect Interview.
+
+## A. Coach Admin Area
+
+This section is for logged-in users designated as coaches to manage their curriculum, students, and view analytics.
+
+**Base Path**: `app/[locale]/dashboard/coach-admin/`
+
+*   **Main Coach Dashboard**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/page.tsx)`
+    *   Purpose: Landing page for coaches, overview, summary statistics, quick links.
+*   **Curriculum Management (Custom Jobs & Questions)**:
+    *   **List Coach's Curricula**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/page.tsx)`
+    *   **Create New Curriculum**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/new/page.tsx)`
+    *   **Edit Curriculum Details**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/[customJobId]/edit/page.tsx)`
+    *   **Manage Questions for a Curriculum**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/[customJobId]/questions/page.tsx)`
+    *   **Add New Question to Curriculum**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/[customJobId]/questions/new/page.tsx)`
+    *   **Edit Question in Curriculum**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/curriculum/[customJobId]/questions/[questionId]/edit/page.tsx)`
+*   **Student Management & Analytics**:
+    *   **List Enrolled Students**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/students/page.tsx)`
+    *   **View Specific Student's Activity**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/students/[studentId]/activity/page.tsx)`
+    *   **Coach's View of Student's Mock Interview Session**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/students/[studentId]/mock-interviews/[sessionId]/page.tsx)`
+    *   **Coach's Review of Student's Practice Question Answer**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/students/[studentId]/answers/[answerId]/review/page.tsx)`
+*   **Settings (Placeholder for Future)**: `[page.tsx](mdc:app/[locale]/dashboard/coach-admin/settings/page.tsx)`
+
+## B. Student-Facing Coach Portal
+
+This section is what students see when they access a specific coach's content.
+
+**Base Path**: `app/[locale]/coaches/[coach-name]/`
+
+*   **Coach Portal Landing Page**: `[page.tsx](mdc:app/[locale]/coaches/[coach-name]/page.tsx)`
+    *   Purpose: Displays coach's branding and lists their available curricula.
+*   **Curriculum Overview Page (Student View)**: `[page.tsx](mdc:app/[locale]/coaches/[coach-name]/curriculum/[customJobId]/page.tsx)`
+    *   Purpose: Shows details of a specific curriculum, lists questions, provides practice options.
+*   **Practice Question Page (Student View)**: `[page.tsx](mdc:app/[locale]/coaches/[coach-name]/curriculum/[customJobId]/questions/[questionId]/practice/page.tsx)`
+    *   Purpose: Student answers questions, views feedback and history.
+*   **Mock Interview (Student View)**:
+    *   **Start Mock Interview Page**: `[page.tsx](mdc:app/[locale]/coaches/[coach-name]/curriculum/[customJobId]/mock-interview/start/page.tsx)`
+    *   **Mock Interview Session Page**: `[page.tsx](mdc:app/[locale]/coaches/[coach-name]/mock-interviews/[sessionId]/page.tsx)`
+        *   Purpose: Live interview interface and post-session review.

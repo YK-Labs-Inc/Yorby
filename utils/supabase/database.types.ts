@@ -41,6 +41,7 @@ export type Database = {
           custom_domain: string | null
           id: string
           name: string
+          slug: string
           updated_at: string | null
           user_id: string
         }
@@ -50,6 +51,7 @@ export type Database = {
           custom_domain?: string | null
           id?: string
           name: string
+          slug: string
           updated_at?: string | null
           user_id: string
         }
@@ -59,6 +61,7 @@ export type Database = {
           custom_domain?: string | null
           id?: string
           name?: string
+          slug?: string
           updated_at?: string | null
           user_id?: string
         }

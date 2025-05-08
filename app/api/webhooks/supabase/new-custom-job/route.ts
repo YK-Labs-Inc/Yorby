@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/utils/supabase/server";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
-import { AxiomRequest } from "next-axiom";
+import { AxiomRequest, withAxiom } from "next-axiom";
 import { Tables } from "@/utils/supabase/database.types";
 
 // Schema for the AI model response
@@ -36,7 +36,7 @@ const verifyWebhookRequest = (request: Request): boolean => {
   );
 };
 
-export const POST = async (request: AxiomRequest) => {
+export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
     path: "/api/webhooks/supabase/new-custom-job",
   });
@@ -131,4 +131,4 @@ export const POST = async (request: AxiomRequest) => {
       { status: 500 }
     );
   }
-};
+});

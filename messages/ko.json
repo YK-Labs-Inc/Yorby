@@ -1816,5 +1816,28 @@
       }
     },
     "referralLink": "회원님의 추천 링크"
+  },
+  "practiceQuestions": {
+    "filters": {
+      "button": "필터",
+      "title": "필터 질문",
+      "answered": "답변됨",
+      "unanswered": "답변 없음",
+      "aiGenerated": "AI 생성됨",
+      "userGenerated": "사용자 생성됨",
+      "sortBy": "정렬 기준",
+      "newestFirst": "최신순 ➡️",
+      "oldestFirst": "가장 오래된 것부터",
+      "apply": "지원하기",
+      "emptyState": {
+        "title": "질문이 없습니다",
+        "description": "필터를 조정하거나 새로운 질문을 생성해 보세요."
+      }
+    }
+  },
+  "notFoundPage": {
+    "title": "404 - 페이지를 찾을 수 없습니다.",
+    "message": "죄송합니다. 찾으시는 페이지가 존재하지 않습니다.",
+    "goHomeLink": "집에 돌아가."
   }
 }
