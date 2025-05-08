@@ -139,14 +139,6 @@ export default function OnboardingPage({
   const user = useUser();
   const { logError } = useAxiomLogging();
   const { updateKnowledgeBase } = useKnowledgeBase();
-  const hasSentRegistrationEvent = useRef(false);
-
-  useEffect(() => {
-    if (user && !hasSentRegistrationEvent.current) {
-      hasSentRegistrationEvent.current = true;
-      window.fbq("track", "CompleteRegistration");
-    }
-  }, [user]);
 
   // Handle initial step based on URL
   useEffect(() => {
