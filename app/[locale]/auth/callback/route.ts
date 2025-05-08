@@ -202,6 +202,3 @@ const addUserToBrevo = async ({
     return false;
   }
 };
-
-// https://perfectinterview.ai/auth/callback?token_hash=pkce_cb6ff3e43bab76dab90cbc214e7c4779aa705277ace0a94e73d82d63&type=magiclink
-// localhost:3000/auth/callback?token_hash=pkce_6fe277bb4af898acf3c432f0c5a96197c45591c1b5560fc57b9e5349&type=magiclink
