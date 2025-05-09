@@ -1,4 +1,4 @@
-import MockInterviewReview from "./MockInterviewReview";
+import MockInterviewReview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/review/MockInterviewReview";
 
 export default async function MockInterviewReviewPage({
   params,
