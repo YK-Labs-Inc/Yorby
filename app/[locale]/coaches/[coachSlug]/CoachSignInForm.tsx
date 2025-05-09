@@ -39,8 +39,9 @@ export default function CoachSignInForm({ coachId }: { coachId: string }) {
       if (searchParams && searchParams.toString()) {
         url = url + `?${searchParams.toString()}`;
       }
-      posthog.capture("landing_page_magic_link_entered", {
+      posthog.capture("register_for_coach_curriculum", {
         $current_url: url,
+        coach_id: coachId,
       });
     }
   }, [state]);
