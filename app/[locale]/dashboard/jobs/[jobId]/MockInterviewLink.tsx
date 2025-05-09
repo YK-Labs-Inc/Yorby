@@ -16,7 +16,6 @@ const MockInterviewLink = ({
   const t = useTranslations("mockInterview");
   const params = useParams();
   let mockInterviewsPath = "";
-  console.log(params);
   if (params && "coachSlug" in params) {
     mockInterviewsPath = `/coaches/${params.coachSlug}/curriculum/${jobId}/mockInterviews`;
   } else {
