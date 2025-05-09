@@ -224,7 +224,7 @@ INSERT INTO public.coaches (
   )
 VALUES
   (
-    uuid_generate_v4(),
+    '9cdc0028-c4ae-49ac-af27-7342c661a802', -- Hardcoded coach ID
     (SELECT id FROM auth.users WHERE email = 'coach@test.com'),
     'Test Coach',
     'test-coach',
@@ -238,13 +238,10 @@ VALUES
 WITH coach_user AS (
   SELECT id AS user_id FROM auth.users WHERE email = 'coach@test.com'
 ),
-coach_profile AS (
-  SELECT id AS coach_id FROM public.coaches WHERE user_id = (SELECT user_id FROM coach_user)
-),
 inserted_custom_job AS (
   INSERT INTO public.custom_jobs (
       id,
-      coach_id,
+      coach_id, -- This will be the hardcoded coach ID
       user_id, -- This is the coach's auth.users.id
       job_title,
       job_description,
@@ -255,7 +252,7 @@ inserted_custom_job AS (
     )
   SELECT
     uuid_generate_v4(),
-    (SELECT coach_id FROM coach_profile),
+    '9cdc0028-c4ae-49ac-af27-7342c661a802', -- Hardcoded coach ID
     (SELECT user_id FROM coach_user),
     'Coach''s Sample Job',
     'This is a sample job description for the curriculum created by Test Coach.',
