@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import LockedJobComponent from "./LockedJobComponent";
 import { CheckCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -32,6 +32,7 @@ interface PracticeQuestionsProps {
   onToggleAIGenerated?: () => void;
   onToggleUserGenerated?: () => void;
   onSortOrderChange?: (value: "asc" | "desc") => void;
+  isMultiTenantExperience: boolean;
 }
 
 export default function PracticeQuestions({
@@ -52,6 +53,7 @@ export default function PracticeQuestions({
   onToggleAIGenerated,
   onToggleUserGenerated,
   onSortOrderChange,
+  isMultiTenantExperience,
 }: PracticeQuestionsProps) {
   // Local state for dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -62,6 +64,7 @@ export default function PracticeQuestions({
     useState(showUserGenerated);
   const [localSortOrder, setLocalSortOrder] = useState(sortOrder);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   const t = useTranslations("practiceQuestions.filters");
 
@@ -183,46 +186,54 @@ export default function PracticeQuestions({
                   />
                   <span>{t("unanswered")}</span>
                 </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={localAIGenerated}
-                    onChange={() => setLocalAIGenerated((v) => !v)}
-                  />
-                  <span>{t("aiGenerated")}</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={localUserGenerated}
-                    onChange={() => setLocalUserGenerated((v) => !v)}
-                  />
-                  <span>{t("userGenerated")}</span>
-                </label>
+                {!isMultiTenantExperience && (
+                  <>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={localAIGenerated}
+                        onChange={() => setLocalAIGenerated((v) => !v)}
+                      />
+                      <span>{t("aiGenerated")}</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={localUserGenerated}
+                        onChange={() => setLocalUserGenerated((v) => !v)}
+                      />
+                      <span>{t("userGenerated")}</span>
+                    </label>
+                  </>
+                )}
               </div>
-              <div className="font-semibold text-gray-800 dark:text-gray-100 mt-2 mb-1">
-                {t("sortBy")}
-              </div>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="sortOrder"
-                  value="desc"
-                  checked={localSortOrder === "desc"}
-                  onChange={() => setLocalSortOrder("desc")}
-                />
-                <span>{t("newestFirst")}</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="sortOrder"
-                  value="asc"
-                  checked={localSortOrder === "asc"}
-                  onChange={() => setLocalSortOrder("asc")}
-                />
-                <span>{t("oldestFirst")}</span>
-              </label>
+              {!isMultiTenantExperience && (
+                <>
+                  <div className="font-semibold text-gray-800 dark:text-gray-100 mt-2 mb-1">
+                    {t("sortBy")}
+                  </div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="sortOrder"
+                      value="desc"
+                      checked={localSortOrder === "desc"}
+                      onChange={() => setLocalSortOrder("desc")}
+                    />
+                    <span>{t("newestFirst")}</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="sortOrder"
+                      value="asc"
+                      checked={localSortOrder === "asc"}
+                      onChange={() => setLocalSortOrder("asc")}
+                    />
+                    <span>{t("oldestFirst")}</span>
+                  </label>
+                </>
+              )}
               <button
                 className="mt-4 w-full bg-primary text-primary-foreground font-semibold py-2 px-4 rounded hover:bg-primary/90"
                 onClick={handleApply}
@@ -284,7 +295,7 @@ export default function PracticeQuestions({
               {currentQuestions.map((question, index) => (
                 <Link
                   key={question.id}
-                  href={`/dashboard/jobs/${jobId}/questions/${question.id}`}
+                  href={`${pathname}/questions/${question.id}`}
                   className={`rounded p-4 transition-colors flex items-center gap-3
                     ${
                       index % 2 === 0
