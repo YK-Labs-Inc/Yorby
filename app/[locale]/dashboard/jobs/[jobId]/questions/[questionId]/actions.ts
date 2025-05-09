@@ -22,6 +22,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
   const questionId = formData.get("questionId") as string;
   const answer = formData.get("answer") as string;
+  const questionPath = formData.get("questionPath") as string;
   const trackingProperties: Record<string, any> = {
     jobId,
     questionId,
@@ -58,20 +59,19 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
       },
     });
   }
-  revalidatePath(`/dashboard/jobs/${jobId}/questions/${questionId}`);
+  revalidatePath(questionPath);
   if (errorMessage) {
     redirect(
-      `/dashboard/jobs/${jobId}/questions/${questionId}?error=${errorMessage}`
+      `${questionPath}?error=${errorMessage}`,
     );
   }
-  redirect(
-    `/dashboard/jobs/${jobId}/questions/${questionId}?submissionId=${submissionId}`
-  );
+  redirect(`${questionPath}?submissionId=${submissionId}`);
 };
 
 export const generateAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
   const questionId = formData.get("questionId") as string;
+  const questionPath = formData.get("questionPath") as string;
   const logger = new Logger().with({
     jobId: jobId,
     questionId: questionId,
@@ -116,7 +116,11 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
 
     ${job.company_name ? `## Company Name\n${job.company_name}` : ""}
 
-    ${job.company_description ? `## Company Description\n${job.company_description}` : ""}
+    ${
+      job.company_description
+        ? `## Company Description\n${job.company_description}`
+        : ""
+    }
 
     ## Question
     ${question}
@@ -182,19 +186,15 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     });
   }
   if (errorMessage) {
-    redirect(
-      `/dashboard/jobs/${jobId}/questions/${questionId}?error=${errorMessage}`
-    );
+    redirect(`${questionPath}?error=${errorMessage}`);
   }
-  redirect(
-    `/dashboard/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`
-  );
+  redirect(`${questionPath}?submissionId=${submission.id}`);
 };
 
 const processAnswer = async (
   jobId: string,
   questionId: string,
-  answer: string
+  answer: string,
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -208,7 +208,7 @@ const processAnswer = async (
     jobId,
     questionId,
     answer,
-    feedback
+    feedback,
   );
   logger.info("Wrote answer to database");
   return submission.id;
@@ -218,7 +218,7 @@ const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
   answer: string,
-  feedback: { pros: string[]; cons: string[] }
+  feedback: { pros: string[]; cons: string[] },
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -251,7 +251,7 @@ const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 const generateFeedback = async (
   jobId: string,
   questionId: string,
-  answer: string
+  answer: string,
 ) => {
   const trackingProperties = {
     questionId,
@@ -298,7 +298,11 @@ const generateFeedback = async (
 
     ${job.company_name ? `## Company Name\n${job.company_name}` : ""}
 
-    ${job.company_description ? `## Company Description\n${job.company_description}` : ""}
+    ${
+    job.company_description
+      ? `## Company Description\n${job.company_description}`
+      : ""
+  }
 
     ## Question
     ${question}
@@ -407,7 +411,7 @@ export const getAllFiles = async (jobId: string) => {
           mimeType: file.mime_type,
         },
       };
-    })
+    }),
   );
 };
 

@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
 import { useActionState } from "react";
 import { submitAnswer, generateAnswer } from "./actions";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { AIButton } from "@/components/ai-button";
 import AnswerGuideline from "./AnswerGuideline";
 import { Link } from "@/i18n/routing";
@@ -70,6 +70,14 @@ export default function AnswerForm({
     };
   }
 
+  const params = useParams();
+  let questionPath = "";
+  if (params && "coachSlug" in params) {
+    questionPath = `/coaches/${params.coachSlug}/curriculum/${jobId}/questions/${question.id}`;
+  } else {
+    questionPath = `/dashboard/jobs/${jobId}/questions/${question.id}`;
+  }
+
   const newViewParams = new URLSearchParams(searchParams ?? {});
   newViewParams.set("view", view === "question" ? "submissions" : "question");
 
@@ -116,6 +124,11 @@ export default function AnswerForm({
                           value={question.id}
                         />
                         <input type="hidden" name="jobId" value={jobId} />
+                        <input
+                          type="hidden"
+                          name="questionPath"
+                          value={questionPath}
+                        />
                         <AIButton
                           type="submit"
                           disabled={
@@ -161,6 +174,11 @@ export default function AnswerForm({
                       type="hidden"
                       name="questionId"
                       value={question.id}
+                    />
+                    <input
+                      type="hidden"
+                      name="questionPath"
+                      value={questionPath}
                     />
                     <SubmitButton
                       className="mt-4"

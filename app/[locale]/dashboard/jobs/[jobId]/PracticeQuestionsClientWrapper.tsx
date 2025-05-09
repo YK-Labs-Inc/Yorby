@@ -13,6 +13,7 @@ export default function PracticeQuestionsClientWrapper({
   currentPage,
   numFreeQuestions = 1,
   isSubscriptionVariant,
+  isMultiTenantExperience,
 }: {
   jobId: string;
   questions: any[];
@@ -21,6 +22,7 @@ export default function PracticeQuestionsClientWrapper({
   currentPage: number;
   numFreeQuestions?: number;
   isSubscriptionVariant: boolean;
+  isMultiTenantExperience: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,6 +100,7 @@ export default function PracticeQuestionsClientWrapper({
         setParam("sort", value);
         updateParams();
       }}
+      isMultiTenantExperience={isMultiTenantExperience}
     />
   );
 }

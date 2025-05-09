@@ -1,4 +1,4 @@
-import React from "react";
+import CustomJob from "@/app/[locale]/dashboard/jobs/[jobId]/CustomJob";
 
 interface StudentCurriculumOverviewPageProps {
   params: Promise<{
@@ -6,22 +6,19 @@ interface StudentCurriculumOverviewPageProps {
     customJobId: string;
     locale: string;
   }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function StudentCurriculumOverviewPage({
   params,
+  searchParams,
 }: StudentCurriculumOverviewPageProps) {
-  const resolvedParams = await params;
+  const jobId = (await params).customJobId;
   return (
-    <div>
-      <h1>Curriculum Overview (Student View)</h1>
-      <p>
-        Purpose: Shows details of a specific curriculum from the coach, lists
-        questions, and provides options to start practicing questions or
-        initiate a mock interview using this curriculum.
-      </p>
-      <p>Coach Name: {resolvedParams.coachName}</p>
-      <p>Custom Job ID: {resolvedParams.customJobId}</p>
-    </div>
+    <CustomJob
+      jobId={jobId}
+      searchParams={searchParams}
+      isMultiTenantExperience={true}
+    />
   );
 }
