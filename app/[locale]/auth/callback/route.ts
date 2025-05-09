@@ -35,7 +35,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (!token) {
       logger.error("Invalid or expired code");
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`,
       );
     }
     // Handle magic link flow
@@ -46,7 +46,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (error) {
       logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Failed to verify magic link. Please try again.`
+        `${origin}/sign-in?error=Failed to verify magic link. Please try again.`,
       );
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -68,7 +68,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     if (error) {
       logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`,
       );
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -111,7 +111,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
 
   if (userInitiallySignedUp) {
     logger.info(
-      "User initially signed up. Redirecting to confirm-initial-login"
+      "User initially signed up. Redirecting to confirm-initial-login",
     );
     return NextResponse.redirect(`${origin}/confirm-initial-login`);
   }
@@ -131,13 +131,14 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
 
 const getRedirectToOnboardingV2 = async (user: User) => {
   const memoriesEnabled = Boolean(
-    await posthog.isFeatureEnabled("enable-memories", user.id)
+    await posthog.isFeatureEnabled("enable-memories", user.id),
   );
   if (!memoriesEnabled) {
     return false;
   }
-  const userHasFinishedMemoriesOnboarding =
-    await completedMemoriesOnboarding(user);
+  const userHasFinishedMemoriesOnboarding = await completedMemoriesOnboarding(
+    user,
+  );
   if (userHasFinishedMemoriesOnboarding) {
     return false;
   }

@@ -5,7 +5,7 @@ import { Logger } from "next-axiom";
 
 export async function signInWithOTP(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
-  const redirectTo = (formData.get("redirectTo") as string) || "/";
+  const redirectTo = formData.get("redirectTo") as string | null;
   const captchaToken = formData.get("captchaToken") as string;
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
@@ -13,12 +13,17 @@ export async function signInWithOTP(prevState: any, formData: FormData) {
     redirectTo,
   });
 
+  let options: { captchaToken: string; emailRedirectTo?: string } = {
+    captchaToken,
+  };
+
+  if (redirectTo) {
+    options.emailRedirectTo = redirectTo;
+  }
+
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-      captchaToken,
-    },
+    options,
   });
 
   if (error) {

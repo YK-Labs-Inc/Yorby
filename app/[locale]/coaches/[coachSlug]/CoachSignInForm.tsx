@@ -1,23 +1,31 @@
 "use client";
 
 import { FormMessage, Message } from "@/components/form-message";
-import { usePathname } from "next/navigation";
-import { signInWithOTP } from "../actions";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { signInWithOTP } from "../../(auth-pages)/actions";
+import { H4 } from "@/components/typography";
+import { usePostHog } from "posthog-js/react";
 
-export default function SignInForm() {
+const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
+  ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
+  : "http://localhost:3000";
+
+export default function CoachSignInForm({ coachId }: { coachId: string }) {
   const signInT = useTranslations("signIn");
   const [state, action, pending] = useActionState(signInWithOTP, {
     success: "",
     error: undefined,
   });
   const [captchaToken, setCaptchaToken] = useState<string>("");
+  const [showCaptcha, setShowCaptcha] = useState<boolean>(true);
+  const posthog = usePostHog();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   let formMessage: Message | undefined;
   if (state.success) {
     formMessage = { success: state.success };
@@ -25,20 +33,26 @@ export default function SignInForm() {
     formMessage = { error: state.error };
   }
 
-  return (
-    <div className="container max-w-md mx-auto pt-20">
-      <form action={action} className="space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">{signInT("title")}</h1>
-          <p className="text-muted-foreground">{signInT("description")}</p>
-          <p className="text-sm text-muted-foreground">
-            {signInT("autoCreateAccount")}
-          </p>
-        </div>
+  useEffect(() => {
+    if (state.success) {
+      let url = window.origin + pathname;
+      if (searchParams && searchParams.toString()) {
+        url = url + `?${searchParams.toString()}`;
+      }
+      posthog.capture("landing_page_magic_link_entered", {
+        $current_url: url,
+      });
+    }
+  }, [state]);
 
+  return (
+    <div className="container max-w-md mx-auto">
+      <form action={action} className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{signInT("form.email.label")}</Label>
+            <H4 className="text-lg font-semibold text-center">
+              {signInT("enterEmailToGetStarted")}
+            </H4>
             <Input
               id="email"
               name="email"
@@ -48,24 +62,33 @@ export default function SignInForm() {
             />
           </div>
           <input type="hidden" name="captchaToken" value={captchaToken} />
-          {pathname && (
-            <input type="hidden" name="redirectTo" value={pathname} />
-          )}
+          <input
+            type="hidden"
+            name="redirectTo"
+            value={`${defaultUrl}/api/coach/${coachId}/register`}
+          />
           <SubmitButton
             disabled={!captchaToken || pending}
             pendingText={signInT("form.submitting")}
             type="submit"
             className="w-full"
           >
-            {signInT("form.submit")}
+            {signInT("form.getStarted")}
           </SubmitButton>
+          <p className="text-muted-foreground text-center">
+            {signInT("description")}
+          </p>
+          <p className="text-sm text-muted-foreground text-center">
+            {signInT("autoCreateAccount")}
+          </p>
           {formMessage && <FormMessage message={formMessage} />}
         </div>
-        <div className="mt-4">
+        <div className={`mt-4 ${showCaptcha ? "" : "hidden"}`}>
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
             onSuccess={(token) => {
               setCaptchaToken(token);
+              setShowCaptcha(false);
             }}
           />
         </div>

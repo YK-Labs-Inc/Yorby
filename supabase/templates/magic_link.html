@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <h2>Perfect Interview Login Link</h2>
+    <p>Click on this link to login:</p>
+    <p>
+      <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&redirect_to={{ .RedirectTo }}"
+        >Log In</a
+      >
+    </p>
+  </body>
+</html>
