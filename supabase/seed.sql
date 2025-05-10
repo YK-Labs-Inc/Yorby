@@ -372,7 +372,7 @@ INSERT INTO public.coaches (
     id,
     user_id,
     name,
-    slug,
+    -- slug,
     created_at,
     updated_at,
     branding_settings,
@@ -383,7 +383,7 @@ VALUES
     '9cdc0028-c4ae-49ac-af27-7342c661a802', -- Hardcoded coach ID
     (SELECT id FROM auth.users WHERE email = 'coach@test.com'),
     'Test Coach',
-    'test-coach',
+    -- 'test-coach',
     current_timestamp,
     current_timestamp,
     NULL,
