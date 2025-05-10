@@ -30,6 +30,13 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 
+CREATE EXTENSION IF NOT EXISTS "http" WITH SCHEMA "extensions";
+
+
+
+
+
+
 CREATE EXTENSION IF NOT EXISTS "moddatetime" WITH SCHEMA "extensions";
 
 
@@ -822,7 +829,7 @@ CREATE INDEX "idx_resumes_user_id" ON "public"."resumes" USING "btree" ("user_id
 
 
 
-CREATE OR REPLACE TRIGGER "New job " AFTER INSERT ON "public"."custom_jobs" FOR EACH ROW EXECUTE FUNCTION "extensions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/new-custom-job', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
+CREATE OR REPLACE TRIGGER "New job " AFTER INSERT ON "public"."custom_jobs" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/new-custom-job', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
 
 
 
@@ -830,7 +837,7 @@ CREATE OR REPLACE TRIGGER "handle_updated_at" BEFORE UPDATE ON "public"."resumes
 
 
 
-CREATE OR REPLACE TRIGGER "new-referral" AFTER INSERT ON "public"."referrals" FOR EACH ROW EXECUTE FUNCTION "extensions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/referrals', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
+CREATE OR REPLACE TRIGGER "new-referral" AFTER INSERT ON "public"."referrals" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/referrals', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
 
 
 
@@ -1586,6 +1593,63 @@ GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
