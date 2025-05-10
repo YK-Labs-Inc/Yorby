@@ -269,7 +269,7 @@ const SidebarTrigger = React.forwardRef<
   const isMobile = useIsMobile();
   const hideSidebar =
     pathname?.includes("/chat-to-resume") ||
-    pathname.includes("mock-interviews");
+    pathname?.includes("/mock-interviews");
 
   if (hideSidebar && isMobile) {
     return null;

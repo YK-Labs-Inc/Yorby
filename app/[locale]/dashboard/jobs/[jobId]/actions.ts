@@ -14,12 +14,13 @@ import { z } from "zod";
 
 export const startMockInterview = async (
   prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => {
   let logger = new Logger();
   let mockInterviewId = "";
   const jobId = formData.get("jobId") as string;
   const onboarding = formData.get("onboarding") as string;
+  const mockInterviewsPath = formData.get("mockInterviewsPath") as string;
   const isOnboarding = onboarding === "true";
   if (!jobId) {
     logger.error("Error starting mock interview:", {
@@ -32,6 +33,7 @@ export const startMockInterview = async (
   }
   logger = logger.with({
     jobId,
+    mockInterviewsPath,
   });
 
   const supabase = await createSupabaseServerClient();
@@ -46,9 +48,9 @@ export const startMockInterview = async (
 
     if (existingMockInterview) {
       redirect(
-        `/dashboard/jobs/${jobId}/mockInterviews/${existingMockInterview.id}${
+        `${mockInterviewsPath}/${existingMockInterview.id}${
           isOnboarding ? "?onboarding=true" : ""
-        }`
+        }`,
       );
     }
   }
@@ -94,7 +96,9 @@ export const startMockInterview = async (
     .map((q, index) => `Question ${index + 1}: ${q.question}`)
     .join("\n");
 
-  const prompt = `You are an experienced interviewer for ${customJob.company_name ?? "a company"}. 
+  const prompt = `You are an experienced interviewer for ${
+    customJob.company_name ?? "a company"
+  }. 
 You are conducting a job interview for the position of ${customJob.job_title}.
 
 Company Context:
@@ -104,7 +108,9 @@ Job Description:
 ${customJob.job_description}
 
 Instructions:
-1. Act as a professional interviewer from ${customJob.company_name ?? "a company"}.
+1. Act as a professional interviewer from ${
+    customJob.company_name ?? "a company"
+  }.
 2. Start by introducing yourself and the company briefly.
 3. Ask relevant technical and behavioral questions based on the job description.
 4. Evaluate the candidate's responses and provide constructive feedback.
@@ -170,9 +176,9 @@ Thank the candidate for their time and tell them that the interview has ended.
     });
   }
   redirect(
-    `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}${
+    `${mockInterviewsPath}/${mockInterviewId}${
       isOnboarding ? "?onboarding=true" : ""
-    }`
+    }`,
   );
 };
 
@@ -194,7 +200,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("emailRequiredError")
+      t("emailRequiredError"),
     );
   }
 
@@ -202,7 +208,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("genericError")
+      t("genericError"),
     );
   }
 
@@ -214,7 +220,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       emailRedirectTo: jobId
         ? `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs/${jobId}`
         : `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/interview-copilots/${interviewCopilotId}`,
-    }
+    },
   );
 
   if (error) {
@@ -227,7 +233,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       jobId
         ? `/dashboard/jobs/${jobId}`
         : `/dashboard/interview-copilots/${interviewCopilotId}`,
-      error.message
+      error.message,
     );
   }
   const user = await supabase.auth.getUser();
@@ -244,7 +250,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     jobId
       ? `/dashboard/jobs/${jobId}`
       : `/dashboard/interview-copilots/${interviewCopilotId}`,
-    t("authSuccess")
+    t("authSuccess"),
   );
 };
 
@@ -320,7 +326,7 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
 
 export const generateMoreQuestions = async (
   prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => {
   const jobId = formData.get("jobId") as string;
   const logger = new Logger().with({
@@ -436,7 +442,9 @@ const generateMoreCustomJobQuestions = async ({
     ${companyDescription}
 
     ## Existing Questions
-    ${existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")}
+    ${
+    existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")
+  }
     `;
   const result = await generateObjectWithFallback({
     systemPrompt: prompt,
@@ -461,7 +469,7 @@ const generateMoreCustomJobQuestions = async ({
         z.object({
           question: z.string(),
           answerGuidelines: z.string(),
-        })
+        }),
       ),
     }),
   });
