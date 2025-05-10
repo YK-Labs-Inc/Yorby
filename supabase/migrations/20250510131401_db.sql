@@ -155,6 +155,20 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
+CREATE TABLE IF NOT EXISTS "public"."coaches" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "name" "text" NOT NULL,
+    "custom_domain" "text",
+    "branding_settings" "jsonb",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone
+);
+
+
+ALTER TABLE "public"."coaches" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."custom_job_categories" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -257,7 +271,8 @@ CREATE TABLE IF NOT EXISTS "public"."custom_jobs" (
     "job_description" "text" NOT NULL,
     "company_name" "text",
     "company_description" "text",
-    "status" "public"."custom_job_access" NOT NULL
+    "status" "public"."custom_job_access" NOT NULL,
+    "coach_id" "uuid"
 );
 
 
@@ -528,6 +543,16 @@ CREATE TABLE IF NOT EXISTS "public"."subscriptions" (
 ALTER TABLE "public"."subscriptions" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."user_coach_access" (
+    "user_id" "uuid" NOT NULL,
+    "coach_id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."user_coach_access" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."user_files" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -575,6 +600,21 @@ CREATE TABLE IF NOT EXISTS "public"."user_knowledge_base_messages" (
 
 
 ALTER TABLE "public"."user_knowledge_base_messages" OWNER TO "postgres";
+
+
+ALTER TABLE ONLY "public"."coaches"
+    ADD CONSTRAINT "coaches_custom_domain_key" UNIQUE ("custom_domain");
+
+
+
+ALTER TABLE ONLY "public"."coaches"
+    ADD CONSTRAINT "coaches_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."coaches"
+    ADD CONSTRAINT "coaches_user_id_key" UNIQUE ("user_id");
+
 
 
 ALTER TABLE ONLY "public"."custom_job_categories"
@@ -732,6 +772,11 @@ ALTER TABLE ONLY "public"."subscriptions"
 
 
 
+ALTER TABLE ONLY "public"."user_coach_access"
+    ADD CONSTRAINT "user_coach_access_pkey" PRIMARY KEY ("user_id", "coach_id");
+
+
+
 ALTER TABLE ONLY "public"."user_files"
     ADD CONSTRAINT "user_files_pkey" PRIMARY KEY ("id");
 
@@ -777,7 +822,7 @@ CREATE INDEX "idx_resumes_user_id" ON "public"."resumes" USING "btree" ("user_id
 
 
 
-CREATE OR REPLACE TRIGGER "New job " AFTER INSERT ON "public"."custom_jobs" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/new-custoom-job', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
+CREATE OR REPLACE TRIGGER "New job " AFTER INSERT ON "public"."custom_jobs" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/new-custom-job', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
 
 
 
@@ -786,6 +831,11 @@ CREATE OR REPLACE TRIGGER "handle_updated_at" BEFORE UPDATE ON "public"."resumes
 
 
 CREATE OR REPLACE TRIGGER "new-referral" AFTER INSERT ON "public"."referrals" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://www.perfectinterview.ai/api/webhooks/supabase/referrals', 'POST', '{"Content-type":"application/json","authorization":"Bearer AnCJ789rcEzFVF2npAogMVyq6OXdnCcY"}', '{}', '10000');
+
+
+
+ALTER TABLE ONLY "public"."coaches"
+    ADD CONSTRAINT "coaches_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -826,6 +876,11 @@ ALTER TABLE ONLY "public"."custom_job_questions"
 
 ALTER TABLE ONLY "public"."custom_jobs"
     ADD CONSTRAINT "custom_job_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."custom_jobs"
+    ADD CONSTRAINT "custom_jobs_coach_id_fkey" FOREIGN KEY ("coach_id") REFERENCES "public"."coaches"("id") ON DELETE CASCADE;
 
 
 
@@ -921,6 +976,16 @@ ALTER TABLE ONLY "public"."resumes"
 
 ALTER TABLE ONLY "public"."subscriptions"
     ADD CONSTRAINT "subscriptions_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."user_coach_access"
+    ADD CONSTRAINT "user_coach_access_coach_id_fkey" FOREIGN KEY ("coach_id") REFERENCES "public"."coaches"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."user_coach_access"
+    ADD CONSTRAINT "user_coach_access_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 
 
 
@@ -1144,6 +1209,20 @@ CREATE POLICY "Allow select access to custom_job_questions for users with acce" 
 
 
 
+CREATE POLICY "Allow select access to custom_job_questions for users with coac" ON "public"."custom_job_questions" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM "public"."user_coach_access"
+  WHERE (("user_coach_access"."user_id" = "auth"."uid"()) AND ("user_coach_access"."coach_id" = ( SELECT "custom_jobs"."coach_id"
+           FROM "public"."custom_jobs"
+          WHERE ("custom_jobs"."id" = "custom_job_questions"."custom_job_id")))))));
+
+
+
+CREATE POLICY "Allow select access to custom_jobs for users with coach access" ON "public"."custom_jobs" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM "public"."user_coach_access"
+  WHERE (("user_coach_access"."user_id" = "auth"."uid"()) AND ("user_coach_access"."coach_id" = "custom_jobs"."coach_id")))));
+
+
+
 CREATE POLICY "Allow select access to demo resume" ON "public"."resumes" FOR SELECT USING ((("id" = '4cbdd2c8-a96b-4d3c-bd32-d9b89d924153'::"uuid") OR ("id" = '0d4a08c1-4054-4c45-b12f-500081499cad'::"uuid") OR ("user_id" = '7823eb9a-62fc-4bbf-bd58-488f117c24e8'::"uuid")));
 
 
@@ -1292,6 +1371,26 @@ CREATE POLICY "Allow update access to user_knowledge_base_messages for users w" 
 
 
 
+CREATE POLICY "Coaches can manage their B2B custom_jobs" ON "public"."custom_jobs" USING ((("coach_id" IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM "public"."coaches" "c"
+  WHERE (("c"."id" = "custom_jobs"."coach_id") AND ("c"."user_id" = "auth"."uid"())))))) WITH CHECK ((("coach_id" IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM "public"."coaches" "c"
+  WHERE (("c"."id" = "custom_jobs"."coach_id") AND ("c"."user_id" = "auth"."uid"())))) AND ("user_id" = "auth"."uid"())));
+
+
+
+CREATE POLICY "Coaches can manage their own coach record" ON "public"."coaches" USING (("auth"."uid"() = "user_id")) WITH CHECK (("auth"."uid"() = "user_id"));
+
+
+
+CREATE POLICY "Coaches can manage user_coach_access entries for their coaching" ON "public"."user_coach_access" USING ((EXISTS ( SELECT 1
+   FROM "public"."coaches" "c"
+  WHERE (("c"."id" = "user_coach_access"."coach_id") AND ("c"."user_id" = "auth"."uid"()))))) WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."coaches" "c"
+  WHERE (("c"."id" = "user_coach_access"."coach_id") AND ("c"."user_id" = "auth"."uid"())))));
+
+
+
 CREATE POLICY "Enable all for users based on user_id" ON "public"."custom_job_credits" USING ((( SELECT "auth"."uid"() AS "uid") = "id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "id"));
 
 
@@ -1313,6 +1412,10 @@ CREATE POLICY "Enable all for users based on user_id" ON "public"."referral_rede
 
 
 CREATE POLICY "Enable all for users based on user_id" ON "public"."referrals" USING ((( SELECT "auth"."uid"() AS "uid") = "id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "id"));
+
+
+
+CREATE POLICY "Enable all for users based on user_id" ON "public"."user_coach_access" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -1344,6 +1447,10 @@ CREATE POLICY "Enable insert access for all users" ON "public"."interview_copilo
 
 
 
+CREATE POLICY "Enable read access for all users" ON "public"."coaches" FOR SELECT USING (true);
+
+
+
 CREATE POLICY "Enable read access for all users" ON "public"."demo_job_questions" FOR SELECT USING (true);
 
 
@@ -1363,6 +1470,9 @@ CREATE POLICY "Enable select for users based on id" ON "public"."subscriptions" 
 
 CREATE POLICY "Users can only access their own resumes" ON "public"."resumes" USING (("user_id" = "auth"."uid"()));
 
+
+
+ALTER TABLE "public"."coaches" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."custom_job_categories" ENABLE ROW LEVEL SECURITY;
@@ -1447,6 +1557,9 @@ ALTER TABLE "public"."resumes" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."subscriptions" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."user_coach_access" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."user_files" ENABLE ROW LEVEL SECURITY;
@@ -1671,6 +1784,12 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."coaches" TO "anon";
+GRANT ALL ON TABLE "public"."coaches" TO "authenticated";
+GRANT ALL ON TABLE "public"."coaches" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."custom_job_categories" TO "anon";
 GRANT ALL ON TABLE "public"."custom_job_categories" TO "authenticated";
 GRANT ALL ON TABLE "public"."custom_job_categories" TO "service_role";
@@ -1836,6 +1955,12 @@ GRANT ALL ON TABLE "public"."resumes" TO "service_role";
 GRANT ALL ON TABLE "public"."subscriptions" TO "anon";
 GRANT ALL ON TABLE "public"."subscriptions" TO "authenticated";
 GRANT ALL ON TABLE "public"."subscriptions" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."user_coach_access" TO "anon";
+GRANT ALL ON TABLE "public"."user_coach_access" TO "authenticated";
+GRANT ALL ON TABLE "public"."user_coach_access" TO "service_role";
 
 
 
