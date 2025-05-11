@@ -96,7 +96,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
 
     ${
       coachKnowledgeBase
-        ? `The question you are trying to generate an answer for could be a part of
+        ? `The question you are trying to generate an answer for is a part of
         a coaching program put together by a career coach. In this scenario, I will also provide you
         some additional information from a career coach that could be relevant to the question. For example, it could contain
         some proprietary framework that the career coach uses to help candidates answer questions.
@@ -293,7 +293,7 @@ const generateFeedback = async (
 
     ${
     coachKnowledgeBase
-      ? `The question you are trying to generate feedback for could be a part of 
+      ? `The question you are trying to generate feedback is a part of 
       a coaching program put together by a career coach. In this scenario, I will also provide you 
       some additional information from a career coach that could be relevant to the question. For example, it could contain
       some proprietary framework that the career coach uses to evaluate candidates.
