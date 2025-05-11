@@ -80,7 +80,7 @@ export const GET = withAxiom(async (
             await supabase.from("custom_jobs").insert({
                 ...rest,
                 id: newJobId,
-                coach_id: null,
+                coach_id: coachId,
                 user_id: user.id,
                 created_at: new Date().toISOString(),
             });

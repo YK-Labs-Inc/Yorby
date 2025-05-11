@@ -34,6 +34,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_knowledge_base: {
+        Row: {
+          coach_id: string
+          created_at: string
+          knowledge_base: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          knowledge_base: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          knowledge_base?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_knowledge_base_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coaches: {
         Row: {
           branding_settings: Json | null
