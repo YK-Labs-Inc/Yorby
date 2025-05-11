@@ -84,6 +84,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     const job = await fetchJob(jobId);
     const { question, answer_guidelines } = await fetchQuestion(questionId);
     const files = await getAllFiles(jobId);
+    const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
     const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
@@ -92,6 +93,18 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     I will provide you with a job title, job description, an optional company name and optional company description,
     the question, the question's answer guidelines, and potentially some files that that contain details
     about the candidate's previous work experience.
+
+    ${
+      coachKnowledgeBase
+        ? `The question you are trying to generate an answer for is a part of
+        a coaching program put together by a career coach. In this scenario, I will also provide you
+        some additional information from a career coach that could be relevant to the question. For example, it could contain
+        some proprietary framework that the career coach uses to help candidates answer questions.
+
+        Use this additional information to generate an answer.
+        `
+        : ""
+    }
 
     You will provide a response to the question in the following format:
 
@@ -127,6 +140,12 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
 
     ## Answer Guidelines
     ${answer_guidelines}
+
+    ${
+      coachKnowledgeBase
+        ? `## Coach Knowledge Base\n${coachKnowledgeBase}`
+        : ""
+    }
     `;
     const result = await generateObjectWithFallback({
       systemPrompt: prompt,
@@ -261,6 +280,7 @@ const generateFeedback = async (
   const logger = new Logger().with(trackingProperties);
   const job = await fetchJob(jobId);
   const { question, answer_guidelines } = await fetchQuestion(questionId);
+  const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
   const files = await getAllFiles(jobId);
   const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
@@ -270,6 +290,18 @@ const generateFeedback = async (
     I will provide you with the job title, job description, an optional company name and optional company description,
     the question, the question's answer guidelines, the candidate's answer, and potentially some files that that contain details
     about the candidate's previous work experience.
+
+    ${
+    coachKnowledgeBase
+      ? `The question you are trying to generate feedback is a part of 
+      a coaching program put together by a career coach. In this scenario, I will also provide you 
+      some additional information from a career coach that could be relevant to the question. For example, it could contain
+      some proprietary framework that the career coach uses to evaluate candidates.
+      
+      Use this additional information to generate feedback for the candidate's answer.
+      `
+      : ""
+  }
 
     You will provide feedback on the candidate's answer and provide a list of pros and cons.
 
@@ -309,6 +341,10 @@ const generateFeedback = async (
 
     ## Answer Guidelines
     ${answer_guidelines}
+
+    ${
+    coachKnowledgeBase ? `## Coach Knowledge Base\n${coachKnowledgeBase}` : ""
+  }
 
     ## Answer
     ${answer}
@@ -464,4 +500,40 @@ const updateFileInDatabase = async ({
   if (error) {
     throw error;
   }
+};
+
+const fetchCoachKnowledgeBaseForJob = async (jobId: string) => {
+  const customJob = await fetchCustomJob(jobId);
+  if (!customJob.coach_id) {
+    return null;
+  }
+  const coachKnowledgeBase = await fetchCoachKnowledgeBase(
+    customJob.coach_id,
+  );
+  return coachKnowledgeBase;
+};
+
+const fetchCustomJob = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("id", jobId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
+const fetchCoachKnowledgeBase = async (coachId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("coach_knowledge_base")
+    .select("*")
+    .eq("coach_id", coachId);
+  if (error) {
+    throw error;
+  }
+  return data.map((d) => d.knowledge_base).join("\n");
 };
