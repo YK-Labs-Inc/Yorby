@@ -5,6 +5,7 @@ import LockedJobComponent from "./LockedJobComponent";
 import { CheckCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 interface Question {
   id: string;
@@ -65,6 +66,14 @@ export default function PracticeQuestions({
   const [localSortOrder, setLocalSortOrder] = useState(sortOrder);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  const params = useParams();
+  let baseUrl = "";
+  if (params && "coachSlug" in params) {
+    baseUrl = `/coaches/${params.coachSlug}/curriculum`;
+  } else {
+    baseUrl = `/dashboard/jobs`;
+  }
 
   const t = useTranslations("practiceQuestions.filters");
 
@@ -323,7 +332,7 @@ export default function PracticeQuestions({
                     (page) => (
                       <Link
                         key={page}
-                        href={`/dashboard/jobs/${jobId}?view=practice&page=${page}`}
+                        href={`${baseUrl}/${jobId}?view=practice&page=${page}`}
                         className={`px-4 py-2 rounded ${
                           currentPage === page
                             ? "bg-blue-500 text-white"

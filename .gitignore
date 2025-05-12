@@ -49,3 +49,7 @@ next-env.d.ts
 *.csv
 
 /app/\[locale\]/local-testing-auth
+
+# TechSalesJack audio files
+/app/api/admin/techsalesjack/audio/
+

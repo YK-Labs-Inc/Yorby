@@ -1,8 +1,8 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import React from "react";
-import SignInForm from "../../interview-prep-landing/components/SignInForm";
 import CoachSignInForm from "./CoachSignInForm";
+import CoachRegistrationButton from "./CoachRegistrationButton";
 
 interface CoachPortalLandingPageProps {
   params: Promise<{
@@ -34,14 +34,22 @@ export default async function CoachPortalLandingPage({
 }: CoachPortalLandingPageProps) {
   const { coachSlug } = await params;
   const coach = await fetchCoach(coachSlug);
-  console.log("coach", coach);
   if (!coach) {
     return <div>Coach not found</div>;
   }
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1>Welcome to {coach.name}&apos;s portal</h1>
-      <CoachSignInForm coachId={coach.id} />
+      {user ? (
+        <CoachRegistrationButton coachId={coach.id} coachName={coach.name} />
+      ) : (
+        <CoachSignInForm coachId={coach.id} />
+      )}
     </div>
   );
 }

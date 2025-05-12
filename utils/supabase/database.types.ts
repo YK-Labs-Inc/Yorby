@@ -34,32 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      coach_knowledge_base: {
-        Row: {
-          coach_id: string
-          created_at: string
-          knowledge_base: string
-        }
-        Insert: {
-          coach_id: string
-          created_at?: string
-          knowledge_base: string
-        }
-        Update: {
-          coach_id?: string
-          created_at?: string
-          knowledge_base?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coach_knowledge_base_coach_id_fkey"
-            columns: ["coach_id"]
-            isOneToOne: true
-            referencedRelation: "coaches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       coaches: {
         Row: {
           branding_settings: Json | null
@@ -268,6 +242,35 @@ export type Database = {
             columns: ["custom_job_id"]
             isOneToOne: false
             referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_job_question_sample_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_question_sample_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_questions"
             referencedColumns: ["id"]
           },
         ]
