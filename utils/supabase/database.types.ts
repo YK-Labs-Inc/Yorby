@@ -272,6 +272,35 @@ export type Database = {
           },
         ]
       }
+      custom_job_question_sample_answers: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_question_sample_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_question_submissions: {
         Row: {
           answer: string
