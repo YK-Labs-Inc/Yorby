@@ -34,6 +34,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_branding: {
+        Row: {
+          coach_id: string
+          created_at: string
+          primary_color_hex: string
+          title: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          primary_color_hex: string
+          title: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          primary_color_hex?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_branding_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: true
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_knowledge_base: {
         Row: {
           coach_id: string
@@ -62,7 +91,6 @@ export type Database = {
       }
       coaches: {
         Row: {
-          branding_settings: Json | null
           created_at: string
           custom_domain: string | null
           id: string
@@ -72,7 +100,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          branding_settings?: Json | null
           created_at?: string
           custom_domain?: string | null
           id?: string
@@ -82,7 +109,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          branding_settings?: Json | null
           created_at?: string
           custom_domain?: string | null
           id?: string

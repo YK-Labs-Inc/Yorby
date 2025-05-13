@@ -27,6 +27,9 @@ INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "pro
 INSERT INTO "public"."coaches" ("id", "user_id", "name", "custom_domain", "branding_settings", "created_at", "updated_at", "slug") VALUES
 	('9cdc0028-c4ae-49ac-af27-7342c661a802', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Tech Sales Jack', NULL, NULL, '2025-05-11 13:59:28.712948+00', '2025-05-11 13:59:28.712948+00', 'techsalesjack');
 
+INSERT INTO "public"."coach_branding" ("coach_id", "created_at", "primary_color_hex", "title") VALUES
+	('9cdc0028-c4ae-49ac-af27-7342c661a802', '2025-05-11 13:59:28.712948+00', '#101636', 'Tech Sales Jack Academy');
+
 
 --
 -- Data for Name: coach_knowledge_base; Type: TABLE DATA; Schema: public; Owner: postgres

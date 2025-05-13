@@ -1,17 +1,11 @@
 "use client";
 
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft } from "lucide-react";
-import { useParams } from "next/navigation";
 
 const BackButton = ({ jobId }: { jobId: string }) => {
-  const params = useParams();
-  let baseUrl = "";
-  if (params && "coachSlug" in params) {
-    baseUrl = `/coaches/${params.coachSlug}/curriculum`;
-  } else {
-    baseUrl = `/dashboard/jobs`;
-  }
+  const { baseUrl } = useMultiTenant();
 
   return (
     <Link
