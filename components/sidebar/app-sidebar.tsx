@@ -9,7 +9,6 @@ import {
   SidebarHeader,
   SidebarMenu,
 } from "@/components/ui/sidebar";
-import { H3 } from "../typography";
 import SidebarMenuItemClient from "./SideBarMenuItemClient";
 import { Button } from "../ui/button";
 import { PlusIcon, ChevronDown } from "lucide-react";
@@ -21,7 +20,6 @@ import { LinkAccountModal } from "../auth/link-account-modal";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
-import { OnboardingChecklist } from "../onboarding/OnboardingChecklist";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   DropdownMenu,
@@ -29,6 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import Header from "./Header";
 
 interface AppSidebarProps {
   numberOfCredits: number;
@@ -42,6 +43,64 @@ interface AppSidebarProps {
   isMemoriesEnabled: boolean;
   enableTransformResume: boolean;
   referralsEnabled: boolean;
+}
+
+function AppSidebarLoading() {
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <div className="flex items-center">
+          <Skeleton className="w-8 h-8 mr-2 rounded-full" />
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <Skeleton className="h-10 w-full mt-4" />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <div className="px-4 py-2">
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <div className="px-4 py-2">
+                <Skeleton className="h-5 w-full mb-2" />
+                <Skeleton className="h-5 w-full" />
+              </div>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="mt-6">
+          <div className="px-4 py-2">
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <div className="px-4 py-2">
+                <Skeleton className="h-5 w-full mb-2" />
+              </div>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="mt-6">
+          <div className="px-4 py-2">
+            <Skeleton className="h-4 w-20" />
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <div className="px-4 py-2">
+                <Skeleton className="h-5 w-full mb-2" />
+              </div>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <Skeleton className="h-8 w-3/4 mx-auto mb-2" />
+        <Skeleton className="h-10 w-full mb-4" />
+        <Skeleton className="h-8 w-full" />
+      </SidebarFooter>
+    </Sidebar>
+  );
 }
 
 export function AppSidebar({
@@ -62,6 +121,8 @@ export function AppSidebar({
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
+  const { isLoadingBranding, coachBrandingSettings, isCoachPath } =
+    useMultiTenant();
 
   useEffect(() => {
     if (authError || authSuccess) {
@@ -69,29 +130,28 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
+  if (isLoadingBranding) {
+    return <AppSidebarLoading />;
+  }
+
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/dashboard/jobs" className="flex items-center">
-          <img
-            src="/assets/dark-logo.png"
-            alt="Perfect Interview"
-            className="w-8 h-8 mr-2"
-          />
-          <H3>Perfect Interview</H3>
-        </Link>
+        <Header />
         {user && (
           <>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="w-full justify-between">
-                  <span className="flex items-center gap-2">
-                    <PlusIcon className="h-4 w-4" />
-                    {t("create")}
-                  </span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
+              {!isCoachPath && (
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full justify-between">
+                    <span className="flex items-center gap-2">
+                      <PlusIcon className="h-4 w-4" />
+                      {t("create")}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              )}
               <DropdownMenuContent align="end" className="w-[200px]">
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/jobs?newJob=true">
@@ -190,7 +250,6 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        {user && <OnboardingChecklist />}
         {!isSubscriptionVariant && user && !hasSubscription && (
           <>
             <p className="text-lg text-center font-bold px-4">
@@ -204,7 +263,7 @@ export function AppSidebar({
             </Link>
           </>
         )}
-        {isSubscriptionVariant && user && !hasSubscription && (
+        {!isCoachPath && isSubscriptionVariant && user && !hasSubscription && (
           <Link href="/purchase">
             <Button className="w-full">{t("unlockAllAccess")}</Button>
           </Link>

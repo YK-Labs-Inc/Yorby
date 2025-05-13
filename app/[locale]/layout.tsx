@@ -19,6 +19,7 @@ import Script from "next/script";
 import { KnowledgeBaseProvider } from "@/app/context/KnowledgeBaseContext";
 import { Toaster } from "@/components/ui/toaster";
 import { ReferralProvider } from "../context/referral-context";
+import { MultiTenantProvider } from "../context/MultiTenantContext";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -204,32 +205,34 @@ export default async function RootLayout({
                 <ReferralProvider>
                   <AxiomWebVitals />
                   <AxiomLoggingProvider user={user}>
-                    <DeepgramContextProvider>
-                      <SidebarProvider>
-                        <OnboardingProvider initialState={onboardingState}>
-                          <KnowledgeBaseProvider
-                            isMemoriesEnabled={isMemoriesEnabled}
-                          >
-                            <AppSidebar
-                              jobs={jobs}
-                              numberOfCredits={numberOfCredits}
-                              hasSubscription={hasSubscription}
-                              user={user}
-                              interviewCopilots={interviewCopilots}
-                              isResumeBuilderEnabled={isResumeBuilderEnabled}
-                              resumes={resumes}
-                              isSubscriptionVariant={isSubscriptionVariant}
+                    <MultiTenantProvider>
+                      <DeepgramContextProvider>
+                        <SidebarProvider>
+                          <OnboardingProvider initialState={onboardingState}>
+                            <KnowledgeBaseProvider
                               isMemoriesEnabled={isMemoriesEnabled}
-                              enableTransformResume={enableTransformResume}
-                              referralsEnabled={referralsEnabled}
-                            />
-                            <SidebarTrigger />
-                            <main className="w-full">{children}</main>
-                            <Toaster />
-                          </KnowledgeBaseProvider>
-                        </OnboardingProvider>
-                      </SidebarProvider>
-                    </DeepgramContextProvider>
+                            >
+                              <AppSidebar
+                                jobs={jobs}
+                                numberOfCredits={numberOfCredits}
+                                hasSubscription={hasSubscription}
+                                user={user}
+                                interviewCopilots={interviewCopilots}
+                                isResumeBuilderEnabled={isResumeBuilderEnabled}
+                                resumes={resumes}
+                                isSubscriptionVariant={isSubscriptionVariant}
+                                isMemoriesEnabled={isMemoriesEnabled}
+                                enableTransformResume={enableTransformResume}
+                                referralsEnabled={referralsEnabled}
+                              />
+                              <SidebarTrigger />
+                              <main className="w-full">{children}</main>
+                              <Toaster />
+                            </KnowledgeBaseProvider>
+                          </OnboardingProvider>
+                        </SidebarProvider>
+                      </DeepgramContextProvider>
+                    </MultiTenantProvider>
                   </AxiomLoggingProvider>
                 </ReferralProvider>
               </UserProvider>

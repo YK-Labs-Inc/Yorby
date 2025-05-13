@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePathname, useRouter } from "next/navigation";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 interface UserMenuProps {
   email: string;
@@ -41,6 +42,7 @@ export function UserMenu({
   const posthog = usePostHog();
   const router = useRouter();
   const pathname = usePathname();
+  const { isCoachPath } = useMultiTenant();
 
   const handleManageSubscription = () => {
     if (!pathname) {
@@ -90,32 +92,38 @@ export function UserMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
-          <DropdownMenuItem
-            onSelect={() => setShowSupportDialog(true)}
-            className="justify-center"
-          >
-            {t("support")}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {referralsEnabled && (
-            <DropdownMenuItem
-              onSelect={handleReferralsClick}
-              className="justify-center"
-            >
-              {t("referrals")}
-            </DropdownMenuItem>
+          {!isCoachPath && (
+            <>
+              <DropdownMenuItem
+                onSelect={() => setShowSupportDialog(true)}
+                className="justify-center"
+              >
+                {t("support")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {referralsEnabled && (
+                <DropdownMenuItem
+                  onSelect={handleReferralsClick}
+                  className="justify-center"
+                >
+                  {t("referrals")}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+            </>
           )}
-          <DropdownMenuSeparator />
-          {isMemoriesEnabled && (
-            <DropdownMenuItem
-              onSelect={handleMemoriesClick}
-              className="justify-center"
-            >
-              {t("memories")}
-            </DropdownMenuItem>
+          {!isCoachPath && isMemoriesEnabled && (
+            <>
+              <DropdownMenuItem
+                onSelect={handleMemoriesClick}
+                className="justify-center"
+              >
+                {t("memories")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
           )}
-          <DropdownMenuSeparator />
-          {hasSubscription && (
+          {!isCoachPath && hasSubscription && (
             <>
               <DropdownMenuItem onSelect={handleManageSubscription}>
                 {t("manageSubscription")}
