@@ -88,7 +88,7 @@ port = 54324
 [storage]
 enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "1GiB"
+file_size_limit = "50GiB"
 
 # Image transformation API is available to Supabase Pro plan.
 # [storage.image_transformation]
@@ -97,51 +97,51 @@ file_size_limit = "1GiB"
 # Uncomment to configure local storage buckets
 [storage.buckets.user-files]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/user-files"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./user-files"
 
 [storage.buckets.custom_job_files]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/custom_job_files"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./custom_job_files"
 
 [storage.buckets.mock_interviews]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/mock_interviews"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./mock_interviews"
 
 [storage.buckets.interview_copilot_files]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/interview_copilot_files"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./interview_copilot_files"
 
 [storage.buckets.interview_copilot_recordings]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/interview_copilot_recordings"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./interview_copilot_recordings"
 
 [storage.buckets.temp-audio-recordings]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/temp-audio-recordings"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./temp-audio-recordings"
 
 [storage.buckets.assets]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/assets"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./assets"
 
 [storage.buckets.interview_copilot_demo_files]
 public = false
-file_size_limit = "1GiB"
-allowed_mime_types = ["*/*"]
-objects_path = "/supabase/interview_copilot_demo_files"
+file_size_limit = "50GiB"
+allowed_mime_types = []
+objects_path = "./interview_copilot_demo_files"
 
 [auth]
 enabled = true
