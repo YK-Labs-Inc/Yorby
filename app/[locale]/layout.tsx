@@ -6,7 +6,10 @@ import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
 import { AxiomWebVitals } from "next-axiom";
 import { IntlProvider, PHProvider } from "./providers";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import {
+  createAdminClient,
+  createSupabaseServerClient,
+} from "@/utils/supabase/server";
 import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -30,6 +33,11 @@ export const metadata = {
   title: "Perfect Interview",
   description: "Ace your next interview with AI-powered interview prep",
 };
+
+export interface StudentWithEmailAndName extends Tables<"user_coach_access"> {
+  email: string;
+  name: string;
+}
 
 const geistSans = Geist({
   display: "swap",
@@ -101,6 +109,50 @@ const fetchResumes = async (userId: string) => {
   return data;
 };
 
+const fetchStudents = async (userId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("coaches")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    return [];
+  }
+  const coachId = data.id;
+  const { data: students, error: studentsError } = await supabase
+    .from("user_coach_access")
+    .select("*")
+    .eq("coach_id", coachId);
+  if (studentsError) {
+    throw studentsError;
+  }
+  const studentsWithEmailAndName = await Promise.all(
+    students.map(async (student) => {
+      const supabase = await createAdminClient();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.admin.getUserById(student.user_id);
+      if (userError) {
+        throw userError;
+      }
+      if (!user || !user.email) {
+        throw new Error("User not found");
+      }
+      return {
+        ...student,
+        email: user.email,
+        name: user.user_metadata.display_name ?? "",
+      };
+    })
+  );
+  return studentsWithEmailAndName;
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -130,6 +182,7 @@ export default async function RootLayout({
   let isMemoriesEnabled = false;
   let enableTransformResume = false;
   let referralsEnabled = false;
+  let students: StudentWithEmailAndName[] = [];
   if (user) {
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
@@ -153,6 +206,7 @@ export default async function RootLayout({
     referralsEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-referrals", user.id)
     );
+    students = await fetchStudents(user.id);
   }
 
   const messages = await getMessages();
@@ -224,6 +278,7 @@ export default async function RootLayout({
                                 isMemoriesEnabled={isMemoriesEnabled}
                                 enableTransformResume={enableTransformResume}
                                 referralsEnabled={referralsEnabled}
+                                students={students}
                               />
                               {/* <SidebarTrigger /> */}
                               <main className="w-full">{children}</main>

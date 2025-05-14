@@ -30,6 +30,7 @@ import {
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "./Header";
+import { StudentWithEmailAndName } from "@/app/[locale]/layout";
 
 interface AppSidebarProps {
   numberOfCredits: number;
@@ -43,6 +44,7 @@ interface AppSidebarProps {
   isMemoriesEnabled: boolean;
   enableTransformResume: boolean;
   referralsEnabled: boolean;
+  students: StudentWithEmailAndName[];
 }
 
 function AppSidebarLoading() {
@@ -115,14 +117,14 @@ export function AppSidebar({
   isMemoriesEnabled,
   enableTransformResume,
   referralsEnabled,
+  students,
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
-  const { isLoadingBranding, coachBrandingSettings, isCoachPath } =
-    useMultiTenant();
+  const { isLoadingBranding, isCoachPath } = useMultiTenant();
 
   useEffect(() => {
     if (authError || authSuccess) {
@@ -183,6 +185,25 @@ export function AppSidebar({
       <SidebarContent>
         {user && (
           <>
+            {students.length > 0 && (
+              <SidebarGroup>
+                <div className="px-4 py-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    {t("students")}
+                  </h4>
+                </div>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {students.map((student) => (
+                      <SidebarMenuItemClient
+                        key={student.user_id}
+                        student={student}
+                      />
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
             {jobs.length > 0 && (
               <SidebarGroup>
                 <div className="px-4 py-2">
@@ -211,13 +232,10 @@ export function AppSidebar({
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {interviewCopilots.map((copilot) => (
-                      <Link
+                      <SidebarMenuItemClient
                         key={copilot.id}
-                        href={`/dashboard/interview-copilots/${copilot.id}`}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-accent rounded-lg"
-                      >
-                        {copilot.title}
-                      </Link>
+                        interviewCopilot={copilot}
+                      />
                     ))}
                   </SidebarMenu>
                 </SidebarGroupContent>
@@ -234,13 +252,7 @@ export function AppSidebar({
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {resumes.map((resume) => (
-                      <Link
-                        key={resume.id}
-                        href={`/dashboard/resumes/${resume.id}`}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-accent rounded-lg"
-                      >
-                        {resume.title}
-                      </Link>
+                      <SidebarMenuItemClient key={resume.id} resume={resume} />
                     ))}
                   </SidebarMenu>
                 </SidebarGroupContent>
