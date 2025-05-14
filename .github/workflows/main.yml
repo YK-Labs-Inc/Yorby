@@ -1,0 +1,36 @@
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    branches:
+      - main
+    paths:
+      - 'supabase/**'
+
+jobs:
+  wait:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.check.outputs.conclusion }}
+    steps:
+      - uses: fountainhead/action-wait-for-check@v1.2.0
+        id: check
+        with:
+          checkName: Supabase Preview
+          ref: ${{ github.event.pull_request.head.sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  migrate:
+    needs:
+      - wait
+    if: ${{ needs.wait.outputs.status == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase --experimental branches get "$GITHUB_HEAD_REF" -o env >> $GITHUB_ENV
+      - name: Custom ORM migration
+        run: psql "$POSTGRES_URL" --single-transaction --variable ON_ERROR_STOP=1 -f supabase/seed.sql
