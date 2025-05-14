@@ -2020,5 +2020,47 @@
     "title": "404 - Page Not Found",
     "message": "Sorry, the page you are looking for does not exist.",
     "goHomeLink": "Go back home"
+  },
+  "coachAdminPortal": {
+    "studentsPage": {
+      "pageTitle": "Enrolled Students",
+      "pageDescription": "A list of students currently enrolled in your coaching program.",
+      "accessDenied": {
+        "title": "Access Denied",
+        "notCoachMessage": "You are not registered as a coach or there was an issue verifying your coach status."
+      },
+      "errors": {
+        "fetchStudentListError": "There was an error fetching the list of enrolled students. Please try again later."
+      },
+      "emptyState": {
+        "noStudentsMessage": "No students are currently enrolled in your program."
+      },
+      "tableHeaders": {
+        "studentId": "Student ID",
+        "email": "Email",
+        "fullName": "Full Name"
+      },
+      "tableCellFallbacks": {
+        "notApplicable": "N/A"
+      },
+      "loggerMessages": {
+        "errorFetchingAuthUser": "Error fetching coach for authenticated user",
+        "errorFetchingCoachProfile": "Error fetching coach profile or user is not a coach",
+        "errorFetchingAccessEntries": "Error fetching user_coach_access entries",
+        "infoNoStudentsEnrolled": "No students enrolled in coach's program",
+        "errorInFulfilledStudentPromise": "Error in fulfilled promise for student",
+        "warningNoStudentData": "No user data found for student ID (fulfilled promise)",
+        "errorStudentDetailFailed": "Failed to fetch details for student"
+      },
+      "placeholders": {
+        "errorEmail": "Error fetching email",
+        "errorName": "Error fetching name",
+        "notFound": "Not found",
+        "failedToFetch": "Failed to fetch"
+      }
+    }
+  },
+  "AdminStudentHeader": {
+    "started": "Started"
   }
 }
