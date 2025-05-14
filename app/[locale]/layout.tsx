@@ -225,7 +225,7 @@ export default async function RootLayout({
                                 enableTransformResume={enableTransformResume}
                                 referralsEnabled={referralsEnabled}
                               />
-                              <SidebarTrigger />
+                              {/* <SidebarTrigger /> */}
                               <main className="w-full">{children}</main>
                               <Toaster />
                             </KnowledgeBaseProvider>
