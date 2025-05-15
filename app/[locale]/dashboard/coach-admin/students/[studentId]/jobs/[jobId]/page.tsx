@@ -13,6 +13,8 @@ import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Tables } from "@/utils/supabase/database.types";
+import StudentQuestionSubmissions from "./StudentQuestionSubmissions";
+import { useSearchParams } from "next/navigation";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -47,7 +49,7 @@ const fetchCustomJobs = async (studentId: string) => {
   const supabase = await createSupabaseServerClient();
   const coach = await fetchCoach();
   const coachId = coach.id;
-  const { data: customJobs } = await supabase
+  const { data: customJobs, error } = await supabase
     .from("custom_jobs")
     .select(
       `
@@ -63,22 +65,28 @@ const fetchCustomJobs = async (studentId: string) => {
     .eq("user_id", studentId)
     .eq("coach_id", coachId)
     .order("created_at", { ascending: false });
+  if (error) {
+    return [];
+  }
   return customJobs;
 };
 
-export default async function AdminStudentViewLayout({
+const AdminStudentView = async ({
   params,
+  searchParams,
 }: Readonly<{
   params: Promise<{ studentId: string }>;
-}>) {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}>) => {
   const t = await getTranslations("AdminStudentHeader");
+  const tAdmin = await getTranslations("AdminStudentView");
   const { studentId } = await params;
   const student = await fetchStudent(studentId);
   if (!student) {
     return notFound();
   }
   const user = student.user;
-  const name = user.user_metadata?.full_name || user.email || "Unknown";
+  const name = user.user_metadata?.full_name || user.email || tAdmin("unknown");
   const role = user.user_metadata?.role || "";
   const cohort = user.user_metadata?.cohort || "";
   function formatDate(dateString: string) {
@@ -107,13 +115,23 @@ export default async function AdminStudentViewLayout({
     return (
       <div className="flex">
         <div className="w-80 min-h-screen bg-gray-50 border-r p-6">
-          No jobs found for this student.
+          {tAdmin("noJobsFound")}
         </div>
       </div>
     );
   }
   const selectedJob = customJobs[0];
   const questions = selectedJob.custom_job_questions;
+  const { questionId } = await searchParams;
+  const currentQuestion =
+    (questionId &&
+      questions.find(
+        (q: Tables<"custom_job_questions">) => q.id === questionId
+      )) ||
+    (questions.length > 0 ? questions[0] : null);
+  const currentSubmissions =
+    currentQuestion?.custom_job_question_submissions || [];
+
   return (
     <div className="relative w-full min-h-screen bg-white">
       {/* Header Bar */}
@@ -124,7 +142,7 @@ export default async function AdminStudentViewLayout({
             <div className="text-sm text-gray-500 flex flex-row gap-2 items-center">
               {role && <span>{role}</span>}
               {role && cohort && <span className="mx-1">&bull;</span>}
-              {cohort && <span>Cohort {cohort}</span>}
+              {cohort && <span>{tAdmin("cohort", { cohort })}</span>}
             </div>
           </div>
         </div>
@@ -169,7 +187,9 @@ export default async function AdminStudentViewLayout({
                     {selectedJob.job_title}
                   </CardTitle>
                   <CardDescription className="text-sm text-gray-500">
-                    {questions?.length || 0} questions
+                    {tAdmin("questionsCount", {
+                      count: questions?.length || 0,
+                    })}
                   </CardDescription>
                 </div>
               </Card>
@@ -185,7 +205,9 @@ export default async function AdminStudentViewLayout({
                         {selectedJob.job_title}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {questions?.length || 0} questions
+                        {tAdmin("questionsCount", {
+                          count: questions?.length || 0,
+                        })}
                       </span>
                     </div>
                     <svg
@@ -228,33 +250,55 @@ export default async function AdminStudentViewLayout({
                 const submissions = q.custom_job_question_submissions;
                 const completed = !!submissions.length;
                 return (
-                  <li
+                  <Link
                     key={q.id}
-                    className={`rounded-lg px-4 py-3 flex flex-col gap-1 ${completed ? "bg-green-50 border border-green-200" : "bg-white border"}`}
+                    href={`/dashboard/coach-admin/students/${studentId}/jobs/${selectedJob.id}?questionId=${q.id}`}
+                    className="block"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">
-                        {q.question}
-                      </span>
-                      {completed && (
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Last submission:{" "}
-                      {submissions.length > 0
-                        ? formatDate(submissions[0].created_at)
-                        : "—"}
-                    </div>
-                  </li>
+                    <li
+                      className={`rounded-lg px-4 py-3 flex flex-col gap-1 ${
+                        currentQuestion?.id === q.id
+                          ? "ring-2 ring-primary border-primary bg-primary/10"
+                          : completed
+                            ? "bg-green-50 border border-green-200"
+                            : "bg-white border"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">
+                          {q.question}
+                        </span>
+                        {completed && (
+                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {tAdmin("lastSubmission", {
+                          date:
+                            submissions.length > 0
+                              ? formatDate(submissions[0].created_at)
+                              : tAdmin("dash"),
+                        })}
+                      </div>
+                    </li>
+                  </Link>
                 );
               })}
             </ul>
           </div>
         </aside>
         {/* Main Content */}
-        <div className="flex-1 px-4 md:px-8 py-6 overflow-y-auto h-full min-h-0"></div>
+        <div className="flex-1 px-4 md:px-8 py-6 overflow-y-auto h-full min-h-0">
+          {currentQuestion && (
+            <StudentQuestionSubmissions
+              question={currentQuestion}
+              submissions={currentSubmissions}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default AdminStudentView;

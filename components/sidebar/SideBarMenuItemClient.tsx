@@ -5,22 +5,102 @@ import { SidebarMenuButton } from "../ui/sidebar";
 import { usePathname } from "next/navigation";
 import { SidebarMenuItem } from "../ui/sidebar";
 import { Link } from "@/i18n/routing";
+import { Tables } from "@/utils/supabase/database.types";
+import { StudentWithEmailAndName } from "@/app/[locale]/layout";
 
-const SidebarMenuItemClient = ({ job }: { job: any }) => {
+type SidebarMenuItemClientProps =
+  | {
+      job: Tables<"custom_jobs">;
+      resume?: never;
+      student?: never;
+      interviewCopilot?: never;
+    }
+  | {
+      job?: never;
+      resume: Tables<"resumes">;
+      student?: never;
+      interviewCopilot?: never;
+    }
+  | {
+      job?: never;
+      resume?: never;
+      student: StudentWithEmailAndName;
+      interviewCopilot?: never;
+    }
+  | {
+      job?: never;
+      resume?: never;
+      student?: never;
+      interviewCopilot: Tables<"interview_copilots">;
+    };
+
+const SidebarMenuItemClient = ({
+  job,
+  resume,
+  student,
+  interviewCopilot,
+}: SidebarMenuItemClientProps) => {
   const pathname = usePathname();
+  const createUrlPath = (): string => {
+    if (job) {
+      return `/dashboard/jobs/${job.id}`;
+    }
+    if (resume) {
+      return `/dashboard/resumes/${resume.id}`;
+    }
+    if (student) {
+      return `/dashboard/coach-admin/students/${student.user_id}`;
+    }
+    if (interviewCopilot) {
+      return `/dashboard/interview-copilots/${interviewCopilot.id}`;
+    }
+    return "#";
+  };
+
+  const constructEntityLabel = () => {
+    if (job) {
+      return job.job_title;
+    }
+    if (resume) {
+      return resume.title;
+    }
+    if (student) {
+      return student.name ? student.name : student.email;
+    }
+    if (interviewCopilot) {
+      return interviewCopilot.title;
+    }
+    throw new Error("No entity provided");
+  };
+
+  const constructEntityId = () => {
+    if (job) {
+      return job.id;
+    }
+    if (resume) {
+      return resume.id;
+    }
+    if (student) {
+      return student.user_id;
+    }
+    if (interviewCopilot) {
+      return interviewCopilot.id;
+    }
+    throw new Error("No entity provided");
+  };
 
   return (
-    <SidebarMenuItem key={job.id}>
+    <SidebarMenuItem key={constructEntityId()}>
       <SidebarMenuButton asChild>
         <Link
+          href={createUrlPath()}
           className={`flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors ${
-            pathname.includes(job.id)
+            pathname?.includes(constructEntityId())
               ? "bg-sidebar-accent font-medium border border-sidebar-border shadow-sm"
               : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
           }`}
-          href={`/dashboard/jobs/${job.id}`}
         >
-          <span>{job.job_title}</span>
+          <span>{constructEntityLabel()}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>

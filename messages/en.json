@@ -339,7 +339,8 @@
     "createResume": "Create Resume",
     "unlockAllAccess": "Unlock Unlimited Access",
     "transformResume": "Transform Resume",
-    "interviewPrep": "Interview Prep"
+    "interviewPrep": "Interview Prep",
+    "students": "Students"
   },
   "upgrade": {
     "locked": {
@@ -2062,5 +2063,27 @@
   },
   "AdminStudentHeader": {
     "started": "Started"
+  },
+  "AdminStudentView": {
+    "noJobsFound": "No jobs found for this student.",
+    "unknown": "Unknown",
+    "cohort": "Cohort {cohort}",
+    "questionsCount": "{count} questions",
+    "lastSubmission": "Last submission: {date}",
+    "dash": "—",
+    "studentQuestionSubmissions": {
+      "question": "Question",
+      "submissionDetails": "Submission Details",
+      "submitted": "Submitted: {date}",
+      "aiFeedback": "AI Feedback",
+      "pros": "Pros",
+      "cons": "Cons",
+      "noPros": "No pros listed.",
+      "noCons": "No cons listed.",
+      "noFeedback": "No feedback available.",
+      "noSubmissionsYet": "No submissions yet.",
+      "submissionHistory": "Submission History",
+      "noPreviousSubmissions": "No previous submissions."
+    }
   }
 }

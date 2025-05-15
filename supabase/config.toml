@@ -97,51 +97,35 @@ file_size_limit = "50GiB"
 # Uncomment to configure local storage buckets
 [storage.buckets.user-files]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./user-files"
+file_size_limit = "40GiB"
 
 [storage.buckets.custom_job_files]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./custom_job_files"
+file_size_limit = "40GiB"
 
 [storage.buckets.mock_interviews]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./mock_interviews"
+file_size_limit = "40GiB"
 
 [storage.buckets.interview_copilot_files]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./interview_copilot_files"
+file_size_limit = "40GiB"
 
 [storage.buckets.interview_copilot_recordings]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./interview_copilot_recordings"
+file_size_limit = "40GiB"
 
 [storage.buckets.temp-audio-recordings]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./temp-audio-recordings"
+file_size_limit = "40GiB"
 
 [storage.buckets.assets]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./assets"
+file_size_limit = "40GiB"
 
 [storage.buckets.interview_copilot_demo_files]
 public = false
-file_size_limit = "50GiB"
-allowed_mime_types = []
-objects_path = "./interview_copilot_demo_files"
+file_size_limit = "40GiB"
 
 [auth]
 enabled = true
