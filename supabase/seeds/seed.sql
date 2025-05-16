@@ -41,11 +41,11 @@ INSERT INTO "public"."coach_branding" ("coach_id", "created_at", "primary_color_
 -- Data for Name: custom_jobs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."custom_jobs" ("id", "created_at", "user_id", "job_title", "job_description", "company_name", "company_description", "status", "coach_id") VALUES
-	('eb2c21e3-e184-4f64-8c83-08aa347af965', '2025-05-11 13:59:28.712948+00', 'fc9a6649-116b-42aa-b884-98ef1bccdbe6', 'Senior Software Engineer', 'A general software engineering role focusing on full-stack development.', 'Tech Solutions LLC', 'A dynamic tech company innovating in cloud services.', 'unlocked', NULL),
-	('613da0f7-fc6d-41fc-880e-990cce699911', '2025-05-11 13:59:28.712948+00', 'e31f799f-a473-49c0-bd35-a2ff073c3b62', 'Junior Developer', 'An entry-level developer role focused on learning and contributing to projects.', 'Startup Innovators Inc.', 'A fast-paced startup working on cutting-edge mobile apps.', 'unlocked', NULL),
-	('da89fe98-61f6-4049-bc77-6ad6b576eb0c', '2025-05-11 13:59:28.712948+00', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Tech Sales Jack', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802'),
-	('90801bef-affb-437d-a33c-cb7494d853b1', '2025-05-11 13:59:28.712948+00', '823fd5c1-185c-4ac0-a20e-b783fad3350c', 'Tech Sales Jack Student', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802');
+INSERT INTO "public"."custom_jobs" ("id", "created_at", "user_id", "job_title", "job_description", "company_name", "company_description", "status", "coach_id", "source_custom_job_id") VALUES
+	('eb2c21e3-e184-4f64-8c83-08aa347af965', '2025-05-11 13:59:28.712948+00', 'fc9a6649-116b-42aa-b884-98ef1bccdbe6', 'Senior Software Engineer', 'A general software engineering role focusing on full-stack development.', 'Tech Solutions LLC', 'A dynamic tech company innovating in cloud services.', 'unlocked', NULL, NULl),
+	('613da0f7-fc6d-41fc-880e-990cce699911', '2025-05-11 13:59:28.712948+00', 'e31f799f-a473-49c0-bd35-a2ff073c3b62', 'Junior Developer', 'An entry-level developer role focused on learning and contributing to projects.', 'Startup Innovators Inc.', 'A fast-paced startup working on cutting-edge mobile apps.', 'unlocked', NULL, NULL),
+	('da89fe98-61f6-4049-bc77-6ad6b576eb0c', '2025-05-11 13:59:28.712948+00', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Tech Sales Jack', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802', NULL),
+	('90801bef-affb-437d-a33c-cb7494d853b1', '2025-05-11 13:59:28.712948+00', '823fd5c1-185c-4ac0-a20e-b783fad3350c', 'Tech Sales Jack Student', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802', 'da89fe98-61f6-4049-bc77-6ad6b576eb0c');
 
 
 --
