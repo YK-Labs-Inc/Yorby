@@ -1796,209 +1796,6 @@
       }
     }
   },
-  "purchase": {
-    "title": "Get Interview Credits",
-    "subscriptionTitle": "Get Unlimited Access To Perfect Interview",
-    "description": "1 credit allows you to generate unlimited practice interview questions and unlimited mock interviews for a single job.",
-    "descriptionV2": "You can redeem credits to create interview prep material for a job or create an Interview Copilot",
-    "descriptionV3": "You can redeem credits to generate interview questions, create an Interview Copilot, or build a resume.",
-    "subscriptionDescription": "Create unlimited resumes, unlimited interview questions, and unlimited Interview Copilots",
-    "unauthenticated": {
-      "title": "Sign In to View Pricing",
-      "description": "Sign in to view our pricing plans and purchase interview credits.",
-      "form": {
-        "email": {
-          "label": "Email",
-          "placeholder": "Enter your email"
-        },
-        "submit": "Sign In"
-      }
-    },
-    "products": {
-      "oneCredit": {
-        "title": "Single Interview",
-        "titleV2": "1 Credit",
-        "description": "Perfect for trying out our mock interview system",
-        "highlight": "1 Credit"
-      },
-      "fiveCredits": {
-        "title": "Interview Pack",
-        "titleV2": "5 Credits",
-        "description": "Great for practicing multiple interviews",
-        "highlight": "5 Credits"
-      },
-      "tenCredits": {
-        "title": "Pro Pack",
-        "titleV2": "10 Credits",
-        "description": "Best value for serious preparation",
-        "highlight": "10 Credits"
-      },
-      "unlimited": {
-        "title": "Unlimited Annual",
-        "titleV2": "Unlimited Credits",
-        "description": "For professionals and frequent job seekers",
-        "highlights": [
-          "Create Unlimited Resumes",
-          "Transform Unlimited Resumes",
-          "Create Unlimited Interview Questions",
-          "Create Unlimited Interview Copilots"
-        ]
-      }
-    },
-    "cta": {
-      "select": "Select Plan",
-      "processing": "Processing...",
-      "mostPopular": "Most Popular"
-    },
-    "pricing": {
-      "perInterview": "per credit",
-      "perMonth": "per month",
-      "savings": "Save {savings}% vs. single interviews",
-      "savingsV2": "Save {savings}% vs. single credit",
-      "loading": "Loading pricing information...",
-      "yearSuffix": "/year",
-      "quarterSuffix": "/quarter",
-      "subscription": "Annual subscription",
-      "quarterlySubscription": "Billed every 3 months",
-      "oneTime": "One-time purchase"
-    },
-    "verifying_purchase": "Verifying your purchase...",
-    "purchase_success": "Purchase Successful! 🎉",
-    "purchase_failed": "Purchase Verification Failed",
-    "redirect_success_message": "You will be redirected to your dashboard in {seconds} seconds...",
-    "redirect_error_message": "Redirecting you back in {seconds} seconds...",
-    "creditUsage": {
-      "modalTrigger": "How Many Credits Do You Need?",
-      "modalTitle": "Credit Usage Breakdown",
-      "gotItButton": "Got it",
-      "items": {
-        "jobPrep": {
-          "title": "Job Interview Preparation",
-          "description": "Create unlimited practice interview questions and mock interviews for a single job",
-          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
-        },
-        "copilot": {
-          "title": "Interview Copilot Session",
-          "description": "One complete Interview Copilot session",
-          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
-        },
-        "resumeBuilder": {
-          "title": "Build a Resume",
-          "description": "Build a resume with our easy to use resume builder",
-          "credits": "{count} {count, plural, one {Credit} other {Credits}}"
-        }
-      }
-    },
-    "errors": {
-      "generic": "Something went wrong — please try again.",
-      "login": "You must be logged in to purchase credits"
-    },
-    "productVideoCarousel": {
-      "heading": "See Perfect Interview in Action",
-      "resumeBuilder": {
-        "title": "Resume Builder",
-        "description": "Use our AI-powered resume builder to craft a professional, tailored resume that gets noticed by top employers."
-      },
-      "practiceQuestions": {
-        "title": "Practice Real Interview Questions",
-        "description": "Simulate real interviews with job-specific questions and get instant, actionable feedback from our AI."
-      },
-      "copilot": {
-        "title": "Master Interviews with Copilot",
-        "description": "Experience a personalized, conversational AI interview copilot that helps you practice, improve, and ace your interviews."
-      }
-    },
-    "trustBadges": {
-      "guarantee": "7-Day Money-Back Guarantee",
-      "secure": "Secure Payment",
-      "cancel": "Cancel Anytime"
-    },
-    "countdownTimer": {
-      "offerEnds": "Offer ends in:"
-    },
-    "testimonials": {
-      "heading": "What Our Users Say",
-      "0": {
-        "name": "Emily Chen",
-        "title": "Financial Analyst",
-        "company": "JPMorgan Chase",
-        "quote": "Perfect Interview gave me the confidence to ace my finance interviews. The mock questions were spot on and the resume builder helped me stand out in a competitive field."
-      },
-      "1": {
-        "name": "Miguel Torres",
-        "title": "Supply Chain Manager",
-        "company": "FedEx",
-        "quote": "The practice interviews and instant feedback made a huge difference. I felt prepared for every scenario in my supply chain interviews."
-      },
-      "2": {
-        "name": "Peter Kang",
-        "title": "Restaurant Manager",
-        "company": "Olive Garden",
-        "quote": "I loved how the AI tailored questions to my experience in hospitality. The resume builder made my achievements shine and helped me land my new role."
-      },
-      "3": {
-        "name": "Robert Johnson",
-        "title": "Operations Manager",
-        "company": "Walmart",
-        "quote": "Perfect Interview's tools helped me prepare for tough operations questions and gave me the edge I needed to get promoted. Highly recommend for anyone in management!"
-      }
-    },
-    "faq": {
-      "heading": "Frequently Asked Questions",
-      "0": {
-        "q": "What do I get with a subscription?",
-        "a": "You get unlimited access to all features: resume builder, AI-powered interview questions, mock interviews, and Interview Copilot sessions."
-      },
-      "1": {
-        "q": "Can I cancel anytime?",
-        "a": "Yes! You can cancel your subscription at any time from your account dashboard. You'll keep access until the end of your billing period."
-      },
-      "2": {
-        "q": "Is there a money-back guarantee?",
-        "a": "Absolutely. If you're not satisfied, contact us within 7 days of starting your subscription for a full refund — no questions asked."
-      },
-      "3": {
-        "q": "How secure is my payment?",
-        "a": "All payments are processed securely with industry-standard encryption. We never store your payment details."
-      },
-      "4": {
-        "q": "Will my data be private?",
-        "a": "Yes, your data is private and will never be shared without your consent. You control your information at all times."
-      }
-    },
-    "hero": {
-      "title": "Land Your Dream Job with AI-Powered Interview Prep",
-      "subtitle": "Unlimited AI-powered interview prep, resume builder, and personalized feedback—risk free."
-    },
-    "mostPopularBadge": "Most Popular",
-    "flashSale": {
-      "limitedTimeOffer": "🎉 Flash Sale: Limited Time Offer! 🎉"
-    },
-    "subscriptionCard": {
-      "monthly": "Monthly",
-      "nMonths": "{count} Months",
-      "monthlySubscription": "Monthly subscription",
-      "nMonthSubscription": "{count}-month subscription",
-      "perMonth": "per month",
-      "savePercentPerMonth": "Save {percent}% per month",
-      "savePercent": "Save {percent}%",
-      "savePercentFor24Hours": "Save {percent}% for 24 hours",
-      "timeRemaining": "Time remaining:",
-      "flashSale": "🔥 Flash Sale"
-    },
-    "referral": {
-      "title": "Have a Referral Code?",
-      "description": "Enter your referral code to get a special discount on your purchase.",
-      "placeholder": "Enter referral code",
-      "redeem": "Redeem",
-      "redeeming": "Redeeming...",
-      "error": {
-        "empty": "Please enter a referral code",
-        "invalid": "Invalid referral code",
-        "generic": "An error occurred while redeeming your code"
-      }
-    }
-  },
   "practiceQuestions": {
     "filters": {
       "button": "Filters",
@@ -2059,10 +1856,10 @@
         "notFound": "Not found",
         "failedToFetch": "Failed to fetch"
       }
+    },
+    "Header": {
+      "started": "Started"
     }
-  },
-  "AdminStudentHeader": {
-    "started": "Started"
   },
   "AdminStudentView": {
     "noJobsFound": "No jobs found for this student.",
@@ -2095,5 +1892,21 @@
     "noPreviousSubmissions": "No previous submissions.",
     "complete": "Complete",
     "in_progress": "In Progress"
+  },
+  "StudentActivitySidebar": {
+    "questions": "Questions",
+    "mockInterviews": "Mock Interviews",
+    "noQuestionsFoundForJob": "No questions found for this job.",
+    "noMockInterviewsFoundForJob": "No mock interviews found for this job.",
+    "noJobsFound": "No jobs found for this student.",
+    "questionsCount": "{count} questions",
+    "mockInterviewCount": "{count} mock interviews",
+    "lastSubmission": "Last submission: {date}",
+    "dash": "—",
+    "mockInterviewDate": "Interview on {date}",
+    "mockInterviewStatus": "Status: {status}",
+    "complete": "Complete",
+    "inProgress": "In Progress",
+    "unknown": "Unknown"
   }
 }
