@@ -56,38 +56,70 @@ export const GET = withAxiom(async (
         const { data: jobs, error: jobsError } = await supabase
             .from("custom_jobs")
             .select("*, custom_job_questions(*)")
+            .eq("user_id", coach.user_id)
             .eq("coach_id", coachId);
         if (jobsError || !jobs || jobs.length === 0) {
             logger.error("No curriculum found for this coach");
             throw new Error("No curriculum found for this coach.");
         }
 
+        let newJobId: string = "";
         // 4. Duplicate jobs and their questions
-        let firstNewJobId = null;
         for (const job of jobs) {
-            const newJobId = randomUUID();
-            if (!firstNewJobId) firstNewJobId = newJobId;
-            insertedJobIds.push(newJobId);
-            const {
-                id,
-                coach_id,
-                user_id,
-                created_at,
-                custom_job_questions,
-                ...rest
-            } = job;
-            // Insert new job for user
-            await supabase.from("custom_jobs").insert({
-                ...rest,
-                id: newJobId,
-                coach_id: coachId,
-                user_id: user.id,
-                created_at: new Date().toISOString(),
-            });
+            const { data: existingJob, error: existingJobError } =
+                await supabase
+                    .from("custom_jobs")
+                    .select("id")
+                    .eq("user_id", user.id)
+                    .eq("source_custom_job_id", job.id)
+                    .single();
+            if (existingJobError) {
+                logger.error("Error fetching existing job", {
+                    existingJobError,
+                });
+                throw existingJobError;
+            }
+            if (existingJob && existingJob.id) {
+                // Already duplicated, use existing job id
+                newJobId = existingJob.id;
+            } else {
+                newJobId = randomUUID();
+                insertedJobIds.push(newJobId);
+                const {
+                    id,
+                    coach_id,
+                    user_id,
+                    created_at,
+                    custom_job_questions,
+                    ...rest
+                } = job;
+                // Insert new job for user, set source_custom_job_id
+                await supabase.from("custom_jobs").insert({
+                    ...rest,
+                    id: newJobId,
+                    coach_id: coachId,
+                    user_id: user.id,
+                    created_at: new Date().toISOString(),
+                    source_custom_job_id: id,
+                });
+            }
             // Duplicate questions
             const questions = job.custom_job_questions;
             if (questions && questions.length > 0) {
                 for (const q of questions) {
+                    // Check if this question has already been duplicated for this job
+                    const {
+                        data: existingQuestion,
+                    } = await supabase
+                        .from("custom_job_questions")
+                        .select("id")
+                        .eq("custom_job_id", newJobId)
+                        .eq("source_custom_job_question_id", q.id)
+                        .single();
+                    if (existingQuestion && existingQuestion.id) {
+                        // Already duplicated, skip
+                        continue;
+                    }
                     const { id: qid, custom_job_id, created_at, ...qrest } = q;
                     const newQId = randomUUID();
                     insertedQuestionIds.push(newQId);
@@ -96,6 +128,7 @@ export const GET = withAxiom(async (
                         id: newQId,
                         custom_job_id: newJobId,
                         created_at: new Date().toISOString(),
+                        source_custom_job_question_id: qid,
                     });
                 }
             }
@@ -103,7 +136,7 @@ export const GET = withAxiom(async (
 
         // 6. Redirect to the first curriculum page
         const redirectUrl =
-            `${defaultUrl}/coaches/${coach.slug}/curriculum/${firstNewJobId}`;
+            `${defaultUrl}/coaches/${coach.slug}/curriculum/${newJobId}`;
         return NextResponse.redirect(redirectUrl);
     } catch (err) {
         logger.error("Error during registration, rolling back", { err });
@@ -135,7 +168,7 @@ const fetchCoach = async (coachId: string) => {
     // Fetch coach details first to be used for any redirect.
     const { data: coach, error: coachFetchError } = await supabase
         .from("coaches")
-        .select("id, slug")
+        .select("id, slug, user_id")
         .eq("id", coachId)
         .single();
 
