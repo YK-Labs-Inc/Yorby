@@ -2085,5 +2085,14 @@
       "submissionHistory": "Submission History",
       "noPreviousSubmissions": "No previous submissions."
     }
+  },
+  "AdminStudentMockInterviewView": {
+    "noMockInterviewsFound": "No mock interviews found for this student.",
+    "unknown": "Unknown",
+    "cohort": "Cohort {cohort}",
+    "unknownJob": "Unknown Job",
+    "mockInterviewCount": "{count} mock interviews",
+    "mockInterviewDate": "Interview on {date}",
+    "mockInterviewStatus": "Status: {status}"
   }
 }

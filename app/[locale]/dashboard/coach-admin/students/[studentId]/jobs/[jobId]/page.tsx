@@ -14,7 +14,6 @@ import { CheckCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { Tables } from "@/utils/supabase/database.types";
 import StudentQuestionSubmissions from "./StudentQuestionSubmissions";
-import { useSearchParams } from "next/navigation";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
