@@ -1,12 +1,12 @@
-import { createAdminClient } from "@/utils/supabase/server";
+import {
+  createAdminClient,
+  createSupabaseServerClient,
+} from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { Card, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle, Clock } from "lucide-react";
-import { Link } from "@/i18n/routing";
 import MockInterviewReview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/review/MockInterviewReview";
+import { JobData } from "@/app/[locale]/dashboard/coach-admin/components/StudentActivitySidebar";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -19,40 +19,61 @@ const fetchStudent = async (studentId: string) => {
   return data;
 };
 
-const fetchCustomJobAndMockInterviews = async (jobId: string) => {
+const fetchCoach = async () => {
   const supabase = await createSupabaseServerClient();
-  const { data: job, error } = await supabase
-    .from("custom_jobs")
-    .select(
-      `*,
-        custom_job_mock_interviews(
-            *
-        )`
-    )
-    .eq("id", jobId)
+  const {
+    data: { user: coachUser },
+  } = await supabase.auth.getUser();
+  if (!coachUser) return null;
+  const { data: coach } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", coachUser.id)
     .single();
-  if (error) return null;
-  return job;
+  return coach;
 };
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+const fetchAllStudentJobsAndRelatedData = async (
+  studentId: string,
+  coachId: string
+): Promise<JobData[]> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select(
+      `
+        id,
+        job_title,
+        custom_job_questions (
+          id,
+          question,
+          created_at,
+          custom_job_question_submissions (
+            id,
+            created_at
+          )
+        ),
+        custom_job_mock_interviews (
+          id,
+          created_at,
+          status
+        )
+    `
+    )
+    .eq("user_id", studentId)
+    .eq("coach_id", coachId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching all student jobs for mock interview view", {
+      error,
+      studentId,
+      coachId,
+    });
+    return [];
+  }
+  return (data as JobData[]) || [];
 };
 
 type AdminStudentMockInterviewViewProps = {
@@ -60,150 +81,57 @@ type AdminStudentMockInterviewViewProps = {
     studentId: string;
     jobId: string;
     mockInterviewId: string;
+    locale: string;
   }>;
 };
 
 const AdminStudentMockInterviewView = async ({
   params,
 }: AdminStudentMockInterviewViewProps) => {
-  const t = await getTranslations("AdminStudentHeader");
-  const tAdmin = await getTranslations("AdminStudentMockInterviewView");
+  const t = await getTranslations("AdminStudentMockInterviewView");
   const { studentId, jobId, mockInterviewId } = await params;
-  const student = await fetchStudent(studentId);
-  if (!student) return notFound();
-  const user = student.user;
-  const name = user.user_metadata?.full_name || user.email || tAdmin("unknown");
-  const role = user.user_metadata?.role || "";
-  const started = formatDate(user.created_at);
-  const job = await fetchCustomJobAndMockInterviews(jobId);
-  const mockInterviews = job?.custom_job_mock_interviews || [];
-  if (!mockInterviews || mockInterviews.length === 0) {
-    return (
-      <div className="flex">
-        <div className="w-80 min-h-screen bg-gray-50 border-r p-6">
-          {tAdmin("noMockInterviewsFound")}
-        </div>
-      </div>
-    );
-  }
-  const selectedMockInterview =
-    mockInterviews.find((mi) => mi.id === mockInterviewId) || mockInterviews[0];
+  const studentData = await fetchStudent(studentId);
+  if (!studentData?.user) return notFound();
 
-  const configureStatus = (status: string) => {
-    switch (status) {
-      case "complete":
-        return tAdmin("complete");
-      case "in_progress":
-        return tAdmin("in_progress");
-      default:
-        return tAdmin("unknown");
+  const coach = await fetchCoach();
+  if (!coach) return notFound();
+
+  const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
+    studentId,
+    coach.id
+  );
+
+  const currentJob = allJobsForStudent.find((j) => j.id === jobId);
+  const currentMockInterview = currentJob?.custom_job_mock_interviews.find(
+    (mi) => mi.id === mockInterviewId
+  );
+
+  if (!currentMockInterview) {
+    if (
+      mockInterviewId === "no-mock-interviews" ||
+      !currentJob?.custom_job_mock_interviews ||
+      currentJob.custom_job_mock_interviews.length === 0
+    ) {
+    } else {
+      return notFound();
     }
-  };
+  }
+
   return (
-    <div className="relative w-full min-h-screen bg-white">
-      {/* Header Bar */}
-      <div className="sticky top-0 z-30 w-full bg-white border-b flex flex-col md:flex-row items-start md:items-center justify-between px-6 py-4 gap-2 md:gap-0">
-        <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
-          <div>
-            <div className="text-xl font-semibold text-gray-900">{name}</div>
-            <div className="text-sm text-gray-500 flex flex-row gap-2 items-center">
-              {role && <span>{role}</span>}
-            </div>
-          </div>
+    <>
+      {currentMockInterview && mockInterviewId !== "no-mock-interviews" ? (
+        <MockInterviewReview mockInterviewId={currentMockInterview.id} />
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-600 text-lg">
+            {currentJob &&
+            (currentJob.custom_job_mock_interviews?.length || 0) === 0
+              ? t("noMockInterviewsInJob")
+              : t("selectMockInterviewToView")}
+          </p>
         </div>
-        <div className="flex flex-row items-center gap-6 mt-2 md:mt-0">
-          <div className="flex items-center gap-1 text-gray-500">
-            <div className="flex flex-col gap-2 items-center">
-              <div className="flex flex-row items-center gap-1">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="font-medium text-gray-900">
-                  {t("started")}
-                </span>
-              </div>
-              <span className="ml-1">{started}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Sidebar and Main Content Row */}
-      <div
-        className="flex flex-row w-full min-h-0"
-        style={{ height: "calc(100vh - 90px)" }}
-      >
-        {/* Sidebar */}
-        <aside className="w-80 border-r flex flex-col overflow-y-auto h-full min-h-0">
-          <div className="p-6 border-b">
-            <Card className="w-full bg-white border rounded-lg shadow-sm">
-              <div className="px-4 py-3">
-                <CardTitle className="text-lg font-semibold text-gray-900">
-                  {job?.job_title || tAdmin("unknownJob")}
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-500">
-                  {tAdmin("mockInterviewCount", {
-                    count: mockInterviews.length,
-                  })}
-                </CardDescription>
-              </div>
-            </Card>
-          </div>
-          <div className="flex-1 p-4 overflow-y-auto">
-            <ul className="space-y-3">
-              {mockInterviews.map((mi) => (
-                <Link
-                  key={mi.id}
-                  href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/mockInterviews/${mi.id}`}
-                  className="block"
-                >
-                  <li
-                    className={`rounded-lg px-4 py-3 flex flex-col gap-1 border transition-all cursor-pointer ${
-                      selectedMockInterview.id === mi.id
-                        ? "ring-2 ring-primary border-primary bg-primary/10"
-                        : mi.status === "complete"
-                          ? "bg-green-50 border-green-200"
-                          : "bg-white border"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">
-                        {tAdmin("mockInterviewDate", {
-                          date: formatDate(mi.created_at),
-                        })}
-                      </span>
-                      {mi.status === "complete" ? (
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      ) : (
-                        <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {tAdmin("mockInterviewStatus", {
-                        status: configureStatus(mi.status),
-                      })}
-                    </div>
-                  </li>
-                </Link>
-              ))}
-            </ul>
-          </div>
-        </aside>
-        {/* Main Content */}
-        <div className="flex-1 px-4 md:px-8 py-6 overflow-y-auto h-full min-h-0">
-          <MockInterviewReview mockInterviewId={selectedMockInterview.id} />
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

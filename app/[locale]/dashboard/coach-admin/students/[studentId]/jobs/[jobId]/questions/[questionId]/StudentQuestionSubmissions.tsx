@@ -1,10 +1,9 @@
-"use client";
-
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/utils/supabase/database.types";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
+import { notFound } from "next/navigation";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -18,21 +17,32 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
-export default function StudentQuestionSubmissions({
+export default async function StudentQuestionSubmissions({
   question,
   submissions,
+  currentSubmissionId,
+  studentId,
+  jobId,
+  questionId,
 }: {
   question: Tables<"custom_job_questions">;
   submissions: Tables<"custom_job_question_submissions">[];
+  currentSubmissionId?: string;
+  studentId: string;
+  jobId: string;
+  questionId: string;
 }) {
-  const t = useTranslations("AdminStudentView.studentQuestionSubmissions");
-  // Default to the most recent submission
-  const [selectedSubmissionId, setSelectedSubmissionId] = useState(
-    submissions.length > 0 ? submissions[0].id : null
+  const t = await getTranslations(
+    "AdminStudentView.studentQuestionSubmissions"
   );
   const currentSubmission =
-    submissions.find((s) => s.id === selectedSubmissionId) ||
+    submissions.find((s) => s.id === currentSubmissionId) ||
     (submissions.length > 0 ? submissions[0] : null);
+
+  if (!currentSubmission) {
+    return notFound();
+  }
+
   // Feedback structure: { pros: string[], cons: string[] }
   const feedback = currentSubmission?.feedback as {
     pros: string[];
@@ -137,20 +147,23 @@ export default function StudentQuestionSubmissions({
                 <li
                   key={submission.id}
                   className={`border rounded-lg p-3 bg-white cursor-pointer transition-colors ${
-                    submission.id === selectedSubmissionId
+                    submission.id === currentSubmission.id
                       ? "ring-2 ring-primary border-primary bg-primary/10"
                       : "hover:bg-gray-50"
                   }`}
-                  onClick={() => setSelectedSubmissionId(submission.id)}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-500">
-                      {formatDate(submission.created_at)}
-                    </span>
-                  </div>
-                  <p className="text-gray-800 line-clamp-3">
-                    {submission.answer}
-                  </p>
+                  <Link
+                    href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-500">
+                        {formatDate(submission.created_at)}
+                      </span>
+                    </div>
+                    <p className="text-gray-800 line-clamp-3">
+                      {submission.answer}
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>

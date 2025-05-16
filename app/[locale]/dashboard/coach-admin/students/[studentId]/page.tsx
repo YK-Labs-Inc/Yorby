@@ -12,7 +12,15 @@ const AdminStudentPage = async ({
   const { studentId } = await params;
   const supabase = await createSupabaseServerClient();
   const { data: studentCustomJobs, error: studentCustomJobsError } =
-    await supabase.from("custom_jobs").select("*").eq("user_id", studentId);
+    await supabase
+      .from("custom_jobs")
+      .select(
+        `*,
+        custom_job_questions(
+            *
+        )`
+      )
+      .eq("user_id", studentId);
   if (studentCustomJobsError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -34,7 +42,7 @@ const AdminStudentPage = async ({
     );
   }
   redirect(
-    `/dashboard/coach-admin/students/${studentId}/jobs/${studentCustomJobs[0].id}`
+    `/dashboard/coach-admin/students/${studentId}/jobs/${studentCustomJobs[0].id}/questions/${studentCustomJobs[0].custom_job_questions[0].id}`
   );
 };
 
