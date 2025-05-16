@@ -44,7 +44,8 @@ INSERT INTO "public"."coach_branding" ("coach_id", "created_at", "primary_color_
 INSERT INTO "public"."custom_jobs" ("id", "created_at", "user_id", "job_title", "job_description", "company_name", "company_description", "status", "coach_id") VALUES
 	('eb2c21e3-e184-4f64-8c83-08aa347af965', '2025-05-11 13:59:28.712948+00', 'fc9a6649-116b-42aa-b884-98ef1bccdbe6', 'Senior Software Engineer', 'A general software engineering role focusing on full-stack development.', 'Tech Solutions LLC', 'A dynamic tech company innovating in cloud services.', 'unlocked', NULL),
 	('613da0f7-fc6d-41fc-880e-990cce699911', '2025-05-11 13:59:28.712948+00', 'e31f799f-a473-49c0-bd35-a2ff073c3b62', 'Junior Developer', 'An entry-level developer role focused on learning and contributing to projects.', 'Startup Innovators Inc.', 'A fast-paced startup working on cutting-edge mobile apps.', 'unlocked', NULL),
-	('da89fe98-61f6-4049-bc77-6ad6b576eb0c', '2025-05-11 13:59:28.712948+00', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Tech Sales Jack', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802');
+	('da89fe98-61f6-4049-bc77-6ad6b576eb0c', '2025-05-11 13:59:28.712948+00', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Tech Sales Jack', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802'),
+	('90801bef-affb-437d-a33c-cb7494d853b1', '2025-05-11 13:59:28.712948+00', '823fd5c1-185c-4ac0-a20e-b783fad3350c', 'Tech Sales Jack Student', 'This is a sample job description for the curriculum created by Test Coach.', 'Coach Solutions Inc.', 'A leading provider of interview coaching.', 'unlocked', '9cdc0028-c4ae-49ac-af27-7342c661a802');
 
 
 --
@@ -115,6 +116,22 @@ Thank the candidate for their time and tell them that the interview has ended.
 -- Data for Name: custom_job_mock_interview_feedback; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO "public"."custom_job_mock_interview_feedback" (
+  "id", "created_at", "input_token_count", "output_token_count", "mock_interview_id", "overview", "pros", "cons", "key_improvements", "job_fit_analysis", "job_fit_percentage", "score"
+) VALUES (
+  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 
+  NOW(), 
+  0, 
+  0, 
+  '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 
+  'lorem ipsum', 
+  '{"lorem ipsum", "lorem ipsum"}', 
+  '{"lorem ipsum", "lorem ipsum"}', 
+  '{"lorem ipsum", "lorem ipsum"}',
+  'lorem ipsum', 
+  0, 
+  0
+);
 
 
 --
@@ -315,7 +332,10 @@ What are your top reps doing consistently to lead and win?
 
 Are there any resources you would suggest I check out in terms of getting more familiar with the product and market as I go through the interview process?
 
-What caught your eye about my outreach?', 'da89fe98-61f6-4049-bc77-6ad6b576eb0c', 'user_generated');
+What caught your eye about my outreach?', 'da89fe98-61f6-4049-bc77-6ad6b576eb0c', 'user_generated'),
+('cdbb0af1-1ee3-42e8-9901-cfa342dfcc58', '2025-05-11 13:59:28.712948+00', 'Tell me about yourself.', 'Structure your answer to be a brief, compelling summary of your professional background, key skills, and career aspirations. Relate your story to the job you''''re applying for.', '90801bef-affb-437d-a33c-cb7494d853b1', 'user_generated'),
+('7936eaf5-e1e6-4316-81ae-f83ab5ca3e26', '2025-05-11 13:59:28.712948+00', 'Why are you interested in this role?', 'Demonstrate genuine interest by highlighting specific aspects of the role, company, or industry that appeal to you. Connect your skills and experience to the job requirements.', '90801bef-affb-437d-a33c-cb7494d853b1', 'user_generated'),
+('55a20866-8315-4aa6-9020-10080a1d5014', '2025-05-11 13:59:28.712948+00', 'What are your strengths?', 'Identify 2-3 key strengths that are relevant to the job. Provide specific examples of how you''''ve used these strengths to achieve positive outcomes in previous roles.', '90801bef-affb-437d-a33c-cb7494d853b1', 'user_generated');
 
 
 --
@@ -422,6 +442,16 @@ Well, in this role, I would be looking to open up communication channels, build 
 -- Data for Name: custom_job_question_submissions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO "public"."custom_job_question_submissions" ("id", "created_at", "custom_job_question_id", "answer", "feedback") VALUES
+	('11111111-1111-1111-1111-111111111111', NOW(), 'cdbb0af1-1ee3-42e8-9901-cfa342dfcc58', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('22222222-2222-2222-2222-222222222222', NOW(), '7936eaf5-e1e6-4316-81ae-f83ab5ca3e26', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('33333333-3333-3333-3333-333333333333', NOW(), '7936eaf5-e1e6-4316-81ae-f83ab5ca3e26', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('44444444-4444-4444-4444-444444444444', NOW(), '7936eaf5-e1e6-4316-81ae-f83ab5ca3e26', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('55555555-5555-5555-5555-555555555555', NOW(), '7936eaf5-e1e6-4316-81ae-f83ab5ca3e26', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('66666666-6666-6666-6666-666666666666', NOW(), '55a20866-8315-4aa6-9020-10080a1d5014', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('77777777-7777-7777-7777-777777777777', NOW(), '55a20866-8315-4aa6-9020-10080a1d5014', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('88888888-8888-8888-8888-888888888888', NOW(), '55a20866-8315-4aa6-9020-10080a1d5014', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}'),
+	('99999999-9999-9999-9999-999999999999', NOW(), '55a20866-8315-4aa6-9020-10080a1d5014', 'lorem ipsum', '{"pros": ["lorem ipsum", "lorem ipsum"], "cons": ["lorem ipsum", "lorem ipsum"]}');
 
 
 --
@@ -469,12 +499,29 @@ Well, in this role, I would be looking to open up communication channels, build 
 --
 -- Data for Name: mock_interview_messages; Type: TABLE DATA; Schema: public; Owner: postgres
 --
+INSERT INTO "public"."mock_interview_messages" (
+  "id", "created_at", "mock_interview_id", "role", "text"
+) VALUES
+  ('bbbbbbb1-bbbb-bbbb-bbbb-bbbbbbbbbbb1', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'user',  'lorem ipsum dolor sit amet.'),
+  ('bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbb2', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'model', 'lorem ipsum dolor sit amet.'),
+  ('bbbbbbb3-bbbb-bbbb-bbbb-bbbbbbbbbbb3', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'user',  'lorem ipsum dolor sit amet.'),
+  ('bbbbbbb4-bbbb-bbbb-bbbb-bbbbbbbbbbb4', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'model', 'lorem ipsum dolor sit amet.'),
+  ('bbbbbbb5-bbbb-bbbb-bbbb-bbbbbbbbbbb5', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'user',  'lorem ipsum dolor sit amet.'),
+  ('bbbbbbb6-bbbb-bbbb-bbbb-bbbbbbbbbbb6', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'model', 'lorem ipsum dolor sit amet.');
 
 
 
 --
 -- Data for Name: mock_interview_question_feedback; Type: TABLE DATA; Schema: public; Owner: postgres
 --
+INSERT INTO "public"."mock_interview_question_feedback" (
+  "id", "created_at", "mock_interview_id", "question", "answer", "pros", "cons", "score"
+) VALUES
+  ('aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'lorem ipsum?', 'lorem ipsum', '{"lorem ipsum", "lorem ipsum"}', '{"lorem ipsum", "lorem ipsum"}', 4),
+  ('aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'lorem ipsum?', 'lorem ipsum', '{"lorem ipsum", "lorem ipsum"}', '{"lorem ipsum", "lorem ipsum"}', 3),
+  ('aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'lorem ipsum?', 'lorem ipsum', '{"lorem ipsum", "lorem ipsum"}', '{"lorem ipsum", "lorem ipsum"}', 5),
+  ('aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'lorem ipsum?', 'lorem ipsum', '{"lorem ipsum", "lorem ipsum"}', '{"lorem ipsum", "lorem ipsum"}', 2),
+  ('aaaaaaa5-aaaa-aaaa-aaaa-aaaaaaaaaaa5', NOW(), '36e4d441-86e2-44d1-97fb-04f9fb0bccf0', 'lorem ipsum?', 'lorem ipsum', '{"lorem ipsum", "lorem ipsum"}', '{"lorem ipsum", "lorem ipsum"}', 4);
 
 
 
