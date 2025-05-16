@@ -72,7 +72,7 @@ export const GET = withAxiom(async (
                     .select("id")
                     .eq("user_id", user.id)
                     .eq("source_custom_job_id", job.id)
-                    .single();
+                    .maybeSingle();
             if (existingJobError) {
                 logger.error("Error fetching existing job", {
                     existingJobError,
@@ -115,9 +115,8 @@ export const GET = withAxiom(async (
                         .select("id")
                         .eq("custom_job_id", newJobId)
                         .eq("source_custom_job_question_id", q.id)
-                        .single();
+                        .maybeSingle();
                     if (existingQuestion && existingQuestion.id) {
-                        // Already duplicated, skip
                         continue;
                     }
                     const { id: qid, custom_job_id, created_at, ...qrest } = q;
