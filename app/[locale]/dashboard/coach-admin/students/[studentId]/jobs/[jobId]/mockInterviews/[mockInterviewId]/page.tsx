@@ -6,7 +6,6 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, Clock } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { Tables } from "@/utils/supabase/database.types";
 import MockInterviewReview from "@/app/[locale]/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/review/MockInterviewReview";
 
 const fetchStudent = async (studentId: string) => {
@@ -20,44 +19,20 @@ const fetchStudent = async (studentId: string) => {
   return data;
 };
 
-const fetchCoach = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-  } = await supabase.auth.getUser();
-  if (!coachUser) return notFound();
-  const { data: coach } = await supabase
-    .from("coaches")
-    .select("id")
-    .eq("user_id", coachUser.id)
-    .single();
-  if (!coach) return notFound();
-  return coach;
-};
-
-const fetchCustomJob = async (jobId: string) => {
+const fetchCustomJobAndMockInterviews = async (jobId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data: job, error } = await supabase
     .from("custom_jobs")
-    .select("*")
+    .select(
+      `*,
+        custom_job_mock_interviews(
+            *
+        )`
+    )
     .eq("id", jobId)
     .single();
   if (error) return null;
   return job;
-};
-
-const fetchMockInterviews = async (jobId: string) => {
-  const supabase = await createSupabaseServerClient();
-  const { data: mockInterviews, error } = await supabase
-    .from("custom_job_mock_interviews")
-    .select("*")
-    .eq("custom_job_id", jobId)
-    .order("created_at", { ascending: false });
-  if (error) {
-    console.error("hey error", error);
-    return [];
-  }
-  return mockInterviews;
 };
 
 const formatDate = (dateString: string) => {
@@ -99,12 +74,9 @@ const AdminStudentMockInterviewView = async ({
   const user = student.user;
   const name = user.user_metadata?.full_name || user.email || tAdmin("unknown");
   const role = user.user_metadata?.role || "";
-  const cohort = user.user_metadata?.cohort || "";
   const started = formatDate(user.created_at);
-  const job = await fetchCustomJob(jobId);
-  console.log("hey job", job);
-  const mockInterviews = await fetchMockInterviews(jobId);
-  console.log("hey mockInterviews", mockInterviews);
+  const job = await fetchCustomJobAndMockInterviews(jobId);
+  const mockInterviews = job?.custom_job_mock_interviews || [];
   if (!mockInterviews || mockInterviews.length === 0) {
     return (
       <div className="flex">
@@ -116,6 +88,17 @@ const AdminStudentMockInterviewView = async ({
   }
   const selectedMockInterview =
     mockInterviews.find((mi) => mi.id === mockInterviewId) || mockInterviews[0];
+
+  const configureStatus = (status: string) => {
+    switch (status) {
+      case "complete":
+        return tAdmin("complete");
+      case "in_progress":
+        return tAdmin("in_progress");
+      default:
+        return tAdmin("unknown");
+    }
+  };
   return (
     <div className="relative w-full min-h-screen bg-white">
       {/* Header Bar */}
@@ -125,8 +108,6 @@ const AdminStudentMockInterviewView = async ({
             <div className="text-xl font-semibold text-gray-900">{name}</div>
             <div className="text-sm text-gray-500 flex flex-row gap-2 items-center">
               {role && <span>{role}</span>}
-              {role && cohort && <span className="mx-1">&bull;</span>}
-              {cohort && <span>{tAdmin("cohort", { cohort })}</span>}
             </div>
           </div>
         </div>
@@ -207,7 +188,9 @@ const AdminStudentMockInterviewView = async ({
                       )}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {tAdmin("mockInterviewStatus", { status: mi.status })}
+                      {tAdmin("mockInterviewStatus", {
+                        status: configureStatus(mi.status),
+                      })}
                     </div>
                   </li>
                 </Link>

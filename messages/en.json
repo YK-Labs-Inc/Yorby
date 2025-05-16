@@ -2067,7 +2067,6 @@
   "AdminStudentView": {
     "noJobsFound": "No jobs found for this student.",
     "unknown": "Unknown",
-    "cohort": "Cohort {cohort}",
     "questionsCount": "{count} questions",
     "lastSubmission": "Last submission: {date}",
     "dash": "—",
@@ -2083,16 +2082,18 @@
       "noFeedback": "No feedback available.",
       "noSubmissionsYet": "No submissions yet.",
       "submissionHistory": "Submission History",
-      "noPreviousSubmissions": "No previous submissions."
+      "unknown": "Unknown"
     }
   },
   "AdminStudentMockInterviewView": {
     "noMockInterviewsFound": "No mock interviews found for this student.",
     "unknown": "Unknown",
-    "cohort": "Cohort {cohort}",
     "unknownJob": "Unknown Job",
     "mockInterviewCount": "{count} mock interviews",
     "mockInterviewDate": "Interview on {date}",
-    "mockInterviewStatus": "Status: {status}"
+    "mockInterviewStatus": "Status: {status}",
+    "noPreviousSubmissions": "No previous submissions.",
+    "complete": "Complete",
+    "in_progress": "In Progress"
   }
 }

@@ -87,7 +87,6 @@ const AdminStudentView = async ({
   const user = student.user;
   const name = user.user_metadata?.full_name || user.email || tAdmin("unknown");
   const role = user.user_metadata?.role || "";
-  const cohort = user.user_metadata?.cohort || "";
   function formatDate(dateString: string) {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -140,8 +139,6 @@ const AdminStudentView = async ({
             <div className="text-xl font-semibold text-gray-900">{name}</div>
             <div className="text-sm text-gray-500 flex flex-row gap-2 items-center">
               {role && <span>{role}</span>}
-              {role && cohort && <span className="mx-1">&bull;</span>}
-              {cohort && <span>{tAdmin("cohort", { cohort })}</span>}
             </div>
           </div>
         </div>
