@@ -4,13 +4,29 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { redirect } from "next/navigation";
 
 // Define the form schema with validation
 const questionFormSchema = z.object({
@@ -33,15 +49,17 @@ interface QuestionFormProps {
     answerGuidelines?: string;
     questionType?: "ai_generated" | "user_generated";
   };
-  onSubmit: (formData: FormData) => Promise<{ success: boolean; message: string }>;
-  onCancel: () => void;
+  onSubmit: (
+    formData: FormData
+  ) => Promise<{ success: boolean; message: string }>;
+  onCancelRedirectUrl: string;
   isEditing?: boolean;
 }
 
 export default function QuestionForm({
   initialValues = {},
   onSubmit,
-  onCancel,
+  onCancelRedirectUrl,
   isEditing = false,
 }: QuestionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,16 +79,16 @@ export default function QuestionForm({
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       const result = await onSubmit(formData);
-      
+
       if (!result.success) {
         setError(result.message);
         setIsSubmitting(false);
         return;
       }
-      
+
       // Form submitted successfully, let the parent component handle navigation
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -83,7 +101,11 @@ export default function QuestionForm({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Interview Question" : "Create New Interview Question"}</CardTitle>
+        <CardTitle>
+          {isEditing
+            ? "Edit Interview Question"
+            : "Create New Interview Question"}
+        </CardTitle>
         <CardDescription>
           {isEditing
             ? "Update this interview question and answer guidelines."
@@ -110,10 +132,10 @@ export default function QuestionForm({
                 <FormItem>
                   <FormLabel>Question*</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter the interview question..." 
-                      className="min-h-[100px]" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter the interview question..."
+                      className="min-h-[100px]"
+                      {...field}
                       name="question"
                       defaultValue={initialValues.question}
                     />
@@ -134,16 +156,17 @@ export default function QuestionForm({
                 <FormItem>
                   <FormLabel>Answer Guidelines*</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter guidelines for what makes a good answer..." 
-                      className="min-h-[150px]" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter guidelines for what makes a good answer..."
+                      className="min-h-[150px]"
+                      {...field}
                       name="answerGuidelines"
                       defaultValue={initialValues.answerGuidelines}
                     />
                   </FormControl>
                   <FormDescription>
-                    Guidelines for what constitutes a good answer to this question.
+                    Guidelines for what constitutes a good answer to this
+                    question.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -160,7 +183,9 @@ export default function QuestionForm({
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={initialValues.questionType || "user_generated"}
+                      defaultValue={
+                        initialValues.questionType || "user_generated"
+                      }
                       className="flex flex-col space-y-1"
                       name="questionType"
                     >
@@ -183,7 +208,8 @@ export default function QuestionForm({
                     </RadioGroup>
                   </FormControl>
                   <FormDescription>
-                    Specify whether this question was manually created or generated by AI.
+                    Specify whether this question was manually created or
+                    generated by AI.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -191,25 +217,24 @@ export default function QuestionForm({
             />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => redirect(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isEditing ? "Saving..." : "Create Question"}
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
-                isEditing ? "Save Changes" : "Create Question"
+                "Create Question"
               )}
             </Button>
           </CardFooter>

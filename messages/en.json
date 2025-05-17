@@ -1859,6 +1859,47 @@
     },
     "Header": {
       "started": "Started"
+    },
+    "programsPage": {
+      "title": "Program Management",
+      "createProgramButton": "Create Program",
+      "createFirstProgramButton": "Create Your First Program",
+      "noProgramsTitle": "No Program Created Yet",
+      "noProgramsDescription": "Get started by creating your first program.",
+      "errorTitle": "Error Loading Program",
+      "errorDescription": "There was a problem loading your program. Please try again later.",
+      "yourProgramsTitle": "Your Programs",
+      "yourProgramsDescription": "Manage your programs and their questions.",
+      "table": {
+        "programTitle": "Program Title",
+        "company": "Company",
+        "questions": "Questions",
+        "created": "Created",
+        "actions": "Actions",
+        "viewDetails": "View Details",
+        "editProgram": "Edit Program",
+        "deleteProgram": "Delete Program"
+      },
+      "createdAtFormat": "{date, date, medium}",
+      "questionsCount": "{count}",
+      "actionsMenu": {
+        "openMenu": "Open menu"
+      },
+      "programForm": {
+        "titleCreate": "Create New Program",
+        "titleEdit": "Edit Program",
+        "programTitleLabel": "Program Title*",
+        "programTitlePlaceholder": "e.g., Software Engineering Immersive, Product Management Bootcamp",
+        "cancel": "Cancel",
+        "create": "Create Program",
+        "saveChanges": "Save Changes",
+        "creating": "Creating...",
+        "saving": "Saving...",
+        "errorTitle": "Error",
+        "genericError": "An unexpected error occurred. Please try again.",
+        "requiredTitle": "Title must be at least 3 characters.",
+        "requiredDescription": "Description must be at least 10 characters."
+      }
     }
   },
   "AdminStudentView": {

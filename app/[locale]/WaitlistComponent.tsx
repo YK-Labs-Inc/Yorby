@@ -16,7 +16,7 @@ const WaitlistComponent = () => {
   const [email, setEmail] = useState("");
 
   const searchParams = useSearchParams();
-  const signedUp = searchParams.get("signed_up") === "true";
+  const signedUp = searchParams?.get("signed_up") === "true";
 
   if (signedUp) {
     return (

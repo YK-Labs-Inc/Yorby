@@ -10,13 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -29,21 +22,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Plus,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  ChevronRight,
-  Home,
-  BookOpen,
-} from "lucide-react";
-import { format } from "date-fns";
+import { Plus, MoreVertical, Pencil, Trash2, ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 
 async function getCoachJobs(userId: string) {
   const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({ function: "getCoachJobs", userId });
 
   // First, get the coach ID for the current user
   const { data: coachData, error: coachError } = await supabase
@@ -53,7 +40,8 @@ async function getCoachJobs(userId: string) {
     .single();
 
   if (coachError || !coachData) {
-    console.error("Error fetching coach data:", coachError);
+    logger.error("Error fetching coach data:", coachError);
+    await logger.flush();
     return { jobs: [], error: coachError || new Error("Coach not found") };
   }
 
@@ -70,10 +58,12 @@ async function getCoachJobs(userId: string) {
     `
     )
     .eq("coach_id", coachData.id)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (jobsError) {
-    console.error("Error fetching jobs:", jobsError);
+    logger.error("Error fetching jobs:", jobsError);
+    await logger.flush();
     return { jobs: [], error: jobsError };
   }
 
@@ -84,8 +74,9 @@ async function getCoachJobs(userId: string) {
   };
 }
 
-export default async function CurriculumPage() {
+export default async function ProgramsPage() {
   const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("coachAdminPortal.programsPage");
 
   // Get the current user
   const {
@@ -96,58 +87,19 @@ export default async function CurriculumPage() {
     return redirect("/sign-in");
   }
 
-  // Get coach jobs
-  const { jobs, coachId, error } = await getCoachJobs(user.id);
+  const { jobs, error } = await getCoachJobs(user.id);
 
   return (
     <div className="container mx-auto py-6">
-      {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin">
-              Coach Admin
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href="/dashboard/coach-admin/curriculum"
-              className="font-semibold"
-            >
-              <BookOpen className="h-4 w-4 mr-1" />
-              Curriculum
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Curriculum Management
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Create and manage job profiles with interview questions for your
-            students.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         </div>
         <Button asChild>
-          <Link href="/dashboard/coach-admin/curriculum/new">
+          <Link href="/dashboard/coach-admin/programs/new">
             <Plus className="h-4 w-4 mr-2" />
-            Create Job
+            {t("createProgramButton")}
           </Link>
         </Button>
       </div>
@@ -157,12 +109,9 @@ export default async function CurriculumPage() {
         <Card className="mb-6 border-destructive">
           <CardHeader>
             <CardTitle className="text-destructive">
-              Error Loading Jobs
+              {t("errorTitle")}
             </CardTitle>
-            <CardDescription>
-              There was a problem loading your curriculum jobs. Please try again
-              later.
-            </CardDescription>
+            <CardDescription>{t("errorDescription")}</CardDescription>
           </CardHeader>
         </Card>
       )}
@@ -171,82 +120,87 @@ export default async function CurriculumPage() {
       {!error && jobs.length === 0 && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>No Jobs Created Yet</CardTitle>
-            <CardDescription>
-              Get started by creating your first job profile for your
-              curriculum.
-            </CardDescription>
+            <CardTitle>{t("noProgramsTitle")}</CardTitle>
+            <CardDescription>{t("noProgramsDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
               <Link href="/dashboard/coach-admin/curriculum/new">
                 <Plus className="h-4 w-4 mr-2" />
-                Create Your First Job
+                {t("createFirstProgramButton")}
               </Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Jobs table */}
+      {/* Programs table */}
       {!error && jobs.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Your Job Profiles</CardTitle>
-            <CardDescription>
-              Manage your curriculum job profiles and their interview questions.
-            </CardDescription>
+            <CardTitle>{t("yourProgramsTitle")}</CardTitle>
+            <CardDescription>{t("yourProgramsDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Questions</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("table.programTitle")}</TableHead>
+                  <TableHead>{t("table.company")}</TableHead>
+                  <TableHead>{t("table.questions")}</TableHead>
+                  <TableHead>{t("table.created")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {jobs.map((job) => (
-                  <TableRow key={job.id}>
+                {jobs.map((program) => (
+                  <TableRow key={program.id}>
                     <TableCell className="font-medium">
                       <Link
-                        href={`/dashboard/coach-admin/curriculum/${job.id}`}
+                        href={`/dashboard/coach-admin/programs/${program.id}`}
                         className="hover:underline text-primary"
                       >
-                        {job.job_title}
+                        {program.job_title}
                       </Link>
                     </TableCell>
-                    <TableCell>{job.company_name || "—"}</TableCell>
-                    <TableCell>{job.custom_job_questions[0].count}</TableCell>
+                    <TableCell>{program.company_name || "—"}</TableCell>
                     <TableCell>
-                      {format(new Date(job.created_at), "MMM d, yyyy")}
+                      {t("questionsCount", {
+                        count: program.custom_job_questions[0].count,
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {t("createdAtFormat", {
+                        date: new Date(program.created_at),
+                      })}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
                             <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
+                            <span className="sr-only">
+                              {t("actionsMenu.openMenu")}
+                            </span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/dashboard/coach-admin/curriculum/${job.id}`}
+                              href={`/dashboard/coach-admin/programs/${program.id}`}
                             >
                               <ChevronRight className="h-4 w-4 mr-2" />
-                              View Details
+                              {t("table.viewDetails")}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link
-                              href={`/dashboard/coach-admin/curriculum/${job.id}/edit`}
+                              href={`/dashboard/coach-admin/programs/${program.id}/edit`}
                             >
                               <Pencil className="h-4 w-4 mr-2" />
-                              Edit Job
+                              {t("table.editProgram")}
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -254,10 +208,10 @@ export default async function CurriculumPage() {
                             asChild
                           >
                             <Link
-                              href={`/dashboard/coach-admin/curriculum/${job.id}/delete`}
+                              href={`/dashboard/coach-admin/programs/${program.id}/delete`}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Job
+                              {t("table.deleteProgram")}
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>

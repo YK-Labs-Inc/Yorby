@@ -4,12 +4,28 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { redirect } from "next/navigation";
 
 // Define the form schema with validation
 const sampleAnswerFormSchema = z.object({
@@ -24,15 +40,17 @@ interface SampleAnswerFormProps {
   initialValues?: {
     answer?: string;
   };
-  onSubmit: (formData: FormData) => Promise<{ success: boolean; message: string }>;
-  onCancel: () => void;
+  onSubmit: (
+    formData: FormData
+  ) => Promise<{ success: boolean; message: string }>;
+  onCancelRedirectUrl: string;
   isEditing?: boolean;
 }
 
 export default function SampleAnswerForm({
   initialValues = {},
   onSubmit,
-  onCancel,
+  onCancelRedirectUrl,
   isEditing = false,
 }: SampleAnswerFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,16 +68,16 @@ export default function SampleAnswerForm({
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       const result = await onSubmit(formData);
-      
+
       if (!result.success) {
         setError(result.message);
         setIsSubmitting(false);
         return;
       }
-      
+
       // Form submitted successfully, let the parent component handle navigation
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
@@ -72,7 +90,9 @@ export default function SampleAnswerForm({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Sample Answer" : "Add Sample Answer"}</CardTitle>
+        <CardTitle>
+          {isEditing ? "Edit Sample Answer" : "Add Sample Answer"}
+        </CardTitle>
         <CardDescription>
           {isEditing
             ? "Update this sample answer for the interview question."
@@ -99,16 +119,17 @@ export default function SampleAnswerForm({
                 <FormItem>
                   <FormLabel>Sample Answer*</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter a sample answer for this question..." 
-                      className="min-h-[200px]" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter a sample answer for this question..."
+                      className="min-h-[200px]"
+                      {...field}
                       name="answer"
                       defaultValue={initialValues.answer}
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide a model answer that demonstrates how to effectively respond to this interview question.
+                    Provide a model answer that demonstrates how to effectively
+                    respond to this interview question.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -116,25 +137,24 @@ export default function SampleAnswerForm({
             />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => redirect(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isEditing ? "Saving..." : "Add Answer"}
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
-                isEditing ? "Save Changes" : "Add Answer"
+                "Add Answer"
               )}
             </Button>
           </CardFooter>

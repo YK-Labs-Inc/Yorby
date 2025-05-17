@@ -411,7 +411,7 @@ export type Database = {
           company_name: string | null
           created_at: string
           id: string
-          job_description: string
+          job_description: string | null
           job_title: string
           source_custom_job_id: string | null
           status: Database["public"]["Enums"]["custom_job_access"]
@@ -423,7 +423,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: string
-          job_description: string
+          job_description?: string | null
           job_title: string
           source_custom_job_id?: string | null
           status: Database["public"]["Enums"]["custom_job_access"]
@@ -435,7 +435,7 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: string
-          job_description?: string
+          job_description?: string | null
           job_title?: string
           source_custom_job_id?: string | null
           status?: Database["public"]["Enums"]["custom_job_access"]

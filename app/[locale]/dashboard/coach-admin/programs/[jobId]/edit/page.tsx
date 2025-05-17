@@ -1,10 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { Database } from "@/utils/supabase/database.types";
-import QuestionForm from "../../components/QuestionForm";
-import { createQuestion } from "../../actions";
+import JobForm from "../../components/ProgramForm";
+import { updateCustomJob } from "../../actions";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,85 +9,93 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChevronRight, Home, BookOpen, Briefcase, Plus } from "lucide-react";
+import { ChevronRight, Home, BookOpen, Briefcase, Pencil } from "lucide-react";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+  const supabase = await createSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("coaches")
     .select("id")
     .eq("user_id", userId)
     .single();
-    
+
   if (error || !data) {
     console.error("Error fetching coach ID:", error);
     return null;
   }
-  
+
   return data.id;
 }
 
 // Function to fetch job details
 async function getJobDetails(jobId: string, coachId: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+  const supabase = await createSupabaseServerClient();
+
   const { data: job, error } = await supabase
     .from("custom_jobs")
-    .select("job_title")
+    .select("*")
     .eq("id", jobId)
     .eq("coach_id", coachId)
     .single();
-    
+
   if (error || !job) {
     console.error("Error fetching job details:", error);
     return null;
   }
-  
+
   return job;
 }
 
-export default async function NewQuestionPage({ params }: { params: { jobId: string } }) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+export default async function EditJobPage({
+  params,
+}: {
+  params: Promise<{ jobId: string }>;
+}) {
+  const { jobId } = await params;
+  const supabase = await createSupabaseServerClient();
+
   // Get the current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return redirect("/sign-in");
   }
-  
+
   // Verify the user is a coach
   const coachId = await getCoachId(user.id);
-  
+
   if (!coachId) {
     // User is not a coach, redirect to dashboard
     return redirect("/dashboard");
   }
-  
-  // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
-  
+
+  // Get job details to populate the form
+  const job = await getJobDetails(jobId, coachId);
+
   if (!job) {
     // Job not found or doesn't belong to this coach
     return redirect("/dashboard/coach-admin/curriculum");
   }
-  
+
   // Handle form submission
-  async function handleCreateQuestion(formData: FormData) {
+  async function handleUpdateJob(formData: FormData) {
     "use server";
-    
-    const result = await createQuestion(params.jobId, formData);
-    
+
+    const result = await updateCustomJob(jobId, formData);
+
     if (result.success) {
       // Redirect to the job detail page
-      redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+      redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
     }
-    
+
     return result;
   }
-  
+
   return (
     <div className="container mx-auto py-6">
       {/* Breadcrumb navigation */}
@@ -123,7 +128,7 @@ export default async function NewQuestionPage({ params }: { params: { jobId: str
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -132,27 +137,34 @@ export default async function NewQuestionPage({ params }: { params: { jobId: str
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink 
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/new`} 
+            <BreadcrumbLink
+              href={`/dashboard/coach-admin/curriculum/${jobId}/edit`}
               className="font-semibold"
             >
-              <Plus className="h-4 w-4 mr-1" />
-              New Question
+              <Pencil className="h-4 w-4 mr-1" />
+              Edit Job
             </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      
+
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Add New Question</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Job Profile</h1>
         <p className="text-muted-foreground mt-2">
-          Create a new interview question for {job.job_title}
+          Update the details of this job profile in your curriculum
         </p>
       </div>
-      
-      <QuestionForm 
-        onSubmit={handleCreateQuestion}
-        onCancel={() => redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`)}
+
+      <JobForm
+        initialValues={{
+          jobTitle: job.job_title,
+          jobDescription: job.job_description,
+          companyName: job.company_name || "",
+          companyDescription: job.company_description || "",
+        }}
+        onSubmit={handleUpdateJob}
+        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}`}
+        isEditing={true}
       />
     </div>
   );

@@ -1,8 +1,5 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { Database } from "@/utils/supabase/database.types";
 import { deleteCustomJob } from "../../actions";
 import {
   Breadcrumb,
@@ -12,33 +9,49 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, ChevronRight, Home, BookOpen, Briefcase, Trash2, ArrowLeft } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  AlertTriangle,
+  ChevronRight,
+  Home,
+  BookOpen,
+  Briefcase,
+  Trash2,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+  const supabase = await createSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("coaches")
     .select("id")
     .eq("user_id", userId)
     .single();
-    
+
   if (error || !data) {
     console.error("Error fetching coach ID:", error);
     return null;
   }
-  
+
   return data.id;
 }
 
 // Function to fetch job details and count related questions
 async function getJobDetails(jobId: string, coachId: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+  const supabase = await createSupabaseServerClient();
+
   // Fetch job details
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
@@ -46,67 +59,66 @@ async function getJobDetails(jobId: string, coachId: string) {
     .eq("id", jobId)
     .eq("coach_id", coachId)
     .single();
-    
+
   if (jobError || !job) {
     console.error("Error fetching job details:", jobError);
     return null;
   }
-  
+
   // Count questions for this job
   const { count: questionCount, error: countError } = await supabase
     .from("custom_job_questions")
     .select("*", { count: "exact", head: true })
     .eq("custom_job_id", jobId);
-    
+
   if (countError) {
     console.error("Error counting questions:", countError);
     return { ...job, questionCount: 0 };
   }
-  
+
   return { ...job, questionCount: questionCount || 0 };
 }
 
-export default async function DeleteJobPage({ params }: { params: { jobId: string } }) {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
+export default async function DeleteJobPage({
+  params,
+}: {
+  params: { jobId: string };
+}) {
+  const supabase = await createSupabaseServerClient();
+
   // Get the current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return redirect("/sign-in");
   }
-  
+
   // Verify the user is a coach
   const coachId = await getCoachId(user.id);
-  
+
   if (!coachId) {
     // User is not a coach, redirect to dashboard
     return redirect("/dashboard");
   }
-  
+
   // Get job details
   const job = await getJobDetails(params.jobId, coachId);
-  
+
   if (!job) {
     // Job not found or doesn't belong to this coach
     return redirect("/dashboard/coach-admin/curriculum");
   }
-  
+
   // Handle job deletion
-  async function handleDeleteJob() {
+  async function handleDeleteJob(formData: FormData) {
     "use server";
-    
-    const result = await deleteCustomJob(params.jobId);
-    
-    if (result.success) {
-      // The deleteCustomJob action already includes a redirect
-      // But we'll return the result for completeness
-      return result;
-    }
-    
-    return result;
+    const jobId = formData.get("jobId") as string;
+    await deleteCustomJob(jobId);
+    redirect(`/dashboard/coach-admin/curriculum`);
   }
-  
+
   return (
     <div className="container mx-auto py-6">
       {/* Breadcrumb navigation */}
@@ -139,7 +151,9 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+            <BreadcrumbLink
+              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
+            >
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -148,8 +162,8 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink 
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/delete`} 
+            <BreadcrumbLink
+              href={`/dashboard/coach-admin/curriculum/${params.jobId}/delete`}
               className="font-semibold"
             >
               <Trash2 className="h-4 w-4 mr-1" />
@@ -158,7 +172,7 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      
+
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
@@ -168,14 +182,16 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
           </Link>
         </Button>
       </div>
-      
+
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Delete Job Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Delete Job Profile
+        </h1>
         <p className="text-muted-foreground mt-2">
           Confirm deletion of this job profile from your curriculum
         </p>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="text-destructive flex items-center">
@@ -183,7 +199,8 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
             Confirm Deletion
           </CardTitle>
           <CardDescription>
-            You are about to delete the following job profile from your curriculum
+            You are about to delete the following job profile from your
+            curriculum
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -191,42 +208,39 @@ export default async function DeleteJobPage({ params }: { params: { jobId: strin
             <h3 className="font-medium">Job Title:</h3>
             <p className="text-lg">{job.job_title}</p>
           </div>
-          
+
           {job.company_name && (
             <div>
               <h3 className="font-medium">Company:</h3>
               <p>{job.company_name}</p>
             </div>
           )}
-          
+
           <div>
             <h3 className="font-medium">Associated Questions:</h3>
-            <p>{job.questionCount} question{job.questionCount !== 1 ? 's' : ''}</p>
+            <p>
+              {job.questionCount} question{job.questionCount !== 1 ? "s" : ""}
+            </p>
           </div>
-          
+
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Warning</AlertTitle>
             <AlertDescription>
-              This action cannot be undone. Deleting this job profile will also delete all associated 
-              questions and sample answers. Students will no longer be able to practice with this job profile.
+              This action cannot be undone. Deleting this job profile will also
+              delete all associated questions and sample answers. Students will
+              no longer be able to practice with this job profile.
             </AlertDescription>
           </Alert>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button 
-            variant="outline" 
-            asChild
-          >
+          <Button variant="outline" asChild>
             <Link href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
               Cancel
             </Link>
           </Button>
           <form action={handleDeleteJob}>
-            <Button 
-              type="submit" 
-              variant="destructive"
-            >
+            <Button type="submit" variant="destructive">
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Job Profile
             </Button>
