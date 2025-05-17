@@ -82,8 +82,9 @@ async function getJobDetails(jobId: string, coachId: string) {
 export default async function DeleteJobPage({
   params,
 }: {
-  params: { jobId: string };
+  params: Promise<{ jobId: string }>;
 }) {
+  const { jobId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -104,7 +105,7 @@ export default async function DeleteJobPage({
   }
 
   // Get job details
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -151,9 +152,7 @@ export default async function DeleteJobPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -163,7 +162,7 @@ export default async function DeleteJobPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/delete`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/delete`}
               className="font-semibold"
             >
               <Trash2 className="h-4 w-4 mr-1" />
@@ -176,7 +175,7 @@ export default async function DeleteJobPage({
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+          <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Job Profile
           </Link>
@@ -235,7 +234,7 @@ export default async function DeleteJobPage({
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" asChild>
-            <Link href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+            <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               Cancel
             </Link>
           </Button>
