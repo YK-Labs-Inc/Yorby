@@ -78,8 +78,9 @@ async function getQuestionDetails(questionId: string, jobId: string) {
 export default async function EditQuestionPage({
   params,
 }: {
-  params: { jobId: string; questionId: string };
+  params: Promise<{ jobId: string; questionId: string }>;
 }) {
+  const { jobId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -100,7 +101,7 @@ export default async function EditQuestionPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -108,27 +109,23 @@ export default async function EditQuestionPage({
   }
 
   // Get question details to populate the form
-  const question = await getQuestionDetails(params.questionId, params.jobId);
+  const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
   }
 
   // Handle form submission
   async function handleUpdateQuestion(formData: FormData) {
     "use server";
 
-    const result = await updateQuestion(
-      params.jobId,
-      params.questionId,
-      formData
-    );
+    const result = await updateQuestion(jobId, questionId, formData);
 
     if (result.success) {
       // Redirect to the question detail page
       redirect(
-        `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`
+        `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`
       );
     }
 
@@ -167,9 +164,7 @@ export default async function EditQuestionPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -179,7 +174,7 @@ export default async function EditQuestionPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
               Question
@@ -190,7 +185,7 @@ export default async function EditQuestionPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/edit`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/edit`}
               className="font-semibold"
             >
               <Pencil className="h-4 w-4 mr-1" />
@@ -214,11 +209,7 @@ export default async function EditQuestionPage({
           questionType: question.question_type,
         }}
         onSubmit={handleUpdateQuestion}
-        onCancel={() =>
-          redirect(
-            `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`
-          )
-        }
+        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
         isEditing={true}
       />
     </div>

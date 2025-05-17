@@ -99,8 +99,9 @@ async function getSampleAnswerDetails(answerId: string, questionId: string) {
 export default async function EditSampleAnswerPage({
   params,
 }: {
-  params: { jobId: string; questionId: string; answerId: string };
+  params: Promise<{ jobId: string; questionId: string; answerId: string }>;
 }) {
+  const { jobId, questionId, answerId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -121,7 +122,7 @@ export default async function EditSampleAnswerPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -129,23 +130,20 @@ export default async function EditSampleAnswerPage({
   }
 
   // Get question details for breadcrumb
-  const question = await getQuestionDetails(params.questionId, params.jobId);
+  const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
   }
 
   // Get sample answer details to populate the form
-  const sampleAnswer = await getSampleAnswerDetails(
-    params.answerId,
-    params.questionId
-  );
+  const sampleAnswer = await getSampleAnswerDetails(answerId, questionId);
 
   if (!sampleAnswer) {
     // Sample answer not found or doesn't belong to this question
     return redirect(
-      `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`
+      `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`
     );
   }
 
@@ -154,16 +152,16 @@ export default async function EditSampleAnswerPage({
     "use server";
 
     const result = await updateSampleAnswer(
-      params.jobId,
-      params.questionId,
-      params.answerId,
+      jobId,
+      questionId,
+      answerId,
       formData
     );
 
     if (result.success) {
       // Redirect to the sample answers management page
       redirect(
-        `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`
+        `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`
       );
     }
 
@@ -202,9 +200,7 @@ export default async function EditSampleAnswerPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -214,7 +210,7 @@ export default async function EditSampleAnswerPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
               Question
@@ -225,7 +221,7 @@ export default async function EditSampleAnswerPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
             >
               <FileText className="h-4 w-4 mr-1" />
               Sample Answers
@@ -236,11 +232,11 @@ export default async function EditSampleAnswerPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers/${params.answerId}/edit`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers/${answerId}/edit`}
               className="font-semibold"
             >
               <Link
-                href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers/${params.answerId}/edit`}
+                href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers/${answerId}/edit`}
               >
                 <Pencil className="h-4 w-4 mr-1" />
                 Edit Sample Answer
@@ -268,7 +264,7 @@ export default async function EditSampleAnswerPage({
           answer: sampleAnswer.answer,
         }}
         onSubmit={handleUpdateSampleAnswer}
-        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
         isEditing={true}
       />
     </div>

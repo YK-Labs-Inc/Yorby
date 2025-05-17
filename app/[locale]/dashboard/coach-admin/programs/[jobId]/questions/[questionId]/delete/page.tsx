@@ -103,8 +103,9 @@ async function getQuestionDetails(questionId: string, jobId: string) {
 export default async function DeleteQuestionPage({
   params,
 }: {
-  params: { jobId: string; questionId: string };
+  params: Promise<{ jobId: string; questionId: string }>;
 }) {
+  const { jobId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -125,7 +126,7 @@ export default async function DeleteQuestionPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -133,22 +134,22 @@ export default async function DeleteQuestionPage({
   }
 
   // Get question details
-  const question = await getQuestionDetails(params.questionId, params.jobId);
+  const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
   }
 
   // Handle question deletion
   async function handleDeleteQuestion() {
     "use server";
 
-    const result = await deleteQuestion(params.jobId, params.questionId);
+    const result = await deleteQuestion(jobId, questionId);
 
     if (result.success) {
       // Redirect to the job detail page
-      redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+      redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
     }
   }
 
@@ -184,9 +185,7 @@ export default async function DeleteQuestionPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -196,7 +195,7 @@ export default async function DeleteQuestionPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
               Question
@@ -207,7 +206,7 @@ export default async function DeleteQuestionPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/delete`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/delete`}
               className="font-semibold"
             >
               <Trash2 className="h-4 w-4 mr-1" />
@@ -221,7 +220,7 @@ export default async function DeleteQuestionPage({
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
           <Link
-            href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+            href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Question
@@ -283,7 +282,7 @@ export default async function DeleteQuestionPage({
         <CardFooter className="flex justify-between">
           <Button variant="outline" asChild>
             <Link
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
             >
               Cancel
             </Link>

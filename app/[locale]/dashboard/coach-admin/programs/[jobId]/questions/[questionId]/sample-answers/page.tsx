@@ -111,8 +111,9 @@ async function getSampleAnswers(questionId: string) {
 export default async function SampleAnswersPage({
   params,
 }: {
-  params: { jobId: string; questionId: string };
+  params: Promise<{ jobId: string; questionId: string }>;
 }) {
+  const { jobId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -133,7 +134,7 @@ export default async function SampleAnswersPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -141,30 +142,26 @@ export default async function SampleAnswersPage({
   }
 
   // Get question details
-  const question = await getQuestionDetails(params.questionId, params.jobId);
+  const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
   }
 
   // Get sample answers
-  const sampleAnswers = await getSampleAnswers(params.questionId);
+  const sampleAnswers = await getSampleAnswers(questionId);
 
   // Handle form submission for creating a sample answer
   async function handleCreateSampleAnswer(formData: FormData) {
     "use server";
 
-    const result = await createSampleAnswer(
-      params.jobId,
-      params.questionId,
-      formData
-    );
+    const result = await createSampleAnswer(jobId, questionId, formData);
 
     if (result.success) {
       // Redirect to refresh the page with the new sample answer
       redirect(
-        `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`
+        `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`
       );
     }
 
@@ -176,15 +173,15 @@ export default async function SampleAnswersPage({
     "use server";
 
     const result = await deleteSampleAnswer(
-      params.jobId,
-      params.questionId,
+      jobId,
+      questionId,
       formData.get("answerId") as string
     );
 
     if (result.success) {
       // Redirect to refresh the page without the deleted sample answer
       redirect(
-        `/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`
+        `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`
       );
     }
   }
@@ -221,9 +218,7 @@ export default async function SampleAnswersPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -233,7 +228,7 @@ export default async function SampleAnswersPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
               Question
@@ -244,7 +239,7 @@ export default async function SampleAnswersPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
               className="font-semibold"
             >
               <FileText className="h-4 w-4 mr-1" />
@@ -257,7 +252,7 @@ export default async function SampleAnswersPage({
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+          <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Job Profile
           </Link>
@@ -323,7 +318,7 @@ export default async function SampleAnswersPage({
               <CardContent>
                 <Button asChild>
                   <Link
-                    href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers?tab=add`}
+                    href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers?tab=add`}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Your First Sample Answer
@@ -343,7 +338,7 @@ export default async function SampleAnswersPage({
                       <div className="flex gap-2">
                         <Button asChild size="sm" variant="outline">
                           <Link
-                            href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers/${answer.id}/edit`}
+                            href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers/${answer.id}/edit`}
                           >
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
@@ -382,7 +377,7 @@ export default async function SampleAnswersPage({
         <TabsContent value="add">
           <SampleAnswerForm
             onSubmit={handleCreateSampleAnswer}
-            onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+            onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
           />
         </TabsContent>
       </Tabs>

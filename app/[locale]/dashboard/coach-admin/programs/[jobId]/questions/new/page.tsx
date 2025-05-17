@@ -52,8 +52,9 @@ async function getJobDetails(jobId: string, coachId: string) {
 export default async function NewQuestionPage({
   params,
 }: {
-  params: { jobId: string };
+  params: Promise<{ jobId: string }>;
 }) {
+  const { jobId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -74,7 +75,7 @@ export default async function NewQuestionPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -85,11 +86,11 @@ export default async function NewQuestionPage({
   async function handleCreateQuestion(formData: FormData) {
     "use server";
 
-    const result = await createQuestion(params.jobId, formData);
+    const result = await createQuestion(jobId, formData);
 
     if (result.success) {
       // Redirect to the job detail page
-      redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+      redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
     }
 
     return result;
@@ -127,9 +128,7 @@ export default async function NewQuestionPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -139,7 +138,7 @@ export default async function NewQuestionPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/new`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/new`}
               className="font-semibold"
             >
               <Plus className="h-4 w-4 mr-1" />
@@ -157,7 +156,7 @@ export default async function NewQuestionPage({
       </div>
       <QuestionForm
         onSubmit={handleCreateQuestion}
-        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${params.jobId}`}
+        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}`}
       />
     </div>
   );

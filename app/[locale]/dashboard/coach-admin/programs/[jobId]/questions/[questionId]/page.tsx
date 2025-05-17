@@ -110,8 +110,9 @@ async function getSampleAnswers(questionId: string) {
 export default async function QuestionDetailPage({
   params,
 }: {
-  params: { jobId: string; questionId: string };
+  params: Promise<{ jobId: string; questionId: string }>;
 }) {
+  const { jobId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -132,7 +133,7 @@ export default async function QuestionDetailPage({
   }
 
   // Get job details for breadcrumb
-  const job = await getJobDetails(params.jobId, coachId);
+  const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
@@ -140,15 +141,15 @@ export default async function QuestionDetailPage({
   }
 
   // Get question details
-  const question = await getQuestionDetails(params.questionId, params.jobId);
+  const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${params.jobId}`);
+    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
   }
 
   // Get sample answers
-  const sampleAnswers = await getSampleAnswers(params.questionId);
+  const sampleAnswers = await getSampleAnswers(questionId);
 
   return (
     <div className="container mx-auto py-6">
@@ -182,9 +183,7 @@ export default async function QuestionDetailPage({
             <ChevronRight className="h-4 w-4" />
           </BreadcrumbSeparator>
           <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}`}
-            >
+            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
               <Briefcase className="h-4 w-4 mr-1" />
               {job.job_title}
             </BreadcrumbLink>
@@ -194,7 +193,7 @@ export default async function QuestionDetailPage({
           </BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
               className="font-semibold"
             >
               <MessageSquare className="h-4 w-4 mr-1" />
@@ -207,7 +206,7 @@ export default async function QuestionDetailPage({
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/curriculum/${params.jobId}`}>
+          <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Job Profile
           </Link>
@@ -227,7 +226,7 @@ export default async function QuestionDetailPage({
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/edit`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/edit`}
             >
               <Pencil className="h-4 w-4 mr-2" />
               Edit Question
@@ -235,7 +234,7 @@ export default async function QuestionDetailPage({
           </Button>
           <Button asChild variant="destructive">
             <Link
-              href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/delete`}
+              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/delete`}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Question
@@ -291,7 +290,7 @@ export default async function QuestionDetailPage({
         </h2>
         <Button asChild>
           <Link
-            href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+            href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
           >
             <FileText className="h-4 w-4 mr-2" />
             Manage Sample Answers
@@ -312,7 +311,7 @@ export default async function QuestionDetailPage({
           <CardContent>
             <Button asChild>
               <Link
-                href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers?tab=add`}
+                href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers?tab=add`}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Sample Answer
@@ -348,7 +347,7 @@ export default async function QuestionDetailPage({
             <div className="flex justify-center mt-4">
               <Button asChild variant="outline">
                 <Link
-                  href={`/dashboard/coach-admin/curriculum/${params.jobId}/questions/${params.questionId}/sample-answers`}
+                  href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   View All Sample Answers
