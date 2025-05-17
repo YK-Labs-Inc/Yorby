@@ -391,7 +391,7 @@ const generateMoreCustomJobQuestions = async ({
     };
   }[];
   jobTitle: string;
-  jobDescription: string;
+  jobDescription: string | null;
   companyName: string | null;
   companyDescription: string | null;
 }) => {
