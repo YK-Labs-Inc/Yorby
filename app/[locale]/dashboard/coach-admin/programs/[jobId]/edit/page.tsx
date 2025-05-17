@@ -157,12 +157,9 @@ export default async function EditJobPage({
 
       <JobForm
         initialValues={{
-          jobTitle: job.job_title,
-          jobDescription: job.job_description,
-          companyName: job.company_name || "",
-          companyDescription: job.company_description || "",
+          title: job.job_title,
+          description: job.job_description || "",
         }}
-        onSubmit={handleUpdateJob}
         onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}`}
         isEditing={true}
       />
