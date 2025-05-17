@@ -12,6 +12,7 @@
     "@deepgram/sdk": "^3.11.2",
     "@google/generative-ai": "^0.21.0",
     "@hcaptcha/react-hcaptcha": "^1.11.0",
+    "@hookform/resolvers": "^5.0.1",
     "@marsidev/react-turnstile": "^1.1.0",
     "@notionhq/client": "^2.2.15",
     "@posthog/ai": "^3.3.1",
@@ -44,6 +45,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "csv-parse": "^5.6.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.4.3",
     "html2pdf.js": "^0.10.3",
     "lodash": "^4.17.21",
@@ -60,6 +62,7 @@
     "raf": "^3.4.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.56.4",
     "react-markdown": "^9.0.3",
     "react-social-media-embed": "^2.5.18",
     "remark-gfm": "^4.0.1",
@@ -67,7 +70,7 @@
     "sonner": "^2.0.3",
     "stripe": "^17.5.0",
     "tus-js-client": "^4.3.1",
-    "zod": "^3.24.2"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
