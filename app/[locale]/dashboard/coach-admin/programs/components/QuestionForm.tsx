@@ -140,16 +140,7 @@ export default function QuestionForm({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>
-          {isEditing
-            ? "Edit Interview Question"
-            : "Create New Interview Question"}
-        </CardTitle>
-        <CardDescription>
-          {isEditing
-            ? "Update this interview question and answer guidelines."
-            : "Add a new interview question to this job profile."}
-        </CardDescription>
+        <CardTitle>{isEditing ? t("editTitle") : t("createTitle")}</CardTitle>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -169,19 +160,16 @@ export default function QuestionForm({
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Question*</FormLabel>
+                  <FormLabel>{t("questionSectionHeader")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter the interview question..."
+                      placeholder={t("questionPlaceholder")}
                       className="min-h-[100px]"
                       {...field}
                       name="question"
                       defaultValue={initialValues.question}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The interview question that will be presented to students.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -193,20 +181,16 @@ export default function QuestionForm({
               name="answerGuidelines"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Answer Guidelines*</FormLabel>
+                  <FormLabel>{t("answerGuidelinesSectionHeader")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter guidelines for what makes a good answer..."
+                      placeholder={t("answerGuidelinesPlaceholder")}
                       className="min-h-[150px]"
                       {...field}
                       name="answerGuidelines"
                       defaultValue={initialValues.answerGuidelines}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Guidelines for what constitutes a good answer to this
-                    question.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -219,18 +203,18 @@ export default function QuestionForm({
               onClick={() => redirect(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Create Question"}
+                  {isEditing ? t("savingChanges") : t("creatingQuestion")}
                 </>
               ) : isEditing ? (
-                "Save Changes"
+                t("saveChanges")
               ) : (
-                "Create Question"
+                t("createQuestion")
               )}
             </Button>
           </CardFooter>

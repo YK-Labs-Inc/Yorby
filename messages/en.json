@@ -1962,7 +1962,18 @@
         }
       },
       "questionForm": {
-        "genericError": "Something went wrong, please try again."
+        "genericError": "Something went wrong, please try again.",
+        "editTitle": "Edit Question",
+        "createTitle": "Create Question",
+        "questionPlaceholder": "Enter the question",
+        "questionSectionHeader": "Question",
+        "answerGuidelinesSectionHeader": "Answer Guidelines",
+        "answerGuidelinesPlaceholder": "Enter guidelines for what makes a good answer",
+        "cancel": "Cancel",
+        "saveChanges": "Save Changes",
+        "savingChanges": "Saving Changes...",
+        "createQuestion": "Create Question",
+        "creatingQuestion": "Creating Question..."
       }
     }
   },

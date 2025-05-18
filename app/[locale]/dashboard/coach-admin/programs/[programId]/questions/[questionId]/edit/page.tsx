@@ -120,13 +120,6 @@ export default async function EditQuestionPage({
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Edit Question</h1>
-        <p className="text-muted-foreground mt-2">
-          Update this interview question for {job.job_title}
-        </p>
-      </div>
-
       <QuestionForm
         initialValues={{
           question: question.question,
