@@ -1,13 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { ChevronRight, Home, BookOpen, Briefcase, Plus } from "lucide-react";
+import { Home, BookOpen, Briefcase, Plus } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import QuestionForm from "../../../components/QuestionForm";
 import { createQuestion } from "../../../actions";
@@ -74,7 +67,7 @@ export default async function NewQuestionPage({
     return redirect("/dashboard");
   }
 
-  // Get job details for breadcrumb
+  // Get job details
   const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
@@ -98,56 +91,6 @@ export default async function NewQuestionPage({
 
   return (
     <div className="container mx-auto py-6">
-      {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin">
-              Coach Admin
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin/curriculum">
-              <BookOpen className="h-4 w-4 mr-1" />
-              Curriculum
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
-              <Briefcase className="h-4 w-4 mr-1" />
-              {job.job_title}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/new`}
-              className="font-semibold"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              New Question
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Add New Question</h1>
         <p className="text-muted-foreground mt-2">

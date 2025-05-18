@@ -1,12 +1,5 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import {
   AlertTriangle,
-  ChevronRight,
   Home,
   BookOpen,
   Briefcase,
@@ -125,7 +117,7 @@ export default async function DeleteQuestionPage({
     return redirect("/dashboard");
   }
 
-  // Get job details for breadcrumb
+  // Get job details
   const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
@@ -155,67 +147,6 @@ export default async function DeleteQuestionPage({
 
   return (
     <div className="container mx-auto py-6">
-      {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin">
-              Coach Admin
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin/curriculum">
-              <BookOpen className="h-4 w-4 mr-1" />
-              Curriculum
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
-              <Briefcase className="h-4 w-4 mr-1" />
-              {job.job_title}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
-            >
-              <MessageSquare className="h-4 w-4 mr-1" />
-              Question
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/delete`}
-              className="font-semibold"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete Question
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">

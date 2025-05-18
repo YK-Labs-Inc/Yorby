@@ -2,13 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,7 +26,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Home,
-  ChevronRight,
   BookOpen,
   Briefcase,
   Plus,

@@ -1,14 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
-  ChevronRight,
   Home,
   BookOpen,
   Briefcase,
@@ -121,7 +113,7 @@ export default async function EditSampleAnswerPage({
     return redirect("/dashboard");
   }
 
-  // Get job details for breadcrumb
+  // Get job details
   const job = await getJobDetails(jobId, coachId);
 
   if (!job) {
@@ -129,7 +121,7 @@ export default async function EditSampleAnswerPage({
     return redirect("/dashboard/coach-admin/curriculum");
   }
 
-  // Get question details for breadcrumb
+  // Get question details
   const question = await getQuestionDetails(questionId, jobId);
 
   if (!question) {
@@ -170,82 +162,6 @@ export default async function EditSampleAnswerPage({
 
   return (
     <div className="container mx-auto py-6">
-      {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin">
-              Coach Admin
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin/curriculum">
-              <BookOpen className="h-4 w-4 mr-1" />
-              Curriculum
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
-              <Briefcase className="h-4 w-4 mr-1" />
-              {job.job_title}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
-            >
-              <MessageSquare className="h-4 w-4 mr-1" />
-              Question
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
-            >
-              <FileText className="h-4 w-4 mr-1" />
-              Sample Answers
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers/${answerId}/edit`}
-              className="font-semibold"
-            >
-              <Link
-                href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers/${answerId}/edit`}
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-                Edit Sample Answer
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           Edit Sample Answer
