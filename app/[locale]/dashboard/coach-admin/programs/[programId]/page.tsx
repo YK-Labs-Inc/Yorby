@@ -84,7 +84,6 @@ async function getProgramData(programId: string, coachId: string) {
       id,
       question,
       answer_guidelines,
-      question_type,
       created_at,
       custom_job_question_sample_answers (count)
     `
@@ -227,12 +226,8 @@ export default async function ProgramDetailPage({
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("table.question")}</TableHead>
-                  <TableHead>{t("table.type")}</TableHead>
                   <TableHead>{t("table.sampleAnswers")}</TableHead>
                   <TableHead>{t("table.created")}</TableHead>
-                  <TableHead className="text-right">
-                    {t("table.actions")}
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -249,66 +244,10 @@ export default async function ProgramDetailPage({
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {question.question_type === "ai_generated"
-                          ? t("typeAIGenerated")
-                          : t("typeManual")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
                       {question.custom_job_question_sample_answers[0].count}
                     </TableCell>
                     <TableCell>
                       {format(new Date(question.created_at), "MMM d, yyyy")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">
-                              {t("table.actions")}
-                            </span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              {t("viewDetails")}
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/edit`}
-                            >
-                              <Pencil className="h-4 w-4 mr-2" />
-                              {t("editQuestion")}
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/sample-answers`}
-                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              {t("manageSampleAnswers")}
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            asChild
-                          >
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/delete`}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {t("deleteQuestion")}
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -316,112 +255,6 @@ export default async function ProgramDetailPage({
             </Table>
           </CardContent>
         </Card>
-      )}
-
-      {/* Questions preview section */}
-      {questions.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold tracking-tight mb-4">
-            {t("questionDetailsSectionTitle")}
-          </h2>
-          <div className="space-y-6">
-            {questions.map((question) => (
-              <Card key={question.id} id={`question-${question.id}`}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {question.question}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        <Badge variant="outline" className="mr-2">
-                          {question.question_type === "ai_generated"
-                            ? t("typeAIGenerated")
-                            : t("typeManual")}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {t("createdOn", {
-                            date: format(
-                              new Date(question.created_at),
-                              "MMMM d, yyyy"
-                            ),
-                          })}
-                        </span>
-                      </CardDescription>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                          <span className="sr-only">{t("table.actions")}</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            {t("viewDetails")}
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/edit`}
-                          >
-                            <Pencil className="h-4 w-4 mr-2" />
-                            {t("editQuestion")}
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          asChild
-                        >
-                          <Link
-                            href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/delete`}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            {t("deleteQuestion")}
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-medium mb-2">
-                        {t("answerGuidelinesTitle")}
-                      </h3>
-                      <div className="bg-muted p-4 rounded-md whitespace-pre-wrap text-sm">
-                        {question.answer_guidelines}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-medium">
-                          {t("sampleAnswersLabel")}
-                        </h3>
-                        <Badge variant="secondary">
-                          {question.custom_job_question_sample_answers[0].count}
-                        </Badge>
-                      </div>
-                      <Button asChild size="sm" variant="outline">
-                        <Link
-                          href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/sample-answers`}
-                        >
-                          {t("manageSampleAnswersButton")}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       )}
     </div>
   );
