@@ -2,14 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import JobForm from "../../components/ProgramForm";
 import { updateCustomJob } from "../../actions";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { ChevronRight, Home, BookOpen, Briefcase, Pencil } from "lucide-react";
+import { Home, BookOpen, Briefcase, Pencil } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 // Helper function to get coach ID from user ID
@@ -98,56 +91,6 @@ export default async function EditJobPage({
 
   return (
     <div className="container mx-auto py-6">
-      {/* Breadcrumb navigation */}
-      <Breadcrumb className="mb-6">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">
-              <Home className="h-4 w-4 mr-1" />
-              Dashboard
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin">
-              Coach Admin
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/coach-admin/curriculum">
-              <BookOpen className="h-4 w-4 mr-1" />
-              Curriculum
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink href={`/dashboard/coach-admin/curriculum/${jobId}`}>
-              <Briefcase className="h-4 w-4 mr-1" />
-              {job.job_title}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRight className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              href={`/dashboard/coach-admin/curriculum/${jobId}/edit`}
-              className="font-semibold"
-            >
-              <Pencil className="h-4 w-4 mr-1" />
-              Edit Job
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Edit Job Profile</h1>
         <p className="text-muted-foreground mt-2">
