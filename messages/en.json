@@ -1954,6 +1954,16 @@
       "programEditPage": {
         "title": "Edit Program"
       }
+    },
+    "questionsPage": {
+      "createQuestions": {
+        "errors": {
+          "missingFields": "Question and answer guidelines are both required"
+        }
+      },
+      "questionForm": {
+        "genericError": "Something went wrong, please try again."
+      }
     }
   },
   "AdminStudentView": {
