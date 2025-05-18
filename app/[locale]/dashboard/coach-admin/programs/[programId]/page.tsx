@@ -31,6 +31,7 @@ import {
   Trash2,
   Eye,
   FileText,
+  ArrowLeft,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
@@ -141,6 +142,15 @@ export default async function ProgramDetailPage({
 
   return (
     <div className="container mx-auto py-6">
+      {/* Back button */}
+      <div className="mb-6">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/dashboard/coach-admin/programs`}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t("backToPrograms")}
+          </Link>
+        </Button>
+      </div>
       {/* Header with action buttons */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>

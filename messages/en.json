@@ -321,7 +321,8 @@
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again.",
     "userNotFound": "User not found — please sign in  again.",
-    "onlyPdfFilesAllowed": "Only PDF files are allowed. Please upload PDF documents only."
+    "onlyPdfFilesAllowed": "Only PDF files are allowed. Please upload PDF documents only.",
+    "noPermission": "Sorry, you do not have permission to perform this action"
   },
   "sidebar": {
     "addJob": "Create Interview Questions",
@@ -1935,7 +1936,20 @@
         "questionDetailsSectionTitle": "Question Details",
         "answerGuidelinesTitle": "Answer Guidelines",
         "sampleAnswersLabel": "Sample Answers:",
-        "manageSampleAnswersButton": "Manage Sample Answers"
+        "manageSampleAnswersButton": "Manage Sample Answers",
+        "backToPrograms": "View All Programs"
+      },
+      "programDeletionPage": {
+        "confirmTitle": "Confirm Deletion",
+        "confirmDescription": "You are about to delete the following program from your list",
+        "programTitle": "Program Title:",
+        "associatedQuestions": "Associated Questions:",
+        "questionsCount": "{count} question{plural}",
+        "warningTitle": "Warning",
+        "warningDescription": "This action cannot be undone. Deleting this program will also delete all associated questions and sample answers. Users will no longer be able to practice with this program.",
+        "cancel": "Cancel",
+        "delete": "Delete Program",
+        "backToProgram": "Back to Program Details"
       }
     }
   },

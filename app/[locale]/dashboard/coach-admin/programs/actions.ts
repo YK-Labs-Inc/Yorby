@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 
 type ActionResponse = {
   success: boolean;
@@ -139,16 +140,21 @@ export async function updateCustomJob(
   };
 }
 
-export async function deleteCustomJob(jobId: string): Promise<ActionResponse> {
+export const deleteCustomJob = async (jobId: string) => {
+  const t = await getTranslations("errors");
   const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({ function: "deleteCustomJob", jobId });
 
   // Validate coach
   const coach = await validateCoach();
   if (!coach) {
-    return {
-      success: false,
-      message: "Unauthorized: You must be a coach to perform this action",
-    };
+    logger.error("Unauthorized: You must be a coach to perform this action");
+    await logger.flush();
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("noPermission")
+      }`,
+    );
   }
 
   // Verify the job belongs to this coach
@@ -160,10 +166,13 @@ export async function deleteCustomJob(jobId: string): Promise<ActionResponse> {
     .single();
 
   if (jobError || !jobData) {
-    return {
-      success: false,
-      message: "Job not found or you don't have permission to delete it",
-    };
+    logger.error("Program not found");
+    await logger.flush();
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("noPermission")
+      }`,
+    );
   }
 
   // Delete the custom job
@@ -176,24 +185,21 @@ export async function deleteCustomJob(jobId: string): Promise<ActionResponse> {
     .eq("coach_id", coach.coachId);
 
   if (error) {
-    console.error("Error deleting custom job:", error);
-    return {
-      success: false,
-      message: "Failed to delete job: " + error.message,
-    };
+    logger.error("Error deleting custom job:", error);
+    await logger.flush();
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("pleaseTryAgain")
+      }`,
+    );
   }
 
   // Revalidate the curriculum page
-  revalidatePath("/dashboard/coach-admin/curriculum");
-
-  // Redirect to the curriculum listing page
-  redirect("/dashboard/coach-admin/curriculum");
-
-  return {
-    success: true,
-    message: "Job deleted successfully",
-  };
-}
+  revalidatePath("/dashboard/coach-admin/programs");
+  redirect(
+    `/dashboard/coach-admin/programs`,
+  );
+};
 
 // Question Actions
 export async function createQuestion(
