@@ -1899,6 +1899,43 @@
         "genericError": "An unexpected error occurred. Please try again.",
         "requiredTitle": "Title must be at least 3 characters.",
         "requiredDescription": "Description must be at least 10 characters."
+      },
+      "programDetailPage": {
+        "headerTitle": "{programTitle}",
+        "headerCompany": "{companyName}",
+        "editButton": "Edit Program",
+        "deleteButton": "Delete Program",
+        "detailsCardTitle": "Program Details",
+        "detailsCardDescription": "Information about this program profile in your programs",
+        "programDescriptionTitle": "Program Description",
+        "companyDescriptionTitle": "Company Description",
+        "statusLabel": "Status:",
+        "statusUnlocked": "Unlocked",
+        "statusLocked": "Locked",
+        "createdOn": "Created on {date}",
+        "questionsSectionTitle": "Program Questions",
+        "addQuestionButton": "Add Question",
+        "emptyQuestionsTitle": "No Questions Added Yet",
+        "addFirstQuestionButton": "Add Your First Question",
+        "questionsListTitle": "Questions ({count})",
+        "questionsListDescription": "Questions and answer guidelines for this program profile",
+        "table": {
+          "question": "Question",
+          "type": "Type",
+          "sampleAnswers": "Sample Answers",
+          "created": "Created",
+          "actions": "Actions"
+        },
+        "typeAIGenerated": "AI Generated",
+        "typeManual": "Manual",
+        "viewDetails": "View Details",
+        "editQuestion": "Edit Question",
+        "manageSampleAnswers": "Manage Sample Answers",
+        "deleteQuestion": "Delete Question",
+        "questionDetailsSectionTitle": "Question Details",
+        "answerGuidelinesTitle": "Answer Guidelines",
+        "sampleAnswersLabel": "Sample Answers:",
+        "manageSampleAnswersButton": "Manage Sample Answers"
       }
     }
   },

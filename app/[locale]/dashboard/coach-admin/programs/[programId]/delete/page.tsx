@@ -1,6 +1,13 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { deleteCustomJob } from "../../actions";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import {
   AlertTriangle,
+  ChevronRight,
   Home,
   BookOpen,
   Briefcase,
@@ -41,14 +49,14 @@ async function getCoachId(userId: string) {
 }
 
 // Function to fetch job details and count related questions
-async function getJobDetails(jobId: string, coachId: string) {
+async function getJobDetails(programId: string, coachId: string) {
   const supabase = await createSupabaseServerClient();
 
   // Fetch job details
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
     .select("*")
-    .eq("id", jobId)
+    .eq("id", programId)
     .eq("coach_id", coachId)
     .single();
 
@@ -61,7 +69,7 @@ async function getJobDetails(jobId: string, coachId: string) {
   const { count: questionCount, error: countError } = await supabase
     .from("custom_job_questions")
     .select("*", { count: "exact", head: true })
-    .eq("custom_job_id", jobId);
+    .eq("custom_job_id", programId);
 
   if (countError) {
     console.error("Error counting questions:", countError);
@@ -71,12 +79,12 @@ async function getJobDetails(jobId: string, coachId: string) {
   return { ...job, questionCount: questionCount || 0 };
 }
 
-export default async function DeleteJobPage({
+export default async function DeleteProgramPage({
   params,
 }: {
-  params: Promise<{ jobId: string }>;
+  params: Promise<{ programId: string }>;
 }) {
-  const { jobId } = await params;
+  const { programId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -97,27 +105,79 @@ export default async function DeleteJobPage({
   }
 
   // Get job details
-  const job = await getJobDetails(jobId, coachId);
+  const job = await getJobDetails(programId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/curriculum");
+    return redirect("/dashboard/coach-admin/programs");
   }
 
   // Handle job deletion
   async function handleDeleteJob(formData: FormData) {
     "use server";
-    const jobId = formData.get("jobId") as string;
-    await deleteCustomJob(jobId);
-    redirect(`/dashboard/coach-admin/curriculum`);
+    const programId = formData.get("programId") as string;
+    await deleteCustomJob(programId);
+    redirect(`/dashboard/coach-admin/programs`);
   }
 
   return (
     <div className="container mx-auto py-6">
+      {/* Breadcrumb navigation */}
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">
+              <Home className="h-4 w-4 mr-1" />
+              Dashboard
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/coach-admin">
+              Coach Admin
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard/coach-admin/programs">
+              <BookOpen className="h-4 w-4 mr-1" />
+              programs
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href={`/dashboard/coach-admin/programs/${programId}`}
+            >
+              <Briefcase className="h-4 w-4 mr-1" />
+              {job.job_title}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <ChevronRight className="h-4 w-4" />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href={`/dashboard/coach-admin/programs/${programId}/delete`}
+              className="font-semibold"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete Job
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
+          <Link href={`/dashboard/coach-admin/programs/${programId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Job Profile
           </Link>
@@ -129,7 +189,7 @@ export default async function DeleteJobPage({
           Delete Job Profile
         </h1>
         <p className="text-muted-foreground mt-2">
-          Confirm deletion of this job profile from your curriculum
+          Confirm deletion of this job profile from your programs
         </p>
       </div>
 
@@ -140,8 +200,7 @@ export default async function DeleteJobPage({
             Confirm Deletion
           </CardTitle>
           <CardDescription>
-            You are about to delete the following job profile from your
-            curriculum
+            You are about to delete the following job profile from your programs
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -176,7 +235,7 @@ export default async function DeleteJobPage({
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" asChild>
-            <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
+            <Link href={`/dashboard/coach-admin/programs/${programId}`}>
               Cancel
             </Link>
           </Button>
