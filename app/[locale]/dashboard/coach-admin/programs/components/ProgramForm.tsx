@@ -38,12 +38,14 @@ interface JobFormProps {
   };
   onCancelRedirectUrl: string;
   isEditing?: boolean;
+  submitAction?: (formData: FormData) => Promise<any>; // New prop for custom submit action
 }
 
 export default function JobForm({
   initialValues = {},
   onCancelRedirectUrl,
   isEditing = false,
+  submitAction,
 }: JobFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,16 +78,26 @@ export default function JobForm({
     try {
       const formData = new FormData();
       formData.append("title", values.title);
-      const result = await createCustomJob(formData);
+      
+      // Use the provided submitAction if available, otherwise use createCustomJob
+      const result = submitAction 
+        ? await submitAction(formData) 
+        : await createCustomJob(formData);
 
       if (result.success) {
-        router.push(`/dashboard/coach-admin/programs/${result.programId}`);
+        if (isEditing) {
+          // For editing, redirect to the cancel URL (which should be the detail page)
+          router.push(onCancelRedirectUrl);
+        } else {
+          // For creating, navigate to the new program page
+          router.push(`/dashboard/coach-admin/programs/${result.programId}`);
+        }
       } else {
         setError(result.message || t("genericError"));
       }
     } catch (err) {
       setError(t("genericError"));
-      logError("Create job form submission error:", { error: err });
+      logError(`${isEditing ? "Update" : "Create"} job form submission error:`, { error: err });
     } finally {
       setIsSubmitting(false);
     }
