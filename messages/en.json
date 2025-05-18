@@ -1950,6 +1950,9 @@
         "cancel": "Cancel",
         "delete": "Delete Program",
         "backToProgram": "Back to Program Details"
+      },
+      "programEditPage": {
+        "title": "Edit Program"
       }
     }
   },

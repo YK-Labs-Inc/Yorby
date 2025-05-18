@@ -8,18 +8,15 @@ import * as z from "zod";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,21 +27,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { createCustomJob } from "../new/actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useTranslations } from "next-intl";
+import { updateCustomJob } from "../[programId]/edit/actions";
 
-interface JobFormProps {
+interface ProgramFormProps {
   initialValues?: {
     title?: string;
     description?: string;
   };
   onCancelRedirectUrl: string;
   isEditing?: boolean;
+  programId?: string;
 }
 
-export default function JobForm({
+export default function ProgramForm({
   initialValues = {},
   onCancelRedirectUrl,
   isEditing = false,
-}: JobFormProps) {
+  programId,
+}: ProgramFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { logError } = useAxiomLogging();
@@ -72,22 +72,41 @@ export default function JobForm({
   const handleSubmit = async (values: z.infer<typeof jobFormSchema>) => {
     setIsSubmitting(true);
     setError(null);
-
+    const title = values.title;
     try {
-      const formData = new FormData();
-      formData.append("title", values.title);
-      const result = await createCustomJob(formData);
-
-      if (result.success) {
-        router.push(`/dashboard/coach-admin/programs/${result.programId}`);
+      if (isEditing && programId) {
+        handleEditJob(title, programId);
       } else {
-        setError(result.message || t("genericError"));
+        handleCreateJob(title);
       }
     } catch (err) {
       setError(t("genericError"));
       logError("Create job form submission error:", { error: err });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateJob = async (title: string) => {
+    const formData = new FormData();
+    formData.append("title", title);
+    const result = await createCustomJob(formData);
+    if (result.success) {
+      router.push(`/dashboard/coach-admin/programs/${result.programId}`);
+    } else {
+      setError(result.message || t("genericError"));
+    }
+  };
+
+  const handleEditJob = async (title: string, programId: string) => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("programId", programId);
+    const result = await updateCustomJob(formData);
+    if (result.success) {
+      router.push(`/dashboard/coach-admin/programs/${programId}`);
+    } else {
+      setError(result.message || t("genericError"));
     }
   };
 
