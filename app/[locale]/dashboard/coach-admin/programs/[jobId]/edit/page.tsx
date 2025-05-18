@@ -105,6 +105,7 @@ export default async function EditJobPage({
         }}
         onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}`}
         isEditing={true}
+        submitAction={handleUpdateJob}
       />
     </div>
   );
