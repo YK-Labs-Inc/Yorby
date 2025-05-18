@@ -1974,6 +1974,17 @@
         "savingChanges": "Saving Changes...",
         "createQuestion": "Create Question",
         "creatingQuestion": "Creating Question..."
+      },
+      "deleteQuestions": {
+        "backToAllQuestions": "Back To Questions",
+        "deleteQuestion": "Delete Question",
+        "confirmDeletion": "Confirm Deletion",
+        "question": "Question",
+        "answerGuidelines": "Answer Guidelines",
+        "sampleAnswers": "Sample Answers",
+        "warning": "Warning",
+        "warningConfirmation": "This action cannot be undone. Deleting this question will also delete all associated sample answers. Users will no longer be able to practice with this question.",
+        "cancel": "Cancel"
       }
     }
   },

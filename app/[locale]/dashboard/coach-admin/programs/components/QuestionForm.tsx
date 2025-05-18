@@ -29,6 +29,7 @@ import { redirect, useRouter } from "next/navigation";
 import { createQuestion } from "../[programId]/questions/new/actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useTranslations } from "next-intl";
+import { editQuestion } from "../[programId]/questions/[questionId]/edit/actions";
 
 // Define the form schema with validation
 const questionFormSchema = z.object({
@@ -83,9 +84,9 @@ export default function QuestionForm({
     const { question, answerGuidelines } = values;
     try {
       if (isEditing && questionId) {
-        handleEditQuestion({ question, answerGuidelines, questionId });
+        await handleEditQuestion({ question, answerGuidelines, questionId });
       } else {
-        handleCreateQuestion({ question, answerGuidelines });
+        await handleCreateQuestion({ question, answerGuidelines });
       }
     } catch (err) {
       setError(t("genericError"));
@@ -126,15 +127,18 @@ export default function QuestionForm({
     questionId: string;
   }) => {
     const formData = new FormData();
-    formData.append("quesiton", question);
+    formData.append("question", question);
     formData.append("answerGuidelines", answerGuidelines);
     formData.append("questionId", questionId);
-    // const result = await editQuestion(formData);
-    // if (result.success) {
-    //   router.push(`/dashboard/coach-admin/programs/${result.questionId}`);
-    // } else {
-    //   setError(result.message || t("genericError"));
-    // }
+    formData.append("programId", programId);
+    const result = await editQuestion(formData);
+    if (result.success) {
+      router.push(
+        `/dashboard/coach-admin/programs/${programId}/questions/${result.questionId}`
+      );
+    } else {
+      setError(result.message || t("genericError"));
+    }
   };
 
   return (
@@ -167,7 +171,6 @@ export default function QuestionForm({
                       className="min-h-[100px]"
                       {...field}
                       name="question"
-                      defaultValue={initialValues.question}
                     />
                   </FormControl>
                   <FormMessage />
@@ -188,7 +191,6 @@ export default function QuestionForm({
                       className="min-h-[150px]"
                       {...field}
                       name="answerGuidelines"
-                      defaultValue={initialValues.answerGuidelines}
                     />
                   </FormControl>
                   <FormMessage />

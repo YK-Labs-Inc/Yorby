@@ -1,11 +1,11 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { validateCoach } from "../../../actions";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
+import { validateCoach } from "../../../../actions";
 
-export async function createQuestion(
+export async function editQuestion(
     formData: FormData,
 ) {
     const supabase = await createSupabaseServerClient();
@@ -32,10 +32,12 @@ export async function createQuestion(
     const question = formData.get("question") as string;
     const answerGuidelines = formData.get("answerGuidelines") as string;
     const programId = formData.get("programId") as string;
+    const questionId = formData.get("questionId") as string;
     logger = logger.with({
         question,
         answerGuidelines,
         programId,
+        questionId,
     });
 
     // Validate required fields
@@ -77,7 +79,8 @@ export async function createQuestion(
     // Create the question
     const { data, error } = await supabase
         .from("custom_job_questions")
-        .insert({
+        .upsert({
+            id: questionId,
             question,
             answer_guidelines: answerGuidelines,
             custom_job_id: programId,

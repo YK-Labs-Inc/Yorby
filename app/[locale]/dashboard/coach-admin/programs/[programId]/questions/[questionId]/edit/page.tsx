@@ -83,7 +83,7 @@ export default async function EditQuestionPage({
 
   if (!coachId) {
     // User is not a coach, redirect to dashboard
-    return redirect("/dashboard");
+    return redirect("/onboarding");
   }
 
   // Get job details
@@ -91,7 +91,7 @@ export default async function EditQuestionPage({
 
   if (!job) {
     // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/curriculum");
+    return redirect("/dashboard/coach-admin/programs");
   }
 
   // Get question details to populate the form
@@ -99,23 +99,7 @@ export default async function EditQuestionPage({
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${programId}`);
-  }
-
-  // Handle form submission
-  async function handleUpdateQuestion(formData: FormData) {
-    "use server";
-
-    const result = await updateQuestion(programId, questionId, formData);
-
-    if (result.success) {
-      // Redirect to the question detail page
-      redirect(
-        `/dashboard/coach-admin/curriculum/${programId}/questions/${questionId}`
-      );
-    }
-
-    return result;
+    return redirect(`/dashboard/coach-admin/programs/${programId}`);
   }
 
   return (
@@ -127,8 +111,9 @@ export default async function EditQuestionPage({
           questionType: question.question_type,
         }}
         programId={programId}
-        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${programId}/questions/${questionId}`}
+        onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
         isEditing={true}
+        questionId={questionId}
       />
     </div>
   );
