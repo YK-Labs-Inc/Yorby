@@ -1,9 +1,8 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import JobForm from "../../components/ProgramForm";
-import { updateCustomJob } from "../../actions";
-import { Home, BookOpen, Briefcase, Pencil } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
@@ -24,13 +23,13 @@ async function getCoachId(userId: string) {
 }
 
 // Function to fetch job details
-async function getJobDetails(jobId: string, coachId: string) {
+async function getJobDetails(programId: string, coachId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: job, error } = await supabase
     .from("custom_jobs")
     .select("*")
-    .eq("id", jobId)
+    .eq("id", programId)
     .eq("coach_id", coachId)
     .single();
 
@@ -45,9 +44,9 @@ async function getJobDetails(jobId: string, coachId: string) {
 export default async function EditJobPage({
   params,
 }: {
-  params: Promise<{ jobId: string }>;
+  params: Promise<{ programId: string }>;
 }) {
-  const { jobId } = await params;
+  const { programId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -64,38 +63,25 @@ export default async function EditJobPage({
 
   if (!coachId) {
     // User is not a coach, redirect to dashboard
-    return redirect("/dashboard");
+    return redirect("/onboarding");
   }
 
   // Get job details to populate the form
-  const job = await getJobDetails(jobId, coachId);
+  const job = await getJobDetails(programId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/curriculum");
+    return redirect("/dashboard/coach-admin/programs");
   }
 
-  // Handle form submission
-  async function handleUpdateJob(formData: FormData) {
-    "use server";
-
-    const result = await updateCustomJob(jobId, formData);
-
-    if (result.success) {
-      // Redirect to the job detail page
-      redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
-    }
-
-    return result;
-  }
+  const t = await getTranslations(
+    "coachAdminPortal.programsPage.programEditPage"
+  );
 
   return (
     <div className="container mx-auto py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Edit Job Profile</h1>
-        <p className="text-muted-foreground mt-2">
-          Update the details of this job profile in your curriculum
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       </div>
 
       <JobForm
@@ -103,8 +89,9 @@ export default async function EditJobPage({
           title: job.job_title,
           description: job.job_description || "",
         }}
-        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}`}
+        onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}`}
         isEditing={true}
+        programId={programId}
       />
     </div>
   );

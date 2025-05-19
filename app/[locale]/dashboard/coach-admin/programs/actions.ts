@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
+import { getTranslations } from "next-intl/server";
 
 type ActionResponse = {
   success: boolean;
@@ -53,39 +54,21 @@ export async function validateCoach(): Promise<
   return { userId: user.id, coachId };
 }
 
-export async function updateCustomJob(
-  jobId: string,
-  formData: FormData,
-): Promise<ActionResponse> {
+export const deleteCustomJob = async (jobId: string) => {
+  const t = await getTranslations("errors");
   const supabase = await createSupabaseServerClient();
-  const logger = new Logger().with({ function: "updateCustomJob", jobId });
+  const logger = new Logger().with({ function: "deleteCustomJob", jobId });
 
   // Validate coach
   const coach = await validateCoach();
   if (!coach) {
     logger.error("Unauthorized: You must be a coach to perform this action");
     await logger.flush();
-    return {
-      success: false,
-      message: "Unauthorized: You must be a coach to perform this action",
-    };
-  }
-
-  // Extract form data
-  const jobTitle = formData.get("jobTitle") as string;
-  const jobDescription = formData.get("jobDescription") as string;
-  const companyName = formData.get("companyName") as string || null;
-  const companyDescription = formData.get("companyDescription") as string ||
-    null;
-
-  // Validate required fields
-  if (!jobTitle || !jobDescription) {
-    logger.error("Job title and description are required");
-    await logger.flush();
-    return {
-      success: false,
-      message: "Job title and description are required",
-    };
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("noPermission")
+      }`,
+    );
   }
 
   // Verify the job belongs to this coach
@@ -97,73 +80,13 @@ export async function updateCustomJob(
     .single();
 
   if (jobError || !jobData) {
-    logger.error("Job not found or you don't have permission to edit it");
+    logger.error("Program not found");
     await logger.flush();
-    return {
-      success: false,
-      message: "Job not found or you don't have permission to edit it",
-    };
-  }
-
-  // Update the custom job
-  const { data, error } = await supabase
-    .from("custom_jobs")
-    .update({
-      job_title: jobTitle,
-      job_description: jobDescription,
-      company_name: companyName,
-      company_description: companyDescription,
-    })
-    .eq("id", jobId)
-    .eq("coach_id", coach.coachId)
-    .select()
-    .single();
-
-  if (error) {
-    logger.error("Failed to update job: " + error.message);
-    await logger.flush();
-    return {
-      success: false,
-      message: "Failed to update job: " + error.message,
-    };
-  }
-
-  // Revalidate the curriculum pages
-  revalidatePath("/dashboard/coach-admin/curriculum");
-  revalidatePath(`/dashboard/coach-admin/curriculum/${jobId}`);
-
-  return {
-    success: true,
-    message: "Job updated successfully",
-    data,
-  };
-}
-
-export async function deleteCustomJob(jobId: string): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
-
-  // Validate coach
-  const coach = await validateCoach();
-  if (!coach) {
-    return {
-      success: false,
-      message: "Unauthorized: You must be a coach to perform this action",
-    };
-  }
-
-  // Verify the job belongs to this coach
-  const { data: jobData, error: jobError } = await supabase
-    .from("custom_jobs")
-    .select()
-    .eq("id", jobId)
-    .eq("coach_id", coach.coachId)
-    .single();
-
-  if (jobError || !jobData) {
-    return {
-      success: false,
-      message: "Job not found or you don't have permission to delete it",
-    };
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("noPermission")
+      }`,
+    );
   }
 
   // Delete the custom job
@@ -176,101 +99,21 @@ export async function deleteCustomJob(jobId: string): Promise<ActionResponse> {
     .eq("coach_id", coach.coachId);
 
   if (error) {
-    console.error("Error deleting custom job:", error);
-    return {
-      success: false,
-      message: "Failed to delete job: " + error.message,
-    };
+    logger.error("Error deleting custom job:", error);
+    await logger.flush();
+    redirect(
+      `/dashboard/coach-admin/programs/${jobId}/delete?error_message=${
+        t("pleaseTryAgain")
+      }`,
+    );
   }
 
   // Revalidate the curriculum page
-  revalidatePath("/dashboard/coach-admin/curriculum");
-
-  // Redirect to the curriculum listing page
-  redirect("/dashboard/coach-admin/curriculum");
-
-  return {
-    success: true,
-    message: "Job deleted successfully",
-  };
-}
-
-// Question Actions
-export async function createQuestion(
-  jobId: string,
-  formData: FormData,
-): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
-
-  // Validate coach
-  const coach = await validateCoach();
-  if (!coach) {
-    return {
-      success: false,
-      message: "Unauthorized: You must be a coach to perform this action",
-    };
-  }
-
-  // Extract form data
-  const question = formData.get("question") as string;
-  const answerGuidelines = formData.get("answerGuidelines") as string;
-  const questionType =
-    formData.get("questionType") as "ai_generated" | "user_generated" ||
-    "user_generated";
-
-  // Validate required fields
-  if (!question || !answerGuidelines) {
-    return {
-      success: false,
-      message: "Question and answer guidelines are required",
-    };
-  }
-
-  // Verify the job belongs to this coach
-  const { data: jobData, error: jobError } = await supabase
-    .from("custom_jobs")
-    .select()
-    .eq("id", jobId)
-    .eq("coach_id", coach.coachId)
-    .single();
-
-  if (jobError || !jobData) {
-    return {
-      success: false,
-      message:
-        "Job not found or you don't have permission to add questions to it",
-    };
-  }
-
-  // Create the question
-  const { data, error } = await supabase
-    .from("custom_job_questions")
-    .insert({
-      question,
-      answer_guidelines: answerGuidelines,
-      custom_job_id: jobId,
-      question_type: questionType,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error creating question:", error);
-    return {
-      success: false,
-      message: "Failed to create question: " + error.message,
-    };
-  }
-
-  // Revalidate the job page to show the new question
-  revalidatePath(`/dashboard/coach-admin/curriculum/${jobId}`);
-
-  return {
-    success: true,
-    message: "Question created successfully",
-    data,
-  };
-}
+  revalidatePath("/dashboard/coach-admin/programs");
+  redirect(
+    `/dashboard/coach-admin/programs`,
+  );
+};
 
 export async function updateQuestion(
   jobId: string,
@@ -365,78 +208,6 @@ export async function updateQuestion(
     success: true,
     message: "Question updated successfully",
     data,
-  };
-}
-
-export async function deleteQuestion(
-  jobId: string,
-  questionId: string,
-): Promise<ActionResponse> {
-  const supabase = await createSupabaseServerClient();
-
-  // Validate coach
-  const coach = await validateCoach();
-  if (!coach) {
-    return {
-      success: false,
-      message: "Unauthorized: You must be a coach to perform this action",
-    };
-  }
-
-  // Verify the job belongs to this coach
-  const { data: jobData, error: jobError } = await supabase
-    .from("custom_jobs")
-    .select()
-    .eq("id", jobId)
-    .eq("coach_id", coach.coachId)
-    .single();
-
-  if (jobError || !jobData) {
-    return {
-      success: false,
-      message:
-        "Job not found or you don't have permission to delete questions from it",
-    };
-  }
-
-  // Verify the question belongs to this job
-  const { data: questionData, error: questionError } = await supabase
-    .from("custom_job_questions")
-    .select()
-    .eq("id", questionId)
-    .eq("custom_job_id", jobId)
-    .single();
-
-  if (questionError || !questionData) {
-    return {
-      success: false,
-      message: "Question not found or doesn't belong to this job",
-    };
-  }
-
-  // Delete the question
-  // Note: This will cascade delete related sample answers
-  // if the database is set up with the proper foreign key constraints
-  const { error } = await supabase
-    .from("custom_job_questions")
-    .delete()
-    .eq("id", questionId)
-    .eq("custom_job_id", jobId);
-
-  if (error) {
-    console.error("Error deleting question:", error);
-    return {
-      success: false,
-      message: "Failed to delete question: " + error.message,
-    };
-  }
-
-  // Revalidate the job page
-  revalidatePath(`/dashboard/coach-admin/curriculum/${jobId}`);
-
-  return {
-    success: true,
-    message: "Question deleted successfully",
   };
 }
 

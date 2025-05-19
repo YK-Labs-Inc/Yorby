@@ -44,13 +44,13 @@ async function getCoachId(userId: string) {
 }
 
 // Function to fetch job details
-async function getJobDetails(jobId: string, coachId: string) {
+async function getJobDetails(programId: string, coachId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: job, error } = await supabase
     .from("custom_jobs")
     .select("job_title")
-    .eq("id", jobId)
+    .eq("id", programId)
     .eq("coach_id", coachId)
     .single();
 
@@ -63,14 +63,14 @@ async function getJobDetails(jobId: string, coachId: string) {
 }
 
 // Function to fetch question details
-async function getQuestionDetails(questionId: string, jobId: string) {
+async function getQuestionDetails(questionId: string, programId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: question, error } = await supabase
     .from("custom_job_questions")
     .select("*")
     .eq("id", questionId)
-    .eq("custom_job_id", jobId)
+    .eq("custom_job_id", programId)
     .single();
 
   if (error || !question) {
@@ -102,9 +102,9 @@ async function getSampleAnswers(questionId: string) {
 export default async function QuestionDetailPage({
   params,
 }: {
-  params: Promise<{ jobId: string; questionId: string }>;
+  params: Promise<{ programId: string; questionId: string }>;
 }) {
-  const { jobId, questionId } = await params;
+  const { programId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -125,19 +125,19 @@ export default async function QuestionDetailPage({
   }
 
   // Get job details
-  const job = await getJobDetails(jobId, coachId);
+  const job = await getJobDetails(programId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/curriculum");
+    return redirect("/dashboard/coach-admin/programs");
   }
 
   // Get question details
-  const question = await getQuestionDetails(questionId, jobId);
+  const question = await getQuestionDetails(questionId, programId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
+    return redirect(`/dashboard/coach-admin/programs/${programId}`);
   }
 
   // Get sample answers
@@ -148,7 +148,7 @@ export default async function QuestionDetailPage({
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/curriculum/${jobId}`}>
+          <Link href={`/dashboard/coach-admin/programs/${programId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Job Profile
           </Link>
@@ -168,7 +168,7 @@ export default async function QuestionDetailPage({
         <div className="flex gap-2">
           <Button asChild variant="outline">
             <Link
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/edit`}
+              href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/edit`}
             >
               <Pencil className="h-4 w-4 mr-2" />
               Edit Question
@@ -176,7 +176,7 @@ export default async function QuestionDetailPage({
           </Button>
           <Button asChild variant="destructive">
             <Link
-              href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/delete`}
+              href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/delete`}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Question
@@ -232,7 +232,7 @@ export default async function QuestionDetailPage({
         </h2>
         <Button asChild>
           <Link
-            href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
+            href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers`}
           >
             <FileText className="h-4 w-4 mr-2" />
             Manage Sample Answers
@@ -253,7 +253,7 @@ export default async function QuestionDetailPage({
           <CardContent>
             <Button asChild>
               <Link
-                href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers?tab=add`}
+                href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers?tab=add`}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Sample Answer
@@ -289,7 +289,7 @@ export default async function QuestionDetailPage({
             <div className="flex justify-center mt-4">
               <Button asChild variant="outline">
                 <Link
-                  href={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}/sample-answers`}
+                  href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers`}
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   View All Sample Answers

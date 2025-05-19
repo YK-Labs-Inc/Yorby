@@ -1,0 +1,261 @@
+import React from "react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Plus,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Eye,
+  FileText,
+  ArrowLeft,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getTranslations } from "next-intl/server";
+
+// Helper function to get coach ID from user ID
+async function getCoachId(userId: string) {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !data) {
+    console.error("Error fetching coach ID:", error);
+    return null;
+  }
+
+  return data.id;
+}
+
+// Function to fetch program and questions data
+async function getProgramData(programId: string, coachId: string) {
+  const supabase = await createSupabaseServerClient();
+
+  // Fetch program details
+  const { data: program, error: programError } = await supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("id", programId)
+    .eq("coach_id", coachId)
+    .single();
+
+  if (programError || !program) {
+    console.error("Error fetching program data:", programError);
+    return {
+      program: null,
+      questions: [],
+      error: programError || new Error("Program not found"),
+    };
+  }
+
+  // Fetch questions for this program
+  const { data: questions, error: questionsError } = await supabase
+    .from("custom_job_questions")
+    .select(
+      `
+      id,
+      question,
+      answer_guidelines,
+      created_at,
+      custom_job_question_sample_answers (count)
+    `
+    )
+    .eq("custom_job_id", programId)
+    .order("created_at", { ascending: false });
+
+  if (questionsError) {
+    console.error("Error fetching questions:", questionsError);
+    return { program, questions: [], error: questionsError };
+  }
+
+  return { program, questions: questions || [], error: null };
+}
+
+export default async function ProgramDetailPage({
+  params,
+}: {
+  params: Promise<{ programId: string }>;
+}) {
+  const { programId } = await params;
+  const supabase = await createSupabaseServerClient();
+
+  // Get the current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/sign-in");
+  }
+
+  // Verify the user is a coach
+  const coachId = await getCoachId(user.id);
+
+  if (!coachId) {
+    // User is not a coach, redirect to dashboard
+    return redirect("/");
+  }
+
+  // Get program and questions data
+  const { program, questions, error } = await getProgramData(
+    programId,
+    coachId
+  );
+
+  if (error || !program) {
+    // Program not found or doesn't belong to this coach
+    return redirect("/dashboard/coach-admin/programs");
+  }
+
+  const t = await getTranslations(
+    "coachAdminPortal.programsPage.programDetailPage"
+  );
+
+  return (
+    <div className="container mx-auto py-6">
+      {/* Back button */}
+      <div className="mb-6">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/dashboard/coach-admin/programs`}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t("backToPrograms")}
+          </Link>
+        </Button>
+      </div>
+      {/* Header with action buttons */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t("headerTitle", { programTitle: program.job_title })}
+          </h1>
+          {program.company_name && (
+            <p className="text-muted-foreground mt-1">
+              {t("headerCompany", { companyName: program.company_name })}
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href={`/dashboard/coach-admin/programs/${programId}/edit`}>
+              <Pencil className="h-4 w-4 mr-2" />
+              {t("editButton")}
+            </Link>
+          </Button>
+          <Button asChild variant="destructive">
+            <Link href={`/dashboard/coach-admin/programs/${programId}/delete`}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t("deleteButton")}
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Questions section */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          {t("questionsSectionTitle")}
+        </h2>
+        <Button asChild>
+          <Link
+            href={`/dashboard/coach-admin/programs/${programId}/questions/new`}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {t("addQuestionButton")}
+          </Link>
+        </Button>
+      </div>
+
+      {/* Empty questions state */}
+      {questions.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("emptyQuestionsTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link
+                href={`/dashboard/coach-admin/programs/${programId}/questions/new`}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t("addFirstQuestionButton")}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Questions list */}
+      {questions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {t("questionsListTitle", { count: questions.length })}
+            </CardTitle>
+            <CardDescription>{t("questionsListDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("table.question")}</TableHead>
+                  <TableHead>{t("table.sampleAnswers")}</TableHead>
+                  <TableHead>{t("table.created")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {questions.map((question) => (
+                  <TableRow key={question.id}>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
+                        className="hover:underline text-primary"
+                      >
+                        {question.question.length > 80
+                          ? `${question.question.substring(0, 80)}...`
+                          : question.question}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      {question.custom_job_question_sample_answers[0].count}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(question.created_at), "MMM d, yyyy")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

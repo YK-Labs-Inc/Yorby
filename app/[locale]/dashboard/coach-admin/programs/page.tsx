@@ -125,7 +125,7 @@ export default async function ProgramsPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/dashboard/coach-admin/curriculum/new">
+              <Link href="/dashboard/coach-admin/programs/new">
                 <Plus className="h-4 w-4 mr-2" />
                 {t("createFirstProgramButton")}
               </Link>
@@ -146,12 +146,8 @@ export default async function ProgramsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("table.programTitle")}</TableHead>
-                  <TableHead>{t("table.company")}</TableHead>
                   <TableHead>{t("table.questions")}</TableHead>
                   <TableHead>{t("table.created")}</TableHead>
-                  <TableHead className="text-right">
-                    {t("table.actions")}
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,7 +161,6 @@ export default async function ProgramsPage() {
                         {program.job_title}
                       </Link>
                     </TableCell>
-                    <TableCell>{program.company_name || "—"}</TableCell>
                     <TableCell>
                       {t("questionsCount", {
                         count: program.custom_job_questions[0].count,
@@ -175,47 +170,6 @@ export default async function ProgramsPage() {
                       {t("createdAtFormat", {
                         date: new Date(program.created_at),
                       })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">
-                              {t("actionsMenu.openMenu")}
-                            </span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${program.id}`}
-                            >
-                              <ChevronRight className="h-4 w-4 mr-2" />
-                              {t("table.viewDetails")}
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${program.id}/edit`}
-                            >
-                              <Pencil className="h-4 w-4 mr-2" />
-                              {t("table.editProgram")}
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            asChild
-                          >
-                            <Link
-                              href={`/dashboard/coach-admin/programs/${program.id}/delete`}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {t("table.deleteProgram")}
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

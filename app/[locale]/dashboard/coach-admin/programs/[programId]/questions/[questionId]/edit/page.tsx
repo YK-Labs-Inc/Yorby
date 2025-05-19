@@ -1,12 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import {
-  Home,
-  BookOpen,
-  Briefcase,
-  MessageSquare,
-  Pencil,
-} from "lucide-react";
+import { Home, BookOpen, Briefcase, MessageSquare, Pencil } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { updateQuestion } from "../../../../actions";
 import QuestionForm from "../../../../components/QuestionForm";
@@ -30,13 +24,13 @@ async function getCoachId(userId: string) {
 }
 
 // Function to fetch job details
-async function getJobDetails(jobId: string, coachId: string) {
+async function getJobDetails(programId: string, coachId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: job, error } = await supabase
     .from("custom_jobs")
     .select("job_title")
-    .eq("id", jobId)
+    .eq("id", programId)
     .eq("coach_id", coachId)
     .single();
 
@@ -49,14 +43,14 @@ async function getJobDetails(jobId: string, coachId: string) {
 }
 
 // Function to fetch question details
-async function getQuestionDetails(questionId: string, jobId: string) {
+async function getQuestionDetails(questionId: string, programId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: question, error } = await supabase
     .from("custom_job_questions")
     .select("*")
     .eq("id", questionId)
-    .eq("custom_job_id", jobId)
+    .eq("custom_job_id", programId)
     .single();
 
   if (error || !question) {
@@ -70,9 +64,9 @@ async function getQuestionDetails(questionId: string, jobId: string) {
 export default async function EditQuestionPage({
   params,
 }: {
-  params: Promise<{ jobId: string; questionId: string }>;
+  params: Promise<{ programId: string; questionId: string }>;
 }) {
-  const { jobId, questionId } = await params;
+  const { programId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -89,59 +83,37 @@ export default async function EditQuestionPage({
 
   if (!coachId) {
     // User is not a coach, redirect to dashboard
-    return redirect("/dashboard");
+    return redirect("/onboarding");
   }
 
   // Get job details
-  const job = await getJobDetails(jobId, coachId);
+  const job = await getJobDetails(programId, coachId);
 
   if (!job) {
     // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/curriculum");
+    return redirect("/dashboard/coach-admin/programs");
   }
 
   // Get question details to populate the form
-  const question = await getQuestionDetails(questionId, jobId);
+  const question = await getQuestionDetails(questionId, programId);
 
   if (!question) {
     // Question not found or doesn't belong to this job
-    return redirect(`/dashboard/coach-admin/curriculum/${jobId}`);
-  }
-
-  // Handle form submission
-  async function handleUpdateQuestion(formData: FormData) {
-    "use server";
-
-    const result = await updateQuestion(jobId, questionId, formData);
-
-    if (result.success) {
-      // Redirect to the question detail page
-      redirect(
-        `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`
-      );
-    }
-
-    return result;
+    return redirect(`/dashboard/coach-admin/programs/${programId}`);
   }
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Edit Question</h1>
-        <p className="text-muted-foreground mt-2">
-          Update this interview question for {job.job_title}
-        </p>
-      </div>
-
       <QuestionForm
         initialValues={{
           question: question.question,
           answerGuidelines: question.answer_guidelines,
           questionType: question.question_type,
         }}
-        onSubmit={handleUpdateQuestion}
-        onCancelRedirectUrl={`/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`}
+        programId={programId}
+        onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
         isEditing={true}
+        questionId={questionId}
       />
     </div>
   );

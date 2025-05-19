@@ -321,7 +321,8 @@
   "errors": {
     "pleaseTryAgain": "Sorry, something went wrong. Please try again.",
     "userNotFound": "User not found — please sign in  again.",
-    "onlyPdfFilesAllowed": "Only PDF files are allowed. Please upload PDF documents only."
+    "onlyPdfFilesAllowed": "Only PDF files are allowed. Please upload PDF documents only.",
+    "noPermission": "Sorry, you do not have permission to perform this action"
   },
   "sidebar": {
     "addJob": "Create Interview Questions",
@@ -1899,6 +1900,91 @@
         "genericError": "An unexpected error occurred. Please try again.",
         "requiredTitle": "Title must be at least 3 characters.",
         "requiredDescription": "Description must be at least 10 characters."
+      },
+      "programDetailPage": {
+        "headerTitle": "{programTitle}",
+        "headerCompany": "{companyName}",
+        "editButton": "Edit Program",
+        "deleteButton": "Delete Program",
+        "detailsCardTitle": "Program Details",
+        "detailsCardDescription": "Information about this program profile in your programs",
+        "programDescriptionTitle": "Program Description",
+        "companyDescriptionTitle": "Company Description",
+        "statusLabel": "Status:",
+        "statusUnlocked": "Unlocked",
+        "statusLocked": "Locked",
+        "createdOn": "Created on {date}",
+        "questionsSectionTitle": "Program Questions",
+        "addQuestionButton": "Add Question",
+        "emptyQuestionsTitle": "No Questions Added Yet",
+        "addFirstQuestionButton": "Add Your First Question",
+        "questionsListTitle": "Questions ({count})",
+        "questionsListDescription": "Questions and answer guidelines for this program profile",
+        "table": {
+          "question": "Question",
+          "type": "Type",
+          "sampleAnswers": "Sample Answers",
+          "created": "Created",
+          "actions": "Actions"
+        },
+        "typeAIGenerated": "AI Generated",
+        "typeManual": "Manual",
+        "viewDetails": "View Details",
+        "editQuestion": "Edit Question",
+        "manageSampleAnswers": "Manage Sample Answers",
+        "deleteQuestion": "Delete Question",
+        "questionDetailsSectionTitle": "Question Details",
+        "answerGuidelinesTitle": "Answer Guidelines",
+        "sampleAnswersLabel": "Sample Answers:",
+        "manageSampleAnswersButton": "Manage Sample Answers",
+        "backToPrograms": "View All Programs"
+      },
+      "programDeletionPage": {
+        "confirmTitle": "Confirm Deletion",
+        "confirmDescription": "You are about to delete the following program from your list",
+        "programTitle": "Program Title:",
+        "associatedQuestions": "Associated Questions:",
+        "questionsCount": "{count} question{plural}",
+        "warningTitle": "Warning",
+        "warningDescription": "This action cannot be undone. Deleting this program will also delete all associated questions and sample answers. Users will no longer be able to practice with this program.",
+        "cancel": "Cancel",
+        "delete": "Delete Program",
+        "backToProgram": "Back to Program Details"
+      },
+      "programEditPage": {
+        "title": "Edit Program"
+      }
+    },
+    "questionsPage": {
+      "createQuestions": {
+        "errors": {
+          "missingFields": "Question and answer guidelines are both required"
+        }
+      },
+      "questionForm": {
+        "genericError": "Something went wrong, please try again.",
+        "editTitle": "Edit Question",
+        "createTitle": "Create Question",
+        "questionPlaceholder": "Enter the question",
+        "questionSectionHeader": "Question",
+        "answerGuidelinesSectionHeader": "Answer Guidelines",
+        "answerGuidelinesPlaceholder": "Enter guidelines for what makes a good answer",
+        "cancel": "Cancel",
+        "saveChanges": "Save Changes",
+        "savingChanges": "Saving Changes...",
+        "createQuestion": "Create Question",
+        "creatingQuestion": "Creating Question..."
+      },
+      "deleteQuestions": {
+        "backToAllQuestions": "Back To Questions",
+        "deleteQuestion": "Delete Question",
+        "confirmDeletion": "Confirm Deletion",
+        "question": "Question",
+        "answerGuidelines": "Answer Guidelines",
+        "sampleAnswers": "Sample Answers",
+        "warning": "Warning",
+        "warningConfirmation": "This action cannot be undone. Deleting this question will also delete all associated sample answers. Users will no longer be able to practice with this question.",
+        "cancel": "Cancel"
       }
     }
   },

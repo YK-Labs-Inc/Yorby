@@ -25,8 +25,11 @@ import {
 } from "@/components/ui/form";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { createQuestion } from "../[programId]/questions/new/actions";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { useTranslations } from "next-intl";
+import { editQuestion } from "../[programId]/questions/[questionId]/edit/actions";
 
 // Define the form schema with validation
 const questionFormSchema = z.object({
@@ -35,9 +38,6 @@ const questionFormSchema = z.object({
   }),
   answerGuidelines: z.string().min(10, {
     message: "Answer guidelines must be at least 10 characters.",
-  }),
-  questionType: z.enum(["ai_generated", "user_generated"], {
-    required_error: "Question type is required.",
   }),
 });
 
@@ -49,21 +49,24 @@ interface QuestionFormProps {
     answerGuidelines?: string;
     questionType?: "ai_generated" | "user_generated";
   };
-  onSubmit: (
-    formData: FormData
-  ) => Promise<{ success: boolean; message: string }>;
+  programId: string;
   onCancelRedirectUrl: string;
   isEditing?: boolean;
+  questionId?: string;
 }
 
 export default function QuestionForm({
   initialValues = {},
-  onSubmit,
   onCancelRedirectUrl,
   isEditing = false,
+  questionId,
+  programId,
 }: QuestionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { logError } = useAxiomLogging();
+  const t = useTranslations("coachAdminPortal.questionsPage.questionForm");
+  const router = useRouter();
 
   // Initialize the form with default values or provided initial values
   const form = useForm<QuestionFormValues>({
@@ -71,49 +74,80 @@ export default function QuestionForm({
     defaultValues: {
       question: initialValues.question || "",
       answerGuidelines: initialValues.answerGuidelines || "",
-      questionType: initialValues.questionType || "user_generated",
     },
   });
 
   // Handle form submission
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (values: z.infer<typeof questionFormSchema>) => {
     setIsSubmitting(true);
     setError(null);
-
+    const { question, answerGuidelines } = values;
     try {
-      const result = await onSubmit(formData);
-
-      if (!result.success) {
-        setError(result.message);
-        setIsSubmitting(false);
-        return;
+      if (isEditing && questionId) {
+        await handleEditQuestion({ question, answerGuidelines, questionId });
+      } else {
+        await handleCreateQuestion({ question, answerGuidelines });
       }
-
-      // Form submitted successfully, let the parent component handle navigation
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-      console.error("Form submission error:", err);
+      setError(t("genericError"));
+      logError("Create job form submission error:", { error: err });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateQuestion = async ({
+    question,
+    answerGuidelines,
+  }: {
+    question: string;
+    answerGuidelines: string;
+  }) => {
+    const formData = new FormData();
+    formData.append("question", question);
+    formData.append("answerGuidelines", answerGuidelines);
+    formData.append("programId", programId);
+    const result = await createQuestion(formData);
+    if (result.success) {
+      router.push(
+        `/dashboard/coach-admin/programs/${programId}/questions/${result.questionId}`
+      );
+    } else {
+      setError(result.message || t("genericError"));
+    }
+  };
+
+  const handleEditQuestion = async ({
+    question,
+    answerGuidelines,
+    questionId,
+  }: {
+    question: string;
+    answerGuidelines: string;
+    questionId: string;
+  }) => {
+    const formData = new FormData();
+    formData.append("question", question);
+    formData.append("answerGuidelines", answerGuidelines);
+    formData.append("questionId", questionId);
+    formData.append("programId", programId);
+    const result = await editQuestion(formData);
+    if (result.success) {
+      router.push(
+        `/dashboard/coach-admin/programs/${programId}/questions/${result.questionId}`
+      );
+    } else {
+      setError(result.message || t("genericError"));
     }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>
-          {isEditing
-            ? "Edit Interview Question"
-            : "Create New Interview Question"}
-        </CardTitle>
-        <CardDescription>
-          {isEditing
-            ? "Update this interview question and answer guidelines."
-            : "Add a new interview question to this job profile."}
-        </CardDescription>
+        <CardTitle>{isEditing ? t("editTitle") : t("createTitle")}</CardTitle>
       </CardHeader>
       <Form {...form}>
-        <form action={handleSubmit}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <CardContent className="space-y-4">
             {/* Error alert */}
             {error && (
@@ -130,19 +164,15 @@ export default function QuestionForm({
               name="question"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Question*</FormLabel>
+                  <FormLabel>{t("questionSectionHeader")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter the interview question..."
+                      placeholder={t("questionPlaceholder")}
                       className="min-h-[100px]"
                       {...field}
                       name="question"
-                      defaultValue={initialValues.question}
                     />
                   </FormControl>
-                  <FormDescription>
-                    The interview question that will be presented to students.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -154,63 +184,15 @@ export default function QuestionForm({
               name="answerGuidelines"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Answer Guidelines*</FormLabel>
+                  <FormLabel>{t("answerGuidelinesSectionHeader")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter guidelines for what makes a good answer..."
+                      placeholder={t("answerGuidelinesPlaceholder")}
                       className="min-h-[150px]"
                       {...field}
                       name="answerGuidelines"
-                      defaultValue={initialValues.answerGuidelines}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Guidelines for what constitutes a good answer to this
-                    question.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Question Type */}
-            <FormField
-              control={form.control}
-              name="questionType"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Question Type*</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={
-                        initialValues.questionType || "user_generated"
-                      }
-                      className="flex flex-col space-y-1"
-                      name="questionType"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="user_generated" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          User Generated
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="ai_generated" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          AI Generated
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormDescription>
-                    Specify whether this question was manually created or
-                    generated by AI.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -223,18 +205,18 @@ export default function QuestionForm({
               onClick={() => redirect(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Create Question"}
+                  {isEditing ? t("savingChanges") : t("creatingQuestion")}
                 </>
               ) : isEditing ? (
-                "Save Changes"
+                t("saveChanges")
               ) : (
-                "Create Question"
+                t("createQuestion")
               )}
             </Button>
           </CardFooter>
