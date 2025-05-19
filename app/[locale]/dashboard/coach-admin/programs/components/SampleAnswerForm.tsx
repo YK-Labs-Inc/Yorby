@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,12 +24,15 @@ import {
 } from "@/components/ui/form";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { redirect } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { createSampleAnswer } from "../[programId]/questions/[questionId]/sample-answers/new/actions";
+import { editSampleAnswer } from "../[programId]/questions/[questionId]/sample-answers/[answerId]/edit/actions";
 
 // Define the form schema with validation
 const sampleAnswerFormSchema = z.object({
-  answer: z.string().min(10, {
-    message: "Sample answer must be at least 10 characters.",
+  answer: z.string().min(1, {
+    message: "Sample answer is required",
   }),
 });
 
@@ -40,21 +42,28 @@ interface SampleAnswerFormProps {
   initialValues?: {
     answer?: string;
   };
-  onSubmit: (
-    formData: FormData
-  ) => Promise<{ success: boolean; message: string }>;
+  programId: string;
+  questionId: string;
+  answerId?: string;
   onCancelRedirectUrl: string;
   isEditing?: boolean;
 }
 
 export default function SampleAnswerForm({
   initialValues = {},
-  onSubmit,
+  programId,
+  questionId,
+  answerId,
   onCancelRedirectUrl,
   isEditing = false,
 }: SampleAnswerFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { logError } = useAxiomLogging();
+  const router = useRouter();
+  const t = useTranslations(
+    "coachAdminPortal.sampleAnswersPage.sampleAnswerForm"
+  );
 
   // Initialize the form with default values or provided initial values
   const form = useForm<SampleAnswerFormValues>({
@@ -65,48 +74,96 @@ export default function SampleAnswerForm({
   });
 
   // Handle form submission
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (
+    values: z.infer<typeof sampleAnswerFormSchema>
+  ) => {
     setIsSubmitting(true);
     setError(null);
-
     try {
-      const result = await onSubmit(formData);
-
-      if (!result.success) {
-        setError(result.message);
-        setIsSubmitting(false);
-        return;
+      if (isEditing && answerId) {
+        await handleEditSampleAnswer({
+          sampleAnswer: values.answer,
+          programId,
+          questionId,
+          sampleAnswerId: answerId,
+        });
+      } else {
+        await handleCreateSampleAnswer({
+          sampleAnswer: values.answer,
+          programId,
+          questionId,
+        });
       }
-
-      // Form submitted successfully, let the parent component handle navigation
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
-      console.error("Form submission error:", err);
+      setError(t("genericError"));
+      logError("Create job form submission error:", { error: err });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEditSampleAnswer = async ({
+    sampleAnswer,
+    programId,
+    questionId,
+    sampleAnswerId,
+  }: {
+    sampleAnswer: string;
+    programId: string;
+    questionId: string;
+    sampleAnswerId: string;
+  }) => {
+    const formData = new FormData();
+    formData.append("answer", sampleAnswer);
+    formData.append("programId", programId);
+    formData.append("questionId", questionId);
+    formData.append("sampleAnswerId", sampleAnswerId);
+    const result = await editSampleAnswer(formData);
+    if (result.success) {
+      router.push(
+        `/dashboard/coach-admin/programs/${programId}/questions/${questionId}`
+      );
+    } else {
+      setError(result.message || t("genericError"));
+    }
+  };
+
+  const handleCreateSampleAnswer = async ({
+    sampleAnswer,
+    programId,
+    questionId,
+  }: {
+    sampleAnswer: string;
+    programId: string;
+    questionId: string;
+  }) => {
+    const formData = new FormData();
+    formData.append("answer", sampleAnswer);
+    formData.append("programId", programId);
+    formData.append("questionId", questionId);
+    const result = await createSampleAnswer(formData);
+    if (result.success) {
+      router.push(
+        `/dashboard/coach-admin/programs/${programId}/questions/${questionId}`
+      );
+    } else {
+      setError(result.message || t("genericError"));
     }
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>
-          {isEditing ? "Edit Sample Answer" : "Add Sample Answer"}
-        </CardTitle>
-        <CardDescription>
-          {isEditing
-            ? "Update this sample answer for the interview question."
-            : "Add a new sample answer to help students understand what makes a good response."}
-        </CardDescription>
+        <CardTitle>{isEditing ? t("editTitle") : t("createTitle")}</CardTitle>
       </CardHeader>
       <Form {...form}>
-        <form action={handleSubmit}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <CardContent className="space-y-4">
             {/* Error alert */}
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>{t("errorTitle")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -117,20 +174,14 @@ export default function SampleAnswerForm({
               name="answer"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sample Answer*</FormLabel>
+                  <FormLabel>{t("answerLabel")}*</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter a sample answer for this question..."
+                      placeholder={t("answerPlaceholder")}
                       className="min-h-[200px]"
                       {...field}
-                      name="answer"
-                      defaultValue={initialValues.answer}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Provide a model answer that demonstrates how to effectively
-                    respond to this interview question.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -140,21 +191,21 @@ export default function SampleAnswerForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => redirect(onCancelRedirectUrl)}
+              onClick={() => router.push(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Add Answer"}
+                  {isEditing ? t("saving") : t("creating")}
                 </>
               ) : isEditing ? (
-                "Save Changes"
+                t("saveChanges")
               ) : (
-                "Add Answer"
+                t("create")
               )}
             </Button>
           </CardFooter>

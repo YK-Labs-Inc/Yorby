@@ -21,32 +21,13 @@ async function getCoachId(userId: string) {
   return data.id;
 }
 
-// Function to fetch job details
-async function getJobDetails(programId: string, coachId: string) {
-  const supabase = await createSupabaseServerClient();
-
-  const { data: job, error } = await supabase
-    .from("custom_jobs")
-    .select("job_title")
-    .eq("id", programId)
-    .eq("coach_id", coachId)
-    .single();
-
-  if (error || !job) {
-    console.error("Error fetching job details:", error);
-    return null;
-  }
-
-  return job;
-}
-
 // Function to fetch question details
 async function getQuestionDetails(questionId: string, programId: string) {
   const supabase = await createSupabaseServerClient();
 
   const { data: question, error } = await supabase
     .from("custom_job_questions")
-    .select("question")
+    .select("*")
     .eq("id", questionId)
     .eq("custom_job_id", programId)
     .single();
@@ -59,35 +40,12 @@ async function getQuestionDetails(questionId: string, programId: string) {
   return question;
 }
 
-// Function to fetch sample answer details
-async function getSampleAnswerDetails(
-  answerId: string,
-  questionId: string,
-  programId: string
-) {
-  const supabase = await createSupabaseServerClient();
-
-  const { data: sampleAnswer, error } = await supabase
-    .from("custom_job_question_sample_answers")
-    .select("*")
-    .eq("id", answerId)
-    .eq("question_id", questionId)
-    .single();
-
-  if (error || !sampleAnswer) {
-    console.error("Error fetching sample answer details:", error);
-    return null;
-  }
-
-  return sampleAnswer;
-}
-
-export default async function EditSampleAnswerPage({
+export default async function NewSampleAnswerPage({
   params,
 }: {
-  params: { programId: string; questionId: string; answerId: string };
+  params: { programId: string; questionId: string };
 }) {
-  const { programId, questionId, answerId } = params;
+  const { programId, questionId } = params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -104,15 +62,7 @@ export default async function EditSampleAnswerPage({
 
   if (!coachId) {
     // User is not a coach, redirect to dashboard
-    return redirect("/onboarding");
-  }
-
-  // Get job details
-  const job = await getJobDetails(programId, coachId);
-
-  if (!job) {
-    // Job not found or doesn't belong to this coach
-    return redirect("/dashboard/coach-admin/programs");
+    return redirect("/dashboard");
   }
 
   // Get question details
@@ -123,31 +73,12 @@ export default async function EditSampleAnswerPage({
     return redirect(`/dashboard/coach-admin/programs/${programId}`);
   }
 
-  // Get sample answer details
-  const sampleAnswer = await getSampleAnswerDetails(
-    answerId,
-    questionId,
-    programId
-  );
-
-  if (!sampleAnswer) {
-    // Sample answer not found or doesn't belong to this question
-    return redirect(
-      `/dashboard/coach-admin/programs/${programId}/questions/${questionId}`
-    );
-  }
-
   return (
     <div className="container mx-auto py-6">
       <SampleAnswerForm
         programId={programId}
         questionId={questionId}
-        answerId={answerId}
-        initialValues={{
-          answer: sampleAnswer.answer,
-        }}
         onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
-        isEditing
       />
     </div>
   );

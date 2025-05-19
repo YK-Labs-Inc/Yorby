@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Database } from "@/utils/supabase/database.types";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
@@ -104,6 +105,7 @@ export default async function QuestionDetailPage({
 }: {
   params: Promise<{ programId: string; questionId: string }>;
 }) {
+  const t = await getTranslations("coachAdminPortal.questionDetailPage");
   const { programId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
@@ -150,7 +152,7 @@ export default async function QuestionDetailPage({
         <Button asChild variant="outline" size="sm">
           <Link href={`/dashboard/coach-admin/programs/${programId}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Job Profile
+            {t("navigation.backButton")}
           </Link>
         </Button>
       </div>
@@ -159,11 +161,8 @@ export default async function QuestionDetailPage({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Question Details
+            {t("header.title")}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            View and manage this interview question
-          </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
@@ -171,7 +170,7 @@ export default async function QuestionDetailPage({
               href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/edit`}
             >
               <Pencil className="h-4 w-4 mr-2" />
-              Edit Question
+              {t("header.editButton")}
             </Link>
           </Button>
           <Button asChild variant="destructive">
@@ -179,7 +178,7 @@ export default async function QuestionDetailPage({
               href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/delete`}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete Question
+              {t("header.deleteButton")}
             </Link>
           </Button>
         </div>
@@ -187,76 +186,51 @@ export default async function QuestionDetailPage({
 
       {/* Question details card */}
       <Card className="mb-8">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle>Question Information</CardTitle>
-              <CardDescription>
-                Details about this interview question
-              </CardDescription>
-            </div>
-            <Badge variant="outline">
-              {question.question_type === "ai_generated"
-                ? "AI Generated"
-                : "Manual"}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-medium mb-2">Question</h3>
+              <h3 className="text-sm font-medium mb-2">
+                {t("questionDetails.questionLabel")}
+              </h3>
               <div className="bg-muted p-4 rounded-md whitespace-pre-wrap">
                 {question.question}
               </div>
             </div>
 
             <div>
-              <h3 className="text-sm font-medium mb-2">Answer Guidelines</h3>
+              <h3 className="text-sm font-medium mb-2">
+                {t("questionDetails.answerGuidelinesLabel")}
+              </h3>
               <div className="bg-muted p-4 rounded-md whitespace-pre-wrap">
                 {question.answer_guidelines}
               </div>
             </div>
 
             <div className="text-sm text-muted-foreground">
-              Created on {format(new Date(question.created_at), "MMMM d, yyyy")}
+              {t("questionDetails.createdOn", {
+                date: format(new Date(question.created_at), "MMMM d, yyyy"),
+              })}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Sample answers section */}
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Sample Answers
-        </h2>
-        <Button asChild>
-          <Link
-            href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers`}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Manage Sample Answers
-          </Link>
-        </Button>
-      </div>
-
       {/* Empty sample answers state */}
       {sampleAnswers.length === 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>No Sample Answers Yet</CardTitle>
+            <CardTitle>{t("sampleAnswers.emptyState.title")}</CardTitle>
             <CardDescription>
-              Add sample answers to help students understand what makes a good
-              response to this question.
+              {t("sampleAnswers.emptyState.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
               <Link
-                href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers?tab=add`}
+                href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers/new`}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Sample Answer
+                {t("sampleAnswers.emptyState.addFirstButton")}
               </Link>
             </Button>
           </CardContent>
@@ -266,16 +240,54 @@ export default async function QuestionDetailPage({
       {/* Sample answers list */}
       {sampleAnswers.length > 0 && (
         <div className="space-y-6">
+          <div className="flex justify-end">
+            <Button asChild>
+              <Link
+                href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers/new`}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t("sampleAnswers.list.addNewButton")}
+              </Link>
+            </Button>
+          </div>
           {sampleAnswers.map((answer, index) => (
             <Card key={answer.id} id={`answer-${answer.id}`}>
               <CardHeader>
-                <CardTitle className="text-base">
-                  Sample Answer {index + 1}
-                </CardTitle>
-                <CardDescription>
-                  Created on{" "}
-                  {format(new Date(answer.created_at), "MMMM d, yyyy")}
-                </CardDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-base">
+                      {t("sampleAnswers.list.sampleAnswerTitle", {
+                        number: index + 1,
+                      })}
+                    </CardTitle>
+                    <CardDescription>
+                      {t("sampleAnswers.list.createdOn", {
+                        date: format(
+                          new Date(answer.created_at),
+                          "MMMM d, yyyy"
+                        ),
+                      })}
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers/${answer.id}/edit`}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        {t("sampleAnswers.list.editButton")}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="destructive" size="sm">
+                      <Link
+                        href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers/${answer.id}/delete`}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {t("sampleAnswers.list.deleteButton")}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="whitespace-pre-wrap bg-muted p-4 rounded-md">
@@ -284,19 +296,6 @@ export default async function QuestionDetailPage({
               </CardContent>
             </Card>
           ))}
-
-          {sampleAnswers.length > 0 && (
-            <div className="flex justify-center mt-4">
-              <Button asChild variant="outline">
-                <Link
-                  href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}/sample-answers`}
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  View All Sample Answers
-                </Link>
-              </Button>
-            </div>
-          )}
         </div>
       )}
     </div>
