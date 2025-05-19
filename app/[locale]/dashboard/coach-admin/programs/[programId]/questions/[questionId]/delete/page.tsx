@@ -132,14 +132,14 @@ export default async function DeleteQuestionPage({
     <div className="container mx-auto py-6">
       {/* Back button */}
       <div className="mb-6">
-        <Button asChild variant="outline" size="sm">
-          <Link
-            href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
-          >
+        <Link
+          href={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
+        >
+          <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t("backToAllQuestions")}
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       <div className="mb-8">
