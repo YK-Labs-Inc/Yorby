@@ -57,12 +57,12 @@ export default async function DeleteSampleAnswerPage({
   params,
   searchParams,
 }: {
-  params: { programId: string; questionId: string; answerId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ programId: string; questionId: string; answerId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const t = await getTranslations("coachAdminPortal.sampleAnswerDeletePage");
-  const { programId, questionId, answerId } = params;
-  const { error_message } = searchParams;
+  const { programId, questionId, answerId } = await params;
+  const { error_message } = await searchParams;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user

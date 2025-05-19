@@ -85,9 +85,9 @@ async function getSampleAnswerDetails(
 export default async function EditSampleAnswerPage({
   params,
 }: {
-  params: { programId: string; questionId: string; answerId: string };
+  params: Promise<{ programId: string; questionId: string; answerId: string }>;
 }) {
-  const { programId, questionId, answerId } = params;
+  const { programId, questionId, answerId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user

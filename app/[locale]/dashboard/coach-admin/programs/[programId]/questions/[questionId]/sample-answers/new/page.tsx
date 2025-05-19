@@ -43,9 +43,9 @@ async function getQuestionDetails(questionId: string, programId: string) {
 export default async function NewSampleAnswerPage({
   params,
 }: {
-  params: { programId: string; questionId: string };
+  params: Promise<{ programId: string; questionId: string }>;
 }) {
-  const { programId, questionId } = params;
+  const { programId, questionId } = await params;
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
