@@ -247,22 +247,45 @@ const writeAnswerToDatabase = async (
   });
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
+  // First write the answer to custom_job_question_submissions
+  const { data: submission, error: submissionError } = await supabase
     .from("custom_job_question_submissions")
     .insert({
       answer: answer,
       custom_job_question_id: questionId,
-      feedback: feedback,
+      feedback, // Keep for backward compatibility
     })
     .select()
     .single();
 
-  if (error) {
-    throw error;
+  if (submissionError) {
+    throw submissionError;
   }
 
-  logger.info("Answer written to database");
-  return data;
+  try {
+    // Then write the feedback to custom_job_question_submission_feedback
+    const { error: feedbackError } = await supabase
+      .from("custom_job_question_submission_feedback")
+      .insert({
+        submission_id: submission.id,
+        feedback_role: "ai",
+        pros: feedback.pros,
+        cons: feedback.cons,
+      });
+
+    if (feedbackError) {
+      logger.error("Error writing feedback to database", {
+        error: feedbackError,
+      });
+    }
+  } catch (error: unknown) {
+    logger.error("Error writing feedback to database", { error });
+    await logger.flush();
+  }
+
+  logger.info("Answer and feedback written to database");
+  await logger.flush();
+  return submission;
 };
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
