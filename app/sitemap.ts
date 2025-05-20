@@ -1,9 +1,13 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { MetadataRoute } from "next";
+import { Logger } from "next-axiom";
 
 const PAGE_SIZE = 500;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const logger = new Logger().with({
+    function: "sitemap",
+  });
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
 
@@ -52,12 +56,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     return [...staticPages, ...blogEntries, ...sampleResumesEntries];
   } catch (error) {
-    console.error("Error generating sitemap:", error);
+    logger.error("Error generating sitemap", { error });
+    await logger.flush();
     return [];
   }
 }
 
 const fetchAllDemoJobs = async () => {
+  const logger = new Logger().with({
+    function: "fetchAllDemoJobs",
+  });
   const supabase = await createSupabaseServerClient();
 
   // First, get the total count
@@ -66,7 +74,8 @@ const fetchAllDemoJobs = async () => {
     .select("*", { count: "exact", head: true });
 
   if (countError || !count) {
-    console.error("Error getting count:", countError);
+    logger.error("Error getting count", { error: countError });
+    await logger.flush();
     return [];
   }
 
@@ -85,7 +94,8 @@ const fetchAllDemoJobs = async () => {
       .range(from, to);
 
     if (error) {
-      console.error(`Error fetching page ${page + 1}:`, error);
+      logger.error(`Error fetching page ${page + 1}`, { error });
+      await logger.flush();
       return [];
     }
 
@@ -96,6 +106,9 @@ const fetchAllDemoJobs = async () => {
 };
 
 const fetchAllSampleResumes = async () => {
+  const logger = new Logger().with({
+    function: "fetchAllSampleResumes",
+  });
   const supabase = await createSupabaseServerClient();
 
   // First, get the total count
@@ -104,7 +117,8 @@ const fetchAllSampleResumes = async () => {
     .select("*", { count: "exact", head: true });
 
   if (countError || !count) {
-    console.error("Error getting count:", countError);
+    logger.error("Error getting count", { error: countError });
+    await logger.flush();
     return [];
   }
 
@@ -123,7 +137,8 @@ const fetchAllSampleResumes = async () => {
       .range(from, to);
 
     if (error) {
-      console.error(`Error fetching page ${page + 1}:`, error);
+      logger.error(`Error fetching page ${page + 1}`, { error });
+      await logger.flush();
       return [];
     }
 

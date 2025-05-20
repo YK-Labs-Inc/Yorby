@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface CopyButtonProps {
   text: string;
@@ -9,6 +10,7 @@ interface CopyButtonProps {
 
 export function CopyButton({ text, onCopy }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const { logError } = useAxiomLogging();
 
   const copyToClipboard = async () => {
     try {
@@ -17,7 +19,7 @@ export function CopyButton({ text, onCopy }: CopyButtonProps) {
       if (onCopy) onCopy();
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      logError("Failed to copy text", { error: err });
     }
   };
 

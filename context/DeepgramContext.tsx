@@ -81,7 +81,7 @@ const DeepgramContextProvider: FunctionComponent<
       setConnection(conn);
     } catch (error) {
       // Handle errors from getApiKey or other parts of the connection process
-      console.error("Failed to connect to Deepgram:", error);
+      logError("Failed to connect to Deepgram", { error });
 
       // Display a user-friendly error message
       if (error instanceof Error) {
