@@ -36,8 +36,14 @@ export default function AnswerForm({
 }: {
   question: Tables<"custom_job_questions">;
   jobId: string;
-  submissions: Tables<"custom_job_question_submissions">[];
-  currentSubmission: Tables<"custom_job_question_submissions"> | null;
+  submissions: (Tables<"custom_job_question_submissions"> & {
+    custom_job_question_submission_feedback: Tables<"custom_job_question_submission_feedback">[];
+  })[];
+  currentSubmission:
+    | (Tables<"custom_job_question_submissions"> & {
+        custom_job_question_submission_feedback: Tables<"custom_job_question_submission_feedback">[];
+      })
+    | null;
 }) {
   const t = useTranslations("interviewQuestion");
   const [_, submitAnswerAction, isSubmitAnswerPending] = useActionState(
@@ -56,10 +62,21 @@ export default function AnswerForm({
     setCurrentAnswer(initialAnswer);
   }, [initialAnswer]);
 
-  const feedback = currentSubmission?.feedback as {
+  // Get feedback from either source
+  const feedbackFromNewTable =
+    currentSubmission?.custom_job_question_submission_feedback?.[0];
+  const feedbackFromLegacy = currentSubmission?.feedback as {
     pros: string[];
     cons: string[];
   } | null;
+
+  const feedback = feedbackFromNewTable
+    ? {
+        pros: feedbackFromNewTable.pros,
+        cons: feedbackFromNewTable.cons,
+      }
+    : feedbackFromLegacy;
+
   const searchParams = useSearchParams();
   const error = searchParams?.get("error") as string;
   const view = searchParams?.get("view") || "question";

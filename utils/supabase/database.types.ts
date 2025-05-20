@@ -327,6 +327,41 @@ export type Database = {
           },
         ]
       }
+      custom_job_question_submission_feedback: {
+        Row: {
+          cons: string[]
+          created_at: string
+          feedback_role: Database["public"]["Enums"]["feedback_role"]
+          id: string
+          pros: string[]
+          submission_id: string
+        }
+        Insert: {
+          cons: string[]
+          created_at?: string
+          feedback_role: Database["public"]["Enums"]["feedback_role"]
+          id?: string
+          pros: string[]
+          submission_id: string
+        }
+        Update: {
+          cons?: string[]
+          created_at?: string
+          feedback_role?: Database["public"]["Enums"]["feedback_role"]
+          id?: string
+          pros?: string[]
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_question_submission_feedback_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_question_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_question_submissions: {
         Row: {
           answer: string
@@ -1256,6 +1291,7 @@ export type Database = {
     Enums: {
       custom_job_access: "locked" | "unlocked"
       deletion_status: "deleted" | "not_deleted"
+      feedback_role: "ai" | "user"
       interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
@@ -1382,6 +1418,7 @@ export const Constants = {
     Enums: {
       custom_job_access: ["locked", "unlocked"],
       deletion_status: ["deleted", "not_deleted"],
+      feedback_role: ["ai", "user"],
       interview_copilot_access: ["locked", "unlocked"],
       interview_copilot_status: ["in_progress", "complete"],
       interview_status: ["in_progress", "complete"],

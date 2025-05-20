@@ -8,7 +8,15 @@ const fetchQuestion = async (questionId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_job_questions")
-    .select(`*, custom_job_question_submissions(*)`)
+    .select(
+      `
+      *,
+      custom_job_question_submissions(
+        *,
+        custom_job_question_submission_feedback(*)
+      )
+    `
+    )
     .eq("id", questionId)
     .order("created_at", {
       ascending: false,
@@ -36,12 +44,15 @@ const QuestionComponent = async ({
     question.custom_job_question_submissions.length > 0
       ? question.custom_job_question_submissions[0]
       : null;
-  let currentSubmission: Tables<"custom_job_question_submissions"> | undefined =
-    submissionId
-      ? question.custom_job_question_submissions.find(
-          (submission) => submission.id === submissionId
-        )
-      : undefined;
+  let currentSubmission:
+    | (Tables<"custom_job_question_submissions"> & {
+        custom_job_question_submission_feedback: Tables<"custom_job_question_submission_feedback">[];
+      })
+    | undefined = submissionId
+    ? question.custom_job_question_submissions.find(
+        (submission) => submission.id === submissionId
+      )
+    : undefined;
 
   // Determine if we should show onboarding
   const showOnboarding =
@@ -51,7 +62,8 @@ const QuestionComponent = async ({
         (submission.feedback as { pros: string[]; cons: string[] })?.pros
           .length > 0 ||
         (submission.feedback as { pros: string[]; cons: string[] })?.cons
-          .length > 0
+          .length > 0 ||
+        submission.custom_job_question_submission_feedback.length > 0
     ); // No generated answers yet
 
   return (
