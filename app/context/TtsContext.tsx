@@ -9,6 +9,7 @@ import {
   useEffect,
 } from "react";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface TtsContextType {
   isTtsEnabled: boolean;
@@ -51,6 +52,7 @@ export function TtsProvider({
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { logError } = useAxiomLogging();
 
   useEffect(() => {
     if (audioRef.current) {
@@ -73,7 +75,7 @@ export function TtsProvider({
         }
       }
     } catch (e) {
-      console.error("Error in stopAudioPlayback:", e);
+      logError("Error in stopAudioPlayback", { error: e });
     } finally {
       setIsPlaying(false);
     }
@@ -100,7 +102,7 @@ export function TtsProvider({
       const { transformedText } = await transformResponse.json();
       return transformedText;
     } catch (error) {
-      console.error("Text transformation error:", error);
+      logError("Text transformation error", { error });
       return text;
     }
   };
@@ -141,7 +143,7 @@ export function TtsProvider({
       };
 
       audio.onerror = (e) => {
-        console.error("Audio playback error:", e);
+        logError("Audio playback error", { error: e });
         setIsPlaying(false);
         onPlaybackEnd?.();
         if (audio.src) {
@@ -168,7 +170,7 @@ export function TtsProvider({
       audio.src = url;
       await audio.play();
     } catch (error) {
-      console.error("TTS Error:", error);
+      logError("TTS Error", { error });
       setIsPlaying(false);
       onPlaybackEnd?.();
     }

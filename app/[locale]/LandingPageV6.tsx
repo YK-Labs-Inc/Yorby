@@ -9,6 +9,7 @@ import { BottomCTA } from "../components/landing/BottomCTA";
 import Footer from "../components/landing/Footer";
 import OurFeatures from "../components/landing/OurFeatures";
 import { InstagramEmbed, TikTokEmbed } from "react-social-media-embed";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 export default function LandingPageV6() {
   return (
@@ -133,6 +134,7 @@ const HowItWorksSection = () => {
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isProgrammaticScroll = useRef(false);
   const programmaticScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { logError } = useAxiomLogging();
 
   const goToNextStep = () => {
     setActiveStepIndex((prevIndex) => (prevIndex + 1) % steps.length);
@@ -212,7 +214,7 @@ const HowItWorksSection = () => {
       videoElement.addEventListener("timeupdate", handleTimeUpdate);
       videoElement.load();
       videoElement.play().catch((error) => {
-        console.error("Video play failed on step change:", error);
+        logError("Video play failed on step change", { error });
       });
     } else {
       startTimer();
@@ -319,7 +321,7 @@ const HowItWorksSection = () => {
     if (currentStep?.video && videoRef.current) {
       videoRef.current
         .play()
-        .catch((e) => console.error("Error resuming video:", e));
+        .catch((e) => logError("Error resuming video", { error: e }));
     } else {
       startTimer();
     }

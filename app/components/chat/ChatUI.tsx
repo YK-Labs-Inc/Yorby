@@ -123,7 +123,7 @@ export function ChatUI({
         await startRecording();
         setIsRecording(true);
       } catch (error) {
-        console.error("Failed to start recording:", error);
+        logError("Failed to start recording", { error });
       }
     }
   };
