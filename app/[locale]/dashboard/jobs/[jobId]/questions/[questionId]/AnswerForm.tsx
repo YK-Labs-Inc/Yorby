@@ -16,8 +16,9 @@ import { Link } from "@/i18n/routing";
 import { FormMessage, Message } from "@/components/form-message";
 import { useState, useEffect } from "react";
 import SpeechToTextModal from "./SpeechToTextModal";
-import { Star } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -226,22 +227,36 @@ export default function AnswerForm({
                   {t("noSubmissions")}
                 </p>
               ) : (
-                submissions.map((submission) => (
-                  <Link
-                    key={submission.id}
-                    href={`/dashboard/jobs/${jobId}/questions/${question.id}?submissionId=${submission.id}`}
-                    className="block p-4 border rounded-lg hover:bg-accent transition-colors w-full text-left"
-                  >
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-muted-foreground">
-                        {t("submissionDate", {
-                          date: formatDate(new Date(submission.created_at)),
-                        })}
-                      </p>
-                    </div>
-                    <p className="mt-2 line-clamp-3">{submission.answer}</p>
-                  </Link>
-                ))
+                submissions.map((submission) => {
+                  const hasAdminFeedback =
+                    submission.custom_job_question_submission_feedback.some(
+                      (feedback) => feedback.feedback_role === "user"
+                    );
+                  return (
+                    <Link
+                      key={submission.id}
+                      href={`/dashboard/jobs/${jobId}/questions/${question.id}?submissionId=${submission.id}`}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors w-full text-left"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">
+                            {t("submissionDate", {
+                              date: formatDate(new Date(submission.created_at)),
+                            })}
+                          </p>
+                        </div>
+                        <p>{submission.answer}</p>
+                      </div>
+                      {hasAdminFeedback && (
+                        <Sparkles
+                          className="h-4 w-4 text-yellow-500"
+                          fill="currentColor"
+                        />
+                      )}
+                    </Link>
+                  );
+                })
               )}
             </div>
           )}
@@ -257,7 +272,7 @@ export default function AnswerForm({
                   title={t("manualFeedbackTooltip")}
                   aria-label={t("manualFeedbackTooltip")}
                 >
-                  <Star
+                  <Sparkles
                     className="w-4 h-4 mr-1 text-yellow-700"
                     fill="currentColor"
                   />
@@ -277,7 +292,7 @@ export default function AnswerForm({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
                       <div className="flex items-center gap-2 mb-4">
-                        <Star
+                        <Sparkles
                           className="w-5 h-5 text-yellow-500"
                           fill="currentColor"
                         />
@@ -307,7 +322,7 @@ export default function AnswerForm({
                     </div>
                     <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
                       <div className="flex items-center gap-2 mb-4">
-                        <Star
+                        <Sparkles
                           className="w-5 h-5 text-yellow-500"
                           fill="currentColor"
                         />

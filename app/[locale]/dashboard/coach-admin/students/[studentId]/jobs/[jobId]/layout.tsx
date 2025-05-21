@@ -9,7 +9,6 @@ import StudentActivityHeader from "@/app/[locale]/dashboard/coach-admin/componen
 import StudentActivitySidebar, {
   JobData,
 } from "@/app/[locale]/dashboard/coach-admin/components/StudentActivitySidebar";
-import { Tables } from "@/utils/supabase/database.types";
 
 // Fetch student info
 const fetchStudent = async (studentId: string) => {
@@ -52,7 +51,11 @@ const fetchAllStudentJobsAndRelatedData = async (
           created_at,
           custom_job_question_submissions (
             id,
-            created_at
+            created_at,
+            custom_job_question_submission_feedback (
+              id,
+              feedback_role
+            )
           )
         ),
         custom_job_mock_interviews (

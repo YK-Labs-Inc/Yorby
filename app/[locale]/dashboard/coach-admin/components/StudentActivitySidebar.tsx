@@ -10,13 +10,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { CheckCircle, Clock, ChevronDown } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
 
 // Updated types using Tables from database.types.ts
+// Define the structure for feedback within a submission
+interface SubmissionFeedback
+  extends Tables<"custom_job_question_submission_feedback"> {}
+
+// Update QuestionSubmission type to include feedback
+interface QuestionSubmission extends Tables<"custom_job_question_submissions"> {
+  custom_job_question_submission_feedback: SubmissionFeedback[];
+}
+
 export type QuestionWithSubmissions = Tables<"custom_job_questions"> & {
-  custom_job_question_submissions: Tables<"custom_job_question_submissions">[];
+  custom_job_question_submissions: QuestionSubmission[];
 };
 
 export type JobData = Tables<"custom_jobs"> & {
@@ -234,6 +243,16 @@ export default function StudentActivitySidebar({
             {questions.map((q) => {
               const submissions = getQuestionSubmissions(q);
               const completed = submissions.length > 0;
+              const hasCoachFeedback = submissions.some(
+                (submission) =>
+                  Array.isArray(
+                    submission.custom_job_question_submission_feedback
+                  ) &&
+                  submission.custom_job_question_submission_feedback.some(
+                    (fb) => fb.feedback_role === "user"
+                  )
+              );
+
               return (
                 <li key={q.id}>
                   <Link
@@ -249,19 +268,21 @@ export default function StudentActivitySidebar({
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-gray-800 truncate flex-1">
-                        {q.question}
-                      </span>
-                      {completed && (
-                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <div className="flex flex-col gap-2">
+                        <span className="text-sm font-medium text-gray-800 truncate flex-1">
+                          {q.question}
+                        </span>
+                        <div className="text-xs text-gray-500">
+                          {t("lastSubmission", {
+                            date: completed
+                              ? formatDate(submissions[0].created_at)
+                              : t("dash"),
+                          })}
+                        </div>
+                      </div>
+                      {hasCoachFeedback && (
+                        <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0 ml-2" />
                       )}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {t("lastSubmission", {
-                        date: completed
-                          ? formatDate(submissions[0].created_at)
-                          : t("dash"),
-                      })}
                     </div>
                   </Link>
                 </li>
@@ -296,11 +317,6 @@ export default function StudentActivitySidebar({
                         date: formatDate(mi.created_at),
                       })}
                     </span>
-                    {mi.status === "complete" ? (
-                      <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    ) : (
-                      <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    )}
                   </div>
                   <div className="text-xs text-gray-500 mt-0.5">
                     {t("mockInterviewStatus", {

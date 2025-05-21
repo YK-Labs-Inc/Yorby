@@ -186,9 +186,7 @@ const AdminStudentQuestionViewPage = async ({
           jobId={jobId}
           questionId={questionId}
           question={currentQuestion as QuestionWithSubmissions}
-          submissions={
-            submissions as Tables<"custom_job_question_submissions">[]
-          }
+          submissions={submissions}
           currentSubmissionId={submissionId as string}
           currentSubmission={currentSubmission}
           currentCoachFeedback={currentCoachFeedback}
