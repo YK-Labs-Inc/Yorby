@@ -104,6 +104,17 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     }
   }
 
+  // Check if the user is a coach (multi-tenant user)
+  if (user) {
+    const isCoach = await checkIfUserIsCoach(user.id);
+    logger = logger.with({ isCoach });
+    
+    if (isCoach) {
+      logger.info("User is a coach, redirecting to choose-role");
+      return NextResponse.redirect(`${origin}/choose-role`);
+    }
+  }
+
   if (redirectTo) {
     logger.info("Redirecting to", { redirectTo });
     return NextResponse.redirect(`${redirectTo}`);
@@ -128,6 +139,22 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   logger.info("Redirecting to onboarding");
   return NextResponse.redirect(`${origin}/onboarding`);
 });
+
+/**
+ * Checks if a user is a coach by looking for an entry in the coaches table
+ * @param userId The user's ID
+ * @returns True if the user is a coach, false otherwise
+ */
+const checkIfUserIsCoach = async (userId: string): Promise<boolean> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  
+  return !!data && !error;
+};
 
 const getRedirectToOnboardingV2 = async (user: User) => {
   const memoriesEnabled = Boolean(
