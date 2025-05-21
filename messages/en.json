@@ -1898,7 +1898,7 @@
         "noPreviousSubmissions": "No previous submissions.",
         "submissionNotFound": "Submission not found.",
         "editFeedback": "Edit Feedback",
-        "coachFeedback": "Manual Feedback",
+        "coachFeedback": "Admin Feedback",
         "deleteDialogTitle": "Delete Feedback?",
         "deleteDialogDescription": "Are you sure you want to delete this feedback? This action cannot be undone.",
         "deleteDialogConfirm": "Delete",

@@ -6,10 +6,9 @@ import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { CoachFeedbackForm } from "./CoachFeedbackForm";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Sparkles, Trash2 } from "lucide-react";
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -52,11 +51,21 @@ function CoachFeedbackCard({
   const [error, setError] = React.useState<string | null>(null);
 
   return (
-    <Card className="mt-8">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <span>{t("coachFeedback")}</span>
-        </CardTitle>
+    <Card className="mt-8 border-4 border-yellow-400 bg-yellow-50/80 shadow-xl relative overflow-visible">
+      <div className="absolute -top-5 left-6 flex items-center gap-2 z-10">
+        <div
+          className="flex items-center bg-yellow-300 text-yellow-900 font-bold px-3 py-1 rounded-full shadow border-2 border-yellow-400 text-sm"
+          title={t("coachFeedback")}
+          aria-label={t("coachFeedback")}
+        >
+          <Sparkles
+            className="w-4 h-4 mr-1 text-yellow-700"
+            fill="currentColor"
+          />
+          {t("coachFeedback")}
+        </div>
+      </div>
+      <CardHeader className="flex flex-row items-center justify-end pt-8 pb-2">
         <div className="flex gap-2">
           <Button
             variant="ghost"
@@ -118,39 +127,53 @@ function CoachFeedbackCard({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h4 className="font-medium text-green-800 mb-2">
-              {t("strengths")}
-            </h4>
-            {feedback.pros.length === 0 ? (
-              <p className="italic text-green-700">{t("noStrengths")}</p>
-            ) : (
-              <ul className="list-disc ml-5 space-y-1">
-                {feedback.pros.map((pro: string, idx: number) => (
-                  <li key={idx} className="text-green-800">
-                    {pro}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles
+                className="w-5 h-5 text-yellow-500"
+                fill="currentColor"
+              />
+              <h3 className="font-semibold text-lg text-yellow-900">
+                {t("strengths")}
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {feedback.pros.length === 0 ? (
+                <p className="text-yellow-800 italic">{t("noStrengths")}</p>
+              ) : (
+                feedback.pros.map((pro: string, idx: number) => (
+                  <div key={idx} className="flex gap-2 items-start">
+                    <span className="text-yellow-600 mt-1">•</span>
+                    <p className="text-yellow-900">{pro}</p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="font-medium text-red-800 mb-2">
-              {t("areasForImprovement")}
-            </h4>
-            {feedback.cons.length === 0 ? (
-              <p className="italic text-red-700">
-                {t("noAreasForImprovement")}
-              </p>
-            ) : (
-              <ul className="list-disc ml-5 space-y-1">
-                {feedback.cons.map((con: string, idx: number) => (
-                  <li key={idx} className="text-red-800">
-                    {con}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles
+                className="w-5 h-5 text-yellow-500"
+                fill="currentColor"
+              />
+              <h3 className="font-semibold text-lg text-yellow-900">
+                {t("areasForImprovement")}
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {feedback.cons.length === 0 ? (
+                <p className="text-yellow-800 italic">
+                  {t("noAreasForImprovement")}
+                </p>
+              ) : (
+                feedback.cons.map((con: string, idx: number) => (
+                  <div key={idx} className="flex gap-2 items-start">
+                    <span className="text-yellow-600 mt-1">•</span>
+                    <p className="text-yellow-900">{con}</p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
