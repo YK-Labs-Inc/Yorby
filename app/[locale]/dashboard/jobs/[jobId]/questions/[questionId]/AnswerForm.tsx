@@ -16,6 +16,8 @@ import { Link } from "@/i18n/routing";
 import { FormMessage, Message } from "@/components/form-message";
 import { useState, useEffect } from "react";
 import SpeechToTextModal from "./SpeechToTextModal";
+import { Star } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -76,6 +78,9 @@ export default function AnswerForm({
         cons: feedbackFromNewTable.cons,
       }
     : feedbackFromLegacy;
+
+  const manualFeedback =
+    currentSubmission?.custom_job_question_submission_feedback?.[0] || null;
 
   const searchParams = useSearchParams();
   const error = searchParams?.get("error") as string;
@@ -244,6 +249,97 @@ export default function AnswerForm({
       </Card>
       {feedback && view === "question" && (
         <>
+          {manualFeedback && (
+            <Card className="mt-6 border-4 border-yellow-400 bg-yellow-50/80 shadow-xl relative overflow-visible">
+              <div className="absolute -top-5 left-6 flex items-center gap-2 z-10">
+                <div
+                  className="flex items-center bg-yellow-300 text-yellow-900 font-bold px-3 py-1 rounded-full shadow border-2 border-yellow-400 text-sm"
+                  title={t("manualFeedbackTooltip")}
+                  aria-label={t("manualFeedbackTooltip")}
+                >
+                  <Star
+                    className="w-4 h-4 mr-1 text-yellow-700"
+                    fill="currentColor"
+                  />
+                  {t("manualFeedback")}
+                </div>
+              </div>
+              <CardHeader className="pt-8 pb-2">
+                <p className="text-yellow-800 text-sm mt-1 font-medium">
+                  {t("manualFeedbackTooltip")}
+                </p>
+              </CardHeader>
+              <CardContent>
+                {manualFeedback.pros.length === 0 &&
+                manualFeedback.cons.length === 0 ? (
+                  <p>{t("noFeedback")}</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Star
+                          className="w-5 h-5 text-yellow-500"
+                          fill="currentColor"
+                        />
+                        <h3 className="font-semibold text-lg text-yellow-900">
+                          {t("pros")}
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        {manualFeedback.pros.length === 0 ? (
+                          <p className="text-yellow-800 italic">
+                            {t("noPros")}
+                          </p>
+                        ) : (
+                          manualFeedback.pros.map(
+                            (pro: string, index: number) => (
+                              <div
+                                key={index}
+                                className="flex gap-2 items-start"
+                              >
+                                <span className="text-yellow-600 mt-1">•</span>
+                                <p className="text-yellow-900">{pro}</p>
+                              </div>
+                            )
+                          )
+                        )}
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-white/80 dark:bg-yellow-100/10 p-6 overflow-y-auto border border-yellow-200 max-h-[400px] relative shadow-sm">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Star
+                          className="w-5 h-5 text-yellow-500"
+                          fill="currentColor"
+                        />
+                        <h3 className="font-semibold text-lg text-yellow-900">
+                          {t("cons")}
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        {manualFeedback.cons.length === 0 ? (
+                          <p className="text-yellow-800 italic">
+                            {t("noCons")}
+                          </p>
+                        ) : (
+                          manualFeedback.cons.map(
+                            (con: string, index: number) => (
+                              <div
+                                key={index}
+                                className="flex gap-2 items-start"
+                              >
+                                <span className="text-yellow-600 mt-1">•</span>
+                                <p className="text-yellow-900">{con}</p>
+                              </div>
+                            )
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>{t("feedbackLabel")}</CardTitle>

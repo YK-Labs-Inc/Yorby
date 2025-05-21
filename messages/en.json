@@ -234,7 +234,9 @@
         }
       },
       "button": "Got it!"
-    }
+    },
+    "manualFeedback": "Admin Feedback",
+    "manualFeedbackTooltip": "This feedback was written by an admin in your program."
   },
   "mockInterview": {
     "title": "Mock Interviews",
@@ -1856,6 +1858,53 @@
         "errorName": "Error fetching name",
         "notFound": "Not found",
         "failedToFetch": "Failed to fetch"
+      },
+      "feedbackForm": {
+        "title": "Provide Feedback",
+        "editTitle": "Edit Feedback",
+        "description": "Provide feedback on the student's answer by listing strengths and areas for improvement.",
+        "prosLabel": "Strengths",
+        "consLabel": "Areas for Improvement",
+        "addPro": "Add Strength",
+        "addCon": "Add Area for Improvement",
+        "prosPlaceholder": "Enter a strength of the answer...",
+        "consPlaceholder": "Enter an area for improvement...",
+        "submit": "Submit Feedback",
+        "update": "Update Feedback",
+        "submitting": "Submitting...",
+        "cancel": "Cancel",
+        "errors": {
+          "title": "Error",
+          "generic": "An error occurred. Please try again.",
+          "bothEmpty": "Please provide at least one strength or one area for improvement."
+        }
+      },
+      "studentQuestionSubmissions": {
+        "question": "Question",
+        "submissionDetails": "Submission Details",
+        "submitted": "Submitted: {date}",
+        "aiFeedback": "AI Feedback",
+        "pros": "Pros",
+        "noPros": "No pros identified for this answer.",
+        "cons": "Cons",
+        "noCons": "No cons identified for this answer.",
+        "greatAnswer": "Great answer! No improvements needed 🙂",
+        "strengths": "Strengths",
+        "noStrengths": "No strengths identified.",
+        "areasForImprovement": "Areas for Improvement",
+        "noAreasForImprovement": "No areas for improvement identified.",
+        "addFeedback": "Add Feedback",
+        "submissionHistory": "Submission History",
+        "noPreviousSubmissions": "No previous submissions.",
+        "submissionNotFound": "Submission not found.",
+        "editFeedback": "Edit Feedback",
+        "coachFeedback": "Manual Feedback",
+        "deleteDialogTitle": "Delete Feedback?",
+        "deleteDialogDescription": "Are you sure you want to delete this feedback? This action cannot be undone.",
+        "deleteDialogConfirm": "Delete",
+        "deleteDialogCancel": "Cancel",
+        "deleteDialogSuccess": "Feedback deleted successfully.",
+        "deleteDialogError": "Failed to delete feedback. Please try again."
       }
     },
     "Header": {

@@ -156,6 +156,28 @@ const AdminStudentQuestionViewPage = async ({
       : []
     : [];
 
+  // Find the current submission
+  const currentSubmission =
+    submissions.find((s) => s.id === submissionId) ||
+    (submissions.length > 0 ? submissions[0] : null);
+
+  // Fetch coach feedback for this submission (feedback_role === 'user')
+  let currentCoachFeedback = null;
+  if (currentSubmission) {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { data: feedbackRows } = await supabase
+        .from("custom_job_question_submission_feedback")
+        .select("*")
+        .eq("submission_id", currentSubmission.id)
+        .eq("feedback_role", "user")
+        .maybeSingle();
+      currentCoachFeedback = feedbackRows || null;
+    } catch (e) {
+      currentCoachFeedback = null;
+    }
+  }
+
   return (
     <>
       {currentQuestion && questionId !== "no-questions" ? (
@@ -168,6 +190,8 @@ const AdminStudentQuestionViewPage = async ({
             submissions as Tables<"custom_job_question_submissions">[]
           }
           currentSubmissionId={submissionId as string}
+          currentSubmission={currentSubmission}
+          currentCoachFeedback={currentCoachFeedback}
         />
       ) : (
         <div className="flex items-center justify-center h-full">
