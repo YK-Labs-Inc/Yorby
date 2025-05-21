@@ -2,7 +2,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserIcon, UsersIcon } from "lucide-react";
 
@@ -36,7 +43,9 @@ export default async function ChooseRolePage() {
     <div className="container mx-auto py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">{t("title")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            {t("title")}
+          </h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
 
@@ -49,7 +58,9 @@ export default async function ChooseRolePage() {
                   <UserIcon className="h-8 w-8 text-primary" />
                 </div>
                 <CardTitle>{t("personalPrep.title")}</CardTitle>
-                <CardDescription>{t("personalPrep.description")}</CardDescription>
+                <CardDescription>
+                  {t("personalPrep.description")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p>{t("personalPrep.content")}</p>
@@ -62,19 +73,26 @@ export default async function ChooseRolePage() {
 
           {/* Coaching Dashboard Option */}
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <Link href="/dashboard/coach-admin/programs" className="block h-full">
+            <Link
+              href="/dashboard/coach-admin/programs"
+              className="block h-full"
+            >
               <CardHeader className="text-center">
                 <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
                   <UsersIcon className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle>{t("coachDashboard.title")}</CardTitle>
-                <CardDescription>{t("coachDashboard.description")}</CardDescription>
+                <CardTitle>{t("programsDashboard.title")}</CardTitle>
+                <CardDescription>
+                  {t("programsDashboard.description")}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>{t("coachDashboard.content")}</p>
+                <p>{t("programsDashboard.content")}</p>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">{t("coachDashboard.button")}</Button>
+                <Button variant="outline">
+                  {t("programsDashboard.button")}
+                </Button>
               </CardFooter>
             </Link>
           </Card>

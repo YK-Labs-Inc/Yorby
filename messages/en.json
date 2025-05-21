@@ -2106,5 +2106,21 @@
     "complete": "Complete",
     "inProgress": "In Progress",
     "unknown": "Unknown"
+  },
+  "chooseRole": {
+    "title": "What would you like to do?",
+    "description": "Choose how you want to use Perfect Interview.",
+    "personalPrep": {
+      "title": "Personal Job Prep",
+      "description": "Create your own interview prep material for your next job search.",
+      "content": "Generate personalized interview questions, practice with AI, and get feedback tailored to your experience.",
+      "button": "Start Personal Prep"
+    },
+    "programsDashboard": {
+      "title": "Programs Dashboard",
+      "description": "Manage your programs, users, and curriculum.",
+      "content": "Access your programs dashboard to create and manage programs, add questions, and track user progress.",
+      "button": "Go to Programs Dashboard"
+    }
   }
 }
