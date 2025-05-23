@@ -151,6 +151,18 @@ export default function StudentActivitySidebar({
       : [];
   };
 
+  const sortedQuestions = [...questions].sort((a, b) => {
+    const submissionsA = getQuestionSubmissions(a);
+    const submissionsB = getQuestionSubmissions(b);
+    if (submissionsA.length > 0 && submissionsB.length === 0) {
+      return -1; // a (with submissions) comes first
+    }
+    if (submissionsA.length === 0 && submissionsB.length > 0) {
+      return 1; // b (with submissions) comes first
+    }
+    return 0; // Preserve original order for questions with same submission status
+  });
+
   return (
     <aside className="w-80 border-r flex flex-col overflow-y-auto h-full min-h-0">
       <div className="p-4 border-b border-gray-200">
@@ -240,7 +252,7 @@ export default function StudentActivitySidebar({
       <div className="flex-1 p-4 overflow-y-auto">
         {selectedTab === "questions" && (
           <ul className="space-y-2">
-            {questions.map((q) => {
+            {sortedQuestions.map((q) => {
               const submissions = getQuestionSubmissions(q);
               const completed = submissions.length > 0;
               const hasCoachFeedback = submissions.some(
@@ -269,7 +281,7 @@ export default function StudentActivitySidebar({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-gray-800 truncate flex-1">
+                        <span className="text-sm font-medium text-gray-800 whitespace-normal break-words">
                           {q.question}
                         </span>
                         <div className="text-xs text-gray-500">
