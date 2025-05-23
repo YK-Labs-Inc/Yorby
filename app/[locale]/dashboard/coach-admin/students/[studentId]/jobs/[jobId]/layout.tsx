@@ -54,7 +54,8 @@ const fetchAllStudentJobsAndRelatedData = async (
             created_at,
             custom_job_question_submission_feedback (
               id,
-              feedback_role
+              feedback_role,
+              confidence_score
             )
           )
         ),

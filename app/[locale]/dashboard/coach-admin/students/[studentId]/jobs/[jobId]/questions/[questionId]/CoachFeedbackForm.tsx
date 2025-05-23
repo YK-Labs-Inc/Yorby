@@ -117,7 +117,7 @@ export function CoachFeedbackForm({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>{existingFeedback ? t("editTitle") : t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>

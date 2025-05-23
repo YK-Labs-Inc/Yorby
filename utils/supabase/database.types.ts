@@ -329,6 +329,7 @@ export type Database = {
       }
       custom_job_question_submission_feedback: {
         Row: {
+          confidence_score: number
           cons: string[]
           created_at: string
           feedback_role: Database["public"]["Enums"]["feedback_role"]
@@ -337,6 +338,7 @@ export type Database = {
           submission_id: string
         }
         Insert: {
+          confidence_score: number
           cons: string[]
           created_at?: string
           feedback_role: Database["public"]["Enums"]["feedback_role"]
@@ -345,6 +347,7 @@ export type Database = {
           submission_id: string
         }
         Update: {
+          confidence_score?: number
           cons?: string[]
           created_at?: string
           feedback_role?: Database["public"]["Enums"]["feedback_role"]

@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles, AlertTriangle } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
 
@@ -252,6 +252,34 @@ export default function StudentActivitySidebar({
                     (fb) => fb.feedback_role === "user"
                   )
               );
+              const latestSubmission =
+                submissions.length > 0 ? submissions[0] : null;
+              let aiFeedbackNeedsReview = false;
+
+              if (
+                latestSubmission &&
+                Array.isArray(
+                  latestSubmission.custom_job_question_submission_feedback
+                )
+              ) {
+                const lowConfidenceAIFeedbackExists =
+                  latestSubmission.custom_job_question_submission_feedback.some(
+                    (fb) =>
+                      fb.feedback_role === "ai" && fb.confidence_score < 0.8
+                  );
+
+                const hasUserFeedbackForSubmission =
+                  latestSubmission.custom_job_question_submission_feedback.some(
+                    (fb) => fb.feedback_role === "user"
+                  );
+
+                if (
+                  lowConfidenceAIFeedbackExists &&
+                  !hasUserFeedbackForSubmission
+                ) {
+                  aiFeedbackNeedsReview = true;
+                }
+              }
 
               return (
                 <li key={q.id}>
@@ -282,6 +310,9 @@ export default function StudentActivitySidebar({
                       </div>
                       {hasCoachFeedback && (
                         <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0 ml-2" />
+                      )}
+                      {aiFeedbackNeedsReview && (
+                        <AlertTriangle className="w-4 h-4 text-yellow-500 fill-yellow-400 flex-shrink-0 ml-1" />
                       )}
                     </div>
                   </Link>

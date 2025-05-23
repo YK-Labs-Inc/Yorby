@@ -17,8 +17,6 @@ import { FormMessage, Message } from "@/components/form-message";
 import { useState, useEffect } from "react";
 import SpeechToTextModal from "./SpeechToTextModal";
 import { Sparkles } from "lucide-react";
-import { Tooltip } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {

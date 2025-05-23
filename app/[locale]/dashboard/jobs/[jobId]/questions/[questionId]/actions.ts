@@ -188,6 +188,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
   const submission = await writeAnswerToDatabase(jobId, questionId, response, {
     pros: [],
     cons: [],
+    confidence_score: 1,
   });
 
   const supabase = await createSupabaseServerClient();
@@ -237,7 +238,7 @@ const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
   answer: string,
-  feedback: { pros: string[]; cons: string[] },
+  feedback: { pros: string[]; cons: string[]; confidence_score: number },
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -271,6 +272,7 @@ const writeAnswerToDatabase = async (
         feedback_role: "ai",
         pros: feedback.pros,
         cons: feedback.cons,
+        confidence_score: feedback.confidence_score,
       });
 
     if (feedbackError) {
@@ -327,12 +329,14 @@ const generateFeedback = async (
   }
 
     You will provide feedback on the candidate's answer and provide a list of pros and cons.
+    You will also provide a confidence score from 0.0 to 1.0 on how confident you are in providing feedback on the candidate's answer in relation to the answer guidelines. A score of 1.0 means you are very confident and a score of 0.0 means you are not confident at all.
 
     You will provide your feedback in the following format:
 
     {
       "pros": string[],
-      "cons": string[]
+      "cons": string[],
+      "confidence_score": number (float between 0.0 and 1.0)
     }
 
     For each con, provide a reason why the candidate's answer is not good and also provide actionable steps on how to improve the candidate's
@@ -393,6 +397,7 @@ const generateFeedback = async (
     schema: z.object({
       pros: z.array(z.string()),
       cons: z.array(z.string()),
+      confidence_score: z.number().min(0).max(1),
     }),
     loggingContext: {
       jobId,
@@ -400,11 +405,12 @@ const generateFeedback = async (
       function: "generateFeedback",
     },
   });
-  const { pros, cons } = result;
-  logger.info("Feedback generated", { pros, cons });
+  const { pros, cons, confidence_score } = result;
+  logger.info("Feedback generated", { pros, cons, confidence_score });
   return {
     pros,
     cons,
+    confidence_score,
   };
 };
 
