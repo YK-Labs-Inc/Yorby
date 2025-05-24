@@ -32,10 +32,15 @@ export async function createQuestion(
     const question = formData.get("question") as string;
     const answerGuidelines = formData.get("answerGuidelines") as string;
     const programId = formData.get("programId") as string;
+    const publicationStatus = formData.get("publication_status") as
+        | "published"
+        | "draft";
+
     logger = logger.with({
         question,
         answerGuidelines,
         programId,
+        publicationStatus,
     });
 
     // Validate required fields
@@ -82,6 +87,7 @@ export async function createQuestion(
             answer_guidelines: answerGuidelines,
             custom_job_id: programId,
             question_type: "user_generated",
+            publication_status: publicationStatus,
         })
         .select()
         .single();

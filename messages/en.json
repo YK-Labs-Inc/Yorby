@@ -1974,7 +1974,8 @@
           "type": "Type",
           "sampleAnswers": "Sample Answers",
           "created": "Created",
-          "actions": "Actions"
+          "actions": "Actions",
+          "status": "Status"
         },
         "typeAIGenerated": "AI Generated",
         "typeManual": "Manual",
@@ -1986,7 +1987,21 @@
         "answerGuidelinesTitle": "Answer Guidelines",
         "sampleAnswersLabel": "Sample Answers:",
         "manageSampleAnswersButton": "Manage Sample Answers",
-        "backToPrograms": "View All Programs"
+        "backToPrograms": "View All Programs",
+        "toast": {
+          "statusUpdateSuccess": {
+            "title": "Status Updated",
+            "description": "Question status changed to {status}."
+          }
+        },
+        "ariaLabel": {
+          "publishQuestion": "Publish question",
+          "unpublishQuestion": "Unpublish question"
+        },
+        "status": {
+          "published": "Published",
+          "draft": "Draft"
+        }
       },
       "programDeletionPage": {
         "confirmTitle": "Confirm Deletion",
@@ -2018,6 +2033,8 @@
         "questionSectionHeader": "Question",
         "answerGuidelinesSectionHeader": "Answer Guidelines",
         "answerGuidelinesPlaceholder": "Enter guidelines for what makes a good answer",
+        "publishImmediatelyLabel": "Publish",
+        "publishImmediatelyDescription": "Make this question visible to your students. If unchecked, it will be saved as a draft and students will not see it.",
         "cancel": "Cancel",
         "saveChanges": "Save Changes",
         "savingChanges": "Saving Changes...",

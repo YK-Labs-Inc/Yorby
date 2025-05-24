@@ -37,9 +37,9 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   }
   return {
     ...data,
-    custom_job_questions: data.custom_job_questions.sort(
-      (a: any, b: any) => a.created_at - b.created_at
-    ),
+    custom_job_questions: data.custom_job_questions
+      .filter((q) => q.publication_status === "published")
+      .sort((a, b) => Number(a.created_at) - Number(b.created_at)),
   };
 };
 

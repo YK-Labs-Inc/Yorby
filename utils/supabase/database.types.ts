@@ -400,6 +400,7 @@ export type Database = {
           created_at: string
           custom_job_id: string
           id: string
+          publication_status: Database["public"]["Enums"]["question_publication_status"]
           question: string
           question_type: Database["public"]["Enums"]["question_type"]
           source_custom_job_question_id: string | null
@@ -409,6 +410,7 @@ export type Database = {
           created_at?: string
           custom_job_id: string
           id?: string
+          publication_status?: Database["public"]["Enums"]["question_publication_status"]
           question: string
           question_type?: Database["public"]["Enums"]["question_type"]
           source_custom_job_question_id?: string | null
@@ -418,6 +420,7 @@ export type Database = {
           created_at?: string
           custom_job_id?: string
           id?: string
+          publication_status?: Database["public"]["Enums"]["question_publication_status"]
           question?: string
           question_type?: Database["public"]["Enums"]["question_type"]
           source_custom_job_question_id?: string | null
@@ -1297,6 +1300,7 @@ export type Database = {
       interview_status: "in_progress" | "complete"
       locked_status: "locked" | "unlocked"
       message_role: "user" | "model"
+      question_publication_status: "draft" | "published"
       question_type: "ai_generated" | "user_generated"
     }
     CompositeTypes: {
@@ -1424,6 +1428,7 @@ export const Constants = {
       interview_status: ["in_progress", "complete"],
       locked_status: ["locked", "unlocked"],
       message_role: ["user", "model"],
+      question_publication_status: ["draft", "published"],
       question_type: ["ai_generated", "user_generated"],
     },
   },
