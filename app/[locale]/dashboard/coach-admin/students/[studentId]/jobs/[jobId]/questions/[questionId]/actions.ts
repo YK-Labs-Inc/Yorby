@@ -53,6 +53,7 @@ export async function createCoachFeedback(formData: FormData) {
                 feedback_role: "user",
                 pros: pros,
                 cons: cons,
+                confidence_score: 1.0,
             });
         if (error) {
             logger.error("Failed to create feedback", { error });

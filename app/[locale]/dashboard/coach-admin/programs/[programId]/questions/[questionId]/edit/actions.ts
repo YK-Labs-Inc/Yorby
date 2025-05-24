@@ -33,11 +33,16 @@ export async function editQuestion(
     const answerGuidelines = formData.get("answerGuidelines") as string;
     const programId = formData.get("programId") as string;
     const questionId = formData.get("questionId") as string;
+    const publicationStatus = formData.get("publication_status") as
+        | "published"
+        | "draft";
+
     logger = logger.with({
         question,
         answerGuidelines,
         programId,
         questionId,
+        publicationStatus,
     });
 
     // Validate required fields
@@ -84,7 +89,7 @@ export async function editQuestion(
             question,
             answer_guidelines: answerGuidelines,
             custom_job_id: programId,
-            question_type: "user_generated",
+            publication_status: publicationStatus,
         })
         .select()
         .single();

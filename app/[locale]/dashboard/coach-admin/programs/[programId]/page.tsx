@@ -36,6 +36,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
+import QuestionStatusToggle from "../components/QuestionStatusToggle";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
@@ -85,6 +86,7 @@ async function getProgramData(programId: string, coachId: string) {
       question,
       answer_guidelines,
       created_at,
+      publication_status,
       custom_job_question_sample_answers (count)
     `
     )
@@ -228,6 +230,10 @@ export default async function ProgramDetailPage({
                   <TableHead>{t("table.question")}</TableHead>
                   <TableHead>{t("table.sampleAnswers")}</TableHead>
                   <TableHead>{t("table.created")}</TableHead>
+                  <TableHead>{t("table.status")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -238,8 +244,8 @@ export default async function ProgramDetailPage({
                         href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
                         className="hover:underline text-primary"
                       >
-                        {question.question.length > 80
-                          ? `${question.question.substring(0, 80)}...`
+                        {question.question.length > 60
+                          ? `${question.question.substring(0, 60)}...`
                           : question.question}
                       </Link>
                     </TableCell>
@@ -248,6 +254,58 @@ export default async function ProgramDetailPage({
                     </TableCell>
                     <TableCell>
                       {format(new Date(question.created_at), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell>
+                      <QuestionStatusToggle
+                        questionId={question.id}
+                        programId={programId}
+                        initialStatus={
+                          question.publication_status as "published" | "draft"
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              {t("viewDetails")}
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/edit`}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              {t("editQuestion")}
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}`}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              {t("manageSampleAnswers")}
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={`/dashboard/coach-admin/programs/${programId}/questions/${question.id}/delete`}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("deleteQuestion")}
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

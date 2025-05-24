@@ -25,11 +25,12 @@ import {
 } from "@/components/ui/form";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createQuestion } from "../[programId]/questions/new/actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useTranslations } from "next-intl";
 import { editQuestion } from "../[programId]/questions/[questionId]/edit/actions";
+import { Switch } from "@/components/ui/switch";
 
 // Define the form schema with validation
 const questionFormSchema = z.object({
@@ -39,6 +40,7 @@ const questionFormSchema = z.object({
   answerGuidelines: z.string().min(10, {
     message: "Answer guidelines must be at least 10 characters.",
   }),
+  publishImmediately: z.boolean().default(false).optional(),
 });
 
 type QuestionFormValues = z.infer<typeof questionFormSchema>;
@@ -48,6 +50,7 @@ interface QuestionFormProps {
     question?: string;
     answerGuidelines?: string;
     questionType?: "ai_generated" | "user_generated";
+    publication_status?: "draft" | "published";
   };
   programId: string;
   onCancelRedirectUrl: string;
@@ -74,6 +77,7 @@ export default function QuestionForm({
     defaultValues: {
       question: initialValues.question || "",
       answerGuidelines: initialValues.answerGuidelines || "",
+      publishImmediately: initialValues.publication_status === "published",
     },
   });
 
@@ -81,16 +85,25 @@ export default function QuestionForm({
   const handleSubmit = async (values: z.infer<typeof questionFormSchema>) => {
     setIsSubmitting(true);
     setError(null);
-    const { question, answerGuidelines } = values;
+    const { question, answerGuidelines, publishImmediately } = values;
     try {
       if (isEditing && questionId) {
-        await handleEditQuestion({ question, answerGuidelines, questionId });
+        await handleEditQuestion({
+          question,
+          answerGuidelines,
+          questionId,
+          publishImmediately,
+        });
       } else {
-        await handleCreateQuestion({ question, answerGuidelines });
+        await handleCreateQuestion({
+          question,
+          answerGuidelines,
+          publishImmediately,
+        });
       }
     } catch (err) {
       setError(t("genericError"));
-      logError("Create job form submission error:", { error: err });
+      logError("Question form submission error:", { error: err });
     } finally {
       setIsSubmitting(false);
     }
@@ -99,14 +112,20 @@ export default function QuestionForm({
   const handleCreateQuestion = async ({
     question,
     answerGuidelines,
+    publishImmediately,
   }: {
     question: string;
     answerGuidelines: string;
+    publishImmediately?: boolean;
   }) => {
     const formData = new FormData();
     formData.append("question", question);
     formData.append("answerGuidelines", answerGuidelines);
     formData.append("programId", programId);
+    formData.append(
+      "publication_status",
+      publishImmediately ? "published" : "draft"
+    );
     const result = await createQuestion(formData);
     if (result.success) {
       router.push(
@@ -121,16 +140,22 @@ export default function QuestionForm({
     question,
     answerGuidelines,
     questionId,
+    publishImmediately,
   }: {
     question: string;
     answerGuidelines: string;
     questionId: string;
+    publishImmediately?: boolean;
   }) => {
     const formData = new FormData();
     formData.append("question", question);
     formData.append("answerGuidelines", answerGuidelines);
     formData.append("questionId", questionId);
     formData.append("programId", programId);
+    formData.append(
+      "publication_status",
+      publishImmediately ? "published" : "draft"
+    );
     const result = await editQuestion(formData);
     if (result.success) {
       router.push(
@@ -197,12 +222,36 @@ export default function QuestionForm({
                 </FormItem>
               )}
             />
+
+            {/* Publish Immediately Toggle */}
+            <FormField
+              control={form.control}
+              name="publishImmediately"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      {t("publishImmediatelyLabel")}
+                    </FormLabel>
+                    <FormDescription>
+                      {t("publishImmediatelyDescription")}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button
               type="button"
               variant="outline"
-              onClick={() => redirect(onCancelRedirectUrl)}
+              onClick={() => router.push(onCancelRedirectUrl)}
               disabled={isSubmitting}
             >
               {t("cancel")}
