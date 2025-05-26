@@ -166,6 +166,7 @@
     }
   },
   "interviewQuestion": {
+    "sampleAnswersLabel": "Sample Answers",
     "questionLabel": "Question",
     "submissionsLabel": "Submissions",
     "answerLabel": "Your Answer",
