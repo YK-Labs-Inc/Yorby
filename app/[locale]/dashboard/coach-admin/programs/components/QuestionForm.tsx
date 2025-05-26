@@ -7,7 +7,6 @@ import * as z from "zod";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -34,12 +33,8 @@ import { Switch } from "@/components/ui/switch";
 
 // Define the form schema with validation
 const questionFormSchema = z.object({
-  question: z.string().min(5, {
-    message: "Question must be at least 5 characters.",
-  }),
-  answerGuidelines: z.string().min(10, {
-    message: "Answer guidelines must be at least 10 characters.",
-  }),
+  question: z.string(),
+  answerGuidelines: z.string(),
   publishImmediately: z.boolean().default(false).optional(),
 });
 

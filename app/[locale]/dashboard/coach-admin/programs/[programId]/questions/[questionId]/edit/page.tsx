@@ -109,6 +109,7 @@ export default async function EditQuestionPage({
           question: question.question,
           answerGuidelines: question.answer_guidelines,
           questionType: question.question_type,
+          publication_status: question.publication_status,
         }}
         programId={programId}
         onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
