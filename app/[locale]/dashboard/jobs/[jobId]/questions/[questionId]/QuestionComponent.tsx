@@ -1,10 +1,7 @@
 import AnswerForm from "./AnswerForm";
 import { Tables } from "@/utils/supabase/database.types";
 import { OnboardingWrapper } from "./OnboardingWrapper";
-import {
-  createAdminClient,
-  createSupabaseServerClient,
-} from "@/utils/supabase/server";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 import BackButton from "./BackButton";
 import { Logger } from "next-axiom";
 import { notFound } from "next/navigation";
