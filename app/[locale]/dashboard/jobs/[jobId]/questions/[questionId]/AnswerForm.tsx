@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import SpeechToTextModal from "./SpeechToTextModal";
 import { Sparkles } from "lucide-react";
 import SampleAnswers from "./SampleAnswers";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -61,6 +62,7 @@ export default function AnswerForm({
   const initialAnswer = currentSubmission?.answer ?? "";
   const [currentAnswer, setCurrentAnswer] = useState(initialAnswer);
   const hasAnswerChanged = currentAnswer !== initialAnswer;
+  const { isCoachProgramsPage } = useMultiTenant();
 
   useEffect(() => {
     setCurrentAnswer(initialAnswer);
@@ -93,14 +95,8 @@ export default function AnswerForm({
       error,
     };
   }
-
-  const params = useParams();
-  let questionPath = "";
-  if (params && "coachSlug" in params) {
-    questionPath = `/coaches/${params.coachSlug}/curriculum/${jobId}/questions/${question.id}`;
-  } else {
-    questionPath = `/dashboard/jobs/${jobId}/questions/${question.id}`;
-  }
+  const { baseUrl } = useMultiTenant();
+  const questionPath = `${baseUrl}/${jobId}/questions/${question.id}`;
 
   const newViewParams = new URLSearchParams(searchParams ?? {});
   newViewParams.set("view", view === "question" ? "submissions" : "question");
@@ -141,30 +137,32 @@ export default function AnswerForm({
                           setCurrentAnswer(text);
                         }}
                       />
-                      <form action={generateAnswerAction}>
-                        <input
-                          type="hidden"
-                          name="questionId"
-                          value={question.id}
-                        />
-                        <input type="hidden" name="jobId" value={jobId} />
-                        <input
-                          type="hidden"
-                          name="questionPath"
-                          value={questionPath}
-                        />
-                        <AIButton
-                          type="submit"
-                          disabled={
-                            isGenerateAnswerPending || isSubmitAnswerPending
-                          }
-                          pending={isGenerateAnswerPending}
-                          pendingText={t("buttons.generatingAnswer")}
-                          variant="outline"
-                        >
-                          {t("buttons.generateAnswer")}
-                        </AIButton>
-                      </form>
+                      {!isCoachProgramsPage && (
+                        <form action={generateAnswerAction}>
+                          <input
+                            type="hidden"
+                            name="questionId"
+                            value={question.id}
+                          />
+                          <input type="hidden" name="jobId" value={jobId} />
+                          <input
+                            type="hidden"
+                            name="questionPath"
+                            value={questionPath}
+                          />
+                          <AIButton
+                            type="submit"
+                            disabled={
+                              isGenerateAnswerPending || isSubmitAnswerPending
+                            }
+                            pending={isGenerateAnswerPending}
+                            pendingText={t("buttons.generatingAnswer")}
+                            variant="outline"
+                          >
+                            {t("buttons.generateAnswer")}
+                          </AIButton>
+                        </form>
+                      )}
                     </div>
                   </div>
                   <form action={submitAnswerAction}>

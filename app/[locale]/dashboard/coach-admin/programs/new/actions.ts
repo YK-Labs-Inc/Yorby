@@ -71,7 +71,7 @@ export async function createCustomJob(
 
     await logger.flush();
 
-    // Revalidate the curriculum page to show the new job
+    // Revalidate the program page to show the new job
     revalidatePath("/dashboard/coach-admin/programs");
     return {
         success: true,

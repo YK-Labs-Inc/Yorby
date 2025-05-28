@@ -26,7 +26,7 @@ export default async function NewJobPage() {
 
   return (
     <div className="container mx-auto py-6">
-      <ProgramForm onCancelRedirectUrl={"/dashboard/coach-admin/curriculum"} />
+      <ProgramForm onCancelRedirectUrl={"/dashboard/coach-admin/programs"} />
     </div>
   );
 }

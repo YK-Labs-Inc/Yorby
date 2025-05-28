@@ -199,9 +199,9 @@ export async function updateQuestion(
   }
 
   // Revalidate the job page and question page
-  revalidatePath(`/dashboard/coach-admin/curriculum/${jobId}`);
+  revalidatePath(`/dashboard/coach-admin/programs/${jobId}`);
   revalidatePath(
-    `/dashboard/coach-admin/curriculum/${jobId}/questions/${questionId}`,
+    `/dashboard/coach-admin/programs/${jobId}/questions/${questionId}`,
   );
 
   return {
