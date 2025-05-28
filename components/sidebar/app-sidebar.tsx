@@ -30,11 +30,13 @@ import {
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "./Header";
-import { StudentWithEmailAndName } from "@/app/[locale]/layout";
+import { CoachInfo, StudentWithEmailAndName } from "@/app/[locale]/layout";
 
 interface AppSidebarProps {
   numberOfCredits: number;
   jobs: Tables<"custom_jobs">[];
+  coachJobs: Tables<"custom_jobs">[];
+  coachInfo: CoachInfo;
   interviewCopilots: Tables<"interview_copilots">[];
   user: User | null;
   hasSubscription: boolean;
@@ -108,6 +110,8 @@ function AppSidebarLoading() {
 export function AppSidebar({
   interviewCopilots,
   jobs,
+  coachJobs,
+  coachInfo,
   numberOfCredits,
   hasSubscription,
   user,
@@ -121,6 +125,9 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"coach" | "student">(
+    coachInfo.isCoach ? "coach" : "student"
+  );
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
@@ -140,20 +147,56 @@ export function AppSidebar({
     <Sidebar>
       <SidebarHeader>
         <Header />
+
+        {/* View Toggle for Coach/Student - Only show if user is a coach */}
+        {user && coachInfo.isCoach && (
+          <div className="flex justify-center mb-3 mt-3">
+            <div
+              className="inline-flex rounded-md shadow-sm border border-sidebar-border"
+              role="group"
+            >
+              <button
+                type="button"
+                className={`px-4 py-2 text-sm font-medium rounded-l-md ${
+                  viewMode === "coach"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-transparent text-muted-foreground hover:bg-muted/50"
+                }`}
+                onClick={() => setViewMode("coach")}
+              >
+                {t("coachView")}
+              </button>
+              <button
+                type="button"
+                className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+                  viewMode === "student"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-transparent text-muted-foreground hover:bg-muted/50"
+                }`}
+                onClick={() => setViewMode("student")}
+              >
+                {t("studentView")}
+              </button>
+            </div>
+          </div>
+        )}
+
         {user && (
           <>
             <DropdownMenu>
-              {!isCoachPath && (
-                <DropdownMenuTrigger asChild>
-                  <Button className="w-full justify-between">
-                    <span className="flex items-center gap-2">
-                      <PlusIcon className="h-4 w-4" />
-                      {t("create")}
-                    </span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-              )}
+              {/* Only show Create dropdown in student view or if not a coach */}
+              {!isCoachPath &&
+                (viewMode === "student" || !coachInfo.isCoach) && (
+                  <DropdownMenuTrigger asChild>
+                    <Button className="w-full justify-between">
+                      <span className="flex items-center gap-2">
+                        <PlusIcon className="h-4 w-4" />
+                        {t("create")}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                )}
               <DropdownMenuContent align="end" className="w-[200px]">
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/jobs?newJob=true">
@@ -185,78 +228,117 @@ export function AppSidebar({
       <SidebarContent>
         {user && (
           <>
-            {students.length > 0 && (
-              <SidebarGroup>
-                <div className="px-4 py-2">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    {t("students")}
-                  </h4>
-                </div>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {students.map((student) => (
-                      <SidebarMenuItemClient
-                        key={student.user_id}
-                        student={student}
-                      />
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            )}
-            {jobs.length > 0 && (
-              <SidebarGroup>
-                <div className="px-4 py-2">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    {t("interviewPrep")}
-                  </h4>
-                </div>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {jobs.map((job) => (
-                      <SidebarMenuItemClient key={job.id} job={job} />
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+            {/* COACH VIEW */}
+            {viewMode === "coach" && coachInfo.isCoach && (
+              <>
+                {/* Students Section - Coach View */}
+                {students.length > 0 && (
+                  <SidebarGroup>
+                    <div className="px-4 py-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {t("students")}
+                      </h4>
+                    </div>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {students.map((student) => (
+                          <SidebarMenuItemClient
+                            key={student.user_id}
+                            student={student}
+                          />
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                )}
+
+                {/* Coach Jobs Section */}
+                {coachJobs.length > 0 && (
+                  <SidebarGroup className={students.length > 0 ? "mt-6" : ""}>
+                    <div className="px-4 py-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {t("programs")}
+                      </h4>
+                    </div>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {coachJobs.map((job) => (
+                          <SidebarMenuItemClient
+                            key={job.id}
+                            job={job}
+                            isCoachJob={true}
+                          />
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                )}
+              </>
             )}
 
-            {/* Interview Copilots Section */}
-            {interviewCopilots.length > 0 && (
-              <SidebarGroup className="mt-6">
-                <div className="px-4 py-2">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    {t("interviewCopilots")}
-                  </h4>
-                </div>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {interviewCopilots.map((copilot) => (
-                      <SidebarMenuItemClient
-                        key={copilot.id}
-                        interviewCopilot={copilot}
-                      />
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            )}
+            {/* STUDENT VIEW */}
+            {viewMode === "student" && (
+              <>
+                {/* Interview Prep Section - Student View */}
+                {jobs.length > 0 && (
+                  <SidebarGroup>
+                    <div className="px-4 py-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {t("interviewPrep")}
+                      </h4>
+                    </div>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {jobs.map((job) => (
+                          <SidebarMenuItemClient key={job.id} job={job} />
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                )}
 
-            {resumes.length > 0 && (
-              <SidebarGroup className="mt-6">
-                <div className="px-4 py-2">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    {t("resumes")}
-                  </h4>
-                </div>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {resumes.map((resume) => (
-                      <SidebarMenuItemClient key={resume.id} resume={resume} />
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+                {/* Interview Copilots Section - Student View */}
+                {interviewCopilots.length > 0 && (
+                  <SidebarGroup className="mt-6">
+                    <div className="px-4 py-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {t("interviewCopilots")}
+                      </h4>
+                    </div>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {interviewCopilots.map((copilot) => (
+                          <SidebarMenuItemClient
+                            key={copilot.id}
+                            interviewCopilot={copilot}
+                          />
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                )}
+
+                {/* Resumes Section - Student View */}
+                {resumes.length > 0 && (
+                  <SidebarGroup className="mt-6">
+                    <div className="px-4 py-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {t("resumes")}
+                      </h4>
+                    </div>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {resumes.map((resume) => (
+                          <SidebarMenuItemClient
+                            key={resume.id}
+                            resume={resume}
+                          />
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                )}
+              </>
             )}
           </>
         )}

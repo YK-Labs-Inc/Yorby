@@ -11,24 +11,28 @@ import { StudentWithEmailAndName } from "@/app/[locale]/layout";
 type SidebarMenuItemClientProps =
   | {
       job: Tables<"custom_jobs">;
+      isCoachJob?: boolean;
       resume?: never;
       student?: never;
       interviewCopilot?: never;
     }
   | {
       job?: never;
+      isCoachJob?: never;
       resume: Tables<"resumes">;
       student?: never;
       interviewCopilot?: never;
     }
   | {
       job?: never;
+      isCoachJob?: never;
       resume?: never;
       student: StudentWithEmailAndName;
       interviewCopilot?: never;
     }
   | {
       job?: never;
+      isCoachJob?: never;
       resume?: never;
       student?: never;
       interviewCopilot: Tables<"interview_copilots">;
@@ -36,6 +40,7 @@ type SidebarMenuItemClientProps =
 
 const SidebarMenuItemClient = ({
   job,
+  isCoachJob,
   resume,
   student,
   interviewCopilot,
@@ -43,6 +48,9 @@ const SidebarMenuItemClient = ({
   const pathname = usePathname();
   const createUrlPath = (): string => {
     if (job) {
+      if (isCoachJob) {
+        return `/dashboard/coach-admin/programs/${job.id}`;
+      }
       return `/dashboard/jobs/${job.id}`;
     }
     if (resume) {

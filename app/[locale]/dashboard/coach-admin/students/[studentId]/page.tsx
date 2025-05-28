@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { QuestionWithSubmissions } from "../../components/StudentActivitySidebar";
+import { Tables } from "@/utils/supabase/database.types";
 
 const AdminStudentPage = async ({
   params,
@@ -17,7 +19,8 @@ const AdminStudentPage = async ({
       .select(
         `*,
         custom_job_questions(
-            *
+            *,
+            custom_job_question_submissions(*)
         )`
       )
       .eq("user_id", studentId);
@@ -41,8 +44,33 @@ const AdminStudentPage = async ({
       </div>
     );
   }
+
+  // Updated parameter type to QuestionWithSubmissions
+  const getQuestionSubmissions = (
+    question: Tables<"custom_job_questions"> & {
+      custom_job_question_submissions: Tables<"custom_job_question_submissions">[];
+    }
+  ) => {
+    return Array.isArray(question.custom_job_question_submissions)
+      ? question.custom_job_question_submissions
+      : [];
+  };
+
+  const sortedQuestions = [...studentCustomJobs[0].custom_job_questions].sort(
+    (a, b) => {
+      const submissionsA = getQuestionSubmissions(a);
+      const submissionsB = getQuestionSubmissions(b);
+      if (submissionsA.length > 0 && submissionsB.length === 0) {
+        return -1; // a (with submissions) comes first
+      }
+      if (submissionsA.length === 0 && submissionsB.length > 0) {
+        return 1; // b (with submissions) comes first
+      }
+      return 0; // Preserve original order for questions with same submission status
+    }
+  );
   redirect(
-    `/dashboard/coach-admin/students/${studentId}/jobs/${studentCustomJobs[0].id}/questions/${studentCustomJobs[0].custom_job_questions[0].id}`
+    `/dashboard/coach-admin/students/${studentId}/jobs/${studentCustomJobs[0].id}/questions/${sortedQuestions[0].id}`
   );
 };
 
