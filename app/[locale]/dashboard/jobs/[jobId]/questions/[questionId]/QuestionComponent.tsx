@@ -4,7 +4,7 @@ import { OnboardingWrapper } from "./OnboardingWrapper";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import BackButton from "./BackButton";
 import { Logger } from "next-axiom";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 const fetchQuestion = async (questionId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -54,6 +54,25 @@ const fetchQuestionSampleAnswers = async (sourceQuestionId: string) => {
   return data;
 };
 
+const checkOnboardingStatus = async () => {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    redirect("/login");
+  }
+
+  // Check if user has viewed the onboarding
+  const hasViewedOnboarding =
+    user.app_metadata?.["viewed_question_answer_onboarding"];
+
+  // Show onboarding if the flag doesn't exist or is false
+  return !hasViewedOnboarding;
+};
+
 const QuestionComponent = async ({
   questionId,
   jobId,
@@ -87,17 +106,8 @@ const QuestionComponent = async ({
       )
     : undefined;
 
-  // Determine if we should show onboarding
-  const showOnboarding =
-    question.custom_job_question_submissions.length === 0 && // First question (no submissions)
-    !question.custom_job_question_submissions.some(
-      (submission) =>
-        (submission.feedback as { pros: string[]; cons: string[] })?.pros
-          .length > 0 ||
-        (submission.feedback as { pros: string[]; cons: string[] })?.cons
-          .length > 0 ||
-        submission.custom_job_question_submission_feedback.length > 0
-    ); // No generated answers yet
+  // Check if we should show onboarding based on user metadata
+  const showOnboarding = await checkOnboardingStatus();
 
   return (
     <>
