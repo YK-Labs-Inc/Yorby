@@ -344,7 +344,10 @@
     "unlockAllAccess": "Unlock Unlimited Access",
     "transformResume": "Transform Resume",
     "interviewPrep": "Interview Prep",
-    "students": "Students"
+    "students": "Students",
+    "coachView": "Coach View",
+    "studentView": "Student View",
+    "coachJobs": "Coach Jobs"
   },
   "upgrade": {
     "locked": {
