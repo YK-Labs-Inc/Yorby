@@ -51,7 +51,7 @@ export const createJob = async ({
 
   // Check if all files are PDFs
   const allFiles = [resume, coverLetter, ...miscDocuments].filter(
-    (file) => file !== null
+    (file) => file !== null,
   ) as File[];
   const nonPdfFiles = allFiles.filter((file) => !isPdfFile(file));
 
@@ -61,8 +61,7 @@ export const createJob = async ({
       fileNames: nonPdfFiles.map((file) => file.name),
     });
     return {
-      error:
-        t("onlyPdfFilesAllowed") ||
+      error: t("onlyPdfFilesAllowed") ||
         "Only PDF files are allowed. Please upload PDF documents only.",
     };
   }
@@ -100,19 +99,19 @@ export const createJob = async ({
     const geminiUploadResponses = await Promise.all([
       resume
         ? processFile({
-            file: resume,
-            displayName: "Resume",
-            customJobId,
-            userId,
-          })
+          file: resume,
+          displayName: "Resume",
+          customJobId,
+          userId,
+        })
         : null,
       coverLetter
         ? processFile({
-            file: coverLetter,
-            displayName: "Cover Letter",
-            customJobId,
-            userId,
-          })
+          file: coverLetter,
+          displayName: "Cover Letter",
+          customJobId,
+          userId,
+        })
         : null,
       ...miscDocuments.map((file, index) =>
         processFile({
@@ -221,7 +220,9 @@ export const uploadFileToSupabase = async ({
   userId: string;
 }) => {
   const supabase = await createSupabaseServerClient();
-  const filePath = `${userId}/${customJobId}/${new Date().getTime()}.${file.name.split(".").pop()}`;
+  const filePath = `${userId}/${customJobId}/${new Date().getTime()}.${
+    file.name.split(".").pop()
+  }`;
   const { error } = await supabase.storage
     .from("custom_job_files")
     .upload(filePath, file);
@@ -234,7 +235,7 @@ export const uploadFileToSupabase = async ({
 export const writeToDb = async (
   uploadResponse: UploadResponse,
   customJobId: string,
-  filePath: string
+  filePath: string,
 ) => {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.from("custom_job_files").insert({
@@ -347,7 +348,7 @@ export const generateCustomJobQuestions = async ({
           z.object({
             question: z.string(),
             answerGuidelines: z.string(),
-          })
+          }),
         ),
       }),
       loggingContext,
@@ -381,7 +382,8 @@ export const writeCustomJobQuestionsToDb = async ({
       custom_job_id: customJobId,
       question,
       answer_guidelines: answerGuidelines,
-    }))
+      publication_status: "published" as const,
+    })),
   );
   if (error) {
     throw error;
