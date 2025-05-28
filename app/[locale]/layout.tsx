@@ -4,7 +4,7 @@ import "./globals.css";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
-import { AxiomWebVitals } from "next-axiom";
+import { AxiomWebVitals, Logger } from "next-axiom";
 import { IntlProvider, PHProvider } from "./providers";
 import {
   createAdminClient,
@@ -49,56 +49,56 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const fetchUserCoachInfo = async (userId: string): Promise<CoachInfo> => {
+const fetchUserCoachInfo = async (userId: string) => {
   const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({ function: "fetchUserCoachInfo", userId });
   const { data, error } = await supabase
     .from("coaches")
     .select("*")
     .eq("user_id", userId)
     .maybeSingle();
-  
+
   if (error) {
-    console.error("Error fetching coach info:", error);
+    logger.error("Error fetching coach info", { error });
+    await logger.flush();
     return { isCoach: false, coachData: null };
   }
-  
-  return { 
-    isCoach: data !== null, 
-    coachData: data 
+
+  return {
+    isCoach: data !== null,
+    coachData: data,
   };
 };
 
 const fetchJobs = async (userId: string, userCoachId: string | null = null) => {
   const supabase = await createSupabaseServerClient();
-  
+
   // Start with base query to get user's jobs
-  let query = supabase
-    .from("custom_jobs")
-    .select("*")
-    .eq("user_id", userId);
-  
+  let query = supabase.from("custom_jobs").select("*").eq("user_id", userId);
+
   // If user has a coach, exclude jobs created by that coach
   // This ensures student view doesn't show jobs where they're a student of the coach
   if (userCoachId) {
     query = query.neq("coach_id", userCoachId);
   }
-  
+
   const { data, error } = await query;
-  
+
   if (error) {
     throw error;
   }
   return data;
 };
 
-const fetchCoachJobs = async (coachId: string) => {
+const fetchCoachJobs = async (coachId: string, userId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_jobs")
     .select("*")
     .eq("coach_id", coachId)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
-  
+
   if (error) {
     throw error;
   }
@@ -234,32 +234,22 @@ export default async function RootLayout({
   let referralsEnabled = false;
   let students: StudentWithEmailAndName[] = [];
   let coachInfo: CoachInfo = { isCoach: false, coachData: null };
-  
+
   if (user) {
     // Fetch coach information first to determine if user is a coach
     coachInfo = await fetchUserCoachInfo(user.id);
-    
-    // Get user's coach ID if they have one (for student view filtering)
-    const { data: userCoachAccess } = await supabase
-      .from("user_coach_access")
-      .select("coach_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-      
-    const userCoachId = userCoachAccess?.coach_id || null;
-    
     // Fetch standard data
     numberOfCredits = await fetchNumberOfCredits(user.id);
     hasSubscription = await fetchHasSubscription(user.id);
-    jobs = await fetchJobs(user.id, userCoachId);
+    jobs = await fetchJobs(user.id, coachInfo.coachData?.id);
     interviewCopilots = await fetchInterviewCopilots(user.id);
-    
+
     // Fetch coach-specific data if user is a coach
     if (coachInfo.isCoach && coachInfo.coachData) {
-      coachJobs = await fetchCoachJobs(coachInfo.coachData.id);
+      coachJobs = await fetchCoachJobs(coachInfo.coachData.id, user.id);
       students = await fetchStudents(user.id);
     }
-    
+
     isSubscriptionVariant =
       (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
       "test";
