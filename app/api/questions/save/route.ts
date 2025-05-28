@@ -11,7 +11,7 @@ const SaveQuestionsSchema = z.object({
       question: z.string(),
       answer_guidelines: z.string().optional(),
       order: z.number().optional(),
-    })
+    }),
   ),
 });
 
@@ -30,7 +30,8 @@ async function getAnswerGuidelines({
   question: string;
   jobId: string;
 }) {
-  const prompt = `You are an expert interview coach. Given the following job information and interview question, 
+  const prompt =
+    `You are an expert interview coach. Given the following job information and interview question, 
   write a concise set of answer guidelines that describe what a strong or correct answer would include. Focus 
   on the key points, skills, or experiences the candidate should mention.
 
@@ -86,8 +87,9 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           question: question.question,
           answer_guidelines: guidelines,
           question_type: "user_generated" as const,
+          publication_status: "published" as const,
         };
-      })
+      }),
     );
     await supabase.from("custom_job_questions").insert(insertData);
 
@@ -100,7 +102,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     logger.error("Error saving questions", { error });
     return NextResponse.json(
       { error: "Failed to save questions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });
