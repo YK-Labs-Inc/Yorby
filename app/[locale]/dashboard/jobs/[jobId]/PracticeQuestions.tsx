@@ -6,6 +6,7 @@ import { CheckCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 interface Question {
   id: string;
@@ -66,14 +67,7 @@ export default function PracticeQuestions({
   const [localSortOrder, setLocalSortOrder] = useState(sortOrder);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-
-  const params = useParams();
-  let baseUrl = "";
-  if (params && "coachSlug" in params) {
-    baseUrl = `/coaches/${params.coachSlug}/curriculum`;
-  } else {
-    baseUrl = `/dashboard/jobs`;
-  }
+  const { baseUrl } = useMultiTenant();
 
   const t = useTranslations("practiceQuestions.filters");
 

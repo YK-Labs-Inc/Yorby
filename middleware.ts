@@ -113,7 +113,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   // Handle next-intl middleware first
-  const response = await intlMiddleware(request);
+  const response = intlMiddleware(request);
   if (response) return response;
 
   // Then handle session update

@@ -135,7 +135,7 @@ export const GET = withAxiom(async (
 
         // 6. Redirect to the first curriculum page
         const redirectUrl =
-            `${defaultUrl}/coaches/${coach.slug}/curriculum/${newJobId}`;
+            `${defaultUrl}/coaches/${coach.slug}/programs/${newJobId}`;
         return NextResponse.redirect(redirectUrl);
     } catch (err) {
         logger.error("Error during registration, rolling back", { err });

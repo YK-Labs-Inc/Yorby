@@ -1,6 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Settings } from "lucide-react";
 
@@ -8,9 +15,12 @@ export default function CoachAdminDashboardPage() {
   return (
     <div className="container mx-auto py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Coach Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Coach Admin Dashboard
+        </h1>
         <p className="text-muted-foreground mt-2">
-          Manage your curriculum, students, and coaching settings from this dashboard.
+          Manage your curriculum, students, and coaching settings from this
+          dashboard.
         </p>
       </div>
 
@@ -28,14 +38,14 @@ export default function CoachAdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Create and manage custom job profiles with tailored interview questions and sample answers
-              for your students to practice with.
+              Create and manage custom job profiles with tailored interview
+              questions and sample answers for your students to practice with.
             </p>
           </CardContent>
           <CardFooter>
             <Button asChild className="w-full">
-              <Link href="/dashboard/coach-admin/curriculum">
-                Manage Curriculum
+              <Link href="/dashboard/coach-admin/programs">
+                Manage Programs
               </Link>
             </Button>
           </CardFooter>
@@ -54,8 +64,8 @@ export default function CoachAdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Track student progress, review their practice sessions, and manage access to your
-              curriculum materials.
+              Track student progress, review their practice sessions, and manage
+              access to your curriculum materials.
             </p>
           </CardContent>
           <CardFooter>
@@ -80,7 +90,8 @@ export default function CoachAdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Update your profile information, branding settings, and notification preferences.
+              Update your profile information, branding settings, and
+              notification preferences.
             </p>
           </CardContent>
           <CardFooter>

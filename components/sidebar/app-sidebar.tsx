@@ -131,13 +131,18 @@ export function AppSidebar({
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
-  const { isLoadingBranding, isCoachPath } = useMultiTenant();
+  const { isLoadingBranding, isCoachPath, isCoachProgramsPage } =
+    useMultiTenant();
 
   useEffect(() => {
     if (authError || authSuccess) {
       setIsAuthOpen(true);
     }
   }, [authError, authSuccess]);
+
+  if (isCoachPath && !isCoachProgramsPage) {
+    return null;
+  }
 
   if (isLoadingBranding) {
     return <AppSidebarLoading />;

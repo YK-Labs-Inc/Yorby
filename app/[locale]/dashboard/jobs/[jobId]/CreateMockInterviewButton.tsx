@@ -5,6 +5,7 @@ import { startMockInterview } from "./actions";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 export default function CreateMockInterviewButton({
   jobId,
@@ -16,14 +17,8 @@ export default function CreateMockInterviewButton({
     useActionState(startMockInterview, {
       error: "",
     });
-  const params = useParams();
-  let mockInterviewsPath = "";
-  if (params && "coachSlug" in params) {
-    mockInterviewsPath = `/coaches/${params.coachSlug}/curriculum/${jobId}/mockInterviews`;
-  } else {
-    mockInterviewsPath = `/dashboard/jobs/${jobId}/mockInterviews`;
-  }
-
+  const { baseUrl } = useMultiTenant();
+  const mockInterviewsPath = `${baseUrl}/${jobId}/mockInterviews`;
   useEffect(() => {
     if (startInterviewState.error) {
       alert(startInterviewState.error);

@@ -9,13 +9,14 @@ import React, {
   useEffect,
   useTransition,
 } from "react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface MultiTenantContextProps {
   isCoachPath: boolean;
+  isCoachProgramsPage: boolean;
   coachBrandingSettings: Tables<"coach_branding"> | null; // Use the specific row type
   isLoadingBranding: boolean;
   baseUrl: string;
@@ -33,14 +34,21 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
     useState<Tables<"coach_branding"> | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
   const { logError } = useAxiomLogging();
+  const pathname = usePathname();
 
-  const isCoachPath = useMemo(() => {
-    return typeof coachSlug === "string" && coachSlug.length > 0;
-  }, [coachSlug]);
+  const isCoachPath = useMemo(
+    () => pathname?.startsWith("/en/coaches") ?? false,
+    [pathname]
+  );
+
+  const isCoachProgramsPage = useMemo(
+    () => (isCoachPath && pathname?.includes("programs")) ?? false,
+    [isCoachPath, pathname]
+  );
 
   useEffect(() => {
     if (isCoachPath) {
-      setBaseUrl(`/coaches/${coachSlug}/curriculum`);
+      setBaseUrl(`/coaches/${coachSlug}/programs`);
     } else {
       setBaseUrl(`/dashboard/jobs`);
     }
@@ -82,11 +90,18 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const value = useMemo(
     () => ({
       isCoachPath,
+      isCoachProgramsPage,
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,
     }),
-    [isCoachPath, coachBrandingSettings, isLoadingBranding, baseUrl]
+    [
+      isCoachPath,
+      isCoachProgramsPage,
+      coachBrandingSettings,
+      isLoadingBranding,
+      baseUrl,
+    ]
   );
 
   return (

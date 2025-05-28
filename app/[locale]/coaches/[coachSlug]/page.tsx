@@ -6,6 +6,7 @@ import CoachRegistrationButton from "./CoachRegistrationButton";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { H1, H2 } from "@/components/typography";
 
 interface CoachPortalLandingPageProps {
   params: Promise<{
@@ -138,13 +139,13 @@ export default async function CoachPortalLandingPage({
 
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-2">
-      <h1>Welcome to {coach.name}&apos;s portal</h1>
+      <H2>Welcome to {coach.name}&apos;s Program</H2>
       {user ? (
         registrationStatus.hasAccess &&
         registrationStatus.hasDuplicatedJobs &&
         registrationStatus.firstJobId ? (
           <Link
-            href={`/coaches/${coach.slug}/curriculum/${registrationStatus.firstJobId}`}
+            href={`/coaches/${coach.slug}/programs/${registrationStatus.firstJobId}`}
           >
             <Button>Go to Your Curriculum</Button>
           </Link>

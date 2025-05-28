@@ -1,11 +1,12 @@
 "use client";
 
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Link } from "@/i18n/routing";
 import { Tables } from "@/utils/supabase/database.types";
 import { formatDate } from "@/utils/utils";
 import { CheckCircle, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+
 const MockInterviewLink = ({
   interview,
   jobId,
@@ -14,13 +15,8 @@ const MockInterviewLink = ({
   jobId: string;
 }) => {
   const t = useTranslations("mockInterview");
-  const params = useParams();
-  let mockInterviewsPath = "";
-  if (params && "coachSlug" in params) {
-    mockInterviewsPath = `/coaches/${params.coachSlug}/curriculum/${jobId}/mockInterviews`;
-  } else {
-    mockInterviewsPath = `/dashboard/jobs/${jobId}/mockInterviews`;
-  }
+  const { baseUrl } = useMultiTenant();
+  const mockInterviewsPath = `${baseUrl}/${jobId}/mockInterviews`;
   return (
     <Link
       key={interview.id}
