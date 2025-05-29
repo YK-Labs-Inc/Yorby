@@ -452,37 +452,41 @@ export default function StudentQuestionSubmissions({
                 {feedback &&
                 (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-h-[400px] flex flex-col">
                       <h4 className="font-medium text-green-800 mb-2">
                         {t("pros")}
                       </h4>
-                      {feedback.pros.length === 0 ? (
-                        <p className="italic text-green-700">{t("noPros")}</p>
-                      ) : (
-                        <ul className="list-disc ml-5 space-y-1">
-                          {feedback.pros.map((pro, idx) => (
-                            <li key={idx} className="text-green-800">
-                              {pro}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                      <div className="flex-1 overflow-y-auto">
+                        {feedback.pros.length === 0 ? (
+                          <p className="italic text-green-700">{t("noPros")}</p>
+                        ) : (
+                          <ul className="list-disc ml-5 space-y-1">
+                            {feedback.pros.map((pro, idx) => (
+                              <li key={idx} className="text-green-800">
+                                {pro}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-h-[400px] flex flex-col">
                       <h4 className="font-medium text-red-800 mb-2">
                         {t("cons")}
                       </h4>
-                      {feedback.cons.length === 0 ? (
-                        <p className="italic text-red-700">{t("noCons")}</p>
-                      ) : (
-                        <ul className="list-disc ml-5 space-y-1">
-                          {feedback.cons.map((con, idx) => (
-                            <li key={idx} className="text-red-800">
-                              {con}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                      <div className="flex-1 overflow-y-auto">
+                        {feedback.cons.length === 0 ? (
+                          <p className="italic text-red-700">{t("noCons")}</p>
+                        ) : (
+                          <ul className="list-disc ml-5 space-y-1">
+                            {feedback.cons.map((con, idx) => (
+                              <li key={idx} className="text-red-800">
+                                {con}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
