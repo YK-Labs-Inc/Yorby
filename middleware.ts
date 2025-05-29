@@ -96,18 +96,21 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     return Response.redirect(redirectUrl.toString(), 301);
   }
 
-  // Domain-based rewrite for b2b.perfectinterview.ai
   if (B2B_DOMAINS.some((domain) => hostname.includes(domain))) {
+    // Extract the pathname
     const { pathname } = request.nextUrl;
-    const url = request.nextUrl.clone();
-
-    if (pathname === "/") {
-      url.pathname = "/coaches";
+    // Check if the path already starts with /en/coaches
+    if (!pathname.startsWith("/en/coaches")) {
+      // If the path is just "/", rewrite to "/en/coaches"
+      // Otherwise, append the original path after /en/coaches
+      const url = request.nextUrl.clone();
+      if (pathname === "/") {
+        url.pathname = "/en/coaches";
+      } else {
+        url.pathname = `/en/coaches${pathname}`;
+      }
       return NextResponse.rewrite(url);
     }
-
-    url.pathname = `${pathname}`;
-    return NextResponse.rewrite(url);
   }
 
   // Handle next-intl middleware first
