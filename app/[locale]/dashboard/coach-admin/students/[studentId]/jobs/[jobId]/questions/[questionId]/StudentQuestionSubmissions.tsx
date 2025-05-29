@@ -530,13 +530,6 @@ export default function StudentQuestionSubmissions({
                     <p className="text-gray-800 line-clamp-3">
                       {submission.answer}
                     </p>
-
-                    {/* Audio Player for historical submissions */}
-                    {submission.audio_bucket && submission.audio_file_path && (
-                      <div className="mt-2">
-                        <AudioPlayer submission={submission} />
-                      </div>
-                    )}
                   </Link>
                 </li>
               ))}

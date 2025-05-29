@@ -66,7 +66,7 @@ export default function AnswerForm({
   );
   const initialAnswer = currentSubmission?.answer ?? "";
   const [currentAnswer, setCurrentAnswer] = useState(initialAnswer);
-  const [currentAudioBlob, setCurrentAudioBlob] = useState<Blob | null>(null);
+  const currentAudioBlob = useRef<Blob | null>(null);
   const currentAudioDuration = useRef<number>(0);
   const [isUploadingAudio, setIsUploadingAudio] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -77,7 +77,7 @@ export default function AnswerForm({
 
   useEffect(() => {
     setCurrentAnswer(initialAnswer);
-    setCurrentAudioBlob(null); // Clear audio blob when switching submissions
+    currentAudioBlob.current = null; // Clear audio blob when switching submissions
     currentAudioDuration.current = 0; // Clear audio duration when switching submissions
   }, [initialAnswer]);
 
@@ -117,7 +117,7 @@ export default function AnswerForm({
   const handleSubmitAnswer = async (formData: FormData) => {
     try {
       // If there's an audio blob, upload it first
-      if (currentAudioBlob) {
+      if (currentAudioBlob.current) {
         setIsUploadingAudio(true);
         setUploadProgress(0);
 
@@ -146,8 +146,8 @@ export default function AnswerForm({
         const filePath = `${user.id}${coachUserId && `/coaches/${coachUserId}`}/programs/${jobId}/questions/${question.id}/${fileName}`;
 
         // Convert blob to File
-        const audioFile = new File([currentAudioBlob], fileName, {
-          type: currentAudioBlob.type || "audio/webm",
+        const audioFile = new File([currentAudioBlob.current], fileName, {
+          type: currentAudioBlob.current.type || "audio/webm",
         });
 
         await uploadFile({
@@ -224,7 +224,7 @@ export default function AnswerForm({
                           duration: number
                         ) => {
                           setCurrentAnswer(text);
-                          setCurrentAudioBlob(audioBlob || null);
+                          currentAudioBlob.current = audioBlob;
                           currentAudioDuration.current = duration;
                         }}
                       />
