@@ -1,14 +1,8 @@
-alter table "public"."coaches" add column "slug" text not null;
-
 alter table "public"."custom_job_question_submissions" add column "audio_bucket" text;
 
 alter table "public"."custom_job_question_submissions" add column "audio_file_path" text;
 
 alter table "public"."custom_job_question_submissions" add column "audio_recording_duration" numeric;
-
-CREATE UNIQUE INDEX coaches_slug_key ON public.coaches USING btree (slug);
-
-alter table "public"."coaches" add constraint "coaches_slug_key" UNIQUE using index "coaches_slug_key";
 
 create policy "Allow read access to custom_job_question_sample_answers for use"
 on "public"."custom_job_question_sample_answers"
