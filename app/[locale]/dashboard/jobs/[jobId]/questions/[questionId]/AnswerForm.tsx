@@ -173,6 +173,11 @@ export default function AnswerForm({
           logError,
           logInfo,
         });
+      } else {
+        // No audio blob, submit answer directly
+        startSubmitting(() => {
+          submitAnswerAction(formData);
+        });
       }
     } catch (error) {
       logError("Error in handleSubmitAnswer", { error });
