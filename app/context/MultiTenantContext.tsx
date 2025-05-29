@@ -14,6 +14,21 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
+const b2bDomains = ["b2b.perfectinterview.ai"];
+
+// Custom hook to get hostname
+const useHostname = (): string => {
+  const [hostname, setHostname] = useState<string>("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+  }, []);
+
+  return hostname;
+};
+
 interface MultiTenantContextProps {
   isCoachPath: boolean;
   isCoachProgramsPage: boolean;
@@ -33,12 +48,15 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const [coachBrandingSettings, setCoachBrandingSettings] =
     useState<Tables<"coach_branding"> | null>(null);
   const [baseUrl, setBaseUrl] = useState<string>("");
+  const hostname = useHostname();
   const { logError } = useAxiomLogging();
   const pathname = usePathname();
 
   const isCoachPath = useMemo(
-    () => pathname?.startsWith("/en/coaches") ?? false,
-    [pathname]
+    () =>
+      (pathname?.startsWith("/en/coaches") ?? false) ||
+      b2bDomains.includes(hostname),
+    [pathname, hostname]
   );
 
   const isCoachProgramsPage = useMemo(

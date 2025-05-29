@@ -108,10 +108,10 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   if (user) {
     const isCoach = await checkIfUserIsCoach(user.id);
     logger = logger.with({ isCoach });
-    
+
     if (isCoach) {
       logger.info("User is a coach, redirecting to choose-role");
-      return NextResponse.redirect(`${origin}/choose-role`);
+      return NextResponse.redirect(`${origin}/dashboard/coach-admin/programs`);
     }
   }
 
@@ -152,7 +152,7 @@ const checkIfUserIsCoach = async (userId: string): Promise<boolean> => {
     .select("id")
     .eq("user_id", userId)
     .maybeSingle();
-  
+
   return !!data && !error;
 };
 
