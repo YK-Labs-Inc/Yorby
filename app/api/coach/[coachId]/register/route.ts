@@ -13,7 +13,10 @@ export const GET = withAxiom(async (
 ) => {
     const supabase = await createSupabaseServerClient();
     const coachId = (await params).coachId;
-    let logger = req.log.with({ coachId });
+    let logger = req.log.with({
+        coachId,
+        path: "/api/coach/[coachId]/register",
+    });
 
     let insertedJobIds: string[] = [];
     let insertedQuestionIds: string[] = [];
@@ -50,6 +53,10 @@ export const GET = withAxiom(async (
                 error: "Error inserting into user_coach_access",
             }, { status: 500 });
         }
+        logger.info("Inserted into user_coach_access", {
+            userId,
+            coachId,
+        });
         userCoachAccessCreated = true;
 
         // 3. Fetch all custom_jobs for this coach
@@ -62,6 +69,9 @@ export const GET = withAxiom(async (
             logger.error("No curriculum found for this coach");
             throw new Error("No curriculum found for this coach.");
         }
+        logger.info("Found programs for this coach", {
+            jobs,
+        });
 
         let newJobId: string = "";
         // 4. Duplicate jobs and their questions

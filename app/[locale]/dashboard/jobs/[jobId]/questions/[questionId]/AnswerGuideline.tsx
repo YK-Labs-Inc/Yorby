@@ -4,6 +4,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown";
 
 export default function AnswerGuideline({
   question,
@@ -27,10 +29,14 @@ export default function AnswerGuideline({
         )}
       </CardHeader>
       {isExpanded && (
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {question.answer_guidelines}
-          </p>
+        <CardContent className="space-y-4 pt-4 max-h-80 overflow-y-auto custom-scrollbar">
+          <div className="text-sm text-muted-foreground markdown max-h-64 overflow-y-auto custom-scrollbar">
+            <div className="p-4 border rounded-lg bg-muted/30">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {question.answer_guidelines}
+              </ReactMarkdown>
+            </div>
+          </div>
         </CardContent>
       )}
     </Card>

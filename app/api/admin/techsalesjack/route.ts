@@ -68,10 +68,13 @@ async function transcribeAudioBuffer(
 
     try {
         const arrayBuffer = new Uint8Array(fileBuffer).buffer as ArrayBuffer;
-        logger.info("(TranscriptionHelper) Transcribing audio file", {
-            fileName,
-            mimeType,
-        });
+        logger.info(
+            "(TranscriptionHelper) Transcribing audio file with speaker diarization",
+            {
+                fileName,
+                mimeType,
+            },
+        );
 
         const transcriptionResultText = await generateTextWithFallback({
             messages: [
@@ -81,7 +84,26 @@ async function transcribeAudioBuffer(
                         {
                             type: "text",
                             text:
-                                'Please transcribe the following audio accurately. Maintain proper punctuation and paragraph breaks. If you are unable to provide a transcription, please return "Unable to transcribe audio. Please try again.".',
+                                `Please transcribe the following audio with speaker diarization and format the output in markdown. 
+
+Requirements:
+1. Identify different speakers and label them as **Speaker 1**, **Speaker 2**, etc.
+2. Format each speaker's contribution with their label as a markdown heading
+3. Maintain proper punctuation, paragraph breaks, and natural speech flow
+4. If there are pauses or interruptions, indicate them appropriately
+5. Use markdown formatting for emphasis, lists, or other structural elements as appropriate
+
+Format example:
+## Speaker 1
+This is what the first speaker says...
+
+## Speaker 2  
+This is the response from the second speaker...
+
+## Speaker 1
+Continuation from speaker 1...
+
+If you are unable to provide a transcription, please return "Unable to transcribe audio. Please try again.".`,
                         },
                         {
                             type: "file",
@@ -91,23 +113,31 @@ async function transcribeAudioBuffer(
                     ],
                 },
             ],
-            systemPrompt: "",
+            systemPrompt:
+                "You are an expert audio transcriptionist with speaker diarization capabilities. Focus on accuracy, proper speaker identification, and clear markdown formatting.",
             loggingContext: {
                 fileName,
-                source: "admin/techsalesjack/transcribe_helper",
+                source:
+                    "admin/techsalesjack/transcribe_helper_with_diarization",
                 mimeType,
             },
         });
-        logger.info("(TranscriptionHelper) Transcription successful", {
-            fileName,
-            transcriptionLength: transcriptionResultText?.length,
-        });
+        logger.info(
+            "(TranscriptionHelper) Speaker diarization transcription successful",
+            {
+                fileName,
+                transcriptionLength: transcriptionResultText?.length,
+            },
+        );
         return { transcription: transcriptionResultText };
     } catch (transcriptionError: any) {
-        logger.error("(TranscriptionHelper) Transcription failed", {
-            fileName,
-            error: transcriptionError.message,
-        });
+        logger.error(
+            "(TranscriptionHelper) Speaker diarization transcription failed",
+            {
+                fileName,
+                error: transcriptionError.message,
+            },
+        );
         return { transcriptionError: transcriptionError.message };
     }
 }
@@ -234,12 +264,38 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
         // --- Start: Database Insertion Logic ---
         const supabase = await createAdminClient();
-        const targetCustomJobId = "45679815-8fd7-41ca-8da5-c941d264159b";
+        const targetCustomJobId = "da89fe98-61f6-4049-bc77-6ad6b576eb0c";
         let questionsInsertedCount = 0;
         let sampleAnswersInsertedCount = 0;
+        let audioFilesUploadedCount = 0;
         const insertionErrors: { questionIndex: number; error: any }[] = [];
 
         logger.info("Starting database insertions...", { targetCustomJobId });
+
+        // Get the user_id from the target custom job
+        const { data: customJobData, error: customJobError } = await supabase
+            .from("custom_jobs")
+            .select("user_id")
+            .eq("id", targetCustomJobId)
+            .single();
+
+        if (customJobError || !customJobData) {
+            logger.error("Error fetching custom job data", {
+                targetCustomJobId,
+                error: customJobError,
+            });
+            throw new Error(
+                `Failed to fetch custom job: ${
+                    customJobError?.message || "No data returned"
+                }`,
+            );
+        }
+
+        const userId = customJobData.user_id;
+        logger.info("Found user_id for custom job", {
+            userId,
+            targetCustomJobId,
+        });
 
         for (let i = 0; i < records.length; i++) {
             const csvRecord = records[i];
@@ -286,56 +342,133 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
                     newQuestionId,
                 });
 
-                // 4. Find transcribed answers and insert into custom_job_question_sample_answer
-                const transcribedAnswers = parsedAudioDataList
-                    .filter((audio) =>
-                        audio.questionNumber === currentQuestionNumberInFile &&
-                        audio.transcription &&
-                        audio.transcription.trim() !== "" &&
-                        audio.transcription !==
-                            "Unable to transcribe audio. Please try again."
-                    )
-                    .map((audio) =>
-                        ({
-                            question_id: newQuestionId,
-                            answer: audio.transcription!,
-                        }) as CustomJobQuestionSampleAnswerInsert
-                    ); // Asserting non-null transcription here based on filter
+                // 4. Find audio files for this question and upload them to storage
+                const relevantAudioFiles = parsedAudioDataList.filter((audio) =>
+                    audio.questionNumber === currentQuestionNumberInFile &&
+                    audio.transcription &&
+                    audio.transcription.trim() !== "" &&
+                    audio.transcription !==
+                        "Unable to transcribe audio. Please try again."
+                );
 
-                if (transcribedAnswers.length > 0) {
+                const transcribedAnswersWithStorage:
+                    CustomJobQuestionSampleAnswerInsert[] = [];
+
+                for (const audioFile of relevantAudioFiles) {
+                    try {
+                        // Generate timestamp-based filename
+                        const timestamp = Date.now();
+                        const fileExtension = path.extname(audioFile.fileName);
+                        const timestampFileName =
+                            `${timestamp}${fileExtension}`;
+
+                        // Define storage path
+                        const storagePath =
+                            `${userId}/programs/${targetCustomJobId}/questions/${newQuestionId}/sample-answer/${timestampFileName}`;
+
+                        logger.info("Uploading audio file to storage", {
+                            originalFileName: audioFile.fileName,
+                            storagePath,
+                            questionId: newQuestionId,
+                        });
+
+                        // Upload to Supabase storage
+                        const { error: uploadError } = await supabase.storage
+                            .from("coach_files")
+                            .upload(storagePath, audioFile.buffer, {
+                                contentType: audioFile.fileName.endsWith(".mp4")
+                                    ? "audio/mp4"
+                                    : "audio/m4a",
+                                upsert: false, // Don't overwrite if exists
+                            });
+
+                        if (uploadError) {
+                            logger.error("Error uploading audio file", {
+                                questionIndex: i,
+                                questionId: newQuestionId,
+                                fileName: audioFile.fileName,
+                                storagePath,
+                                error: uploadError,
+                            });
+                            insertionErrors.push({
+                                questionIndex: i,
+                                error:
+                                    `Audio upload failed for ${audioFile.fileName}: ${uploadError.message}`,
+                            });
+                            continue; // Skip this audio file but continue with others
+                        }
+
+                        logger.info("Successfully uploaded audio file", {
+                            questionIndex: i,
+                            questionId: newQuestionId,
+                            fileName: audioFile.fileName,
+                            storagePath,
+                        });
+
+                        audioFilesUploadedCount++;
+
+                        // Add to transcribed answers with storage info
+                        transcribedAnswersWithStorage.push({
+                            question_id: newQuestionId,
+                            answer: audioFile.transcription!,
+                            bucket: "coach_files",
+                            file_path: storagePath,
+                        });
+                    } catch (uploadLoopError) {
+                        logger.error("Unhandled error during audio upload", {
+                            questionIndex: i,
+                            questionId: newQuestionId,
+                            fileName: audioFile.fileName,
+                            error: uploadLoopError,
+                        });
+                        insertionErrors.push({
+                            questionIndex: i,
+                            error:
+                                `Audio upload error for ${audioFile.fileName}: ${uploadLoopError}`,
+                        });
+                    }
+                }
+
+                // 5. Insert sample answers with storage references
+                if (transcribedAnswersWithStorage.length > 0) {
                     logger.info(
-                        `Found ${transcribedAnswers.length} transcribed answers for question ${newQuestionId}`,
+                        `Inserting ${transcribedAnswersWithStorage.length} sample answers with storage references for question ${newQuestionId}`,
                         { questionIndex: i },
                     );
+
                     const { error: answerError } = await supabase
                         .from("custom_job_question_sample_answers")
-                        .insert(transcribedAnswers);
+                        .insert(transcribedAnswersWithStorage);
 
                     if (answerError) {
                         logger.error("Error inserting sample answers", {
                             questionIndex: i,
                             questionId: newQuestionId,
-                            numberOfAnswers: transcribedAnswers.length,
+                            numberOfAnswers:
+                                transcribedAnswersWithStorage.length,
                             error: answerError,
                         });
-                        // Log error but potentially continue? Or add to errors list?
                         insertionErrors.push({
                             questionIndex: i,
                             error:
                                 `Sample answer insert failed: ${answerError.message}`,
                         });
                     } else {
-                        sampleAnswersInsertedCount += transcribedAnswers.length;
+                        sampleAnswersInsertedCount +=
+                            transcribedAnswersWithStorage.length;
                         logger.info(
-                            `Successfully inserted ${transcribedAnswers.length} sample answers`,
+                            `Successfully inserted ${transcribedAnswersWithStorage.length} sample answers with storage references`,
                             { questionIndex: i, questionId: newQuestionId },
                         );
                     }
                 } else {
-                    logger.warn("No valid transcriptions found for question", {
-                        questionIndex: i,
-                        questionId: newQuestionId,
-                    });
+                    logger.warn(
+                        "No valid transcriptions with successful uploads found for question",
+                        {
+                            questionIndex: i,
+                            questionId: newQuestionId,
+                        },
+                    );
                 }
             } catch (loopError) {
                 logger.error("Unhandled error during insertion loop", {
@@ -350,6 +483,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         logger.info("Finished database insertions.", {
             questionsInserted: questionsInsertedCount,
             sampleAnswersInserted: sampleAnswersInsertedCount,
+            audioFilesUploaded: audioFilesUploadedCount,
             errorsEncountered: insertionErrors.length,
         });
 
@@ -359,12 +493,13 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         return NextResponse.json({
             success: insertionErrors.length === 0,
             message: insertionErrors.length === 0
-                ? "CSV parsed, audio processed, and data inserted successfully."
+                ? "CSV parsed, audio processed, uploaded to storage, and data inserted successfully."
                 : `Processing complete with ${insertionErrors.length} errors.`,
             totalCsvRecords: records.length,
             totalAudioFilesProcessed: parsedAudioDataList.length,
             questionsInserted: questionsInsertedCount,
             sampleAnswersInserted: sampleAnswersInsertedCount,
+            audioFilesUploaded: audioFilesUploadedCount,
             transcriptionsAttempted: parsedAudioDataList.filter((a) =>
                 GEMINI_API_KEY
             ).length,
