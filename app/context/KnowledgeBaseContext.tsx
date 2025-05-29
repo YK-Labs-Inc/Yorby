@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslations } from "next-intl";
 import { ToastAction } from "@/components/ui/toast";
 import Link from "next/link";
+import { useMultiTenant } from "./MultiTenantContext";
 
 interface KnowledgeBaseContextType {
   knowledgeBase: string | null;
@@ -43,10 +44,11 @@ export function KnowledgeBaseProvider({
   const pathname = usePathname();
   const t = useTranslations("knowledgeBase");
   const { toast } = useToast();
+  const { isCoachPath } = useMultiTenant();
 
   const updateKnowledgeBase = useCallback(
     async (newMessages: CoreMessage[]) => {
-      if (!isMemoriesEnabled) {
+      if (!isMemoriesEnabled || isCoachPath) {
         return;
       }
       try {
