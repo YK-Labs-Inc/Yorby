@@ -100,14 +100,12 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     // Extract the pathname
     const { pathname } = request.nextUrl;
     // Check if the path already starts with /en/coaches
-    if (!pathname.startsWith("/en/coaches")) {
+    if (!pathname.includes("/coaches")) {
       // If the path is just "/", rewrite to "/en/coaches"
       // Otherwise, append the original path after /en/coaches
       const url = request.nextUrl.clone();
       if (pathname === "/") {
-        url.pathname = "/en/coaches";
-      } else {
-        url.pathname = `/en/coaches${pathname}`;
+        url.pathname = "/coaches";
       }
       return NextResponse.rewrite(url);
     }
