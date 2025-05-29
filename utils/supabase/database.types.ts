@@ -301,19 +301,25 @@ export type Database = {
       custom_job_question_sample_answers: {
         Row: {
           answer: string
+          bucket: string | null
           created_at: string
+          file_path: string | null
           id: string
           question_id: string
         }
         Insert: {
           answer: string
+          bucket?: string | null
           created_at?: string
+          file_path?: string | null
           id?: string
           question_id: string
         }
         Update: {
           answer?: string
+          bucket?: string | null
           created_at?: string
+          file_path?: string | null
           id?: string
           question_id?: string
         }

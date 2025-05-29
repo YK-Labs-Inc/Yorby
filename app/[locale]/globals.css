@@ -84,6 +84,102 @@
   }
 }
 
+/* Markdown Styles for ReactMarkdown */
+@layer components {
+  .markdown {
+    @apply text-foreground;
+  }
+  
+  .markdown h1 {
+    @apply scroll-m-20 text-2xl font-bold tracking-tight mb-4 mt-6 first:mt-0;
+  }
+  
+  .markdown h2 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight mb-3 mt-5 first:mt-0;
+  }
+  
+  .markdown h3 {
+    @apply scroll-m-20 text-lg font-semibold tracking-tight mb-2 mt-4 first:mt-0;
+  }
+  
+  .markdown h4 {
+    @apply scroll-m-20 text-base font-semibold tracking-tight mb-2 mt-3 first:mt-0;
+  }
+  
+  .markdown h5 {
+    @apply scroll-m-20 text-sm font-semibold tracking-tight mb-2 mt-3 first:mt-0;
+  }
+  
+  .markdown h6 {
+    @apply scroll-m-20 text-sm font-medium tracking-tight mb-2 mt-3 first:mt-0;
+  }
+  
+  .markdown p {
+    @apply leading-6 mb-4 first:mt-0;
+  }
+  
+  .markdown ul {
+    @apply my-4 ml-6 list-disc space-y-1;
+  }
+  
+  .markdown ol {
+    @apply my-4 ml-6 list-decimal space-y-1;
+  }
+  
+  .markdown li {
+    @apply leading-6;
+  }
+  
+  .markdown li > ul,
+  .markdown li > ol {
+    @apply my-2;
+  }
+  
+  .markdown blockquote {
+    @apply mt-4 border-l-2 border-border pl-6 italic text-muted-foreground;
+  }
+  
+  .markdown code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-medium;
+  }
+  
+  .markdown pre {
+    @apply relative rounded bg-muted p-4 font-mono text-sm overflow-x-auto my-4;
+  }
+  
+  .markdown pre code {
+    @apply bg-transparent p-0 text-sm;
+  }
+  
+  .markdown table {
+    @apply w-full border-collapse border border-border my-4;
+  }
+  
+  .markdown th {
+    @apply border border-border px-4 py-2 text-left font-medium bg-muted/50;
+  }
+  
+  .markdown td {
+    @apply border border-border px-4 py-2;
+  }
+  
+  .markdown hr {
+    @apply my-6 border-t border-border;
+  }
+  
+  .markdown a {
+    @apply text-primary underline underline-offset-4 hover:text-primary/80 transition-colors;
+  }
+  
+  .markdown strong {
+    @apply font-semibold;
+  }
+  
+  .markdown em {
+    @apply italic;
+  }
+}
+
 /* Custom Scrollbar Styles */
 .custom-scrollbar {
   scrollbar-width: thin;
