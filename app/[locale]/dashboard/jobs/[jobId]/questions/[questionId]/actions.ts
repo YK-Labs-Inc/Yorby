@@ -340,6 +340,35 @@ const writeAnswerToDatabase = async (
 
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
+const fetchQuestionSampleAnswers = async (questionId: string) => {
+  let logger = new Logger().with({
+    questionId,
+    function: "fetchQuestionSampleAnswers",
+  });
+  const question = await fetchQuestion(questionId);
+  const sourceQuestionId = question.source_custom_job_question_id;
+  if (!sourceQuestionId) {
+    return [];
+  }
+  logger = logger.with({
+    sourceQuestionId,
+  });
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_question_sample_answers")
+    .select("*")
+    .eq("question_id", sourceQuestionId);
+
+  if (error) {
+    logger.error("Error fetching question sample answers", { error });
+    await logger.flush();
+    return [];
+  }
+  logger.info("Question sample answers fetched", { data });
+  await logger.flush();
+  return data;
+};
+
 const generateFeedback = async (
   jobId: string,
   questionId: string,
@@ -354,6 +383,7 @@ const generateFeedback = async (
   const job = await fetchJob(jobId);
   const { question, answer_guidelines } = await fetchQuestion(questionId);
   const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
+  const sampleAnswers = await fetchQuestionSampleAnswers(questionId);
   const files = await getAllFiles(jobId);
   const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
@@ -376,6 +406,12 @@ const generateFeedback = async (
       : ""
   }
 
+    ${
+    sampleAnswers.length > 0
+      ? `I will also provide you with sample answers to this question that can serve as examples of good responses. Use these to help evaluate the candidate's answer and provide more specific feedback.`
+      : ""
+  }
+
     You will provide feedback on the candidate's answer and provide a list of pros and cons.
 
     You will provide your feedback in the following format:
@@ -394,6 +430,8 @@ const generateFeedback = async (
     If the answer is so good without any cons, you can provide an empty cons array and an empty pros array.
 
     Otherwise, provide a list of pros and cons.
+
+    Return your feedback in the second person and refer to the candidate as "you".
 
     ## Job Title
     ${job.job_title}
@@ -417,6 +455,16 @@ const generateFeedback = async (
 
     ${
     coachKnowledgeBase ? `## Coach Knowledge Base\n${coachKnowledgeBase}` : ""
+  }
+
+    ${
+    sampleAnswers.length > 0
+      ? `## Sample Answers\n${
+        sampleAnswers.map((sa, index) =>
+          `### Sample Answer ${index + 1}\n${sa.answer}`
+        ).join("\n\n")
+      }`
+      : ""
   }
 
     ## Answer
