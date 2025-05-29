@@ -46,6 +46,7 @@ function AudioPlayer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const t = useTranslations("AudioPlayer");
 
   // Use the duration from the submission data instead of detecting it
   const duration = submission.audio_recording_duration || 0;
@@ -136,7 +137,7 @@ function AudioPlayer({
     return (
       <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
         <Volume2 className="h-4 w-4 text-gray-400" />
-        <span className="text-sm text-gray-600">Loading audio...</span>
+        <span className="text-sm text-gray-600">{t("loadingAudio")}</span>
       </div>
     );
   }
@@ -145,7 +146,7 @@ function AudioPlayer({
     return (
       <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
         <Volume2 className="h-4 w-4 text-red-400" />
-        <span className="text-sm text-red-600">Failed to load audio</span>
+        <span className="text-sm text-red-600">{t("failedToLoadAudio")}</span>
       </div>
     );
   }
