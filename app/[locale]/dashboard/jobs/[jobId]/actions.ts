@@ -11,6 +11,7 @@ import { writeCustomJobQuestionsToDb } from "@/app/[locale]/landing2/actions";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { z } from "zod";
+import { headers } from "next/headers";
 
 export const startMockInterview = async (
   prevState: any,
@@ -195,6 +196,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     interviewCopilotId,
     email,
   });
+  const origin = (await headers()).get("origin");
 
   if (!email) {
     return encodedRedirect(
@@ -218,8 +220,8 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     },
     {
       emailRedirectTo: jobId
-        ? `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/jobs/${jobId}`
-        : `https://${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/interview-copilots/${interviewCopilotId}`,
+        ? `${origin}/dashboard/jobs/${jobId}`
+        : `${origin}/dashboard/interview-copilots/${interviewCopilotId}`,
     },
   );
 

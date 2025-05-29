@@ -28,6 +28,8 @@ const PERSONA_INTERVIEW_REDIRECT_DOMAINS = [
   "gogginsmockinterview",
 ];
 
+const B2B_DOMAINS = ["b2b.perfectinterview.ai", "yorby.ai"];
+
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
   logger.middleware(request);
@@ -95,21 +97,17 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   // Domain-based rewrite for b2b.perfectinterview.ai
-  if (hostname === "b2b.perfectinterview.ai") {
-    // Extract the pathname
+  if (B2B_DOMAINS.some((domain) => hostname.includes(domain))) {
     const { pathname } = request.nextUrl;
-    // Check if the path already starts with /en/coaches
-    if (!pathname.startsWith("/en/coaches")) {
-      // If the path is just "/", rewrite to "/en/coaches"
-      // Otherwise, append the original path after /en/coaches
-      const url = request.nextUrl.clone();
-      if (pathname === "/") {
-        url.pathname = "/en/coaches";
-      } else {
-        url.pathname = `/en/coaches${pathname}`;
-      }
+    const url = request.nextUrl.clone();
+
+    if (pathname === "/") {
+      url.pathname = "/coaches";
       return NextResponse.rewrite(url);
     }
+
+    url.pathname = `${pathname}`;
+    return NextResponse.rewrite(url);
   }
 
   // Handle next-intl middleware first

@@ -6,16 +6,18 @@ import { encodedRedirect } from "@/utils/utils";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const linkAnonymousAccount = async (
   prevState: any,
-  formData: FormData
+  formData: FormData,
 ) => {
   const email = formData.get("email") as string;
   const redirectTo = formData.get("redirectTo") as string | undefined;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("accountLinking");
+  const origin = (await headers()).get("origin");
   const logger = new Logger().with({
     email,
   });
@@ -33,8 +35,10 @@ export const linkAnonymousAccount = async (
       email,
     },
     {
-      emailRedirectTo: `https://${process.env.NEXT_PUBLIC_SITE_URL}${redirectTo ? redirectTo : "/dashboard/jobs"}`,
-    }
+      emailRedirectTo: `${origin}${
+        redirectTo ? redirectTo : "/dashboard/jobs"
+      }`,
+    },
   );
 
   if (error) {
@@ -64,16 +68,18 @@ export async function signInWithOTP(formData: FormData) {
   const email = formData.get("email") as string;
   const redirectTo = (formData.get("redirectTo") as string) || "/";
   const captchaToken = formData.get("captchaToken") as string;
+  const origin = (await headers()).get("origin");
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     email,
     redirectTo,
+    origin,
   });
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirect_to=${redirectTo}`,
+      emailRedirectTo: `${origin}/auth/callback?redirect_to=${redirectTo}`,
       captchaToken,
     },
   });
@@ -87,7 +93,7 @@ export async function signInWithOTP(formData: FormData) {
   return encodedRedirect(
     "authSuccess",
     redirectTo,
-    "Check your email for the magic link."
+    "Check your email for the magic link.",
   );
 }
 
