@@ -10,12 +10,12 @@ const JobCategorySchema = z.object({
   industry: z
     .string()
     .describe(
-      "The general job industry (e.g., healthcare, finance, technology, customer service)"
+      "The general job industry (e.g., healthcare, finance, technology, customer service)",
     ),
   title: z
     .string()
     .describe(
-      "A normalized job title without fancy terms that reflects the core responsibilities"
+      "A normalized job title without fancy terms that reflects the core responsibilities",
     ),
 });
 
@@ -32,12 +32,12 @@ type InsertPayload = {
 const verifyWebhookRequest = (request: Request): boolean => {
   return (
     request.headers.get("authorization") ===
-    `Bearer ${process.env.SUPABASE_WEBHOOK_SECRET!}`
+      `Bearer ${process.env.SUPABASE_WEBHOOK_SECRET!}`
   );
 };
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
-  const logger = request.log.with({
+  let logger = request.log.with({
     path: "/api/webhooks/supabase/new-custom-job",
   });
 
@@ -47,7 +47,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Invalid webhook request - authentication failed");
       return NextResponse.json(
         { error: "Invalid webhook request - authentication failed" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -59,12 +59,15 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Unexpected webhook payload", { payload });
       return NextResponse.json(
         { error: "Unexpected webhook payload" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const job = payload.record;
-    logger.info("Processing new custom job", { jobId: job.id });
+    logger = logger.with({
+      jobId: job.id,
+    });
+    logger.info("Processing new custom job");
 
     const supabase = await createAdminClient();
     const prompt = `
@@ -104,7 +107,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       });
       return NextResponse.json(
         { error: "Failed to insert job category" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -128,7 +131,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     });
     return NextResponse.json(
       { error: "Failed to process webhook" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });
