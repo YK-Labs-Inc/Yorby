@@ -11,10 +11,6 @@ import { signInWithOTP } from "../(auth-pages)/actions";
 import { H4 } from "@/components/typography";
 import { usePostHog } from "posthog-js/react";
 
-const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
-  ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
-  : "http://localhost:3000";
-
 export default function CoachesPage() {
   const signInT = useTranslations("signIn");
   const [state, action, pending] = useActionState(signInWithOTP, {
@@ -70,11 +66,7 @@ export default function CoachesPage() {
               />
             </div>
             <input type="hidden" name="captchaToken" value={captchaToken} />
-            <input
-              type="hidden"
-              name="redirectTo"
-              value={`${defaultUrl}/coaches/auth`}
-            />
+            <input type="hidden" name="redirectTo" value={"/coaches/auth"} />
             <SubmitButton
               disabled={!captchaToken || pending}
               pendingText={signInT("form.submitting")}

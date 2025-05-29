@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 import { AxiomRequest, withAxiom } from "next-axiom";
-
-const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
-    ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
-    : "http://localhost:3000";
+import { headers } from "next/headers";
 
 export const GET = withAxiom(async (
     req: AxiomRequest,
@@ -23,6 +20,11 @@ export const GET = withAxiom(async (
     let userId: string | null = null;
     let userCoachAccessCreated = false;
     const coach = await fetchCoach(coachId);
+    const host = (await headers()).get("host");
+    if (!host) {
+        logger.error("No host found");
+        throw new Error("No host found");
+    }
     const errorRedirectUrl = new URL(
         `/coaches/${coach.slug}/register-error?coachId=${coach.id}`,
         req.nextUrl.origin,
@@ -69,9 +71,7 @@ export const GET = withAxiom(async (
             logger.error("No curriculum found for this coach");
             throw new Error("No curriculum found for this coach.");
         }
-        logger.info("Found programs for this coach", {
-            jobs,
-        });
+        logger.info("Found programs for this coach");
 
         let newJobId: string = "";
         // 4. Duplicate jobs and their questions
@@ -144,8 +144,9 @@ export const GET = withAxiom(async (
         }
 
         // 6. Redirect to the first curriculum page
-        const redirectUrl =
-            `${defaultUrl}/coaches/${coach.slug}/programs/${newJobId}`;
+        const redirectUrl = `http${
+            host.includes("localhost") ? "" : "s"
+        }://${host}/coaches/${coach.slug}/programs/${newJobId}`;
         return NextResponse.redirect(redirectUrl);
     } catch (err) {
         logger.error("Error during registration, rolling back", { err });
