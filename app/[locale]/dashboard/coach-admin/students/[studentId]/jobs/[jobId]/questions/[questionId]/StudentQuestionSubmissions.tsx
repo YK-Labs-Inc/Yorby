@@ -6,8 +6,8 @@ import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { CoachFeedbackForm } from "./CoachFeedbackForm";
 import { Button } from "@/components/ui/button";
-import { Pencil, Sparkles, Trash2, Play, Pause, Volume2 } from "lucide-react";
-import React, { useState, useRef, useEffect } from "react";
+import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertDialog,
@@ -21,7 +21,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { deleteCoachFeedback } from "./actions";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import AudioPlayer from "@/components/ui/audio-player";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -33,161 +33,6 @@ function formatDate(dateString: string) {
     minute: "numeric",
     hour12: true,
   }).format(date);
-}
-
-function AudioPlayer({
-  submission,
-}: {
-  submission: Tables<"custom_job_question_submissions">;
-}) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const t = useTranslations("AudioPlayer");
-
-  // Use the duration from the submission data instead of detecting it
-  const duration = submission.audio_recording_duration || 0;
-
-  useEffect(() => {
-    const getAudioUrl = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const supabase = createSupabaseBrowserClient();
-        const { data, error } = await supabase.storage
-          .from(submission.audio_bucket!)
-          .createSignedUrl(submission.audio_file_path!, 3600); // 1 hour expiry
-
-        if (error) {
-          setError("Failed to load audio");
-          return;
-        }
-
-        setAudioUrl(data.signedUrl);
-      } catch (err) {
-        setError("Failed to load audio");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getAudioUrl();
-  }, [submission.audio_bucket, submission.audio_file_path]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const handleEnded = () => setIsPlaying(false);
-    const handleError = () => {
-      setError("Failed to load audio");
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener("timeupdate", updateTime);
-    audio.addEventListener("ended", handleEnded);
-    audio.addEventListener("error", handleError);
-
-    return () => {
-      audio.removeEventListener("timeupdate", updateTime);
-      audio.removeEventListener("ended", handleEnded);
-      audio.removeEventListener("error", handleError);
-    };
-  }, [audioUrl]);
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-
-    const seekTime = (parseFloat(e.target.value) / 100) * duration;
-    audio.currentTime = seekTime;
-    setCurrentTime(seekTime);
-  };
-
-  const formatTime = (time: number) => {
-    if (isNaN(time) || !isFinite(time)) {
-      return "0:00";
-    }
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
-
-  if (!submission.audio_bucket || !submission.audio_file_path) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-        <Volume2 className="h-4 w-4 text-gray-400" />
-        <span className="text-sm text-gray-600">{t("loadingAudio")}</span>
-      </div>
-    );
-  }
-
-  if (error || !audioUrl) {
-    return (
-      <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
-        <Volume2 className="h-4 w-4 text-red-400" />
-        <span className="text-sm text-red-600">{t("failedToLoadAudio")}</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-3 bg-muted/30 border border-border/50 rounded-md">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={togglePlayPause}
-          className="h-8 w-8 p-0 hover:bg-muted"
-        >
-          {isPlaying ? (
-            <Pause className="h-3 w-3" />
-          ) : (
-            <Play className="h-3 w-3" />
-          )}
-        </Button>
-
-        <div className="flex-1">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={duration > 0 ? (currentTime / duration) * 100 : 0}
-            onChange={handleSeek}
-            className="w-full h-1 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-foreground [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono">
-          <span>{formatTime(currentTime)}</span>
-          <span>/</span>
-          <span>{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      {audioUrl && <audio ref={audioRef} src={audioUrl} preload="metadata" />}
-    </div>
-  );
 }
 
 function CoachFeedbackCard({
@@ -439,7 +284,16 @@ export default function StudentQuestionSubmissions({
             </p>
 
             {/* Audio Player */}
-            <AudioPlayer submission={currentSubmission} />
+            {currentSubmission.audio_bucket &&
+              currentSubmission.audio_file_path && (
+                <AudioPlayer
+                  bucket={currentSubmission.audio_bucket}
+                  filePath={currentSubmission.audio_file_path}
+                  presetDuration={
+                    currentSubmission.audio_recording_duration || undefined
+                  }
+                />
+              )}
 
             <Separator />
             <Card className="mt-8">
