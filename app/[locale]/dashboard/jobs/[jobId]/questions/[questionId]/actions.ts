@@ -24,10 +24,18 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   const questionId = formData.get("questionId") as string;
   const answer = formData.get("answer") as string;
   const questionPath = formData.get("questionPath") as string;
+  const bucketName = formData.get("bucketName") as string | null;
+  const filePath = formData.get("filePath") as string | null;
+  const audioRecordingDuration = formData.get("audioRecordingDuration") as
+    | string
+    | null;
   const trackingProperties: Record<string, any> = {
     jobId,
     questionId,
     answer,
+    bucketName,
+    filePath,
+    audioRecordingDuration,
     function: "submitAnswer",
   };
   const t = await getTranslations("errors");
@@ -36,7 +44,14 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   let submissionId = "";
   try {
     logger.info("Submitting answer");
-    submissionId = await processAnswer(jobId, questionId, answer);
+    submissionId = await processAnswer(
+      jobId,
+      questionId,
+      answer,
+      bucketName,
+      filePath,
+      audioRecordingDuration,
+    );
   } catch (error: unknown) {
     logger.error("Error writing answer to database", { error });
     errorMessage = t("pleaseTryAgain");
@@ -57,6 +72,9 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
         jobId,
         questionId,
         answer,
+        bucketName,
+        filePath,
+        audioRecordingDuration,
       },
     });
   }
@@ -186,10 +204,18 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     errorMessage = translation("pleaseTryAgain");
   }
 
-  const submission = await writeAnswerToDatabase(jobId, questionId, response, {
-    pros: [],
-    cons: [],
-  });
+  const submission = await writeAnswerToDatabase(
+    jobId,
+    questionId,
+    response,
+    {
+      pros: [],
+      cons: [],
+    },
+    null,
+    null,
+    null,
+  );
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -215,11 +241,17 @@ const processAnswer = async (
   jobId: string,
   questionId: string,
   answer: string,
+  bucketName: string | null,
+  filePath: string | null,
+  audioRecordingDuration: string | null,
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
     questionId: questionId,
     answer: answer,
+    bucketName,
+    filePath,
+    audioRecordingDuration,
     function: "processAnswer",
   });
   const feedback = await generateFeedback(jobId, questionId, answer);
@@ -229,6 +261,9 @@ const processAnswer = async (
     questionId,
     answer,
     feedback,
+    bucketName,
+    filePath,
+    audioRecordingDuration,
   );
   logger.info("Wrote answer to database");
   return submission.id;
@@ -239,14 +274,25 @@ const writeAnswerToDatabase = async (
   questionId: string,
   answer: string,
   feedback: { pros: string[]; cons: string[] },
+  bucketName: string | null,
+  filePath: string | null,
+  audioRecordingDuration: string | null,
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
     questionId: questionId,
     answer: answer,
+    bucketName,
+    filePath,
+    audioRecordingDuration,
     function: "writeAnswerToDatabase",
   });
   const supabase = await createSupabaseServerClient();
+
+  // Convert duration to number if provided
+  const durationInSeconds = audioRecordingDuration
+    ? parseInt(audioRecordingDuration, 10)
+    : null;
 
   // First write the answer to custom_job_question_submissions
   const { data: submission, error: submissionError } = await supabase
@@ -255,6 +301,9 @@ const writeAnswerToDatabase = async (
       answer: answer,
       custom_job_question_id: questionId,
       feedback, // Keep for backward compatibility
+      audio_bucket: bucketName,
+      audio_file_path: filePath,
+      audio_recording_duration: durationInSeconds,
     })
     .select()
     .single();

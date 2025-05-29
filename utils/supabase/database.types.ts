@@ -365,6 +365,9 @@ export type Database = {
       custom_job_question_submissions: {
         Row: {
           answer: string
+          audio_bucket: string | null
+          audio_file_path: string | null
+          audio_recording_duration: number | null
           created_at: string
           custom_job_question_id: string
           feedback: Json | null
@@ -372,6 +375,9 @@ export type Database = {
         }
         Insert: {
           answer: string
+          audio_bucket?: string | null
+          audio_file_path?: string | null
+          audio_recording_duration?: number | null
           created_at?: string
           custom_job_question_id: string
           feedback?: Json | null
@@ -379,6 +385,9 @@ export type Database = {
         }
         Update: {
           answer?: string
+          audio_bucket?: string | null
+          audio_file_path?: string | null
+          audio_recording_duration?: number | null
           created_at?: string
           custom_job_question_id?: string
           feedback?: Json | null

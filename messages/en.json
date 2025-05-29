@@ -178,7 +178,8 @@
       "submitting": "Submitting...",
       "generateAnswer": "Generate Answer",
       "generatingAnswer": "Generating Answer...",
-      "noChanges": "No Changes"
+      "noChanges": "No Changes",
+      "uploadingAudio": "Uploading audio..."
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
@@ -237,7 +238,9 @@
       "button": "Got it!"
     },
     "manualFeedback": "Admin Feedback",
-    "manualFeedbackTooltip": "This feedback was written by an admin in your program."
+    "manualFeedbackTooltip": "This feedback was written by an admin in your program.",
+    "generatingFeedback": "Generating feedback...",
+    "uploadingAudio": "Uploading audio..."
   },
   "mockInterview": {
     "title": "Mock Interviews",

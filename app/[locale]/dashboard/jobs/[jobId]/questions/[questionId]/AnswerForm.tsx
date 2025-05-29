@@ -7,9 +7,9 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
-import { useActionState } from "react";
+import { useActionState, useRef, useTransition } from "react";
 import { submitAnswer, generateAnswer } from "./actions";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { AIButton } from "@/components/ai-button";
 import AnswerGuideline from "./AnswerGuideline";
 import { Link } from "@/i18n/routing";
@@ -19,6 +19,9 @@ import SpeechToTextModal from "./SpeechToTextModal";
 import { Sparkles } from "lucide-react";
 import SampleAnswers from "./SampleAnswers";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
+import { uploadFile } from "@/utils/storage";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -37,6 +40,7 @@ export default function AnswerForm({
   submissions,
   currentSubmission,
   sampleAnswers,
+  coachUserId,
 }: {
   question: Tables<"custom_job_questions">;
   jobId: string;
@@ -49,6 +53,7 @@ export default function AnswerForm({
       })
     | null;
   sampleAnswers: Tables<"custom_job_question_sample_answers">[];
+  coachUserId: string | null;
 }) {
   const t = useTranslations("interviewQuestion");
   const [_, submitAnswerAction, isSubmitAnswerPending] = useActionState(
@@ -61,11 +66,19 @@ export default function AnswerForm({
   );
   const initialAnswer = currentSubmission?.answer ?? "";
   const [currentAnswer, setCurrentAnswer] = useState(initialAnswer);
+  const [currentAudioBlob, setCurrentAudioBlob] = useState<Blob | null>(null);
+  const currentAudioDuration = useRef<number>(0);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const hasAnswerChanged = currentAnswer !== initialAnswer;
   const { isCoachProgramsPage } = useMultiTenant();
+  const { logInfo, logError } = useAxiomLogging();
+  const [submitting, startSubmitting] = useTransition();
 
   useEffect(() => {
     setCurrentAnswer(initialAnswer);
+    setCurrentAudioBlob(null); // Clear audio blob when switching submissions
+    currentAudioDuration.current = 0; // Clear audio duration when switching submissions
   }, [initialAnswer]);
 
   // Get feedback from either source
@@ -101,6 +114,78 @@ export default function AnswerForm({
   const newViewParams = new URLSearchParams(searchParams ?? {});
   newViewParams.set("view", view === "question" ? "submissions" : "question");
 
+  const handleSubmitAnswer = async (formData: FormData) => {
+    try {
+      // If there's an audio blob, upload it first
+      if (currentAudioBlob) {
+        setIsUploadingAudio(true);
+        setUploadProgress(0);
+
+        const supabase = createSupabaseBrowserClient();
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          logError("Failed to get user for audio upload", { userError });
+          throw new Error("Authentication required for audio upload");
+        }
+
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError || !session) {
+          logError("Failed to get session for audio upload", { sessionError });
+          throw new Error("Session required for audio upload");
+        }
+
+        const fileName = `${Date.now()}.webm`;
+        const filePath = `${user.id}${coachUserId && `/coaches/${coachUserId}`}/programs/${jobId}/questions/${question.id}/${fileName}`;
+
+        // Convert blob to File
+        const audioFile = new File([currentAudioBlob], fileName, {
+          type: currentAudioBlob.type || "audio/webm",
+        });
+
+        await uploadFile({
+          bucketName: "user-files",
+          filePath,
+          file: audioFile,
+          setProgress: setUploadProgress,
+          onComplete: () => {
+            logInfo("Audio file uploaded successfully", { filePath });
+            // Now submit the answer with the form data (including audio file path if uploaded)
+            startSubmitting(() => {
+              formData.append("bucketName", "user-files");
+              formData.append("filePath", filePath);
+              formData.append(
+                "audioRecordingDuration",
+                currentAudioDuration.current.toString()
+              );
+              submitAnswerAction(formData);
+            });
+            setIsUploadingAudio(false);
+          },
+          accessToken: session.access_token,
+          logError,
+          logInfo,
+        });
+      }
+    } catch (error) {
+      logError("Error in handleSubmitAnswer", { error });
+      setIsUploadingAudio(false);
+    }
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    await handleSubmitAnswer(formData);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -133,8 +218,14 @@ export default function AnswerForm({
                         disabled={
                           isGenerateAnswerPending || isSubmitAnswerPending
                         }
-                        onTranscriptionComplete={(text) => {
+                        onTranscriptionComplete={(
+                          text: string,
+                          audioBlob: Blob,
+                          duration: number
+                        ) => {
                           setCurrentAnswer(text);
+                          setCurrentAudioBlob(audioBlob || null);
+                          currentAudioDuration.current = duration;
                         }}
                       />
                       {!isCoachProgramsPage && (
@@ -165,7 +256,7 @@ export default function AnswerForm({
                       )}
                     </div>
                   </div>
-                  <form action={submitAnswerAction}>
+                  <form onSubmit={handleFormSubmit}>
                     <div className="relative">
                       <Textarea
                         id="answer"
@@ -175,10 +266,14 @@ export default function AnswerForm({
                         value={currentAnswer}
                         onChange={(e) => setCurrentAnswer(e.target.value)}
                         disabled={
-                          isSubmitAnswerPending || isGenerateAnswerPending
+                          isSubmitAnswerPending ||
+                          isGenerateAnswerPending ||
+                          isUploadingAudio
                         }
                         className={
-                          isGenerateAnswerPending || isSubmitAnswerPending
+                          isGenerateAnswerPending ||
+                          isSubmitAnswerPending ||
+                          isUploadingAudio
                             ? "opacity-50"
                             : ""
                         }
@@ -187,6 +282,34 @@ export default function AnswerForm({
                         <div className="absolute inset-0 flex items-center justify-center bg-background/50">
                           <div className="animate-pulse text-muted-foreground">
                             {t("buttons.generatingAnswer")}...
+                          </div>
+                        </div>
+                      )}
+                      {isUploadingAudio && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
+                          <div className="animate-pulse text-muted-foreground mb-2">
+                            {t("uploadingAudio")}
+                          </div>
+                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      )}
+                      {isSubmitAnswerPending && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
+                          {/* Simple loading spinner */}
+                          <div className="relative w-8 h-8 mb-4">
+                            <div className="absolute inset-0 border-2 border-gray-200 dark:border-gray-700 rounded-full"></div>
+                            <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+
+                          <div className="text-center space-y-1">
+                            <div className="text-sm font-medium text-muted-foreground">
+                              {t("generatingFeedback")}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -207,9 +330,14 @@ export default function AnswerForm({
                       disabled={
                         isGenerateAnswerPending ||
                         isSubmitAnswerPending ||
+                        isUploadingAudio ||
                         !hasAnswerChanged
                       }
-                      pendingText={t("buttons.submitting")}
+                      pendingText={
+                        isUploadingAudio
+                          ? t("buttons.uploadingAudio")
+                          : t("buttons.submitting")
+                      }
                       type="submit"
                     >
                       {t("buttons.submit")}
