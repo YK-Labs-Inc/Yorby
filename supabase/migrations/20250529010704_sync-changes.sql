@@ -6,8 +6,6 @@ alter table "public"."custom_job_question_submissions" add column "audio_file_pa
 
 alter table "public"."custom_job_question_submissions" add column "audio_recording_duration" numeric;
 
-alter table "public"."custom_job_questions" alter column "publication_status" set default 'draft'::question_publication_status;
-
 CREATE UNIQUE INDEX coaches_slug_key ON public.coaches USING btree (slug);
 
 alter table "public"."coaches" add constraint "coaches_slug_key" UNIQUE using index "coaches_slug_key";
