@@ -73,6 +73,41 @@ const checkOnboardingStatus = async () => {
   return !hasViewedOnboarding;
 };
 
+const fetchCoachUserIdFromJobId = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    function: "fetchCoachUserIdFromJobId",
+    jobId,
+  });
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select("coach_id")
+    .eq("id", jobId)
+    .maybeSingle();
+  if (error || !data) {
+    logger.error("Failed fetching custom_job", { error });
+    await logger.flush();
+    throw error;
+  }
+  const coachId = data.coach_id;
+  if (!coachId) {
+    return null;
+  }
+  const { data: coachUser, error: coachUserError } = await supabase
+    .from("coaches")
+    .select("user_id")
+    .eq("id", coachId)
+    .single();
+  if (coachUserError) {
+    logger.error("Failed fetching coach user id from coach id", {
+      error: coachUserError,
+    });
+    await logger.flush();
+    throw coachUserError;
+  }
+  return coachUser.user_id;
+};
+
 const QuestionComponent = async ({
   questionId,
   jobId,
@@ -106,6 +141,8 @@ const QuestionComponent = async ({
       )
     : undefined;
 
+  const coachUserId = await fetchCoachUserIdFromJobId(jobId);
+
   // Check if we should show onboarding based on user metadata
   const showOnboarding = await checkOnboardingStatus();
 
@@ -119,6 +156,7 @@ const QuestionComponent = async ({
           submissions={question.custom_job_question_submissions}
           currentSubmission={currentSubmission ?? lastSubmission}
           sampleAnswers={sampleAnswers}
+          coachUserId={coachUserId}
         />
       </div>
       <OnboardingWrapper showOnboarding={showOnboarding} />

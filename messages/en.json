@@ -178,7 +178,8 @@
       "submitting": "Submitting...",
       "generateAnswer": "Generate Answer",
       "generatingAnswer": "Generating Answer...",
-      "noChanges": "No Changes"
+      "noChanges": "No Changes",
+      "uploadingAudio": "Uploading audio..."
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
@@ -237,7 +238,9 @@
       "button": "Got it!"
     },
     "manualFeedback": "Admin Feedback",
-    "manualFeedbackTooltip": "This feedback was written by an admin in your program."
+    "manualFeedbackTooltip": "This feedback was written by an admin in your program.",
+    "generatingFeedback": "Generating feedback...",
+    "uploadingAudio": "Uploading audio..."
   },
   "mockInterview": {
     "title": "Mock Interviews",
@@ -2192,5 +2195,9 @@
       "content": "Access your programs dashboard to create and manage programs, add questions, and track user progress.",
       "button": "Go to Programs Dashboard"
     }
+  },
+  "AudioPlayer": {
+    "loadingAudio": "Loading audio...",
+    "failedToLoadAudio": "Failed to load audio"
   }
 }

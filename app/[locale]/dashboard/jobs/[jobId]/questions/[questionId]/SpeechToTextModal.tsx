@@ -29,7 +29,11 @@ interface MediaDevice {
 
 interface SpeechToTextModalProps {
   disabled?: boolean;
-  onTranscriptionComplete: (text: string) => void;
+  onTranscriptionComplete: (
+    text: string,
+    audioBlob: Blob,
+    duration: number
+  ) => void;
 }
 
 export default function SpeechToTextModal({
@@ -44,9 +48,10 @@ export default function SpeechToTextModal({
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isTestRecording, setIsTestRecording] = useState(false);
-  const [testRecording, setTestRecording] = useState<Blob | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const recordingStartTimeRef = useRef<number>(0);
   const { logError } = useAxiomLogging();
 
   // Get available audio devices
@@ -123,7 +128,6 @@ export default function SpeechToTextModal({
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/webm",
         });
-        setTestRecording(audioBlob);
         // Automatically play the recording
         const audioUrl = URL.createObjectURL(audioBlob);
         const audioElement = new Audio(audioUrl);
@@ -171,11 +175,18 @@ export default function SpeechToTextModal({
 
       audioRecorder.onstop = async () => {
         setIsProcessing(true);
+
+        // Calculate recording duration
+        const duration =
+          recordingStartTimeRef.current > 0
+            ? Math.round((Date.now() - recordingStartTimeRef.current) / 1000)
+            : 0;
+
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/webm",
         });
         const formData = new FormData();
-        formData.append("audio", audioBlob);
+        formData.append("audioFileToTranscribe", audioBlob);
         formData.append("source", "practiceQuestion");
 
         try {
@@ -192,17 +203,19 @@ export default function SpeechToTextModal({
             transcription: string;
           };
           if (transcription) {
-            onTranscriptionComplete(transcription);
+            onTranscriptionComplete(transcription, audioBlob, duration);
             setIsOpen(false);
           }
         } catch (error: any) {
           logError("Error processing recording:", { error: error.message });
+          setError(error.message);
         } finally {
           setIsProcessing(false);
         }
       };
 
       audioRecorder.start(1000); // Start recording with 1 second timeslices
+      recordingStartTimeRef.current = Date.now(); // Track start time
       setIsRecording(true);
     } catch (error: any) {
       logError("Error starting audio recording:", { error: error.message });
@@ -230,7 +243,7 @@ export default function SpeechToTextModal({
       }
       setIsRecording(false);
       setIsProcessing(false);
-      setTestRecording(null);
+      recordingStartTimeRef.current = 0;
     }
     setIsOpen(open);
   };
@@ -239,7 +252,6 @@ export default function SpeechToTextModal({
   const handleAudioChange = (deviceId: string) => {
     setSelectedAudio(deviceId);
     setupStream();
-    setTestRecording(null);
   };
 
   return (
@@ -329,6 +341,9 @@ export default function SpeechToTextModal({
             <div className="text-center text-sm text-muted-foreground">
               {t("speechToText.processing")}
             </div>
+          )}
+          {error && (
+            <div className=" text-center text-sm text-red-500">{error}</div>
           )}
         </div>
       </DialogContent>
