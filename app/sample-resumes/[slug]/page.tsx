@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { ResumeDataType } from "../../dashboard/resumes/components/ResumeBuilder";
 import SampleResume from "./SampleResume";
-import ScrollProgressBar from "../../../components/ScrollProgressBar";
+import ScrollProgressBar from "@/app/components/ScrollProgressBar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
