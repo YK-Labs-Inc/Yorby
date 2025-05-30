@@ -8,8 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const logger = new Logger().with({
     function: "sitemap",
   });
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://perfectinterview.ai";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
+    "https://perfectinterview.ai";
 
   try {
     const allDemoJobs = await fetchAllDemoJobs();
@@ -25,11 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const sampleResumesEntries: MetadataRoute.Sitemap = allSampleResumes.map(
       (resume) => ({
-        url: `${baseUrl}/en/sample-resumes/${resume.slug}`,
+        url: `${baseUrl}/sample-resumes/${resume.slug}`,
         lastModified: new Date().toISOString(),
         changeFrequency: "weekly",
         priority: 0.7,
-      })
+      }),
     );
 
     // Add other important pages
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       },
       {
-        url: `${baseUrl}/en/sample-resumes`,
+        url: `${baseUrl}/sample-resumes`,
         lastModified: new Date().toISOString(),
         changeFrequency: "daily",
         priority: 0.8,
