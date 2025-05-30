@@ -8,7 +8,7 @@ import { ipAddress } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { CoreMessage } from "ai";
-import { ResumeDataType } from "@/app/[locale]/dashboard/resumes/components/ResumeBuilder";
+import { ResumeDataType } from "@/app/dashboard/resumes/components/ResumeBuilder";
 import { getAllUserMemories } from "../../memories/utils";
 
 const resumeItemDescriptionsSchema = z.object({
@@ -93,7 +93,7 @@ const updateResume = async (
       fileUri: string;
       mimeType: string;
     };
-  }[]
+  }[],
 ) => {
   const systemPrompt = `
     You are an AI assistant that can help users edit their resume.
@@ -190,16 +190,16 @@ const updateResume = async (
       "conclusionMessage": string //response to the user about the changes you made and asking them if they would like to make any more changes
     }
 ${
-  speakingStyle
-    ? `
+    speakingStyle
+      ? `
 
     IMPORTANT: Your introMessage and conclusionMessage to the user should be written in the following speaking style
     but the updatedResumeJSON should be written in a professional manner to maximize
     the chances of the user getting the job they want and passing the ATS.
 
     ${speakingStyle}`
-    : ""
-}
+      : ""
+  }
 
     When returning the updatedResumeJSON, make sure to return the entire resume in the same exact JSON format as the original resume
     and only change the sections that the user has requested to change. The updatedResumeJSON should be a representation of the
@@ -215,26 +215,26 @@ ${
     `;
 
   const result = await streamObjectWithFallback({
-    messages:
-      files && files.length > 0
-        ? [
+    messages: files && files.length > 0
+      ? [
+        {
+          role: "user",
+          content: [
             {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Use the following files as additional context to form your responses",
-                },
-                ...files.map((file) => ({
-                  type: "file" as "file",
-                  data: file.fileData.fileUri,
-                  mimeType: file.fileData.mimeType,
-                })),
-              ],
+              type: "text",
+              text:
+                "Use the following files as additional context to form your responses",
             },
-            ...messages,
-          ]
-        : messages,
+            ...files.map((file) => ({
+              type: "file" as "file",
+              data: file.fileData.fileUri,
+              mimeType: file.fileData.mimeType,
+            })),
+          ],
+        },
+        ...messages,
+      ]
+      : messages,
     systemPrompt,
     schema: z.object({
       introMessage: z.string(),
@@ -289,7 +289,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
           content: [
             {
               type: "text",
-              text: `Here is additional information about the user's work history and experience — use it to help you edit the resume: 
+              text:
+                `Here is additional information about the user's work history and experience — use it to help you edit the resume: 
             
             ${knowledge_base}`,
             },
@@ -303,7 +304,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       resume,
       finalMessages,
       speakingStyle,
-      files
+      files,
     );
 
     logger.info("Resume updated", {});
@@ -338,7 +339,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     logger.error("Failed to update resume", { error });
     return NextResponse.json(
       { error: "Failed to update resume" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });

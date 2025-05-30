@@ -1,8 +1,8 @@
 "use client";
 
-import { InterviewCopilotCreationForm } from "@/app/[locale]/dashboard/interview-copilots/InterviewCopilotCreationForm";
-import ResumeBuilder from "@/app/[locale]/dashboard/resumes/components/ResumeBuilder";
-import JobCreationComponent from "@/app/[locale]/JobCreationComponent";
+import { InterviewCopilotCreationForm } from "@/app/dashboard/interview-copilots/InterviewCopilotCreationForm";
+import ResumeBuilder from "@/app/dashboard/resumes/components/ResumeBuilder";
+import JobCreationComponent from "@/app/JobCreationComponent";
 import { FileText, Users, MessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";

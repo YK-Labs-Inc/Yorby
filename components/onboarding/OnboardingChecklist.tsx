@@ -1,14 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Circle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { useOnboarding } from "@/context/OnboardingContext";
 import { useRouter } from "next/navigation";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useActionState, useEffect, useTransition } from "react";
-import { startMockInterview } from "@/app/[locale]/dashboard/jobs/[jobId]/actions";
+import { startMockInterview } from "@/app/dashboard/jobs/[jobId]/actions";
 
 export function OnboardingChecklist() {
   const { onboardingState, isOnboardingComplete } = useOnboarding();

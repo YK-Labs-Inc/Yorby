@@ -7,7 +7,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 import { FileText, CheckCircle, ArrowRight, Video, Mic } from "lucide-react";
 import { useTranslations } from "next-intl";
 

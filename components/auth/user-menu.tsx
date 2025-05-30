@@ -10,7 +10,7 @@ import {
 import { Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { useTransition, useState } from "react";
-import { redirectToStripeCustomerPortal } from "@/app/[locale]/purchase/actions";
+import { redirectToStripeCustomerPortal } from "@/app/purchase/actions";
 import { handleSignOut } from "./actions";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";

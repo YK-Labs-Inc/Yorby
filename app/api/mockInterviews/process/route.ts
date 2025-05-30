@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import {
-  GoogleGenerativeAI,
   GenerateContentResult,
+  GoogleGenerativeAI,
   SchemaType,
 } from "@google/generative-ai";
-import { getAllFiles } from "@/app/[locale]/dashboard/jobs/[jobId]/questions/[questionId]/actions";
+import { getAllFiles } from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/actions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
 import { withAxiom } from "next-axiom";
@@ -35,7 +35,7 @@ async function withRetry<T>(
   name: string,
   logger: any,
   retries = MAX_RETRIES,
-  delay = RETRY_DELAY
+  delay = RETRY_DELAY,
 ): Promise<GenerationResult<T>> {
   try {
     return await operation();
@@ -56,9 +56,10 @@ async function generateOverview(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<string>> {
-  const systemPrompt = `You are an expert interview coach. Review this job interview and provide a concise overview of the candidate's performance.
+  const systemPrompt =
+    `You are an expert interview coach. Review this job interview and provide a concise overview of the candidate's performance.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -102,7 +103,7 @@ to write more feedback if you don't have any.`;
       };
     },
     "overview generation",
-    logger
+    logger,
   );
 }
 
@@ -110,9 +111,10 @@ async function generateProsAndCons(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<{ pros: string[]; cons: string[] }>> {
-  const systemPrompt = `You are an expert interview coach. Review this job interview and list the strengths and areas for improvement.
+  const systemPrompt =
+    `You are an expert interview coach. Review this job interview and list the strengths and areas for improvement.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -162,7 +164,7 @@ Do not force yourself to think of a pro or a con if it is unnecessary.`;
       };
     },
     "pros and cons generation",
-    logger
+    logger,
   );
 }
 
@@ -171,9 +173,10 @@ async function generateQuestionBreakdown(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<any[]>> {
-  const systemPrompt = `You are an expert interview coach. Your job is to provide feedback on every interview question 
+  const systemPrompt =
+    `You are an expert interview coach. Your job is to provide feedback on every interview question 
   that is asked in this interview. 
 
   Follow these steps:
@@ -247,7 +250,7 @@ It is okay to have an empty strengths or any empty improvements field, however, 
                     })
                     .required(),
                 })
-                .required()
+                .required(),
             ),
           })
           .required(),
@@ -263,7 +266,7 @@ It is okay to have an empty strengths or any empty improvements field, however, 
             cons: q.feedback.improvements,
             mock_interview_id: mockInterviewId,
             score: q.feedback.rating,
-          }))
+          })),
         );
       if (error) {
         throw error;
@@ -276,7 +279,7 @@ It is okay to have an empty strengths or any empty improvements field, however, 
       };
     },
     "question breakdown generation",
-    logger
+    logger,
   );
 }
 
@@ -289,9 +292,10 @@ async function generateJobFitAnalysis(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<JobFitAnalysis>> {
-  const systemPrompt = `You are an expert interview coach. Analyze how well the candidate's responses align with the job requirements.
+  const systemPrompt =
+    `You are an expert interview coach. Analyze how well the candidate's responses align with the job requirements.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -345,7 +349,7 @@ When writing your job fit analysis, do not force yourself to write more feedback
       };
     },
     "job fit analysis generation",
-    logger
+    logger,
   );
 }
 
@@ -353,9 +357,10 @@ async function generateScore(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<number>> {
-  const systemPrompt = `You are an expert interview coach. Provide an overall score for this interview performance.
+  const systemPrompt =
+    `You are an expert interview coach. Provide an overall score for this interview performance.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -399,7 +404,7 @@ Return a number between 0-100 representing the overall interview performance, co
       };
     },
     "score generation",
-    logger
+    logger,
   );
 }
 
@@ -407,9 +412,10 @@ async function generateKeyImprovements(
   transcript: string,
   jobContext: any,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
-  logger: Logger
+  logger: Logger,
 ): Promise<GenerationResult<string[]>> {
-  const systemPrompt = `You are an expert interview coach. Identify the key areas where the candidate should focus on improving.
+  const systemPrompt =
+    `You are an expert interview coach. Identify the key areas where the candidate should focus on improving.
 
 Context Information:
 ${JSON.stringify(jobContext, null, 2)}
@@ -461,7 +467,7 @@ It is also okay to include multiple improvements if the candidate has multiple a
       };
     },
     "key improvements generation",
-    logger
+    logger,
   );
 }
 
@@ -525,7 +531,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         transcript,
         jobContext,
         jobFiles,
-        logger
+        logger,
       ),
       generateJobFitAnalysis(transcript, jobContext, jobFiles, logger),
       generateScore(transcript, jobContext, jobFiles, logger),
@@ -535,16 +541,14 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     logger.info("All feedback components generated in parallel");
 
     // Calculate total token counts
-    const totalInputTokens =
-      overviewResult.inputTokens +
+    const totalInputTokens = overviewResult.inputTokens +
       prosAndConsResult.inputTokens +
       questionBreakdownResult.inputTokens +
       jobFitAnalysisResult.inputTokens +
       scoreResult.inputTokens +
       keyImprovementsResult.inputTokens;
 
-    const totalOutputTokens =
-      overviewResult.outputTokens +
+    const totalOutputTokens = overviewResult.outputTokens +
       prosAndConsResult.outputTokens +
       questionBreakdownResult.outputTokens +
       jobFitAnalysisResult.outputTokens +

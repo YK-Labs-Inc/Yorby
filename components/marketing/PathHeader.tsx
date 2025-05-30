@@ -1,5 +1,5 @@
-import { Link } from "@/i18n/routing";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export function PathHeader() {
   return (
