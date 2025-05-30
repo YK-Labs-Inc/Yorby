@@ -14,7 +14,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-const b2bDomains = ["b2b.perfectinterview.ai", "yorby.ai"];
+const b2bDomains = ["b2b.perfectinterview.ai", "yorby.ai", "localhost"];
 
 // Custom hook to get hostname
 const useHostname = (): string => {
@@ -54,7 +54,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
 
   const isCoachPath = useMemo(
     () =>
-      (pathname?.startsWith("/en/coaches") ?? false) ||
+      (pathname?.startsWith("/coaches") ?? false) ||
       b2bDomains.includes(hostname),
     [pathname, hostname]
   );

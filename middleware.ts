@@ -96,10 +96,8 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   if (B2B_DOMAINS.some((domain) => hostname.includes(domain))) {
-    console.log("hey hostname", hostname);
     // Extract the pathname
     const { pathname } = request.nextUrl;
-    console.log("hey pathname", pathname);
     // Check if the path already starts with /en/coaches
     if (!pathname.includes("/coaches")) {
       // If the path is just "/", rewrite to "/en/coaches"
