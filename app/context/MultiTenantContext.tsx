@@ -55,7 +55,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const isCoachPath = useMemo(
     () =>
       (pathname?.startsWith("/coaches") ?? false) ||
-      b2bDomains.includes(hostname),
+      b2bDomains.some((domain) => hostname.includes(domain)),
     [pathname, hostname]
   );
 
