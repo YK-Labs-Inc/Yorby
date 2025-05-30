@@ -1,7 +1,6 @@
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { Logger } from "next-axiom";
-import { NextResponse } from "next/server";
 
 // Domains that should be redirected
 const REDIRECT_DOMAINS = [
@@ -22,8 +21,6 @@ const PERSONA_INTERVIEW_REDIRECT_DOMAINS = [
   "chaewonmockinterview",
   "gogginsmockinterview",
 ];
-
-const B2B_DOMAINS = ["b2b.perfectinterview.ai", "yorby.ai"];
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
@@ -95,19 +92,12 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     return Response.redirect(redirectUrl.toString(), 301);
   }
 
-  if (B2B_DOMAINS.some((domain) => hostname.includes(domain))) {
-    // Extract the pathname
+  if (hostname.includes("yorby.ai")) {
     const { pathname } = request.nextUrl;
-    // Check if the path already starts with /en/coaches
-    if (!pathname.includes("/coaches")) {
-      // If the path is just "/", rewrite to "/en/coaches"
-      // Otherwise, append the original path after /en/coaches
-      const url = request.nextUrl.clone();
-      if (pathname === "/") {
-        url.pathname = "/coaches";
-        return NextResponse.rewrite(url);
-      }
+    if (pathname === "/") {
+      return Response.redirect(new URL("/coaches", request.url).toString());
     }
+    return response;
   }
   return response;
 }
