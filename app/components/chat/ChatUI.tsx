@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { CoreMessage } from "ai";
-import { useVoiceRecording } from "@/app/[locale]/dashboard/resumes/components/useVoiceRecording";
-import VoiceRecordingOverlay from "@/app/[locale]/dashboard/resumes/components/VoiceRecordingOverlay";
+import { useVoiceRecording } from "@/app/dashboard/resumes/components/useVoiceRecording";
+import VoiceRecordingOverlay from "@/app/dashboard/resumes/components/VoiceRecordingOverlay";
 import { useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";

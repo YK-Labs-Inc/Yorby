@@ -1,12 +1,7 @@
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { Logger } from "next-axiom";
-import createIntlMiddleware from "next-intl/middleware";
-import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
-
-// Create the next-intl middleware
-const intlMiddleware = createIntlMiddleware(routing);
 
 // Domains that should be redirected
 const REDIRECT_DOMAINS = [
@@ -33,6 +28,10 @@ const B2B_DOMAINS = ["b2b.perfectinterview.ai", "yorby.ai"];
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const logger = new Logger({ source: "middleware" });
   logger.middleware(request);
+
+  // Then handle session update
+  event.waitUntil(logger.flush());
+  const response = await updateSession(request);
 
   // Check if the current domain needs to be redirected
   const hostname = request.headers.get("host") || "";
@@ -97,8 +96,10 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   if (B2B_DOMAINS.some((domain) => hostname.includes(domain))) {
+    console.log("hey hostname", hostname);
     // Extract the pathname
     const { pathname } = request.nextUrl;
+    console.log("hey pathname", pathname);
     // Check if the path already starts with /en/coaches
     if (!pathname.includes("/coaches")) {
       // If the path is just "/", rewrite to "/en/coaches"
@@ -106,25 +107,9 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
       const url = request.nextUrl.clone();
       if (pathname === "/") {
         url.pathname = "/coaches";
+        return NextResponse.rewrite(url);
       }
-      return NextResponse.rewrite(url);
     }
   }
-
-  // Handle next-intl middleware first
-  const response = intlMiddleware(request);
-  if (response) return response;
-
-  // Then handle session update
-  event.waitUntil(logger.flush());
-  return await updateSession(request);
+  return response;
 }
-
-export const config = {
-  matcher: [
-    // Skip static files, API routes, sitemaps and blog
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|blog|_feather|ingest|_axiom|monitoring|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|m4a|mp4|mp3)$).*)",
-    // Language paths remain unchanged
-    "/(en)/:path*",
-  ],
-};

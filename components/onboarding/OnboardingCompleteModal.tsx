@@ -4,14 +4,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
 import { FileText, MessageSquare, Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "../ui/card";
+import Link from "next/link";
 
 export function OnboardingCompleteModal() {
   const t = useTranslations("knowledgeBase");

@@ -4,9 +4,9 @@ import { SidebarMenuButton } from "../ui/sidebar";
 
 import { usePathname } from "next/navigation";
 import { SidebarMenuItem } from "../ui/sidebar";
-import { Link } from "@/i18n/routing";
 import { Tables } from "@/utils/supabase/database.types";
-import { StudentWithEmailAndName } from "@/app/[locale]/layout";
+import { StudentWithEmailAndName } from "@/app/layout";
+import Link from "next/link";
 
 type SidebarMenuItemClientProps =
   | {

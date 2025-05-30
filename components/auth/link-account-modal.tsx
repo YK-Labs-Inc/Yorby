@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState } from "react";
 import { linkAnonymousAccount } from "./actions";
 import { Button } from "../ui/button";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 
 export function LinkAccountModal() {
   const [isOpen, setIsOpen] = useState(false);

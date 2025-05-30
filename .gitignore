@@ -48,7 +48,7 @@ next-env.d.ts
 # CSV files
 *.csv
 
-/app/\[locale\]/local-testing-auth
+/app/local-testing-auth
 
 # TechSalesJack audio files
 /app/api/admin/techsalesjack/audio/

@@ -1,5 +1,5 @@
 import { Geist } from "next/font/google";
-import "../[locale]/globals.css";
+import "../globals.css";
 
 const geistSans = Geist({
   display: "swap",

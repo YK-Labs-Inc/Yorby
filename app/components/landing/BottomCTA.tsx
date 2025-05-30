@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import SignInForm from "@/app/[locale]/interview-prep-landing/components/SignInForm";
+import SignInForm from "@/app/interview-prep-landing/components/SignInForm";
 
 export const BottomCTA = () => {
   const t = useTranslations("LandingPageV5.bottomCTA");

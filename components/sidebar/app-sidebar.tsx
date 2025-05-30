@@ -12,7 +12,6 @@ import {
 import SidebarMenuItemClient from "./SideBarMenuItemClient";
 import { Button } from "../ui/button";
 import { PlusIcon, ChevronDown } from "lucide-react";
-import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
@@ -30,8 +29,8 @@ import {
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "./Header";
-import { CoachInfo, StudentWithEmailAndName } from "@/app/[locale]/layout";
-
+import { CoachInfo, StudentWithEmailAndName } from "@/app/layout";
+import Link from "next/link";
 interface AppSidebarProps {
   numberOfCredits: number;
   jobs: Tables<"custom_jobs">[];

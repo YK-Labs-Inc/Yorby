@@ -1,6 +1,6 @@
-import { Link } from "@/i18n/routing";
 import { H3 } from "../typography";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
+import Link from "next/link";
 
 const Header = () => {
   const { baseUrl, coachBrandingSettings } = useMultiTenant();
