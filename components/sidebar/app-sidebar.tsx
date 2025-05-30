@@ -130,8 +130,13 @@ export function AppSidebar({
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
-  const { isLoadingBranding, isCoachPath, isCoachProgramsPage } =
-    useMultiTenant();
+  const {
+    isLoadingBranding,
+    isYorby,
+    isCoachProgramsPage,
+    isCoachHomePage,
+    isCoachPath,
+  } = useMultiTenant();
 
   useEffect(() => {
     if (authError || authSuccess) {
@@ -139,7 +144,11 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  if (isCoachPath && !isCoachProgramsPage) {
+  if (isYorby && (window.location.pathname === "/" || isCoachProgramsPage)) {
+    return null;
+  }
+
+  if (isCoachHomePage) {
     return null;
   }
 

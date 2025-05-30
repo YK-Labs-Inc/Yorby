@@ -14,8 +14,6 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-const b2bDomains = ["b2b.perfectinterview.ai", "yorby.ai", "localhost"];
-
 // Custom hook to get hostname
 const useHostname = (): string => {
   const [hostname, setHostname] = useState<string>("");
@@ -32,9 +30,11 @@ const useHostname = (): string => {
 interface MultiTenantContextProps {
   isCoachPath: boolean;
   isCoachProgramsPage: boolean;
+  isCoachHomePage: boolean;
   coachBrandingSettings: Tables<"coach_branding"> | null; // Use the specific row type
   isLoadingBranding: boolean;
   baseUrl: string;
+  isYorby: boolean;
 }
 
 const MultiTenantContext = createContext<MultiTenantContextProps | undefined>(
@@ -52,16 +52,18 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const { logError } = useAxiomLogging();
   const pathname = usePathname();
 
-  const isCoachPath = useMemo(
-    () =>
-      (pathname?.startsWith("/coaches") ?? false) ||
-      b2bDomains.some((domain) => hostname.includes(domain)),
-    [pathname, hostname]
-  );
+  const isYorby = useMemo(() => hostname.includes("yorby.ai"), [hostname]);
+
+  const isCoachHomePage = useMemo(() => pathname === "/coaches", [pathname]);
 
   const isCoachProgramsPage = useMemo(
-    () => (isCoachPath && pathname?.includes("programs")) ?? false,
-    [isCoachPath, pathname]
+    () => pathname?.startsWith("/coaches/programs") ?? false,
+    [pathname]
+  );
+
+  const isCoachPath = useMemo(
+    () => isCoachHomePage || isCoachProgramsPage,
+    [isCoachHomePage, isCoachProgramsPage]
   );
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setBaseUrl(`/dashboard/jobs`);
     }
-  }, [isCoachPath]);
+  }, [coachSlug]);
 
   useEffect(() => {
     if (isCoachPath && typeof coachSlug === "string") {
@@ -109,13 +111,16 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       isCoachPath,
       isCoachProgramsPage,
+      isCoachHomePage,
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,
+      isYorby,
     }),
     [
       isCoachPath,
       isCoachProgramsPage,
+      isCoachHomePage,
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,

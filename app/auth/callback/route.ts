@@ -56,6 +56,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         userId: user.id,
         email: user.email,
         logger,
+        origin,
       });
     }
   } else if (token && type === "signup" && email) {
@@ -79,7 +80,14 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         userId: user.id,
         email,
         logger,
+        origin,
       });
+      if (userInitiallySignedUp) {
+        logger.info(
+          "User initially signed up. Redirecting to confirm-initial-login",
+        );
+        return NextResponse.redirect(`${origin}/confirm-initial-login`);
+      }
     }
   } else if (type === "email_change" && token) {
     // Handle email change flow
@@ -100,6 +108,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
         userId: user.id,
         email,
         logger,
+        origin,
       });
     }
   }
@@ -180,10 +189,12 @@ const addUserToBrevo = async ({
   userId,
   email,
   logger,
+  origin,
 }: {
   userId: string;
   email: string;
   logger: Logger;
+  origin: string;
 }) => {
   try {
     let apiInstance = new SibApiV3Sdk.ContactsApi();
@@ -192,6 +203,18 @@ const addUserToBrevo = async ({
       throw new Error("BREVO_API_KEY is not set");
     }
     apiInstance.setApiKey(SibApiV3Sdk.ContactsApiApiKeys.apiKey, brevoApiKey);
+
+    let brevoListId: null | number = null;
+    if (origin.includes("yorby.ai")) {
+      brevoListId = 9;
+    } else if (origin.includes("perfectinterview.ai")) {
+      brevoListId = 6;
+    }
+
+    if (!brevoListId) {
+      logger.error("No Brevo list ID found for origin", { origin });
+      return false;
+    }
 
     try {
       // Check if contact already exists
@@ -209,7 +232,7 @@ const addUserToBrevo = async ({
       });
       let createContact = new SibApiV3Sdk.CreateContact();
       createContact.email = email;
-      createContact.listIds = [6]; // Ensure this list ID is correct
+      createContact.listIds = [brevoListId]; // Ensure this list ID is correct
 
       await apiInstance.createContact(createContact);
       logger.info("Added contact to Brevo", { email });
