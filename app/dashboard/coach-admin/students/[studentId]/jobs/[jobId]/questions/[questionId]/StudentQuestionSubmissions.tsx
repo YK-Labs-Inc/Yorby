@@ -245,10 +245,11 @@ export default function StudentQuestionSubmissions({
     return <div className="text-red-500">{t("submissionNotFound")}</div>;
   }
 
-  // Feedback structure: { pros: string[], cons: string[] }
+  // Feedback structure: { pros: string[], cons: string[], correctness_score?: number }
   const feedback = currentSubmission?.feedback as {
     pros: string[];
     cons: string[];
+    correctness_score?: number;
   } | null;
 
   return (
@@ -303,6 +304,28 @@ export default function StudentQuestionSubmissions({
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Correctness Score Display */}
+                {feedback && typeof feedback.correctness_score === "number" && (
+                  <div className="mb-4 flex items-center gap-3">
+                    <span className="font-semibold text-gray-700">
+                      {t("correctnessScore")}
+                    </span>
+                    <span
+                      className={`flex items-center justify-center text-white font-bold shadow-md rounded-lg p-1
+                        ${
+                          feedback.correctness_score >= 80
+                            ? "bg-green-500"
+                            : feedback.correctness_score >= 50
+                              ? "bg-yellow-400 text-yellow-900"
+                              : "bg-red-500"
+                        }
+                      `}
+                    >
+                      {feedback.correctness_score}%
+                    </span>
+                  </div>
+                )}
+                {/* Pros/Cons */}
                 {feedback &&
                 (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -367,31 +390,58 @@ export default function StudentQuestionSubmissions({
             <p className="italic text-gray-500">{t("noPreviousSubmissions")}</p>
           ) : (
             <ul className="space-y-4">
-              {submissions.map((submission) => (
-                <li
-                  key={submission.id}
-                  className={`border rounded-lg p-3 bg-white cursor-pointer transition-colors ${
-                    submission.id === currentSubmission.id
-                      ? "ring-2 ring-primary border-primary bg-primary/10"
-                      : "hover:bg-gray-50"
-                  }`}
-                >
-                  <Link
-                    href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
+              {submissions.map((submission) => {
+                const feedback = submission.feedback as {
+                  pros: string[];
+                  cons: string[];
+                  correctness_score?: number;
+                } | null;
+                return (
+                  <li
+                    key={submission.id}
+                    className={`border rounded-lg p-3 bg-white cursor-pointer transition-colors ${
+                      submission.id === currentSubmission.id
+                        ? "ring-2 ring-primary border-primary bg-primary/10"
+                        : "hover:bg-gray-50"
+                    }`}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-500">
-                        {t("submitted", {
-                          date: formatDate(submission.created_at),
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-gray-800 line-clamp-3">
-                      {submission.answer}
-                    </p>
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-gray-500">
+                              {t("submitted", {
+                                date: formatDate(submission.created_at),
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-gray-800 line-clamp-3">
+                            {submission.answer}
+                          </p>
+                        </div>
+                        {feedback &&
+                          typeof feedback.correctness_score === "number" && (
+                            <span
+                              className={`ml-2 flex items-center justify-center rounded-lg text-white font-bold shadow-md p-1
+                              ${
+                                feedback.correctness_score >= 80
+                                  ? "bg-green-500"
+                                  : feedback.correctness_score >= 50
+                                    ? "bg-yellow-400 text-yellow-900"
+                                    : "bg-red-500"
+                              }
+                            `}
+                            >
+                              {feedback.correctness_score}%
+                            </span>
+                          )}
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
