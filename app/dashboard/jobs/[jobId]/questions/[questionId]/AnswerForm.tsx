@@ -22,6 +22,7 @@ import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { uploadFile } from "@/utils/storage";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import InterviewFeedback from "@/components/ui/interview-feedback";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -459,13 +460,13 @@ export default function AnswerForm({
                           fill="currentColor"
                         />
                         <h3 className="font-semibold text-lg text-yellow-900">
-                          {t("cons")}
+                          {t("areasToImprove")}
                         </h3>
                       </div>
                       <div className="space-y-3">
                         {manualFeedback.cons.length === 0 ? (
                           <p className="text-yellow-800 italic">
-                            {t("noCons")}
+                            {t("noAreasToImprove")}
                           </p>
                         ) : (
                           manualFeedback.cons.map(
@@ -487,99 +488,7 @@ export default function AnswerForm({
               </CardContent>
             </Card>
           )}
-          {feedback && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("feedbackLabel")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {feedback.pros.length === 0 && feedback.cons.length === 0 ? (
-                  <p>{t("noFeedback")}</p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="rounded-lg bg-green-50/50 dark:bg-green-950/20 p-6 overflow-y-auto border border-green-100 dark:border-green-900 max-h-[400px] relative">
-                      <div className="flex items-center gap-2 mb-4 sticky -top-6 -mx-6 -mt-6 px-6 pt-6 pb-2 bg-green-50 dark:bg-green-950 border-b border-green-100 dark:border-green-900">
-                        <svg
-                          className="w-5 h-5 text-green-600 dark:text-green-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <h3 className="font-semibold text-lg text-green-900 dark:text-green-100">
-                          {t("pros")}
-                        </h3>
-                      </div>
-                      <div className="space-y-3">
-                        {feedback.pros.length === 0 ? (
-                          <p className="text-green-800 dark:text-green-200 italic">
-                            {t("noPros")}
-                          </p>
-                        ) : (
-                          feedback.pros.map((pro: string, index: number) => (
-                            <div key={index} className="flex gap-2 items-start">
-                              <span className="text-green-600 dark:text-green-400 mt-1">
-                                •
-                              </span>
-                              <p className="text-green-800 dark:text-green-200">
-                                {pro}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-red-50/50 dark:bg-red-950/20 p-6 overflow-y-auto border border-red-100 dark:border-red-900 max-h-[400px] relative">
-                      <div className="flex items-center gap-2 mb-4 sticky -top-6 -mx-6 -mt-6 px-6 pt-6 pb-2 bg-red-50 dark:bg-red-950 border-b border-red-100 dark:border-red-900">
-                        <svg
-                          className="w-5 h-5 text-red-600 dark:text-red-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                          />
-                        </svg>
-                        <h3 className="font-semibold text-lg text-red-900 dark:text-red-100">
-                          {t("cons")}
-                        </h3>
-                      </div>
-                      <div className="space-y-3">
-                        {feedback.cons.length === 0 ? (
-                          <p className="text-red-800 dark:text-red-200 italic">
-                            {t("noCons")}
-                          </p>
-                        ) : (
-                          feedback.cons.map((con: string, index: number) => (
-                            <div key={index} className="flex gap-2 items-start">
-                              <span className="text-red-600 dark:text-red-400 mt-1">
-                                •
-                              </span>
-                              <p className="text-red-800 dark:text-red-200">
-                                {con}
-                              </p>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {feedback && <InterviewFeedback feedback={feedback} />}
           <AnswerGuideline question={question} />
           <SampleAnswers sampleAnswers={sampleAnswers} />
         </>

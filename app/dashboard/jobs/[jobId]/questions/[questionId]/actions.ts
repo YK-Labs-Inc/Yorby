@@ -382,98 +382,90 @@ const generateFeedback = async (
     function: "generateFeedback",
   };
   const logger = new Logger().with(trackingProperties);
+
+  // Step 1: Fetch all context
   const job = await fetchJob(jobId);
   const { question, answer_guidelines } = await fetchQuestion(questionId);
   const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
   const sampleAnswers = await fetchQuestionSampleAnswers(questionId);
   const files = await getAllFiles(jobId);
+
+  // Step 2: Extract core criteria from answer guidelines
+  const coreCriteria = await extractCoreCriteria(answer_guidelines, logger);
+
+  // Step 3: Grade against core criteria
+  const criteriaGrading = await gradeAgainstCriteria(
+    job,
+    question,
+    answer,
+    coreCriteria,
+    files,
+    logger,
+  );
+
+  // Step 4: Compare with sample answers (if any)
+  const sampleComparison = sampleAnswers.length > 0
+    ? await compareWithSampleAnswers(
+      job,
+      question,
+      answer,
+      sampleAnswers,
+      files,
+      logger,
+    )
+    : { strengths: [], weaknesses: [] };
+
+  // Step 5: Apply coach knowledge base (if available)
+  const coachFeedback = coachKnowledgeBase
+    ? await applyCoachKnowledgeBase(
+      job,
+      question,
+      answer,
+      coachKnowledgeBase,
+      files,
+      logger,
+    )
+    : { coach_feedback: [] };
+
+  // Step 6: Synthesize final feedback
+  const finalFeedback = await synthesizeFinalFeedback(
+    criteriaGrading,
+    sampleComparison,
+    coachFeedback,
+    logger,
+  );
+
+  logger.info("Feedback generated", finalFeedback);
+  return finalFeedback;
+};
+
+// Step 1: Extract core criteria from answer guidelines
+const extractCoreCriteria = async (
+  answerGuidelines: string,
+  logger: Logger,
+) => {
   const prompt = `
-    You are an expert job interviewer for a given job title and job description that I will provide you.
-
-    As an expert job interviewer, you will provide feedback on the candidate's answer to the question, and also assign a correctness_score (0-100) that measures how correct the answer is, based primarily on the answer guidelines. Use the sample answers as additional context/examples, but do not require the user's answer to match them directly. Grade against the answer guidelines.
-
-    I will provide you with the job title, job description, an optional company name and optional company description,
-    the question, the question's answer guidelines, the candidate's answer, and potentially some files that contain details
-    about the candidate's previous work experience.
-
-    ${
-    coachKnowledgeBase
-      ? `The question you are trying to generate feedback for is a part of 
-      a coaching program put together by a career coach. In this scenario, I will also provide you 
-      some additional information from a career coach that could be relevant to the question. For example, it could contain
-      some proprietary framework that the career coach uses to evaluate candidates.
-      
-      Use this additional information to generate feedback for the candidate's answer.
-      `
-      : ""
-  }
-
-    ${
-    sampleAnswers.length > 0
-      ? `I will also provide you with sample answers to this question that can serve as examples of good responses. Use these to help evaluate the candidate's answer and provide more specific feedback, but do not require the candidate's answer to match them directly.`
-      : ""
-  }
-
-    You will provide feedback on the candidate's answer and provide a list of pros and cons.
-
-    You will also provide a correctness_score, which is a number between 0 and 100 (inclusive), that represents how correct the candidate's answer is, based on the answer guidelines. 100 means the answer is perfect according to the guidelines, 0 means it does not meet the guidelines at all.
-
-    You will provide your feedback in the following format:
-
+    You are an expert at analyzing interview question answer guidelines.
+    
+    Given the following answer guidelines (which may contain verbose explanations and context), 
+    extract the essential, core criteria that define what makes a "correct" answer.
+    
+    Focus on:
+    - Specific requirements that must be met
+    - Key elements that should be included
+    - Clear, measurable criteria
+    
+    Ignore fluff, examples, and explanatory text. Return only the essential grading criteria.
+    
+    Return your response in the following format:
     {
-      "pros": string[],
-      "cons": string[],
-      "correctness_score": number
+      "core_criteria": string[]
     }
-
-    For each con, provide a reason why the candidate's answer is not good and also provide actionable steps on how to improve the candidate's answer.
-    If possible, use the candidate's previous work experience files to rewrite their answer and address the con that you provided. 
-
-    Do not force yourself to provide feedback on the candidate's answer if you do not have any feedback to provide.
-
-    If the answer is so good without any cons, you can provide an empty cons array and an empty pros array.
-
-    Otherwise, provide a list of pros and cons.
-
-    Return your feedback in the second person and refer to the candidate as "you".
-
-    ## Job Title
-    ${job.job_title}
-
-    ## Job Description
-    ${job.job_description}
-
-    ${job.company_name ? `## Company Name\n${job.company_name}` : ""}
-
-    ${
-    job.company_description
-      ? `## Company Description\n${job.company_description}`
-      : ""
-  }
-
-    ## Question
-    ${question}
-
+    
     ## Answer Guidelines
-    ${answer_guidelines}
+    ${answerGuidelines}
+  `;
 
-    ${
-    coachKnowledgeBase ? `## Coach Knowledge Base\n${coachKnowledgeBase}` : ""
-  }
-
-    ${
-    sampleAnswers.length > 0
-      ? `## Sample Answers\n${
-        sampleAnswers.map((sa, index) =>
-          `### Sample Answer ${index + 1}\n${sa.answer}`
-        ).join("\n\n")
-      }`
-      : ""
-  }
-
-    ## Answer
-    ${answer}
-    `;
   const result = await generateObjectWithFallback({
     systemPrompt: prompt,
     messages: [
@@ -482,7 +474,81 @@ const generateFeedback = async (
         content: [
           {
             type: "text",
-            text: "Generate the feedback and correctness_score",
+            text: "Extract the core criteria for grading this answer",
+          },
+        ],
+      },
+    ],
+    schema: z.object({
+      core_criteria: z.array(z.string()),
+    }),
+    loggingContext: {
+      function: "extractCoreCriteria",
+    },
+  });
+
+  logger.info("Core criteria extracted", result);
+  return result.core_criteria;
+};
+
+// Step 2: Grade against core criteria
+const gradeAgainstCriteria = async (
+  job: any,
+  question: string,
+  answer: string,
+  coreCriteria: string[],
+  files: {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[],
+  logger: Logger,
+) => {
+  const prompt = `
+    You are an expert job interviewer grading a candidate's answer against specific criteria.
+    
+    Grade the candidate's answer strictly against the provided core criteria.
+    For each criterion, determine if it was met, partially met, or not met.
+    
+    Provide a preliminary correctness score (0-100) based on how well the answer meets the criteria.
+    
+    Return your response in the following format:
+    {
+      "criteria_met": string[],
+      "criteria_partially_met": string[],
+      "criteria_missed": string[],
+      "preliminary_score": number
+    }
+    
+    ## Job Context
+    **Job Title:** ${job.job_title}
+    **Job Description:** ${job.job_description}
+    ${job.company_name ? `**Company:** ${job.company_name}` : ""}
+    
+    ## Question
+    ${question}
+    
+    ## Core Criteria
+    ${
+    coreCriteria.map((criterion, index) => `${index + 1}. ${criterion}`).join(
+      "\n",
+    )
+  }
+    
+    ## Candidate's Answer
+    ${answer}
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Grade this answer against the core criteria",
           },
           ...files.map((f) => ({
             type: "file" as "file",
@@ -493,23 +559,252 @@ const generateFeedback = async (
       },
     ],
     schema: z.object({
+      criteria_met: z.array(z.string()),
+      criteria_partially_met: z.array(z.string()),
+      criteria_missed: z.array(z.string()),
+      preliminary_score: z.number().min(0).max(100),
+    }),
+    loggingContext: {
+      function: "gradeAgainstCriteria",
+    },
+  });
+
+  logger.info("Criteria grading completed", result);
+  return result;
+};
+
+// Step 3: Compare with sample answers
+const compareWithSampleAnswers = async (
+  job: any,
+  question: string,
+  answer: string,
+  sampleAnswers: any[],
+  files: {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[],
+  logger: Logger,
+) => {
+  const prompt = `
+    You are an expert job interviewer comparing a candidate's answer to high-quality sample answers.
+    
+    Compare the candidate's answer to the provided sample answers and identify:
+    - Strengths: What the candidate did well compared to the samples
+    - Weaknesses: Actual problems or gaps in the candidate's answer (not just "could be better" suggestions)
+    
+    IMPORTANT: For weaknesses, only identify genuine issues or significant gaps, not minor improvements.
+    Examples of valid weaknesses: missing key information, incorrect facts, poor structure, inappropriate tone
+    Examples of NOT weaknesses: "could have added more detail", "might consider mentioning X"
+    
+    Do not require the candidate's answer to match the samples exactly, but use them as benchmarks for quality.
+    
+    Return your response in the following format:
+    {
+      "strengths": string[],
+      "weaknesses": string[]
+    }
+    
+    ## Job Context
+    **Job Title:** ${job.job_title}
+    **Job Description:** ${job.job_description}
+    
+    ## Question
+    ${question}
+    
+    ## Sample Answers
+    ${
+    sampleAnswers.map((sa, index) =>
+      `### Sample Answer ${index + 1}\n${sa.answer}`
+    ).join("\n\n")
+  }
+    
+    ## Candidate's Answer
+    ${answer}
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Compare this answer to the sample answers",
+          },
+          ...files.map((f) => ({
+            type: "file" as "file",
+            data: f.fileData.fileUri,
+            mimeType: f.fileData.mimeType,
+          })),
+        ],
+      },
+    ],
+    schema: z.object({
+      strengths: z.array(z.string()),
+      weaknesses: z.array(z.string()),
+    }),
+    loggingContext: {
+      function: "compareWithSampleAnswers",
+    },
+  });
+
+  logger.info("Sample answer comparison completed", result);
+  return result;
+};
+
+// Step 4: Apply coach knowledge base
+const applyCoachKnowledgeBase = async (
+  job: any,
+  question: string,
+  answer: string,
+  coachKnowledgeBase: string,
+  files: {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[],
+  logger: Logger,
+) => {
+  const prompt = `
+    You are evaluating a candidate's answer using a career coach's proprietary knowledge and frameworks.
+    
+    The coach has provided specific guidance, frameworks, or methodologies that should be considered
+    when evaluating interview answers. Use this knowledge to identify any actual issues or problems
+    with the candidate's answer based on the coach's framework.
+    
+    Focus on identifying genuine problems or violations of the coach's methodology, not general suggestions.
+    
+    Return your response in the following format:
+    {
+      "coach_feedback": string[]
+    }
+    
+    ## Job Context
+    **Job Title:** ${job.job_title}
+    **Job Description:** ${job.job_description}
+    
+    ## Question
+    ${question}
+    
+    ## Coach Knowledge Base
+    ${coachKnowledgeBase}
+    
+    ## Candidate's Answer
+    ${answer}
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Evaluate this answer using the coach's knowledge base",
+          },
+          ...files.map((f) => ({
+            type: "file" as "file",
+            data: f.fileData.fileUri,
+            mimeType: f.fileData.mimeType,
+          })),
+        ],
+      },
+    ],
+    schema: z.object({
+      coach_feedback: z.array(z.string()),
+    }),
+    loggingContext: {
+      function: "applyCoachKnowledgeBase",
+    },
+  });
+
+  logger.info("Coach knowledge base evaluation completed", result);
+  return result;
+};
+
+// Step 5: Synthesize final feedback
+const synthesizeFinalFeedback = async (
+  criteriaGrading: any,
+  sampleComparison: any,
+  coachFeedback: any,
+  logger: Logger,
+) => {
+  const prompt = `
+    You are synthesizing multiple evaluations of a candidate's interview answer into final feedback.
+    
+    Based on the provided evaluations, create comprehensive feedback with:
+    - Pros: What the candidate did well (be specific and encouraging)
+    - Cons: ONLY include actual problems, errors, or incorrect parts of the answer that need fixing
+    - Correctness Score: A final score (0-100) based on all evaluations
+    
+    IMPORTANT GUIDELINES FOR CONS:
+    - A "con" is NOT a general suggestion or "nice to have" improvement
+    - A "con" is ONLY when something in the answer is actively wrong, incorrect, or harmful
+    - Examples of valid cons: factual errors, contradictory statements, completely missing required criteria, inappropriate responses
+    - Examples of NOT cons: "could have mentioned X", "would be better if Y", "consider adding Z"
+    - If the answer is generally good but could be enhanced, DO NOT list those enhancements as cons
+    - It is perfectly acceptable to have an empty cons array if nothing is actively wrong
+    
+    For any cons you do identify, provide specific, actionable advice on how to fix the actual problem.
+    Use the second person ("you") when addressing the candidate.
+    
+    Return your response in the following format:
+    {
+      "pros": string[],
+      "cons": string[],
+      "correctness_score": number
+    }
+    
+    ## Criteria-Based Grading
+    **Criteria Met:** ${criteriaGrading.criteria_met.join(", ") || "None"}
+    **Criteria Partially Met:** ${
+    criteriaGrading.criteria_partially_met.join(", ") || "None"
+  }
+    **Criteria Missed:** ${criteriaGrading.criteria_missed.join(", ") || "None"}
+    **Preliminary Score:** ${criteriaGrading.preliminary_score}
+    
+    ## Sample Answer Comparison
+    **Strengths:** ${sampleComparison.strengths.join(", ") || "None identified"}
+    **Weaknesses:** ${
+    sampleComparison.weaknesses.join(", ") || "None identified"
+  }
+    
+    ## Coach Feedback
+    **Additional Insights:** ${
+    coachFeedback.coach_feedback.join(", ") || "None provided"
+  }
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt: prompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Synthesize all evaluations into final feedback",
+          },
+        ],
+      },
+    ],
+    schema: z.object({
       pros: z.array(z.string()),
       cons: z.array(z.string()),
       correctness_score: z.number().min(0).max(100),
     }),
     loggingContext: {
-      jobId,
-      questionId,
-      function: "generateFeedback",
+      function: "synthesizeFinalFeedback",
     },
   });
-  const { pros, cons, correctness_score } = result;
-  logger.info("Feedback generated", { pros, cons, correctness_score });
-  return {
-    pros,
-    cons,
-    correctness_score,
-  };
+
+  logger.info("Final feedback synthesis completed", result);
+  return result;
 };
 
 const fetchJob = async (jobId: string) => {
