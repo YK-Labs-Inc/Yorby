@@ -35,6 +35,7 @@ interface MultiTenantContextProps {
   isLoadingBranding: boolean;
   baseUrl: string;
   isYorby: boolean;
+  isCoachPortalLandingPage: boolean;
 }
 
 const MultiTenantContext = createContext<MultiTenantContextProps | undefined>(
@@ -57,13 +58,20 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const isCoachHomePage = useMemo(() => pathname === "/coaches", [pathname]);
 
   const isCoachProgramsPage = useMemo(
-    () => pathname?.startsWith("/coaches/programs") ?? false,
-    [pathname]
+    () =>
+      typeof coachSlug === "string" &&
+      pathname === `/coaches/${coachSlug}/programs`,
+    [pathname, coachSlug]
   );
 
+  const isCoachPortalLandingPage = useMemo(() => {
+    if (typeof coachSlug !== "string") return false;
+    return pathname === `/coaches/${coachSlug}`;
+  }, [pathname, coachSlug]);
+
   const isCoachPath = useMemo(
-    () => isCoachHomePage || isCoachProgramsPage,
-    [isCoachHomePage, isCoachProgramsPage]
+    () => isCoachHomePage || isCoachProgramsPage || isCoachPortalLandingPage,
+    [isCoachHomePage, isCoachProgramsPage, isCoachPortalLandingPage]
   );
 
   useEffect(() => {
@@ -116,6 +124,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       isLoadingBranding,
       baseUrl,
       isYorby,
+      isCoachPortalLandingPage,
     }),
     [
       isCoachPath,
@@ -124,6 +133,8 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,
+      isYorby,
+      isCoachPortalLandingPage,
     ]
   );
 

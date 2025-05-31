@@ -133,7 +133,7 @@ export function AppSidebar({
   const {
     isLoadingBranding,
     isYorby,
-    isCoachProgramsPage,
+    isCoachPortalLandingPage,
     isCoachHomePage,
     isCoachPath,
   } = useMultiTenant();
@@ -144,11 +144,11 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  if (isYorby && (window.location.pathname === "/" || isCoachProgramsPage)) {
-    return null;
-  }
-
-  if (isCoachHomePage) {
+  if (
+    (isYorby && window.location.pathname === "/") ||
+    isCoachHomePage ||
+    isCoachPortalLandingPage
+  ) {
     return null;
   }
 

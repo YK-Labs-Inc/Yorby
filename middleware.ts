@@ -1,4 +1,5 @@
 import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 import { Logger } from "next-axiom";
 
@@ -95,7 +96,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   if (hostname.includes("yorby.ai")) {
     const { pathname } = request.nextUrl;
     if (pathname === "/") {
-      return Response.redirect(new URL("/coaches", request.url).toString());
+      return NextResponse.rewrite(new URL("/coaches", request.url));
     }
     return response;
   }
