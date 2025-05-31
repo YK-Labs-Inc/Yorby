@@ -3,12 +3,12 @@ import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import Link from "next/link";
 
 const Header = () => {
-  const { baseUrl, coachBrandingSettings } = useMultiTenant();
+  const { baseUrl, isCoachPath } = useMultiTenant();
 
   return (
     <Link href={baseUrl} className="flex items-center">
-      {coachBrandingSettings ? (
-        <H3>{coachBrandingSettings.title}</H3>
+      {isCoachPath ? (
+        <H3>Yorby</H3>
       ) : (
         <>
           <img

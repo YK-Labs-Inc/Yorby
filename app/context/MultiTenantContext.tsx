@@ -13,6 +13,7 @@ import { useParams, usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { S } from "@upstash/redis/zmscore-BdNsMd17";
 
 // Custom hook to get hostname
 const useHostname = (): string => {
@@ -59,8 +60,14 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
 
   const isCoachProgramsPage = useMemo(
     () =>
-      typeof coachSlug === "string" &&
-      pathname === `/coaches/${coachSlug}/programs`,
+      (typeof coachSlug === "string" &&
+        pathname?.startsWith(`/coaches/${coachSlug}/programs`)) ??
+      false,
+    [pathname, coachSlug]
+  );
+
+  const isCoachDashboardPage = useMemo(
+    () => pathname?.startsWith(`/dashboard/coach-admin`) ?? false,
     [pathname, coachSlug]
   );
 
@@ -70,13 +77,24 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   }, [pathname, coachSlug]);
 
   const isCoachPath = useMemo(
-    () => isCoachHomePage || isCoachProgramsPage || isCoachPortalLandingPage,
-    [isCoachHomePage, isCoachProgramsPage, isCoachPortalLandingPage]
+    () =>
+      isCoachHomePage ||
+      isCoachProgramsPage ||
+      isCoachPortalLandingPage ||
+      isCoachDashboardPage,
+    [
+      isCoachHomePage,
+      isCoachProgramsPage,
+      isCoachPortalLandingPage,
+      isCoachDashboardPage,
+    ]
   );
 
   useEffect(() => {
-    if (isCoachPath) {
+    if (isCoachPath && coachSlug) {
       setBaseUrl(`/coaches/${coachSlug}/programs`);
+    } else if (isCoachDashboardPage) {
+      setBaseUrl(`/dashboard/coach-admin/programs`);
     } else {
       setBaseUrl(`/dashboard/jobs`);
     }
