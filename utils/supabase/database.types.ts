@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
           query?: string
-          variables?: Json
           extensions?: Json
+          variables?: Json
+          operationName?: string
         }
         Returns: Json
       }
@@ -336,6 +336,7 @@ export type Database = {
       custom_job_question_submission_feedback: {
         Row: {
           cons: string[]
+          correctness_score: number | null
           created_at: string
           feedback_role: Database["public"]["Enums"]["feedback_role"]
           id: string
@@ -344,6 +345,7 @@ export type Database = {
         }
         Insert: {
           cons: string[]
+          correctness_score?: number | null
           created_at?: string
           feedback_role: Database["public"]["Enums"]["feedback_role"]
           id?: string
@@ -352,6 +354,7 @@ export type Database = {
         }
         Update: {
           cons?: string[]
+          correctness_score?: number | null
           created_at?: string
           feedback_role?: Database["public"]["Enums"]["feedback_role"]
           id?: string

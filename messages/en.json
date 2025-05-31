@@ -1911,7 +1911,8 @@
         "deleteDialogConfirm": "Delete",
         "deleteDialogCancel": "Cancel",
         "deleteDialogSuccess": "Feedback deleted successfully.",
-        "deleteDialogError": "Failed to delete feedback. Please try again."
+        "deleteDialogError": "Failed to delete feedback. Please try again.",
+        "correctnessScore": "Correctness Score"
       }
     },
     "Header": {

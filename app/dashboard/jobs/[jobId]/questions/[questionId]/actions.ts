@@ -211,6 +211,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     {
       pros: [],
       cons: [],
+      correctness_score: 100,
     },
     null,
     null,
@@ -273,7 +274,7 @@ const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
   answer: string,
-  feedback: { pros: string[]; cons: string[] },
+  feedback: { pros: string[]; cons: string[]; correctness_score: number },
   bucketName: string | null,
   filePath: string | null,
   audioRecordingDuration: string | null,
@@ -321,6 +322,7 @@ const writeAnswerToDatabase = async (
         feedback_role: "ai",
         pros: feedback.pros,
         cons: feedback.cons,
+        correctness_score: feedback.correctness_score,
       });
 
     if (feedbackError) {
@@ -388,15 +390,15 @@ const generateFeedback = async (
   const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
 
-    As an expert job interviewer, you will provide feedback on the candidate's answer to the question.
+    As an expert job interviewer, you will provide feedback on the candidate's answer to the question, and also assign a correctness_score (0-100) that measures how correct the answer is, based primarily on the answer guidelines. Use the sample answers as additional context/examples, but do not require the user's answer to match them directly. Grade against the answer guidelines.
 
     I will provide you with the job title, job description, an optional company name and optional company description,
-    the question, the question's answer guidelines, the candidate's answer, and potentially some files that that contain details
+    the question, the question's answer guidelines, the candidate's answer, and potentially some files that contain details
     about the candidate's previous work experience.
 
     ${
     coachKnowledgeBase
-      ? `The question you are trying to generate feedback is a part of 
+      ? `The question you are trying to generate feedback for is a part of 
       a coaching program put together by a career coach. In this scenario, I will also provide you 
       some additional information from a career coach that could be relevant to the question. For example, it could contain
       some proprietary framework that the career coach uses to evaluate candidates.
@@ -408,21 +410,23 @@ const generateFeedback = async (
 
     ${
     sampleAnswers.length > 0
-      ? `I will also provide you with sample answers to this question that can serve as examples of good responses. Use these to help evaluate the candidate's answer and provide more specific feedback.`
+      ? `I will also provide you with sample answers to this question that can serve as examples of good responses. Use these to help evaluate the candidate's answer and provide more specific feedback, but do not require the candidate's answer to match them directly.`
       : ""
   }
 
     You will provide feedback on the candidate's answer and provide a list of pros and cons.
 
+    You will also provide a correctness_score, which is a number between 0 and 100 (inclusive), that represents how correct the candidate's answer is, based on the answer guidelines. 100 means the answer is perfect according to the guidelines, 0 means it does not meet the guidelines at all.
+
     You will provide your feedback in the following format:
 
     {
       "pros": string[],
-      "cons": string[]
+      "cons": string[],
+      "correctness_score": number
     }
 
-    For each con, provide a reason why the candidate's answer is not good and also provide actionable steps on how to improve the candidate's
-    answer.
+    For each con, provide a reason why the candidate's answer is not good and also provide actionable steps on how to improve the candidate's answer.
     If possible, use the candidate's previous work experience files to rewrite their answer and address the con that you provided. 
 
     Do not force yourself to provide feedback on the candidate's answer if you do not have any feedback to provide.
@@ -478,7 +482,7 @@ const generateFeedback = async (
         content: [
           {
             type: "text",
-            text: "Generate the feedback",
+            text: "Generate the feedback and correctness_score",
           },
           ...files.map((f) => ({
             type: "file" as "file",
@@ -491,6 +495,7 @@ const generateFeedback = async (
     schema: z.object({
       pros: z.array(z.string()),
       cons: z.array(z.string()),
+      correctness_score: z.number().min(0).max(100),
     }),
     loggingContext: {
       jobId,
@@ -498,11 +503,12 @@ const generateFeedback = async (
       function: "generateFeedback",
     },
   });
-  const { pros, cons } = result;
-  logger.info("Feedback generated", { pros, cons });
+  const { pros, cons, correctness_score } = result;
+  logger.info("Feedback generated", { pros, cons, correctness_score });
   return {
     pros,
     cons,
+    correctness_score,
   };
 };
 
