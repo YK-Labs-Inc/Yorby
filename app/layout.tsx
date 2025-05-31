@@ -221,7 +221,6 @@ export default async function RootLayout({
   let hasSubscription = false;
   let onboardingState = null;
   let isResumeBuilderEnabled = false;
-  let isSubscriptionVariant = false;
   let isMemoriesEnabled = false;
   let enableTransformResume = false;
   let referralsEnabled = false;
@@ -243,9 +242,6 @@ export default async function RootLayout({
       students = await fetchStudents(user.id);
     }
 
-    isSubscriptionVariant =
-      (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-      "test";
     isResumeBuilderEnabled = Boolean(
       await posthog.isFeatureEnabled("enable-resume-builder", user.id)
     );
@@ -330,7 +326,6 @@ export default async function RootLayout({
                                 interviewCopilots={interviewCopilots}
                                 isResumeBuilderEnabled={isResumeBuilderEnabled}
                                 resumes={resumes}
-                                isSubscriptionVariant={isSubscriptionVariant}
                                 isMemoriesEnabled={isMemoriesEnabled}
                                 enableTransformResume={enableTransformResume}
                                 referralsEnabled={referralsEnabled}

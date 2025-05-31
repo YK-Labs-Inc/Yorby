@@ -12,7 +12,6 @@ export default function PracticeQuestionsClientWrapper({
   userCredits,
   currentPage,
   numFreeQuestions = 1,
-  isSubscriptionVariant,
   isMultiTenantExperience,
 }: {
   jobId: string;
@@ -21,7 +20,6 @@ export default function PracticeQuestionsClientWrapper({
   userCredits: number;
   currentPage: number;
   numFreeQuestions?: number;
-  isSubscriptionVariant: boolean;
   isMultiTenantExperience: boolean;
 }) {
   const router = useRouter();
@@ -74,7 +72,6 @@ export default function PracticeQuestionsClientWrapper({
       userCredits={userCredits}
       currentPage={currentPage}
       numFreeQuestions={numFreeQuestions}
-      isSubscriptionVariant={isSubscriptionVariant}
       sortOrder={sortOrder}
       showAnswered={showAnswered}
       showUnanswered={showUnanswered}

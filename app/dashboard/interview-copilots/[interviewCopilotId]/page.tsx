@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { linkAnonymousAccount } from "@/app/dashboard/jobs/[jobId]/actions";
-import PostHogClient from "@/app/posthog";
 import MobileWarning from "./MobileWarning";
 
 const fetchInterviewCopilot = async (interviewCopilotId: string) => {
@@ -89,8 +88,6 @@ export default async function Page({
     formMessage = { message: message };
   }
 
-  const posthog = PostHogClient();
-
   if (interviewCopilot?.status === "complete") {
     redirect(`/dashboard/interview-copilots/${interviewCopilotId}/review`);
   }
@@ -127,9 +124,6 @@ export default async function Page({
   const hasSubscription = await fetchHasSubscription(user?.id || "");
   const isLocked =
     interviewCopilot.interview_copilot_access === "locked" && !hasSubscription;
-  const isSubscriptionVariant =
-    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-    "test";
 
   return (
     <div className="container mx-auto px-4 py-8">

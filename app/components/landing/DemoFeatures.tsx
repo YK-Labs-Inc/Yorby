@@ -13,7 +13,6 @@ export default function DemoFeatures({
   user,
   hasSubscription,
   credits,
-  isSubscriptionVariant,
   isFreemiumEnabled,
   transformResumeEnabled,
   enableResumesFileUpload,
@@ -21,7 +20,6 @@ export default function DemoFeatures({
   user: any;
   hasSubscription: boolean;
   credits: number;
-  isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   transformResumeEnabled: boolean;
   enableResumesFileUpload: boolean;
@@ -56,7 +54,6 @@ export default function DemoFeatures({
           hasSubscription={hasSubscription}
           credits={credits}
           user={user}
-          isSubscriptionVariant={isSubscriptionVariant}
           isFreemiumEnabled={isFreemiumEnabled}
           transformResumeEnabled={transformResumeEnabled}
           enableResumesFileUpload={enableResumesFileUpload}

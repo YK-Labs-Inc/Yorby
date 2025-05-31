@@ -110,11 +110,6 @@ export default async function CustomJob({
       "optional-anonymous-account-linking",
       user.id
     )) === "control";
-  const isSubscriptionVariant =
-    (await posthog.getFeatureFlag(
-      "subscription-price-test-1",
-      user.id || ""
-    )) === "test";
   const userSubmittedQuestionsEnabled = await posthog.isFeatureEnabled(
     "user-submitted-questions",
     user.id
@@ -209,7 +204,6 @@ export default async function CustomJob({
               userCredits={userCredits}
               currentPage={currentPage}
               numFreeQuestions={3}
-              isSubscriptionVariant={isSubscriptionVariant}
               isMultiTenantExperience={isMultiTenantExperience}
             />
           )}
@@ -219,7 +213,6 @@ export default async function CustomJob({
               filter={filter}
               userCredits={userCredits}
               isLocked={isLocked}
-              isSubscriptionVariant={isSubscriptionVariant}
             />
           )}
         </div>

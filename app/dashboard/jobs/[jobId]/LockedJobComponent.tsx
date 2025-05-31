@@ -4,16 +4,6 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { unlockJob } from "./actions";
-import { useActionState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import React from "react";
 
 const mockQuestions = [
@@ -36,44 +26,15 @@ export default function LockedJobComponent({
   jobId,
   userCredits,
   view = "practice",
-  isSubscriptionVariant = false,
 }: {
   jobId: string;
   userCredits: number;
   view: "practice" | "mock";
-  isSubscriptionVariant: boolean;
 }) {
   const t = useTranslations("upgrade");
-  const [state, action, pending] = useActionState(unlockJob, null);
-  const [showDialog, setShowDialog] = React.useState(false);
-
-  useEffect(() => {
-    if (state?.error) {
-      alert(state.error);
-    }
-  }, [state]);
 
   return (
     <>
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Need More Credits</DialogTitle>
-            <DialogDescription className="space-y-3 pt-2">
-              {t("locked.insufficientCredits")}
-              <br />
-              <br />
-              {t("locked.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-6">
-            <Link href="/purchase">
-              <Button size="lg">{t("locked.title")}</Button>
-            </Link>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <div className="relative mt-4">
         {/* Blurred mock questions in the background */}
         <div className="absolute inset-0 w-full">
@@ -106,9 +67,7 @@ export default function LockedJobComponent({
               <Lock className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {isSubscriptionVariant
-                ? t("locked.subscriptionTitle")
-                : t("locked.title")}
+              {t("locked.subscriptionTitle")}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
               {t(
@@ -117,33 +76,11 @@ export default function LockedJobComponent({
                   : "locked.description"
               )}
             </p>
-            {isSubscriptionVariant ? (
-              <Link href="/purchase">
-                <Button size="lg" className="mt-2">
-                  {t("locked.button")}
-                </Button>
-              </Link>
-            ) : userCredits > 0 ? (
-              <form action={action}>
-                <input type="hidden" name="jobId" value={jobId} />
-                <input
-                  type="hidden"
-                  name="numberOfCredits"
-                  value={userCredits}
-                />
-                <Button size="lg" className="mt-2" type="submit">
-                  {pending ? t("locked.unlocking") : t("locked.button")}
-                </Button>
-              </form>
-            ) : (
-              <Button
-                size="lg"
-                className="mt-2"
-                onClick={() => setShowDialog(true)}
-              >
+            <Link href="/purchase">
+              <Button size="lg" className="mt-2">
                 {t("locked.button")}
               </Button>
-            )}
+            </Link>
           </div>
         </div>
       </div>

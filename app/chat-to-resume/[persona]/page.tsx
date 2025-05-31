@@ -17,16 +17,12 @@ export default async function ChatToResume({
   } = await supabase.auth.getUser();
   let hasSubscription = false;
   let credits = 0;
-  let isSubscriptionVariant = false;
   let isFreemiumEnabled = false;
   let transformResumeEnabled = false;
   let enableResumesFileUpload = false;
   if (user) {
     hasSubscription = await fetchHasSubscription(user.id);
     credits = await fetchUserCredits(user.id);
-    isSubscriptionVariant =
-      (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-      "test";
     isFreemiumEnabled =
       (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
       "test";
@@ -44,7 +40,6 @@ export default async function ChatToResume({
         hasSubscription={hasSubscription}
         credits={credits}
         user={user}
-        isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
         persona={persona}
         transformResumeEnabled={transformResumeEnabled}

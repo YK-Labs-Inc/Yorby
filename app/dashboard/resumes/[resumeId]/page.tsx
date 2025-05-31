@@ -48,9 +48,6 @@ export default async function ResumePage({
   }
   const hasSubscription = await fetchHasSubscription(user.id);
   const credits = await fetchUserCredits(user.id);
-  const isSubscriptionVariant =
-    (await posthog.getFeatureFlag("subscription-price-test-1", user.id)) ===
-    "test";
   const isFreemiumEnabled =
     (await posthog.getFeatureFlag("freemium-resume-experience", user.id)) ===
     "test";
@@ -77,7 +74,6 @@ export default async function ResumePage({
       hasSubscription={hasSubscription}
       credits={credits}
       user={user}
-      isSubscriptionVariant={isSubscriptionVariant}
       isFreemiumEnabled={isFreemiumEnabled}
       transformResumeEnabled={transformResumeEnabled ?? false}
       transformSummary={transformSummary}
