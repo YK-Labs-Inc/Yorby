@@ -18,7 +18,7 @@ import { UserMenu } from "../auth/user-menu";
 import { LinkAccountModal } from "../auth/link-account-modal";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 import {
   DropdownMenu,
@@ -124,9 +124,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"coach" | "student">(
-    coachInfo.isCoach ? "coach" : "student"
-  );
+  const [showSidebar, setShowSidebar] = useState(false);
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
@@ -137,6 +135,7 @@ export function AppSidebar({
     isCoachHomePage,
     isCoachPath,
   } = useMultiTenant();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (authError || authSuccess) {
@@ -144,11 +143,19 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  if (
-    (isYorby && window.location.pathname === "/") ||
-    isCoachHomePage ||
-    isCoachPortalLandingPage
-  ) {
+  useEffect(() => {
+    if (
+      (isYorby && pathname === "/") ||
+      isCoachHomePage ||
+      isCoachPortalLandingPage
+    ) {
+      setShowSidebar(false);
+    } else {
+      setShowSidebar(true);
+    }
+  }, [isYorby, pathname]);
+
+  if (!showSidebar) {
     return null;
   }
 
@@ -161,55 +168,21 @@ export function AppSidebar({
       <SidebarHeader>
         <Header />
 
-        {/* View Toggle for Coach/Student - Only show if user is a coach */}
-        {user && coachInfo.isCoach && (
-          <div className="flex justify-center mb-3 mt-3">
-            <div
-              className="inline-flex rounded-md shadow-sm border border-sidebar-border"
-              role="group"
-            >
-              <button
-                type="button"
-                className={`px-4 py-2 text-sm font-medium rounded-l-md ${
-                  viewMode === "coach"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-transparent text-muted-foreground hover:bg-muted/50"
-                }`}
-                onClick={() => setViewMode("coach")}
-              >
-                {t("coachView")}
-              </button>
-              <button
-                type="button"
-                className={`px-4 py-2 text-sm font-medium rounded-r-md ${
-                  viewMode === "student"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-transparent text-muted-foreground hover:bg-muted/50"
-                }`}
-                onClick={() => setViewMode("student")}
-              >
-                {t("studentView")}
-              </button>
-            </div>
-          </div>
-        )}
-
         {user && (
           <>
             <DropdownMenu>
-              {/* Only show Create dropdown in student view or if not a coach */}
-              {!isCoachPath &&
-                (viewMode === "student" || !coachInfo.isCoach) && (
-                  <DropdownMenuTrigger asChild>
-                    <Button className="w-full justify-between">
-                      <span className="flex items-center gap-2">
-                        <PlusIcon className="h-4 w-4" />
-                        {t("create")}
-                      </span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                )}
+              {/* Only show Create dropdown if not a coach path */}
+              {!isCoachPath && (
+                <DropdownMenuTrigger asChild>
+                  <Button className="w-full justify-between">
+                    <span className="flex items-center gap-2">
+                      <PlusIcon className="h-4 w-4" />
+                      {t("create")}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              )}
               <DropdownMenuContent align="end" className="w-[200px]">
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/jobs?newJob=true">
@@ -241,8 +214,8 @@ export function AppSidebar({
       <SidebarContent>
         {user && (
           <>
-            {/* COACH VIEW */}
-            {viewMode === "coach" && coachInfo.isCoach && (
+            {/* COACH VIEW: Only show for coaches */}
+            {coachInfo.isCoach && (
               <>
                 {/* Students Section - Coach View */}
                 {students.length > 0 && (
@@ -289,15 +262,15 @@ export function AppSidebar({
               </>
             )}
 
-            {/* STUDENT VIEW */}
-            {viewMode === "student" && (
+            {/* STUDENT VIEW: Only show for non-coaches */}
+            {!coachInfo.isCoach && (
               <>
                 {/* Interview Prep Section - Student View */}
                 {jobs.length > 0 && (
                   <SidebarGroup>
                     <div className="px-4 py-2">
                       <h4 className="text-sm font-semibold text-muted-foreground">
-                        {t("interviewPrep")}
+                        {isCoachPath ? t("programs") : t("interviewPrep")}
                       </h4>
                     </div>
                     <SidebarGroupContent>

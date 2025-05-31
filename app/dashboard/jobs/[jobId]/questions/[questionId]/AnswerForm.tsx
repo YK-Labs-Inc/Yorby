@@ -97,7 +97,7 @@ export default function AnswerForm({
     : feedbackFromLegacy;
 
   const manualFeedback =
-    currentSubmission?.custom_job_question_submission_feedback?.[0] || null;
+    currentSubmission?.custom_job_question_submission_feedback?.[0];
 
   const searchParams = useSearchParams();
   const error = searchParams?.get("error") as string;
@@ -200,7 +200,7 @@ export default function AnswerForm({
               {view === "question" ? t("questionLabel") : t("submissionsLabel")}
             </CardTitle>
             <Link
-              href={`/dashboard/jobs/${jobId}/questions/${question.id}?${newViewParams.toString()}`}
+              href={`${baseUrl}/${jobId}/questions/${question.id}?${newViewParams.toString()}`}
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
             >
               {view === "question"
@@ -367,7 +367,7 @@ export default function AnswerForm({
                   return (
                     <Link
                       key={submission.id}
-                      href={`/dashboard/jobs/${jobId}/questions/${question.id}?submissionId=${submission.id}`}
+                      href={`${baseUrl}/${jobId}/questions/${question.id}?submissionId=${submission.id}`}
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors w-full text-left"
                     >
                       <div className="flex flex-col gap-2">
@@ -396,7 +396,7 @@ export default function AnswerForm({
       </Card>
       {view === "question" && (
         <>
-          {manualFeedback && (
+          {manualFeedback?.feedback_role === "user" && (
             <Card className="mt-6 border-4 border-yellow-400 bg-yellow-50/80 shadow-xl relative overflow-visible">
               <div className="absolute -top-5 left-6 flex items-center gap-2 z-10">
                 <div
