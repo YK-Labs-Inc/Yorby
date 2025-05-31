@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import { unlockInterviewCopilot } from "./actions";
 import { cn } from "@/lib/utils";
-import { INTERVIEW_COPILOT_REQUIRED_CREDITS } from "@/app/constants/interview_copilots";
 import {
   Dialog,
   DialogContent,
@@ -27,44 +25,16 @@ interface LockedInterviewCopilotComponentProps {
     interview_copilot_files: Tables<"interview_copilot_files">[];
   };
   userCredits: number;
-  isSubscriptionVariant: boolean;
 }
 
 export default function LockedInterviewCopilotComponent({
   interviewCopilot,
   userCredits,
-  isSubscriptionVariant,
 }: LockedInterviewCopilotComponentProps) {
   const t = useTranslations("interviewCopilots");
-  const [state, action, pending] = useActionState(unlockInterviewCopilot, null);
-  const [showDialog, setShowDialog] = React.useState(false);
 
   return (
     <div className="flex flex-col gap-4">
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("locked.insufficientCredits.title")}</DialogTitle>
-            <DialogDescription className="space-y-3 pt-2">
-              {t("locked.insufficientCredits.description")}
-              <br />
-              <br />
-              {t("locked.creditCost", {
-                credits: INTERVIEW_COPILOT_REQUIRED_CREDITS,
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-6">
-            <Button onClick={() => setShowDialog(false)} variant="outline">
-              {t("locked.cancel")}
-            </Button>
-            <Button asChild>
-              <a href="/purchase">{t("locked.insufficientCredits.button")}</a>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Header with Title and Unlock Button */}
       <div className="flex-col md:flex-row flex items-start md:items-center justify-between gap-4">
         <div className="flex-1">
@@ -73,38 +43,11 @@ export default function LockedInterviewCopilotComponent({
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          {isSubscriptionVariant ? (
-            <Link href="/purchase">
-              <AIButton pending={false} pendingText={""}>
-                {t("locked.subscriptionCTA")}
-              </AIButton>
-            </Link>
-          ) : userCredits > 0 ? (
-            <form action={action}>
-              <input
-                type="hidden"
-                name="interviewCopilotId"
-                value={interviewCopilot.id}
-              />
-              <input type="hidden" name="numberOfCredits" value={userCredits} />
-              <AIButton
-                type="submit"
-                pending={pending}
-                pendingText={t("locked.unlocking")}
-              >
-                {t("locked.button")}
-              </AIButton>
-              {state?.error && <FormMessage message={{ error: state.error }} />}
-            </form>
-          ) : (
-            <AIButton
-              onClick={() => setShowDialog(true)}
-              pendingText={t("locked.unlocking")}
-              pending={pending}
-            >
-              {t("locked.button")}
+          <Link href="/purchase">
+            <AIButton pending={false} pendingText={""}>
+              {t("locked.subscriptionCTA")}
             </AIButton>
-          )}
+          </Link>
         </div>
       </div>
 

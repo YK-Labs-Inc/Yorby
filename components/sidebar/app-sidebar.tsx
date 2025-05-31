@@ -40,7 +40,6 @@ interface AppSidebarProps {
   user: User | null;
   hasSubscription: boolean;
   isResumeBuilderEnabled: boolean;
-  isSubscriptionVariant: boolean;
   resumes: Tables<"resumes">[];
   isMemoriesEnabled: boolean;
   enableTransformResume: boolean;
@@ -115,7 +114,6 @@ export function AppSidebar({
   hasSubscription,
   user,
   isResumeBuilderEnabled,
-  isSubscriptionVariant,
   resumes,
   isMemoriesEnabled,
   enableTransformResume,
@@ -330,20 +328,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        {!isSubscriptionVariant && user && !hasSubscription && (
-          <>
-            <p className="text-lg text-center font-bold px-4">
-              {t("numberOfCredits", { numberOfCredits })}
-            </p>
-            <Link className="w-full" href="/purchase">
-              <Button className="w-full">
-                <PlusIcon />
-                {t("buyMoreCredits")}
-              </Button>
-            </Link>
-          </>
-        )}
-        {!isCoachPath && isSubscriptionVariant && user && !hasSubscription && (
+        {user && !hasSubscription && !isCoachPath && (
           <Link href="/purchase">
             <Button className="w-full">{t("unlockAllAccess")}</Button>
           </Link>
