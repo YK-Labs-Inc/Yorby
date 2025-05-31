@@ -22,7 +22,7 @@ import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { uploadFile } from "@/utils/storage";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
-import InterviewFeedback from "@/components/ui/interview-feedback";
+import QuestionFeedback from "@/components/ui/question-feedback";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -488,7 +488,7 @@ export default function AnswerForm({
               </CardContent>
             </Card>
           )}
-          {feedback && <InterviewFeedback feedback={feedback} />}
+          {feedback && <QuestionFeedback feedback={feedback} />}
           <AnswerGuideline question={question} />
           <SampleAnswers sampleAnswers={sampleAnswers} />
         </>

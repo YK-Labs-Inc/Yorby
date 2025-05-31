@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteCoachFeedback } from "./actions";
 import AudioPlayer from "@/components/ui/audio-player";
-import InterviewFeedback from "@/components/ui/interview-feedback";
+import QuestionFeedback from "@/components/ui/question-feedback";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -329,7 +329,7 @@ export default function StudentQuestionSubmissions({
                 {/* Pros/Cons using InterviewFeedback component */}
                 {feedback &&
                 (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
-                  <InterviewFeedback feedback={feedback} className="mt-4" />
+                  <QuestionFeedback feedback={feedback} className="mt-4" />
                 ) : (
                   <p className="italic text-gray-500">{t("greatAnswer")}</p>
                 )}

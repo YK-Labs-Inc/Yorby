@@ -7,15 +7,15 @@ interface FeedbackData {
   cons: string[];
 }
 
-interface InterviewFeedbackProps {
+interface QuestionFeedbackProps {
   feedback: FeedbackData;
   className?: string;
 }
 
-export default function InterviewFeedback({
+export default function QuestionFeedback({
   feedback,
   className = "",
-}: InterviewFeedbackProps) {
+}: QuestionFeedbackProps) {
   const t = useTranslations("interviewQuestion");
 
   if (feedback.pros.length === 0 && feedback.cons.length === 0) {
