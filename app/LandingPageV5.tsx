@@ -10,7 +10,6 @@ export default function LandingPageV5(props: {
   user: any;
   hasSubscription: boolean;
   credits: number;
-  isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   transformResumeEnabled: boolean;
   enableResumesFileUpload: boolean;

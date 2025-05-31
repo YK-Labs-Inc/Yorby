@@ -22,7 +22,6 @@ import { FormMessage, Message } from "@/components/form-message";
 import Link from "next/link";
 import {
   saveResume,
-  unlockResume,
   trackResumeEdit,
   getResumeEditCount,
   verifyAnonymousUser,
@@ -269,7 +268,6 @@ const ResumeBuilderComponent = ({
   hasSubscription,
   credits,
   user,
-  isSubscriptionVariant,
   isFreemiumEnabled,
   persona,
   transformResumeEnabled,
@@ -280,7 +278,6 @@ const ResumeBuilderComponent = ({
   hasSubscription: boolean;
   credits: number;
   user: User | null;
-  isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   persona?: string;
   transformResumeEnabled: boolean;
@@ -304,18 +301,6 @@ const ResumeBuilderComponent = ({
   const [showLimitDialog, setShowLimitDialog] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const MAX_FREE_EDITS = 0;
-  const [unlockState, unlockAction, unlockPending] = useActionState(
-    unlockResume,
-    {
-      error: "",
-    }
-  );
-  const [verifyAnonymousUserState, verifyAnonymousUserAction] = useActionState(
-    verifyAnonymousUser,
-    {
-      error: "",
-    }
-  );
   const [_, startTransition] = useTransition();
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const pathname = usePathname();
@@ -345,14 +330,6 @@ const ResumeBuilderComponent = ({
     },
     [setSelectedVoice]
   );
-
-  // Handle unlock success
-  useEffect(() => {
-    if (unlockState?.success && resumeId) {
-      setShowLimitDialog(false);
-      fetchResumeData(resumeId);
-    }
-  }, [unlockState?.success, resumeId]);
 
   const shouldShowSplitView = resumeId || isGenerating;
   const isLocked = Boolean(
@@ -415,8 +392,7 @@ const ResumeBuilderComponent = ({
                 resume_list_items(*), 
                 resume_detail_items(
                   *,
-                  resume_item_descriptions(*))
-              )`
+                  resume_item_descriptions(*))\n              )`
           )
           .eq("id", resumeId)
           .single();
@@ -828,15 +804,7 @@ const ResumeBuilderComponent = ({
           <DialogHeader>
             <DialogTitle>{t("freemium.limitReached.title")}</DialogTitle>
             <DialogDescription>
-              {isSubscriptionVariant
-                ? t("freemium.limitReached.description")
-                : credits < 1
-                  ? t("freemium.limitReached.descriptionNoCredits", {
-                      numberOfCredits: 1,
-                    })
-                  : t("freemium.limitReached.descriptionWithCredits", {
-                      numberOfCredits: 1,
-                    })}
+              {t("freemium.limitReached.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6 flex flex-col sm:flex-row justify-end gap-2">
@@ -847,36 +815,12 @@ const ResumeBuilderComponent = ({
             >
               {t("freemium.limitReached.cancel")}
             </Button>
-            {isSubscriptionVariant ? (
-              <Link href="/purchase" className="w-full sm:w-auto">
-                <Button className="w-full">
-                  {t("freemium.limitReached.upgrade")}
-                </Button>
-              </Link>
-            ) : credits < 1 ? (
-              <Link href="/purchase" className="w-full sm:w-auto">
-                <Button className="w-full">
-                  {t("freemium.limitReached.purchaseCredits")}
-                </Button>
-              </Link>
-            ) : (
-              <form action={unlockAction} className="w-full sm:w-auto">
-                <input type="hidden" name="resumeId" value={resumeId} />
-                <Button
-                  type="submit"
-                  disabled={unlockPending}
-                  className="w-full"
-                >
-                  {unlockPending
-                    ? t("freemium.limitReached.unlocking")
-                    : t("freemium.limitReached.unlockWithCredit")}
-                </Button>
-              </form>
-            )}
+            <Link href="/purchase" className="w-full sm:w-auto">
+              <Button className="w-full">
+                {t("freemium.limitReached.upgrade")}
+              </Button>
+            </Link>
           </div>
-          {unlockState?.error && (
-            <FormMessage message={{ error: unlockState.error }} />
-          )}
         </DialogContent>
       </Dialog>
     </div>
@@ -888,7 +832,6 @@ export default function ResumeBuilder({
   hasSubscription,
   credits,
   user,
-  isSubscriptionVariant,
   isFreemiumEnabled,
   persona,
   transformResumeEnabled,
@@ -899,7 +842,6 @@ export default function ResumeBuilder({
   hasSubscription: boolean;
   credits: number;
   user: User | null;
-  isSubscriptionVariant: boolean;
   isFreemiumEnabled: boolean;
   enableResumesFileUpload: boolean;
   persona?: string;
@@ -916,7 +858,6 @@ export default function ResumeBuilder({
         hasSubscription={hasSubscription}
         credits={credits}
         user={user}
-        isSubscriptionVariant={isSubscriptionVariant}
         isFreemiumEnabled={isFreemiumEnabled}
         persona={persona}
         transformResumeEnabled={transformResumeEnabled}

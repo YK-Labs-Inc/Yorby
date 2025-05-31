@@ -23,7 +23,6 @@ interface PracticeQuestionsProps {
   userCredits: number;
   currentPage: number;
   numFreeQuestions?: number;
-  isSubscriptionVariant: boolean;
   sortOrder: "asc" | "desc";
   showAnswered: boolean;
   showUnanswered: boolean;
@@ -44,7 +43,6 @@ export default function PracticeQuestions({
   userCredits,
   currentPage,
   numFreeQuestions = 1,
-  isSubscriptionVariant,
   sortOrder,
   showAnswered,
   showUnanswered,
@@ -290,7 +288,6 @@ export default function PracticeQuestions({
                 jobId={jobId}
                 userCredits={userCredits}
                 view="practice"
-                isSubscriptionVariant={isSubscriptionVariant}
               />
             </>
           ) : (
