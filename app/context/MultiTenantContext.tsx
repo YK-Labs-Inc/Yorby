@@ -13,7 +13,6 @@ import { useParams, usePathname } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types"; // Import Database type
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { S } from "@upstash/redis/zmscore-BdNsMd17";
 
 // Custom hook to get hostname
 const useHostname = (): string => {
