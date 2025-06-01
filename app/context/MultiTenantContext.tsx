@@ -37,6 +37,7 @@ interface MultiTenantContextProps {
   baseUrl: string;
   isYorby: boolean;
   isCoachPortalLandingPage: boolean;
+  isCoachDashboardPage: boolean;
 }
 
 const MultiTenantContext = createContext<MultiTenantContextProps | undefined>(
@@ -54,7 +55,12 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const { logError } = useAxiomLogging();
   const pathname = usePathname();
 
-  const isYorby = useMemo(() => hostname.includes("yorby.ai"), [hostname]);
+  const isYorby = useMemo(
+    () =>
+      hostname.includes("yorby.ai") ||
+      process.env.NEXT_PUBLIC_IS_YORBY === "true",
+    [hostname]
+  );
 
   const isCoachHomePage = useMemo(() => pathname === "/coaches", [pathname]);
 
@@ -143,6 +149,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       baseUrl,
       isYorby,
       isCoachPortalLandingPage,
+      isCoachDashboardPage,
     }),
     [
       isCoachPath,
@@ -153,6 +160,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       baseUrl,
       isYorby,
       isCoachPortalLandingPage,
+      isCoachDashboardPage,
     ]
   );
 

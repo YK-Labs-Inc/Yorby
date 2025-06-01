@@ -226,7 +226,7 @@ const addUserToBrevo = async ({
       return false;
     } catch (error: any) {
       // Brevo throws an error if the contact does not exist
-      logger.error("Brevo contact not found. Proceeding to create.", {
+      logger.info("Brevo contact not found. Proceeding to create.", {
         error,
         email,
       });

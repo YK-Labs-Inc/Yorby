@@ -26,7 +26,7 @@ export default function SignInForm() {
   }
 
   return (
-    <div className="container max-w-md mx-auto pt-20">
+    <div className="container max-w-md mx-auto">
       <form action={action} className="space-y-6">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">{signInT("title")}</h1>
