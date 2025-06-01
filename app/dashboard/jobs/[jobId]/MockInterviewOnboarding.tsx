@@ -11,13 +11,34 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
+import { markMockInterviewOnboardingViewed } from "./questions/[questionId]/actions";
 
-export default function MockInterviewOnboarding() {
-  const [showOnboarding, setShowOnboarding] = useState(true);
+interface MockInterviewOnboardingProps {
+  hasViewedOnboarding: boolean;
+}
+
+export default function MockInterviewOnboarding({
+  hasViewedOnboarding,
+}: MockInterviewOnboardingProps) {
+  const [showOnboarding, setShowOnboarding] = useState(!hasViewedOnboarding);
   const t = useTranslations("mockInterview");
 
+  const handleCloseOnboarding = async () => {
+    setShowOnboarding(false);
+    // Mark onboarding as viewed in the database
+    await markMockInterviewOnboardingViewed();
+  };
+
+  // Don't render if user has already viewed onboarding
+  if (hasViewedOnboarding) {
+    return null;
+  }
+
   return (
-    <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+    <Dialog
+      open={showOnboarding}
+      onOpenChange={(open) => !open && handleCloseOnboarding()}
+    >
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -45,7 +66,7 @@ export default function MockInterviewOnboarding() {
           ))}
         </div>
         <div className="flex justify-end">
-          <Button onClick={() => setShowOnboarding(false)}>
+          <Button onClick={handleCloseOnboarding}>
             {t("onboarding.button")}
           </Button>
         </div>

@@ -1001,3 +1001,43 @@ export async function markQuestionAnswerOnboardingViewed() {
   await logger.flush();
   return { success: true };
 }
+
+export async function markMockInterviewOnboardingViewed() {
+  const supabase = await createAdminClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  const logger = new Logger().with({
+    userId: user?.id,
+    function: "markMockInterviewOnboardingViewed",
+  });
+
+  if (userError || !user) {
+    logger.error("Error fetching user:", { error: userError?.message });
+    await logger.flush();
+    redirect("/login");
+  }
+
+  const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
+    app_metadata: {
+      ...user.app_metadata,
+      "viewed_mock_interview_onboarding": true,
+    },
+  });
+
+  if (error) {
+    logger.error("Error updating user metadata:", { error: error.message });
+    await logger.flush();
+  }
+
+  logger.info(
+    "Successfully updated mock interview onboarding status for user:",
+    {
+      userId: user.id,
+      data,
+    },
+  );
+  await logger.flush();
+}
