@@ -48,10 +48,19 @@ export default async function MockInterview({
     return true;
   });
 
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const hasViewedOnboarding =
+    user?.app_metadata?.viewed_mock_interview_onboarding === true;
+
   if (isLocked) {
     return (
       <div className="flex flex-col gap-4 w-full">
-        {allMockInterviews.length === 0 && <MockInterviewOnboarding />}
+        {allMockInterviews.length === 0 && (
+          <MockInterviewOnboarding hasViewedOnboarding={hasViewedOnboarding} />
+        )}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <InterviewFilter jobId={jobId} currentFilter={filter} />
@@ -87,7 +96,9 @@ export default async function MockInterview({
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      {allMockInterviews.length === 0 && <MockInterviewOnboarding />}
+      {allMockInterviews.length === 0 && (
+        <MockInterviewOnboarding hasViewedOnboarding={hasViewedOnboarding} />
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <InterviewFilter jobId={jobId} currentFilter={filter} />
