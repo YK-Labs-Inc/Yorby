@@ -132,8 +132,8 @@ export function AppSidebar({
     isLoadingBranding,
     isYorby,
     isCoachPortalLandingPage,
-    isCoachHomePage,
-    isCoachPath,
+    isCoachProgramsPage,
+    isCoachDashboardPage,
   } = useMultiTenant();
   const pathname = usePathname();
 
@@ -144,14 +144,10 @@ export function AppSidebar({
   }, [authError, authSuccess]);
 
   useEffect(() => {
-    if (
-      (isYorby && pathname === "/") ||
-      isCoachHomePage ||
-      isCoachPortalLandingPage
-    ) {
-      setShowSidebar(false);
-    } else {
+    if (isCoachDashboardPage || isCoachPortalLandingPage) {
       setShowSidebar(true);
+    } else {
+      setShowSidebar(false);
     }
   }, [isYorby, pathname]);
 
@@ -172,7 +168,7 @@ export function AppSidebar({
           <>
             <DropdownMenu>
               {/* Only show Create dropdown if not a coach path */}
-              {!isCoachPath && (
+              {!isYorby && (
                 <DropdownMenuTrigger asChild>
                   <Button className="w-full justify-between">
                     <span className="flex items-center gap-2">
@@ -270,7 +266,7 @@ export function AppSidebar({
                   <SidebarGroup>
                     <div className="px-4 py-2">
                       <h4 className="text-sm font-semibold text-muted-foreground">
-                        {isCoachPath ? t("programs") : t("interviewPrep")}
+                        {isYorby ? t("programs") : t("interviewPrep")}
                       </h4>
                     </div>
                     <SidebarGroupContent>
@@ -343,7 +339,7 @@ export function AppSidebar({
             </Link>
           </>
         )}
-        {!isCoachPath && isSubscriptionVariant && user && !hasSubscription && (
+        {!isYorby && isSubscriptionVariant && user && !hasSubscription && (
           <Link href="/purchase">
             <Button className="w-full">{t("unlockAllAccess")}</Button>
           </Link>
