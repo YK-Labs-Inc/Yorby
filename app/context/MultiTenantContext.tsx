@@ -56,7 +56,9 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   const isYorby = useMemo(
-    () => hostname.includes("yorby.ai") || hostname.includes("localhost"),
+    () =>
+      hostname.includes("yorby.ai") ||
+      process.env.NEXT_PUBLIC_IS_YORBY === "true",
     [hostname]
   );
 
