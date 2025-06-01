@@ -131,7 +131,6 @@ export function AppSidebar({
   const {
     isLoadingBranding,
     isYorby,
-    isCoachPortalLandingPage,
     isCoachProgramsPage,
     isCoachDashboardPage,
   } = useMultiTenant();
@@ -144,10 +143,14 @@ export function AppSidebar({
   }, [authError, authSuccess]);
 
   useEffect(() => {
-    if (isCoachDashboardPage || isCoachPortalLandingPage) {
-      setShowSidebar(true);
+    if (isYorby) {
+      if (isCoachDashboardPage || isCoachProgramsPage) {
+        setShowSidebar(true);
+      } else {
+        setShowSidebar(false);
+      }
     } else {
-      setShowSidebar(false);
+      setShowSidebar(true);
     }
   }, [isYorby, pathname]);
 
