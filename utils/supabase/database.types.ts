@@ -821,6 +821,42 @@ export type Database = {
           },
         ]
       }
+      mock_interview_questions: {
+        Row: {
+          created_at: string
+          id: string
+          interview_id: string
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interview_id: string
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interview_id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_questions_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_interview_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           id: string

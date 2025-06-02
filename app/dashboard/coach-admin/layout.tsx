@@ -9,7 +9,10 @@ interface CoachAdminLayoutProps {
 const CoachAdminLayout = async ({ children }: CoachAdminLayoutProps) => {
   const origin = (await headers()).get("x-forwarded-host");
 
-  if (!origin?.includes("yorby")) {
+  if (
+    !origin?.includes("yorby") &&
+    process.env.NEXT_PUBLIC_IS_YORBY !== "true"
+  ) {
     redirect("/");
   }
 

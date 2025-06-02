@@ -371,7 +371,7 @@ const fetchQuestionSampleAnswers = async (questionId: string) => {
   return data;
 };
 
-const generateFeedback = async (
+export const generateFeedback = async (
   jobId: string,
   questionId: string,
   answer: string,

@@ -1,33 +1,29 @@
 import { NextResponse } from "next/server";
 import {
-  GenerateContentResult,
-  GoogleGenerativeAI,
-  SchemaType,
-} from "@google/generative-ai";
-import { getAllFiles } from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/actions";
+  generateFeedback,
+  getAllFiles,
+} from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/actions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
 import { withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { z } from "zod";
-import { generateObject } from "ai";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
+
+interface JobContext {
+  jobTitle: string | null;
+  jobDescription: string | null;
+  companyName: string | null;
+  companyDescription: string | null;
+}
 
 interface GenerationResult<T> {
   data: T;
   inputTokens: number;
   outputTokens: number;
-}
-
-// Helper function to get token counts from Gemini response
-function getTokenCounts(result: GenerateContentResult) {
-  return {
-    inputTokens: result.response.usageMetadata?.promptTokenCount || 0,
-    outputTokens: result.response.usageMetadata?.candidatesTokenCount || 0,
-  };
 }
 
 async function withRetry<T>(
@@ -54,7 +50,7 @@ async function withRetry<T>(
 
 async function generateOverview(
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<string>> {
@@ -109,7 +105,7 @@ to write more feedback if you don't have any.`;
 
 async function generateProsAndCons(
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<{ pros: string[]; cons: string[] }>> {
@@ -168,110 +164,138 @@ Do not force yourself to think of a pro or a con if it is unnecessary.`;
   );
 }
 
+interface QuestionAnswerPair {
+  question: string;
+  answer: string;
+}
+
+interface MatchedQuestionData {
+  questionId: string;
+  question: string;
+  answer_guidelines: string;
+}
+
 async function generateQuestionBreakdown(
   mockInterviewId: string,
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<any[]>> {
-  const systemPrompt =
-    `You are an expert interview coach. Your job is to provide feedback on every interview question 
-  that is asked in this interview. 
-
-  Follow these steps:
-
-  1) Read the interview transcript and the context information.
-  2) Extract each interview question and answer pair from the transcript.
-  3) Generate a list of strengths and areas for improvement for each question and answer pairing and 
-  generate a score from 0-100 for each question and answer pairing.
-  4) Return the feedback in JSON format.
-
-Context Information:
-${JSON.stringify(jobContext, null, 2)}
-
-Interview Transcript:
-${transcript}
-
-Extract each question-answer pair and provide detailed feedback in this JSON format:
-{
-  "question_breakdown": [
-    {
-      "question": "question text", // string
-      "answer": "answer text", // string
-      "feedback": {
-        "strengths": ["specific strengths"], // array of strings
-        "improvements": ["areas to improve"], // array of strings
-        "rating": "score from 0-100" // number
-      }
-    }
-  ]
-}
-  
-Your final response should be a JSON object with the question_breakdown array.
-
-If there are no strengths or areas for improvement, return an empty list for that specific field.
-
-Do not force yourself to write more feedback if you don't have any.
-It is okay to have an empty strengths or any empty improvements field, however, it is not okay to have an empty rating.
-`;
   return withRetry(
     async () => {
-      const result = await generateObjectWithFallback({
-        systemPrompt,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: "Generate the question breakdown",
-              },
-              ...jobFiles.map((file) => ({
-                type: "file" as "file",
-                data: file.fileData.fileUri,
-                mimeType: file.fileData.mimeType,
-              })),
-            ],
-          },
-        ],
-        schema: z
-          .object({
-            question_breakdown: z.array(
-              z
-                .object({
-                  question: z.string(),
-                  answer: z.string(),
-                  feedback: z
-                    .object({
-                      strengths: z.array(z.string()),
-                      improvements: z.array(z.string()),
-                      rating: z.number(),
-                    })
-                    .required(),
-                })
-                .required(),
-            ),
-          })
-          .required(),
-      });
+      // Step 1: Extract question-answer pairs from transcript
+      const extractedPairs = await extractQuestionAnswerPairs(
+        transcript,
+        logger,
+      );
+
+      // Step 2: Get the associated custom job questions for this mock interview
+      const mockInterviewQuestions = await getMockInterviewQuestions(
+        mockInterviewId,
+        logger,
+      );
+
+      // Step 3: Process each extracted Q&A pair
+      const feedbackResults = await Promise.all(
+        extractedPairs.map(async (pair) => {
+          const matchedQuestion = await findMatchingQuestion(
+            pair.question,
+            mockInterviewQuestions,
+          );
+
+          if (matchedQuestion) {
+            // Step 4a: Use sophisticated generateFeedback for matched questions
+            logger.info("Using generateFeedback for matched question", {
+              questionId: matchedQuestion.questionId,
+              question: pair.question,
+            });
+
+            try {
+              const customJob = await getCustomJobFromMockInterview(
+                mockInterviewId,
+              );
+              const feedback = await generateFeedback(
+                customJob.id,
+                matchedQuestion.questionId,
+                pair.answer,
+              );
+
+              return {
+                question: pair.question,
+                answer: pair.answer,
+                pros: feedback.pros,
+                cons: feedback.cons,
+                score: feedback.correctness_score,
+              };
+            } catch (error) {
+              logger.warn(
+                "generateFeedback failed, falling back to simple AI feedback",
+                {
+                  error: error instanceof Error ? error.message : String(error),
+                  questionId: matchedQuestion.questionId,
+                },
+              );
+
+              // Fallback to simple AI feedback if generateFeedback fails
+              return await generateSimpleAIFeedback(
+                pair,
+                jobContext,
+                jobFiles,
+                logger,
+              );
+            }
+          } else {
+            // Step 4b: Use simple AI feedback for unmatched questions
+            logger.info("Using simple AI feedback for unmatched question", {
+              question: pair.question,
+            });
+            return await generateSimpleAIFeedback(
+              pair,
+              jobContext,
+              jobFiles,
+              logger,
+            );
+          }
+        }),
+      );
+
+      // Step 5: Store all feedback in database
       const supabase = await createSupabaseServerClient();
       const { error } = await supabase
         .from("mock_interview_question_feedback")
         .insert(
-          result.question_breakdown.map((q) => ({
-            question: q.question,
-            answer: q.answer,
-            pros: q.feedback.strengths,
-            cons: q.feedback.improvements,
+          feedbackResults.map((result) => ({
+            question: result.question,
+            answer: result.answer,
+            pros: result.pros,
+            cons: result.cons,
             mock_interview_id: mockInterviewId,
-            score: q.feedback.rating,
+            score: result.score,
           })),
         );
+
       if (error) {
         throw error;
       }
-      logger.info("Question breakdown generated");
+
+      // Calculate matched questions count for logging
+      const matchedCount = await Promise.all(
+        extractedPairs.map(async (pair) => {
+          const matched = await findMatchingQuestion(
+            pair.question,
+            mockInterviewQuestions,
+          );
+          return matched !== null;
+        }),
+      );
+      const totalMatchedQuestions = matchedCount.filter(Boolean).length;
+
+      logger.info("Question breakdown generated", {
+        totalQuestions: feedbackResults.length,
+        matchedQuestions: totalMatchedQuestions,
+      });
+
       return {
         data: [],
         inputTokens: 0,
@@ -283,6 +307,278 @@ It is okay to have an empty strengths or any empty improvements field, however, 
   );
 }
 
+// Helper function to extract question-answer pairs from transcript
+async function extractQuestionAnswerPairs(
+  transcript: string,
+  logger: Logger,
+): Promise<QuestionAnswerPair[]> {
+  const systemPrompt = `
+    You are an expert at analyzing interview transcripts. Your job is to extract every question-answer pair from the interview transcript.
+    
+    Parse the transcript and identify:
+    1. Each interview question asked by the interviewer
+    2. The corresponding answer given by the candidate
+    
+    Return the extracted pairs in this JSON format:
+    {
+      "question_answer_pairs": [
+        {
+          "question": "exact question text",
+          "answer": "exact answer text"
+        }
+      ]
+    }
+    
+    Instructions:
+    - Extract the exact text of questions and answers
+    - Include all questions asked, even follow-up questions
+    - Match each question with its corresponding answer
+    - If a question doesn't have a clear answer, include it with an empty answer string
+    
+    Interview Transcript:
+    ${transcript}
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Extract question-answer pairs from this transcript",
+          },
+        ],
+      },
+    ],
+    schema: z.object({
+      question_answer_pairs: z.array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      ),
+    }),
+  });
+
+  logger.info("Extracted question-answer pairs", {
+    count: result.question_answer_pairs.length,
+  });
+  return result.question_answer_pairs;
+}
+
+// Helper function to get mock interview questions for this interview
+async function getMockInterviewQuestions(
+  mockInterviewId: string,
+  logger: Logger,
+): Promise<MatchedQuestionData[]> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("mock_interview_questions")
+    .select(`
+      custom_job_questions (
+        id,
+        question,
+        answer_guidelines
+      )
+    `)
+    .eq("interview_id", mockInterviewId);
+
+  if (error) {
+    logger.error("Failed to fetch mock interview questions", { error });
+    return [];
+  }
+
+  const questions = data
+    ?.filter((item) => item.custom_job_questions)
+    .map((item) => ({
+      questionId: item.custom_job_questions!.id,
+      question: item.custom_job_questions!.question,
+      answer_guidelines: item.custom_job_questions!.answer_guidelines,
+    })) || [];
+
+  logger.info("Fetched mock interview questions", { count: questions.length });
+  return questions;
+}
+
+// Helper function to find matching question using AI semantic matching
+async function findMatchingQuestion(
+  extractedQuestion: string,
+  mockInterviewQuestions: MatchedQuestionData[],
+): Promise<MatchedQuestionData | null> {
+  if (mockInterviewQuestions.length === 0) {
+    return null;
+  }
+
+  const systemPrompt = `
+    You are an expert at matching interview questions based on semantic meaning and intent.
+    
+    Given an extracted question from an interview transcript and a list of predefined questions,
+    determine which predefined question (if any) best matches the extracted question.
+    
+    Consider:
+    - Semantic meaning and intent
+    - Core topic being asked about
+    - Similar phrasing or concepts
+    - Context and purpose of the question
+    
+    Return the ID of the best matching question, or null if no question is a good match.
+    A "good match" means the questions are asking about essentially the same thing, even if worded differently.
+    
+    If the extracted question doesn't reasonably match any of the predefined questions, return null.
+    
+    Return your response in this JSON format:
+    {
+      "matched_question_id": "question_id_string_or_null",
+    }
+    
+    ## Extracted Question
+    "${extractedQuestion}"
+    
+    ## Predefined Questions
+    ${
+    mockInterviewQuestions.map((q, index) =>
+      `${index + 1}. ID: ${q.questionId}\n   Question: "${q.question}"`
+    ).join("\n\n")
+  }
+  `;
+
+  try {
+    const result = await generateObjectWithFallback({
+      systemPrompt,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Find the best matching question from the predefined list",
+            },
+          ],
+        },
+      ],
+      schema: z.object({
+        matched_question_id: z.string().nullable(),
+      }),
+    });
+
+    // Only consider it a match if confidence is high enough (75% or higher)
+    const matchedQuestion = mockInterviewQuestions.find(
+      (q) => q.questionId === result.matched_question_id,
+    );
+
+    return matchedQuestion ?? null;
+  } catch (error) {
+    // If AI matching fails, fall back to null (no match)
+    console.warn("AI question matching failed:", error);
+    return null;
+  }
+}
+
+// Helper function to get custom job from mock interview
+async function getCustomJobFromMockInterview(mockInterviewId: string) {
+  const supabase = await createSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("custom_job_mock_interviews")
+    .select(`
+      custom_jobs (*)
+    `)
+    .eq("id", mockInterviewId)
+    .single();
+
+  if (error || !data?.custom_jobs) {
+    throw new Error("Failed to fetch custom job for mock interview");
+  }
+
+  return data.custom_jobs;
+}
+
+// Helper function to generate simple AI feedback for unmatched questions
+async function generateSimpleAIFeedback(
+  pair: QuestionAnswerPair,
+  jobContext: JobContext,
+  jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
+  logger: Logger,
+): Promise<
+  {
+    question: string;
+    answer: string;
+    pros: string[];
+    cons: string[];
+    score: number;
+  }
+> {
+  const systemPrompt = `
+    You are an expert interview coach. Provide feedback on this specific question-answer pair from an interview.
+    
+    Context Information:
+    ${JSON.stringify(jobContext, null, 2)}
+    
+    Question: ${pair.question}
+    Answer: ${pair.answer}
+    
+    Provide feedback in this JSON format:
+    {
+      "pros": ["specific strengths in the answer"],
+      "cons": ["specific areas for improvement"],
+      "score": "score from 0-100"
+    }
+    
+    Focus on:
+    - Relevance to the job role and context
+    - Clarity and structure of the answer
+    - Specific examples and evidence provided
+    - Professional communication skills
+    
+    Guidelines:
+    - Pros should highlight what the candidate did well
+    - Cons should only include actual problems or missing critical elements
+    - Score should reflect overall answer quality (0-100)
+    - If there are no genuine issues, cons can be empty
+  `;
+
+  const result = await generateObjectWithFallback({
+    systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Generate feedback for this question-answer pair",
+          },
+          ...jobFiles.map((file) => ({
+            type: "file" as "file",
+            data: file.fileData.fileUri,
+            mimeType: file.fileData.mimeType,
+          })),
+        ],
+      },
+    ],
+    schema: z.object({
+      pros: z.array(z.string()),
+      cons: z.array(z.string()),
+      score: z.number().min(0).max(100),
+    }),
+  });
+
+  logger.info("Generated simple AI feedback", {
+    question: pair.question,
+    score: result.score,
+  });
+
+  return {
+    question: pair.question,
+    answer: pair.answer,
+    pros: result.pros,
+    cons: result.cons,
+    score: result.score,
+  };
+}
+
 interface JobFitAnalysis {
   job_fit_analysis: string;
   job_fit_percentage: number;
@@ -290,7 +586,7 @@ interface JobFitAnalysis {
 
 async function generateJobFitAnalysis(
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<JobFitAnalysis>> {
@@ -355,7 +651,7 @@ When writing your job fit analysis, do not force yourself to write more feedback
 
 async function generateScore(
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<number>> {
@@ -410,7 +706,7 @@ Return a number between 0-100 representing the overall interview performance, co
 
 async function generateKeyImprovements(
   transcript: string,
-  jobContext: any,
+  jobContext: JobContext,
   jobFiles: { fileData: { fileUri: string; mimeType: string } }[],
   logger: Logger,
 ): Promise<GenerationResult<string[]>> {
@@ -508,7 +804,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       .map((msg) => `${msg.role.toUpperCase()}: ${msg.text}`)
       .join("\\n");
     logger.info("Transcript created");
-    const jobContext = {
+    const jobContext: JobContext = {
       jobTitle: customJob.job_title,
       jobDescription: customJob.job_description,
       companyName: customJob.company_name,
