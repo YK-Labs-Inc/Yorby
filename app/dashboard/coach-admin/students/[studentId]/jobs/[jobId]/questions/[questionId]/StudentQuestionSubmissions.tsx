@@ -297,28 +297,6 @@ export default function StudentQuestionSubmissions({
                   )}
 
                 <Separator />
-                {/* Correctness Score Display */}
-                {/* {feedback &&
-                      typeof feedback.correctness_score === "number" && (
-                        <div className="mb-4 flex items-center gap-3">
-                          <span className="font-semibold text-gray-700">
-                            {t("correctnessScore")}
-                          </span>
-                          <span
-                            className={`flex items-center justify-center text-white font-bold shadow-md rounded-lg p-1
-                        ${
-                          feedback.correctness_score >= 80
-                            ? "bg-green-500"
-                            : feedback.correctness_score >= 50
-                              ? "bg-yellow-400 text-yellow-900"
-                              : "bg-red-500"
-                        }
-                      `}
-                          >
-                            {feedback.correctness_score}%
-                          </span>
-                        </div>
-                      )} */}
                 {/* Pros/Cons using InterviewFeedback component */}
                 {feedback &&
                 (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
