@@ -297,15 +297,8 @@ export default function StudentQuestionSubmissions({
                   )}
 
                 <Separator />
-                <Card className="mt-8">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <span>{t("aiFeedback")}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Correctness Score Display */}
-                    {feedback &&
+                {/* Correctness Score Display */}
+                {/* {feedback &&
                       typeof feedback.correctness_score === "number" && (
                         <div className="mb-4 flex items-center gap-3">
                           <span className="font-semibold text-gray-700">
@@ -325,16 +318,18 @@ export default function StudentQuestionSubmissions({
                             {feedback.correctness_score}%
                           </span>
                         </div>
-                      )}
-                    {/* Pros/Cons using InterviewFeedback component */}
-                    {feedback &&
-                    (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
-                      <QuestionFeedback feedback={feedback} className="mt-4" />
-                    ) : (
-                      <p className="italic text-gray-500">{t("greatAnswer")}</p>
-                    )}
-                  </CardContent>
-                </Card>
+                      )} */}
+                {/* Pros/Cons using InterviewFeedback component */}
+                {feedback &&
+                (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
+                  <QuestionFeedback
+                    feedback={feedback}
+                    className="mt-4"
+                    correctnessScore={feedback.correctness_score}
+                  />
+                ) : (
+                  <p className="italic text-gray-500">{t("greatAnswer")}</p>
+                )}
                 {/* Coach Feedback Section for the current active submission */}
                 <CoachFeedbackSection
                   submissionId={currentSubmission.id}

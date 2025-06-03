@@ -10,11 +10,13 @@ interface FeedbackData {
 interface QuestionFeedbackProps {
   feedback: FeedbackData;
   className?: string;
+  correctnessScore?: number;
 }
 
 export default function QuestionFeedback({
   feedback,
   className = "",
+  correctnessScore,
 }: QuestionFeedbackProps) {
   const t = useTranslations("interviewQuestion");
 
@@ -22,7 +24,29 @@ export default function QuestionFeedback({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>{t("feedbackLabel")}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>{t("feedbackLabel")}</CardTitle>
+            {typeof correctnessScore === "number" && (
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-gray-700">
+                  {t("correctnessScore")}
+                </span>
+                <span
+                  className={`flex items-center justify-center text-white font-bold shadow-md rounded-lg px-3 py-1
+                    ${
+                      correctnessScore >= 80
+                        ? "bg-green-500"
+                        : correctnessScore >= 50
+                          ? "bg-yellow-400 text-yellow-900"
+                          : "bg-red-500"
+                    }
+                  `}
+                >
+                  {correctnessScore}%
+                </span>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <p>{t("noFeedback")}</p>
@@ -34,7 +58,29 @@ export default function QuestionFeedback({
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>{t("feedbackLabel")}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{t("feedbackLabel")}</CardTitle>
+          {typeof correctnessScore === "number" && (
+            <div className="flex items-center gap-3">
+              <span className="font-semibold text-gray-700">
+                {t("correctnessScore")}
+              </span>
+              <span
+                className={`flex items-center justify-center text-white font-bold shadow-md rounded-lg px-3 py-1
+                  ${
+                    correctnessScore >= 80
+                      ? "bg-green-500"
+                      : correctnessScore >= 50
+                        ? "bg-yellow-400 text-yellow-900"
+                        : "bg-red-500"
+                  }
+                `}
+              >
+                {correctnessScore}%
+              </span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
