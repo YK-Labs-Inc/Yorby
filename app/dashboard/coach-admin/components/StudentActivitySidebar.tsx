@@ -123,7 +123,9 @@ export default function StudentActivitySidebar({
   const mockInterviews: Tables<"custom_job_mock_interviews">[] = Array.isArray(
     selectedJob.custom_job_mock_interviews
   )
-    ? selectedJob.custom_job_mock_interviews
+    ? selectedJob.custom_job_mock_interviews.filter(
+        (entry) => entry.status === "complete"
+      )
     : [];
 
   const handleJobChange = (newJobId: string) => {

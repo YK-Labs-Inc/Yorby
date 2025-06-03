@@ -1914,7 +1914,9 @@
         "deleteDialogCancel": "Cancel",
         "deleteDialogSuccess": "Feedback deleted successfully.",
         "deleteDialogError": "Failed to delete feedback. Please try again.",
-        "correctnessScore": "Correctness Score"
+        "correctnessScore": "Correctness Score",
+        "noSubmissions": "No Submissions Yet",
+        "noSubmissionsDescription": "This student hasn't submitted any answers to this question yet."
       }
     },
     "Header": {
