@@ -139,17 +139,6 @@ const AdminStudentQuestionViewPage = async ({
     (q: QuestionWithSubmissions) => q.id === questionId
   );
 
-  if (!currentQuestion) {
-    if (
-      questionId === "no-questions" ||
-      !currentJob?.custom_job_questions ||
-      currentJob.custom_job_questions.length === 0
-    ) {
-    } else {
-      return notFound();
-    }
-  }
-
   const submissions = currentQuestion
     ? Array.isArray(currentQuestion.custom_job_question_submissions)
       ? currentQuestion.custom_job_question_submissions

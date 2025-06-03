@@ -152,7 +152,7 @@ export function AppSidebar({
     } else {
       setShowSidebar(true);
     }
-  }, [isYorby, pathname]);
+  }, [isYorby, isCoachDashboardPage, isCoachProgramsPage]);
 
   if (!showSidebar) {
     return null;
@@ -275,7 +275,11 @@ export function AppSidebar({
                     <SidebarGroupContent>
                       <SidebarMenu>
                         {jobs.map((job) => (
-                          <SidebarMenuItemClient key={job.id} job={job} />
+                          <SidebarMenuItemClient
+                            key={job.id}
+                            job={job}
+                            isCoachJob={Boolean(job.coach_id)}
+                          />
                         ))}
                       </SidebarMenu>
                     </SidebarGroupContent>

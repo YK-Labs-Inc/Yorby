@@ -242,7 +242,8 @@
     "manualFeedback": "Admin Feedback",
     "manualFeedbackTooltip": "This feedback was written by an admin in your program.",
     "generatingFeedback": "Generating feedback...",
-    "uploadingAudio": "Uploading audio..."
+    "uploadingAudio": "Uploading audio...",
+    "correctnessScore": "Correctness Score"
   },
   "mockInterview": {
     "title": "Mock Interviews",
@@ -1914,7 +1915,8 @@
         "deleteDialogCancel": "Cancel",
         "deleteDialogSuccess": "Feedback deleted successfully.",
         "deleteDialogError": "Failed to delete feedback. Please try again.",
-        "correctnessScore": "Correctness Score"
+        "noSubmissions": "No Submissions Yet",
+        "noSubmissionsDescription": "This student hasn't submitted any answers to this question yet."
       }
     },
     "Header": {

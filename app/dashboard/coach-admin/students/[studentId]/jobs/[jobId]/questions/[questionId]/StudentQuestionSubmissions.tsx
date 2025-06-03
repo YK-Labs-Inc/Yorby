@@ -6,7 +6,7 @@ import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { CoachFeedbackForm } from "./CoachFeedbackForm";
 import { Button } from "@/components/ui/button";
-import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import { Pencil, Sparkles, Trash2, FileText } from "lucide-react";
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
@@ -242,9 +242,6 @@ export default function StudentQuestionSubmissions({
   const t = useTranslations(
     "coachAdminPortal.studentsPage.studentQuestionSubmissions"
   );
-  if (!currentSubmission) {
-    return <div className="text-red-500">{t("submissionNotFound")}</div>;
-  }
 
   // Feedback structure: { pros: string[], cons: string[], correctness_score?: number }
   const feedback = currentSubmission?.feedback as {
@@ -267,128 +264,107 @@ export default function StudentQuestionSubmissions({
         </CardContent>
       </Card>
 
-      {/* Current Submission */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("submissionDetails")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">
-                {t("submitted", {
-                  date: formatDate(currentSubmission.created_at),
-                })}
-              </span>
-            </div>
-            <p className="whitespace-pre-line text-gray-800 border rounded p-3 bg-gray-50">
-              {currentSubmission.answer}
-            </p>
+      {/* Current Submission or Empty State */}
+      {currentSubmission ? (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("submissionDetails")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">
+                    {t("submitted", {
+                      date: formatDate(currentSubmission.created_at),
+                    })}
+                  </span>
+                </div>
+                <p className="whitespace-pre-line text-gray-800 border rounded p-3 bg-gray-50">
+                  {currentSubmission.answer}
+                </p>
 
-            {/* Audio Player */}
-            {currentSubmission.audio_bucket &&
-              currentSubmission.audio_file_path && (
-                <AudioPlayer
-                  bucket={currentSubmission.audio_bucket}
-                  filePath={currentSubmission.audio_file_path}
-                  presetDuration={
-                    currentSubmission.audio_recording_duration || undefined
-                  }
-                />
-              )}
+                {/* Audio Player */}
+                {currentSubmission.audio_bucket &&
+                  currentSubmission.audio_file_path && (
+                    <AudioPlayer
+                      bucket={currentSubmission.audio_bucket}
+                      filePath={currentSubmission.audio_file_path}
+                      presetDuration={
+                        currentSubmission.audio_recording_duration || undefined
+                      }
+                    />
+                  )}
 
-            <Separator />
-            <Card className="mt-8">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <span>{t("aiFeedback")}</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Correctness Score Display */}
-                {feedback && typeof feedback.correctness_score === "number" && (
-                  <div className="mb-4 flex items-center gap-3">
-                    <span className="font-semibold text-gray-700">
-                      {t("correctnessScore")}
-                    </span>
-                    <span
-                      className={`flex items-center justify-center text-white font-bold shadow-md rounded-lg p-1
-                        ${
-                          feedback.correctness_score >= 80
-                            ? "bg-green-500"
-                            : feedback.correctness_score >= 50
-                              ? "bg-yellow-400 text-yellow-900"
-                              : "bg-red-500"
-                        }
-                      `}
-                    >
-                      {feedback.correctness_score}%
-                    </span>
-                  </div>
-                )}
+                <Separator />
                 {/* Pros/Cons using InterviewFeedback component */}
                 {feedback &&
                 (feedback.pros.length > 0 || feedback.cons.length > 0) ? (
-                  <QuestionFeedback feedback={feedback} className="mt-4" />
+                  <QuestionFeedback
+                    feedback={feedback}
+                    className="mt-4"
+                    correctnessScore={feedback.correctness_score}
+                  />
                 ) : (
                   <p className="italic text-gray-500">{t("greatAnswer")}</p>
                 )}
-              </CardContent>
-            </Card>
-            {/* Coach Feedback Section for the current active submission */}
-            <CoachFeedbackSection
-              submissionId={currentSubmission.id}
-              existingFeedback={currentCoachFeedback}
-            />
-          </div>
-        </CardContent>
-      </Card>
+                {/* Coach Feedback Section for the current active submission */}
+                <CoachFeedbackSection
+                  submissionId={currentSubmission.id}
+                  existingFeedback={currentCoachFeedback}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Submission History */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("submissionHistory")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {submissions.length === 0 ? (
-            <p className="italic text-gray-500">{t("noPreviousSubmissions")}</p>
-          ) : (
-            <ul className="space-y-4">
-              {submissions.map((submission) => {
-                const feedback = submission.feedback as {
-                  pros: string[];
-                  cons: string[];
-                  correctness_score?: number;
-                } | null;
-                return (
-                  <li
-                    key={submission.id}
-                    className={`border rounded-lg p-3 bg-white cursor-pointer transition-colors ${
-                      submission.id === currentSubmission.id
-                        ? "ring-2 ring-primary border-primary bg-primary/10"
-                        : "hover:bg-gray-50"
-                    }`}
-                  >
-                    <Link
-                      href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-gray-500">
-                              {t("submitted", {
-                                date: formatDate(submission.created_at),
-                              })}
-                            </span>
-                          </div>
-                          <p className="text-gray-800 line-clamp-3">
-                            {submission.answer}
-                          </p>
-                        </div>
-                        {feedback &&
-                          typeof feedback.correctness_score === "number" && (
-                            <span
-                              className={`ml-2 flex items-center justify-center rounded-lg text-white font-bold shadow-md p-1
+          {/* Submission History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("submissionHistory")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {submissions.length === 0 ? (
+                <p className="italic text-gray-500">
+                  {t("noPreviousSubmissions")}
+                </p>
+              ) : (
+                <ul className="space-y-4">
+                  {submissions.map((submission) => {
+                    const feedback = submission.feedback as {
+                      pros: string[];
+                      cons: string[];
+                      correctness_score?: number;
+                    } | null;
+                    return (
+                      <li
+                        key={submission.id}
+                        className={`border rounded-lg p-3 bg-white cursor-pointer transition-colors ${
+                          submission.id === currentSubmission.id
+                            ? "ring-2 ring-primary border-primary bg-primary/10"
+                            : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <Link
+                          href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs text-gray-500">
+                                  {t("submitted", {
+                                    date: formatDate(submission.created_at),
+                                  })}
+                                </span>
+                              </div>
+                              <p className="text-gray-800 line-clamp-3">
+                                {submission.answer}
+                              </p>
+                            </div>
+                            {feedback &&
+                              typeof feedback.correctness_score ===
+                                "number" && (
+                                <span
+                                  className={`ml-2 flex items-center justify-center rounded-lg text-white font-bold shadow-md p-1
                               ${
                                 feedback.correctness_score >= 80
                                   ? "bg-green-500"
@@ -397,19 +373,35 @@ export default function StudentQuestionSubmissions({
                                     : "bg-red-500"
                               }
                             `}
-                            >
-                              {feedback.correctness_score}%
-                            </span>
-                          )}
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                                >
+                                  {feedback.correctness_score}%
+                                </span>
+                              )}
+                          </div>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full bg-gray-100 p-3 mb-4">
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {t("noSubmissions")}
+            </h3>
+            <p className="text-gray-500 max-w-md">
+              {t("noSubmissionsDescription")}
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
