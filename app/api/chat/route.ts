@@ -4,6 +4,7 @@ import { Logger } from "next-axiom";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { CoreMessage } from "ai";
 import { getAllUserMemories } from "../memories/utils";
+import { Tables } from "@/utils/supabase/database.types";
 
 interface ChatRequestBody {
   message: string;
@@ -36,8 +37,9 @@ export async function POST(request: Request) {
       speakingStyle,
     });
 
+    let savedUserMessage: { id: string } | null = null;
     if (!isInitialMessage) {
-      await saveMockInterviewMessage({
+      savedUserMessage = await saveMockInterviewMessage({
         mockInterviewId,
         role: "user",
         text: message,
@@ -141,13 +143,16 @@ export async function POST(request: Request) {
 
     logger.info("Chat response generated");
 
-    const savedMessage = await saveMockInterviewMessage({
+    await saveMockInterviewMessage({
       mockInterviewId,
       role: "model",
       text: response,
     });
 
-    return NextResponse.json({ response, savedMessageId: savedMessage.id });
+    return NextResponse.json({
+      response,
+      savedMessageId: savedUserMessage?.id,
+    });
   } catch (error: any) {
     logger.error("Chat error:", { error: error.message });
     return NextResponse.json(
