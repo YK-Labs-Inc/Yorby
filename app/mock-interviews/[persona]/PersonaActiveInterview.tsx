@@ -16,6 +16,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { MediaDeviceProvider } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 interface PersonaActiveInterviewProps {
   stream: MediaStream | null;
@@ -178,50 +179,52 @@ Let's start with something easy! Could you tell me a little bit about yourself? 
   };
 
   return (
-    <div className="h-[calc(100vh-5rem)] flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
-      <div className="flex justify-end mb-4">
-        <Button
-          onClick={endInterview}
-          variant="destructive"
-          className="w-full sm:w-auto"
-        >
-          {t("endInterview")}
-        </Button>
-      </div>
+    <MediaDeviceProvider>
+      <div className="h-[calc(100vh-5rem)] flex flex-col max-w-[1080px] mx-auto p-4 md:p-6">
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={endInterview}
+            variant="destructive"
+            className="w-full sm:w-auto"
+          >
+            {t("endInterview")}
+          </Button>
+        </div>
 
-      <div className="flex-1 flex flex-col min-h-0">
-        {showEndModal ? (
-          <Card className="w-full mb-4">
-            <CardHeader>
-              <CardTitle className="text-lg md:text-xl">
-                Interview Complete!
-              </CardTitle>
-              <CardDescription className="pt-4 text-sm md:text-base">
-                Great job completing the mock interview! To unlock unlimited
-                personalized mock interviews tailored to specific jobs and your
-                resume, sign up for PerfectInterview today.
-              </CardDescription>
-            </CardHeader>
-            <CardFooter className="flex justify-center">
-              <Link href="/sign-in" className="w-full">
-                <Button className="w-full" size="lg">
-                  Sign Up Now
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        ) : null}
+        <div className="flex-1 flex flex-col min-h-0">
+          {showEndModal ? (
+            <Card className="w-full mb-4">
+              <CardHeader>
+                <CardTitle className="text-lg md:text-xl">
+                  Interview Complete!
+                </CardTitle>
+                <CardDescription className="pt-4 text-sm md:text-base">
+                  Great job completing the mock interview! To unlock unlimited
+                  personalized mock interviews tailored to specific jobs and
+                  your resume, sign up for PerfectInterview today.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="flex justify-center">
+                <Link href="/sign-in" className="w-full">
+                  <Button className="w-full" size="lg">
+                    Sign Up Now
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          ) : null}
 
-        <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
-          <ChatUI
-            messages={messages}
-            onSendMessage={handleSendMessage}
-            isProcessing={isProcessingAIResponse}
-            showTtsControls={true}
-            className="h-full"
-          />
+          <div className="flex-1 bg-slate-50 dark:bg-slate-900/50 rounded-lg overflow-hidden">
+            <ChatUI
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              isProcessing={isProcessingAIResponse}
+              showTtsControls={true}
+              className="h-full"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </MediaDeviceProvider>
   );
 }

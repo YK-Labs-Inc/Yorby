@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { ChatUI } from "@/app/components/chat";
 import { Card } from "@/components/ui/card";
-import { H2 } from "@/components/typography";
 import { useTranslations } from "next-intl";
 import { CoreMessage } from "ai";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -11,6 +10,7 @@ import { TtsProvider } from "@/app/context/TtsContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { QuestionsResponse } from "@/app/api/questions/parse/route";
 import { revalidateJobQuestions } from "./actions";
+import { MediaDeviceProvider } from "./mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 interface Props {
   jobId: string;
@@ -132,8 +132,10 @@ function _UploadQuestionsClient({ jobId, job }: Props) {
 
 export default function UploadQuestionsClient({ jobId, job }: Props) {
   return (
-    <TtsProvider>
-      <_UploadQuestionsClient jobId={jobId} job={job} />
-    </TtsProvider>
+    <MediaDeviceProvider>
+      <TtsProvider>
+        <_UploadQuestionsClient jobId={jobId} job={job} />
+      </TtsProvider>
+    </MediaDeviceProvider>
   );
 }
