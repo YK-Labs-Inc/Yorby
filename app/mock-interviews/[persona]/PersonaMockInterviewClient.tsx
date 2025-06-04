@@ -5,6 +5,7 @@ import { VOICE_OPTIONS, VoiceOption } from "@/app/types/tts";
 import PersonaMockInterviewSetup from "./PersonaMockInterviewSetup";
 import PersonaActiveInterview from "./PersonaActiveInterview";
 import { TtsProvider } from "@/app/context/TtsContext";
+import { MediaDeviceProvider } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 interface MediaDevice {
   deviceId: string;
@@ -156,8 +157,10 @@ export default function PersonaMockInterviewClient({
   selectedVoice = VOICE_OPTIONS[0],
 }: PersonaMockInterviewClientProps) {
   return (
-    <TtsProvider initialTtsEnabled={true} initialVoice={selectedVoice}>
-      <PersonaMockInterviewClientInternal selectedVoice={selectedVoice} />
-    </TtsProvider>
+    <MediaDeviceProvider>
+      <TtsProvider initialTtsEnabled={true} initialVoice={selectedVoice}>
+        <PersonaMockInterviewClientInternal selectedVoice={selectedVoice} />
+      </TtsProvider>
+    </MediaDeviceProvider>
   );
 }

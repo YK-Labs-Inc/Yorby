@@ -10,6 +10,7 @@ import { useTransformResume } from "../../agent/useTransformResume";
 import { ResumeDataType } from "../../components/ResumeBuilder";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MediaDeviceProvider } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 interface ResumeTransformationProps {
   resume: ResumeDataType;
@@ -101,8 +102,10 @@ export default function ResumeTransformation({
   resume,
 }: ResumeTransformationProps) {
   return (
-    <TtsProvider>
-      <ResumeTransformationForm resume={resume} />
-    </TtsProvider>
+    <MediaDeviceProvider>
+      <TtsProvider>
+        <ResumeTransformationForm resume={resume} />
+      </TtsProvider>
+    </MediaDeviceProvider>
   );
 }

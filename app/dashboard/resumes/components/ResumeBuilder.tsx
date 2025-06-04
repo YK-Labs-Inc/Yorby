@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/select";
 import { useResumeEditAgent } from "../agent/useResumeEdit";
 import { H2 } from "@/components/typography";
+import { MediaDeviceProvider } from "../../jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 export type ResumeDataType = Tables<"resumes"> & {
   resume_sections: (Tables<"resume_sections"> & {
@@ -907,22 +908,24 @@ export default function ResumeBuilder({
   transformSummary?: string;
 }) {
   return (
-    <TtsProvider
-      initialVoice={VOICE_OPTIONS.find((voice) => voice.voiceId === persona)}
-      initialTtsEnabled={Boolean(persona)}
-    >
-      <ResumeBuilderComponent
-        resumeId={resumeId}
-        hasSubscription={hasSubscription}
-        credits={credits}
-        user={user}
-        isSubscriptionVariant={isSubscriptionVariant}
-        isFreemiumEnabled={isFreemiumEnabled}
-        persona={persona}
-        transformResumeEnabled={transformResumeEnabled}
-        transformSummary={transformSummary}
-        enableResumesFileUpload={enableResumesFileUpload}
-      />
-    </TtsProvider>
+    <MediaDeviceProvider>
+      <TtsProvider
+        initialVoice={VOICE_OPTIONS.find((voice) => voice.voiceId === persona)}
+        initialTtsEnabled={Boolean(persona)}
+      >
+        <ResumeBuilderComponent
+          resumeId={resumeId}
+          hasSubscription={hasSubscription}
+          credits={credits}
+          user={user}
+          isSubscriptionVariant={isSubscriptionVariant}
+          isFreemiumEnabled={isFreemiumEnabled}
+          persona={persona}
+          transformResumeEnabled={transformResumeEnabled}
+          transformSummary={transformSummary}
+          enableResumesFileUpload={enableResumesFileUpload}
+        />
+      </TtsProvider>
+    </MediaDeviceProvider>
   );
 }

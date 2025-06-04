@@ -13,6 +13,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Tables } from "@/utils/supabase/database.types";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { useTranslations } from "next-intl";
+import { MediaDeviceProvider } from "../dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const t = useTranslations("knowledgeBase");
@@ -211,8 +212,10 @@ export default function UserInfoPage({
   isOnboarding: boolean;
 }) {
   return (
-    <TtsProvider>
-      <_UserInfoPage isOnboarding={isOnboarding} />
-    </TtsProvider>
+    <MediaDeviceProvider>
+      <TtsProvider>
+        <_UserInfoPage isOnboarding={isOnboarding} />
+      </TtsProvider>
+    </MediaDeviceProvider>
   );
 }
