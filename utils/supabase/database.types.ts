@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          query?: string
-          extensions?: Json
           variables?: Json
+          query?: string
           operationName?: string
+          extensions?: Json
         }
         Returns: Json
       }
@@ -750,23 +750,29 @@ export type Database = {
       }
       mock_interview_messages: {
         Row: {
+          bucket_name: string | null
           created_at: string
           id: string
           mock_interview_id: string
+          recording_path: string | null
           role: Database["public"]["Enums"]["message_role"]
           text: string
         }
         Insert: {
+          bucket_name?: string | null
           created_at?: string
           id?: string
           mock_interview_id: string
+          recording_path?: string | null
           role: Database["public"]["Enums"]["message_role"]
           text: string
         }
         Update: {
+          bucket_name?: string | null
           created_at?: string
           id?: string
           mock_interview_id?: string
+          recording_path?: string | null
           role?: Database["public"]["Enums"]["message_role"]
           text?: string
         }
@@ -787,6 +793,7 @@ export type Database = {
           created_at: string
           id: string
           mock_interview_id: string
+          mock_interview_question_id: string | null
           pros: string[]
           question: string
           score: number
@@ -797,6 +804,7 @@ export type Database = {
           created_at?: string
           id?: string
           mock_interview_id: string
+          mock_interview_question_id?: string | null
           pros: string[]
           question: string
           score: number
@@ -807,11 +815,19 @@ export type Database = {
           created_at?: string
           id?: string
           mock_interview_id?: string
+          mock_interview_question_id?: string | null
           pros?: string[]
           question?: string
           score?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "mock_interview_question_feedbac_mock_interview_question_id_fkey"
+            columns: ["mock_interview_question_id"]
+            isOneToOne: false
+            referencedRelation: "mock_interview_questions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mock_interview_question_feedback_mock_interview_id_fkey"
             columns: ["mock_interview_id"]

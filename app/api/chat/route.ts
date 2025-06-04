@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       logger.error("Message and mockInterviewId are required");
       return NextResponse.json(
         { error: "Message and mockInterviewId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       });
       return NextResponse.json(
         { error: "Failed to fetch interview details" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
           role: "user" as const,
           content: message,
         },
-      ]
+      ],
     );
 
     const response = await generateTextWithFallback({
@@ -141,18 +141,18 @@ export async function POST(request: Request) {
 
     logger.info("Chat response generated");
 
-    await saveMockInterviewMessage({
+    const savedMessage = await saveMockInterviewMessage({
       mockInterviewId,
       role: "model",
       text: response,
     });
 
-    return NextResponse.json({ response });
+    return NextResponse.json({ response, savedMessageId: savedMessage.id });
   } catch (error: any) {
     logger.error("Chat error:", { error: error.message });
     return NextResponse.json(
       { error: "Failed to process chat message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -167,13 +167,16 @@ async function saveMockInterviewMessage({
   text: string;
 }) {
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from("mock_interview_messages").insert({
-    mock_interview_id: mockInterviewId,
-    role,
-    text,
-  });
+  const { data, error } = await supabase.from("mock_interview_messages").insert(
+    {
+      mock_interview_id: mockInterviewId,
+      role,
+      text,
+    },
+  ).select("id").single();
 
   if (error) {
     throw error;
   }
+  return data;
 }
