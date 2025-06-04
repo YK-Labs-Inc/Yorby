@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -12,6 +12,7 @@ import { CoreMessage } from "ai";
 import { ChatUI } from "@/app/components/chat";
 import { useTts } from "@/app/context/TtsContext";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
@@ -38,7 +39,6 @@ export default function ActiveInterviewComponent({
   const [firstQuestionAudioIsInitialized, setFirstQuestionAudioIsInitialized] =
     useState(messageHistory.length > 0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const videoRecorderRef = useRef<MediaRecorder | null>(null);
   const videoChunksRef = useRef<Blob[]>([]);
   const { logError } = useAxiomLogging();
   const [showEndModal, setShowEndModal] = useState(false);
@@ -60,6 +60,70 @@ export default function ActiveInterviewComponent({
       setFirstQuestionAudioIsInitialized(true);
     }
   }, [isInitialized]);
+
+  async function saveMockInterviewMessageRecording(
+    mockInterviewId: string,
+    messageId: string,
+    videoChunks: Blob[],
+    userId: string,
+    jobId: string
+  ) {
+    const supabase = createSupabaseBrowserClient();
+    try {
+      // 1. Fetch coach_id for the job
+      const { data: job, error: jobError } = await supabase
+        .from("custom_jobs")
+        .select("coach_id")
+        .eq("id", jobId)
+        .single();
+      if (jobError) throw new Error(jobError.message);
+      const coachId = job?.coach_id;
+
+      // 2. Build file path
+      const fileName = `${Date.now()}`;
+      let filePath = "";
+      if (coachId) {
+        filePath = `${userId}/coaches/${coachId}/mockInterviews/${mockInterviewId}/messages/${messageId}/${fileName}`;
+      } else {
+        filePath = `${userId}/mockInterviews/${mockInterviewId}/messages/${messageId}/${fileName}`;
+      }
+
+      // 3. Create Blob and infer type
+      const videoBlob = new Blob(videoChunks);
+      const fileType = videoBlob.type || "video/webm";
+      const fileExt = fileType.split("/")[1] || "webm";
+      const fullFilePath = `${filePath}.${fileExt}`;
+
+      // 4. Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("mock-interview-messages")
+        .upload(fullFilePath, videoBlob, {
+          contentType: fileType,
+          upsert: true,
+        });
+      if (uploadError) throw new Error(uploadError.message);
+
+      // 5. Call API route to update DB
+      const response = await fetch(
+        `/api/mockInterviews/${mockInterviewId}/messages/${messageId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bucket_name: "mock-interview-messages",
+            recording_path: fullFilePath,
+          }),
+        }
+      );
+      if (!response.ok) {
+        logError("Failed to update mock_interview_messages", {
+          error: await response.text(),
+        });
+      }
+    } catch (err) {
+      logError("Error in saveMockInterviewMessageRecording:", { error: err });
+    }
+  }
 
   const handleSendMessage = async (message: string) => {
     setIsProcessingAIResponse(true);
@@ -126,7 +190,11 @@ export default function ActiveInterviewComponent({
           index: updatedMessages.length - 1,
         };
       }
-      const { response: aiResponse } = await chatResponse.json();
+      const { response: aiResponse, savedMessageId } =
+        (await chatResponse.json()) as {
+          response: string;
+          savedMessageId: string;
+        };
       updatedMessages = [
         ...updatedMessages.slice(0, -1),
         {
@@ -138,6 +206,18 @@ export default function ActiveInterviewComponent({
 
       if (messages.length === 0) {
         setFirstQuestionAudioIsInitialized(true);
+      }
+
+      if (videoChunksRef.current.length > 0) {
+        if (user) {
+          await saveMockInterviewMessageRecording(
+            mockInterviewId,
+            savedMessageId,
+            videoChunksRef.current,
+            user.id,
+            jobId
+          );
+        }
       }
     } catch (error: any) {
       logError("Error in interview:", { error: error.message });
@@ -158,39 +238,20 @@ export default function ActiveInterviewComponent({
       };
     }
   };
-
-  const startVideoRecording = () => {
-    if (!stream) {
-      throw new Error("No media stream available");
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
-    const videoAndAudioRecorder = new MediaRecorder(stream);
-    videoChunksRef.current = [];
-    videoAndAudioRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        videoChunksRef.current.push(e.data);
-      }
-    };
-    videoRecorderRef.current = videoAndAudioRecorder;
-    videoRecorderRef.current.start(100);
-  };
-
-  const stopVideoRecording = () => {
-    if (videoRecorderRef.current) {
-      videoRecorderRef.current.stop();
-    }
+  const videoRecordingCompletedCallback = async (videoBlob: Blob[]) => {
+    videoChunksRef.current = videoBlob;
   };
 
   useEffect(() => {
-    if (firstQuestionAudioIsInitialized) {
-      startVideoRecording();
+    if (firstQuestionAudioIsInitialized && stream) {
+      // Set up video display
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
     }
-  }, [firstQuestionAudioIsInitialized]);
+  }, [firstQuestionAudioIsInitialized, stream]);
 
   const endInterview = () => {
-    stopVideoRecording();
     stopAudioPlayback();
   };
 
@@ -249,6 +310,7 @@ export default function ActiveInterviewComponent({
               isProcessing={isProcessingAIResponse}
               showTtsControls={true}
               className="h-full"
+              videoRecordingCompletedCallback={videoRecordingCompletedCallback}
             />
           </div>
         </div>
@@ -257,10 +319,7 @@ export default function ActiveInterviewComponent({
       <EndInterviewModal
         isOpen={showEndModal}
         onClose={() => setShowEndModal(false)}
-        videoBlob={videoChunksRef.current}
         mockInterviewId={mockInterviewId}
-        userId={user.id}
-        accessToken={session.access_token}
         jobId={jobId}
         endInterview={endInterview}
       />

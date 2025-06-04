@@ -10,19 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import { uploadFile } from "@/utils/storage";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useMediaDevice } from "./MediaDeviceContext";
 
 interface EndInterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  videoBlob: Blob[];
   mockInterviewId: string;
-  userId: string;
-  accessToken: string;
   jobId: string;
   endInterview: () => void;
 }
@@ -30,73 +25,22 @@ interface EndInterviewModalProps {
 export default function EndInterviewModal({
   isOpen,
   onClose,
-  videoBlob,
   mockInterviewId,
-  userId,
-  accessToken,
   jobId,
   endInterview,
 }: EndInterviewModalProps) {
   const t = useTranslations("mockInterview.endModal");
   const errorT = useTranslations("errors");
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [shouldUploadVideo, setShouldUploadVideo] = useState(true);
-  const { logError, logInfo } = useAxiomLogging();
+  const { logError } = useAxiomLogging();
   const router = useRouter();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const { isProcessing: isProcessingRecording } = useMediaDevice();
 
   const handleEndInterview = async () => {
     endInterview();
-
-    if (shouldUploadVideo && videoBlob) {
-      await handleUpload(videoBlob);
-    } else {
-      setIsProcessing(true);
-      await processInterview();
-    }
-  };
-
-  const handleUpload = async (videoBlob: Blob[]) => {
-    try {
-      setIsUploading(true);
-      const file = new File(videoBlob, `${mockInterviewId}.webm`, {
-        type: "video/webm",
-      });
-      const filePath = `${userId}/mockInterviews/${mockInterviewId}`;
-
-      await uploadFile({
-        bucketName: "mock_interviews",
-        filePath,
-        file,
-        setProgress: setUploadProgress,
-        onComplete: async () => {
-          const supabase = createSupabaseBrowserClient();
-          await supabase
-            .from("custom_job_mock_interviews")
-            .update({
-              recording_file_path: filePath,
-            })
-            .eq("id", mockInterviewId)
-            .then(({ error }) => {
-              if (error) {
-                logError("Error updating mock interview", {
-                  error: error.message,
-                });
-              }
-              setIsUploading(false);
-              setIsProcessing(true);
-              processInterview();
-            });
-        },
-        accessToken,
-        logError,
-        logInfo,
-      });
-    } catch (error: any) {
-      logError("Error uploading interview recording", { error: error.message });
-      setIsUploading(false);
-    }
+    setIsProcessing(true);
+    await processInterview();
   };
 
   const processInterview = async () => {
@@ -115,9 +59,7 @@ export default function EndInterviewModal({
         throw new Error("Failed to process interview");
       }
 
-      router.push(
-        `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}/review`
-      );
+      setShouldRedirect(true);
     } catch (error: any) {
       logError("Error processing interview", { error: error.message });
       setIsProcessing(false);
@@ -125,48 +67,28 @@ export default function EndInterviewModal({
     }
   };
 
+  useEffect(() => {
+    if (shouldRedirect && !isProcessingRecording) {
+      router.push(
+        `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}/review`
+      );
+    }
+  }, [shouldRedirect, isProcessingRecording, jobId, mockInterviewId, router]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
-        {!isUploading && !isProcessing && (
+        {!isProcessing && !isProcessingRecording && (
           <div className="mt-4 space-y-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {t("confirmMessage")}
             </p>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="upload-video"
-                checked={shouldUploadVideo}
-                onCheckedChange={(checked) =>
-                  setShouldUploadVideo(checked as boolean)
-                }
-              />
-              <label
-                htmlFor="upload-video"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {t("uploadVideoLabel")}
-              </label>
-            </div>
           </div>
         )}
-        {isUploading && (
-          <div className="mt-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              {t("uploading")} ({uploadProgress}%)
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-        {isProcessing && (
+        {(isProcessing || isProcessingRecording) && (
           <div className="mt-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {t("processing")}
@@ -178,7 +100,7 @@ export default function EndInterviewModal({
             <span className="text-sm">{t("emailAlert")}</span>
           </div>
         )}
-        {!isUploading && !isProcessing && (
+        {!isProcessing && !isProcessingRecording && (
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={onClose}>
               {t("cancelButton")}

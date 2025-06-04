@@ -1,4 +1,11 @@
-import { useState, useRef, useEffect, SetStateAction, Dispatch } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  SetStateAction,
+  Dispatch,
+  useCallback,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import {
@@ -21,7 +28,6 @@ import {
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { CoreMessage } from "ai";
-import { useVoiceRecording } from "@/app/dashboard/resumes/components/useVoiceRecording";
 import VoiceRecordingOverlay from "@/app/dashboard/resumes/components/VoiceRecordingOverlay";
 import { useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
@@ -29,6 +35,10 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import Markdown from "react-markdown";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { useMediaDevice } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
+
+const MAX_INLINE_SIZE = 3.5 * 1024 * 1024; // 3.5MB in bytes
 
 interface ChatUIProps {
   messages: CoreMessage[];
@@ -45,6 +55,7 @@ interface ChatUIProps {
   ttsEndpoint?: string;
   transformTextEndpoint?: string;
   showFileSelector?: boolean;
+  videoRecordingCompletedCallback?: (videoBlob: Blob[]) => Promise<void>;
 }
 
 export function ChatUI({
@@ -54,6 +65,7 @@ export function ChatUI({
   isDisabled = false,
   className = "",
   showFileSelector = false,
+  videoRecordingCompletedCallback,
 }: ChatUIProps) {
   const t = useTranslations("chat");
   const [textInput, setTextInput] = useState<string>("");
@@ -82,6 +94,97 @@ export function ChatUI({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const processAudio = useCallback(
+    async (audioChunks: Blob[]) => {
+      if (audioChunks.length === 0) {
+        logError("No audio chunks to process");
+        return;
+      }
+
+      try {
+        // Create audio blob
+        const audioBlob = new Blob(audioChunks, {
+          type: "audio/webm",
+        });
+
+        // Get current user and session
+        const supabase = createSupabaseBrowserClient();
+        if (audioBlob.size < MAX_INLINE_SIZE) {
+          const formData = new FormData();
+          formData.append("audioFileToTranscribe", audioBlob);
+          formData.append("source", "resume-builder");
+
+          const response = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            if (response.status === 400) {
+              alert(t("recordingError"));
+            } else {
+              throw new Error(`Transcription failed: ${response.status}`);
+            }
+          }
+
+          const { transcription } = (await response.json()) as {
+            transcription: string;
+          };
+          if (transcription.trim()) {
+            setTextInput(transcription);
+            setIsRecording(false);
+          }
+        } else {
+          const filePath = `${crypto.randomUUID()}.webm`;
+
+          // Upload to Supabase storage
+          const { error: uploadError } = await supabase.storage
+            .from("temp-audio-recordings")
+            .upload(filePath, audioBlob);
+
+          if (uploadError) {
+            logError("Error uploading audio file:", { error: uploadError });
+            return;
+          }
+
+          // Send file path to transcription API
+          const formData = new FormData();
+          formData.append("filePath", filePath);
+          formData.append("source", "resume-builder");
+
+          const response = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            if (response.status === 400) {
+              alert(t("recordingError"));
+            } else {
+              throw new Error(`Transcription failed: ${response.status}`);
+            }
+          }
+
+          const { transcription } = (await response.json()) as {
+            transcription: string;
+          };
+          if (transcription.trim()) {
+            setTextInput(transcription);
+            setIsRecording(false);
+          }
+
+          // Clean up - delete the temporary file
+          await supabase.storage
+            .from("temp-audio-recordings")
+            .remove([filePath]);
+        }
+      } catch (error) {
+        logError("Error processing audio:", { error });
+      }
+    },
+    [messages, t]
+  );
+
   const {
     startRecording,
     stopRecording,
@@ -90,15 +193,7 @@ export function ChatUI({
     audioDevices,
     selectedAudio,
     setSelectedAudio,
-  } = useVoiceRecording({
-    onTranscription: (transcription: string) => {
-      if (transcription.trim()) {
-        setTextInput(transcription);
-        setIsRecording(false);
-      }
-    },
-    t,
-  });
+  } = useMediaDevice();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,7 +215,10 @@ export function ChatUI({
       setIsRecording(false);
     } else {
       try {
-        await startRecording();
+        await startRecording({
+          audioRecordingCompletedCallback: processAudio,
+          videoRecordingCompletedCallback,
+        });
         setIsRecording(true);
       } catch (error) {
         logError("Failed to start recording", { error });

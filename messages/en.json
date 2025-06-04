@@ -1461,7 +1461,9 @@
     "pleaseSelectAMicrophone": "Please select a microphone",
     "micPermissionError": "Please grant permission to access your microphone",
     "recordingError": "Error recording your response. Please try again.",
-    "transcribing": "Transcribing..."
+    "transcribing": "Transcribing...",
+    "pleaseSelectACamera": "Please select a camera",
+    "cameraPermissionError": "Please grant permission to access your camera"
   },
   "LandingPageV5": {
     "hero": {
@@ -2204,5 +2206,45 @@
   "AudioPlayer": {
     "loadingAudio": "Loading audio...",
     "failedToLoadAudio": "Failed to load audio"
+  },
+  "mockInterviewReview": {
+    "video": {
+      "title": "Interview Recording",
+      "description": "Review your interview performance",
+      "loading": "Loading video...",
+      "emptyState": "Select a message to review your answer performance."
+    },
+    "transcript": {
+      "title": "Interview Transcript",
+      "description": "Complete interview conversation",
+      "playButtonTooltip": "Play this message's video"
+    },
+    "overallPerformance": {
+      "title": "Overall Performance",
+      "description": "Your interview score and fit analysis",
+      "score": "Interview Score",
+      "scoreValue": "{score}%",
+      "jobFit": "Job Fit",
+      "jobFitValue": "{percentage}%"
+    },
+    "overallFeedback": {
+      "title": "Overall Feedback",
+      "description": "General feedback and recommendations",
+      "overviewTitle": "Overview",
+      "jobFitAnalysisTitle": "Job Fit Analysis",
+      "keyImprovementsTitle": "Key Improvements"
+    },
+    "questionReview": {
+      "title": "Question Review",
+      "description": "Detailed feedback for each question",
+      "tab": "Question {number}",
+      "questionTitle": "Question",
+      "answerTitle": "Your Answer",
+      "scoreTitle": "Score",
+      "questionScore": "Question Score",
+      "scoreValue": "{score}%",
+      "strengthsTitle": "Strengths",
+      "areasForImprovementTitle": "Areas for Improvement"
+    }
   }
 }

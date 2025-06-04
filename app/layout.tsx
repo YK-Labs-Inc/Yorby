@@ -21,6 +21,7 @@ import { KnowledgeBaseProvider } from "@/app/context/KnowledgeBaseContext";
 import { Toaster } from "@/components/ui/toaster";
 import { MultiTenantProvider } from "./context/MultiTenantContext";
 import { ReferralProvider } from "./context/referral-context";
+import { MediaDeviceProvider } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
