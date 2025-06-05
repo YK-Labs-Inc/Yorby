@@ -7,7 +7,7 @@ import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import * as SibApiV3Sdk from "@sendinblue/client";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 const CREDITS_MAP: { [key: string]: number } = {
@@ -18,7 +18,7 @@ const CREDITS_MAP: { [key: string]: number } = {
 
 async function handleSuccessfulPayment(
   session: Stripe.Checkout.Session,
-  logger: Logger
+  logger: Logger,
 ) {
   const userId = session.metadata?.userId;
   let productId = "";
@@ -50,7 +50,7 @@ async function handleSuccessfulPayment(
     } else {
       // Handle one-time credit purchase
       const lineItems = await stripe.checkout.sessions.listLineItems(
-        session.id
+        session.id,
       );
       productId = lineItems.data[0]?.price?.product as string;
       amountTotal = lineItems.data[0]?.amount_total;
@@ -117,7 +117,7 @@ async function handleSuccessfulPayment(
 
 async function handleSubscriptionEnded(
   subscription: Stripe.Subscription,
-  logger: Logger
+  logger: Logger,
 ) {
   try {
     const supabase = await createAdminClient();
@@ -187,7 +187,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
 
     logger.info("Received Stripe webhook", { type: event.type });
@@ -196,14 +196,14 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       case "checkout.session.completed":
         await handleSuccessfulPayment(
           event.data.object as Stripe.Checkout.Session,
-          logger
+          logger,
         );
         break;
 
       case "customer.subscription.deleted":
         await handleSubscriptionEnded(
           event.data.object as Stripe.Subscription,
-          logger
+          logger,
         );
         break;
 
