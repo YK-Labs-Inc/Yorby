@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { useActionState, useEffect, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { signInWithOTP } from "../../(auth-pages)/actions";
+import { signInWithOTP } from "@/app/(auth-pages)/actions";
 import { H4 } from "@/components/typography";
 import { usePostHog } from "posthog-js/react";
 

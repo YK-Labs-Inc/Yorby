@@ -145,7 +145,7 @@ export default async function CoachPortalLandingPage({
         registrationStatus.hasDuplicatedJobs &&
         registrationStatus.firstJobId ? (
           <Link
-            href={`/coaches/${coach.slug}/programs/${registrationStatus.firstJobId}`}
+            href={`/${coach.slug}/programs/${registrationStatus.firstJobId}`}
           >
             <Button>Go to Your Curriculum</Button>
           </Link>

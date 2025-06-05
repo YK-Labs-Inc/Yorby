@@ -7,6 +7,7 @@ import { SidebarMenuItem } from "../ui/sidebar";
 import { Tables } from "@/utils/supabase/database.types";
 import { StudentWithEmailAndName } from "@/app/layout";
 import Link from "next/link";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 type SidebarMenuItemClientProps =
   | {
@@ -46,12 +47,13 @@ const SidebarMenuItemClient = ({
   interviewCopilot,
 }: SidebarMenuItemClientProps) => {
   const pathname = usePathname();
+  const { baseUrl } = useMultiTenant();
   const createUrlPath = (): string => {
     if (job) {
       if (isCoachJob) {
         return `/dashboard/coach-admin/programs/${job.id}`;
       }
-      return `/dashboard/jobs/${job.id}`;
+      return `${baseUrl}/${job.id}`;
     }
     if (resume) {
       return `/dashboard/resumes/${resume.id}`;

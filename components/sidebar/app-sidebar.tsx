@@ -275,11 +275,7 @@ export function AppSidebar({
                     <SidebarGroupContent>
                       <SidebarMenu>
                         {jobs.map((job) => (
-                          <SidebarMenuItemClient
-                            key={job.id}
-                            job={job}
-                            isCoachJob={Boolean(job.coach_id)}
-                          />
+                          <SidebarMenuItemClient key={job.id} job={job} />
                         ))}
                       </SidebarMenu>
                     </SidebarGroupContent>

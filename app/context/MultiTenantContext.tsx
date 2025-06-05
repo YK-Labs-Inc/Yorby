@@ -61,12 +61,15 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
     [hostname]
   );
 
-  const isCoachHomePage = useMemo(() => pathname === "/coaches", [pathname]);
+  const isCoachHomePage = useMemo(
+    () => pathname === "/coaches" || (isYorby && pathname === "/"),
+    [pathname, isYorby]
+  );
 
   const isCoachProgramsPage = useMemo(
     () =>
       (typeof coachSlug === "string" &&
-        pathname?.startsWith(`/coaches/${coachSlug}/programs`)) ??
+        pathname?.startsWith(`/${coachSlug}/programs`)) ??
       false,
     [pathname, coachSlug]
   );
@@ -78,7 +81,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
 
   const isCoachPortalLandingPage = useMemo(() => {
     if (typeof coachSlug !== "string") return false;
-    return pathname === `/coaches/${coachSlug}`;
+    return pathname === `/${coachSlug}`;
   }, [pathname, coachSlug]);
 
   const isCoachPath = useMemo(
@@ -97,7 +100,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isCoachPath && coachSlug) {
-      setBaseUrl(`/coaches/${coachSlug}/programs`);
+      setBaseUrl(`/${coachSlug}/programs`);
     } else if (isCoachDashboardPage) {
       setBaseUrl(`/dashboard/coach-admin/programs`);
     } else {
