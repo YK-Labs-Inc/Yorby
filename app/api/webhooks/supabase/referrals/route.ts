@@ -7,7 +7,7 @@ import { Resend } from "resend";
 import SuccessfulRewardRedemption from "@/components/email/SuccessfulRewardRedemption";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 // Define the webhook payload type
@@ -23,7 +23,7 @@ type InsertPayload = {
 const verifyWebhookRequest = (request: Request): boolean => {
   return (
     request.headers.get("authorization") ===
-    `Bearer ${process.env.SUPABASE_WEBHOOK_SECRET!}`
+      `Bearer ${process.env.SUPABASE_WEBHOOK_SECRET!}`
   );
 };
 
@@ -35,8 +35,8 @@ async function sendSuccessfulRewardRedemptionEmail(userId: string) {
   try {
     const supabase = await createAdminClient();
     // Fetch the user's email
-    const { data: userData, error: userError } =
-      await supabase.auth.admin.getUserById(userId);
+    const { data: userData, error: userError } = await supabase.auth.admin
+      .getUserById(userId);
     const userEmail = userData?.user?.email;
     if (userEmail) {
       const resend = new Resend(process.env.RESEND_API_KEY!);
@@ -70,7 +70,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Invalid webhook request - authentication failed");
       return NextResponse.json(
         { error: "Invalid webhook request - authentication failed" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -82,7 +82,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Unexpected webhook payload", { payload });
       return NextResponse.json(
         { error: "Unexpected webhook payload" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -102,7 +102,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       });
       return NextResponse.json(
         { error: "Error fetching referral code" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -116,7 +116,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Error counting referrals", { error: countError });
       return NextResponse.json(
         { error: "Error counting referrals" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -133,7 +133,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       logger.error("Error fetching redemptions", { error: redemptionsError });
       return NextResponse.json(
         { error: "Error fetching redemptions" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -141,8 +141,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     // Calculate how many new redemptions are available
     const totalPossibleRedemptions = Math.floor(totalReferralCount / 3);
-    const newRedemptionsAvailable =
-      totalPossibleRedemptions - currentRedemptionCount;
+    const newRedemptionsAvailable = totalPossibleRedemptions -
+      currentRedemptionCount;
 
     if (newRedemptionsAvailable > 0) {
       // Check if user has an existing subscription
@@ -166,7 +166,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           });
           return NextResponse.json(
             { error: "Error fetching user" },
-            { status: 404 }
+            { status: 404 },
           );
         }
 
@@ -211,8 +211,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             .from("referral_redemptions")
             .upsert({
               id: referralCode.user_id,
-              referral_redemption_count:
-                currentRedemptionCount + newRedemptionsAvailable,
+              referral_redemption_count: currentRedemptionCount +
+                newRedemptionsAvailable,
             });
 
           if (redemptionError) {
@@ -221,7 +221,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             });
             return NextResponse.json(
               { error: "Error recording redemption" },
-              { status: 500 }
+              { status: 500 },
             );
           }
 
@@ -232,20 +232,19 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             totalReferralCount,
             previousRedemptionCount: currentRedemptionCount,
             newRedemptionsApplied: newRedemptionsAvailable,
-            totalRedemptionCount:
-              currentRedemptionCount + newRedemptionsAvailable,
+            totalRedemptionCount: currentRedemptionCount +
+              newRedemptionsAvailable,
             trialDays: 30 * newRedemptionsAvailable,
           });
         } catch (stripeError) {
           logger.error("Stripe error", {
-            error:
-              stripeError instanceof Error
-                ? stripeError.message
-                : String(stripeError),
+            error: stripeError instanceof Error
+              ? stripeError.message
+              : String(stripeError),
           });
           return NextResponse.json(
             { error: "Error processing Stripe subscription" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       } else {
@@ -282,7 +281,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             // Extend active subscription
             const newEndDate = new Date(currentSub.current_period_end * 1000);
             newEndDate.setMonth(
-              newEndDate.getMonth() + newRedemptionsAvailable
+              newEndDate.getMonth() + newRedemptionsAvailable,
             );
 
             currentSub = await stripe.subscriptions.update(currentSub.id, {
@@ -326,8 +325,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             .from("referral_redemptions")
             .upsert({
               id: referralCode.user_id,
-              referral_redemption_count:
-                currentRedemptionCount + newRedemptionsAvailable,
+              referral_redemption_count: currentRedemptionCount +
+                newRedemptionsAvailable,
             });
 
           if (redemptionError) {
@@ -336,7 +335,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             });
             return NextResponse.json(
               { error: "Error recording redemption" },
-              { status: 500 }
+              { status: 500 },
             );
           }
 
@@ -347,20 +346,19 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             totalReferralCount,
             previousRedemptionCount: currentRedemptionCount,
             newRedemptionsApplied: newRedemptionsAvailable,
-            totalRedemptionCount:
-              currentRedemptionCount + newRedemptionsAvailable,
+            totalRedemptionCount: currentRedemptionCount +
+              newRedemptionsAvailable,
             subscriptionStatus: currentSub.status,
           });
         } catch (stripeError) {
           logger.error("Stripe error", {
-            error:
-              stripeError instanceof Error
-                ? stripeError.message
-                : String(stripeError),
+            error: stripeError instanceof Error
+              ? stripeError.message
+              : String(stripeError),
           });
           return NextResponse.json(
             { error: "Error processing Stripe subscription" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -387,7 +385,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     });
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });

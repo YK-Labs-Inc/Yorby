@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 export interface Product extends Omit<Stripe.Product, "description"> {
@@ -66,7 +66,7 @@ export async function getProducts(userId: string) {
   try {
     const isTestVariant =
       (await posthog.getFeatureFlag("subscription-price-test-1", userId)) ===
-      "test";
+        "test";
     const isFlashPricing =
       (await posthog.getFeatureFlag("flash-pricing", userId)) === "test";
 
@@ -78,15 +78,15 @@ export async function getProducts(userId: string) {
     // If flash pricing is enabled, also fetch the increased prices
     const additionalPriceIds = isFlashPricing
       ? Object.values(SUBSCRIPTION_PRICES).map(
-          ({ increasedPriceId }) => increasedPriceId
-        )
+        ({ increasedPriceId }) => increasedPriceId,
+      )
       : [];
 
     // Fetch all prices in parallel with expanded product data
     const prices = await Promise.all(
       [...priceIds, ...additionalPriceIds].map((priceId) =>
         stripe.prices.retrieve(priceId, { expand: ["product"] })
-      )
+      ),
     );
 
     let productsWithPrices: Product[] = [];
@@ -94,7 +94,7 @@ export async function getProducts(userId: string) {
     if (isTestVariant) {
       // Get monthly price as base price for calculating savings
       const monthlyPrice = prices.find(
-        (p) => p.id === SUBSCRIPTION_PRICES.monthly.priceId
+        (p) => p.id === SUBSCRIPTION_PRICES.monthly.priceId,
       )!;
       const monthlyAmount = monthlyPrice.unit_amount! / 100;
 
@@ -104,8 +104,8 @@ export async function getProducts(userId: string) {
           const price = prices.find(
             (p) =>
               p.id ===
-              SUBSCRIPTION_PRICES[key as keyof typeof SUBSCRIPTION_PRICES]
-                .priceId
+                SUBSCRIPTION_PRICES[key as keyof typeof SUBSCRIPTION_PRICES]
+                  .priceId,
           )!;
           const product = price.product as Stripe.Product;
           const totalPrice = price.unit_amount! / 100;
@@ -120,8 +120,8 @@ export async function getProducts(userId: string) {
           let savings = null;
           if (months > 1) {
             const totalCostAtMonthly = monthlyAmount * months;
-            savings =
-              ((totalCostAtMonthly - totalPrice) / totalCostAtMonthly) * 100;
+            savings = ((totalCostAtMonthly - totalPrice) / totalCostAtMonthly) *
+              100;
           }
 
           return {
@@ -138,20 +138,21 @@ export async function getProducts(userId: string) {
               : null,
             increasedPriceId,
           } as Product;
-        }
+        },
       );
     } else {
       // Get single credit price as base price for calculating savings
-      const singleCreditPrice =
-        prices.find((p) => p.id === CREDIT_PRICES.single.priceId)!
-          .unit_amount! / 100;
+      const singleCreditPrice = prices.find((p) =>
+        p.id === CREDIT_PRICES.single.priceId
+      )!
+        .unit_amount! / 100;
 
       // Create credit products
       productsWithPrices = Object.entries(CREDIT_PRICES).map(
         ([key, { credits }]) => {
           const price = prices.find(
             (p) =>
-              p.id === CREDIT_PRICES[key as keyof typeof CREDIT_PRICES].priceId
+              p.id === CREDIT_PRICES[key as keyof typeof CREDIT_PRICES].priceId,
           )!;
           const product = price.product as Stripe.Product;
           const totalPrice = price.unit_amount! / 100;
@@ -175,7 +176,7 @@ export async function getProducts(userId: string) {
             savings,
             increasedPriceId: null,
           } as Product;
-        }
+        },
       );
     }
 
@@ -204,10 +205,10 @@ export async function createCheckoutSession(formData: FormData) {
   const priceId = formData.get("priceId") as string;
   const isSubscription = (formData.get("isSubscription") as string) === "true";
   const cancelledPurchaseRedirectUrl = formData.get(
-    "cancelledPurchaseRedirectUrl"
+    "cancelledPurchaseRedirectUrl",
   ) as string;
   const successfulPurchaseRedirectUrl = formData.get(
-    "successfulPurchaseRedirectUrl"
+    "successfulPurchaseRedirectUrl",
   ) as string;
   const t = await getTranslations("purchase");
   let logger = new Logger().with({
@@ -249,14 +250,16 @@ export async function createCheckoutSession(formData: FormData) {
         quantity: 1,
       },
     ],
-    success_url: `${origin}${successfulPurchaseRedirectUrl}${successfulPurchaseRedirectUrl.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${origin}${successfulPurchaseRedirectUrl}${
+      successfulPurchaseRedirectUrl.includes("?") ? "&" : "?"
+    }session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}${cancelledPurchaseRedirectUrl}`,
     metadata,
     allow_promotion_codes: true,
     subscription_data: isSubscription
       ? {
-          metadata,
-        }
+        metadata,
+      }
       : undefined,
   };
   if (email) {

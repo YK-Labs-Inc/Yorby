@@ -3,19 +3,18 @@ import { z } from "zod";
 import { createAdminClient } from "@/utils/supabase/server";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { Logger } from "next-axiom";
-import { PostgrestQueryBuilder } from "@supabase/postgrest-js";
 
 // Schema for the AI model response
 const JobCategorySchema = z.object({
   industry: z
     .string()
     .describe(
-      "The general job industry (e.g., healthcare, finance, technology, customer service)"
+      "The general job industry (e.g., healthcare, finance, technology, customer service)",
     ),
   title: z
     .string()
     .describe(
-      "A normalized job title without fancy terms that reflects the core responsibilities"
+      "A normalized job title without fancy terms that reflects the core responsibilities",
     ),
 });
 
@@ -49,12 +48,12 @@ export async function GET(request: Request) {
       });
       return NextResponse.json(
         { error: "Failed to fetch categorized jobs" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const categorizedJobIds = new Set(
-      categorizedJobs?.map((job) => job.custom_job_id) || []
+      categorizedJobs?.map((job) => job.custom_job_id) || [],
     );
 
     // Fetch all custom jobs in batches to overcome the 1000 record limit
@@ -83,19 +82,19 @@ export async function GET(request: Request) {
         });
         return NextResponse.json(
           { error: `Failed to fetch custom jobs batch ${page}` },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
       // Filter out already categorized jobs
       const uncategorizedBatchJobs = ((batchJobs as CustomJob[]) || []).filter(
-        (job) => !categorizedJobIds.has(job.id)
+        (job) => !categorizedJobIds.has(job.id),
       );
 
       allCustomJobs = [...allCustomJobs, ...uncategorizedBatchJobs];
 
       logger.info(
-        `Fetched batch ${page}: ${batchJobs?.length} jobs, ${uncategorizedBatchJobs.length} uncategorized`
+        `Fetched batch ${page}: ${batchJobs?.length} jobs, ${uncategorizedBatchJobs.length} uncategorized`,
       );
 
       // Check if we've fetched all jobs
@@ -111,7 +110,7 @@ export async function GET(request: Request) {
     if (!customJobs || customJobs.length === 0) {
       return NextResponse.json(
         { message: "No uncategorized jobs found" },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -128,7 +127,9 @@ export async function GET(request: Request) {
       const currentBatch = customJobs.slice(start, end);
 
       logger.info(
-        `Processing batch ${batchIndex + 1}/${totalBatches} (${currentBatch.length} jobs)`
+        `Processing batch ${
+          batchIndex + 1
+        }/${totalBatches} (${currentBatch.length} jobs)`,
       );
 
       // Process each job in the current batch
@@ -188,14 +189,16 @@ export async function GET(request: Request) {
         } catch (jobError) {
           logger.error("Error processing job", {
             jobId: job.id,
-            error:
-              jobError instanceof Error ? jobError.message : String(jobError),
+            error: jobError instanceof Error
+              ? jobError.message
+              : String(jobError),
           });
           results.push({
             jobId: job.id,
             success: false,
-            error:
-              jobError instanceof Error ? jobError.message : "Unknown error",
+            error: jobError instanceof Error
+              ? jobError.message
+              : "Unknown error",
           });
         }
       }
@@ -203,7 +206,9 @@ export async function GET(request: Request) {
       // Add a small delay between batches to avoid rate limiting
       if (batchIndex < totalBatches - 1) {
         logger.info(
-          `Completed batch ${batchIndex + 1}/${totalBatches}, waiting before next batch`
+          `Completed batch ${
+            batchIndex + 1
+          }/${totalBatches}, waiting before next batch`,
         );
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
@@ -227,7 +232,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json(
       { error: "Failed to process jobs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
