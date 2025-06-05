@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { H2 } from "@/components/typography";
+import { getTranslations } from "next-intl/server";
 
 interface CoachPortalLandingPageProps {
   params: Promise<{
@@ -124,6 +125,8 @@ export default async function CoachPortalLandingPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const t = await getTranslations("coachAdminPortal.programsPage");
+
   let registrationStatus: {
     hasAccess: boolean;
     hasDuplicatedJobs: boolean;
@@ -141,9 +144,13 @@ export default async function CoachPortalLandingPage({
     <div className="flex flex-col items-center justify-center h-screen gap-2">
       <H2>Welcome to {coach.name}&apos;s Program</H2>
       {user ? (
-        registrationStatus.hasAccess &&
-        registrationStatus.hasDuplicatedJobs &&
-        registrationStatus.firstJobId ? (
+        user.id === coach.user_id ? (
+          <Link href="/dashboard/coach-admin/programs">
+            <Button>{t("viewYourProgramsButton")}</Button>
+          </Link>
+        ) : registrationStatus.hasAccess &&
+          registrationStatus.hasDuplicatedJobs &&
+          registrationStatus.firstJobId ? (
           <Link
             href={`/${coach.slug}/programs/${registrationStatus.firstJobId}`}
           >
