@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-02-24.acacia",
 });
 
 export async function GET(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   if (!sessionId) {
     return NextResponse.json(
       { success: false, error: "Session ID is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       });
       return NextResponse.json(
         { success: false, error: "Payment not completed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       logger.error("User ID not found in session metadata", { sessionId });
       return NextResponse.json(
         { success: false, error: "User ID not found" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     });
     return NextResponse.json(
       { success: false, error: "Failed to verify session" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await logger.flush();
