@@ -26,7 +26,7 @@ export const GET = withAxiom(async (
         throw new Error("No host found");
     }
     const errorRedirectUrl = new URL(
-        `/coaches/${coach.slug}/register-error?coachId=${coach.id}`,
+        `/${coach.slug}/register-error?coachId=${coach.id}`,
         req.nextUrl.origin,
     ).toString();
 
@@ -146,7 +146,7 @@ export const GET = withAxiom(async (
         // 6. Redirect to the first curriculum page
         const redirectUrl = `http${
             host.includes("localhost") ? "" : "s"
-        }://${host}/coaches/${coach.slug}/programs/${newJobId}`;
+        }://${host}/${coach.slug}/programs/${newJobId}`;
         return NextResponse.redirect(redirectUrl);
     } catch (err) {
         logger.error("Error during registration, rolling back", { err });
