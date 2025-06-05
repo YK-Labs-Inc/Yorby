@@ -2033,7 +2033,8 @@
       },
       "programEditPage": {
         "title": "Edit Program"
-      }
+      },
+      "viewYourProgramsButton": "View your programs"
     },
     "questionsPage": {
       "createQuestions": {
