@@ -169,7 +169,7 @@ export default function MockInterviewReviewClientComponent({
               return (
                 <div
                   key={message.id}
-                  className={`flex items-center gap-2 ${isUser ? "justify-end" : "justify-start"}`}
+                  className={`flex items-center gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}
                 >
                   {/* Message bubble */}
                   <div
@@ -185,7 +185,6 @@ export default function MockInterviewReviewClientComponent({
                   </div>
                   {/* Only show play button if recordingUrl is not present and message has a video (model messages only) */}
                   {!recordingUrl &&
-                    !isUser &&
                     message.bucket_name &&
                     message.recording_path && (
                       <Button
