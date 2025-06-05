@@ -324,7 +324,9 @@
       "emailAlert": "We'll send you an email when your interview is ready to review",
       "confirmButton": "End Interview",
       "cancelButton": "Continue Interview",
-      "uploadVideoLabel": "Upload interview recording for review"
+      "uploadVideoLabel": "Upload interview recording for review",
+      "processErrorRetryMessage": "Sorry, something went wrong while processing your interview. Please try again.",
+      "retryButton": "Retry Processing"
     }
   },
   "errors": {

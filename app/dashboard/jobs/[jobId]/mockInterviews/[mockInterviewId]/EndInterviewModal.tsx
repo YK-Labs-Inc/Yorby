@@ -30,18 +30,13 @@ export default function EndInterviewModal({
   endInterview,
 }: EndInterviewModalProps) {
   const t = useTranslations("mockInterview.endModal");
-  const errorT = useTranslations("errors");
-  const [isProcessing, setIsProcessing] = useState(false);
   const { logError } = useAxiomLogging();
   const router = useRouter();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-  const { isProcessing: isProcessingRecording } = useMediaDevice();
 
-  const handleEndInterview = async () => {
-    endInterview();
-    setIsProcessing(true);
-    await processInterview();
-  };
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  const { isProcessing: isProcessingRecording } = useMediaDevice();
 
   const processInterview = async () => {
     try {
@@ -56,24 +51,48 @@ export default function EndInterviewModal({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to process interview");
+        logError("Error processing interview: API error", { mockInterviewId, status: response.status });
+        setProcessingError(t("processErrorRetryMessage"));
+        setIsProcessing(false);
+        return;
       }
 
       setShouldRedirect(true);
     } catch (error: any) {
-      logError("Error processing interview", { error: error.message });
+      logError("Error processing interview: Network/general error", { mockInterviewId, error: error.message });
+      setProcessingError(t("processErrorRetryMessage"));
       setIsProcessing(false);
-      alert(errorT("pleaseTryAgain"));
     }
   };
 
+  const handleEndInterview = async () => {
+    endInterview();
+    setProcessingError(null); // Clear previous errors
+    setIsProcessing(true);
+    await processInterview();
+  };
+
+  const handleRetry = async () => {
+    setProcessingError(null); // Clear error message
+    setIsProcessing(true); // Show processing indicator
+    await processInterview();
+  };
+
   useEffect(() => {
-    if (shouldRedirect && !isProcessingRecording) {
+    if (shouldRedirect && !isProcessingRecording && !processingError) {
       router.push(
         `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}/review`
       );
     }
-  }, [shouldRedirect, isProcessingRecording, jobId, mockInterviewId, router]);
+  }, [shouldRedirect, isProcessingRecording, jobId, mockInterviewId, router, processingError]);
+
+  // Reset error state when modal is closed/reopened
+  useEffect(() => {
+    if (!isOpen) {
+      setProcessingError(null);
+      setIsProcessing(false); // Also reset processing if modal is closed externally
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -81,14 +100,22 @@ export default function EndInterviewModal({
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
-        {!isProcessing && !isProcessingRecording && (
+
+        {processingError && !isProcessing && !isProcessingRecording ? (
+          // Error occurred
           <div className="mt-4 space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t("confirmMessage")}
+            <p className="text-sm text-red-500 dark:text-red-400">
+              {processingError}
             </p>
+            <DialogFooter className="mt-0">
+              <Button variant="outline" onClick={onClose}>
+                {t("cancelButton")}
+              </Button>
+              <Button onClick={handleRetry}>{t("retryButton")}</Button>
+            </DialogFooter>
           </div>
-        )}
-        {(isProcessing || isProcessingRecording) && (
+        ) : (isProcessing || isProcessingRecording) ? (
+          // Processing (API or media)
           <div className="mt-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {t("processing")}
@@ -99,14 +126,21 @@ export default function EndInterviewModal({
             </div>
             <span className="text-sm">{t("emailAlert")}</span>
           </div>
-        )}
-        {!isProcessing && !isProcessingRecording && (
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={onClose}>
-              {t("cancelButton")}
-            </Button>
-            <Button onClick={handleEndInterview}>{t("confirmButton")}</Button>
-          </DialogFooter>
+        ) : (
+          // Initial state
+          <>
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t("confirmMessage")}
+              </p>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={onClose}>
+                {t("cancelButton")}
+              </Button>
+              <Button onClick={handleEndInterview}>{t("confirmButton")}</Button>
+            </DialogFooter>
+          </>
         )}
       </DialogContent>
     </Dialog>
