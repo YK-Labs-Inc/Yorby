@@ -11,7 +11,13 @@ import { signInWithOTP } from "@/app/(auth-pages)/actions";
 import { H4 } from "@/components/typography";
 import { usePostHog } from "posthog-js/react";
 
-export default function CoachSignInForm({ coachId }: { coachId: string }) {
+export default function CoachSignInForm({
+  coachId,
+  redirectTo,
+}: {
+  coachId: string;
+  redirectTo: string;
+}) {
   const signInT = useTranslations("signIn");
   const [state, action, pending] = useActionState(signInWithOTP, {
     success: "",
@@ -59,11 +65,7 @@ export default function CoachSignInForm({ coachId }: { coachId: string }) {
             />
           </div>
           <input type="hidden" name="captchaToken" value={captchaToken} />
-          <input
-            type="hidden"
-            name="redirectTo"
-            value={`/api/coach/${coachId}/register`}
-          />
+          <input type="hidden" name="redirectTo" value={redirectTo} />
           <SubmitButton
             disabled={!captchaToken || pending}
             pendingText={signInT("form.submitting")}
