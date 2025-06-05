@@ -86,8 +86,14 @@ export default function ActiveInterviewComponent({
           .from("coaches")
           .select("user_id")
           .eq("id", coachId)
-          .single();
-        if (coachError) throw new Error(coachError.message);
+          .maybeSingle();
+        if (coachError) {
+          logError("Error fetching coach user_id", {
+            error: coachError.message,
+            coachId,
+          });
+          throw coachError;
+        }
         coachUserId = coach?.user_id;
       }
 
