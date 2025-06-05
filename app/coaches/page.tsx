@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { useActionState, useEffect, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { signInWithOTP } from "../(auth-pages)/actions";
-import { H4 } from "@/components/typography";
+import { H2, P, H4 } from "@/components/typography";
 import { usePostHog } from "posthog-js/react";
 
 export default function CoachesPage() {
@@ -44,11 +44,20 @@ export default function CoachesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container max-w-md mx-auto pt-20">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">
-            Welcome to Perfect Interiview B2B
-          </h1>
+      <div className="container max-w-xl mx-auto pt-20">
+        <div className="flex flex-col items-center gap-2 mb-8">
+          <H2 className="text-4xl font-bold tracking-tight text-center">
+            Yorby
+          </H2>
+          <H4 className="text-xl font-medium text-center text-muted-foreground mb-2">
+            AI Coaching Platform For Career Coaches
+          </H4>
+          <P className="text-center text-lg text-muted-foreground mb-4">
+            Yorby empowers career coaches to scale their impact by creating AI
+            avatars of themselves and their knowledge. Build question banks, run
+            mock interviews, and let your students practice and get
+            feedback—powered by your expertise, delivered by AI.
+          </P>
         </div>
 
         <form action={action} className="space-y-6">

@@ -125,8 +125,6 @@ export default async function CoachPortalLandingPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const t = await getTranslations("coachAdminPortal.programsPage");
-
   let registrationStatus: {
     hasAccess: boolean;
     hasDuplicatedJobs: boolean;
@@ -140,28 +138,23 @@ export default async function CoachPortalLandingPage({
     );
   }
 
+  let redirectTo = `/api/coach/${coach.id}/register`;
+  if (user) {
+    if (user.id === coach.user_id) {
+      redirectTo = "/dashboard/coach-admin/programs";
+    } else if (
+      registrationStatus.hasAccess &&
+      registrationStatus.hasDuplicatedJobs &&
+      registrationStatus.firstJobId
+    ) {
+      redirectTo = `/${coach.slug}/programs/${registrationStatus.firstJobId}`;
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-2">
-      <H2>Welcome to {coach.name}&apos;s Program</H2>
-      {user ? (
-        user.id === coach.user_id ? (
-          <Link href="/dashboard/coach-admin/programs">
-            <Button>{t("viewYourProgramsButton")}</Button>
-          </Link>
-        ) : registrationStatus.hasAccess &&
-          registrationStatus.hasDuplicatedJobs &&
-          registrationStatus.firstJobId ? (
-          <Link
-            href={`/${coach.slug}/programs/${registrationStatus.firstJobId}`}
-          >
-            <Button>Go to Your Curriculum</Button>
-          </Link>
-        ) : (
-          <CoachRegistrationButton coachId={coach.id} coachName={coach.name} />
-        )
-      ) : (
-        <CoachSignInForm coachId={coach.id} />
-      )}
+      <H2>Welcome to {coach.name}&apos;s program</H2>
+      <CoachSignInForm coachId={coach.id} redirectTo={redirectTo} />
     </div>
   );
 }
