@@ -213,6 +213,9 @@ importers:
       '@types/react-dom':
         specifier: 19.0.2
         version: 19.0.2(@types/react@19.1.6)
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       postcss:
         specifier: 8.4.49
         version: 8.4.49

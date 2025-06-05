@@ -12,7 +12,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   const conversationId = formData.get("conversationId") as string;
   const files = formData.getAll("files") as File[];
   const messages = JSON.parse(
-    formData.get("messages") as string
+    formData.get("messages") as string,
   ) as CoreMessage[];
   const isOnboarding = formData.get("isOnboarding") === "true";
   const logger = req.log.with({
@@ -42,7 +42,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     if (conversationError) {
       return new Response(
         JSON.stringify({ error: conversationError.message }),
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -113,7 +113,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     throw messageError;
   }
 
-  const systemPrompt = `An assistant whose role is to gather information about a user's career and work history.
+  const systemPrompt =
+    `An assistant whose role is to gather information about a user's career and work history.
     
     As the user provides information, ask follow up questions to gather more information about whatever
     the user has provided. If the user has provided enough information, thank them and ask if they have
@@ -198,7 +199,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       }),
       {
         status: 500,
-      }
+      },
     );
   }
 });
