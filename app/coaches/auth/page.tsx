@@ -105,7 +105,7 @@ export default async function CoachesAuthPage() {
   // If user has exactly one coach access, redirect to that coach's program
   if (coachAccess.length === 1) {
     const coach = coachAccess[0];
-    redirect(`/coaches/${coach.coach_slug}`);
+    redirect(`/${coach.coach_slug}`);
   }
 
   // If user has multiple coach access entries, show table
@@ -136,9 +136,7 @@ export default async function CoachesAuthPage() {
                   </TableCell>
                   <TableCell>
                     <Button asChild size="sm">
-                      <Link href={`/coaches/${coach.coach_slug}`}>
-                        View Program
-                      </Link>
+                      <Link href={`/${coach.coach_slug}`}>View Program</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
