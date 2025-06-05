@@ -30,16 +30,24 @@ export default function EndInterviewModal({
   endInterview,
 }: EndInterviewModalProps) {
   const t = useTranslations("mockInterview.endModal");
+  const [isProcessing, setIsProcessing] = useState(false);
   const { logError } = useAxiomLogging();
   const router = useRouter();
 
-  const [isProcessing, setIsProcessing] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const { isProcessing: isProcessingRecording } = useMediaDevice();
 
+  const handleEndInterview = async () => {
+    endInterview();
+    setProcessingError(null); // Clear previous errors
+    setIsProcessing(true);
+    await processInterview();
+  };
+
   const processInterview = async () => {
     try {
+      setShouldRedirect(false);
       const response = await fetch("/api/mockInterviews/process", {
         method: "POST",
         headers: {
@@ -51,7 +59,10 @@ export default function EndInterviewModal({
       });
 
       if (!response.ok) {
-        logError("Error processing interview: API error", { mockInterviewId, status: response.status });
+        logError("Error processing interview: API error", {
+          mockInterviewId,
+          status: response.status,
+        });
         setProcessingError(t("processErrorRetryMessage"));
         setIsProcessing(false);
         return;
@@ -59,17 +70,13 @@ export default function EndInterviewModal({
 
       setShouldRedirect(true);
     } catch (error: any) {
-      logError("Error processing interview: Network/general error", { mockInterviewId, error: error.message });
+      logError("Error processing interview: Network/general error", {
+        mockInterviewId,
+        error: error.message,
+      });
       setProcessingError(t("processErrorRetryMessage"));
       setIsProcessing(false);
     }
-  };
-
-  const handleEndInterview = async () => {
-    endInterview();
-    setProcessingError(null); // Clear previous errors
-    setIsProcessing(true);
-    await processInterview();
   };
 
   const handleRetry = async () => {
@@ -84,7 +91,14 @@ export default function EndInterviewModal({
         `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}/review`
       );
     }
-  }, [shouldRedirect, isProcessingRecording, jobId, mockInterviewId, router, processingError]);
+  }, [
+    shouldRedirect,
+    isProcessingRecording,
+    jobId,
+    mockInterviewId,
+    router,
+    processingError,
+  ]);
 
   // Reset error state when modal is closed/reopened
   useEffect(() => {
@@ -114,7 +128,7 @@ export default function EndInterviewModal({
               <Button onClick={handleRetry}>{t("retryButton")}</Button>
             </DialogFooter>
           </div>
-        ) : (isProcessing || isProcessingRecording) ? (
+        ) : isProcessing || isProcessingRecording ? (
           // Processing (API or media)
           <div className="mt-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
