@@ -79,11 +79,29 @@ export default function ActiveInterviewComponent({
       if (jobError) throw new Error(jobError.message);
       const coachId = job?.coach_id;
 
+      let coachUserId = null;
+      if (coachId) {
+        // Fetch the coach's user_id from the coaches table
+        const { data: coach, error: coachError } = await supabase
+          .from("coaches")
+          .select("user_id")
+          .eq("id", coachId)
+          .maybeSingle();
+        if (coachError) {
+          logError("Error fetching coach user_id", {
+            error: coachError.message,
+            coachId,
+          });
+          throw coachError;
+        }
+        coachUserId = coach?.user_id;
+      }
+
       // 2. Build file path
       const fileName = `${Date.now()}`;
       let filePath = "";
-      if (coachId) {
-        filePath = `${userId}/coaches/${coachId}/mockInterviews/${mockInterviewId}/messages/${messageId}/${fileName}`;
+      if (coachUserId) {
+        filePath = `${userId}/coaches/${coachUserId}/mockInterviews/${mockInterviewId}/messages/${messageId}/${fileName}`;
       } else {
         filePath = `${userId}/mockInterviews/${mockInterviewId}/messages/${messageId}/${fileName}`;
       }
