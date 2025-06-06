@@ -157,7 +157,7 @@ export default function PersonaMockInterviewClient({
   selectedVoice = VOICE_OPTIONS[0],
 }: PersonaMockInterviewClientProps) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio">
       <TtsProvider initialTtsEnabled={true} initialVoice={selectedVoice}>
         <PersonaMockInterviewClientInternal selectedVoice={selectedVoice} />
       </TtsProvider>

@@ -132,7 +132,7 @@ function _UploadQuestionsClient({ jobId, job }: Props) {
 
 export default function UploadQuestionsClient({ jobId, job }: Props) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio">
       <TtsProvider>
         <_UploadQuestionsClient jobId={jobId} job={job} />
       </TtsProvider>

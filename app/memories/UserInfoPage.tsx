@@ -221,7 +221,7 @@ export default function UserInfoPage({
   isOnboarding: boolean;
 }) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio">
       <TtsProvider>
         <_UserInfoPage isOnboarding={isOnboarding} />
       </TtsProvider>
