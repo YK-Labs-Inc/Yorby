@@ -31,7 +31,7 @@ export default function AnswerGuideline({
       {isExpanded && (
         <CardContent className="space-y-4 pt-4 max-h-80 overflow-y-auto custom-scrollbar">
           <div className="text-sm text-muted-foreground markdown max-h-64 overflow-y-auto custom-scrollbar">
-            <div className="p-4 border rounded-lg bg-muted/30">
+            <div className="p-4 border rounded-lg bg-muted/30 markdown">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {question.answer_guidelines}
               </ReactMarkdown>

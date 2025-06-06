@@ -929,10 +929,9 @@ const fetchCoachKnowledgeBaseForJob = async (jobId: string) => {
   if (!customJob.coach_id) {
     return null;
   }
-  const coachKnowledgeBase = await fetchCoachKnowledgeBase(
+  return await fetchCoachKnowledgeBase(
     customJob.coach_id,
   );
-  return coachKnowledgeBase;
 };
 
 const fetchCustomJob = async (jobId: string) => {
@@ -950,13 +949,40 @@ const fetchCustomJob = async (jobId: string) => {
 
 const fetchCoachKnowledgeBase = async (coachId: string) => {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("coach_knowledge_base")
-    .select("*")
-    .eq("coach_id", coachId);
-  if (error) {
-    throw error;
+  const logger = new Logger().with({
+    coachId: coachId,
+    function: "fetchCoachKnowledgeBase",
+  });
+  const { data: coachData, error: coachError } = await supabase
+    .from("coaches")
+    .select("user_id")
+    .eq("id", coachId)
+    .single();
+  if (coachError) {
+    logger.error("Error fetching coach:", { error: coachError.message });
+    await logger.flush();
+    return null;
   }
+  logger.info("Coach data fetched:", {
+    coachData,
+  });
+  const userId = coachData.user_id;
+  const { data, error } = await supabase
+    .from("user_knowledge_base")
+    .select("*")
+    .eq("user_id", userId);
+  if (error) {
+    logger.error("Error fetching user knowledge base:", {
+      error: error.message,
+    });
+    await logger.flush();
+    return null;
+  }
+  logger.info("Coach knowledge base fetched:", {
+    userId: userId,
+    data,
+  });
+  await logger.flush();
   return data.map((d) => d.knowledge_base).join("\n");
 };
 

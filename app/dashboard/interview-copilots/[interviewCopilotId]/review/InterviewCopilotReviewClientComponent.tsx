@@ -144,9 +144,11 @@ export default function InterviewCopilotReviewClientComponent({
                       <h3 className="font-semibold mb-2">
                         {t("questions.answerLabel")}
                       </h3>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {qa.answer}
-                      </ReactMarkdown>
+                      <div className="markdown">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {qa.answer}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 </div>

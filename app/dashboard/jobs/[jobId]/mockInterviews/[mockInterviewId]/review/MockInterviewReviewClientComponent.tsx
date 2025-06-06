@@ -173,7 +173,7 @@ export default function MockInterviewReviewClientComponent({
                 >
                   {/* Message bubble */}
                   <div
-                    className={`rounded-lg p-3 break-words ${
+                    className={`markdown rounded-lg p-3 break-words ${
                       isUser
                         ? "bg-blue-500 text-white max-w-[70%]"
                         : "bg-gray-200 dark:bg-gray-800 max-w-[70%]"

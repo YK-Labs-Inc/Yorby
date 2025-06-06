@@ -26,8 +26,9 @@ export async function createCustomJob(
 
     // Extract form data
     const title = formData.get("title") as string;
+    const job_description = formData.get("job_description") as string | null;
 
-    logger = logger.with({ title });
+    logger = logger.with({ title, job_description });
 
     // Validate required fields
     if (!title) {
@@ -44,6 +45,7 @@ export async function createCustomJob(
         .from("custom_jobs")
         .insert({
             job_title: title,
+            job_description: job_description || null,
             user_id: coach.userId,
             coach_id: coach.coachId,
             status: "unlocked",

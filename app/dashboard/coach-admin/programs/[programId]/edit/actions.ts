@@ -29,8 +29,9 @@ export async function updateCustomJob(
     // Extract form data
     const programId = formData.get("programId") as string;
     const title = formData.get("title") as string;
+    const job_description = formData.get("job_description") as string | null;
 
-    logger = logger.with({ programId, title });
+    logger = logger.with({ programId, title, job_description });
 
     if (!programId) {
         logger.error("Program id is required");
@@ -57,6 +58,7 @@ export async function updateCustomJob(
         .upsert({
             id: programId,
             job_title: title,
+            job_description: job_description || null,
             user_id: coach.userId,
             coach_id: coach.coachId,
             status: "unlocked",
@@ -69,7 +71,7 @@ export async function updateCustomJob(
         await logger.flush();
         return {
             success: false,
-            message: "Failed to update program — please try again",
+            message: "Failed to update program — please try again",
         };
     }
 
@@ -78,7 +80,7 @@ export async function updateCustomJob(
         await logger.flush();
         return {
             success: false,
-            message: "Failed to update program — please try again",
+            message: "Failed to update program — please try again",
         };
     }
 

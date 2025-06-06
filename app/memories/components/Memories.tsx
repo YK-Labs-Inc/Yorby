@@ -233,7 +233,7 @@ export const MemoriesView = ({
                 />
               ) : knowledgeBase ? (
                 <Card className="h-full overflow-y-auto">
-                  <div className="p-6">
+                  <div className="p-6 markdown">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {knowledgeBase}
                     </ReactMarkdown>
