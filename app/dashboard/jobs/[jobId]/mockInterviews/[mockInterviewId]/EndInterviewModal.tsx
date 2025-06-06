@@ -100,6 +100,7 @@ export default function EndInterviewModal({
     mockInterviewId,
     router,
     processingError,
+    baseUrl,
   ]);
 
   // Reset error state when modal is closed/reopened
