@@ -28,6 +28,7 @@ import { createCustomJob } from "../new/actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useTranslations } from "next-intl";
 import { updateCustomJob } from "../[programId]/edit/actions";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProgramFormProps {
   initialValues?: {
@@ -56,6 +57,7 @@ export default function ProgramForm({
     title: z.string().min(3, {
       message: t("requiredTitle"),
     }),
+    job_description: z.string().optional(),
   });
 
   type JobFormValues = z.infer<typeof jobFormSchema>;
@@ -65,6 +67,7 @@ export default function ProgramForm({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
       title: initialValues.title || "",
+      job_description: initialValues.description || "",
     },
   });
 
@@ -73,11 +76,12 @@ export default function ProgramForm({
     setIsSubmitting(true);
     setError(null);
     const title = values.title;
+    const job_description = values.job_description || "";
     try {
       if (isEditing && programId) {
-        handleEditJob(title, programId);
+        await handleEditJob(title, job_description, programId);
       } else {
-        handleCreateJob(title);
+        await handleCreateJob(title, job_description);
       }
     } catch (err) {
       setError(t("genericError"));
@@ -87,9 +91,10 @@ export default function ProgramForm({
     }
   };
 
-  const handleCreateJob = async (title: string) => {
+  const handleCreateJob = async (title: string, job_description: string) => {
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("job_description", job_description);
     const result = await createCustomJob(formData);
     if (result.success) {
       router.push(`/dashboard/coach-admin/programs/${result.programId}`);
@@ -98,9 +103,14 @@ export default function ProgramForm({
     }
   };
 
-  const handleEditJob = async (title: string, programId: string) => {
+  const handleEditJob = async (
+    title: string,
+    job_description: string,
+    programId: string
+  ) => {
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("job_description", job_description);
     formData.append("programId", programId);
     const result = await updateCustomJob(formData);
     if (result.success) {
@@ -139,6 +149,25 @@ export default function ProgramForm({
                       placeholder={t("programTitlePlaceholder")}
                       {...field}
                       name="programTitle"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Program Description */}
+            <FormField
+              control={form.control}
+              name="job_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("programDescriptionLabel")}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={t("programDescriptionPlaceholder")}
+                      {...field}
+                      name="job_description"
                     />
                   </FormControl>
                   <FormMessage />

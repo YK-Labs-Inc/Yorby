@@ -144,7 +144,11 @@ export function AppSidebar({
 
   useEffect(() => {
     if (isYorby) {
-      if (isCoachDashboardPage || isCoachProgramsPage) {
+      if (
+        isCoachDashboardPage ||
+        isCoachProgramsPage ||
+        pathname === "/memories"
+      ) {
         setShowSidebar(true);
       } else {
         setShowSidebar(false);

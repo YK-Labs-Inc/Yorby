@@ -19,8 +19,8 @@ export type Database = {
         Args: {
           variables?: Json
           query?: string
-          operationName?: string
           extensions?: Json
+          operationName?: string
         }
         Returns: Json
       }
@@ -56,32 +56,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "coach_branding_coach_id_fkey"
-            columns: ["coach_id"]
-            isOneToOne: true
-            referencedRelation: "coaches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      coach_knowledge_base: {
-        Row: {
-          coach_id: string
-          created_at: string
-          knowledge_base: string
-        }
-        Insert: {
-          coach_id: string
-          created_at?: string
-          knowledge_base: string
-        }
-        Update: {
-          coach_id?: string
-          created_at?: string
-          knowledge_base?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coach_knowledge_base_coach_id_fkey"
             columns: ["coach_id"]
             isOneToOne: true
             referencedRelation: "coaches"

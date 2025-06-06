@@ -14,15 +14,17 @@ import { Tables } from "@/utils/supabase/database.types";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { useTranslations } from "next-intl";
 import { MediaDeviceProvider } from "../dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
+import { useMultiTenant } from "../context/MultiTenantContext";
 
 const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const t = useTranslations("knowledgeBase");
   const [generatingResponse, setGeneratingResponse] = useState(false);
   const [files, setFiles] = useState<Tables<"user_files">[]>([]);
+  const { isYorby } = useMultiTenant();
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
-      content: t("initialMessage"),
+      content: isYorby ? t("initialYorbyMessage") : t("initialMessage"),
     },
   ]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -31,10 +33,17 @@ const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const {
     knowledgeBase,
     isUpdatingKnowledgeBase,
-    updateKnowledgeBase,
     setKnowledgeBase,
     setIsUpdatingKnowledgeBase,
   } = useKnowledgeBase();
+
+  useEffect(() => {
+    if (isYorby) {
+      setMessages([{ role: "assistant", content: t("initialYorbyMessage") }]);
+    } else {
+      setMessages([{ role: "assistant", content: t("initialMessage") }]);
+    }
+  }, [isYorby]);
 
   const fetchFiles = useCallback(async () => {
     if (!user) return;

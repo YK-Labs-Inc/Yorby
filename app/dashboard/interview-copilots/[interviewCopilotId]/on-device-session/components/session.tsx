@@ -1659,7 +1659,7 @@ export function Session({
                         {q.question}
                       </div>
                       {q.answer ? (
-                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none">
+                        <div className="text-gray-700 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none markdown">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {q.answer}
                           </ReactMarkdown>
