@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
 import { useMediaDevice } from "./MediaDeviceContext";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 interface EndInterviewModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export default function EndInterviewModal({
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const { isProcessing: isProcessingRecording } = useMediaDevice();
+  const { baseUrl } = useMultiTenant();
 
   const handleEndInterview = async () => {
     endInterview();
@@ -88,7 +90,7 @@ export default function EndInterviewModal({
   useEffect(() => {
     if (shouldRedirect && !isProcessingRecording && !processingError) {
       router.push(
-        `/dashboard/jobs/${jobId}/mockInterviews/${mockInterviewId}/review`
+        `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review`
       );
     }
   }, [
@@ -98,6 +100,7 @@ export default function EndInterviewModal({
     mockInterviewId,
     router,
     processingError,
+    baseUrl,
   ]);
 
   // Reset error state when modal is closed/reopened
