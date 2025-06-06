@@ -18,6 +18,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient } from "@/utils/supabase/server";
+import { Resend } from "resend";
+import { CoachLowScoreNotification } from "@/components/email/CoachLowScoreNotification";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -270,6 +272,74 @@ const processAnswer = async (
   return submission.id;
 };
 
+async function sendCoachLowScoreNotification(
+  { job, questionId, feedback, submissionId }: {
+    job: any;
+    questionId: string;
+    feedback: { pros: string[]; cons: string[]; correctness_score: number };
+    submissionId: string;
+  },
+) {
+  try {
+    if (!job.coach_id) return;
+    const adminClient = await createAdminClient();
+    // Get coach user_id from coach_id
+    const { data: coachRow } = await adminClient
+      .from("coaches")
+      .select("user_id")
+      .eq("id", job.coach_id)
+      .single();
+    if (!coachRow?.user_id) return;
+    // Get coach email
+    const { data: coachUser } = await adminClient.auth.admin.getUserById(
+      coachRow.user_id,
+    );
+    const coachEmail = coachUser?.user?.email;
+    if (!coachEmail) return;
+    // Get student name
+    const { data: studentUser } = await adminClient.auth.admin.getUserById(
+      job.user_id,
+    );
+    const studentName = studentUser?.user?.user_metadata?.full_name ||
+      studentUser?.user?.email || "Student";
+    // Get question text
+    const questionRow = await fetchQuestion(questionId);
+    // Build review link
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
+      "https://perfectinterview.ai";
+    const reviewLink =
+      `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/jobs/${job.id}/questions/${questionId}?submissionId=${submissionId}`;
+    // Send email
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    await resend.emails.send({
+      from: "Perfect Interview <noreply@transactional.perfectinterview.ai>",
+      to: [coachEmail],
+      subject:
+        `Student ${studentName} received a low score (${feedback.correctness_score}) on a question`,
+      react: CoachLowScoreNotification({
+        studentName,
+        jobTitle: job.job_title,
+        questionText: questionRow.question,
+        score: feedback.correctness_score,
+        reviewLink,
+      }),
+    });
+    const logger = new Logger().with({
+      function: "sendCoachLowScoreNotification",
+    });
+    logger.info("Sent low score email to coach", {
+      coachEmail,
+      studentName,
+      reviewLink,
+    });
+  } catch (e) {
+    const logger = new Logger().with({
+      function: "sendCoachLowScoreNotification",
+    });
+    logger.error("Error sending low score email to coach", { error: e });
+  }
+}
+
 const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
@@ -335,6 +405,17 @@ const writeAnswerToDatabase = async (
     await logger.flush();
   }
 
+  // Send email to coach if score is below threshold
+  if (feedback.correctness_score < LOW_SCORE_THRESHOLD) {
+    const job = await fetchJob(jobId);
+    await sendCoachLowScoreNotification({
+      job,
+      questionId,
+      feedback,
+      submissionId: submission.id,
+    });
+  }
+
   logger.info("Answer and feedback written to database");
   await logger.flush();
   return submission;
@@ -370,6 +451,8 @@ const fetchQuestionSampleAnswers = async (questionId: string) => {
   await logger.flush();
   return data;
 };
+
+const LOW_SCORE_THRESHOLD = 70;
 
 export const generateFeedback = async (
   jobId: string,
