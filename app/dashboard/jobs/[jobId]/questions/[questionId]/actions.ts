@@ -18,6 +18,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient } from "@/utils/supabase/server";
+import { Resend } from "resend";
+import { CoachLowScoreNotification } from "@/components/email/CoachLowScoreNotification";
+import { headers } from "next/headers";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -270,6 +273,91 @@ const processAnswer = async (
   return submission.id;
 };
 
+const sendCoachLowScoreNotification = async (
+  { job, questionId, feedback, submissionId }: {
+    job: any;
+    questionId: string;
+    feedback: { pros: string[]; cons: string[]; correctness_score: number };
+    submissionId: string;
+  },
+) => {
+  const logger = new Logger().with({
+    function: "sendCoachLowScoreNotification",
+  });
+  try {
+    logger.info("Starting coach low score notification", {
+      jobId: job.id,
+      questionId,
+      submissionId,
+    });
+    if (!job.coach_id) {
+      logger.info("No coach_id on job, skipping notification");
+      await logger.flush();
+      return;
+    }
+    const adminClient = await createAdminClient();
+    // Get coach user_id from coach_id
+    const { data: coachRow } = await adminClient
+      .from("coaches")
+      .select("user_id")
+      .eq("id", job.coach_id)
+      .single();
+    if (!coachRow?.user_id) {
+      logger.info("No user_id found for coach");
+      await logger.flush();
+      return;
+    }
+    // Get coach email
+    const { data: coachUser } = await adminClient.auth.admin.getUserById(
+      coachRow.user_id,
+    );
+    const coachEmail = coachUser?.user?.email;
+    if (!coachEmail) {
+      logger.info("No email found for coach");
+      await logger.flush();
+      return;
+    }
+    // Get student name
+    const { data: studentUser } = await adminClient.auth.admin.getUserById(
+      job.user_id,
+    );
+    const studentName = studentUser?.user?.user_metadata?.full_name ||
+      studentUser?.user?.email || "Student";
+    // Get question text
+    const questionRow = await fetchQuestion(questionId);
+    // Build review link
+    const baseUrl = (await headers()).get("origin");
+    const reviewLink =
+      `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/jobs/${job.id}/questions/${questionId}?submissionId=${submissionId}`;
+    // Send email
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    await resend.emails.send({
+      from: "Yorby <notifications@noreply.yorby.ai>",
+      to: [coachEmail],
+      subject:
+        `Student ${studentName} received a low score (${feedback.correctness_score}%) on a question`,
+      react: CoachLowScoreNotification({
+        studentName,
+        jobTitle: job.job_title,
+        questionText: questionRow.question,
+        score: feedback.correctness_score,
+        reviewLink,
+        pros: feedback.pros,
+        cons: feedback.cons,
+      }),
+    });
+    logger.info("Sent low score email to coach", {
+      coachEmail,
+      studentName,
+      reviewLink,
+    });
+  } catch (e) {
+    logger.error("Error sending low score email to coach", { error: e });
+  } finally {
+    await logger.flush();
+  }
+};
+
 const writeAnswerToDatabase = async (
   jobId: string,
   questionId: string,
@@ -335,6 +423,19 @@ const writeAnswerToDatabase = async (
     await logger.flush();
   }
 
+  // Send email to coach if score is below threshold
+  if (feedback.correctness_score < LOW_SCORE_THRESHOLD) {
+    const job = await fetchJob(jobId);
+    if (job.coach_id) {
+      await sendCoachLowScoreNotification({
+        job,
+        questionId,
+        feedback,
+        submissionId: submission.id,
+      });
+    }
+  }
+
   logger.info("Answer and feedback written to database");
   await logger.flush();
   return submission;
@@ -370,6 +471,8 @@ const fetchQuestionSampleAnswers = async (questionId: string) => {
   await logger.flush();
   return data;
 };
+
+const LOW_SCORE_THRESHOLD = 70;
 
 export const generateFeedback = async (
   jobId: string,

@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Coach Notification Settings Architecture
+
+This rule describes the architecture and implementation of the coach notification settings system in Perfect Interview.
+
+## Database Table: `coach_notification_settings`
+
+Notification preferences for each coach are stored in the `coach_notification_settings` table. This table supports:
+- Multiple notification **scenarios** (e.g., low score, every submission)
+- Multiple **channels** (e.g., email, Slack, Discord)
+- Per-scenario **thresholds** (e.g., correctness score)
+- Channel-specific configuration (e.g., webhook URLs)
+
+### Table Schema Example
+
+| Column      | Type        | Description                                                      |
+|-------------|-------------|------------------------------------------------------------------|
+| id          | uuid (PK)   | Unique identifier                                                |
+| coach_id    | uuid (FK)   | References `coaches.id`                                          |
+| scenario    | text        | Notification scenario (e.g. `low_score`, `every_submission`)     |
+| channel     | text        | Notification channel (e.g. `email`, `slack`, `discord`)          |
+| enabled     | boolean     | Whether this notification is enabled                             |
+| threshold   | integer     | Optional. E.g. score threshold for `low_score`                  |
+| config      | jsonb       | Optional. Channel-specific config (e.g. webhook URL)             |
+| created_at  | timestamptz | Timestamp of creation                                            |
+| updated_at  | timestamptz | Timestamp of last update                                         |
+| unique (coach_id, scenario, channel) |
+
+See migration example in chat for details.
+
+## Notification Logic
+
+- When a notification event occurs (e.g., a student receives a low score), the system queries `coach_notification_settings` for all enabled settings for the coach and scenario.
+- For each enabled channel, the system uses the config/threshold as needed to send the notification.
+- The notification sending logic is implemented in [`app/dashboard/jobs/[jobId]/questions/[questionId]/actions.ts`](mdc:app/dashboard/jobs/[jobId]/questions/[questionId]/actions.ts), e.g. see the `sendCoachLowScoreNotification` function.
+- The notification email template is in [`components/email/CoachLowScoreNotification.tsx`](mdc:components/email/CoachLowScoreNotification.tsx).
+
+## Extensibility
+
+- New scenarios and channels can be added without schema changes.
+- Channel-specific configuration is stored in the `config` JSONB column.
+- System-wide defaults can be supported by using `coach_id = null`.
+
+## Future Support
+
+- Additional notification types (e.g., mock interview completion) and channels (e.g., SMS, push) can be added by inserting new rows in the table.
+- Coaches will be able to manage their notification preferences via a settings UI.
+
+---
+
+**See this rule for guidance when implementing or updating coach notification settings, channels, or scenarios.**

@@ -98,7 +98,9 @@ export default function AnswerForm({
     : feedbackFromLegacy;
 
   const manualFeedback =
-    currentSubmission?.custom_job_question_submission_feedback?.[0];
+    currentSubmission?.custom_job_question_submission_feedback?.find(
+      (feedback) => feedback.feedback_role === "user"
+    );
 
   const searchParams = useSearchParams();
   const error = searchParams?.get("error") as string;
@@ -397,7 +399,7 @@ export default function AnswerForm({
       </Card>
       {view === "question" && (
         <>
-          {manualFeedback?.feedback_role === "user" && (
+          {manualFeedback && (
             <Card className="mt-6 border-4 border-yellow-400 bg-yellow-50/80 shadow-xl relative overflow-visible">
               <div className="absolute -top-5 left-6 flex items-center gap-2 z-10">
                 <div
