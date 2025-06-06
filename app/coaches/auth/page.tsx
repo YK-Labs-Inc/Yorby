@@ -13,23 +13,13 @@ import {
 import { H1 } from "@/components/typography";
 import { Logger } from "next-axiom";
 
-const fetchUserCoachAccess = async (userId: string) => {
+const userPrograms = async (userId: string) => {
   const logger = new Logger().with({ userId });
   const supabase = await createSupabaseServerClient();
 
-  const { data: userCoachAccessEntries, error: accessError } = await supabase
-    .from("user_coach_access")
-    .select(
-      `
-      coach_id,
-      created_at,
-      coaches!inner(
-        id,
-        name,
-        slug
-      )
-    `
-    )
+  const { data, error: accessError } = await supabase
+    .from("custom_jobs")
+    .select("*, coach:coach_id(slug, name, id)")
     .eq("user_id", userId);
 
   if (accessError) {
@@ -38,16 +28,15 @@ const fetchUserCoachAccess = async (userId: string) => {
     return [];
   }
 
-  if (!userCoachAccessEntries || userCoachAccessEntries.length === 0) {
+  logger.info("User coach access entries", {
+    data,
+  });
+
+  if (!data || data.length === 0) {
     return [];
   }
 
-  return userCoachAccessEntries.map((entry) => ({
-    coach_id: entry.coach_id,
-    coach_name: entry.coaches.name,
-    coach_slug: entry.coaches.slug,
-    created_at: entry.created_at,
-  }));
+  return data;
 };
 
 export default async function CoachesAuthPage() {
@@ -82,10 +71,10 @@ export default async function CoachesAuthPage() {
     );
   }
 
-  const coachAccess = await fetchUserCoachAccess(user.id);
+  const programs = await userPrograms(user.id);
 
   // If user has no coach access
-  if (coachAccess.length === 0) {
+  if (programs.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container max-w-4xl mx-auto pt-20">
@@ -103,9 +92,9 @@ export default async function CoachesAuthPage() {
   }
 
   // If user has exactly one coach access, redirect to that coach's program
-  if (coachAccess.length === 1) {
-    const coach = coachAccess[0];
-    redirect(`/${coach.coach_slug}`);
+  if (programs.length === 1) {
+    const program = programs[0];
+    redirect(`/${program.coach?.slug}/programs/${program.id}`);
   }
 
   // If user has multiple coach access entries, show table
@@ -115,8 +104,8 @@ export default async function CoachesAuthPage() {
         <div className="text-center mb-8">
           <H1 className="text-4xl font-bold mb-4">Your Coaching Programs</H1>
           <p className="text-xl text-muted-foreground">
-            You have access to {coachAccess.length} coaching programs. Select
-            one to continue.
+            You have access to {programs.length} coaching programs. Select one
+            to continue.
           </p>
         </div>
 
@@ -129,14 +118,18 @@ export default async function CoachesAuthPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {coachAccess.map((coach) => (
-                <TableRow key={coach.coach_id}>
+              {programs.map((program) => (
+                <TableRow key={program.coach_id}>
                   <TableCell className="font-medium">
-                    {coach.coach_name}
+                    {program.coach?.name}
                   </TableCell>
                   <TableCell>
                     <Button asChild size="sm">
-                      <Link href={`/${coach.coach_slug}`}>View Program</Link>
+                      <Link
+                        href={`/${program.coach?.slug}/programs/${program.id}`}
+                      >
+                        View Program
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>
