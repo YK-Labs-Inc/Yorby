@@ -21,8 +21,8 @@ export function CoachLowScoreNotification({
     <div
       style={{
         fontFamily: "sans-serif",
-        color: "#222",
-        background: "#f9fafb",
+        color: "#111",
+        background: "#fff",
         padding: 24,
         borderRadius: 12,
         maxWidth: 520,
@@ -53,8 +53,8 @@ export function CoachLowScoreNotification({
           fontSize: 15,
           margin: "14px 0",
           paddingLeft: 12,
-          borderLeft: "3px solid #eab308",
-          background: "#fefce8",
+          borderLeft: "3px solid #111",
+          background: "#f3f4f6",
         }}
       >
         {questionText}
@@ -67,7 +67,7 @@ export function CoachLowScoreNotification({
         style={{
           display: "inline-block",
           padding: "10px 22px",
-          background: "#2563eb",
+          background: "#111",
           color: "#fff",
           borderRadius: 8,
           textDecoration: "none",
@@ -75,8 +75,8 @@ export function CoachLowScoreNotification({
           fontSize: 15,
           transition: "background 0.2s",
         }}
-        onMouseOver={(e) => (e.currentTarget.style.background = "#1d4ed8")}
-        onMouseOut={(e) => (e.currentTarget.style.background = "#2563eb")}
+        onMouseOver={(e) => (e.currentTarget.style.background = "#222")}
+        onMouseOut={(e) => (e.currentTarget.style.background = "#111")}
       >
         Review Submission
       </a>
@@ -87,7 +87,7 @@ export function CoachLowScoreNotification({
         <div style={{ margin: "18px 0 10px 0", fontSize: 15 }}>
           {pros.length > 0 && (
             <div style={{ marginBottom: 8 }}>
-              <span style={{ fontWeight: 600, color: "#15803d" }}>Pros:</span>
+              <span style={{ fontWeight: 600, color: "#111" }}>Pros:</span>
               <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
                 {pros.map((pro, i) => (
                   <li key={i} style={{ marginBottom: 2 }}>
@@ -99,7 +99,7 @@ export function CoachLowScoreNotification({
           )}
           {cons.length > 0 && (
             <div>
-              <span style={{ fontWeight: 600, color: "#b91c1c" }}>Cons:</span>
+              <span style={{ fontWeight: 600, color: "#111" }}>Cons:</span>
               <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
                 {cons.map((con, i) => (
                   <li key={i} style={{ marginBottom: 2 }}>

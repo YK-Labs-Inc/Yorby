@@ -19,8 +19,8 @@ export function StudentCoachFeedbackNotification({
     <div
       style={{
         fontFamily: "sans-serif",
-        color: "#222",
-        background: "#f9fafb",
+        color: "#111",
+        background: "#fff",
         padding: 24,
         borderRadius: 12,
         maxWidth: 520,
@@ -49,15 +49,36 @@ export function StudentCoachFeedbackNotification({
           fontSize: 15,
           margin: "14px 0",
           paddingLeft: 12,
-          borderLeft: "3px solid #2563eb",
-          background: "#eef2ff",
+          borderLeft: "3px solid #111",
+          background: "#f3f4f6",
         }}
       >
         {questionText}
       </blockquote>
+      <a
+        href={reviewLink}
+        style={{
+          display: "inline-block",
+          padding: "10px 22px",
+          background: "#111",
+          color: "#fff",
+          borderRadius: 8,
+          textDecoration: "none",
+          fontWeight: 600,
+          fontSize: 15,
+          transition: "background 0.2s",
+        }}
+        onMouseOver={(e) => (e.currentTarget.style.background = "#222")}
+        onMouseOut={(e) => (e.currentTarget.style.background = "#111")}
+      >
+        View Feedback
+      </a>
+      <p style={{ fontSize: 13, color: "#6b7280", marginTop: 22 }}>
+        This is an automated notification from Yorby.
+      </p>
       <div style={{ margin: "18px 0 10px 0", fontSize: 15 }}>
         <div style={{ marginBottom: 8 }}>
-          <span style={{ fontWeight: 600, color: "#15803d" }}>Strengths:</span>
+          <span style={{ fontWeight: 600, color: "#111" }}>Strengths:</span>
           <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
             {pros.length > 0 ? (
               pros.map((pro, i) => (
@@ -71,7 +92,7 @@ export function StudentCoachFeedbackNotification({
           </ul>
         </div>
         <div>
-          <span style={{ fontWeight: 600, color: "#b91c1c" }}>
+          <span style={{ fontWeight: 600, color: "#111" }}>
             Areas for Improvement:
           </span>
           <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
@@ -87,27 +108,6 @@ export function StudentCoachFeedbackNotification({
           </ul>
         </div>
       </div>
-      <a
-        href={reviewLink}
-        style={{
-          display: "inline-block",
-          padding: "10px 22px",
-          background: "#2563eb",
-          color: "#fff",
-          borderRadius: 8,
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: 15,
-          transition: "background 0.2s",
-        }}
-        onMouseOver={(e) => (e.currentTarget.style.background = "#1d4ed8")}
-        onMouseOut={(e) => (e.currentTarget.style.background = "#2563eb")}
-      >
-        View Feedback
-      </a>
-      <p style={{ fontSize: 13, color: "#6b7280", marginTop: 22 }}>
-        This is an automated notification from Yorby.
-      </p>
     </div>
   );
 }
