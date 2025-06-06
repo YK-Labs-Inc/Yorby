@@ -80,10 +80,6 @@ export default async function EditJobPage({
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-      </div>
-
       <JobForm
         initialValues={{
           title: job.job_title,
