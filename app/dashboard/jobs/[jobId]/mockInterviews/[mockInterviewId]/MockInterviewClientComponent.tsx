@@ -69,7 +69,7 @@ export default function MockInterviewClientComponent(props: {
   messageHistory: Tables<"mock_interview_messages">[];
 }) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio-video">
       <TtsProvider initialVoice={VOICE_OPTIONS[0]} initialTtsEnabled={true}>
         <MockInterviewComponent {...props} />
       </TtsProvider>

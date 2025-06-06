@@ -908,7 +908,7 @@ export default function ResumeBuilder({
   transformSummary?: string;
 }) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio">
       <TtsProvider
         initialVoice={VOICE_OPTIONS.find((voice) => voice.voiceId === persona)}
         initialTtsEnabled={Boolean(persona)}

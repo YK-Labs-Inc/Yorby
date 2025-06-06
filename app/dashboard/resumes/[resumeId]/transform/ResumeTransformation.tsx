@@ -102,7 +102,7 @@ export default function ResumeTransformation({
   resume,
 }: ResumeTransformationProps) {
   return (
-    <MediaDeviceProvider>
+    <MediaDeviceProvider mediaType="audio">
       <TtsProvider>
         <ResumeTransformationForm resume={resume} />
       </TtsProvider>

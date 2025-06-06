@@ -59,9 +59,13 @@ export const useMediaDevice = () => {
 
 interface MediaDeviceProviderProps {
   children: ReactNode;
+  mediaType: "audio" | "audio-video";
 }
 
-export const MediaDeviceProvider = ({ children }: MediaDeviceProviderProps) => {
+export const MediaDeviceProvider = ({
+  children,
+  mediaType,
+}: MediaDeviceProviderProps) => {
   const [videoDevices, setVideoDevices] = useState<MediaDevice[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDevice[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<string>("");
@@ -110,11 +114,18 @@ export const MediaDeviceProvider = ({ children }: MediaDeviceProviderProps) => {
     if (isInitialized) return { audio: selectedAudio, video: selectedVideo };
 
     try {
-      // Request both microphone and camera permissions
-      const initialStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
+      // Request permissions based on mediaType
+      let initialStream: MediaStream;
+      if (mediaType === "audio-video") {
+        initialStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+      } else {
+        initialStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+      }
       // Stop the initial stream since we'll create a new one with selected devices
       initialStream.getTracks().forEach((track) => track.stop());
 
@@ -129,13 +140,18 @@ export const MediaDeviceProvider = ({ children }: MediaDeviceProviderProps) => {
             device.label || `Microphone ${device.deviceId.substring(0, 5)}...`,
         }));
 
-      // Get video devices
-      const videos = devices
-        .filter((device) => device.kind === "videoinput")
-        .map((device) => ({
-          deviceId: device.deviceId,
-          label: device.label || `Camera ${device.deviceId.substring(0, 5)}...`,
-        }));
+      // Get video devices only if mediaType is audio-video
+      const videos =
+        mediaType === "audio-video"
+          ? devices
+              .filter((device) => device.kind === "videoinput")
+              .map((device) => ({
+                deviceId: device.deviceId,
+                label:
+                  device.label ||
+                  `Camera ${device.deviceId.substring(0, 5)}...`,
+              }))
+          : [];
 
       setAudioDevices(audios);
       setVideoDevices(videos);
@@ -183,7 +199,7 @@ export const MediaDeviceProvider = ({ children }: MediaDeviceProviderProps) => {
         streamRef.current = null;
       }
     };
-  }, []);
+  }, [mediaType]);
 
   useEffect(() => {
     let currentStream: MediaStream | null = null;
