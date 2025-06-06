@@ -622,8 +622,8 @@ INSERT INTO "public"."user_coach_access" ("user_id", "coach_id", "created_at") V
 -- Data for Name: user_knowledge_base; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."coach_knowledge_base" ("created_at", "coach_id", "knowledge_base") VALUES
-	('2025-05-11 18:34:54.405511+00', '9cdc0028-c4ae-49ac-af27-7342c661a802', 'Interview Question Framework: Triple P or 3P
+INSERT INTO "public"."user_knowledge_base" ("created_at", "user_id", "knowledge_base") VALUES
+	('2025-05-11 18:34:54.405511+00', '9aa1ccb0-0aee-4629-8d68-cb14fc4b9283', 'Interview Question Framework: Triple P or 3P
 
 Almost every other interview question you''ll be asked, you can use the triple P framework:
 
