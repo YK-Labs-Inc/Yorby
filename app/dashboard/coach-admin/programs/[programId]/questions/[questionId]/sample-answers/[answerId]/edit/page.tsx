@@ -137,6 +137,20 @@ export default async function EditSampleAnswerPage({
     );
   }
 
+  // If there is an audio file, fetch a signed URL
+  let initialAudioUrl: string | undefined = undefined;
+  let initialAudioFilePath: string | undefined = undefined;
+  if (sampleAnswer.file_path) {
+    const { data: signedUrlData, error: signedUrlError } =
+      await supabase.storage
+        .from("coach_files")
+        .createSignedUrl(sampleAnswer.file_path, 3600); // 1 hour expiry
+    if (!signedUrlError && signedUrlData?.signedUrl) {
+      initialAudioUrl = signedUrlData.signedUrl;
+      initialAudioFilePath = sampleAnswer.file_path;
+    }
+  }
+
   return (
     <div className="container mx-auto py-6">
       <SampleAnswerForm
@@ -145,6 +159,8 @@ export default async function EditSampleAnswerPage({
         answerId={answerId}
         initialValues={{
           answer: sampleAnswer.answer,
+          initialAudioUrl,
+          initialAudioFilePath,
         }}
         onCancelRedirectUrl={`/dashboard/coach-admin/programs/${programId}/questions/${questionId}`}
         isEditing

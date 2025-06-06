@@ -14,10 +14,14 @@ export async function createSampleAnswer(
         const answer = formData.get("answer") as string;
         const questionId = formData.get("questionId") as string;
         const programId = formData.get("programId") as string;
+        const bucket = formData.get("bucket") as string | null;
+        const file_path = formData.get("file_path") as string | null;
         logger = logger.with({
             answer,
             questionId,
             programId,
+            bucket,
+            file_path,
         });
         const t = await getTranslations(
             "coachAdminPortal.sampleAnswersPage.sampleAnswerForm",
@@ -38,6 +42,8 @@ export async function createSampleAnswer(
             .insert({
                 answer,
                 question_id: questionId,
+                bucket,
+                file_path,
             })
             .select()
             .single();

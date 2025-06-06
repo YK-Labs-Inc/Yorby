@@ -1,0 +1,38 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# SampleAnswerForm Requirements and Implementation
+
+## Overview
+- [SampleAnswerForm.tsx](mdc:app/dashboard/coach-admin/programs/components/SampleAnswerForm.tsx) is the master form for creating and editing sample answers for coach-admin interview questions.
+- The form supports both text and optional audio sample answers.
+
+## Audio Upload and Recording
+- Users can upload an audio file (audio/*) or record audio directly in the browser.
+- Audio recording uses the [MediaDeviceContext](mdc:app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext.tsx) and is always available via the form UI.
+- When an audio file is uploaded or recorded:
+  - The audio is transcribed via a POST to `/api/transcribe`.
+  - The resulting transcription is automatically populated in the answer textarea, which the user can edit.
+  - Users can preview, remove, or replace the audio before submitting.
+
+## Storage
+- If an audio file is present on submit, it is uploaded to Supabase Storage using the browser client ([createSupabaseBrowserClient](mdc:utils/supabase/client.ts)).
+- The storage bucket is `coach_files`.
+- The file path format is `${userId}/programs/${programId}/questions/${questionId}/sample-answer/${fileName}` where `fileName` is a timestamp and extension.
+- The form submits the answer text, and if audio is present, also submits the `bucket` and `file_path` to the server action.
+
+## Provider Wrapping
+- The default export of [SampleAnswerForm.tsx](mdc:app/dashboard/coach-admin/programs/components/SampleAnswerForm.tsx) is a wrapper that always renders the form inside a `<MediaDeviceProvider>`, ensuring the `useMediaDevice` hook always works.
+- The actual form logic and UI is implemented in an internal-only `InternalSampleAnswerForm` component.
+- Usage of `SampleAnswerForm` elsewhere in the codebase does not require manual provider wrapping.
+
+## Validation
+- The answer (text) is always required.
+- Audio is optional.
+
+## UI/UX
+- All controls are styled with Tailwind CSS.
+- The form provides clear feedback for uploading, transcribing, and errors.
+- Users can preview and remove/replace audio before submitting.
