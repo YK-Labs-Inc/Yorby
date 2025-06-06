@@ -15,11 +15,15 @@ export async function editSampleAnswer(
         const questionId = formData.get("questionId") as string;
         const programId = formData.get("programId") as string;
         const sampleAnswerId = formData.get("sampleAnswerId") as string;
+        const bucket = formData.get("bucket") as string | null;
+        const file_path = formData.get("file_path") as string | null;
         logger = logger.with({
             answer,
             questionId,
             programId,
             sampleAnswerId,
+            bucket,
+            file_path,
         });
         const t = await getTranslations(
             "coachAdminPortal.sampleAnswersPage.sampleAnswerForm",
@@ -41,6 +45,8 @@ export async function editSampleAnswer(
                 id: sampleAnswerId,
                 answer,
                 question_id: questionId,
+                bucket,
+                file_path,
             })
             .select()
             .single();
