@@ -2,12 +2,8 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import React from "react";
 import CoachSignInForm from "./CoachSignInForm";
-import CoachRegistrationButton from "./CoachRegistrationButton";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { H2 } from "@/components/typography";
-import { getTranslations } from "next-intl/server";
 
 interface CoachPortalLandingPageProps {
   params: Promise<{
@@ -27,7 +23,7 @@ const fetchCoach = async (coachSlug: string) => {
     .eq("slug", coachSlug)
     .single();
   if (error) {
-    logger.error("Error fetching coach", { error });
+    logger.warn("No coach found for slug", { error });
     await logger.flush();
     return null;
   }
