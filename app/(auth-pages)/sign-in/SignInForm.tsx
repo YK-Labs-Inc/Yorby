@@ -1,7 +1,6 @@
 "use client";
 
 import { FormMessage, Message } from "@/components/form-message";
-import { usePathname } from "next/navigation";
 import { signInWithOTP } from "../actions";
 import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
 import { useActionState, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 export default function SignInForm() {
   const signInT = useTranslations("signIn");
@@ -17,7 +17,7 @@ export default function SignInForm() {
     error: undefined,
   });
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const pathname = usePathname();
+  const { isYorby } = useMultiTenant();
   let formMessage: Message | undefined;
   if (state.success) {
     formMessage = { success: state.success };
@@ -48,9 +48,11 @@ export default function SignInForm() {
             />
           </div>
           <input type="hidden" name="captchaToken" value={captchaToken} />
-          {pathname && (
-            <input type="hidden" name="redirectTo" value={pathname} />
-          )}
+          <input
+            type="hidden"
+            name="redirectTo"
+            value={isYorby ? "/coaches/auth" : "/onboarding"}
+          />
           <SubmitButton
             disabled={!captchaToken || pending}
             pendingText={signInT("form.submitting")}
