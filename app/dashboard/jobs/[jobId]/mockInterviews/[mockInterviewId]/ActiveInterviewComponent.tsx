@@ -13,6 +13,7 @@ import { ChatUI } from "@/app/components/chat";
 import { useTts } from "@/app/context/TtsContext";
 import { useKnowledgeBase } from "@/app/context/KnowledgeBaseContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { generateMuxUploadUrl } from "./actions";
 
 interface ActiveInterviewProps {
   mockInterviewId: string;
@@ -61,13 +62,80 @@ export default function ActiveInterviewComponent({
     }
   }, [isInitialized]);
 
-  async function saveMockInterviewMessageRecording(
-    mockInterviewId: string,
-    messageId: string,
-    videoChunks: Blob[],
-    userId: string,
-    jobId: string
-  ) {
+  const saveMockInterviewMessageRecording = async ({
+    mockInterviewId,
+    messageId,
+    videoChunks,
+    userId,
+    jobId,
+  }: {
+    mockInterviewId: string;
+    messageId: string;
+    videoChunks: Blob[];
+    userId: string;
+    jobId: string;
+  }) => {
+    void saveMockInterviewMessageRecordingInSupabaseStorage({
+      mockInterviewId,
+      messageId,
+      videoChunks,
+      userId,
+      jobId,
+    });
+    void saveMockInterviewMessageRecordingInMux({
+      messageId,
+      videoChunks,
+    });
+  };
+
+  const saveMockInterviewMessageRecordingInMux = async ({
+    messageId,
+    videoChunks,
+  }: {
+    messageId: string;
+    videoChunks: Blob[];
+  }) => {
+    const { uploadUrl, error } = await generateMuxUploadUrl(messageId);
+    if (error || !uploadUrl) {
+      logError("Error generating Mux upload URL", { error });
+      return;
+    }
+    try {
+      // Combine videoChunks into a single Blob
+      const videoBlob = new Blob(videoChunks);
+      const contentType = videoBlob.type || "video/webm";
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        body: videoBlob,
+        headers: {
+          "Content-Type": contentType,
+        },
+      });
+      if (!uploadResponse.ok) {
+        logError("Failed to upload video to Mux", {
+          status: uploadResponse.status,
+          statusText: uploadResponse.statusText,
+          messageId,
+        });
+      }
+    } catch (err) {
+      logError("Error uploading video to Mux", { error: err });
+    }
+  };
+
+  const saveMockInterviewMessageRecordingInSupabaseStorage = async ({
+    mockInterviewId,
+    messageId,
+    videoChunks,
+    userId,
+    jobId,
+  }: {
+    mockInterviewId: string;
+    messageId: string;
+    videoChunks: Blob[];
+    userId: string;
+    jobId: string;
+  }) => {
     const supabase = createSupabaseBrowserClient();
     try {
       // 1. Fetch coach_id for the job
@@ -141,7 +209,7 @@ export default function ActiveInterviewComponent({
     } catch (err) {
       logError("Error in saveMockInterviewMessageRecording:", { error: err });
     }
-  }
+  };
 
   const handleSendMessage = async (message: string) => {
     setIsProcessingAIResponse(true);
@@ -228,13 +296,13 @@ export default function ActiveInterviewComponent({
 
       if (videoChunksRef.current.length > 0) {
         if (user) {
-          await saveMockInterviewMessageRecording(
+          await saveMockInterviewMessageRecording({
             mockInterviewId,
-            savedMessageId,
-            videoChunksRef.current,
-            user.id,
-            jobId
-          );
+            messageId: savedMessageId,
+            videoChunks: videoChunksRef.current,
+            userId: user.id,
+            jobId,
+          });
         }
       }
     } catch (error: any) {
