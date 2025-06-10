@@ -722,6 +722,44 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_interview_message_mux_metadata: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          duration: number | null
+          id: string
+          playback_id: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id: string
+          playback_id?: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_message_mux_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "mock_interview_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mock_interview_messages: {
         Row: {
           bucket_name: string | null
@@ -1344,6 +1382,7 @@ export type Database = {
       interview_status: "in_progress" | "complete"
       locked_status: "locked" | "unlocked"
       message_role: "user" | "model"
+      mux_status: "preparing" | "ready" | "errored"
       question_publication_status: "draft" | "published"
       question_type: "ai_generated" | "user_generated"
     }
@@ -1472,6 +1511,7 @@ export const Constants = {
       interview_status: ["in_progress", "complete"],
       locked_status: ["locked", "unlocked"],
       message_role: ["user", "model"],
+      mux_status: ["preparing", "ready", "errored"],
       question_publication_status: ["draft", "published"],
       question_type: ["ai_generated", "user_generated"],
     },
