@@ -17,14 +17,19 @@ import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useTranslations } from "next-intl";
+import MuxPlayer from "@mux/mux-player-react";
 
 interface MockInterviewReviewClientComponentProps {
   mockInterview: Tables<"custom_job_mock_interviews">;
-  messages: Tables<"mock_interview_messages">[];
+  messages: (Tables<"mock_interview_messages"> & {
+    mux_metadata?: Tables<"mock_interview_message_mux_metadata"> | null;
+  })[];
   feedback: Tables<"custom_job_mock_interview_feedback">;
   questionFeedback: Tables<"mock_interview_question_feedback">[];
   recordingUrl: string | null;
 }
+
+type VideoSource = { muxPlaybackId?: string; supabaseUrl?: string } | null;
 
 export default function MockInterviewReviewClientComponent({
   mockInterview,
@@ -35,11 +40,11 @@ export default function MockInterviewReviewClientComponent({
 }: MockInterviewReviewClientComponentProps) {
   const t = useTranslations("mockInterviewReview");
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   // State for video playback
-  const [videoSource, setVideoSource] = useState<string | null>(recordingUrl);
+  const [videoSource, setVideoSource] = useState<VideoSource>(null);
   const [loadingVideo, setLoadingVideo] = useState(false);
 
   // Helper to get signed URL for Supabase Storage
@@ -92,19 +97,25 @@ export default function MockInterviewReviewClientComponent({
 
   // Handler for playing a message video
   const handlePlayMessageVideo = async (
-    message: Tables<"mock_interview_messages">
+    message: Tables<"mock_interview_messages"> & {
+      mux_metadata?: Tables<"mock_interview_message_mux_metadata"> | null;
+    }
   ) => {
-    if (!message.bucket_name || !message.recording_path) return;
     setLoadingVideo(true);
-    // Get the signed URL for the video
-    const url = await getSupabaseSignedUrl(
-      message.bucket_name,
-      message.recording_path
-    );
-    setVideoSource(url);
+    if (message.mux_metadata && message.mux_metadata.playback_id) {
+      setVideoSource({ muxPlaybackId: message.mux_metadata.playback_id });
+    } else if (message.bucket_name && message.recording_path) {
+      // fallback to Supabase Storage
+      const url = await getSupabaseSignedUrl(
+        message.bucket_name,
+        message.recording_path
+      );
+      setVideoSource({ supabaseUrl: url ?? undefined });
+    } else {
+      setVideoSource(null);
+    }
     setLoadingVideo(false);
-    // Optionally, scroll to the video player
-    videoRef.current?.scrollIntoView({ behavior: "smooth" });
+    (videoRef.current as any)?.scrollIntoView?.({ behavior: "smooth" });
   };
 
   return (
@@ -139,12 +150,15 @@ export default function MockInterviewReviewClientComponent({
                   <div className="w-full flex items-center justify-center h-48">
                     {t("video.loading")}
                   </div>
-                ) : videoSource ? (
+                ) : videoSource && videoSource.muxPlaybackId ? (
+                  <MuxPlayer playbackId={videoSource.muxPlaybackId} />
+                ) : videoSource && videoSource.supabaseUrl ? (
                   <video
                     ref={videoRef}
-                    src={videoSource || undefined}
+                    src={videoSource.supabaseUrl}
                     controls
                     className="w-full rounded-lg aspect-video"
+                    autoPlay
                   />
                 ) : (
                   <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
@@ -183,10 +197,10 @@ export default function MockInterviewReviewClientComponent({
                       {message.text}
                     </ReactMarkdown>
                   </div>
-                  {/* Only show play button if recordingUrl is not present and message has a video (model messages only) */}
+                  {/* Only show play button if recordingUrl is not present and message has a mux video */}
                   {!recordingUrl &&
-                    message.bucket_name &&
-                    message.recording_path && (
+                    message.mux_metadata &&
+                    message.mux_metadata.playback_id && (
                       <Button
                         variant="ghost"
                         size="icon"

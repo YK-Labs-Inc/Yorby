@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { AxiomRequest, withAxiom } from "next-axiom";
 import Mux from "@mux/mux-node";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 
 const mux = new Mux({
     webhookSecret: process.env.MUX_WEBHOOK_SECRET,
@@ -16,7 +16,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         process.env.MUX_WEBHOOK_SECRET,
     );
     const event = mux.webhooks.unwrap(body, headersList);
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createAdminClient();
     let updateError = null;
     const logger = request.log.with({
         function: "muxWebhook",
