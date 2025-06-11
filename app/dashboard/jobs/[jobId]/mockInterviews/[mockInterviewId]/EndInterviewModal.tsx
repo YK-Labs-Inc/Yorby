@@ -21,6 +21,7 @@ interface EndInterviewModalProps {
   mockInterviewId: string;
   jobId: string;
   endInterview: () => void;
+  hasPendingUploads: boolean;
 }
 
 export default function EndInterviewModal({
@@ -29,6 +30,7 @@ export default function EndInterviewModal({
   mockInterviewId,
   jobId,
   endInterview,
+  hasPendingUploads,
 }: EndInterviewModalProps) {
   const t = useTranslations("mockInterview.endModal");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,7 +90,12 @@ export default function EndInterviewModal({
   };
 
   useEffect(() => {
-    if (shouldRedirect && !isProcessingRecording && !processingError) {
+    if (
+      shouldRedirect &&
+      !isProcessingRecording &&
+      !processingError &&
+      !hasPendingUploads
+    ) {
       router.push(
         `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review`
       );
@@ -101,6 +108,7 @@ export default function EndInterviewModal({
     router,
     processingError,
     baseUrl,
+    hasPendingUploads,
   ]);
 
   // Reset error state when modal is closed/reopened
@@ -131,8 +139,8 @@ export default function EndInterviewModal({
               <Button onClick={handleRetry}>{t("retryButton")}</Button>
             </DialogFooter>
           </div>
-        ) : isProcessing || isProcessingRecording ? (
-          // Processing (API or media)
+        ) : isProcessing || isProcessingRecording || hasPendingUploads ? (
+          // Processing (API, media, or uploads)
           <div className="mt-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {t("processing")}
