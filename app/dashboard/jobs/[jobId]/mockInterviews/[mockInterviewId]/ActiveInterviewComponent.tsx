@@ -48,6 +48,10 @@ export default function ActiveInterviewComponent({
   const { selectedVoice, stopAudioPlayback } = useTts();
   const { updateKnowledgeBase } = useKnowledgeBase();
 
+  // Track pending uploads
+  const [pendingUploads, setPendingUploads] = useState<Set<string>>(new Set());
+  const pendingUploadsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!isInitialized) {
       setIsInitialized(true);
@@ -75,17 +79,35 @@ export default function ActiveInterviewComponent({
     userId: string;
     jobId: string;
   }) => {
-    void saveMockInterviewMessageRecordingInSupabaseStorage({
-      mockInterviewId,
-      messageId,
-      videoChunks,
-      userId,
-      jobId,
-    });
-    void saveMockInterviewMessageRecordingInMux({
-      messageId,
-      videoChunks,
-    });
+    // Add to pending uploads
+    const uploadId = `${messageId}-${Date.now()}`;
+    pendingUploadsRef.current.add(uploadId);
+    setPendingUploads(new Set(pendingUploadsRef.current));
+
+    try {
+      await Promise.all([
+        saveMockInterviewMessageRecordingInSupabaseStorage({
+          mockInterviewId,
+          messageId,
+          videoChunks,
+          userId,
+          jobId,
+        }),
+        saveMockInterviewMessageRecordingInMux({
+          messageId,
+          videoChunks,
+        }),
+      ]);
+    } catch (error) {
+      logError("Error in saveMockInterviewMessageRecording", {
+        error,
+        messageId,
+      });
+    } finally {
+      // Remove from pending uploads
+      pendingUploadsRef.current.delete(uploadId);
+      setPendingUploads(new Set(pendingUploadsRef.current));
+    }
   };
 
   const saveMockInterviewMessageRecordingInMux = async ({
@@ -408,6 +430,7 @@ export default function ActiveInterviewComponent({
         mockInterviewId={mockInterviewId}
         jobId={jobId}
         endInterview={endInterview}
+        hasPendingUploads={pendingUploads.size > 0}
       />
     </div>
   );
