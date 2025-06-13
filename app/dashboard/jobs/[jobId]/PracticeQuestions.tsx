@@ -272,8 +272,6 @@ export default function PracticeQuestions({
                         ? "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/20 dark:hover:bg-gray-800/30"
                         : "bg-white hover:bg-gray-100 dark:bg-gray-800/10 dark:hover:bg-gray-800/20"
                     }`}
-                  rel="noopener noreferrer"
-                  target="_blank"
                 >
                   <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
                     {(index + 1).toString().padStart(2, "0")}
@@ -305,8 +303,6 @@ export default function PracticeQuestions({
                         ? "bg-gray-100 hover:bg-gray-200 dark:bg-gray-800/20 dark:hover:bg-gray-800/30"
                         : "bg-white hover:bg-gray-100 dark:bg-gray-800/10 dark:hover:bg-gray-800/20"
                     }`}
-                  rel="noopener noreferrer"
-                  target="_blank"
                 >
                   <span className="text-gray-500 dark:text-gray-400 text-xs font-mono">
                     {(startIndex + index + 1).toString().padStart(2, "0")}

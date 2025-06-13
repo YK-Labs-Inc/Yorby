@@ -180,7 +180,8 @@
       "generatingAnswer": "Generating Answer...",
       "noChanges": "No Changes",
       "uploadingAudio": "Uploading audio...",
-      "uploadingVideo": "Uploading video..."
+      "uploadingVideo": "Uploading video...",
+      "createNewSubmission": "Create New Submission"
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
