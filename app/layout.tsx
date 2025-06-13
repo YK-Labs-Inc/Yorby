@@ -337,7 +337,9 @@ export default async function RootLayout({
                                 students={students}
                               />
                               {/* <SidebarTrigger /> */}
-                              <main className="w-full">{children}</main>
+                              <main className="w-full bg-background">
+                                {children}
+                              </main>
                               <Toaster />
                             </KnowledgeBaseProvider>
                           </OnboardingProvider>
