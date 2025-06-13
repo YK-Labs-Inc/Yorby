@@ -107,11 +107,10 @@ export default function SubmissionVideoPlayer({
   // Determine video playback source
   const getVideoSource = (): VideoSource => {
     const muxMetadata = currentSubmission?.mux_metadata;
-    console.log("currentSubmission", currentSubmission);
 
     // Try Mux first
     if (muxMetadata) {
-      if (muxMetadata.status === "ready" && muxMetadata.playback_id) {
+      if (muxMetadata.playback_id) {
         return { type: "mux", playbackId: muxMetadata.playback_id };
       } else if (!muxMetadata.playback_id && muxMetadata.status !== "errored") {
         return { type: "preparing" };

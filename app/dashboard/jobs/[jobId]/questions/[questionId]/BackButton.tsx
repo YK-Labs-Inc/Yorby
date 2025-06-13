@@ -12,7 +12,7 @@ const BackButton = ({ jobId }: { jobId: string }) => {
       href={`${baseUrl}/${jobId}`}
       className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
     >
-      <ArrowLeft className="h-8 w-8 mr-2" />
+      <ArrowLeft className="h-6 w-6 mr-2" />
     </Link>
   );
 };

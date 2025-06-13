@@ -180,7 +180,8 @@
       "generatingAnswer": "Generating Answer...",
       "noChanges": "No Changes",
       "uploadingAudio": "Uploading audio...",
-      "uploadingVideo": "Uploading video..."
+      "uploadingVideo": "Uploading video...",
+      "createNewSubmission": "Create New Submission"
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
@@ -278,6 +279,10 @@
       "title": "Your Video Response",
       "processingMessage": "We are currently processing your video, please check in a few moments to see if it is ready.",
       "loadingMessage": "Loading video..."
+    },
+    "noFeedbackYet": {
+      "title": "No Feedback Yet",
+      "description": "Submit an answer to receive feedback on your response. Your feedback will appear here once generated."
     }
   },
   "mockInterview": {

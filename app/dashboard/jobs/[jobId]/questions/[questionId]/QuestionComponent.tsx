@@ -149,7 +149,7 @@ const QuestionComponent = async ({
 
   return (
     <>
-      <div className="max-w-[1080px] w-full mx-auto p-2 md:p-6 space-y-6">
+      <div className="w-full mx-auto p-2">
         <BackButton jobId={jobId} />
         <AnswerForm
           jobId={jobId}
