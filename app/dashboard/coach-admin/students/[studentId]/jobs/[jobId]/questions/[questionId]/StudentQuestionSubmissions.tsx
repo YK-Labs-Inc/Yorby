@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CoachFeedbackForm } from "./CoachFeedbackForm";
 import { Button } from "@/components/ui/button";
 import { Pencil, Sparkles, Trash2, FileText } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertDialog,
@@ -21,8 +21,8 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { deleteCoachFeedback } from "./actions";
-import AudioPlayer from "@/components/ui/audio-player";
 import QuestionFeedback from "@/components/ui/question-feedback";
+import SubmissionVideoPlayer from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/SubmissionVideoPlayer";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -220,12 +220,18 @@ function CoachFeedbackSection({
 
 interface StudentQuestionSubmissionsProps {
   question: Tables<"custom_job_questions">;
-  submissions: Tables<"custom_job_question_submissions">[];
+  submissions: (Tables<"custom_job_question_submissions"> & {
+    custom_job_question_submission_mux_metadata?: Tables<"custom_job_question_submission_mux_metadata"> | null;
+  })[];
   currentSubmissionId?: string;
   studentId: string;
   jobId: string;
   questionId: string;
-  currentSubmission: Tables<"custom_job_question_submissions"> | null;
+  currentSubmission:
+    | (Tables<"custom_job_question_submissions"> & {
+        custom_job_question_submission_mux_metadata?: Tables<"custom_job_question_submission_mux_metadata"> | null;
+      })
+    | null;
   currentCoachFeedback: any;
 }
 
@@ -280,21 +286,14 @@ export default function StudentQuestionSubmissions({
                     })}
                   </span>
                 </div>
-                <p className="whitespace-pre-line text-gray-800 border rounded p-3 bg-gray-50">
-                  {currentSubmission.answer}
-                </p>
-
-                {/* Audio Player */}
-                {currentSubmission.audio_bucket &&
-                  currentSubmission.audio_file_path && (
-                    <AudioPlayer
-                      bucket={currentSubmission.audio_bucket}
-                      filePath={currentSubmission.audio_file_path}
-                      presetDuration={
-                        currentSubmission.audio_recording_duration || undefined
-                      }
-                    />
-                  )}
+                <div className="flex gap-2">
+                  <p className="flex-1 whitespace-pre-line text-gray-800 border rounded p-3 bg-gray-50">
+                    {currentSubmission.answer}
+                  </p>
+                  <SubmissionVideoPlayer
+                    currentSubmission={currentSubmission}
+                  />
+                </div>
 
                 <Separator />
                 {/* Pros/Cons using InterviewFeedback component */}

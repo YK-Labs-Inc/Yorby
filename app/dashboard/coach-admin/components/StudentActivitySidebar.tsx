@@ -22,6 +22,7 @@ interface SubmissionFeedback
 // Update QuestionSubmission type to include feedback
 interface QuestionSubmission extends Tables<"custom_job_question_submissions"> {
   custom_job_question_submission_feedback: SubmissionFeedback[];
+  mux_metadata: Tables<"custom_job_question_submission_mux_metadata"> | null;
 }
 
 export type QuestionWithSubmissions = Tables<"custom_job_questions"> & {

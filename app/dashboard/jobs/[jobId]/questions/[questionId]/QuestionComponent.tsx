@@ -16,7 +16,8 @@ const fetchQuestion = async (questionId: string) => {
       *,
       custom_job_question_submissions(
         *,
-        custom_job_question_submission_feedback(*)
+        custom_job_question_submission_feedback(*),
+        mux_metadata:custom_job_question_submission_mux_metadata(*)
       )
     `
     )

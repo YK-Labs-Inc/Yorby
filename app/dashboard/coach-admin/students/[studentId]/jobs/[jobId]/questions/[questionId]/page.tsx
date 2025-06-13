@@ -5,7 +5,6 @@ import {
 import { Logger } from "next-axiom";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Tables } from "@/utils/supabase/database.types";
 import StudentQuestionSubmissions from "./StudentQuestionSubmissions";
 import {
   JobData,
@@ -56,7 +55,8 @@ const fetchAllStudentJobsAndRelatedData = async (
           question,
           created_at,
           custom_job_question_submissions (
-            *
+            *,
+            mux_metadata:custom_job_question_submission_mux_metadata(*)
           )
         ),
         custom_job_mock_interviews (

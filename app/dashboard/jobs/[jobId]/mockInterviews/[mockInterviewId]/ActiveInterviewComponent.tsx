@@ -117,7 +117,10 @@ export default function ActiveInterviewComponent({
     messageId: string;
     videoChunks: Blob[];
   }) => {
-    const { uploadUrl, error } = await generateMuxUploadUrl(messageId);
+    const { uploadUrl, error } = await generateMuxUploadUrl({
+      databaseId: messageId,
+      table: "mock_interview_message_mux_metadata",
+    });
     if (error || !uploadUrl) {
       logError("Error generating Mux upload URL", { error });
       return;
@@ -125,13 +128,9 @@ export default function ActiveInterviewComponent({
     try {
       // Combine videoChunks into a single Blob
       const videoBlob = new Blob(videoChunks);
-      const contentType = videoBlob.type || "video/webm";
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
         body: videoBlob,
-        headers: {
-          "Content-Type": contentType,
-        },
       });
       if (!uploadResponse.ok) {
         logError("Failed to upload video to Mux", {
