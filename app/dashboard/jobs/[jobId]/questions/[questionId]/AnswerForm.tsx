@@ -393,11 +393,9 @@ export default function AnswerForm({
                   {/* Video and Textarea Side by Side */}
                   <div className="flex gap-2">
                     {/* Video Player - 50% width */}
-                    <div className="flex-1">
-                      <SubmissionVideoPlayer
-                        currentSubmission={currentSubmission}
-                      />
-                    </div>
+                    <SubmissionVideoPlayer
+                      currentSubmission={currentSubmission}
+                    />
 
                     {/* Answer Form - 50% width */}
                     <div className="flex-1">

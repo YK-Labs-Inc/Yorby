@@ -17,7 +17,7 @@ interface SubmissionVideoPlayerProps {
 
 type VideoSource =
   | { type: "mux"; playbackId: string }
-  | { type: "supabase"; url: string }
+  | { type: "supabase"; url: string; isAudio: boolean }
   | { type: "preparing" }
   | { type: "loading" }
   | null;
@@ -28,8 +28,25 @@ export default function SubmissionVideoPlayer({
   const { logError } = useAxiomLogging();
   const t = useTranslations("interviewQuestion.videoPlayer");
 
+  // Helper to detect if file is audio based on extension
+  const isAudioFile = (filePath: string): boolean => {
+    const audioExtensions = [
+      ".mp3",
+      ".wav",
+      ".m4a",
+      ".aac",
+      ".ogg",
+      ".flac",
+      ".webm",
+    ];
+    const extension = filePath
+      .toLowerCase()
+      .substring(filePath.lastIndexOf("."));
+    return audioExtensions.includes(extension);
+  };
+
   // Video playback states
-  const [supabaseVideoUrl, setSupabaseVideoUrl] = useState<string | null>(null);
+  const [supabaseMediaUrl, setSupabaseMediaUrl] = useState<string | null>(null);
   const [loadingSupabaseVideo, setLoadingSupabaseVideo] = useState(false);
 
   // Helper to get signed URL for Supabase Storage
@@ -55,7 +72,7 @@ export default function SubmissionVideoPlayer({
       if (
         currentSubmission?.audio_bucket &&
         currentSubmission?.audio_file_path &&
-        !supabaseVideoUrl &&
+        !supabaseMediaUrl &&
         !loadingSupabaseVideo
       ) {
         setLoadingSupabaseVideo(true);
@@ -64,7 +81,7 @@ export default function SubmissionVideoPlayer({
             currentSubmission.audio_bucket,
             currentSubmission.audio_file_path
           );
-          setSupabaseVideoUrl(url);
+          setSupabaseMediaUrl(url);
         } catch (error) {
           logError("Error loading Supabase video", { error });
         } finally {
@@ -78,16 +95,19 @@ export default function SubmissionVideoPlayer({
     currentSubmission?.id,
     currentSubmission?.audio_bucket,
     currentSubmission?.audio_file_path,
+    supabaseMediaUrl,
+    loadingSupabaseVideo,
   ]);
 
   // Reset video URL when submission changes
   useEffect(() => {
-    setSupabaseVideoUrl(null);
+    setSupabaseMediaUrl(null);
   }, [currentSubmission?.id]);
 
   // Determine video playback source
   const getVideoSource = (): VideoSource => {
     const muxMetadata = currentSubmission?.mux_metadata;
+    console.log("currentSubmission", currentSubmission);
 
     // Try Mux first
     if (muxMetadata) {
@@ -104,8 +124,12 @@ export default function SubmissionVideoPlayer({
       if (loadingSupabaseVideo) {
         return { type: "loading" };
       }
-      if (supabaseVideoUrl) {
-        return { type: "supabase", url: supabaseVideoUrl };
+      if (supabaseMediaUrl) {
+        return {
+          type: "supabase",
+          url: supabaseMediaUrl,
+          isAudio: isAudioFile(currentSubmission.audio_file_path),
+        };
       }
     }
 
@@ -125,7 +149,7 @@ export default function SubmissionVideoPlayer({
   }
 
   return (
-    <>
+    <div className="flex-1">
       {videoSource.type === "mux" && (
         <MuxPlayer
           playbackId={videoSource.playbackId}
@@ -133,11 +157,21 @@ export default function SubmissionVideoPlayer({
         />
       )}
       {videoSource.type === "supabase" && (
-        <video
-          src={videoSource.url}
-          controls
-          className="w-full rounded-lg aspect-video"
-        />
+        <>
+          {videoSource.isAudio ? (
+            <audio
+              src={videoSource.url}
+              controls
+              className="w-full rounded-lg"
+            />
+          ) : (
+            <video
+              src={videoSource.url}
+              controls
+              className="w-full rounded-lg aspect-video"
+            />
+          )}
+        </>
       )}
       {videoSource.type === "preparing" && (
         <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-muted rounded-lg">
@@ -159,6 +193,6 @@ export default function SubmissionVideoPlayer({
           {t("loadingMessage")}
         </div>
       )}
-    </>
+    </div>
   );
 }
