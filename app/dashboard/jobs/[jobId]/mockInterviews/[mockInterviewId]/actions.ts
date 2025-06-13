@@ -6,13 +6,15 @@ import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 
-export const generateMuxUploadUrl = async (messageId: string) => {
+export const generateMuxUploadUrl = async (
+    { databaseId, table }: { databaseId: string; table: string },
+) => {
     const mux = new Mux();
     const origin = (await headers()).get("origin");
     const t = await getTranslations("errors");
     const logger = new Logger().with({
         function: "generateMuxUploadUrl",
-        messageId,
+        databaseId,
     });
     if (!origin) {
         logger.error("No origin found");
@@ -26,40 +28,57 @@ export const generateMuxUploadUrl = async (messageId: string) => {
             new_asset_settings: {
                 playback_policy: ["public"],
                 video_quality: "basic",
-                passthrough: messageId,
+                passthrough: table,
+                meta: {
+                    external_id: databaseId,
+                },
             },
         });
         const { url, id } = resp;
-        await writeMuxMetadataEntry(messageId, id);
+        await writeMuxMetadataEntry({ databaseId, uploadId: id, table });
         logger.info("Mux upload URL generated", { url, id });
         await logger.flush();
         return { uploadUrl: url };
-    } catch (error) {
-        logger.error("Error generating Mux upload URL", { error });
+    } catch (error: any) {
+        logger.error("Error generating Mux upload URL", {
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
         await logger.flush();
         return { error: t("pleaseTryAgain") };
     }
 };
 
-const writeMuxMetadataEntry = async (messageId: string, uploadId: string) => {
+const writeMuxMetadataEntry = async (
+    { databaseId, uploadId, table }: {
+        databaseId: string;
+        uploadId: string;
+        table: string;
+    },
+) => {
     const supabase = await createSupabaseServerClient();
     const logger = new Logger().with({
         function: "writeMuxMetadataEntry",
-        messageId,
+        databaseId,
         uploadId,
     });
     const { error } = await supabase
-        .from("mock_interview_message_mux_metadata")
+        .from(
+            table as
+                | "mock_interview_message_mux_metadata"
+                | "custom_job_question_submission_mux_metadata",
+        )
         .insert({
-            id: messageId,
+            id: databaseId,
             upload_id: uploadId,
             status: "preparing",
         });
     if (error) {
-        logger.error("Error writing Mux metadata entry", { error });
+        logger.error("Error writing Mux metadata entry", {
+            error: error.message,
+        });
         await logger.flush();
         throw error;
     }
-    logger.info("Mux metadata entry written", { messageId, uploadId });
+    logger.info("Mux metadata entry written", { databaseId, uploadId });
     await logger.flush();
 };

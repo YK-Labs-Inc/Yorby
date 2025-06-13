@@ -26,17 +26,27 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     switch (event.type) {
         case "video.asset.created": {
             const asset = event.data;
-            const messageId = asset.passthrough;
+            const table = asset.passthrough as
+                | "custom_job_question_submission_mux_metadata"
+                | "mock_interview_message_mux_metadata";
+            if (!table) {
+                logger.error(
+                    "Missing passthrough (table) in asset.created event",
+                    { asset },
+                );
+                break;
+            }
+            const messageId = asset.meta?.external_id;
             if (!messageId) {
                 logger.error(
-                    "Missing passthrough (messageId) in asset.created event",
+                    "Missing external_id (messageId) in asset.created event",
                     { asset },
                 );
                 break;
             }
             // Fetch current row for idempotency check
             const { data: row, error: fetchError } = await supabase
-                .from("mock_interview_message_mux_metadata")
+                .from(table)
                 .select("status")
                 .eq("id", messageId)
                 .maybeSingle();
@@ -48,7 +58,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
             }
             if (row?.status !== "ready") {
                 const { error } = await supabase
-                    .from("mock_interview_message_mux_metadata")
+                    .from(table)
                     .update({
                         asset_id: asset.id,
                         status: "preparing",
@@ -60,17 +70,27 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         }
         case "video.asset.ready": {
             const asset = event.data;
-            const messageId = asset.passthrough;
+            const table = asset.passthrough as
+                | "custom_job_question_submission_mux_metadata"
+                | "mock_interview_message_mux_metadata";
+            if (!table) {
+                logger.error(
+                    "Missing passthrough (table) in asset.ready event",
+                    { asset },
+                );
+                break;
+            }
+            const messageId = asset.meta?.external_id;
             if (!messageId) {
                 logger.error(
-                    "Missing passthrough (messageId) in asset.ready event",
+                    "Missing external_id (messageId) in asset.ready event",
                     { asset },
                 );
                 break;
             }
             const playbackId = asset.playback_ids?.[0]?.id || null;
             const { error } = await supabase
-                .from("mock_interview_message_mux_metadata")
+                .from(table)
                 .update({
                     asset_id: asset.id,
                     playback_id: playbackId,
@@ -82,16 +102,26 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         }
         case "video.asset.errored": {
             const asset = event.data;
-            const messageId = asset.passthrough;
+            const table = asset.passthrough as
+                | "custom_job_question_submission_mux_metadata"
+                | "mock_interview_message_mux_metadata";
+            if (!table) {
+                logger.error(
+                    "Missing passthrough (table) in asset.errored event",
+                    { asset },
+                );
+                break;
+            }
+            const messageId = asset.meta?.external_id;
             if (!messageId) {
                 logger.error(
-                    "Missing passthrough (messageId) in asset.errored event",
+                    "Missing external_id (messageId) in asset.errored event",
                     { asset },
                 );
                 break;
             }
             const { error } = await supabase
-                .from("mock_interview_message_mux_metadata")
+                .from(table)
                 .update({
                     asset_id: asset.id,
                     status: "errored",

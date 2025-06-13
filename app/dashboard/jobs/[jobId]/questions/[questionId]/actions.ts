@@ -81,13 +81,15 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
       },
     });
   }
-  revalidatePath(questionPath);
   if (errorMessage) {
     redirect(
       `${questionPath}?error=${errorMessage}`,
     );
   }
-  redirect(`${questionPath}?submissionId=${submissionId}`);
+  return {
+    submissionId,
+    filePath,
+  };
 };
 
 export const generateAnswer = async (prevState: any, formData: FormData) => {

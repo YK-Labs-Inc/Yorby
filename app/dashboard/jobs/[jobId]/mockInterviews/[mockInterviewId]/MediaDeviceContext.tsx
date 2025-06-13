@@ -23,6 +23,7 @@ interface MediaDeviceContextType {
   selectedAudio: string;
   stream: MediaStream | null;
   isRecording: boolean;
+  isRecordingTestAudio: boolean;
   isProcessing: boolean;
   testRecording: Blob | null;
   isInitialized: boolean;
@@ -72,6 +73,7 @@ export const MediaDeviceProvider = ({
   const [selectedAudio, setSelectedAudio] = useState<string>("");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isRecordingTestAudio, setIsRecordingTestAudio] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [testRecording, setTestRecording] = useState<Blob | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -209,10 +211,10 @@ export const MediaDeviceProvider = ({
         stream.getTracks().forEach((track) => track.stop());
       }
 
-      if (selectedVideo && selectedAudio) {
+      if (selectedAudio) {
         try {
           const newStream = await navigator.mediaDevices.getUserMedia({
-            video: { deviceId: selectedVideo },
+            video: selectedVideo ? { deviceId: selectedVideo } : undefined,
             audio: { deviceId: selectedAudio },
           });
           currentStream = newStream;
@@ -427,7 +429,7 @@ export const MediaDeviceProvider = ({
     const audioStream = new MediaStream(stream.getAudioTracks());
     const mediaRecorder = new MediaRecorder(audioStream);
     const chunks: BlobPart[] = [];
-    setIsRecording(true);
+    setIsRecordingTestAudio(true);
 
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) {
@@ -438,7 +440,7 @@ export const MediaDeviceProvider = ({
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunks, { type: "audio/webm" });
       setTestRecording(blob);
-      setIsRecording(false);
+      setIsRecordingTestAudio(false);
     };
 
     mediaRecorder.start();
@@ -481,6 +483,7 @@ export const MediaDeviceProvider = ({
     stream,
     isRecording,
     isProcessing,
+    isRecordingTestAudio,
     testRecording,
     isInitialized,
     setSelectedVideo,

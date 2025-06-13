@@ -179,7 +179,8 @@
       "generateAnswer": "Generate Answer",
       "generatingAnswer": "Generating Answer...",
       "noChanges": "No Changes",
-      "uploadingAudio": "Uploading audio..."
+      "uploadingAudio": "Uploading audio...",
+      "uploadingVideo": "Uploading video..."
     },
     "feedbackLabel": "Feedback",
     "noFeedback": "Great answer! No improvements needed 🙂",
@@ -203,7 +204,9 @@
       "processing": "Transcribing your recording...",
       "testMicrophone": "Test Your Microphone",
       "testRecording": "Record Test Audio",
-      "stopTestRecording": "Stop Test Recording"
+      "stopTestRecording": "Stop Test Recording",
+      "selectCamera": "Select Camera",
+      "selectCameraPlaceholder": "Choose a camera"
     },
     "onboarding": {
       "title": "Practice Your Interview Answers",
@@ -243,7 +246,39 @@
     "manualFeedbackTooltip": "This feedback was written by an admin in your program.",
     "generatingFeedback": "Generating feedback...",
     "uploadingAudio": "Uploading audio...",
-    "correctnessScore": "Correctness Score"
+    "uploadingVideo": "Uploading video...",
+    "correctnessScore": "Correctness Score",
+    "inputModes": {
+      "title": "Choose how to answer",
+      "video": "Video",
+      "audio": "Audio",
+      "text": "Text",
+      "videoDescription": "Record your answer with video and audio",
+      "audioDescription": "Record your voice only",
+      "textDescription": "Type your answer"
+    },
+    "videoRecording": {
+      "setup": "Video Setup",
+      "camera": "Camera",
+      "microphone": "Microphone",
+      "title": "Video Answer",
+      "recording": "Recording",
+      "startRecording": "Start Recording",
+      "stopRecording": "Stop Recording",
+      "retake": "Retake",
+      "backToCamera": "Back to Camera"
+    },
+    "uploadingRecording": "Uploading Recording",
+    "uploadWarning": "Please do not close this page or navigate away while your recording is being uploaded. This process may take a few moments.",
+    "uploadNotification": {
+      "title": "Uploading Recording",
+      "description": "Please do not close this page or navigate away while your recording is being uploaded. This process may take a few moments."
+    },
+    "videoPlayer": {
+      "title": "Your Video Response",
+      "processingMessage": "We are currently processing your video, please check in a few moments to see if it is ready.",
+      "loadingMessage": "Loading video..."
+    }
   },
   "mockInterview": {
     "title": "Mock Interviews",
