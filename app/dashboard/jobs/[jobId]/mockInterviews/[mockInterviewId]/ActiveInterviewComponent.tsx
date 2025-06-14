@@ -366,26 +366,6 @@ export default function ActiveInterviewComponent({
     stopAudioPlayback();
   };
 
-  if (!user || !session) {
-    return null;
-  }
-
-  if (!firstQuestionAudioIsInitialized) {
-    return (
-      <div className="h-screen flex flex-col gap-6 max-w-[1080px] mx-auto justify-center items-center p-4 md:p-6">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" />
-          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 text-center">
-            {t("loading.title")}
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-center">
-            {t("loading.description")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Add states for video interview UI
   const [isUserRecording, setIsUserRecording] = useState(false);
   const [currentAIMessage, setCurrentAIMessage] = useState<string>("");
@@ -554,6 +534,26 @@ export default function ActiveInterviewComponent({
     }
   };
 
+  if (!user || !session) {
+    return null;
+  }
+
+  if (!firstQuestionAudioIsInitialized) {
+    return (
+      <div className="h-screen flex flex-col gap-6 max-w-[1080px] mx-auto justify-center items-center p-4 md:p-6">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" />
+          <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 text-center">
+            {t("loading.title")}
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center">
+            {t("loading.description")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-background flex flex-col">
       {/* Main content area */}
@@ -561,11 +561,13 @@ export default function ActiveInterviewComponent({
         {/* Video feeds row - both centered at same height */}
         <div className="flex-1 flex items-center justify-center p-8 gap-8">
           {/* AI Interviewer video */}
-          <div className={`relative w-full max-w-xl aspect-video bg-card rounded-lg overflow-hidden shadow-xl border-2 flex items-center justify-center transition-all duration-300 ${
-            isAISpeaking 
-              ? "border-primary shadow-primary/20 shadow-2xl" 
-              : "border-border"
-          }`}>
+          <div
+            className={`relative w-full max-w-xl aspect-video bg-card rounded-lg overflow-hidden shadow-xl border-2 flex items-center justify-center transition-all duration-300 ${
+              isAISpeaking
+                ? "border-primary shadow-primary/20 shadow-2xl"
+                : "border-border"
+            }`}
+          >
             {/* Speaking animation overlay */}
             {isAISpeaking && (
               <div className="absolute inset-0 pointer-events-none">
@@ -575,9 +577,11 @@ export default function ActiveInterviewComponent({
             )}
             <div className="text-center p-8">
               {/* AI Avatar */}
-              <div className={`w-32 h-32 mx-auto bg-primary rounded-full flex items-center justify-center shadow-xl transition-transform duration-300 ${
-                isAISpeaking ? "scale-110" : "scale-100"
-              }`}>
+              <div
+                className={`w-32 h-32 mx-auto bg-primary rounded-full flex items-center justify-center shadow-xl transition-transform duration-300 ${
+                  isAISpeaking ? "scale-110" : "scale-100"
+                }`}
+              >
                 <div className="text-primary-foreground text-5xl font-bold">
                   AI
                 </div>
