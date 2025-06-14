@@ -123,7 +123,6 @@ export function TtsProvider({
 
     try {
       setIsPlaying(true);
-      onPlaybackStart?.();
 
       if (!audioRef.current) {
         audioRef.current = new Audio();
@@ -133,6 +132,11 @@ export function TtsProvider({
       audio.playbackRate = playbackSpeed;
 
       stopAudioPlayback();
+
+      // Call onPlaybackStart when audio actually starts playing
+      audio.onplay = () => {
+        onPlaybackStart?.();
+      };
 
       audio.onended = () => {
         setIsPlaying(false);
