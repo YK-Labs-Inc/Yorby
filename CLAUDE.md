@@ -4,7 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PerfectInterview 2.0 is a comprehensive AI-powered interview preparation platform built with Next.js 15, React 19, and Supabase. It features mock interviews, resume building, real-time interview assistance, and a multi-tenant coaching system.
+This repository contains the source code for two applications:
+
+### 1. Perfect Interview (B2C)
+A comprehensive suite of AI-powered job preparation tools featuring:
+- **Resume Builder**: AI-powered resume creation through a conversational chat interface
+- **Job Prep Generator**: Upload job descriptions to generate practice interview questions, with AI mock interview capabilities for realistic practice sessions
+- **Interview Copilot**: Real-time interview assistance that joins meetings and helps answer questions during live interviews
+
+### 2. Yorby (B2B)
+A white-labeled platform for career coaches to power their businesses:
+- Coaches can upload custom questions for their clients to practice
+- Students can practice with questions and perform mock interviews
+- Admin dashboard for coaches to monitor student performance
+- Manual feedback capabilities for reviewing practice submissions and mock interviews
+- Essentially a white-labeled version of Perfect Interview's job prep tool with coach-specific customization
 
 ## Essential Commands
 
