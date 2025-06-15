@@ -26,7 +26,7 @@ const StudentActivityHeader = ({
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mr-4"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm font-medium">Back to Students</span>
+          <span className="text-sm font-medium">{t("backToStudents")}</span>
         </Link>
         <div>
           <div className="text-xl font-semibold text-gray-900">{name}</div>
