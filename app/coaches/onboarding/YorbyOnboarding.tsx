@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { User, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { updateUserDisplayName } from "@/app/onboarding-v2/actions";
 import { H1 } from "@/components/typography";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 export default function YorbyOnboarding({
   redirectTo = "/coaches/auth",
@@ -21,6 +22,7 @@ export default function YorbyOnboarding({
   const [error, setError] = useState("");
   const router = useRouter();
   const t = useTranslations("yorbyOnboarding");
+  const { logError } = useAxiomLogging();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +44,7 @@ export default function YorbyOnboarding({
       // Redirect to the specified URL after successful update
       router.push(redirectTo);
     } catch (error) {
-      console.error("Error updating display name:", error);
+      logError("Error updating display name", { error });
       setError(t("updateError"));
       setIsUpdating(false);
     }
