@@ -131,6 +131,32 @@ Key required variables:
 5. **Internationalization**: Support for EN, ES, FR, JP, KO, ZH
 6. **Testing**: Limited test coverage - only typewriter component has tests
 
+### Next.js App Router
+
+This is a Next.js application using the App Router paradigm:
+- All routes are defined in the `/app` directory
+- Server Components are the default
+- Client Components require the `"use client"` directive
+- API routes are colocated in `/app/api` directories
+
+### Logging with Axiom
+
+The application uses Axiom for structured logging via the `next-axiom` package:
+
+**Server Components and Server Actions**:
+- Import `Logger` from `next-axiom`
+- Example: `import { Logger } from "next-axiom"`
+- Use `log.info()`, `log.error()`, `log.warn()` methods
+
+**Client Components**:
+- Use the `useAxiomLogging` hook from `@context/AxiomLoggingContext.tsx`
+- Example: `const { logInfo, logError, logWarning } = useAxiomLogging()`
+- Automatically includes userId in all logs
+
+**Route Handlers**:
+- Use `req.log` from the `AxiomRequest` object
+- Example: `req.log.info("Processing request", { endpoint: "/api/example" })`
+
 ### Common Workflows
 
 **Adding a new feature**:

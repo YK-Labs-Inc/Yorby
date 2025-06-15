@@ -143,7 +143,13 @@ export default async function CoachPortalLandingPage({
       registrationStatus.hasDuplicatedJobs &&
       registrationStatus.firstJobId
     ) {
-      redirectTo = `/${coach.slug}/programs/${registrationStatus.firstJobId}`;
+      // Check if user has a display name
+      if (!user.user_metadata?.display_name) {
+        // Redirect to onboarding with the program URL as the final destination
+        redirectTo = `/coaches/onboarding?redirect=${encodeURIComponent(`/${coach.slug}/programs/${registrationStatus.firstJobId}`)}`;
+      } else {
+        redirectTo = `/${coach.slug}/programs/${registrationStatus.firstJobId}`;
+      }
     }
   }
 

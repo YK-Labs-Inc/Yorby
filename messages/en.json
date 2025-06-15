@@ -1692,6 +1692,14 @@
           "Here's how..."
         ]
       },
+      "personalInfo": {
+        "title": "Let's Get Acquainted",
+        "description": "Help us personalize your experience",
+        "prompt": "What should we call you?",
+        "placeholder": "Enter your name",
+        "nameRequired": "Please enter your name",
+        "updateError": "Failed to save your name. Please try again."
+      },
       "knowledgeBase": {
         "title": "Getting to Know You",
         "description": "First, we get to know you and your career",
@@ -1759,7 +1767,8 @@
     },
     "buttons": {
       "next": "Next",
-      "startKnowledgeBase": "Get Started"
+      "startKnowledgeBase": "Get Started",
+      "saving": "Saving..."
     },
     "upload": {
       "title": "Upload Documents",
@@ -1844,6 +1853,17 @@
       "title": "Follow Us On Social Media",
       "subtitle": "Join thousands of job seekers who have transformed their interview experience"
     }
+  },
+  "yorbyOnboarding": {
+    "title": "Welcome to Yorby",
+    "subtitle": "Tell us a little bit about yourself",
+    "nameLabel": "What should we call you?",
+    "namePlaceholder": "Enter your name",
+    "nameRequired": "Please enter your name",
+    "updateError": "Failed to save your name. Please try again.",
+    "saving": "Saving...",
+    "continue": "Continue",
+    "privacyNote": "Your information is secure and will only be used to personalize your experience."
   },
   "referrals": {
     "title": "Your Referral Code",
