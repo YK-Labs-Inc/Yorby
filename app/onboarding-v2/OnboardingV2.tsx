@@ -35,12 +35,20 @@ import { Product } from "../purchase/actions";
 import TrustBadges from "../purchase/components/TrustBadges";
 import { SubscriptionPricingCard } from "../purchase/SubscriptionPricingCard";
 import React from "react";
+import { Input } from "@/components/ui/input";
+import { updateUserDisplayName } from "./actions";
+import { User } from "lucide-react";
 
 const steps = [
   {
     title: "welcome",
     icon: "✨",
     searchParam: "welcome",
+  },
+  {
+    title: "personalInfo",
+    icon: "👤",
+    searchParam: "personal-info",
   },
   {
     title: "knowledgeBase",
@@ -133,6 +141,8 @@ export default function OnboardingPage({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [showReferralNudgeDialog, setShowReferralNudgeDialog] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("onboardingV2");
@@ -155,9 +165,33 @@ export default function OnboardingPage({
     }
   }, [searchParams]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       const nextStep = currentStep + 1;
+
+      // If we're on the personal info step, save the name first
+      if (steps[currentStep].title === "personalInfo") {
+        if (!displayName.trim()) {
+          setError(t("steps.personalInfo.nameRequired"));
+          return;
+        }
+        setIsUpdatingName(true);
+        try {
+          const result = await updateUserDisplayName(displayName.trim());
+          if (result.error) {
+            setError(result.error);
+            setIsUpdatingName(false);
+            return;
+          }
+        } catch (error) {
+          logError("Error updating display name:", { error });
+          setError(t("steps.personalInfo.updateError"));
+          setIsUpdatingName(false);
+          return;
+        }
+        setIsUpdatingName(false);
+        setError("");
+      }
 
       // If we're on the purchase step, show confirmation dialog
       if (steps[currentStep].title === "purchase") {
@@ -268,6 +302,31 @@ export default function OnboardingPage({
                   {line}
                 </p>
               ))}
+          </div>
+        );
+      case "personalInfo":
+        return (
+          <div className="space-y-4 max-w-md mx-auto">
+            <div className="flex items-center gap-2 justify-center mb-4">
+              <User className="w-5 h-5 text-gray-600" />
+              <p className="text-lg text-gray-700">
+                {t("steps.personalInfo.prompt")}
+              </p>
+            </div>
+            <Input
+              type="text"
+              placeholder={t("steps.personalInfo.placeholder")}
+              value={displayName}
+              onChange={(e) => {
+                setDisplayName(e.target.value);
+                setError("");
+              }}
+              className="text-center"
+              disabled={isUpdatingName}
+            />
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
           </div>
         );
       case "toolkit":
@@ -409,8 +468,14 @@ export default function OnboardingPage({
                     : "default"
                 }
                 size={steps[currentStep].title === "purchase" ? "lg" : "xl"}
+                disabled={isUpdatingName}
               >
-                {steps[currentStep].title === "upload" ? (
+                {isUpdatingName ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("buttons.saving")}
+                  </>
+                ) : steps[currentStep].title === "upload" ? (
                   <>
                     <BookOpen className="w-4 h-4 mr-2" />
                     {t("buttons.startKnowledgeBase")}

@@ -143,10 +143,22 @@ export const GET = withAxiom(async (
             }
         }
 
-        // 6. Redirect to the first curriculum page
-        const redirectUrl = `http${
-            host.includes("localhost") ? "" : "s"
-        }://${host}/${coach.slug}/programs/${newJobId}`;
+        // 6. Check if user has a display name
+        const needsOnboarding = !user.user_metadata?.display_name;
+        
+        // Build the final coach program URL
+        const coachProgramUrl = `/${coach.slug}/programs/${newJobId}`;
+        const protocol = host.includes("localhost") ? "http" : "https";
+        
+        let redirectUrl: string;
+        if (needsOnboarding) {
+            // Redirect to onboarding with the final destination as a parameter
+            redirectUrl = `${protocol}://${host}/coaches/onboarding?redirect=${encodeURIComponent(coachProgramUrl)}`;
+        } else {
+            // Redirect directly to the first curriculum page
+            redirectUrl = `${protocol}://${host}${coachProgramUrl}`;
+        }
+        
         return NextResponse.redirect(redirectUrl);
     } catch (err) {
         logger.error("Error during registration, rolling back", { err });

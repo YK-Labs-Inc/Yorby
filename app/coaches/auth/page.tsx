@@ -71,6 +71,11 @@ export default async function CoachesAuthPage() {
     );
   }
 
+  // Check if user has a display name, if not redirect to onboarding
+  if (!user.user_metadata?.display_name) {
+    redirect("/coaches/onboarding");
+  }
+
   const programs = await userPrograms(user.id);
 
   // If user has no coach access
