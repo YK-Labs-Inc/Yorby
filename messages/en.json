@@ -1932,7 +1932,8 @@
       "tableHeaders": {
         "studentId": "Student ID",
         "email": "Email",
-        "fullName": "Full Name"
+        "fullName": "Full Name",
+        "lastSignIn": "Last Sign In"
       },
       "tableCellFallbacks": {
         "notApplicable": "N/A"
@@ -2003,7 +2004,9 @@
       }
     },
     "Header": {
-      "started": "Started"
+      "started": "Started",
+      "lastSignIn": "Last Sign In",
+      "backToStudents": "Back to Students"
     },
     "programsPage": {
       "title": "Program Management",

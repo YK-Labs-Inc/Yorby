@@ -20,6 +20,7 @@ export interface Student {
   id: string;
   email?: string | null;
   full_name?: string | null;
+  last_sign_in_at?: string | null;
 }
 
 const fetchStudentsForCoach = async () => {
@@ -112,8 +113,9 @@ const fetchStudentsForCoach = async () => {
           email:
             studentData.user.email || t("tableCellFallbacks.notApplicable"),
           full_name:
-            studentData.user.user_metadata?.full_name ||
+            studentData.user.user_metadata?.display_name ||
             t("tableCellFallbacks.notApplicable"),
+          last_sign_in_at: studentData.user.last_sign_in_at || null,
         });
       } else {
         logger.warn(t("loggerMessages.warningNoStudentData"), {
@@ -149,7 +151,7 @@ export default async function ListEnrolledStudentsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const students = await fetchStudentsForCoach();
@@ -190,6 +192,7 @@ export default async function ListEnrolledStudentsPage() {
             <TableRow>
               <TableHead>{t("tableHeaders.email")}</TableHead>
               <TableHead>{t("tableHeaders.fullName")}</TableHead>
+              <TableHead>{t("tableHeaders.lastSignIn")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

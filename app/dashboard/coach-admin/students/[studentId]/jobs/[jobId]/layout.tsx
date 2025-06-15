@@ -110,6 +110,7 @@ export default async function Layout({
   const name = user.user_metadata?.full_name || user.email || "Unknown";
   const role = user.user_metadata?.role || "";
   const started = formatDateForHeader(user.created_at);
+  const lastSignIn = user.last_sign_in_at ? formatDateForHeader(user.last_sign_in_at) : null;
   const t = await getTranslations("AdminStudentView");
 
   const coach = await fetchCoach();
@@ -122,7 +123,7 @@ export default async function Layout({
   if (!allJobsForStudent || allJobsForStudent.length === 0) {
     return (
       <div className="relative w-full min-h-screen bg-white">
-        <StudentActivityHeader name={name} role={role} started={started} />
+        <StudentActivityHeader name={name} role={role} started={started} lastSignIn={lastSignIn} />
         <div
           className="flex flex-row w-full min-h-0"
           style={{ height: "calc(100vh - 82px)" }}
@@ -137,7 +138,7 @@ export default async function Layout({
 
   return (
     <div className="relative w-full min-h-screen bg-white">
-      <StudentActivityHeader name={name} role={role} started={started} />
+      <StudentActivityHeader name={name} role={role} started={started} lastSignIn={lastSignIn} />
       <div
         className="flex flex-row w-full min-h-0"
         style={{ height: "calc(100vh - 82px)" }}
