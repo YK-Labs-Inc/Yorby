@@ -7,6 +7,7 @@ import { Tables } from "@/utils/supabase/database.types";
 import { TtsProvider, useTts } from "@/app/context/TtsContext";
 import { VOICE_OPTIONS } from "@/app/types/tts";
 import { MediaDeviceProvider, useMediaDevice } from "./MediaDeviceContext";
+import LiveInterviewComponent from "./LiveInterviewComponent";
 
 const MockInterviewComponent = ({
   jobId,
@@ -53,14 +54,7 @@ const MockInterviewComponent = ({
     );
   }
 
-  return (
-    <ActiveInterview
-      mockInterviewId={mockInterviewId}
-      messageHistory={messageHistory}
-      jobId={jobId}
-      stream={stream}
-    />
-  );
+  return <LiveInterviewComponent />;
 };
 
 export default function MockInterviewClientComponent(props: {

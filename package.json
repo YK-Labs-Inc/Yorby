@@ -10,6 +10,7 @@
     "@ai-sdk/google": "^1.1.20",
     "@ai-sdk/react": "^1.1.21",
     "@deepgram/sdk": "^3.11.2",
+    "@google/genai": "^1.5.1",
     "@google/generative-ai": "^0.21.0",
     "@hcaptcha/react-hcaptcha": "^1.11.0",
     "@hookform/resolvers": "^5.0.1",
