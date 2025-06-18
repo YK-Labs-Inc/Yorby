@@ -719,7 +719,7 @@ export default function ActiveInterviewComponent({
             disabled={
               isProcessingAIResponse || isProcessingMedia || isAISpeaking
             }
-            className={`min-w-[200px] ${isUserRecording ? "animate-pulse" : ""}`}
+            className={"min-w-[200px]"}
           >
             {isUserRecording ? (
               <>
