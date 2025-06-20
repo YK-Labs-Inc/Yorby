@@ -53,3 +53,6 @@ next-env.d.ts
 # TechSalesJack audio files
 /app/api/admin/techsalesjack/audio/
 
+# Supabase temp files
+supabase/.temp/*
+
