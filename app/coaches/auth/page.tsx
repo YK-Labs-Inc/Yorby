@@ -76,6 +76,18 @@ export default async function CoachesAuthPage() {
     redirect("/coaches/onboarding");
   }
 
+  // Check if user is a coach
+  const { data: coachData } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  // If user is a coach, redirect to coach admin
+  if (coachData) {
+    redirect("/dashboard/coach-admin/programs");
+  }
+
   const programs = await userPrograms(user.id);
 
   // If user has no coach access
