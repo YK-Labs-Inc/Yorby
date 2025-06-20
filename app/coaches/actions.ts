@@ -36,7 +36,7 @@ export async function ensureCoachExists(userId: string, displayName: string) {
         .from("coaches")
         .select("id")
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
 
       if (!existingSlug) break;
 
