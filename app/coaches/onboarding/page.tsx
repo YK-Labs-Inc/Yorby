@@ -20,7 +20,6 @@ export default async function YorbyOnboardingPage({
   // Check if user already has a display name
   const params = await searchParams;
   const redirectTo = params?.redirect || "/dashboard/coach-admin/programs";
-  console.log("redirectTo", redirectTo);
 
   if (user.user_metadata?.display_name) {
     redirect(redirectTo);
