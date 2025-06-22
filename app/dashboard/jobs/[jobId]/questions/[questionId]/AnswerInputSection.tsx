@@ -842,6 +842,7 @@ export default function AnswerInputSection({
       logError("Error uploading file to Supabase storage", {
         error,
         function: "saveRecordingInSupabaseStorage",
+        filePath,
       });
       throw error;
     }
