@@ -702,34 +702,23 @@ export default function AnswerInputSection({
       chunks,
       filePath,
       submissionId,
-      videoBlob,
     }: {
       chunks: Blob;
       filePath: string;
       submissionId: string;
-      videoBlob: Blob | null;
     }) => {
       try {
         setIsUploadingAudio(true);
-        await Promise.all(
-          videoBlob
-            ? [
-                saveRecordingInSupabaseStorage({
-                  chunks,
-                  filePath,
-                }),
-                saveRecordingInMux({
-                  submissionId,
-                  chunks: videoBlob,
-                }),
-              ]
-            : [
-                saveRecordingInSupabaseStorage({
-                  chunks,
-                  filePath,
-                }),
-              ]
-        );
+        await Promise.all([
+          saveRecordingInSupabaseStorage({
+            chunks,
+            filePath,
+          }),
+          saveRecordingInMux({
+            submissionId,
+            chunks,
+          }),
+        ]);
       } catch (error) {
         logError("Error uploading recording", { error });
         toast({
@@ -757,7 +746,6 @@ export default function AnswerInputSection({
           chunks,
           filePath,
           submissionId,
-          videoBlob: currentVideoBlob.current,
         });
       } else {
         router.push(
