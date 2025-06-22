@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          variables?: Json
-          query?: string
-          extensions?: Json
           operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
         }
         Returns: Json
       }
@@ -142,6 +142,45 @@ export type Database = {
           number_of_credits?: number
         }
         Relationships: []
+      }
+      custom_job_enrollments: {
+        Row: {
+          coach_id: string
+          created_at: string
+          custom_job_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_enrollments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_job_enrollments_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_job_files: {
         Row: {
