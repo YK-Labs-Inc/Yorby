@@ -799,7 +799,7 @@ export default function AnswerInputSection({
       // If there's an audio blob, upload it first
       if (chunks) {
         const fileName = `${Date.now()}.webm`;
-        const filePath = `${user.id}${coachUserId && `/coaches/${coachUserId}`}/programs/${jobId}/questions/${question.id}/${fileName}`;
+        const filePath = `${user.id}${coachUserId ? `/coaches/${coachUserId}` : ""}/programs/${jobId}/questions/${question.id}/${fileName}`;
         formData.append("bucketName", "user-files");
         formData.append("filePath", filePath);
         formData.append(
