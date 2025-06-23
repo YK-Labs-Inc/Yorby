@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 const AdminStudentPage = async ({
   params,
@@ -12,8 +13,46 @@ const AdminStudentPage = async ({
 }>) => {
   const { studentId } = await params;
   const supabase = await createSupabaseServerClient();
-  const { data: studentCustomJobs, error: studentCustomJobsError } =
-    await supabase
+
+  // Check PostHog feature flag
+  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
+    "custom-job-enrollments-migration",
+    studentId
+  );
+  await posthog.shutdown();
+
+  let studentCustomJobs: any[];
+  let studentCustomJobsError;
+
+  if (useNewEnrollmentSystem) {
+    // New enrollment system: fetch using enrollments
+    const { data: enrollments, error: enrollmentsError } = await supabase
+      .from("custom_job_enrollments")
+      .select(
+        `*,
+        custom_jobs!inner(
+          *,
+          custom_job_questions(
+            *,
+            custom_job_question_submissions(*)
+          )
+        )`
+      )
+      .eq("user_id", studentId);
+
+    if (!enrollmentsError && enrollments && enrollments.length > 0) {
+      // Extract custom_jobs from enrollments
+      studentCustomJobs = enrollments.map(
+        (enrollment) => enrollment.custom_jobs
+      );
+      studentCustomJobsError = null;
+    } else {
+      studentCustomJobs = [];
+      studentCustomJobsError = enrollmentsError;
+    }
+  } else {
+    // Legacy system: fetch directly from custom_jobs
+    const legacyResult = await supabase
       .from("custom_jobs")
       .select(
         `*,
@@ -23,6 +62,11 @@ const AdminStudentPage = async ({
         )`
       )
       .eq("user_id", studentId);
+
+    studentCustomJobs = legacyResult.data || [];
+    studentCustomJobsError = legacyResult.error;
+  }
+
   if (studentCustomJobsError) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -33,7 +77,7 @@ const AdminStudentPage = async ({
       </div>
     );
   }
-  if (studentCustomJobs.length === 0) {
+  if (!studentCustomJobs || studentCustomJobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <H3>No student found</H3>
