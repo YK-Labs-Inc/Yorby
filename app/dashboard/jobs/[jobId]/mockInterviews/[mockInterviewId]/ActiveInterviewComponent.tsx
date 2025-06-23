@@ -68,7 +68,7 @@ export default function ActiveInterviewComponent({
     } else {
       setFirstQuestionAudioIsInitialized(true);
     }
-  }, [isInitialized]);
+  }, [isInitialized, messages]);
 
   const saveMockInterviewMessageRecording = async ({
     mockInterviewId,
@@ -277,7 +277,7 @@ export default function ActiveInterviewComponent({
           message,
           mockInterviewId,
           history: prevMessages,
-          isInitialMessage: messages.length === 0,
+          isInitialMessage: prevMessages.length === 0,
           speakingStyle: selectedVoice.speakingStyle,
         }),
       });
@@ -498,7 +498,7 @@ export default function ActiveInterviewComponent({
         videoRecordingCompletedCallback,
       });
     }
-  }, [isUserRecording]);
+  }, [isUserRecording, messages]);
 
   // Process audio and automatically send message
   const processAudioAndSend = async (audioChunks: Blob[]) => {

@@ -46,6 +46,10 @@ export async function POST(request: Request) {
       });
     }
 
+    logger = logger.with({
+      savedMessageId: savedUserMessage?.id,
+    });
+
     if (!message || !mockInterviewId) {
       logger.error("Message and mockInterviewId are required");
       return NextResponse.json(

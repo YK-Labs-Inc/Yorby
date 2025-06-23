@@ -284,6 +284,7 @@ export type Database = {
           interview_prompt: string
           recording_file_path: string | null
           status: Database["public"]["Enums"]["interview_status"]
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -292,6 +293,7 @@ export type Database = {
           interview_prompt: string
           recording_file_path?: string | null
           status: Database["public"]["Enums"]["interview_status"]
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -300,6 +302,7 @@ export type Database = {
           interview_prompt?: string
           recording_file_path?: string | null
           status?: Database["public"]["Enums"]["interview_status"]
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -432,6 +435,7 @@ export type Database = {
           custom_job_question_id: string
           feedback: Json | null
           id: string
+          user_id: string | null
         }
         Insert: {
           answer: string
@@ -442,6 +446,7 @@ export type Database = {
           custom_job_question_id: string
           feedback?: Json | null
           id?: string
+          user_id?: string | null
         }
         Update: {
           answer?: string
@@ -452,6 +457,7 @@ export type Database = {
           custom_job_question_id?: string
           feedback?: Json | null
           id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
