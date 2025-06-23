@@ -175,6 +175,17 @@ async function saveMockInterviewMessage({
   role: "user" | "model";
   text: string;
 }) {
+  const logger = new Logger().with({
+    function: "saveMockInterviewMessage",
+    mockInterviewId,
+    role,
+    textLength: text.length,
+  });
+
+  logger.info("Saving mock interview message", {
+    textPreview: text.substring(0, 100),
+  });
+
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("mock_interview_messages").insert(
     {
@@ -185,7 +196,15 @@ async function saveMockInterviewMessage({
   ).select("id").single();
 
   if (error) {
+    logger.error("Error saving mock interview message", {
+      error,
+    });
     throw error;
   }
+
+  logger.info("Successfully saved mock interview message", {
+    messageId: data.id,
+  });
+
   return data;
 }
