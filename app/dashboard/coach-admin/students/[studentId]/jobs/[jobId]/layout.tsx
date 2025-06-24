@@ -9,7 +9,6 @@ import StudentActivityHeader from "@/app/dashboard/coach-admin/components/Studen
 import StudentActivitySidebar, {
   JobData,
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
-import { posthog } from "@/utils/tracking/serverUtils";
 
 // Fetch student info
 const fetchStudent = async (studentId: string) => {
@@ -40,87 +39,37 @@ const fetchAllStudentJobsAndRelatedData = async (
   coachId: string
 ): Promise<JobData[]> => {
   const supabase = await createSupabaseServerClient();
-
-  // Check PostHog feature flag
-  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
-    "custom-job-enrollments-migration",
-    studentId
-  );
-  await posthog.shutdown();
-
-  if (useNewEnrollmentSystem) {
-    // New enrollment system: fetch using enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from("custom_job_enrollments")
-      .select(
-        `
-          custom_jobs!inner(
-            id,
-            job_title,
-            custom_job_questions (
-              id,
-              question,
-              created_at,
-              custom_job_question_submissions (
-                id,
-                created_at,
-                custom_job_question_submission_feedback (
-                  id,
-                  feedback_role
-                )
-              )
-            ),
-            custom_job_mock_interviews (
-              id,
-              created_at,
-              status
-            )
-          )
-        `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId);
-
-    if (!enrollmentsError && enrollments && enrollments.length > 0) {
-      // Extract custom_jobs from enrollments
-      const jobs = enrollments.map((enrollment) => enrollment.custom_jobs);
-      return (jobs as JobData[]) || [];
-    }
-    return [];
-  } else {
-    // Legacy system: fetch directly from custom_jobs
-    const { data, error } = await supabase
-      .from("custom_jobs")
-      .select(
-        `
-          id,
-          job_title,
-          custom_job_questions (
-            id,
-            question,
-            created_at,
-            custom_job_question_submissions (
-              id,
-              created_at,
-              custom_job_question_submission_feedback (
-                id,
-                feedback_role
-              )
-            )
-          ),
-          custom_job_mock_interviews (
-            id,
-            created_at,
-            status
-          )
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select(
       `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId)
-      .order("created_at", { ascending: false });
-    if (error) return [];
-    return (data as JobData[]) || [];
-  }
+        id,
+        job_title,
+        custom_job_questions (
+          id,
+          question,
+          created_at,
+          custom_job_question_submissions (
+            id,
+            created_at,
+            custom_job_question_submission_feedback (
+              id,
+              feedback_role
+            )
+          )
+        ),
+        custom_job_mock_interviews (
+          id,
+          created_at,
+          status
+        )
+    `
+    )
+    .eq("user_id", studentId)
+    .eq("coach_id", coachId)
+    .order("created_at", { ascending: false });
+  if (error) return [];
+  return (data as JobData[]) || [];
 };
 
 function formatDateForHeader(dateString: string) {
@@ -161,9 +110,7 @@ export default async function Layout({
   const name = user.user_metadata?.full_name || user.email || "Unknown";
   const role = user.user_metadata?.role || "";
   const started = formatDateForHeader(user.created_at);
-  const lastSignIn = user.last_sign_in_at
-    ? formatDateForHeader(user.last_sign_in_at)
-    : null;
+  const lastSignIn = user.last_sign_in_at ? formatDateForHeader(user.last_sign_in_at) : null;
   const t = await getTranslations("AdminStudentView");
 
   const coach = await fetchCoach();
@@ -176,12 +123,7 @@ export default async function Layout({
   if (!allJobsForStudent || allJobsForStudent.length === 0) {
     return (
       <div className="relative w-full min-h-screen bg-white">
-        <StudentActivityHeader
-          name={name}
-          role={role}
-          started={started}
-          lastSignIn={lastSignIn}
-        />
+        <StudentActivityHeader name={name} role={role} started={started} lastSignIn={lastSignIn} />
         <div
           className="flex flex-row w-full min-h-0"
           style={{ height: "calc(100vh - 82px)" }}
@@ -196,12 +138,7 @@ export default async function Layout({
 
   return (
     <div className="relative w-full min-h-screen bg-white">
-      <StudentActivityHeader
-        name={name}
-        role={role}
-        started={started}
-        lastSignIn={lastSignIn}
-      />
+      <StudentActivityHeader name={name} role={role} started={started} lastSignIn={lastSignIn} />
       <div
         className="flex flex-row w-full min-h-0"
         style={{ height: "calc(100vh - 82px)" }}

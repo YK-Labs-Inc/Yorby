@@ -43,12 +43,6 @@ export const startMockInterview = async (
   const supabase = await createSupabaseServerClient();
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user?.id) {
-      throw new Error("User not found");
-    }
     let shouldCreateNewInterview = true;
 
     if (isOnboarding) {
@@ -170,7 +164,6 @@ ${
           custom_job_id: jobId,
           interview_prompt: prompt,
           status: "in_progress",
-          user_id: user.id,
         })
         .select()
         .single();
@@ -207,13 +200,20 @@ ${
           `Failed to insert mock interview questions: ${questionsInsertError.message}`,
         );
       }
-      await trackServerEvent({
-        eventName: "mock_interview_created",
-        userId: user.id,
-        args: {
-          jobId,
-        },
-      });
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user?.id) {
+        await trackServerEvent({
+          eventName: "mock_interview_created",
+          userId: user.id,
+          args: {
+            jobId,
+          },
+        });
+      }
+
       redirectPath = `${mockInterviewsPath}/${mockInterviewId}${
         isOnboarding ? "?onboarding=true" : ""
       }`;

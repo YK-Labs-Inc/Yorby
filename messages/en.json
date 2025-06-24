@@ -2245,9 +2245,7 @@
       "noSubmissionsYet": "No submissions yet.",
       "submissionHistory": "Submission History",
       "unknown": "Unknown"
-    },
-    "noQuestionsInJob": "No questions found for this job.",
-    "selectQuestionToView": "Select a question to view."
+    }
   },
   "AdminStudentMockInterviewView": {
     "noMockInterviewsFound": "No mock interviews found for this student.",

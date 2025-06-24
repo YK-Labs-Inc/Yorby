@@ -10,7 +10,6 @@ import {
   JobData,
   QuestionWithSubmissions,
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
-import { posthog } from "@/utils/tracking/serverUtils";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -45,98 +44,42 @@ const fetchAllStudentJobsAndRelatedData = async (
   coachId: string
 ): Promise<JobData[]> => {
   const supabase = await createSupabaseServerClient();
-
-  // Check PostHog feature flag
-  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
-    "custom-job-enrollments-migration",
-    studentId
-  );
-  await posthog.shutdown();
-
-  if (useNewEnrollmentSystem) {
-    // New enrollment system: fetch using enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from("custom_job_enrollments")
-      .select(
-        `
-          custom_jobs!inner(
-            id,
-            job_title,
-            custom_job_questions (
-              id,
-              question,
-              created_at,
-              custom_job_question_submissions (
-                *,
-                mux_metadata:custom_job_question_submission_mux_metadata(*)
-              )
-            ),
-            custom_job_mock_interviews (
-              id,
-              created_at,
-              status
-            )
-          )
-        `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId);
-
-    if (enrollmentsError) {
-      const logger = new Logger();
-      logger.error("Error fetching enrollments", {
-        error: enrollmentsError,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-
-    if (enrollments && enrollments.length > 0) {
-      // Extract custom_jobs from enrollments
-      const jobs = enrollments.map((enrollment) => enrollment.custom_jobs);
-      return (jobs as JobData[]) || [];
-    }
-    return [];
-  } else {
-    // Legacy system: fetch directly from custom_jobs
-    const { data, error } = await supabase
-      .from("custom_jobs")
-      .select(
-        `
-          id,
-          job_title,
-          custom_job_questions (
-            id,
-            question,
-            created_at,
-            custom_job_question_submissions (
-              *,
-              mux_metadata:custom_job_question_submission_mux_metadata(*)
-            )
-          ),
-          custom_job_mock_interviews (
-            id,
-            created_at,
-            status
-          )
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select(
       `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId)
-      .order("created_at", { ascending: false });
+        id,
+        job_title,
+        custom_job_questions (
+          id,
+          question,
+          created_at,
+          custom_job_question_submissions (
+            *,
+            mux_metadata:custom_job_question_submission_mux_metadata(*)
+          )
+        ),
+        custom_job_mock_interviews (
+          id,
+          created_at,
+          status
+        )
+    `
+    )
+    .eq("user_id", studentId)
+    .eq("coach_id", coachId)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      const logger = new Logger();
-      logger.error("Error fetching all student jobs", {
-        error,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-    return (data as JobData[]) || [];
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching all student jobs", {
+      error,
+      studentId,
+      coachId,
+    });
+    return [];
   }
+  return (data as JobData[]) || [];
 };
 
 function formatDateForHeader(dateString: string) {

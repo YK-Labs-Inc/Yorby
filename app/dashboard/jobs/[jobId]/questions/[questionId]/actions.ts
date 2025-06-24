@@ -379,12 +379,6 @@ const writeAnswerToDatabase = async (
     function: "writeAnswerToDatabase",
   });
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user?.id) {
-    throw new Error("User not found");
-  }
 
   // Convert duration to number if provided
   const durationInSeconds = audioRecordingDuration
@@ -401,7 +395,6 @@ const writeAnswerToDatabase = async (
       audio_bucket: bucketName,
       audio_file_path: filePath,
       audio_recording_duration: durationInSeconds,
-      user_id: user.id,
     })
     .select()
     .single();
