@@ -11,6 +11,7 @@ import {
   QuestionWithSubmissions,
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
 import { posthog } from "@/utils/tracking/serverUtils";
+import { Tables } from "@/utils/supabase/database.types";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -40,70 +41,46 @@ const fetchCoach = async () => {
   return coach;
 };
 
+const fetchQuestionAndRelatedData = async (studentId: string) => {
+  const supabase = await createSupabaseServerClient();
+  // New enrollment system: fetch using enrollments
+  const { data, error } = await supabase
+    .from("custom_job_questions")
+    .select(
+      `
+        *,
+        custom_job_question_submissions (
+          *,
+          custom_job_question_submission_feedback(*),
+          mux_metadata:custom_job_question_submission_mux_metadata(*)
+        )
+        `
+    )
+    .eq("custom_job_question_submissions.user_id", studentId);
+
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching enrollments", {
+      error,
+      studentId,
+      page: "fetchQuestionAndRelatedData",
+    });
+    return [];
+  }
+
+  return data;
+};
+
 const fetchAllStudentJobsAndRelatedData = async (
   studentId: string,
   coachId: string
 ): Promise<JobData[]> => {
   const supabase = await createSupabaseServerClient();
-
-  // Check PostHog feature flag
-  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
-    "custom-job-enrollments-migration",
-    studentId
-  );
-  await posthog.shutdown();
-
-  if (useNewEnrollmentSystem) {
-    // New enrollment system: fetch using enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from("custom_job_enrollments")
-      .select(
-        `
-          custom_jobs!inner(
-            id,
-            job_title,
-            custom_job_questions (
-              id,
-              question,
-              created_at,
-              custom_job_question_submissions (
-                *,
-                mux_metadata:custom_job_question_submission_mux_metadata(*)
-              )
-            ),
-            custom_job_mock_interviews (
-              id,
-              created_at,
-              status
-            )
-          )
-        `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId);
-
-    if (enrollmentsError) {
-      const logger = new Logger();
-      logger.error("Error fetching enrollments", {
-        error: enrollmentsError,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-
-    if (enrollments && enrollments.length > 0) {
-      // Extract custom_jobs from enrollments
-      const jobs = enrollments.map((enrollment) => enrollment.custom_jobs);
-      return (jobs as JobData[]) || [];
-    }
-    return [];
-  } else {
-    // Legacy system: fetch directly from custom_jobs
-    const { data, error } = await supabase
-      .from("custom_jobs")
-      .select(
-        `
+  // Legacy system: fetch directly from custom_jobs
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select(
+      `
           id,
           job_title,
           custom_job_questions (
@@ -112,6 +89,7 @@ const fetchAllStudentJobsAndRelatedData = async (
             created_at,
             custom_job_question_submissions (
               *,
+              custom_job_question_submission_feedback(*),
               mux_metadata:custom_job_question_submission_mux_metadata(*)
             )
           ),
@@ -121,43 +99,22 @@ const fetchAllStudentJobsAndRelatedData = async (
             status
           )
       `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId)
-      .order("created_at", { ascending: false });
+    )
+    .eq("user_id", studentId)
+    .eq("coach_id", coachId)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      const logger = new Logger();
-      logger.error("Error fetching all student jobs", {
-        error,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-    return (data as JobData[]) || [];
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching all student jobs", {
+      error,
+      studentId,
+      coachId,
+    });
+    return [];
   }
+  return (data as JobData[]) || [];
 };
-
-function formatDateForHeader(dateString: string) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
-}
 
 const AdminStudentQuestionViewPage = async ({
   params,
@@ -186,26 +143,48 @@ const AdminStudentQuestionViewPage = async ({
     return notFound();
   }
 
-  const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
-    studentId,
-    coach.id
+  // Check PostHog feature flag
+  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
+    "custom-job-enrollments-migration",
+    studentId
   );
+  await posthog.shutdown();
 
-  const currentJob = allJobsForStudent.find((j) => j.id === jobId);
-  const currentQuestion = currentJob?.custom_job_questions.find(
-    (q: QuestionWithSubmissions) => q.id === questionId
-  );
+  let currentJob: JobData | undefined;
+  let currentQuestion: QuestionWithSubmissions | undefined;
+  let submissions: Tables<"custom_job_question_submissions">[] = [];
+  let currentSubmission: Tables<"custom_job_question_submissions"> | null =
+    null;
 
-  const submissions = currentQuestion
-    ? Array.isArray(currentQuestion.custom_job_question_submissions)
-      ? currentQuestion.custom_job_question_submissions
-      : []
-    : [];
-
-  // Find the current submission
-  const currentSubmission =
-    submissions.find((s) => s.id === submissionId) ||
-    (submissions.length > 0 ? submissions[0] : null);
+  if (useNewEnrollmentSystem) {
+    const questionAndRelatedData = await fetchQuestionAndRelatedData(studentId);
+    currentQuestion = questionAndRelatedData.find((q) => q.id === questionId);
+    submissions = currentQuestion
+      ? Array.isArray(currentQuestion.custom_job_question_submissions)
+        ? currentQuestion.custom_job_question_submissions
+        : []
+      : [];
+    currentSubmission =
+      submissions.find((s) => s.id === submissionId) ||
+      (submissions.length > 0 ? submissions[0] : null);
+  } else {
+    const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
+      studentId,
+      coach.id
+    );
+    currentJob = allJobsForStudent.find((j) => j.id === jobId);
+    currentQuestion = currentJob?.custom_job_questions.find(
+      (q: QuestionWithSubmissions) => q.id === questionId
+    );
+    submissions = currentQuestion
+      ? Array.isArray(currentQuestion.custom_job_question_submissions)
+        ? currentQuestion.custom_job_question_submissions
+        : []
+      : [];
+    currentSubmission =
+      submissions.find((s) => s.id === submissionId) ||
+      (submissions.length > 0 ? submissions[0] : null);
+  }
 
   // Fetch coach feedback for this submission (feedback_role === 'user')
   let currentCoachFeedback = null;
@@ -239,11 +218,7 @@ const AdminStudentQuestionViewPage = async ({
         />
       ) : (
         <div className="flex items-center justify-center h-full">
-          <p className="text-gray-600 text-lg">
-            {currentJob && (currentJob.custom_job_questions?.length || 0) === 0
-              ? t("noQuestionsInJob")
-              : t("selectQuestionToView")}
-          </p>
+          <p className="text-gray-600 text-lg">{t("noQuestionsInJob")}</p>
         </div>
       )}
     </>
