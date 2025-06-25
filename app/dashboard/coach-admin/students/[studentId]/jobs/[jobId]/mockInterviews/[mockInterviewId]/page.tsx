@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import MockInterviewReview from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/review/MockInterviewReview";
 import { JobData } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
+import { posthog } from "@/utils/tracking/serverUtils";
+import { Tables } from "@/utils/supabase/database.types";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -33,66 +35,36 @@ const fetchCoach = async () => {
   return coach;
 };
 
+const fetchMockInterviewAndRelatedData = async (studentId: string) => {
+  const supabase = await createSupabaseServerClient();
+  // New enrollment system: fetch using enrollments
+  const { data, error } = await supabase
+    .from("custom_job_mock_interviews")
+    .select("*")
+    .eq("user_id", studentId);
+
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching enrollments", {
+      error,
+      studentId,
+      page: "fetchMockInterviewAndRelatedData",
+    });
+    return [];
+  }
+
+  return data;
+};
+
 const fetchAllStudentJobsAndRelatedData = async (
   studentId: string,
   coachId: string
 ): Promise<JobData[]> => {
   const supabase = await createSupabaseServerClient();
-
-  // Use new enrollment system
-  const useNewEnrollmentSystem = true;
-
-  if (useNewEnrollmentSystem) {
-    // New enrollment system: fetch using enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from("custom_job_enrollments")
-      .select(
-        `
-          custom_jobs!inner(
-            id,
-            job_title,
-            custom_job_questions (
-              id,
-              question,
-              created_at,
-              custom_job_question_submissions (
-                id,
-                created_at
-              )
-            ),
-            custom_job_mock_interviews (
-              id,
-              created_at,
-              status
-            )
-          )
-        `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId);
-
-    if (enrollmentsError) {
-      const logger = new Logger();
-      logger.error("Error fetching enrollments for mock interview view", {
-        error: enrollmentsError,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-
-    if (enrollments && enrollments.length > 0) {
-      // Extract custom_jobs from enrollments
-      const jobs = enrollments.map((enrollment) => enrollment.custom_jobs);
-      return (jobs as JobData[]) || [];
-    }
-    return [];
-  } else {
-    // Legacy system: fetch directly from custom_jobs
-    const { data, error } = await supabase
-      .from("custom_jobs")
-      .select(
-        `
+  const { data, error } = await supabase
+    .from("custom_jobs")
+    .select(
+      `
           id,
           job_title,
           custom_job_questions (
@@ -110,22 +82,21 @@ const fetchAllStudentJobsAndRelatedData = async (
             status
           )
       `
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coachId)
-      .order("created_at", { ascending: false });
+    )
+    .eq("user_id", studentId)
+    .eq("coach_id", coachId)
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      const logger = new Logger();
-      logger.error("Error fetching all student jobs for mock interview view", {
-        error,
-        studentId,
-        coachId,
-      });
-      return [];
-    }
-    return (data as JobData[]) || [];
+  if (error) {
+    const logger = new Logger();
+    logger.error("Error fetching all student jobs for mock interview view", {
+      error,
+      studentId,
+      coachId,
+    });
+    return [];
   }
+  return (data as JobData[]) || [];
 };
 
 type AdminStudentMockInterviewViewProps = {
@@ -148,25 +119,28 @@ const AdminStudentMockInterviewView = async ({
   const coach = await fetchCoach();
   if (!coach) return notFound();
 
-  const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
-    studentId,
-    coach.id
+  // Check PostHog feature flag
+  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
+    "custom-job-enrollments-migration",
+    studentId
   );
+  await posthog.shutdown();
 
-  const currentJob = allJobsForStudent.find((j) => j.id === jobId);
-  const currentMockInterview = currentJob?.custom_job_mock_interviews.find(
-    (mi) => mi.id === mockInterviewId
-  );
-
-  if (!currentMockInterview) {
-    if (
-      mockInterviewId === "no-mock-interviews" ||
-      !currentJob?.custom_job_mock_interviews ||
-      currentJob.custom_job_mock_interviews.length === 0
-    ) {
-    } else {
-      return notFound();
-    }
+  let currentMockInterview: Tables<"custom_job_mock_interviews"> | undefined;
+  if (useNewEnrollmentSystem) {
+    const mockInterview = await fetchMockInterviewAndRelatedData(studentId);
+    currentMockInterview = mockInterview.find(
+      (mi) => mi.id === mockInterviewId
+    );
+  } else {
+    const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
+      studentId,
+      coach.id
+    );
+    const currentJob = allJobsForStudent.find((j) => j.id === jobId);
+    currentMockInterview = currentJob?.custom_job_mock_interviews.find(
+      (mi) => mi.id === mockInterviewId
+    );
   }
 
   return (
@@ -175,12 +149,7 @@ const AdminStudentMockInterviewView = async ({
         <MockInterviewReview mockInterviewId={currentMockInterview.id} />
       ) : (
         <div className="flex items-center justify-center h-full">
-          <p className="text-gray-600 text-lg">
-            {currentJob &&
-            (currentJob.custom_job_mock_interviews?.length || 0) === 0
-              ? t("noMockInterviewsInJob")
-              : t("selectMockInterviewToView")}
-          </p>
+          <p className="text-gray-600 text-lg">{t("noMockInterviewsInJob")}</p>
         </div>
       )}
     </>

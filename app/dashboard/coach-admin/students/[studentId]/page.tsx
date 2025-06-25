@@ -55,10 +55,10 @@ const AdminStudentPage = async ({
     const legacyResult = await supabase
       .from("custom_jobs")
       .select(
-        `*,
+        `id,
         custom_job_questions(
-            *,
-            custom_job_question_submissions(*)
+            id,
+            custom_job_question_submissions(id)
         )`
       )
       .eq("user_id", studentId);
