@@ -38,7 +38,8 @@ const AdminStudentPage = async ({
           )
         )`
       )
-      .eq("user_id", studentId);
+      .eq("user_id", studentId)
+      .eq("custom_job_question_submissions.user_id", studentId);
 
     if (!enrollmentsError && enrollments && enrollments.length > 0) {
       // Extract custom_jobs from enrollments
