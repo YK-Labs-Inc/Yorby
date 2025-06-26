@@ -91,9 +91,7 @@ export default function JobSelector({
             className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
           >
             <div className="flex flex-col items-start">
-              <span className="font-medium text-gray-800">
-                {job.job_title}
-              </span>
+              <span className="font-medium text-gray-800">{job.job_title}</span>
               <span className="text-xs text-gray-500">
                 {t("questions")}: {job.questionsCount || 0},{" "}
                 {t("mockInterviews")}: {job.mockInterviewsCount || 0}

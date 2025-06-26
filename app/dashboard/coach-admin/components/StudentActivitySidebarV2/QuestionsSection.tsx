@@ -1,4 +1,7 @@
-import { fetchJobQuestions, fetchQuestionSubmissions } from "@/utils/supabase/queries/studentActivity";
+import {
+  fetchJobQuestions,
+  fetchQuestionSubmissions,
+} from "@/utils/supabase/queries/studentActivity";
 import QuestionItem from "./QuestionItem";
 import { getTranslations } from "next-intl/server";
 
@@ -14,27 +17,32 @@ export default async function QuestionsSection({
   locale,
 }: QuestionsSectionProps) {
   const t = await getTranslations("StudentActivitySidebar");
-  
+
   // Fetch questions for this job
-  const questions = await fetchJobQuestions(jobId, studentId);
-  
+  const questions = await fetchJobQuestions(jobId);
+
   if (!questions || questions.length === 0) {
     return (
       <div className="p-4">
-        <p className="text-sm text-gray-500 p-3">{t("noQuestionsFoundForJob")}</p>
+        <p className="text-sm text-gray-500 p-3">
+          {t("noQuestionsFoundForJob")}
+        </p>
       </div>
     );
   }
 
   // Fetch all submissions for these questions in parallel
-  const questionIds = questions.map(q => q.id);
-  const submissionsByQuestion = await fetchQuestionSubmissions(questionIds);
+  const questionIds = questions.map((q) => q.id);
+  const submissionsByQuestion = await fetchQuestionSubmissions(
+    questionIds,
+    studentId
+  );
 
   // Sort questions - ones with submissions first
   const sortedQuestions = [...questions].sort((a, b) => {
     const submissionsA = submissionsByQuestion[a.id] || [];
     const submissionsB = submissionsByQuestion[b.id] || [];
-    
+
     if (submissionsA.length > 0 && submissionsB.length === 0) {
       return -1;
     }

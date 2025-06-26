@@ -100,6 +100,7 @@ export const GET = withAxiom(async (
                 .select("id")
                 .eq("user_id", user.id)
                 .eq("custom_job_id", jobToEnroll.id)
+                .eq("coach_id", coachId)
                 .maybeSingle();
 
             if (!existingEnrollment) {

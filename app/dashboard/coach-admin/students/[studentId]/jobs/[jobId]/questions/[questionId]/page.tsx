@@ -41,31 +41,34 @@ const fetchCoach = async () => {
   return coach;
 };
 
-const fetchQuestionAndRelatedData = async (studentId: string) => {
+const fetchQuestionAndRelatedData = async (studentId: string, questionId: string) => {
   const supabase = await createSupabaseServerClient();
-  // New enrollment system: fetch using enrollments
+  // Fetch only the specific question with submissions for this student
   const { data, error } = await supabase
     .from("custom_job_questions")
     .select(
       `
         *,
-        custom_job_question_submissions (
+        custom_job_question_submissions!inner (
           *,
           custom_job_question_submission_feedback(*),
           mux_metadata:custom_job_question_submission_mux_metadata(*)
         )
         `
     )
-    .eq("custom_job_question_submissions.user_id", studentId);
+    .eq("id", questionId)
+    .eq("custom_job_question_submissions.user_id", studentId)
+    .single();
 
   if (error) {
     const logger = new Logger();
-    logger.error("Error fetching enrollments", {
+    logger.error("Error fetching question data", {
       error,
       studentId,
+      questionId,
       page: "fetchQuestionAndRelatedData",
     });
-    return [];
+    return null;
   }
 
   return data;
@@ -157,8 +160,8 @@ const AdminStudentQuestionViewPage = async ({
     null;
 
   if (useNewEnrollmentSystem) {
-    const questionAndRelatedData = await fetchQuestionAndRelatedData(studentId);
-    currentQuestion = questionAndRelatedData.find((q) => q.id === questionId);
+    const questionData = await fetchQuestionAndRelatedData(studentId, questionId);
+    currentQuestion = questionData || undefined;
     submissions = currentQuestion
       ? Array.isArray(currentQuestion.custom_job_question_submissions)
         ? currentQuestion.custom_job_question_submissions
