@@ -14,6 +14,26 @@ const AdminStudentPage = async ({
   const { studentId } = await params;
   const supabase = await createSupabaseServerClient();
 
+  // Get the current coach's ID
+  const {
+    data: { user: coachUser },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !coachUser) {
+    redirect("/sign-in");
+  }
+
+  const { data: coach, error: coachError } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", coachUser.id)
+    .single();
+
+  if (coachError || !coach) {
+    redirect("/onboarding");
+  }
+
   // Check PostHog feature flag
   const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
     "custom-job-enrollments-migration",
@@ -39,6 +59,7 @@ const AdminStudentPage = async ({
         )`
       )
       .eq("user_id", studentId)
+      .eq("coach_id", coach.id)
       .eq("custom_job_question_submissions.user_id", studentId);
 
     if (!enrollmentsError && enrollments && enrollments.length > 0) {
