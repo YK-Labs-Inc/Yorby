@@ -45,33 +45,7 @@ const AdminStudentPage = async ({
   let studentCustomJobsError;
 
   if (useNewEnrollmentSystem) {
-    // New enrollment system: fetch using enrollments
-    const { data: enrollments, error: enrollmentsError } = await supabase
-      .from("custom_job_enrollments")
-      .select(
-        `*,
-        custom_jobs!inner(
-          *,
-          custom_job_questions(
-            *,
-            custom_job_question_submissions(*)
-          )
-        )`
-      )
-      .eq("user_id", studentId)
-      .eq("coach_id", coach.id)
-      .eq("custom_job_question_submissions.user_id", studentId);
-
-    if (!enrollmentsError && enrollments && enrollments.length > 0) {
-      // Extract custom_jobs from enrollments
-      studentCustomJobs = enrollments.map(
-        (enrollment) => enrollment.custom_jobs
-      );
-      studentCustomJobsError = null;
-    } else {
-      studentCustomJobs = [];
-      studentCustomJobsError = enrollmentsError;
-    }
+    redirect(`/dashboard/coach-admin/students/${studentId}/programs`);
   } else {
     // Legacy system: fetch directly from custom_jobs
     const legacyResult = await supabase

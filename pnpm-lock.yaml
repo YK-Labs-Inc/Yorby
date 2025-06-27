@@ -200,6 +200,9 @@ importers:
       stripe:
         specifier: ^17.5.0
         version: 17.7.0
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.3(react@19.0.0)
       tus-js-client:
         specifier: ^4.3.1
         version: 4.3.1

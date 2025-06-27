@@ -122,46 +122,11 @@ export default async function Layout({
   const coach = await fetchCoach();
   if (!coach) return notFound();
 
-  // Check PostHog feature flag
-  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
-    "custom-job-enrollments-migration",
-    studentId
-  );
-  await posthog.shutdown();
-
-  // Use V2 sidebar for new enrollment system
-  if (useNewEnrollmentSystem) {
-    return (
-      <div className="relative w-full min-h-screen bg-white">
-        <StudentActivityHeader
-          name={name}
-          role={role}
-          started={started}
-          lastSignIn={lastSignIn}
-        />
-        <div
-          className="flex flex-row w-full min-h-0"
-          style={{ height: "calc(100vh - 82px)" }}
-        >
-          <StudentActivitySidebarV2
-            studentId={studentId}
-            coachId={coach.id}
-            activeJobId={jobId}
-            locale={locale}
-          />
-          <div className="flex-1 px-4 md:px-8 py-6 overflow-y-auto h-full min-h-0">
-            {children}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Legacy code path
   const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
     studentId,
     coach.id
   );
+
   if (!allJobsForStudent || allJobsForStudent.length === 0) {
     return (
       <div className="relative w-full min-h-screen bg-white">
