@@ -3,15 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tables } from "@/utils/supabase/database.types";
-import Link from "next/link";
-import { CoachFeedbackForm } from "./CoachFeedbackForm";
-import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import React from "react";
 import { useTranslations } from "next-intl";
 import QuestionFeedback from "@/components/ui/question-feedback";
 import SubmissionVideoPlayer from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/SubmissionVideoPlayer";
-import CoachFeedbackSection from "./CoachFeedbackSection";
+import CoachFeedbackSection from "../../../jobs/[jobId]/questions/[questionId]/CoachFeedbackSection";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -25,7 +22,7 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
-interface StudentQuestionSubmissionsProps {
+interface ClientSideStudentQuestionSubmissionsProps {
   question: Tables<"custom_job_questions">;
   submissions: (Tables<"custom_job_question_submissions"> & {
     custom_job_question_submission_mux_metadata?: Tables<"custom_job_question_submission_mux_metadata"> | null;
@@ -40,9 +37,11 @@ interface StudentQuestionSubmissionsProps {
       })
     | null;
   currentCoachFeedback: any;
+  onSubmissionChange: (submissionId: string) => void;
+  onFeedbackUpdate?: () => void;
 }
 
-export default function StudentQuestionSubmissions({
+export default function ClientSideStudentQuestionSubmissions({
   question,
   submissions,
   currentSubmissionId,
@@ -51,7 +50,9 @@ export default function StudentQuestionSubmissions({
   questionId,
   currentSubmission,
   currentCoachFeedback,
-}: StudentQuestionSubmissionsProps) {
+  onSubmissionChange,
+  onFeedbackUpdate,
+}: ClientSideStudentQuestionSubmissionsProps) {
   const t = useTranslations(
     "coachAdminPortal.studentsPage.studentQuestionSubmissions"
   );
@@ -118,6 +119,7 @@ export default function StudentQuestionSubmissions({
                 <CoachFeedbackSection
                   submissionId={currentSubmission.id}
                   existingFeedback={currentCoachFeedback}
+                  onFeedbackUpdate={onFeedbackUpdate}
                 />
               </div>
             </CardContent>
@@ -149,42 +151,38 @@ export default function StudentQuestionSubmissions({
                             ? "ring-2 ring-primary border-primary bg-primary/10"
                             : "hover:bg-gray-50"
                         }`}
+                        onClick={() => onSubmissionChange(submission.id)}
                       >
-                        <Link
-                          href={`/dashboard/coach-admin/students/${studentId}/jobs/${jobId}/questions/${questionId}?submissionId=${submission.id}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-gray-500">
-                                  {t("submitted", {
-                                    date: formatDate(submission.created_at),
-                                  })}
-                                </span>
-                              </div>
-                              <p className="text-gray-800 line-clamp-3">
-                                {submission.answer}
-                              </p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-500">
+                                {t("submitted", {
+                                  date: formatDate(submission.created_at),
+                                })}
+                              </span>
                             </div>
-                            {feedback &&
-                              typeof feedback.correctness_score ===
-                                "number" && (
-                                <span
-                                  className={`ml-2 flex items-center justify-center rounded-lg text-white font-bold shadow-md p-1
-                              ${
-                                feedback.correctness_score >= 80
-                                  ? "bg-green-500"
-                                  : feedback.correctness_score >= 50
-                                    ? "bg-yellow-400 text-yellow-900"
-                                    : "bg-red-500"
-                              }
-                            `}
-                                >
-                                  {feedback.correctness_score}%
-                                </span>
-                              )}
+                            <p className="text-gray-800 line-clamp-3">
+                              {submission.answer}
+                            </p>
                           </div>
-                        </Link>
+                          {feedback &&
+                            typeof feedback.correctness_score === "number" && (
+                              <span
+                                className={`ml-2 flex items-center justify-center rounded-lg text-white font-bold shadow-md p-1
+                            ${
+                              feedback.correctness_score >= 80
+                                ? "bg-green-500"
+                                : feedback.correctness_score >= 50
+                                  ? "bg-yellow-400 text-yellow-900"
+                                  : "bg-red-500"
+                            }
+                          `}
+                              >
+                                {feedback.correctness_score}%
+                              </span>
+                            )}
+                        </div>
                       </li>
                     );
                   })}
