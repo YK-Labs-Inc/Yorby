@@ -334,10 +334,10 @@ const sendCoachLowScoreNotification = async (
       studentUser?.user?.email || "Student";
     // Get question text
     const questionRow = await fetchQuestion(questionId);
-    // Build review link
+    // Build review link - using new programs path with search params
     const baseUrl = (await headers()).get("origin");
     const reviewLink =
-      `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/jobs/${job.id}/questions/${questionId}?submissionId=${submissionId}`;
+      `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/programs?job=${job.id}&tab=questions&item=${questionId}&submissionId=${submissionId}`;
     // Send email
     const resend = new Resend(process.env.RESEND_API_KEY!);
     await resend.emails.send({
