@@ -10,7 +10,11 @@ import { useActionState, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
-export default function SignInForm() {
+interface SignInFormProps {
+  redirectUrl?: string;
+}
+
+export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
   const signInT = useTranslations("signIn");
   const [state, action, pending] = useActionState(signInWithOTP, {
     success: "",
@@ -51,7 +55,7 @@ export default function SignInForm() {
           <input
             type="hidden"
             name="redirectTo"
-            value={isYorby ? "/coaches/auth" : "/onboarding"}
+            value={redirectUrl || (isYorby ? "/coaches/auth" : "/onboarding")}
           />
           <SubmitButton
             disabled={!captchaToken || pending}

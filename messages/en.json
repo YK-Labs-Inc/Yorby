@@ -743,7 +743,32 @@
       "submitting": "Signing in...",
       "getStarted": "Get Started For Free"
     },
-    "enterEmailToGetStarted": "Enter your email to get started"
+    "enterEmailToGetStarted": "Enter your email to get started",
+    "portalSelection": {
+      "title": "Welcome",
+      "subtitle": "Please select your portal to continue",
+      "backToSelection": "Back to portal selection",
+      "coach": {
+        "title": "Coach Portal",
+        "description": "For career coaches managing students and programs",
+        "features": {
+          "managePrograms": "Manage student programs",
+          "createQuestions": "Create custom questions",
+          "reviewProgress": "Review student progress",
+          "provideFeedback": "Provide feedback"
+        }
+      },
+      "student": {
+        "title": "Student Portal",
+        "description": "For students practicing interviews and building resumes",
+        "features": {
+          "practiceQuestions": "Practice interview questions",
+          "mockInterviews": "Take mock interviews",
+          "buildResume": "Build your resume",
+          "aiFeedback": "Get AI-powered feedback"
+        }
+      }
+    }
   },
   "interviewCopilots": {
     "title": "Interview Copilots",
@@ -2336,6 +2361,22 @@
       "scoreValue": "{score}%",
       "strengthsTitle": "Strengths",
       "areasForImprovementTitle": "Areas for Improvement"
+    }
+  },
+  "studentPrograms": {
+    "title": "My Programs",
+    "subtitle": "Access your enrolled career coaching programs",
+    "noPrograms": {
+      "title": "No programs yet",
+      "description": "You haven't been enrolled in any coaching programs yet."
+    },
+    "programCard": {
+      "coach": "Coach",
+      "enrolled": "Enrolled",
+      "continueButton": "Continue Learning"
+    },
+    "error": {
+      "loadFailed": "Failed to load your programs. Please try again."
     }
   }
 }
