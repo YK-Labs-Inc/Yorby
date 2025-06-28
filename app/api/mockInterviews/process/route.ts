@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   generateFeedback,
-  getAllFiles,
+  getCustomJobFiles,
 } from "@/app/dashboard/jobs/[jobId]/questions/[questionId]/actions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, Logger } from "next-axiom";
@@ -795,7 +795,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const customJob = mockInterview.custom_jobs;
 
     // Get job files
-    const jobFiles = await getAllFiles(customJob.id);
+    const jobFiles = await getCustomJobFiles(customJob.id);
     logger.info("Job files fetched", { jobFiles });
     const messages = mockInterview.mock_interview_messages;
 
