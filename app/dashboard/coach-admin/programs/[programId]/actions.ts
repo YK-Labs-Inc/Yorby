@@ -6,58 +6,6 @@ import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { validateCoach } from "../actions"; // Corrected path
 
-async function updateRelatedQuestionsStatus(
-    sourceQuestionId: string,
-    status: "published" | "draft",
-) {
-    const supabase = await createSupabaseServerClient();
-    const logger = new Logger().with({
-        function: "updateRelatedQuestionsStatus",
-        sourceQuestionId,
-        status,
-    });
-
-    const { data: relatedQuestions, error: fetchError } = await supabase
-        .from("custom_job_questions")
-        .select("id")
-        .eq("source_custom_job_question_id", sourceQuestionId);
-
-    if (fetchError) {
-        logger.error("Failed to fetch related questions.", {
-            sourceQuestionId,
-            error: fetchError,
-        });
-        await logger.flush();
-        return { success: false, error: fetchError };
-    }
-
-    await Promise.all(relatedQuestions.map(async (q: { id: string }) => {
-        const { error: updateError } = await supabase
-            .from("custom_job_questions")
-            .update({ publication_status: status })
-            .eq("id", q.id);
-
-        if (updateError) {
-            logger.error(
-                "Failed to update status for related questions.",
-                {
-                    sourceQuestionId,
-                    relatedQuestionId: q.id,
-                    error: updateError,
-                },
-            );
-            await logger.flush();
-            return { success: false, error: updateError };
-        }
-        logger.info(
-            `Successfully updated status for ${relatedQuestions.length} related questions.`,
-            { sourceQuestionId, newStatus: status, relatedQuestionId: q.id },
-        );
-        await logger.flush();
-    }));
-    return { success: true };
-}
-
 export async function updateQuestionPublicationStatus(
     questionId: string,
     programId: string,
@@ -124,35 +72,8 @@ export async function updateQuestionPublicationStatus(
         return { success: false, message: mainUpdateError.message };
     }
 
-    // Update related questions
-    const relatedUpdateResult = await updateRelatedQuestionsStatus(
-        questionId,
-        status,
-    );
-
-    if (!relatedUpdateResult.success) {
-        logger.warn(
-            "Main question status updated, but failed to update some related questions.",
-            { error: relatedUpdateResult.error },
-        );
-        const { error: revertError } = await supabase
-            .from("custom_job_questions")
-            .update({
-                publication_status: status === "published"
-                    ? "draft"
-                    : "published",
-            })
-            .eq("id", questionId);
-        if (revertError) {
-            logger.error("Failed to revert question publication status.", {
-                error: revertError,
-            });
-        }
-        return {
-            success: false,
-            message: "Failed to update related questions.",
-        };
-    }
+    // Fan-out operations removed - with new enrollment system,
+    // students read directly from coach's master questions
 
     revalidatePath(`/dashboard/coach-admin/programs/${programId}`);
     await logger.flush();
