@@ -8,7 +8,6 @@ import {
   useParams,
 } from "next/navigation";
 import ProgramDashboard from "./components/ProgramDashboard";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ProgramsPage() {
   const searchParams = useSearchParams();
