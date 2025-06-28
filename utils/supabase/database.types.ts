@@ -223,6 +223,89 @@ export type Database = {
           },
         ]
       }
+      custom_job_knowledge_base: {
+        Row: {
+          created_at: string
+          custom_job_id: string
+          id: string
+          knowledge_base: string
+        }
+        Insert: {
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          knowledge_base: string
+        }
+        Update: {
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          knowledge_base?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_knowledge_base_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: true
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_job_knowledge_base_files: {
+        Row: {
+          bucket_name: string
+          coach_id: string
+          created_at: string
+          custom_job_id: string
+          display_name: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id: string
+          mime_type: string
+        }
+        Insert: {
+          bucket_name: string
+          coach_id: string
+          created_at?: string
+          custom_job_id: string
+          display_name: string
+          file_path: string
+          google_file_name: string
+          google_file_uri: string
+          id?: string
+          mime_type: string
+        }
+        Update: {
+          bucket_name?: string
+          coach_id?: string
+          created_at?: string
+          custom_job_id?: string
+          display_name?: string
+          file_path?: string
+          google_file_name?: string
+          google_file_uri?: string
+          id?: string
+          mime_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_job_knowledge_base_files_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_job_knowledge_base_files_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_mock_interview_feedback: {
         Row: {
           cons: string[]

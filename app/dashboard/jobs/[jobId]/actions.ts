@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { encodedRedirect } from "@/utils/utils";
 import { revalidatePath } from "next/cache";
-import { getAllFiles } from "./questions/[questionId]/actions";
+import { getCustomJobFiles } from "./questions/[questionId]/actions";
 import { writeCustomJobQuestionsToDb } from "@/app/landing2/actions";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
@@ -408,7 +408,7 @@ export const generateMoreQuestions = async (
   });
   logger.info("Generating more questions");
   const job = await fetchJob(jobId);
-  const files = await getAllFiles(jobId);
+  const files = await getCustomJobFiles(jobId);
 
   await generateMoreCustomJobQuestions({
     customJobId: jobId,
