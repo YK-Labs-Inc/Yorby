@@ -14,7 +14,6 @@ import { UploadResponse } from "@/utils/types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createAdminClient } from "@/utils/supabase/server";
@@ -107,7 +106,8 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
   try {
     const job = await fetchJob(jobId);
     const { question, answer_guidelines } = await fetchQuestion(questionId);
-    const files = await getAllFiles(jobId);
+    const files = await getCustomJobFiles(jobId);
+    const knowledgeBaseFiles = await fetchCoachKnowledgeBaseFiles(jobId);
     const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
     const prompt = `
     You are an expert job interviewer for a given job title and job description that I will provide you.
@@ -121,11 +121,13 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     ${
       coachKnowledgeBase
         ? `The question you are trying to generate an answer for is a part of
-        a coaching program put together by a career coach. In this scenario, I will also provide you
-        some additional information from a career coach that could be relevant to the question. For example, it could contain
-        some proprietary framework that the career coach uses to help candidates answer questions.
+        a specific coaching program. I will also provide you additional context and information
+        specific to this job/program that should be considered when generating the answer. 
+        This knowledge base may contain company-specific information, proprietary frameworks,
+        role-specific expectations, or other relevant criteria that the coach wants candidates
+        to incorporate in their answers.
 
-        Use this additional information to generate an answer.
+        Use this additional information to generate an answer that aligns with the program's requirements.
         `
         : ""
     }
@@ -167,7 +169,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
 
     ${
       coachKnowledgeBase
-        ? `## Coach Knowledge Base\n${coachKnowledgeBase}`
+        ? `## Program-Specific Knowledge Base\n${coachKnowledgeBase}`
         : ""
     }
     `;
@@ -182,6 +184,11 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
               text: "Generate the answer",
             },
             ...files.map((f) => ({
+              type: "file" as "file",
+              data: f.fileData.fileUri,
+              mimeType: f.fileData.mimeType,
+            })),
+            ...knowledgeBaseFiles.map((f) => ({
               type: "file" as "file",
               data: f.fileData.fileUri,
               mimeType: f.fileData.mimeType,
@@ -500,7 +507,8 @@ export const generateFeedback = async (
   const { question, answer_guidelines } = await fetchQuestion(questionId);
   const coachKnowledgeBase = await fetchCoachKnowledgeBaseForJob(jobId);
   const sampleAnswers = await fetchQuestionSampleAnswers(questionId);
-  const files = await getAllFiles(jobId);
+  const files = await getCustomJobFiles(jobId);
+  const knowledgeBaseFiles = await fetchCoachKnowledgeBaseFiles(jobId);
 
   // Step 2: Extract core criteria from answer guidelines
   const coreCriteria = await extractCoreCriteria(answer_guidelines, logger);
@@ -511,7 +519,7 @@ export const generateFeedback = async (
     question,
     answer,
     coreCriteria,
-    files,
+    [...files, ...knowledgeBaseFiles],
     logger,
   );
 
@@ -522,7 +530,7 @@ export const generateFeedback = async (
       question,
       answer,
       sampleAnswers,
-      files,
+      [...files, ...knowledgeBaseFiles],
       logger,
     )
     : { strengths: [], weaknesses: [] };
@@ -534,7 +542,7 @@ export const generateFeedback = async (
       question,
       answer,
       coachKnowledgeBase,
-      files,
+      [...files, ...knowledgeBaseFiles],
       logger,
     )
     : { coach_feedback: [] };
@@ -782,13 +790,21 @@ const applyCoachKnowledgeBase = async (
   logger: Logger,
 ) => {
   const prompt = `
-    You are evaluating a candidate's answer using a career coach's proprietary knowledge and frameworks.
+    You are evaluating a candidate's answer using program-specific knowledge and frameworks.
     
-    The coach has provided specific guidance, frameworks, or methodologies that should be considered
-    when evaluating interview answers. Use this knowledge to identify any actual issues or problems
-    with the candidate's answer based on the coach's framework.
+    The coach has provided specific guidance, criteria, company-specific information, or methodologies 
+    for this particular job/program that should be considered when evaluating interview answers. 
+    This knowledge base may contain:
+    - Company-specific values or culture
+    - Role-specific expectations
+    - Proprietary frameworks or methodologies
+    - Additional grading criteria
+    - Industry-specific requirements
     
-    Focus on identifying genuine problems or violations of the coach's methodology, not general suggestions.
+    Use this knowledge to identify any actual issues or problems with the candidate's answer 
+    based on these specific requirements.
+    
+    Focus on identifying genuine problems or violations of the specified criteria, not general suggestions.
     
     Return your response in the following format:
     {
@@ -802,7 +818,7 @@ const applyCoachKnowledgeBase = async (
     ## Question
     ${question}
     
-    ## Coach Knowledge Base
+    ## Program-Specific Knowledge Base
     ${coachKnowledgeBase}
     
     ## Candidate's Answer
@@ -961,13 +977,17 @@ const fetchCustomJobFiles = async (jobId: string) => {
   return data;
 };
 
-export const getAllFiles = async (jobId: string) => {
+export const getCustomJobFiles = async (jobId: string) => {
   const customJobFiles = await fetchCustomJobFiles(jobId);
   const fileStatuses = await Promise.all(customJobFiles.map(checkFileExists));
   return await Promise.all(
     fileStatuses.map(async ({ file, status }) => {
       if (!status) {
-        const uploadResponse = await processMissingFile({ file });
+        const uploadResponse = await processMissingFile({
+          file,
+          bucket: "custom_job_files",
+          tableName: "custom_job_files",
+        });
         return {
           fileData: {
             fileUri: uploadResponse.file.uri,
@@ -985,7 +1005,16 @@ export const getAllFiles = async (jobId: string) => {
   );
 };
 
-const checkFileExists = async (file: Tables<"custom_job_files">) => {
+type FileWithGeminiInfo = {
+  id: string;
+  display_name: string;
+  file_path: string;
+  google_file_name: string;
+  google_file_uri: string;
+  mime_type: string;
+};
+
+const checkFileExists = async <T extends FileWithGeminiInfo>(file: T) => {
   try {
     const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
     await fileManager.getFile(file.google_file_name);
@@ -995,15 +1024,19 @@ const checkFileExists = async (file: Tables<"custom_job_files">) => {
   }
 };
 
-const processMissingFile = async ({
+const processMissingFile = async <T extends FileWithGeminiInfo>({
   file,
+  bucket,
+  tableName,
 }: {
-  file: Tables<"custom_job_files">;
+  file: T;
+  bucket: string;
+  tableName: "custom_job_files" | "custom_job_knowledge_base_files";
 }) => {
   const { display_name, file_path } = file;
   const data = await downloadFile({
     filePath: file_path,
-    bucket: "custom_job_files",
+    bucket,
   });
   const uploadResponse = await uploadFileToGemini({
     blob: data,
@@ -1012,6 +1045,7 @@ const processMissingFile = async ({
   await updateFileInDatabase({
     uploadResponse,
     fileId: file.id,
+    tableName,
   });
   return uploadResponse;
 };
@@ -1019,13 +1053,15 @@ const processMissingFile = async ({
 const updateFileInDatabase = async ({
   uploadResponse,
   fileId,
+  tableName,
 }: {
   uploadResponse: UploadResponse;
   fileId: string;
+  tableName: "custom_job_files" | "custom_job_knowledge_base_files";
 }) => {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
-    .from("custom_job_files")
+    .from(tableName)
     .update({
       google_file_uri: uploadResponse.file.uri,
       google_file_name: uploadResponse.file.name,
@@ -1037,13 +1073,50 @@ const updateFileInDatabase = async ({
 };
 
 const fetchCoachKnowledgeBaseForJob = async (jobId: string) => {
-  const customJob = await fetchCustomJob(jobId);
-  if (!customJob.coach_id) {
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    jobId,
+    function: "fetchCoachKnowledgeBaseForJob",
+  });
+
+  try {
+    // First check if there's a custom job knowledge base for this specific job
+    const { data: customJobKnowledgeBase, error: customJobKBError } =
+      await supabase
+        .from("custom_job_knowledge_base")
+        .select("knowledge_base")
+        .eq("custom_job_id", jobId)
+        .single();
+
+    if (!customJobKBError && customJobKnowledgeBase?.knowledge_base) {
+      logger.info("Found custom job knowledge base", { jobId });
+      await logger.flush();
+      return customJobKnowledgeBase.knowledge_base;
+    }
+
+    // Fallback to coach's general knowledge base if no job-specific one exists
+    const customJob = await fetchCustomJob(jobId);
+    if (!customJob.coach_id) {
+      logger.info("No coach_id found for job", { jobId });
+      await logger.flush();
+      return null;
+    }
+
+    const coachKnowledgeBase = await fetchCoachKnowledgeBase(
+      customJob.coach_id,
+    );
+    logger.info("Using coach's general knowledge base", {
+      jobId,
+      coachId: customJob.coach_id,
+      hasKnowledgeBase: !!coachKnowledgeBase,
+    });
+    await logger.flush();
+    return coachKnowledgeBase;
+  } catch (error) {
+    logger.error("Error fetching knowledge base", { error, jobId });
+    await logger.flush();
     return null;
   }
-  return await fetchCoachKnowledgeBase(
-    customJob.coach_id,
-  );
 };
 
 const fetchCustomJob = async (jobId: string) => {
@@ -1096,6 +1169,82 @@ const fetchCoachKnowledgeBase = async (coachId: string) => {
   });
   await logger.flush();
   return data.map((d) => d.knowledge_base).join("\n");
+};
+
+const fetchCoachKnowledgeBaseFiles = async (jobId: string) => {
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    jobId,
+    function: "fetchCoachKnowledgeBaseFiles",
+  });
+
+  try {
+    // Fetch knowledge base files for this job
+    const { data: kbFiles, error } = await supabase
+      .from("custom_job_knowledge_base_files")
+      .select("*")
+      .eq("custom_job_id", jobId);
+
+    if (error) {
+      logger.error("Error fetching knowledge base files", { error });
+      await logger.flush();
+      return [];
+    }
+
+    if (!kbFiles || kbFiles.length === 0) {
+      logger.info("No knowledge base files found", { jobId });
+      await logger.flush();
+      return [];
+    }
+
+    // Check file status and prepare for use
+    const fileStatuses = await Promise.all(kbFiles.map(checkFileExists));
+
+    const processedFiles = await Promise.all(
+      fileStatuses.map(async ({ file, status }) => {
+        if (!status) {
+          try {
+            const uploadResponse = await processMissingFile({
+              file,
+              bucket: "custom-job-knowledge-base-files",
+              tableName: "custom_job_knowledge_base_files",
+            });
+            return {
+              fileData: {
+                fileUri: uploadResponse.file.uri,
+                mimeType: uploadResponse.file.mimeType,
+              },
+            };
+          } catch (error) {
+            logger.error("Error re-uploading file to Gemini", {
+              error,
+              fileId: file.id,
+            });
+            return null;
+          }
+        }
+
+        return {
+          fileData: {
+            fileUri: file.google_file_uri,
+            mimeType: file.mime_type,
+          },
+        };
+      }),
+    );
+
+    logger.info("Fetched knowledge base files", {
+      jobId,
+      filesCount: processedFiles.filter((f) => f !== null).length,
+    });
+    await logger.flush();
+
+    return processedFiles.filter((f) => f !== null);
+  } catch (error) {
+    logger.error("Error in fetchCoachKnowledgeBaseFiles", { error });
+    await logger.flush();
+    return [];
+  }
 };
 
 export async function markQuestionAnswerOnboardingViewed() {

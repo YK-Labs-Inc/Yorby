@@ -33,13 +33,18 @@ import {
   FileText,
   ArrowLeft,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
+import { Logger } from "next-axiom";
 import QuestionStatusToggle from "../components/QuestionStatusToggle";
+import KnowledgeBaseEditor from "../components/KnowledgeBaseEditor";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
+  const log = new Logger().with({
+    function: "getCoachId",
+    userId,
+  });
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
@@ -49,7 +54,8 @@ async function getCoachId(userId: string) {
     .single();
 
   if (error || !data) {
-    console.error("Error fetching coach ID:", error);
+    log.error("Error fetching coach ID", { error });
+    await log.flush();
     return null;
   }
 
@@ -58,6 +64,11 @@ async function getCoachId(userId: string) {
 
 // Function to fetch program and questions data
 async function getProgramData(programId: string, coachId: string) {
+  const log = new Logger().with({
+    programId,
+    coachId,
+    function: "getProgramData",
+  });
   const supabase = await createSupabaseServerClient();
 
   // Fetch program details
@@ -69,7 +80,10 @@ async function getProgramData(programId: string, coachId: string) {
     .single();
 
   if (programError || !program) {
-    console.error("Error fetching program data:", programError);
+    log.error("Error fetching program data", {
+      programError,
+    });
+    await log.flush();
     return {
       program: null,
       questions: [],
@@ -94,11 +108,20 @@ async function getProgramData(programId: string, coachId: string) {
     .order("created_at", { ascending: false });
 
   if (questionsError) {
-    console.error("Error fetching questions:", questionsError);
-    return { program, questions: [], error: questionsError };
+    log.error("Error fetching questions", { questionsError });
+    await log.flush();
+    return {
+      program,
+      questions: [],
+      error: questionsError,
+    };
   }
 
-  return { program, questions: questions || [], error: null };
+  return {
+    program,
+    questions: questions || [],
+    error: null,
+  };
 }
 
 export default async function ProgramDetailPage({
@@ -178,6 +201,15 @@ export default async function ProgramDetailPage({
             </Link>
           </Button>
         </div>
+      </div>
+
+      {/* Knowledge Base section */}
+      <div className="mb-8">
+        <KnowledgeBaseEditor
+          programId={programId}
+          coachId={coachId}
+          userId={user.id}
+        />
       </div>
 
       {/* Questions section */}

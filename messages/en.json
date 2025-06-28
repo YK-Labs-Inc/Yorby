@@ -2101,7 +2101,44 @@
         "status": {
           "published": "Published",
           "draft": "Draft"
+        },
+        "knowledgeBase": {
+          "title": "Knowledge Base",
+          "description": "Add context and information that will be used to grade student performance in mock interviews and practice questions for this program.",
+          "contentLabel": "Knowledge Base Content",
+          "placeholder": "Enter additional context, grading criteria, company-specific information, or any other details that should be considered when evaluating student responses...",
+          "saveButton": "Save Knowledge Base",
+          "savingButton": "Saving...",
+          "successMessage": "Knowledge base updated successfully!",
+          "updateSuccess": "Knowledge base updated successfully",
+          "aiAssistantButton": "AI Assistant"
         }
+      },
+      "knowledgeBase": {
+        "title": "Knowledge Base Management",
+        "description": "Manage additional context and information for grading student performance",
+        "backToProgram": "Back to Program",
+        "knowledgeBaseTitle": "Text Knowledge Base",
+        "knowledgeBaseDescription": "Add context, grading criteria, company values, or any information that should be considered when evaluating responses.",
+        "saveButton": "Save",
+        "savingButton": "Saving...",
+        "saveSuccess": "Knowledge base saved successfully",
+        "saveError": "Failed to save knowledge base",
+        "uploadFiles": "Upload Documents",
+        "uploadDescription": "Upload relevant documents like job descriptions, company handbooks, or training materials.",
+        "uploadButton": "Upload",
+        "uploading": "Uploading...",
+        "uploadSuccess": "Files uploaded successfully",
+        "uploadError": "Failed to upload files",
+        "deleteFile": "Delete file",
+        "deleteConfirm": "Are you sure you want to delete this file?",
+        "deleteSuccess": "File deleted successfully",
+        "deleteError": "Failed to delete file",
+        "noFiles": "No files uploaded yet",
+        "placeholder": "Enter additional context, grading criteria, company-specific information, or any other details that should be considered when evaluating student responses...",
+        "supportedFormats": "Supported formats: PDF, DOC, DOCX, TXT, MD",
+        "textTab": "Text Content",
+        "filesTab": "Upload Files"
       },
       "programDeletionPage": {
         "confirmTitle": "Confirm Deletion",
