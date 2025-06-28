@@ -10,7 +10,6 @@ import {
   JobData,
   QuestionWithSubmissions,
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
-import { posthog } from "@/utils/tracking/serverUtils";
 import { Tables } from "@/utils/supabase/database.types";
 
 const fetchStudent = async (studentId: string) => {
@@ -39,39 +38,6 @@ const fetchCoach = async () => {
     .eq("user_id", coachUser.id)
     .single();
   return coach;
-};
-
-const fetchQuestionAndRelatedData = async (studentId: string, questionId: string) => {
-  const supabase = await createSupabaseServerClient();
-  // Fetch only the specific question with submissions for this student
-  const { data, error } = await supabase
-    .from("custom_job_questions")
-    .select(
-      `
-        *,
-        custom_job_question_submissions!inner (
-          *,
-          custom_job_question_submission_feedback(*),
-          mux_metadata:custom_job_question_submission_mux_metadata(*)
-        )
-        `
-    )
-    .eq("id", questionId)
-    .eq("custom_job_question_submissions.user_id", studentId)
-    .single();
-
-  if (error) {
-    const logger = new Logger();
-    logger.error("Error fetching question data", {
-      error,
-      studentId,
-      questionId,
-      page: "fetchQuestionAndRelatedData",
-    });
-    return null;
-  }
-
-  return data;
 };
 
 const fetchAllStudentJobsAndRelatedData = async (
@@ -146,48 +112,23 @@ const AdminStudentQuestionViewPage = async ({
     return notFound();
   }
 
-  // Check PostHog feature flag
-  const useNewEnrollmentSystem = await posthog.isFeatureEnabled(
-    "custom-job-enrollments-migration",
-    studentId
+  // Legacy system: fetch directly from custom_jobs
+  const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
+    studentId,
+    coach.id
   );
-  await posthog.shutdown();
-
-  let currentJob: JobData | undefined;
-  let currentQuestion: QuestionWithSubmissions | undefined;
-  let submissions: Tables<"custom_job_question_submissions">[] = [];
-  let currentSubmission: Tables<"custom_job_question_submissions"> | null =
-    null;
-
-  if (useNewEnrollmentSystem) {
-    const questionData = await fetchQuestionAndRelatedData(studentId, questionId);
-    currentQuestion = questionData || undefined;
-    submissions = currentQuestion
-      ? Array.isArray(currentQuestion.custom_job_question_submissions)
-        ? currentQuestion.custom_job_question_submissions
-        : []
-      : [];
-    currentSubmission =
-      submissions.find((s) => s.id === submissionId) ||
-      (submissions.length > 0 ? submissions[0] : null);
-  } else {
-    const allJobsForStudent = await fetchAllStudentJobsAndRelatedData(
-      studentId,
-      coach.id
-    );
-    currentJob = allJobsForStudent.find((j) => j.id === jobId);
-    currentQuestion = currentJob?.custom_job_questions.find(
-      (q: QuestionWithSubmissions) => q.id === questionId
-    );
-    submissions = currentQuestion
-      ? Array.isArray(currentQuestion.custom_job_question_submissions)
-        ? currentQuestion.custom_job_question_submissions
-        : []
-      : [];
-    currentSubmission =
-      submissions.find((s) => s.id === submissionId) ||
-      (submissions.length > 0 ? submissions[0] : null);
-  }
+  const currentJob = allJobsForStudent.find((j) => j.id === jobId);
+  const currentQuestion = currentJob?.custom_job_questions.find(
+    (q: QuestionWithSubmissions) => q.id === questionId
+  );
+  const submissions = currentQuestion
+    ? Array.isArray(currentQuestion.custom_job_question_submissions)
+      ? currentQuestion.custom_job_question_submissions
+      : []
+    : [];
+  const currentSubmission =
+    submissions.find((s) => s.id === submissionId) ||
+    (submissions.length > 0 ? submissions[0] : null);
 
   // Fetch coach feedback for this submission (feedback_role === 'user')
   let currentCoachFeedback = null;
