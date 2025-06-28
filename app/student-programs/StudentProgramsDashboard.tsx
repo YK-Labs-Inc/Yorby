@@ -40,25 +40,25 @@ const fetchStudentPrograms = async (
 ): Promise<StudentProgram[]> => {
   const supabase = createSupabaseBrowserClient();
 
-  // Fetch custom jobs where the user is enrolled and has a source_custom_job_id (meaning it's a duplicated program)
+  // Fetch custom jobs where the user is enrolled through the custom_job_enrollments table
   const { data, error } = await supabase
-    .from("custom_jobs")
+    .from("custom_job_enrollments")
     .select(
       `
-      id,
-      job_title,
-      company_name,
       created_at,
-      coach_id,
-      coaches!coach_id (
+      custom_jobs!inner (
         id,
-        name,
-        slug
+        job_title,
+        company_name,
+        coaches!coach_id (
+          id,
+          name,
+          slug
+        )
       )
     `
     )
     .eq("user_id", userId)
-    .not("source_custom_job_id", "is", null)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -72,9 +72,12 @@ const fetchStudentPrograms = async (
   }
 
   return (
-    data?.map((program) => ({
-      ...program,
-      coach: program.coaches,
+    data?.map((enrollment) => ({
+      id: enrollment.custom_jobs.id,
+      job_title: enrollment.custom_jobs.job_title,
+      company_name: enrollment.custom_jobs.company_name,
+      created_at: enrollment.created_at,
+      coach: enrollment.custom_jobs.coaches,
     })) || []
   );
 };
