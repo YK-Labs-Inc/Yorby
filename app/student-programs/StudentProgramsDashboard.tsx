@@ -45,14 +45,11 @@ const fetchStudentPrograms = async (
     .from("custom_job_enrollments")
     .select(
       `
-      custom_job_id,
       created_at,
       custom_jobs!inner (
         id,
         job_title,
         company_name,
-        created_at,
-        coach_id,
         coaches!coach_id (
           id,
           name,
