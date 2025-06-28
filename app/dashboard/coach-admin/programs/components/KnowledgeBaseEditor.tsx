@@ -1,16 +1,8 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import KnowledgeBaseManager from "./KnowledgeBaseManager";
 
-async function getKnowledgeBaseData(programId: string, coachId: string, userId: string) {
+async function getKnowledgeBaseData(programId: string) {
   const supabase = await createSupabaseServerClient();
-
-  // Fetch program details
-  const { data: program } = await supabase
-    .from("custom_jobs")
-    .select("job_title")
-    .eq("id", programId)
-    .eq("coach_id", coachId)
-    .single();
 
   // Fetch knowledge base
   const { data: knowledgeBase } = await supabase
@@ -27,32 +19,27 @@ async function getKnowledgeBaseData(programId: string, coachId: string, userId: 
     .order("created_at", { ascending: false });
 
   return {
-    programTitle: program?.job_title || "",
     knowledgeBase: knowledgeBase?.knowledge_base || null,
-    files: files || []
+    files: files || [],
   };
 }
 
 interface KnowledgeBaseEditorProps {
   programId: string;
   coachId: string;
-  userId: string;
 }
 
-export default async function KnowledgeBaseEditor({ 
+export default async function KnowledgeBaseEditor({
   programId,
   coachId,
-  userId
 }: KnowledgeBaseEditorProps) {
-  const { programTitle, knowledgeBase, files } = await getKnowledgeBaseData(programId, coachId, userId);
+  const { knowledgeBase, files } = await getKnowledgeBaseData(programId);
 
   return (
     <div className="w-full">
       <KnowledgeBaseManager
         programId={programId}
         coachId={coachId}
-        userId={userId}
-        programTitle={programTitle}
         initialKnowledgeBase={knowledgeBase}
         initialFiles={files}
       />

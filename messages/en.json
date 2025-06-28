@@ -2123,6 +2123,7 @@
         "saveButton": "Save",
         "savingButton": "Saving...",
         "saveSuccess": "Knowledge base saved successfully",
+        "saved": "Saved",
         "saveError": "Failed to save knowledge base",
         "uploadFiles": "Upload Documents",
         "uploadDescription": "Upload relevant documents like job descriptions, company handbooks, or training materials.",

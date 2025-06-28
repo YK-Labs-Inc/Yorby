@@ -24,8 +24,8 @@ import {
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 interface KnowledgeBaseFile {
   id: string;
@@ -43,8 +43,6 @@ interface KnowledgeBaseFile {
 interface KnowledgeBaseManagerProps {
   programId: string;
   coachId: string;
-  userId: string;
-  programTitle: string;
   initialKnowledgeBase: string | null;
   initialFiles: KnowledgeBaseFile[];
 }
@@ -52,8 +50,6 @@ interface KnowledgeBaseManagerProps {
 export default function KnowledgeBaseManager({
   programId,
   coachId,
-  userId,
-  programTitle,
   initialKnowledgeBase,
   initialFiles,
 }: KnowledgeBaseManagerProps) {
@@ -66,6 +62,7 @@ export default function KnowledgeBaseManager({
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { toast } = useToast();
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -100,10 +97,15 @@ export default function KnowledgeBaseManager({
       }
 
       logInfo("Knowledge base saved", { programId });
-      toast.success(t("saveSuccess"));
+      toast({
+        title: t("saveSuccess"),
+      });
     } catch (error) {
       logError("Error saving knowledge base", { error, programId });
-      toast.error(t("saveError"));
+      toast({
+        variant: "destructive",
+        title: t("saveError"),
+      });
     } finally {
       setIsSaving(false);
     }
@@ -149,16 +151,21 @@ export default function KnowledgeBaseManager({
       if (fileInput) fileInput.value = "";
 
       logInfo("Files uploaded", { programId, count: uploadedFiles.length });
-      toast.success(t("uploadSuccess"));
+      toast({
+        title: t("uploadSuccess"),
+      });
     } catch (error) {
       logError("Error uploading files", { error, programId });
-      toast.error(t("uploadError"));
+      toast({
+        variant: "destructive",
+        title: t("uploadError"),
+      });
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleDeleteFile = async (fileId: string, filePath: string) => {
+  const handleDeleteFile = async (fileId: string) => {
     if (!confirm(t("deleteConfirm"))) return;
 
     const supabase = createSupabaseBrowserClient();
@@ -166,7 +173,7 @@ export default function KnowledgeBaseManager({
     try {
       // Note: Gemini files are automatically deleted after their expiration time
       // We only need to remove the database record
-      
+
       // Delete from database
       const { error: dbError } = await supabase
         .from("custom_job_knowledge_base_files")
@@ -177,10 +184,15 @@ export default function KnowledgeBaseManager({
 
       setFiles((prevFiles) => prevFiles.filter((f) => f.id !== fileId));
       logInfo("File deleted", { fileId, programId });
-      toast.success(t("deleteSuccess"));
+      toast({
+        title: t("deleteSuccess"),
+      });
     } catch (error) {
       logError("Error deleting file", { error, fileId });
-      toast.error(t("deleteError"));
+      toast({
+        variant: "destructive",
+        title: t("deleteError"),
+      });
     }
   };
 
@@ -196,7 +208,7 @@ export default function KnowledgeBaseManager({
             <TabsTrigger value="text">{t("textTab")}</TabsTrigger>
             <TabsTrigger value="files">{t("filesTab")}</TabsTrigger>
           </TabsList>
-          
+
           {/* Text Knowledge Base Tab */}
           <TabsContent value="text" className="space-y-4">
             <div className="space-y-2">
@@ -289,9 +301,7 @@ export default function KnowledgeBaseManager({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            handleDeleteFile(file.id, file.file_path)
-                          }
+                          onClick={() => handleDeleteFile(file.id)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>

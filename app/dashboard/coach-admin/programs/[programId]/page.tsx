@@ -205,11 +205,7 @@ export default async function ProgramDetailPage({
 
       {/* Knowledge Base section */}
       <div className="mb-8">
-        <KnowledgeBaseEditor
-          programId={programId}
-          coachId={coachId}
-          userId={user.id}
-        />
+        <KnowledgeBaseEditor programId={programId} coachId={coachId} />
       </div>
 
       {/* Questions section */}
