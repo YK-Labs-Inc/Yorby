@@ -49,11 +49,11 @@ export default function CoachSignInForm({
   }, [state]);
 
   return (
-    <div className="container max-w-md mx-auto">
-      <form action={action} className="space-y-6">
-        <div className="space-y-4">
+    <div className="container max-w-md mx-auto px-4">
+      <form action={action} className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-4">
           <div className="space-y-2">
-            <H4 className="text-lg font-semibold text-center">
+            <H4 className="text-base sm:text-lg font-semibold text-center">
               {signInT("enterEmailToGetStarted")}
             </H4>
             <Input
@@ -74,15 +74,15 @@ export default function CoachSignInForm({
           >
             {signInT("form.getStarted")}
           </SubmitButton>
-          <p className="text-muted-foreground text-center">
+          <p className="text-sm sm:text-base text-muted-foreground text-center">
             {signInT("description")}
           </p>
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center">
             {signInT("autoCreateAccount")}
           </p>
           {formMessage && <FormMessage message={formMessage} />}
         </div>
-        <div className={`mt-4 ${showCaptcha ? "" : "hidden"}`}>
+        <div className={`mt-4 flex justify-center ${showCaptcha ? "" : "hidden"}`}>
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
             onSuccess={(token) => {
