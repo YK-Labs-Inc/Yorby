@@ -464,19 +464,11 @@ const fetchQuestionSampleAnswers = async (questionId: string) => {
     questionId,
     function: "fetchQuestionSampleAnswers",
   });
-  const question = await fetchQuestion(questionId);
-  const sourceQuestionId = question.source_custom_job_question_id;
-  if (!sourceQuestionId) {
-    return [];
-  }
-  logger = logger.with({
-    sourceQuestionId,
-  });
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_job_question_sample_answers")
     .select("*")
-    .eq("question_id", sourceQuestionId);
+    .eq("question_id", questionId);
 
   if (error) {
     logger.error("Error fetching question sample answers", { error });
