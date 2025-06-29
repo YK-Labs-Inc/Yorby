@@ -122,7 +122,6 @@ export default async function ProgramRegistrationPage({
     enrollmentStatus = await checkUserEnrollment(user.id, coach.id, program.id);
   }
 
-
   // Determine redirect URL based on enrollment status
   let redirectTo = `/api/coach/${coach.id}/register/${program.id}`;
   if (user && enrollmentStatus.isEnrolled) {
@@ -170,18 +169,6 @@ export default async function ProgramRegistrationPage({
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap">
                   {program.job_description}
-                </p>
-              </div>
-            )}
-
-            {/* Company Description */}
-            {program.company_description && (
-              <div>
-                <h3 className="font-semibold mb-2 text-sm sm:text-base">
-                  About {program.company_name || "the Company"}
-                </h3>
-                <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap">
-                  {program.company_description}
                 </p>
               </div>
             )}
