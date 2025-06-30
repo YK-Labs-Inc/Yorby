@@ -9,15 +9,13 @@ import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { updateUserDisplayName } from "@/app/onboarding-v2/actions";
-import { ensureCoachExists } from "../actions";
 import { H1 } from "@/components/typography";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { useUser } from "@/context/UserContext";
 
 export default function YorbyOnboarding({
-  redirectTo = "/coaches/auth",
+  redirectTo,
 }: {
-  redirectTo?: string;
+  redirectTo: string;
 }) {
   const [displayName, setDisplayName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -25,7 +23,6 @@ export default function YorbyOnboarding({
   const router = useRouter();
   const t = useTranslations("yorbyOnboarding");
   const { logError } = useAxiomLogging();
-  const user = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,19 +39,6 @@ export default function YorbyOnboarding({
         setError(result.error);
         setIsUpdating(false);
         return;
-      }
-
-      // Ensure coach exists in the database
-      if (user?.id) {
-        const coachResult = await ensureCoachExists(
-          user.id,
-          displayName.trim()
-        );
-        if (!coachResult.success) {
-          setError(coachResult.error || t("updateError"));
-          setIsUpdating(false);
-          return;
-        }
       }
 
       // Redirect to coach admin programs page instead of the original redirect

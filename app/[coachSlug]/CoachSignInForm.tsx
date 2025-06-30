@@ -24,7 +24,6 @@ export default function CoachSignInForm({
     error: undefined,
   });
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const [showCaptcha, setShowCaptcha] = useState<boolean>(true);
   const posthog = usePostHog();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -82,12 +81,11 @@ export default function CoachSignInForm({
           </p>
           {formMessage && <FormMessage message={formMessage} />}
         </div>
-        <div className={`mt-4 flex justify-center ${showCaptcha ? "" : "hidden"}`}>
+        <div className="mt-4 flex justify-center">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
             onSuccess={(token) => {
               setCaptchaToken(token);
-              setShowCaptcha(false);
             }}
           />
         </div>
