@@ -126,14 +126,14 @@ export default async function CustomJob({
 
   return (
     <div
-      className={`w-full flex flex-col justify-center items-center p-2 md:p-8 gap-6 ${
+      className={`w-full flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 gap-4 sm:gap-6 ${
         isAnonymous ? "" : "h-full md:h-auto"
       }`}
     >
       <div
-        className={`gap-6 w-full flex-col md:flex-row md:justify-between items-start md:items-center ${isAnonymous ? "flex" : "flex"}`}
+        className={`gap-4 sm:gap-6 w-full flex-col md:flex-row md:justify-between items-start md:items-center ${isAnonymous ? "flex" : "flex"}`}
       >
-        <H1>
+        <H1 className="text-xl sm:text-2xl md:text-3xl">
           {job.job_title
             .split(" ")
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -142,9 +142,9 @@ export default async function CustomJob({
         </H1>
         {!isMultiTenantExperience && (
           <Link href={`/dashboard/jobs/${jobId}/files`}>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 text-sm sm:text-base w-full sm:w-auto">
               <FileText className="h-4 w-4" />
-              Manage Files
+              <span>Manage Files</span>
             </Button>
           </Link>
         )}
@@ -153,11 +153,11 @@ export default async function CustomJob({
       {isAnonymous && isAnonymousAccountLinkingEnabled ? (
         <div className="md mx-auto w-full">
           {(!formMessage || "error" in formMessage) && (
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-              <h2 className="text-lg font-semibold mb-2">{t("title")}</h2>
-              <p className="text-muted-foreground mb-6">{t("description")}</p>
-              <form action={linkAnonymousAccount} className="space-y-4">
-                <Label htmlFor="email">{t("form.email.label")}</Label>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-2">{t("title")}</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("description")}</p>
+              <form action={linkAnonymousAccount} className="space-y-3 sm:space-y-4">
+                <Label htmlFor="email" className="text-sm sm:text-base">{t("form.email.label")}</Label>
                 <Input
                   id="email"
                   name="email"
@@ -166,24 +166,24 @@ export default async function CustomJob({
                   required
                 />
                 <input type="hidden" name="jobId" value={jobId} />
-                <SubmitButton>{t("form.submit")}</SubmitButton>
+                <SubmitButton className="w-full">{t("form.submit")}</SubmitButton>
               </form>
             </div>
           )}
           {formMessage && <FormMessage message={formMessage} />}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 w-full">
-          <div className="flex flex-col md:flex-row items-start gap-2 md:items-center justify-between w-full">
-            <Tabs value={view} className="w-full">
-              <TabsList>
-                <Link href={`?view=practice`} className="w-full">
-                  <TabsTrigger value="practice" className="w-full">
+        <div className="flex flex-col gap-4 sm:gap-6 w-full">
+          <div className="flex flex-col md:flex-row items-start gap-3 sm:gap-4 md:items-center justify-between w-full">
+            <Tabs value={view} className="w-full md:w-auto">
+              <TabsList className="grid w-full grid-cols-2 md:w-auto">
+                <Link href={`?view=practice`}>
+                  <TabsTrigger value="practice" className="w-full text-xs sm:text-sm">
                     Practice Questions
                   </TabsTrigger>
                 </Link>
-                <Link href={`?view=mock`} className="w-full">
-                  <TabsTrigger value="mock" className="w-full">
+                <Link href={`?view=mock`}>
+                  <TabsTrigger value="mock" className="w-full text-xs sm:text-sm">
                     Mock Interview
                   </TabsTrigger>
                 </Link>

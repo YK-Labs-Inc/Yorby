@@ -123,10 +123,8 @@ const QuestionComponent = async ({
     notFound();
   }
   let sampleAnswers: Tables<"custom_job_question_sample_answers">[] = [];
-  if (question.source_custom_job_question_id) {
-    sampleAnswers = await fetchQuestionSampleAnswers(
-      question.source_custom_job_question_id
-    );
+  if (question.id) {
+    sampleAnswers = await fetchQuestionSampleAnswers(question.id);
   }
   const lastSubmission =
     question.custom_job_question_submissions.length > 0

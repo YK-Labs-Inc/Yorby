@@ -2416,5 +2416,21 @@
     "error": {
       "loadFailed": "Failed to load your programs. Please try again."
     }
+  },
+  "coachPortal": {
+    "welcomeTitle": "Welcome to {coachName}'s program",
+    "joinButton": "Join {coachName}'s Program",
+    "joiningButton": "Joining...",
+    "noProgramsAvailable": "No programs are currently available.",
+    "questionCount": "{count} questions",
+    "enrollmentCount": "{count} enrolled",
+    "viewProgram": "View Program",
+    "enrollInProgram": "Enroll in Program",
+    "signInToEnroll": "Sign in to enroll in programs",
+    "signIn": "Sign In",
+    "programTitle": "{programName} by {coachName}",
+    "enrollNow": "Enroll Now",
+    "alreadyEnrolled": "You are enrolled in this program",
+    "continueToProgram": "Continue to Program"
   }
 }

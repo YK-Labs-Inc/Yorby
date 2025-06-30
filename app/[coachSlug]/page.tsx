@@ -1,9 +1,19 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import React from "react";
-import CoachSignInForm from "./CoachSignInForm";
-import { notFound } from "next/navigation";
-import { H2 } from "@/components/typography";
+import { notFound, redirect } from "next/navigation";
+import { H1, H2 } from "@/components/typography";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
 
 interface CoachPortalLandingPageProps {
   params: Promise<{
@@ -14,6 +24,7 @@ interface CoachPortalLandingPageProps {
 
 const fetchCoach = async (coachSlug: string) => {
   const logger = new Logger().with({
+    function: "fetchCoach",
     coachSlug,
   });
   const supabase = await createSupabaseServerClient();
@@ -30,82 +41,64 @@ const fetchCoach = async (coachSlug: string) => {
   return data;
 };
 
-const checkUserCoachRegistration = async (
-  coachId: string,
-  userId: string,
-  coachUserId: string
-) => {
+const fetchCoachPrograms = async (coachId: string, coachUserId: string) => {
+  const logger = new Logger().with({
+    function: "fetchCoachPrograms",
+    coachId,
+    coachUserId,
+  });
   const supabase = await createSupabaseServerClient();
-  // 1. Check user_coach_access
-  const { data: access, error: accessError } = await supabase
+
+  // Get all programs for this coach
+  const { data: programs, error } = await supabase
+    .from("custom_jobs")
+    .select(
+      `
+      id,
+      job_title,
+      job_description,
+      company_name,
+      company_description,
+      created_at
+    `
+    )
+    .eq("coach_id", coachId)
+    .eq("user_id", coachUserId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    logger.error("Error fetching coach programs", { error });
+    await logger.flush();
+    return [];
+  }
+
+  return programs || [];
+};
+
+const checkUserEnrollments = async (userId: string, coachId: string) => {
+  const supabase = await createSupabaseServerClient();
+
+  // Check if user has access to this coach
+  const { data: access } = await supabase
     .from("user_coach_access")
     .select("*")
     .eq("user_id", userId)
     .eq("coach_id", coachId)
     .maybeSingle();
-  if (!access || accessError) {
-    return { hasAccess: false, hasDuplicatedJobs: false, firstJobId: null };
-  }
 
-  // 2. Get all coach jobs and their questions
-  const { data: coachJobs, error: coachJobsError } = await supabase
-    .from("custom_jobs")
-    .select("id, custom_job_questions(id)")
-    .eq("coach_id", coachId)
-    .eq("user_id", coachUserId); // coach's own jobs
-  if (!coachJobs || coachJobs.length === 0 || coachJobsError) {
-    return { hasAccess: true, hasDuplicatedJobs: false, firstJobId: null };
-  }
-
-  // 3. Get all user jobs duplicated from coach jobs, including their questions
-  const { data: userJobs, error: userJobsError } = await supabase
-    .from("custom_jobs")
-    .select(
-      "id, source_custom_job_id, custom_job_questions(id, source_custom_job_question_id)"
-    )
+  // Get user's enrollments for this coach
+  const { data: enrollments } = await supabase
+    .from("custom_job_enrollments")
+    .select("custom_job_id")
     .eq("user_id", userId)
     .eq("coach_id", coachId);
-  if (!userJobs || userJobsError) {
-    return { hasAccess: true, hasDuplicatedJobs: false, firstJobId: null };
-  }
 
-  // Map of coachJobId -> userJob object
-  const userJobMap = new Map(userJobs.map((j) => [j.source_custom_job_id, j]));
-  const allJobsDuplicated = coachJobs.every((j) => userJobMap.has(j.id));
-  if (!allJobsDuplicated) {
-    return { hasAccess: true, hasDuplicatedJobs: false, firstJobId: null };
-  }
+  const enrolledJobIds = enrollments?.map((e) => e.custom_job_id) || [];
 
-  // 4. For each coach job, check that all questions are duplicated by the user
-  for (const coachJob of coachJobs) {
-    const userJob = userJobMap.get(coachJob.id);
-    if (!userJob) {
-      return { hasAccess: true, hasDuplicatedJobs: false, firstJobId: null };
-    }
-    // Get all coach questions for this job
-    const coachQuestionIds = (coachJob.custom_job_questions || []).map(
-      (q) => q.id
-    );
-    if (coachQuestionIds.length === 0) continue;
-    // Get all user questions for this duplicated job
-    const userQuestionSourceIds = new Set(
-      (userJob.custom_job_questions || []).map(
-        (q) => q.source_custom_job_question_id
-      )
-    );
-    // All coach questions must be duplicated
-    const allQuestionsDuplicated = coachQuestionIds.every((qid) =>
-      userQuestionSourceIds.has(qid)
-    );
-    if (!allQuestionsDuplicated) {
-      return { hasAccess: true, hasDuplicatedJobs: false, firstJobId: null };
-    }
-  }
-
-  // Get the first duplicated job id for navigation
-  const firstJobId =
-    coachJobs.length > 0 ? (userJobMap.get(coachJobs[0].id)?.id ?? null) : null;
-  return { hasAccess: true, hasDuplicatedJobs: true, firstJobId };
+  return {
+    hasCoachAccess: !!access,
+    enrolledJobIds,
+  };
 };
 
 export default async function CoachPortalLandingPage({
@@ -116,47 +109,116 @@ export default async function CoachPortalLandingPage({
   if (!coach) {
     notFound();
   }
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const t = await getTranslations("coachPortal");
 
-  let registrationStatus: {
-    hasAccess: boolean;
-    hasDuplicatedJobs: boolean;
-    firstJobId: string | null;
-  } = { hasAccess: false, hasDuplicatedJobs: false, firstJobId: null };
-  if (user) {
-    registrationStatus = await checkUserCoachRegistration(
-      coach.id,
-      user.id,
-      coach.user_id
-    );
+  // If the current user is the coach, redirect to admin
+  if (user && user.id === coach.user_id) {
+    redirect("/dashboard/coach-admin/programs");
   }
 
-  let redirectTo = `/api/coach/${coach.id}/register`;
+  // Fetch all programs for this coach
+  const programs = await fetchCoachPrograms(coach.id, coach.user_id);
+
+  // Check user's enrollment status if logged in
+  let userEnrollmentStatus = {
+    hasCoachAccess: false,
+    enrolledJobIds: [] as string[],
+  };
   if (user) {
-    if (user.id === coach.user_id) {
-      redirectTo = "/dashboard/coach-admin/programs";
-    } else if (
-      registrationStatus.hasAccess &&
-      registrationStatus.hasDuplicatedJobs &&
-      registrationStatus.firstJobId
-    ) {
-      // Check if user has a display name
-      if (!user.user_metadata?.display_name) {
-        // Redirect to onboarding with the program URL as the final destination
-        redirectTo = `/coaches/onboarding?redirect=${encodeURIComponent(`/${coach.slug}/programs/${registrationStatus.firstJobId}`)}`;
-      } else {
-        redirectTo = `/${coach.slug}/programs/${registrationStatus.firstJobId}`;
-      }
-    }
+    userEnrollmentStatus = await checkUserEnrollments(user.id, coach.id);
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-2">
-      <H2>Welcome to {coach.name}&apos;s program</H2>
-      <CoachSignInForm coachId={coach.id} redirectTo={redirectTo} />
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
+      {/* Hero Section */}
+      <div className="bg-background border-b">
+        <div className="container mx-auto py-8 sm:py-12 md:py-16 px-4">
+          <div className="text-center max-w-3xl mx-auto">
+            <H1 className="text-2xl sm:text-3xl md:text-4xl mb-4">
+              {t("welcomeTitle", { coachName: coach.name })}
+            </H1>
+          </div>
+        </div>
+      </div>
+
+      {/* Programs Section */}
+      <div className="container mx-auto py-8 sm:py-12 px-4">
+        {programs.length === 0 ? (
+          <Card className="max-w-2xl mx-auto">
+            <CardContent className="text-center py-8 sm:py-12 md:py-16">
+              <p className="text-base sm:text-lg text-muted-foreground">
+                {t("noProgramsAvailable")}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div
+              className={`grid gap-6 mx-auto ${
+                programs.length === 1
+                  ? "max-w-2xl"
+                  : programs.length === 2
+                    ? "max-w-4xl md:grid-cols-2"
+                    : "max-w-6xl md:grid-cols-2 lg:grid-cols-3"
+              }`}
+            >
+              {programs.map((program) => {
+                const isEnrolled = userEnrollmentStatus.enrolledJobIds.includes(
+                  program.id
+                );
+
+                return (
+                  <Card
+                    key={program.id}
+                    className="group hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col"
+                  >
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg sm:text-xl">
+                        {program.job_title}
+                      </CardTitle>
+                      {program.company_name && (
+                        <CardDescription className="text-sm sm:text-base">
+                          {program.company_name}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="space-y-4 sm:space-y-6 flex-1 flex flex-col">
+                      {program.job_description && (
+                        <p className="text-sm text-muted-foreground line-clamp-3 sm:line-clamp-4 leading-relaxed flex-1">
+                          {program.job_description}
+                        </p>
+                      )}
+
+                      <Button
+                        asChild
+                        className="w-full group-hover:scale-[1.02] transition-transform"
+                        size="default"
+                        variant={isEnrolled ? "secondary" : "default"}
+                      >
+                        <Link
+                          href={`/${coach.slug}/${program.id}`}
+                        >
+                          <span className="text-sm sm:text-base">
+                            {isEnrolled
+                              ? t("viewProgram")
+                              : t("enrollInProgram")}
+                          </span>
+                          <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

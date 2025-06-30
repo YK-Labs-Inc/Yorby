@@ -561,7 +561,6 @@ export type Database = {
           publication_status: Database["public"]["Enums"]["question_publication_status"]
           question: string
           question_type: Database["public"]["Enums"]["question_type"]
-          source_custom_job_question_id: string | null
         }
         Insert: {
           answer_guidelines: string
@@ -571,7 +570,6 @@ export type Database = {
           publication_status?: Database["public"]["Enums"]["question_publication_status"]
           question: string
           question_type?: Database["public"]["Enums"]["question_type"]
-          source_custom_job_question_id?: string | null
         }
         Update: {
           answer_guidelines?: string
@@ -581,7 +579,6 @@ export type Database = {
           publication_status?: Database["public"]["Enums"]["question_publication_status"]
           question?: string
           question_type?: Database["public"]["Enums"]["question_type"]
-          source_custom_job_question_id?: string | null
         }
         Relationships: [
           {
@@ -589,13 +586,6 @@ export type Database = {
             columns: ["custom_job_id"]
             isOneToOne: false
             referencedRelation: "custom_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "custom_job_questions_source_custom_job_question_id_fkey"
-            columns: ["source_custom_job_question_id"]
-            isOneToOne: false
-            referencedRelation: "custom_job_questions"
             referencedColumns: ["id"]
           },
         ]
@@ -609,7 +599,6 @@ export type Database = {
           id: string
           job_description: string | null
           job_title: string
-          source_custom_job_id: string | null
           status: Database["public"]["Enums"]["custom_job_access"]
           user_id: string
         }
@@ -621,7 +610,6 @@ export type Database = {
           id?: string
           job_description?: string | null
           job_title: string
-          source_custom_job_id?: string | null
           status: Database["public"]["Enums"]["custom_job_access"]
           user_id: string
         }
@@ -633,7 +621,6 @@ export type Database = {
           id?: string
           job_description?: string | null
           job_title?: string
-          source_custom_job_id?: string | null
           status?: Database["public"]["Enums"]["custom_job_access"]
           user_id?: string
         }
@@ -643,13 +630,6 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coaches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "custom_jobs_source_custom_job_id_fkey"
-            columns: ["source_custom_job_id"]
-            isOneToOne: false
-            referencedRelation: "custom_jobs"
             referencedColumns: ["id"]
           },
         ]

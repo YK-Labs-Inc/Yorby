@@ -34,6 +34,9 @@ pnpm run start            # Start production server
 
 # Utilities
 pnpm run translate        # Run translation script for internationalization
+
+# Supabase
+supabase gen types --local > utils/supabase/database.types.ts  # Generate Supabase TypeScript types
 ```
 
 ## Architecture Overview
@@ -106,7 +109,6 @@ Key patterns:
 - `/api/webhooks/*` - External service integrations (Stripe, Mux)
 - `/api/coach/[coachId]/register` - Student registration for coach programs
 - `/api/admin/migrate-enrollments` - Enrollment system migration
-- `/api/admin/job-submissions` - Submission management
 
 ### Multi-Tenant Coach System
 

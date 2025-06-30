@@ -10,12 +10,18 @@ export default function RegisterErrorPage() {
   const [error, setError] = useState("");
 
   const coachId = searchParams?.get("coachId") ?? "";
+  const programId = searchParams?.get("programId") ?? "";
 
   const handleRetry = async () => {
+    if (!coachId || !programId) {
+      setError("Missing coach or program information");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/coach/${coachId}/register`, {
+      const res = await fetch(`/api/coach/${coachId}/register/${programId}`, {
         method: "GET",
       });
       if (res.redirected) {
@@ -32,18 +38,18 @@ export default function RegisterErrorPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">
-      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 flex flex-col items-center">
-        <h1 className="text-2xl font-bold mb-4 text-center text-red-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4 py-8">
+      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 sm:p-8 flex flex-col items-center">
+        <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center text-red-600">
           Registration Failed
         </h1>
-        <p className="mb-6 text-center text-muted-foreground">
+        <p className="text-sm sm:text-base mb-4 sm:mb-6 text-center text-muted-foreground">
           We couldn't register you for this coach's program. This could be a
           temporary issue. Please try again.
         </p>
-        {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
+        {error && <div className="mb-3 sm:mb-4 text-sm sm:text-base text-red-500 text-center">{error}</div>}
         <button
-          className="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 transition disabled:opacity-50"
+          className="w-full py-2.5 sm:py-3 px-4 sm:px-6 bg-primary text-white rounded-md hover:bg-primary/90 transition disabled:opacity-50 text-sm sm:text-base font-medium"
           onClick={handleRetry}
           disabled={loading}
         >

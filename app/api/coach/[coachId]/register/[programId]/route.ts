@@ -5,13 +5,15 @@ import { headers } from "next/headers";
 
 export const GET = withAxiom(async (
     req: AxiomRequest,
-    { params }: { params: Promise<{ coachId: string }> },
+    { params }: { params: Promise<{ coachId: string; programId: string }> },
 ) => {
     const supabase = await createSupabaseServerClient();
-    const coachId = (await params).coachId;
+    const { coachId, programId } = await params;
+    
     let logger = req.log.with({
         coachId,
-        path: "/api/coach/[coachId]/register",
+        programId,
+        path: "/api/coach/[coachId]/register/[programId]",
     });
 
     let userId: string | null = null;
@@ -23,7 +25,7 @@ export const GET = withAxiom(async (
         throw new Error("No host found");
     }
     const errorRedirectUrl = new URL(
-        `/${coach.slug}/register-error?coachId=${coach.id}`,
+        `/${coach.slug}/register-error?coachId=${coach.id}&programId=${programId}`,
         req.nextUrl.origin,
     ).toString();
 
@@ -58,34 +60,26 @@ export const GET = withAxiom(async (
         });
         userCoachAccessCreated = true;
 
-        // 3. Fetch all custom_jobs for this coach
-        const { data: jobs, error: jobsError } = await supabase
+        // 3. Fetch the specific program
+        const { data: program, error: programError } = await supabase
             .from("custom_jobs")
-            .select("*, custom_job_questions(*)")
+            .select("*")
+            .eq("id", programId)
             .eq("user_id", coach.user_id)
-            .eq("coach_id", coachId);
-        if (jobsError || !jobs || jobs.length === 0) {
-            logger.error("No curriculum found for this coach");
-            throw new Error("No curriculum found for this coach.");
+            .eq("coach_id", coachId)
+            .single();
+        if (programError || !program) {
+            logger.error("Program not found", { programId, programError });
+            throw new Error("Program not found.");
         }
-        logger.info("Found programs for this coach");
-
-        // New enrollment system - enroll user directly without duplication
-        logger.info("Using new enrollment system");
-
-        // For now, just enroll in the first job (you may want to change this logic)
-        const jobToEnroll = jobs[0];
-        if (!jobToEnroll) {
-            logger.error("No job to enroll in");
-            throw new Error("No curriculum found for this coach.");
-        }
+        logger.info("Found program", { programId });
 
         // Check if already enrolled
         const { data: existingEnrollment } = await supabase
             .from("custom_job_enrollments")
             .select("id")
             .eq("user_id", user.id)
-            .eq("custom_job_id", jobToEnroll.id)
+            .eq("custom_job_id", programId)
             .eq("coach_id", coachId)
             .maybeSingle();
 
@@ -96,7 +90,7 @@ export const GET = withAxiom(async (
                 .insert({
                     user_id: user.id,
                     coach_id: coachId,
-                    custom_job_id: jobToEnroll.id,
+                    custom_job_id: programId,
                 });
 
             if (enrollmentError) {
@@ -107,19 +101,17 @@ export const GET = withAxiom(async (
             }
             logger.info("Created enrollment", {
                 userId: user.id,
-                jobId: jobToEnroll.id,
+                programId,
             });
         } else {
-            logger.info("User already enrolled in this job");
+            logger.info("User already enrolled in this program");
         }
-
-        const newJobId = jobToEnroll.id;
 
         // 6. Check if user has a display name
         const needsOnboarding = !user.user_metadata?.display_name;
 
         // Build the final coach program URL
-        const coachProgramUrl = `/${coach.slug}/programs/${newJobId}`;
+        const coachProgramUrl = `/${coach.slug}/programs/${programId}`;
         const protocol = host.includes("localhost") ? "http" : "https";
 
         let redirectUrl: string;
