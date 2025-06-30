@@ -139,6 +139,10 @@ file_size_limit = "40GiB"
 public = false
 file_size_limit = "40GiB"
 
+[storage.buckets.course-files]
+public = false
+file_size_limit = "40GiB"
+
 [auth]
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
