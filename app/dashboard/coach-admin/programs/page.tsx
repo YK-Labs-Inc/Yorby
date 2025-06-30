@@ -21,15 +21,16 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
+import { ShareLinkButton } from "./components/ShareLinkButton";
 
 async function getCoachJobs(userId: string) {
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({ function: "getCoachJobs", userId });
 
-  // First, get the coach ID for the current user
+  // First, get the coach ID and slug for the current user
   const { data: coachData, error: coachError } = await supabase
     .from("coaches")
-    .select("id")
+    .select("id, slug")
     .eq("user_id", userId)
     .single();
 
@@ -64,6 +65,7 @@ async function getCoachJobs(userId: string) {
   return {
     jobs: jobs || [],
     coachId: coachData.id,
+    coachSlug: coachData.slug,
     error: null,
   };
 }
@@ -81,7 +83,7 @@ export default async function ProgramsPage() {
     return redirect("/sign-in");
   }
 
-  const { jobs, error } = await getCoachJobs(user.id);
+  const { jobs, coachSlug, error } = await getCoachJobs(user.id);
 
   return (
     <div className="container mx-auto py-6">
@@ -142,6 +144,7 @@ export default async function ProgramsPage() {
                   <TableHead>{t("table.programTitle")}</TableHead>
                   <TableHead>{t("table.questions")}</TableHead>
                   <TableHead>{t("table.created")}</TableHead>
+                  <TableHead>{t("table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -164,6 +167,12 @@ export default async function ProgramsPage() {
                       {t("createdAtFormat", {
                         date: new Date(program.created_at),
                       })}
+                    </TableCell>
+                    <TableCell>
+                      <ShareLinkButton
+                        coachSlug={coachSlug}
+                        programId={program.id}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

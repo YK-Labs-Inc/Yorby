@@ -2055,6 +2055,8 @@
       },
       "createdAtFormat": "{date, date, medium}",
       "questionsCount": "{count}",
+      "shareLink": "Share",
+      "shareLinkCopied": "Copied!",
       "actionsMenu": {
         "openMenu": "Open menu"
       },
