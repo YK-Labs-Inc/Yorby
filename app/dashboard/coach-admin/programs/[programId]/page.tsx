@@ -38,28 +38,29 @@ import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import QuestionStatusToggle from "../components/QuestionStatusToggle";
 import KnowledgeBaseEditor from "../components/KnowledgeBaseEditor";
+import { ShareLinkButton } from "../components/ShareLinkButton";
 
-// Helper function to get coach ID from user ID
-async function getCoachId(userId: string) {
+// Helper function to get coach data from user ID
+async function getCoachData(userId: string) {
   const log = new Logger().with({
-    function: "getCoachId",
+    function: "getCoachData",
     userId,
   });
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("coaches")
-    .select("id")
+    .select("id, slug")
     .eq("user_id", userId)
     .single();
 
   if (error || !data) {
-    log.error("Error fetching coach ID", { error });
+    log.error("Error fetching coach data", { error });
     await log.flush();
     return null;
   }
 
-  return data.id;
+  return data;
 }
 
 // Function to fetch program and questions data
@@ -142,12 +143,14 @@ export default async function ProgramDetailPage({
   }
 
   // Verify the user is a coach
-  const coachId = await getCoachId(user.id);
+  const coachData = await getCoachData(user.id);
 
-  if (!coachId) {
+  if (!coachData) {
     // User is not a coach, redirect to dashboard
     return redirect("/");
   }
+
+  const { id: coachId, slug: coachSlug } = coachData;
 
   // Get program and questions data
   const { program, questions, error } = await getProgramData(
@@ -188,6 +191,7 @@ export default async function ProgramDetailPage({
           )}
         </div>
         <div className="flex gap-2">
+          <ShareLinkButton coachSlug={coachSlug} programId={programId} />
           <Button asChild variant="outline">
             <Link href={`/dashboard/coach-admin/programs/${programId}/edit`}>
               <Pencil className="h-4 w-4 mr-2" />
