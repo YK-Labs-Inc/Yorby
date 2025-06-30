@@ -2,44 +2,8 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { H1, P } from "@/components/typography";
+import { H1 } from "@/components/typography";
 import { Logger } from "next-axiom";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-
-const userPrograms = async (userId: string) => {
-  const logger = new Logger().with({ userId });
-  const supabase = await createSupabaseServerClient();
-
-  const { data, error: accessError } = await supabase
-    .from("custom_jobs")
-    .select("*, coach:coach_id(slug, name, id)")
-    .eq("user_id", userId);
-
-  if (accessError) {
-    logger.error("Error fetching user coach access", { error: accessError });
-    await logger.flush();
-    return [];
-  }
-
-  logger.info("User coach access entries", {
-    data,
-  });
-
-  if (!data || data.length === 0) {
-    return [];
-  }
-
-  return data;
-};
 
 export default async function CoachesAuthPage() {
   const supabase = await createSupabaseServerClient();

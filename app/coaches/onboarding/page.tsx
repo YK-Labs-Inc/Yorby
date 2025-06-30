@@ -19,7 +19,16 @@ export default async function YorbyOnboardingPage({
 
   // Check if user already has a display name
   const params = await searchParams;
-  const redirectTo = params?.redirect || "/dashboard/coach-admin/programs";
+
+  const { data: coachData } = await supabase
+    .from("coaches")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const redirectTo =
+    params?.redirect ||
+    (coachData ? "/dashboard/coach-admin/programs" : "/student-programs");
 
   if (user.user_metadata?.display_name) {
     redirect(redirectTo);
