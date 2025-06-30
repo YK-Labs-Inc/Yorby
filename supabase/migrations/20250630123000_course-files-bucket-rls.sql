@@ -112,6 +112,4 @@ TO service_role
 USING (bucket_id = 'course-files')
 WITH CHECK (bucket_id = 'course-files');
 
--- Add comment to document the expected file structure
-COMMENT ON POLICY "Coaches can upload course files" ON storage.objects IS 
-'Files should be organized in the format: course-files/{coach_id}/{lesson_id}/{filename}';
+-- Note: Files should be organized in the format: course-files/{coach_id}/{lesson_id}/{filename}
