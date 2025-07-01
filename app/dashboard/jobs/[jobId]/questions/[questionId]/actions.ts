@@ -283,11 +283,12 @@ const processAnswer = async (
 };
 
 const sendCoachLowScoreNotification = async (
-  { job, questionId, feedback, submissionId }: {
+  { job, questionId, feedback, submissionId, studentUserId }: {
     job: any;
     questionId: string;
     feedback: { pros: string[]; cons: string[]; correctness_score: number };
     submissionId: string;
+    studentUserId: string;
   },
 ) => {
   const logger = new Logger().with({
@@ -328,7 +329,7 @@ const sendCoachLowScoreNotification = async (
     }
     // Get student name
     const { data: studentUser } = await adminClient.auth.admin.getUserById(
-      job.user_id,
+      studentUserId,
     );
     const studentName = studentUser?.user?.user_metadata?.full_name ||
       studentUser?.user?.email || "Student";
@@ -448,6 +449,7 @@ const writeAnswerToDatabase = async (
         questionId,
         feedback,
         submissionId: submission.id,
+        studentUserId: user.id,
       });
     }
   }
