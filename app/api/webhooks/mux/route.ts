@@ -17,7 +17,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     const headersList = await headers();
     const body = await request.text();
-    
+
     // Log webhook signature verification
     try {
         mux.webhooks.verifySignature(
@@ -35,7 +35,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     }
 
     const event = mux.webhooks.unwrap(body, headersList);
-    
+
     // Enhanced logger with event details
     const eventLogger = logger.with({
         eventType: event.type,
@@ -64,7 +64,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
             const table = asset.passthrough as
                 | "custom_job_question_submission_mux_metadata"
-                | "mock_interview_message_mux_metadata";
+                | "mock_interview_message_mux_metadata"
+                | "course_lesson_files_mux_metadata";
             if (!table) {
                 eventLogger.error(
                     "Missing passthrough (table) in asset.created event",
@@ -120,20 +121,26 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
                         status: "preparing",
                     })
                     .eq("id", messageId);
-                
+
                 if (error) {
                     updateError = error;
-                    eventLogger.error("Failed to update metadata to preparing", {
-                        error: error.message,
-                        table,
-                        messageId,
-                    });
+                    eventLogger.error(
+                        "Failed to update metadata to preparing",
+                        {
+                            error: error.message,
+                            table,
+                            messageId,
+                        },
+                    );
                 } else {
-                    eventLogger.info("Successfully updated metadata to preparing", {
-                        table,
-                        messageId,
-                        assetId: asset.id,
-                    });
+                    eventLogger.info(
+                        "Successfully updated metadata to preparing",
+                        {
+                            table,
+                            messageId,
+                            assetId: asset.id,
+                        },
+                    );
                 }
             } else {
                 eventLogger.info("Skipping update - asset already ready", {
@@ -173,7 +180,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
                 break;
             }
             const playbackId = asset.playback_ids?.[0]?.id || null;
-            
+
             eventLogger.info("Updating metadata to ready status", {
                 table,
                 messageId,
@@ -189,7 +196,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
                     status: "ready",
                 })
                 .eq("id", messageId);
-            
+
             if (error) {
                 updateError = error;
                 eventLogger.error("Failed to update metadata to ready", {
@@ -251,7 +258,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
                     status: "errored",
                 })
                 .eq("id", messageId);
-            
+
             if (error) {
                 updateError = error;
                 eventLogger.error("Failed to update metadata to errored", {
@@ -289,7 +296,10 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     eventLogger.info("Mux webhook processed successfully", {
         eventType: event.type,
-        processingTime: Date.now() - (event.created_at ? new Date(event.created_at).getTime() : Date.now()),
+        processingTime: Date.now() -
+            (event.created_at
+                ? new Date(event.created_at).getTime()
+                : Date.now()),
     });
 
     return Response.json({ message: "ok" });
