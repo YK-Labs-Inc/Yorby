@@ -510,10 +510,10 @@ const fetchFiles = async (_key: string, lessonId: string) => {
 
 const fetchFileUrls = async (files: LessonFile[]) => {
   if (!files || files.length === 0) return {};
-  
+
   const supabase = createSupabaseBrowserClient();
   const urls: Record<string, string> = {};
-  
+
   for (const file of files) {
     if (file.file_path && file.bucket_name) {
       const { data, error } = await supabase.storage
@@ -525,7 +525,7 @@ const fetchFileUrls = async (files: LessonFile[]) => {
       }
     }
   }
-  
+
   return urls;
 };
 

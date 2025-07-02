@@ -16,6 +16,21 @@ import { redirect } from "next/navigation";
 import PostHogClient from "@/app/posthog";
 import { QuestionGenerationDropdown } from "./QuestionGenerationDropdown";
 import PracticeQuestionsClientWrapper from "./PracticeQuestionsClientWrapper";
+import Course from "./Course";
+import type { Database } from "@/utils/supabase/database.types";
+
+type CourseModule = Database["public"]["Tables"]["course_modules"]["Row"] & {
+  course_lessons: (Database["public"]["Tables"]["course_lessons"]["Row"] & {
+    course_lesson_blocks: Pick<
+      Database["public"]["Tables"]["course_lesson_blocks"]["Row"],
+      "id" | "block_type"
+    >[];
+  })[];
+};
+
+type Course = Database["public"]["Tables"]["courses"]["Row"] & {
+  course_modules: CourseModule[];
+};
 
 const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   const supabase = await createSupabaseServerClient();
@@ -24,7 +39,18 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
     .select(
       `*, 
       custom_job_questions(*, 
-        custom_job_question_submissions(*))`
+        custom_job_question_submissions(*)
+      ),
+      courses(
+        *,
+        course_modules(
+          *,
+          course_lessons(
+            *,
+            course_lesson_blocks(id, block_type)
+          )
+        )
+      )`
     )
     .eq("id", jobId)
     .order("created_at", { ascending: false })
@@ -32,14 +58,40 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
   if (error) {
     throw error;
   }
+
+  // Process course data
+  let processedCourse: Course | null = null;
+  let processedModules: CourseModule[] = [];
+  if (data.courses) {
+    const course = data.courses as Course; // One-to-one relationship
+    if (course.deletion_status === "not_deleted") {
+      processedCourse = course;
+      processedModules = course.course_modules
+        .filter((m) => m.deletion_status === "not_deleted")
+        .sort((a, b) => a.order_index - b.order_index)
+        .map((module) => ({
+          ...module,
+          course_lessons: module.course_lessons
+            .filter((l) => l.deletion_status === "not_deleted")
+            .sort((a, b) => a.order_index - b.order_index),
+        }));
+    }
+  }
+
   if (data.status === "locked" && !hasSubscription) {
-    return data;
+    return {
+      ...data,
+      course: processedCourse,
+      course_modules: processedModules,
+    };
   }
   return {
     ...data,
     custom_job_questions: data.custom_job_questions
       .filter((q) => q.publication_status === "published")
       .sort((a, b) => Number(a.created_at) - Number(b.created_at)),
+    course: processedCourse,
+    course_modules: processedModules,
   };
 };
 
@@ -104,6 +156,8 @@ export default async function CustomJob({
   }
   const t = await getTranslations("accountLinking");
   const isLocked = job.status === "locked" && !hasSubscription;
+  const hasCourse =
+    job.course && job.course_modules && job.course_modules.length > 0;
   const posthog = PostHogClient();
   const isAnonymousAccountLinkingEnabled =
     (await posthog.getFeatureFlag(
@@ -142,7 +196,10 @@ export default async function CustomJob({
         </H1>
         {!isMultiTenantExperience && (
           <Link href={`/dashboard/jobs/${jobId}/files`}>
-            <Button variant="outline" className="gap-2 text-sm sm:text-base w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="gap-2 text-sm sm:text-base w-full sm:w-auto"
+            >
               <FileText className="h-4 w-4" />
               <span>Manage Files</span>
             </Button>
@@ -154,10 +211,19 @@ export default async function CustomJob({
         <div className="md mx-auto w-full">
           {(!formMessage || "error" in formMessage) && (
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
-              <h2 className="text-base sm:text-lg font-semibold mb-2">{t("title")}</h2>
-              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{t("description")}</p>
-              <form action={linkAnonymousAccount} className="space-y-3 sm:space-y-4">
-                <Label htmlFor="email" className="text-sm sm:text-base">{t("form.email.label")}</Label>
+              <h2 className="text-base sm:text-lg font-semibold mb-2">
+                {t("title")}
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+                {t("description")}
+              </p>
+              <form
+                action={linkAnonymousAccount}
+                className="space-y-3 sm:space-y-4"
+              >
+                <Label htmlFor="email" className="text-sm sm:text-base">
+                  {t("form.email.label")}
+                </Label>
                 <Input
                   id="email"
                   name="email"
@@ -166,7 +232,9 @@ export default async function CustomJob({
                   required
                 />
                 <input type="hidden" name="jobId" value={jobId} />
-                <SubmitButton className="w-full">{t("form.submit")}</SubmitButton>
+                <SubmitButton className="w-full">
+                  {t("form.submit")}
+                </SubmitButton>
               </form>
             </div>
           )}
@@ -176,17 +244,35 @@ export default async function CustomJob({
         <div className="flex flex-col gap-4 sm:gap-6 w-full">
           <div className="flex flex-col md:flex-row items-start gap-3 sm:gap-4 md:items-center justify-between w-full">
             <Tabs value={view} className="w-full md:w-auto">
-              <TabsList className="grid w-full grid-cols-2 md:w-auto">
+              <TabsList
+                className={`grid w-full ${hasCourse ? "grid-cols-3" : "grid-cols-2"} md:w-auto`}
+              >
                 <Link href={`?view=practice`}>
-                  <TabsTrigger value="practice" className="w-full text-xs sm:text-sm">
+                  <TabsTrigger
+                    value="practice"
+                    className="w-full text-xs sm:text-sm"
+                  >
                     Practice Questions
                   </TabsTrigger>
                 </Link>
                 <Link href={`?view=mock`}>
-                  <TabsTrigger value="mock" className="w-full text-xs sm:text-sm">
+                  <TabsTrigger
+                    value="mock"
+                    className="w-full text-xs sm:text-sm"
+                  >
                     Mock Interview
                   </TabsTrigger>
                 </Link>
+                {hasCourse && (
+                  <Link href={`?view=course`}>
+                    <TabsTrigger
+                      value="course"
+                      className="w-full text-xs sm:text-sm"
+                    >
+                      Course
+                    </TabsTrigger>
+                  </Link>
+                )}
               </TabsList>
             </Tabs>
             {!isMultiTenantExperience && (
@@ -220,6 +306,14 @@ export default async function CustomJob({
               userCredits={userCredits}
               isLocked={isLocked}
               isSubscriptionVariant={isSubscriptionVariant}
+            />
+          )}
+          {view === "course" && hasCourse && (
+            <Course
+              course={job.course}
+              modules={job.course_modules}
+              jobId={jobId}
+              isLocked={isLocked}
             />
           )}
         </div>
