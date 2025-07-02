@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +19,8 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-export default function CreateCoursePage({
-  params,
-}: {
-  params: Promise<{ programId: string }>;
-}) {
+export default function CreateCoursePage() {
+  const { programId } = useParams<{ programId: string }>();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
@@ -32,8 +29,6 @@ export default function CreateCoursePage({
   const { logInfo, logError } = useAxiomLogging();
 
   const handleCreateCourse = async () => {
-    const { programId } = await params;
-    
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -91,7 +86,7 @@ export default function CreateCoursePage({
       {/* Back button */}
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
-          <Link href={`/dashboard/coach-admin/programs/${params.programId}/courses`}>
+          <Link href={`/dashboard/coach-admin/programs/${programId}/courses`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Link>
@@ -153,7 +148,9 @@ export default function CreateCoursePage({
               )}
             </Button>
             <Button variant="outline" asChild>
-              <Link href={`/dashboard/coach-admin/programs/${params.programId}/courses`}>
+              <Link
+                href={`/dashboard/coach-admin/programs/${programId}/courses`}
+              >
                 Cancel
               </Link>
             </Button>
