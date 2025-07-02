@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -73,7 +74,7 @@ interface CourseModuleManagerProps {
 // Sortable Module Component
 const SortableModule = ({
   module,
-  expandedModuleId,
+  expandedModules,
   toggleModuleExpansion,
   handleOpenDialog,
   handleDeleteModule,
@@ -81,7 +82,7 @@ const SortableModule = ({
   coachId,
 }: {
   module: CourseModule;
-  expandedModuleId: string | null;
+  expandedModules: Set<string>;
   toggleModuleExpansion: (id: string) => void;
   handleOpenDialog: (module?: CourseModule) => void;
   handleDeleteModule: (id: string) => void;
@@ -132,7 +133,7 @@ const SortableModule = ({
             >
               <ChevronRight
                 className={`h-4 w-4 transition-transform ${
-                  expandedModuleId === module.id ? "rotate-90" : ""
+                  expandedModules.has(module.id) ? "rotate-90" : ""
                 }`}
               />
             </Button>
@@ -158,12 +159,9 @@ const SortableModule = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        {expandedModuleId === module.id && (
+        {expandedModules.has(module.id) && (
           <div className="p-4 border-t">
-            <CourseLessonManager
-              moduleId={module.id}
-              coachId={coachId}
-            />
+            <CourseLessonManager moduleId={module.id} coachId={coachId} />
           </div>
         )}
       </div>
@@ -171,13 +169,28 @@ const SortableModule = ({
   );
 };
 
+// Fetcher function for SWR
+const fetchModules = async (_key: string, courseId: string) => {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("course_modules")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("deletion_status", "not_deleted")
+    .order("order_index", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+};
+
 export default function CourseModuleManager({
   courseId,
   coachId,
 }: CourseModuleManagerProps) {
-  const [modules, setModules] = useState<CourseModule[]>([]);
-  const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<CourseModule | null>(null);
   const [moduleTitle, setModuleTitle] = useState("");
@@ -187,6 +200,21 @@ export default function CourseModuleManager({
   const [isReordering, setIsReordering] = useState(false);
   const { toast } = useToast();
   const { logInfo, logError } = useAxiomLogging();
+
+  // Use SWR for data fetching
+  const {
+    data: modules = [],
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(
+    [`/course-modules/${courseId}`, courseId],
+    ([key, id]) => fetchModules(key, id),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+    }
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -199,37 +227,30 @@ export default function CourseModuleManager({
     })
   );
 
+  // Handle SWR error in useEffect to avoid setState during render
   useEffect(() => {
-    fetchModules();
-  }, [courseId]);
-
-  const fetchModules = async () => {
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from("course_modules")
-        .select("*")
-        .eq("course_id", courseId)
-        .eq("deletion_status", "not_deleted")
-        .order("order_index", { ascending: true });
-
-      if (error) {
-        logError("Error fetching modules", { error, courseId });
-        toast({
-          title: "Error",
-          description: "Failed to load modules",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setModules(data || []);
-    } catch (error) {
-      logError("Exception fetching modules", { error, courseId });
-    } finally {
-      setIsLoading(false);
+    if (error) {
+      logError("Error fetching modules", { error, courseId });
+      toast({
+        title: "Error",
+        description: "Failed to load modules",
+        variant: "destructive",
+      });
     }
-  };
+  }, [error, courseId, logError, toast]);
+
+  // Expand all modules by default when they're loaded or new ones are added
+  useEffect(() => {
+    if (modules.length > 0) {
+      setExpandedModules(prev => {
+        const newSet = new Set(prev);
+        modules.forEach(module => {
+          newSet.add(module.id);
+        });
+        return newSet;
+      });
+    }
+  }, [modules]);
 
   const handleSaveModule = async () => {
     if (!moduleTitle.trim()) {
@@ -256,7 +277,10 @@ export default function CourseModuleManager({
           .eq("id", editingModule.id);
 
         if (error) {
-          logError("Error updating module", { error, moduleId: editingModule.id });
+          logError("Error updating module", {
+            error,
+            moduleId: editingModule.id,
+          });
           toast({
             title: "Error",
             description: "Failed to update module",
@@ -296,7 +320,7 @@ export default function CourseModuleManager({
         });
       }
 
-      await fetchModules();
+      await mutate();
       handleCloseDialog();
     } catch (error) {
       logError("Exception saving module", { error, courseId });
@@ -331,7 +355,7 @@ export default function CourseModuleManager({
         title: "Success",
         description: "Module deleted successfully",
       });
-      await fetchModules();
+      await mutate();
     } catch (error) {
       logError("Exception deleting module", { error, moduleId });
     }
@@ -358,7 +382,15 @@ export default function CourseModuleManager({
   };
 
   const toggleModuleExpansion = (moduleId: string) => {
-    setExpandedModuleId(expandedModuleId === moduleId ? null : moduleId);
+    setExpandedModules(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(moduleId)) {
+        newSet.delete(moduleId);
+      } else {
+        newSet.add(moduleId);
+      }
+      return newSet;
+    });
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -380,7 +412,7 @@ export default function CourseModuleManager({
 
     // Optimistically update the UI
     const newModules = arrayMove(modules, oldIndex, newIndex);
-    setModules(newModules);
+    mutate(newModules, false); // Update local data without revalidation
     setIsReordering(true);
 
     try {
@@ -415,7 +447,7 @@ export default function CourseModuleManager({
           description: "Failed to reorder modules",
           variant: "destructive",
         });
-        await fetchModules();
+        await mutate();
         return;
       }
 
@@ -442,7 +474,7 @@ export default function CourseModuleManager({
           description: "Failed to reorder modules",
           variant: "destructive",
         });
-        await fetchModules();
+        await mutate();
         return;
       }
 
@@ -453,8 +485,8 @@ export default function CourseModuleManager({
       });
     } catch (error) {
       logError("Exception reordering modules", { error });
-      // Revert the optimistic update
-      await fetchModules();
+      // Revert the optimistic update by refetching data
+      await mutate();
     } finally {
       setIsReordering(false);
     }
@@ -512,7 +544,9 @@ export default function CourseModuleManager({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="module-subtitle">Module Subtitle (Optional)</Label>
+                  <Label htmlFor="module-subtitle">
+                    Module Subtitle (Optional)
+                  </Label>
                   <Textarea
                     id="module-subtitle"
                     placeholder="Brief description of the module content"
@@ -576,7 +610,7 @@ export default function CourseModuleManager({
                   <SortableModule
                     key={module.id}
                     module={module}
-                    expandedModuleId={expandedModuleId}
+                    expandedModules={expandedModules}
                     toggleModuleExpansion={toggleModuleExpansion}
                     handleOpenDialog={handleOpenDialog}
                     handleDeleteModule={handleDeleteModule}

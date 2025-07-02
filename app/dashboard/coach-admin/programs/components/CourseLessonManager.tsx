@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,12 +146,27 @@ const SortableLesson = ({
   );
 };
 
+// Fetcher function for SWR
+const fetchLessons = async (_key: string, moduleId: string) => {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("course_lessons")
+    .select("*")
+    .eq("module_id", moduleId)
+    .eq("deletion_status", "not_deleted")
+    .order("order_index", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+};
+
 export default function CourseLessonManager({
   moduleId,
   coachId,
 }: CourseLessonManagerProps) {
-  const [lessons, setLessons] = useState<CourseLesson[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<CourseLesson | null>(null);
   const [lessonTitle, setLessonTitle] = useState("");
@@ -163,6 +179,16 @@ export default function CourseLessonManager({
   const params = useParams<{ programId: string }>();
   const programId = params.programId;
 
+  // Use SWR for data fetching
+  const { data: lessons = [], error, isLoading, mutate } = useSWR(
+    [`/course-lessons/${moduleId}`, moduleId],
+    ([key, id]) => fetchLessons(key, id),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+    }
+  );
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -174,37 +200,17 @@ export default function CourseLessonManager({
     })
   );
 
+  // Handle SWR error in useEffect to avoid setState during render
   useEffect(() => {
-    fetchLessons();
-  }, [moduleId]);
-
-  const fetchLessons = async () => {
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from("course_lessons")
-        .select("*")
-        .eq("module_id", moduleId)
-        .eq("deletion_status", "not_deleted")
-        .order("order_index", { ascending: true });
-
-      if (error) {
-        logError("Error fetching lessons", { error, moduleId });
-        toast({
-          title: "Error",
-          description: "Failed to load lessons",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setLessons(data || []);
-    } catch (error) {
-      logError("Exception fetching lessons", { error, moduleId });
-    } finally {
-      setIsLoading(false);
+    if (error) {
+      logError("Error fetching lessons", { error, moduleId });
+      toast({
+        title: "Error",
+        description: "Failed to load lessons",
+        variant: "destructive",
+      });
     }
-  };
+  }, [error, moduleId, logError, toast]);
 
   const handleSaveLesson = async () => {
     if (!lessonTitle.trim()) {
@@ -274,7 +280,7 @@ export default function CourseLessonManager({
         });
       }
 
-      await fetchLessons();
+      await mutate();
       handleCloseDialog();
     } catch (error) {
       logError("Exception saving lesson", { error, moduleId });
@@ -309,7 +315,7 @@ export default function CourseLessonManager({
         title: "Success",
         description: "Lesson deleted successfully",
       });
-      await fetchLessons();
+      await mutate();
     } catch (error) {
       logError("Exception deleting lesson", { error, lessonId });
     }
@@ -354,7 +360,7 @@ export default function CourseLessonManager({
 
     // Optimistically update the UI
     const newLessons = arrayMove(lessons, oldIndex, newIndex);
-    setLessons(newLessons);
+    mutate(newLessons, false); // Update local data without revalidation
     setIsReordering(true);
 
     try {
@@ -389,7 +395,7 @@ export default function CourseLessonManager({
           description: "Failed to reorder lessons",
           variant: "destructive",
         });
-        await fetchLessons();
+        await mutate();
         return;
       }
 
@@ -416,7 +422,7 @@ export default function CourseLessonManager({
           description: "Failed to reorder lessons",
           variant: "destructive",
         });
-        await fetchLessons();
+        await mutate();
         return;
       }
 
@@ -428,7 +434,7 @@ export default function CourseLessonManager({
     } catch (error) {
       logError("Exception reordering lessons", { error });
       // Revert the optimistic update
-      await fetchLessons();
+      await mutate();
     } finally {
       setIsReordering(false);
     }

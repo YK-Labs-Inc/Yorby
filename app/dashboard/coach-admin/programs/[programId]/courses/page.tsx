@@ -21,18 +21,12 @@ import {
   FileText,
   Image as ImageIcon,
   Type,
-  Settings,
   GraduationCap,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import type { Database } from "@/utils/supabase/database.types";
-
-type Course = Database["public"]["Tables"]["courses"]["Row"];
-type Module = Database["public"]["Tables"]["course_modules"]["Row"];
-type Lesson = Database["public"]["Tables"]["course_lessons"]["Row"];
-type LessonBlock = Database["public"]["Tables"]["course_lesson_blocks"]["Row"];
 
 // Helper function to get coach data from user ID
 async function getCoachData(userId: string) {
@@ -110,7 +104,8 @@ async function getCourseData(programId: string) {
   // Fetch modules with lessons and block counts
   const { data: modules, error: modulesError } = await supabase
     .from("course_modules")
-    .select(`
+    .select(
+      `
       *,
       course_lessons (
         *,
@@ -119,7 +114,8 @@ async function getCourseData(programId: string) {
           block_type
         )
       )
-    `)
+    `
+    )
     .eq("course_id", course.id)
     .eq("deletion_status", "not_deleted")
     .order("order_index", { ascending: true });
@@ -131,12 +127,13 @@ async function getCourseData(programId: string) {
   }
 
   // Sort lessons within each module
-  const sortedModules = modules?.map(module => ({
-    ...module,
-    course_lessons: module.course_lessons
-      .filter((lesson: any) => lesson.deletion_status === "not_deleted")
-      .sort((a: any, b: any) => a.order_index - b.order_index)
-  })) || [];
+  const sortedModules =
+    modules?.map((module) => ({
+      ...module,
+      course_lessons: module.course_lessons
+        .filter((lesson: any) => lesson.deletion_status === "not_deleted")
+        .sort((a: any, b: any) => a.order_index - b.order_index),
+    })) || [];
 
   return { course, modules: sortedModules };
 }
@@ -158,11 +155,19 @@ function getContentTypeIcon(type: string) {
 }
 
 // Helper to format content types for display
-function formatContentTypes(blocks: any[]) {
-  const typeCounts = blocks.reduce((acc, block) => {
-    acc[block.block_type] = (acc[block.block_type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+function formatContentTypes(
+  blocks: Array<{
+    id: string;
+    block_type: Database["public"]["Enums"]["course_content_type"];
+  }>
+) {
+  const typeCounts = blocks.reduce(
+    (acc, block) => {
+      acc[block.block_type] = (acc[block.block_type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const types = Object.entries(typeCounts).map(([type, count]) => {
     const label = type.charAt(0).toUpperCase() + type.slice(1);
@@ -231,12 +236,15 @@ export default async function CourseOverviewPage({
             </div>
             <CardTitle>Create Your Course</CardTitle>
             <CardDescription>
-              Add educational content to complement your interview preparation program
+              Add educational content to complement your interview preparation
+              program
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Button asChild>
-              <Link href={`/dashboard/coach-admin/programs/${programId}/courses/new`}>
+              <Link
+                href={`/dashboard/coach-admin/programs/${programId}/courses/new`}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Course
               </Link>
@@ -257,169 +265,116 @@ export default async function CourseOverviewPage({
             Back to Program
           </Link>
         </Button>
-        <Badge variant="secondary" className="text-sm">
-          UNPUBLISHED
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary" className="text-sm">
+            UNPUBLISHED
+          </Badge>
+          <Button size="lg" disabled>
+            Publish your course
+          </Button>
+        </div>
       </div>
 
       {/* Course Title */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">{course.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
+          {course.title}
+        </h1>
         {course.subtitle && (
           <p className="text-muted-foreground">{course.subtitle}</p>
         )}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Curriculum */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Curriculum Header */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                  <CardTitle>Create your curriculum</CardTitle>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/${coachData.slug}/${programId}/course`}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Preview curriculum
-                    </Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/edit`}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit curriculum
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          {/* Curriculum Content */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Curriculum Preview</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {modules.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">
-                    No modules added yet. Start building your curriculum.
-                  </p>
-                  <Button asChild>
-                    <Link href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/edit`}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Module
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                modules.map((module: any, moduleIndex: number) => (
-                  <div key={module.id} className="space-y-3">
-                    {/* Module Header */}
-                    <div className="font-semibold text-lg">
-                      {module.title}
-                    </div>
-                    
-                    {/* Lessons */}
-                    <div className="ml-4 space-y-2">
-                      {module.course_lessons.map((lesson: any) => (
-                        <div
-                          key={lesson.id}
-                          className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="space-y-1">
-                            <div className="font-medium">{lesson.title}</div>
-                            {lesson.course_lesson_blocks.length > 0 && (
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span>{formatContentTypes(lesson.course_lesson_blocks)}</span>
-                              </div>
-                            )}
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            Draft
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {moduleIndex < modules.length - 1 && (
-                      <Separator className="my-4" />
-                    )}
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Course Settings */}
-        <div className="space-y-6">
-          {/* Customize Course */}
-          <Card>
-            <CardHeader>
+      {/* Main Content */}
+      <div className="space-y-6">
+        {/* Curriculum Header */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-primary" />
-                <CardTitle>Customize your course</CardTitle>
+                <BookOpen className="h-5 w-5 text-primary" />
+                <CardTitle>Create your curriculum</CardTitle>
               </div>
-            </CardHeader>
-          </Card>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/${coachData.slug}/${programId}/course`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Preview curriculum
+                  </Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link
+                    href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/edit`}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit curriculum
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
 
-          {/* Course Details */}
-          <Card>
-            <CardContent className="pt-6 space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Course title</span>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/settings`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
+        {/* Curriculum Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Curriculum Preview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {modules.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No modules added yet. Start building your curriculum.
+                </p>
+                <Button asChild>
+                  <Link
+                    href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/edit`}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Module
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              modules.map((module: any, moduleIndex: number) => (
+                <div key={module.id} className="space-y-3">
+                  {/* Module Header */}
+                  <div className="font-semibold text-lg">{module.title}</div>
+
+                  {/* Lessons */}
+                  <div className="ml-4 space-y-2">
+                    {module.course_lessons.map((lesson: any) => (
+                      <div
+                        key={lesson.id}
+                        className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="space-y-1">
+                          <div className="font-medium">{lesson.title}</div>
+                          {lesson.course_lesson_blocks.length > 0 && (
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>
+                                {formatContentTypes(
+                                  lesson.course_lesson_blocks
+                                )}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          Draft
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+
+                  {moduleIndex < modules.length - 1 && (
+                    <Separator className="my-4" />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">{course.title}</p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Thumbnail</span>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/settings`}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add an image
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Curriculum layout</span>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/dashboard/coach-admin/programs/${programId}/courses/${course.id}/settings`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">Default template</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Publish Button */}
-          <Button className="w-full" size="lg" disabled>
-            Publish your course
-          </Button>
-        </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
