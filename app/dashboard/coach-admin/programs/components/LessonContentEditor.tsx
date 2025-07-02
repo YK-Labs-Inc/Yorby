@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -471,14 +472,68 @@ const SortableBlock = ({
   );
 };
 
+// Fetcher functions for SWR
+const fetchBlocks = async (_key: string, lessonId: string) => {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("course_lesson_blocks")
+    .select("*")
+    .eq("lesson_id", lessonId)
+    .eq("deletion_status", "not_deleted")
+    .order("order_index", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+};
+
+const fetchFiles = async (_key: string, lessonId: string) => {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("course_lesson_files")
+    .select(
+      `
+      *,
+      course_lesson_files_mux_metadata (*)
+    `
+    )
+    .eq("lesson_id", lessonId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+};
+
+const fetchFileUrls = async (files: LessonFile[]) => {
+  if (!files || files.length === 0) return {};
+  
+  const supabase = createSupabaseBrowserClient();
+  const urls: Record<string, string> = {};
+  
+  for (const file of files) {
+    if (file.file_path && file.bucket_name) {
+      const { data, error } = await supabase.storage
+        .from(file.bucket_name)
+        .createSignedUrl(file.file_path, 3600); // 1 hour expiry
+
+      if (data && !error) {
+        urls[file.id] = data.signedUrl;
+      }
+    }
+  }
+  
+  return urls;
+};
+
 export default function LessonContentEditor({
   lessonId,
   coachId,
   programId,
 }: LessonContentEditorProps) {
-  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
-  const [files, setFiles] = useState<LessonFile[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
@@ -486,11 +541,66 @@ export default function LessonContentEditor({
     string | null
   >(null);
   const [videoUploadProgress, setVideoUploadProgress] = useState(0);
-  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
   const { toast } = useToast();
   const { logInfo, logError } = useAxiomLogging();
+
+  // Use SWR for fetching blocks
+  const {
+    data: blocks = [],
+    error: blocksError,
+    isLoading: isLoadingBlocks,
+    mutate: mutateBlocks,
+  } = useSWR(
+    [`/lesson-blocks/${lessonId}`, lessonId],
+    ([key, id]) => fetchBlocks(key, id),
+    {
+      revalidateOnFocus: false,
+      onError: (error) => {
+        logError("Error fetching blocks", {
+          error,
+          lessonId,
+          errorCode: error.code,
+          errorMessage: error.message,
+        });
+        toast({
+          title: "Error",
+          description: "Sorry, something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      },
+    }
+  );
+
+  // Use SWR for fetching files
+  const {
+    data: files = [],
+    error: filesError,
+    isLoading: isLoadingFiles,
+    mutate: mutateFiles,
+  } = useSWR(
+    [`/lesson-files/${lessonId}`, lessonId],
+    ([key, id]) => fetchFiles(key, id),
+    {
+      revalidateOnFocus: false,
+      onError: (error) => {
+        logError("Error fetching files", { error, lessonId });
+      },
+    }
+  );
+
+  // Use SWR for fetching file URLs
+  const { data: fileUrls = {} } = useSWR(
+    files && files.length > 0 ? [`/file-urls/${lessonId}`, files] : null,
+    ([_key, files]) => fetchFileUrls(files),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+    }
+  );
+
+  const isLoading = isLoadingBlocks || isLoadingFiles;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -503,77 +613,9 @@ export default function LessonContentEditor({
     })
   );
 
-  useEffect(() => {
-    fetchContent();
-  }, [lessonId]);
-
-  const fetchContent = async () => {
-    try {
-      const supabase = createSupabaseBrowserClient();
-
-      // Fetch blocks
-      const { data: blocksData, error: blocksError } = await supabase
-        .from("course_lesson_blocks")
-        .select("*")
-        .eq("lesson_id", lessonId)
-        .eq("deletion_status", "not_deleted")
-        .order("order_index", { ascending: true });
-
-      if (blocksError) {
-        logError("Error fetching blocks", {
-          error: blocksError,
-          lessonId,
-          errorCode: blocksError.code,
-          errorMessage: blocksError.message,
-        });
-        toast({
-          title: "Error",
-          description: "Sorry, something went wrong. Please try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch files with Mux metadata
-      const { data: filesData, error: filesError } = await supabase
-        .from("course_lesson_files")
-        .select(
-          `
-          *,
-          course_lesson_files_mux_metadata (*)
-        `
-        )
-        .eq("lesson_id", lessonId);
-
-      if (filesError) {
-        logError("Error fetching files", { error: filesError, lessonId });
-      }
-
-      setBlocks(blocksData || []);
-      setFiles(filesData || []);
-
-      // Generate signed URLs for files
-      if (filesData && filesData.length > 0) {
-        const urls: Record<string, string> = {};
-        for (const file of filesData) {
-          if (file.file_path && file.bucket_name) {
-            const { data, error } = await supabase.storage
-              .from(file.bucket_name)
-              .createSignedUrl(file.file_path, 3600); // 1 hour expiry
-
-            if (data && !error) {
-              urls[file.id] = data.signedUrl;
-            }
-          }
-        }
-        setFileUrls(urls);
-      }
-    } catch (error) {
-      logError("Exception fetching content", { error, lessonId });
-    } finally {
-      setIsLoading(false);
-    }
+  // Refresh all data
+  const refreshContent = async () => {
+    await Promise.all([mutateBlocks(), mutateFiles()]);
   };
 
   const handleAddBlock = async (type: ContentType) => {
@@ -618,7 +660,7 @@ export default function LessonContentEditor({
       // Files will be created when actually uploaded
 
       logInfo("Block created successfully", { lessonId, type, newOrderIndex });
-      await fetchContent();
+      await refreshContent();
     } catch (error) {
       logError("Exception creating block", { error, lessonId });
       toast({
@@ -652,7 +694,7 @@ export default function LessonContentEditor({
       }
 
       logInfo("Text block updated successfully", { blockId });
-      await fetchContent();
+      await refreshContent();
     } catch (error) {
       logError("Exception updating text block", { error, blockId });
     } finally {
@@ -686,7 +728,7 @@ export default function LessonContentEditor({
         title: "Success",
         description: "Content block deleted",
       });
-      await fetchContent();
+      await refreshContent();
     } catch (error) {
       logError("Exception deleting block", { error, blockId });
     }
@@ -711,7 +753,7 @@ export default function LessonContentEditor({
 
     // Optimistically update the UI
     const newBlocks = arrayMove(blocks, oldIndex, newIndex);
-    setBlocks(newBlocks);
+    mutateBlocks(newBlocks, false);
     setIsReordering(true);
 
     try {
@@ -746,7 +788,7 @@ export default function LessonContentEditor({
           description: "Failed to reorder blocks",
           variant: "destructive",
         });
-        await fetchContent();
+        await refreshContent();
         return;
       }
 
@@ -773,7 +815,7 @@ export default function LessonContentEditor({
           description: "Failed to reorder blocks",
           variant: "destructive",
         });
-        await fetchContent();
+        await refreshContent();
         return;
       }
 
@@ -784,8 +826,8 @@ export default function LessonContentEditor({
       });
     } catch (error) {
       logError("Exception reordering blocks", { error });
-      // Revert the optimistic update
-      await fetchContent();
+      // Revert the optimistic update by refetching data
+      await refreshContent();
     } finally {
       setIsReordering(false);
     }
@@ -895,7 +937,7 @@ export default function LessonContentEditor({
         });
         setUploadingVideoBlockId(null);
         setVideoUploadProgress(0);
-        await fetchContent();
+        await refreshContent();
         return;
       }
 
@@ -924,7 +966,7 @@ export default function LessonContentEditor({
           setVideoUploadProgress(0);
 
           // Refresh content to show processing state
-          await fetchContent();
+          await refreshContent();
         } else {
           throw new Error(`Upload failed with status ${xhr.status}`);
         }
@@ -939,7 +981,7 @@ export default function LessonContentEditor({
         });
         setUploadingVideoBlockId(null);
         setVideoUploadProgress(0);
-        fetchContent();
+        refreshContent();
       });
 
       xhr.open("PUT", uploadUrl);
@@ -1047,7 +1089,7 @@ export default function LessonContentEditor({
         title: "Success",
         description: "File uploaded successfully",
       });
-      await fetchContent();
+      await refreshContent();
     } catch (error) {
       logError("Exception uploading file", { error, blockId });
     }

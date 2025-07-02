@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,52 +33,61 @@ interface CourseEditorProps {
   coachId: string;
 }
 
+// Fetcher function for SWR
+const fetchCourse = async (_key: string, programId: string) => {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("custom_job_id", programId)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    throw error;
+  }
+
+  return data;
+};
+
 export default function CourseEditor({
   programId,
   coachId,
 }: CourseEditorProps) {
-  const [course, setCourse] = useState<Course | null>(null);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const { toast } = useToast();
   const { logInfo, logError } = useAxiomLogging();
 
-  useEffect(() => {
-    fetchCourse();
-  }, [programId]);
-
-  const fetchCourse = async () => {
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("custom_job_id", programId)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
+  // Use SWR for data fetching
+  const {
+    data: course,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(
+    [`/course/${programId}`, programId],
+    ([key, id]) => fetchCourse(key, id),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+      onSuccess: (data) => {
+        if (data) {
+          setTitle(data.title);
+          setSubtitle(data.subtitle || "");
+        }
+      },
+      onError: (error) => {
         logError("Error fetching course", { error, programId });
         toast({
           title: "Error",
           description: "Failed to load course data",
           variant: "destructive",
         });
-      }
-
-      if (data) {
-        setCourse(data);
-        setTitle(data.title);
-        setSubtitle(data.subtitle || "");
-      }
-    } catch (error) {
-      logError("Exception fetching course", { error, programId });
-    } finally {
-      setIsLoading(false);
+      },
     }
-  };
+  );
 
   const handleCreateCourse = async () => {
     if (!title.trim()) {
@@ -112,7 +122,8 @@ export default function CourseEditor({
         return;
       }
 
-      setCourse(data);
+      // Update the cache with the new course data
+      mutate(data, false);
       logInfo("Course created successfully", { courseId: data.id, programId });
       toast({
         title: "Success",
@@ -159,7 +170,8 @@ export default function CourseEditor({
         return;
       }
 
-      setCourse(data);
+      // Update the cache with the updated course data
+      mutate(data, false);
       logInfo("Course updated successfully", { courseId: data.id });
       toast({
         title: "Success",
