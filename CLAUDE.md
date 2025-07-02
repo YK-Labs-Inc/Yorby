@@ -216,3 +216,11 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 2. Use the `custom_job_enrollments` table for access control
 3. Implement proper cascade deletes for enrollment-related data
 4. Consider performance with composite indexes
+
+### Data Fetching Guidelines
+
+- When performing client side data fetching use SWR to perform the data fetching
+
+## Coding Guidelines
+
+- **Localization Strategy**: When defining user facing strings, define them in @messages/en.json so that we can localize them moving forward. This will be used in the next-intl package using the useTranslations hook in client component and getTranslations on server components.

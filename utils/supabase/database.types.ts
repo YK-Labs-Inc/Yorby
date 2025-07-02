@@ -93,6 +93,269 @@ export type Database = {
         }
         Relationships: []
       }
+      course_lesson_blocks: {
+        Row: {
+          block_type: Database["public"]["Enums"]["course_content_type"]
+          created_at: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
+          file_id: string | null
+          id: string
+          lesson_id: string
+          order_index: number
+          text_content: string | null
+          updated_at: string
+        }
+        Insert: {
+          block_type: Database["public"]["Enums"]["course_content_type"]
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          file_id?: string | null
+          id?: string
+          lesson_id: string
+          order_index: number
+          text_content?: string | null
+          updated_at?: string
+        }
+        Update: {
+          block_type?: Database["public"]["Enums"]["course_content_type"]
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          file_id?: string | null
+          id?: string
+          lesson_id?: string
+          order_index?: number
+          text_content?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lesson_blocks_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "course_lesson_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_lesson_blocks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_lesson_files: {
+        Row: {
+          bucket_name: string
+          coach_id: string
+          created_at: string
+          display_name: string
+          file_path: string
+          google_file_name: string | null
+          google_file_uri: string | null
+          id: string
+          lesson_id: string
+          mime_type: string
+        }
+        Insert: {
+          bucket_name?: string
+          coach_id: string
+          created_at?: string
+          display_name: string
+          file_path: string
+          google_file_name?: string | null
+          google_file_uri?: string | null
+          id?: string
+          lesson_id: string
+          mime_type: string
+        }
+        Update: {
+          bucket_name?: string
+          coach_id?: string
+          created_at?: string
+          display_name?: string
+          file_path?: string
+          google_file_name?: string | null
+          google_file_uri?: string | null
+          id?: string
+          lesson_id?: string
+          mime_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lesson_files_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_lesson_files_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_lesson_files_mux_metadata: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          duration: number | null
+          id: string
+          playback_id: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id?: string
+          playback_id?: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          duration?: number | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lesson_files_mux_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "course_lesson_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_lessons: {
+        Row: {
+          created_at: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
+          id: string
+          module_id: string
+          order_index: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          module_id: string
+          order_index: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          module_id?: string
+          order_index?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_modules: {
+        Row: {
+          course_id: string
+          created_at: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
+          id: string
+          order_index: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          order_index: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          order_index?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          created_at: string
+          custom_job_id: string
+          deletion_status: Database["public"]["Enums"]["deletion_status"]
+          id: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_job_id: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_job_id?: string
+          deletion_status?: Database["public"]["Enums"]["deletion_status"]
+          id?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: true
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custom_job_categories: {
         Row: {
           category: string
@@ -1520,6 +1783,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      course_content_type: "text" | "pdf" | "video" | "image"
       custom_job_access: "locked" | "unlocked"
       deletion_status: "deleted" | "not_deleted"
       feedback_role: "ai" | "user"
@@ -1649,6 +1913,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      course_content_type: ["text", "pdf", "video", "image"],
       custom_job_access: ["locked", "unlocked"],
       deletion_status: ["deleted", "not_deleted"],
       feedback_role: ["ai", "user"],

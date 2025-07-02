@@ -65,7 +65,8 @@ const writeMuxMetadataEntry = async (
         .from(
             table as
                 | "mock_interview_message_mux_metadata"
-                | "custom_job_question_submission_mux_metadata",
+                | "custom_job_question_submission_mux_metadata"
+                | "course_lesson_files_mux_metadata",
         )
         .insert({
             id: databaseId,

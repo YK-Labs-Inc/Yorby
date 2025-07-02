@@ -32,6 +32,8 @@ import {
   Eye,
   FileText,
   ArrowLeft,
+  GraduationCap,
+  BookOpen,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
@@ -39,6 +41,7 @@ import { Logger } from "next-axiom";
 import QuestionStatusToggle from "../components/QuestionStatusToggle";
 import KnowledgeBaseEditor from "../components/KnowledgeBaseEditor";
 import { ShareLinkButton } from "../components/ShareLinkButton";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 // Helper function to get coach data from user ID
 async function getCoachData(userId: string) {
@@ -167,6 +170,12 @@ export default async function ProgramDetailPage({
     "coachAdminPortal.programsPage.programDetailPage"
   );
 
+  // Check if course creation feature is enabled
+  const isCourseCreationEnabled = await posthog.isFeatureEnabled(
+    "enable-course-creation-feature",
+    user.id
+  );
+
   return (
     <div className="container mx-auto py-6">
       {/* Back button */}
@@ -211,6 +220,31 @@ export default async function ProgramDetailPage({
       <div className="mb-8">
         <KnowledgeBaseEditor programId={programId} coachId={coachId} />
       </div>
+
+      {/* Course section */}
+      {isCourseCreationEnabled && (
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Course Content
+                </CardTitle>
+                <CardDescription>
+                  Create educational content to complement your interview prep
+                </CardDescription>
+              </div>
+              <Button asChild>
+                <Link href={`/dashboard/coach-admin/programs/${programId}/courses`}>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Manage Course
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
 
       {/* Questions section */}
       <div className="mb-4 flex items-center justify-between">
