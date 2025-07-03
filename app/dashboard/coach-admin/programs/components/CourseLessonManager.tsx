@@ -294,10 +294,7 @@ export default function CourseLessonManager({
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase
         .from("course_lessons")
-        .update({
-          deletion_status: "deleted",
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq("id", lessonId);
 
       if (error) {

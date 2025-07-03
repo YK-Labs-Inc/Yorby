@@ -183,9 +183,7 @@ export default function Course({
             <div key={module.id}>
               {/* Module Header */}
               <div className="mb-4">
-                <h3 className="text-lg font-semibold">
-                  Module {moduleIndex + 1}: {module.title}
-                </h3>
+                <h3 className="text-lg font-semibold">{module.title}</h3>
                 {module.subtitle && (
                   <p className="text-sm text-muted-foreground mt-1">
                     {module.subtitle}

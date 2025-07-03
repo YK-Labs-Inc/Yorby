@@ -97,7 +97,6 @@ export type Database = {
         Row: {
           block_type: Database["public"]["Enums"]["course_content_type"]
           created_at: string
-          deletion_status: Database["public"]["Enums"]["deletion_status"]
           file_id: string | null
           id: string
           lesson_id: string
@@ -108,7 +107,6 @@ export type Database = {
         Insert: {
           block_type: Database["public"]["Enums"]["course_content_type"]
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           file_id?: string | null
           id?: string
           lesson_id: string
@@ -119,7 +117,6 @@ export type Database = {
         Update: {
           block_type?: Database["public"]["Enums"]["course_content_type"]
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           file_id?: string | null
           id?: string
           lesson_id?: string
@@ -239,7 +236,6 @@ export type Database = {
       course_lessons: {
         Row: {
           created_at: string
-          deletion_status: Database["public"]["Enums"]["deletion_status"]
           id: string
           module_id: string
           order_index: number
@@ -249,7 +245,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           id?: string
           module_id: string
           order_index: number
@@ -259,7 +254,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           id?: string
           module_id?: string
           order_index?: number
@@ -281,9 +275,9 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
-          deletion_status: Database["public"]["Enums"]["deletion_status"]
           id: string
           order_index: number
+          published: boolean
           subtitle: string | null
           title: string
           updated_at: string
@@ -291,9 +285,9 @@ export type Database = {
         Insert: {
           course_id: string
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           id?: string
           order_index: number
+          published?: boolean
           subtitle?: string | null
           title: string
           updated_at?: string
@@ -301,9 +295,9 @@ export type Database = {
         Update: {
           course_id?: string
           created_at?: string
-          deletion_status?: Database["public"]["Enums"]["deletion_status"]
           id?: string
           order_index?: number
+          published?: boolean
           subtitle?: string | null
           title?: string
           updated_at?: string

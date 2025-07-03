@@ -37,6 +37,8 @@ import {
   BookOpen,
   ChevronRight,
   Loader2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -63,8 +65,12 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
-type CourseModule = Database["public"]["Tables"]["course_modules"]["Row"];
+type CourseModule = Database["public"]["Tables"]["course_modules"]["Row"] & {
+  published?: boolean;
+};
 
 interface CourseModuleManagerProps {
   courseId: string;
@@ -78,6 +84,7 @@ const SortableModule = ({
   toggleModuleExpansion,
   handleOpenDialog,
   handleDeleteModule,
+  handleTogglePublish,
   isDragging,
   coachId,
 }: {
@@ -86,6 +93,7 @@ const SortableModule = ({
   toggleModuleExpansion: (id: string) => void;
   handleOpenDialog: (module?: CourseModule) => void;
   handleDeleteModule: (id: string) => void;
+  handleTogglePublish: (moduleId: string, published: boolean) => void;
   isDragging: boolean;
   coachId: string;
 }) => {
@@ -119,7 +127,15 @@ const SortableModule = ({
               <GripVertical className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="flex-1">
-              <h4 className="font-medium">{module.title}</h4>
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium">{module.title}</h4>
+                <Badge
+                  variant={module.published ? "default" : "secondary"}
+                  className="text-xs"
+                >
+                  {module.published ? "Published" : "Draft"}
+                </Badge>
+              </div>
               {module.subtitle && (
                 <p className="text-sm text-muted-foreground">
                   {module.subtitle}
@@ -145,6 +161,23 @@ const SortableModule = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() =>
+                  handleTogglePublish(module.id, !module.published)
+                }
+              >
+                {module.published ? (
+                  <>
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    Unpublish Module
+                  </>
+                ) : (
+                  <>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Publish Module
+                  </>
+                )}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleOpenDialog(module)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit Module
@@ -176,7 +209,6 @@ const fetchModules = async (_key: string, courseId: string) => {
     .from("course_modules")
     .select("*")
     .eq("course_id", courseId)
-    .eq("deletion_status", "not_deleted")
     .order("order_index", { ascending: true });
 
   if (error) {
@@ -190,7 +222,9 @@ export default function CourseModuleManager({
   courseId,
   coachId,
 }: CourseModuleManagerProps) {
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(
+    new Set()
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<CourseModule | null>(null);
   const [moduleTitle, setModuleTitle] = useState("");
@@ -242,9 +276,9 @@ export default function CourseModuleManager({
   // Expand all modules by default when they're loaded or new ones are added
   useEffect(() => {
     if (modules.length > 0) {
-      setExpandedModules(prev => {
+      setExpandedModules((prev) => {
         const newSet = new Set(prev);
-        modules.forEach(module => {
+        modules.forEach((module) => {
           newSet.add(module.id);
         });
         return newSet;
@@ -301,6 +335,7 @@ export default function CourseModuleManager({
           title: moduleTitle.trim(),
           subtitle: moduleSubtitle.trim() || null,
           order_index: newOrderIndex,
+          published: false, // New modules start as draft
         });
 
         if (error) {
@@ -334,10 +369,7 @@ export default function CourseModuleManager({
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase
         .from("course_modules")
-        .update({
-          deletion_status: "deleted",
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq("id", moduleId);
 
       if (error) {
@@ -358,6 +390,43 @@ export default function CourseModuleManager({
       await mutate();
     } catch (error) {
       logError("Exception deleting module", { error, moduleId });
+    }
+  };
+
+  const handleTogglePublish = async (moduleId: string, published: boolean) => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase
+        .from("course_modules")
+        .update({ published })
+        .eq("id", moduleId);
+
+      if (error) {
+        logError("Error updating module publish status", {
+          error,
+          moduleId,
+          published,
+        });
+        toast({
+          title: "Error",
+          description: "Failed to update module status",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      logInfo("Module publish status updated", { moduleId, published });
+      toast({
+        title: "Success",
+        description: published ? "Module published" : "Module unpublished",
+      });
+      await mutate();
+    } catch (error) {
+      logError("Exception updating module publish status", {
+        error,
+        moduleId,
+        published,
+      });
     }
   };
 
@@ -382,7 +451,7 @@ export default function CourseModuleManager({
   };
 
   const toggleModuleExpansion = (moduleId: string) => {
-    setExpandedModules(prev => {
+    setExpandedModules((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(moduleId)) {
         newSet.delete(moduleId);
@@ -614,6 +683,7 @@ export default function CourseModuleManager({
                     toggleModuleExpansion={toggleModuleExpansion}
                     handleOpenDialog={handleOpenDialog}
                     handleDeleteModule={handleDeleteModule}
+                    handleTogglePublish={handleTogglePublish}
                     isDragging={activeId === module.id}
                     coachId={coachId}
                   />

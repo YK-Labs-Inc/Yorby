@@ -67,13 +67,13 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
     if (course.deletion_status === "not_deleted") {
       processedCourse = course;
       processedModules = course.course_modules
-        .filter((m) => m.deletion_status === "not_deleted")
+        .filter((m) => m.published === true)
         .sort((a, b) => a.order_index - b.order_index)
         .map((module) => ({
           ...module,
-          course_lessons: module.course_lessons
-            .filter((l) => l.deletion_status === "not_deleted")
-            .sort((a, b) => a.order_index - b.order_index),
+          course_lessons: module.course_lessons.sort(
+            (a, b) => a.order_index - b.order_index
+          ),
         }));
     }
   }
