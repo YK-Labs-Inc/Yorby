@@ -53,6 +53,7 @@ async function fetchLessonData(lessonId: string, userId: string) {
     )
     .eq("id", lessonId)
     .eq("deletion_status", "not_deleted")
+    .eq("course_modules.published", true)
     .single();
 
   if (lessonError || !lesson) {

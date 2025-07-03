@@ -707,10 +707,7 @@ export default function LessonContentEditor({
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase
         .from("course_lesson_blocks")
-        .update({
-          deletion_status: "deleted",
-          updated_at: new Date().toISOString(),
-        })
+        .delete()
         .eq("id", blockId);
 
       if (error) {
