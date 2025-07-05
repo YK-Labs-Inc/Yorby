@@ -1,0 +1,134 @@
+/* LiveKit Light Theme Override - Matching App Theme */
+[data-lk-theme='default'] {
+  color-scheme: light !important;
+
+  /* Background colors matching app theme */
+  --lk-bg: hsl(0 0% 98%) !important; /* --background */
+  --lk-bg2: hsl(0 0% 100%) !important; /* --card */
+  --lk-bg3: hsl(0 0% 96.1%) !important; /* --secondary/muted */
+  --lk-bg4: hsl(0 0% 89.8%) !important; /* --border */
+  --lk-bg5: hsl(0 0% 85%) !important;
+
+  /* Text colors matching app theme */
+  --lk-fg: hsl(0 0% 3.9%) !important; /* --foreground */
+  --lk-fg2: hsl(0 0% 9%) !important; /* --primary */
+  --lk-fg3: hsl(0 0% 20%) !important;
+  --lk-fg4: hsl(0 0% 45.1%) !important; /* --muted-foreground */
+  --lk-fg5: hsl(0 0% 63.9%) !important;
+
+  /* Border color */
+  --lk-border-color: hsl(0 0% 89.8%) !important; /* --border */
+
+  /* Primary/Accent colors - using neutral grays to match theme */
+  --lk-accent: hsl(0 0% 9%) !important; /* --primary */
+  --lk-accent-hover: hsl(0 0% 15%) !important;
+  --lk-accent-active: hsl(0 0% 20%) !important;
+
+  /* Danger color */
+  --lk-danger: hsl(0 84.2% 60.2%) !important; /* --destructive */
+  --lk-danger-hover: hsl(0 84.2% 50%) !important;
+
+  /* Success color - using chart-1 green */
+  --lk-success: hsl(142 76% 36%) !important;
+
+  /* Control backgrounds */
+  --lk-control-bg: hsl(0 0% 100%) !important;
+  --lk-control-hover-bg: hsl(0 0% 96.1%) !important;
+  --lk-control-active-bg: hsl(0 0% 89.8%) !important;
+
+  /* Focus and hover colors */
+  --lk-focus-color: hsl(0 0% 3.9%) !important; /* --ring */
+  --lk-hover-color: hsl(0 0% 9%) !important;
+
+  /* Connection quality colors matching charts */
+  --lk-connection-quality-excellent: hsl(142 76% 36%) !important;
+  --lk-connection-quality-good: hsl(43 74% 66%) !important; /* --chart-4 */
+  --lk-connection-quality-poor: hsl(0 84.2% 60.2%) !important; /* --destructive */
+}
+
+/* Additional specific overrides */
+[data-lk-theme='default'] .lk-prejoin {
+  background-color: hsl(0 0% 98%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-button {
+  background-color: hsl(0 0% 9%) !important; /* --primary */
+  color: hsl(0 0% 98%) !important; /* --primary-foreground */
+}
+
+[data-lk-theme='default'] .lk-button:hover {
+  background-color: hsl(0 0% 15%) !important;
+}
+
+[data-lk-theme='default'] .lk-control-bar {
+  background-color: hsl(0 0% 100%) !important;
+  border-top: 1px solid hsl(0 0% 89.8%) !important;
+}
+
+[data-lk-theme='default'] .lk-control-button {
+  background-color: hsl(0 0% 96.1%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-control-button:hover {
+  background-color: hsl(0 0% 89.8%) !important;
+}
+
+[data-lk-theme='default'] .lk-control-button[data-lk-active='true'] {
+  background-color: hsl(0 0% 9%) !important;
+  color: hsl(0 0% 98%) !important;
+}
+
+[data-lk-theme='default'] .lk-chat {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-chat-entry {
+  background-color: hsl(0 0% 96.1%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-participant-tile {
+  background-color: hsl(0 0% 96.1%) !important;
+}
+
+[data-lk-theme='default'] .lk-participant-name {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  color: white !important;
+}
+
+[data-lk-theme='default'] .lk-connection-quality {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-lk-theme='default'] .lk-media-device-select {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 3.9%) !important;
+  border: 1px solid hsl(0 0% 89.8%) !important;
+}
+
+[data-lk-theme='default'] .lk-media-device-select:hover {
+  background-color: hsl(0 0% 96.1%) !important;
+}
+
+/* Additional overrides for better theme consistency */
+[data-lk-theme='default'] .lk-focus-toggle-button {
+  background-color: hsl(0 0% 96.1%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-focus-toggle-button:hover {
+  background-color: hsl(0 0% 89.8%) !important;
+}
+
+[data-lk-theme='default'] .lk-settings-menu {
+  background-color: hsl(0 0% 100%) !important;
+  border: 1px solid hsl(0 0% 89.8%) !important;
+  color: hsl(0 0% 3.9%) !important;
+}
+
+[data-lk-theme='default'] .lk-settings-menu-item:hover {
+  background-color: hsl(0 0% 96.1%) !important;
+}

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 
-export default function useConnectionDetails() {
+interface UseConnectionDetailsProps {
+  mockInterviewId: string;
+}
+
+export default function useConnectionDetails({ mockInterviewId }: UseConnectionDetailsProps) {
   // Generate room connection details, including:
   //   - A random Room name
   //   - A random Participant name
@@ -22,6 +26,7 @@ export default function useConnectionDetails() {
         "/api/livekit/connection-details",
       window.location.origin,
     );
+    url.searchParams.set("mockInterviewId", mockInterviewId);
     fetch(url.toString())
       .then((res) => res.json())
       .then((data) => {
@@ -30,7 +35,7 @@ export default function useConnectionDetails() {
       .catch((error) => {
         console.error("Error fetching connection details:", error);
       });
-  }, []);
+  }, [mockInterviewId]);
 
   useEffect(() => {
     fetchConnectionDetails();

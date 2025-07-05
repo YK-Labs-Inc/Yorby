@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import { motion } from "motion/react";
 import {
+  PreJoin,
   RoomAudioRenderer,
   RoomContext,
   StartAudio,
@@ -12,10 +13,11 @@ import { toastAlert } from "./alert-toast";
 import type { AppConfig } from "./types";
 import { SessionView } from "./session-view";
 import { Toaster } from "@/components/ui/sonner";
-import { Welcome } from "./welcome";
 import useConnectionDetails from "./hooks/useConnectionDetails";
+import { useParams } from "next/navigation";
+import "@livekit/components-styles";
+import "./livekit-light-theme.css";
 
-const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
 
 interface AppProps {
@@ -25,8 +27,10 @@ interface AppProps {
 export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
-  const { connectionDetails, refreshConnectionDetails } =
-    useConnectionDetails();
+  const { mockInterviewId } = useParams<{ mockInterviewId: string }>();
+  const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
+    mockInterviewId,
+  });
 
   useEffect(() => {
     const onDisconnected = () => {
@@ -53,6 +57,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
         }),
+        room.localParticipant.setCameraEnabled(true),
         room.connect(
           connectionDetails.serverUrl,
           connectionDetails.participantToken
@@ -74,44 +79,34 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
     appConfig.isPreConnectBufferEnabled,
   ]);
 
-  const { startButtonText } = appConfig;
+  if (!sessionStarted) {
+    return (
+      <div data-lk-theme="default">
+        <PreJoin onSubmit={() => setSessionStarted(true)} />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <MotionWelcome
-        key="welcome"
-        startButtonText={startButtonText}
-        onStartCall={() => setSessionStarted(true)}
-        disabled={sessionStarted}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: sessionStarted ? 0 : 1 }}
-        transition={{
-          duration: 0.5,
-          ease: "linear",
-          delay: sessionStarted ? 0 : 0.5,
-        }}
-      />
-
+    <div data-lk-theme="default">
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />
         <StartAudio label="Start Audio" />
-        {/* --- */}
         <MotionSessionView
           key="session-view"
           appConfig={appConfig}
           disabled={!sessionStarted}
           sessionStarted={sessionStarted}
           initial={{ opacity: 0 }}
-          animate={{ opacity: sessionStarted ? 1 : 0 }}
+          animate={{ opacity: 1 }}
           transition={{
             duration: 0.5,
             ease: "linear",
-            delay: sessionStarted ? 0.5 : 0,
           }}
         />
       </RoomContext.Provider>
 
       <Toaster />
-    </>
+    </div>
   );
 }
