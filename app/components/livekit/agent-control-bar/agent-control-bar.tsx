@@ -4,20 +4,16 @@ import * as React from "react";
 import { Track } from "livekit-client";
 import {
   BarVisualizer,
-  useRemoteParticipants,
 } from "@livekit/components-react";
-import { MessageSquare, PhoneOff } from "lucide-react";
-import { ChatInput } from "@/app/components/livekit/chat/chat-input";
+import { PhoneOff } from "lucide-react";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { cn } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/utils";
-import { DeviceSelect } from "@/app/components/livekit/device-select";
 import { TrackToggle } from "@/app/components/livekit/track-toggle";
 import {
   UseAgentControlBarProps,
   useAgentControlBar,
 } from "./hooks/use-agent-control-bar";
 import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/toggle";
 
 export interface AgentControlBarProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -46,12 +42,6 @@ export function AgentControlBar({
   onDeviceError,
   ...props
 }: AgentControlBarProps) {
-  const participants = useRemoteParticipants();
-  const [chatOpen, setChatOpen] = React.useState(false);
-  const [isSendingMessage, setIsSendingMessage] = React.useState(false);
-
-  const isAgentAvailable = participants.some((p) => p.isAgent);
-  const isInputDisabled = !chatOpen || !isAgentAvailable || isSendingMessage;
 
   const {
     micTrackRef,
@@ -59,169 +49,86 @@ export function AgentControlBar({
     cameraToggle,
     microphoneToggle,
     screenShareToggle,
-    handleAudioDeviceChange,
-    handleVideoDeviceChange,
     handleDisconnect,
   } = useAgentControlBar({
     controls,
     saveUserChoices,
   });
 
-  const handleSendMessage = async (message: string) => {
-    setIsSendingMessage(true);
-    try {
-      await onSendMessage?.(message);
-    } finally {
-      setIsSendingMessage(false);
-    }
-  };
-
   const onLeave = () => {
     handleDisconnect();
     onDisconnect?.();
   };
 
-  React.useEffect(() => {
-    onChatOpenChange?.(chatOpen);
-  }, [chatOpen, onChatOpenChange]);
-
   return (
     <div
       aria-label="Voice assistant controls"
       className={cn(
-        "bg-background border-bg2 dark:border-separator1 flex flex-col rounded-[31px] border p-3 drop-shadow-md/3",
+        "bg-card border border-border rounded-full px-6 py-3 shadow-sm",
         className
       )}
       {...props}
     >
-      {capabilities.supportsChatInput && (
-        <div
-          inert={!chatOpen}
-          className={cn(
-            "overflow-hidden transition-[height] duration-300 ease-out",
-            chatOpen ? "h-[57px]" : "h-0"
-          )}
-        >
-          <div className="flex h-8 w-full">
-            <ChatInput
-              onSend={handleSendMessage}
-              disabled={isInputDisabled}
-              className="w-full"
-            />
-          </div>
-          <hr className="border-bg2 my-3" />
-        </div>
-      )}
-
-      <div className="flex flex-row justify-between gap-1">
-        <div className="flex gap-1">
+      <div className="flex flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-3">
           {visibleControls.microphone && (
-            <div className="flex items-center gap-0">
-              <TrackToggle
-                source={Track.Source.Microphone}
-                pressed={microphoneToggle.enabled}
-                disabled={microphoneToggle.pending}
-                onPressedChange={microphoneToggle.toggle}
-                className="peer/track group/track relative w-auto pr-3 pl-3 md:rounded-r-none md:border-r-0 md:pr-2"
-              >
+            <TrackToggle
+              source={Track.Source.Microphone}
+              pressed={microphoneToggle.enabled}
+              disabled={microphoneToggle.pending}
+              onPressedChange={microphoneToggle.toggle}
+              variant={microphoneToggle.enabled ? "default" : "outline"}
+              size="lg"
+              className="h-12 w-12 rounded-full p-0"
+            >
+              {microphoneToggle.enabled && (
                 <BarVisualizer
                   barCount={3}
                   trackRef={micTrackRef}
-                  options={{ minHeight: 5 }}
-                  className="flex h-full w-auto items-center justify-center gap-0.5"
+                  options={{ minHeight: 4 }}
+                  className="absolute inset-0 flex items-center justify-center gap-0.5"
                 >
-                  <span
-                    className={cn([
-                      "h-full w-0.5 origin-center rounded-2xl",
-                      "group-data-[state=on]/track:bg-fg1 group-data-[state=off]/track:bg-destructive-foreground",
-                      "data-lk-muted:bg-muted",
-                    ])}
-                  ></span>
+                  <span className="h-4 w-0.5 bg-primary rounded-full" />
                 </BarVisualizer>
-              </TrackToggle>
-              <hr className="bg-separator1 peer-data-[state=off]/track:bg-separatorSerious relative z-10 -mr-px hidden h-4 w-px md:block" />
-              <DeviceSelect
-                kind="audioinput"
-                onError={(error) =>
-                  onDeviceError?.({
-                    source: Track.Source.Microphone,
-                    error: error as Error,
-                  })
-                }
-                onActiveDeviceChange={handleAudioDeviceChange}
-                className={cn([
-                  "pl-2",
-                  "peer-data-[state=off]/track:text-destructive-foreground",
-                  "hover:text-fg1 focus:text-fg1",
-                  "hover:peer-data-[state=off]/track:text-destructive-foreground focus:peer-data-[state=off]/track:text-destructive-foreground",
-                  "hidden rounded-l-none md:block",
-                ])}
-              />
-            </div>
+              )}
+            </TrackToggle>
           )}
 
           {capabilities.supportsVideoInput && visibleControls.camera && (
-            <div className="flex items-center gap-0">
-              <TrackToggle
-                source={Track.Source.Camera}
-                pressed={cameraToggle.enabled}
-                pending={cameraToggle.pending}
-                disabled={cameraToggle.pending}
-                onPressedChange={cameraToggle.toggle}
-                className="peer/track relative w-auto rounded-r-none pr-3 pl-3 disabled:opacity-100 md:border-r-0 md:pr-2"
-              />
-              <hr className="bg-separator1 peer-data-[state=off]/track:bg-separatorSerious relative z-10 -mr-px hidden h-4 w-px md:block" />
-              <DeviceSelect
-                kind="videoinput"
-                onError={(error) =>
-                  onDeviceError?.({
-                    source: Track.Source.Camera,
-                    error: error as Error,
-                  })
-                }
-                onActiveDeviceChange={handleVideoDeviceChange}
-                className={cn([
-                  "pl-2",
-                  "peer-data-[state=off]/track:text-destructive-foreground",
-                  "hover:text-fg1 focus:text-fg1",
-                  "hover:peer-data-[state=off]/track:text-destructive-foreground focus:peer-data-[state=off]/track:text-destructive-foreground",
-                  "rounded-l-none",
-                ])}
-              />
-            </div>
+            <TrackToggle
+              source={Track.Source.Camera}
+              pressed={cameraToggle.enabled}
+              pending={cameraToggle.pending}
+              disabled={cameraToggle.pending}
+              onPressedChange={cameraToggle.toggle}
+              variant={cameraToggle.enabled ? "default" : "outline"}
+              size="lg"
+              className="h-12 w-12 rounded-full p-0"
+            />
           )}
 
           {capabilities.supportsScreenShare && visibleControls.screenShare && (
-            <div className="flex items-center gap-0">
-              <TrackToggle
-                variant="outline"
-                source={Track.Source.ScreenShare}
-                pressed={screenShareToggle.enabled}
-                disabled={screenShareToggle.pending}
-                onPressedChange={screenShareToggle.toggle}
-                className="relative w-auto"
-              />
-            </div>
+            <TrackToggle
+              source={Track.Source.ScreenShare}
+              pressed={screenShareToggle.enabled}
+              disabled={screenShareToggle.pending}
+              onPressedChange={screenShareToggle.toggle}
+              variant={screenShareToggle.enabled ? "default" : "outline"}
+              size="lg"
+              className="h-12 px-5 rounded-full"
+            />
           )}
 
-          {visibleControls.chat && (
-            <Toggle
-              variant="outline"
-              aria-label="Toggle chat"
-              pressed={chatOpen}
-              onPressedChange={setChatOpen}
-              disabled={!isAgentAvailable}
-              className="aspect-square h-full"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </Toggle>
-          )}
         </div>
         {visibleControls.leave && (
-          <Button variant="destructive" onClick={onLeave} className="font-mono">
-            <PhoneOff className="h-4 w-4" />
-            <span className="hidden md:inline">END CALL</span>
-            <span className="inline md:hidden">END</span>
+          <Button 
+            variant="destructive" 
+            onClick={onLeave} 
+            size="lg"
+            className="h-12 px-6 rounded-full font-medium"
+          >
+            <PhoneOff className="h-5 w-5 mr-2" />
+            <span>End Call</span>
           </Button>
         )}
       </div>

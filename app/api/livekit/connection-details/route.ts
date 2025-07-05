@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
     AccessToken,
     type AccessTokenOptions,
     AgentDispatchClient,
     type VideoGrant,
 } from "livekit-server-sdk";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
 const API_KEY = process.env.LIVEKIT_API_KEY;
@@ -21,7 +22,7 @@ export type ConnectionDetails = {
     participantToken: string;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
         if (LIVEKIT_URL === undefined) {
             throw new Error("LIVEKIT_URL is not defined");
@@ -33,22 +34,45 @@ export async function GET() {
             throw new Error("LIVEKIT_API_SECRET is not defined");
         }
 
+        // Get the current user
+        const supabase = await createSupabaseServerClient();
+        const { data: { user }, error: userError } = await supabase.auth
+            .getUser();
+
+        if (userError || !user) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        // Get mockInterviewId from query params
+        const searchParams = request.nextUrl.searchParams;
+        const mockInterviewId = searchParams.get("mockInterviewId");
+
+        if (!mockInterviewId) {
+            return new NextResponse("mockInterviewId is required", {
+                status: 400,
+            });
+        }
+
+        // Fetch the mock interview to get the interview prompt
+        const { data: mockInterview, error: mockInterviewError } = await supabase
+            .from("custom_job_mock_interviews")
+            .select("interview_prompt")
+            .eq("id", mockInterviewId)
+            .single();
+
+        if (mockInterviewError || !mockInterview) {
+            return new NextResponse("Mock interview not found", { status: 404 });
+        }
+
         // Generate participant token
-        const participantName = "user";
-        const participantIdentity = `voice_assistant_user_${
-            Math.floor(Math.random() * 10_000)
-        }`;
-        const roomName = `voice_assistant_room_${
-            Math.floor(Math.random() * 10_000)
-        }`;
+        const participantName = user.user_metadata?.full_name || user.email ||
+            "User";
+        const participantIdentity = user.id;
+        const roomName = mockInterviewId;
         const participantToken = await createParticipantToken(
             {
                 identity: participantIdentity,
                 name: participantName,
-                attributes: {
-                    candidate_name: "John",
-                    interview_prompt: "You are a software engineer interviewer",
-                },
             },
             roomName,
         );
@@ -68,9 +92,8 @@ export async function GET() {
                 {
                     metadata: JSON.stringify({
                         user_id: participantIdentity,
-                        candidate_name: "John",
-                        interview_prompt:
-                            "You are a software engineer interviewer",
+                        candidate_name: participantName,
+                        interview_prompt: mockInterview.interview_prompt,
                     }),
                 },
             );
