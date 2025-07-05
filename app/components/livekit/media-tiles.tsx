@@ -30,7 +30,7 @@ const animationProps = {
     scale: 0,
   },
   transition: {
-    type: 'spring',
+    type: 'spring' as const,
     stiffness: 675,
     damping: 75,
     mass: 1,
