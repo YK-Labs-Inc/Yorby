@@ -1,21 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps extends React.HTMLAttributes<HTMLFormElement> {
   onSend?: (message: string) => void;
   disabled?: boolean;
 }
 
-export function ChatInput({ onSend, className, disabled, ...props }: ChatInputProps) {
+export function ChatInput({
+  onSend,
+  className,
+  disabled,
+  ...props
+}: ChatInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     props.onSubmit?.(e);
     onSend?.(message);
-    setMessage('');
+    setMessage("");
   };
 
   const isDisabled = disabled || message.trim().length === 0;
@@ -30,7 +35,10 @@ export function ChatInput({ onSend, className, disabled, ...props }: ChatInputPr
     <form
       {...props}
       onSubmit={handleSubmit}
-      className={cn('flex items-center gap-2 rounded-md pl-1 text-sm', className)}
+      className={cn(
+        "flex items-center gap-2 rounded-md pl-1 text-sm",
+        className
+      )}
     >
       <input
         autoFocus
@@ -45,7 +53,7 @@ export function ChatInput({ onSend, className, disabled, ...props }: ChatInputPr
       <Button
         size="sm"
         type="submit"
-        variant={isDisabled ? 'secondary' : 'primary'}
+        variant={isDisabled ? "secondary" : "default"}
         disabled={isDisabled}
         className="font-mono"
       >
