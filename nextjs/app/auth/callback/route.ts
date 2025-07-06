@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import * as SibApiV3Sdk from "@sendinblue/client";
 import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
 import { User } from "@supabase/supabase-js";
+import { getgroups } from "process";
 
 export const GET = withAxiom(async (request: AxiomRequest) => {
   // The `/auth/callback` route is required for the server-side auth flow implemented
@@ -33,9 +34,8 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   if (type === "magiclink") {
     logger.info("Handling magic link");
     if (!token) {
-      logger.error("Invalid or expired code");
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Invalid or expired code. Please try again.`,
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
       );
     }
     // Handle magic link flow
@@ -44,9 +44,8 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       type: "magiclink",
     });
     if (error) {
-      logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Failed to verify magic link. Please try again.`,
+        `${origin}/sign-in?error=Failed to verify magic link. Please try again.`
       );
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -67,9 +66,8 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     });
 
     if (error) {
-      logger.error("Failed to verify magic link", { error });
       return NextResponse.redirect(
-        `${origin}/sign-in?error=Invalid or expired code. Please try again.`,
+        `${origin}/sign-in?error=Invalid or expired code. Please try again.`
       );
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -84,7 +82,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       });
       if (userInitiallySignedUp) {
         logger.info(
-          "User initially signed up. Redirecting to confirm-initial-login",
+          "User initially signed up. Redirecting to confirm-initial-login"
         );
         return NextResponse.redirect(`${origin}/confirm-initial-login`);
       }
@@ -96,7 +94,6 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
       type: "email_change",
     });
     if (error) {
-      logger.error("Failed to verify email change", { error });
       return NextResponse.redirect(`${origin}/sign-up?error=${error.message}`);
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -113,7 +110,6 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     }
   }
 
-
   if (redirectTo) {
     logger.info("Redirecting to", { redirectTo });
     return NextResponse.redirect(`${redirectTo}`);
@@ -121,7 +117,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
 
   if (userInitiallySignedUp) {
     logger.info(
-      "User initially signed up. Redirecting to confirm-initial-login",
+      "User initially signed up. Redirecting to confirm-initial-login"
     );
     return NextResponse.redirect(`${origin}/confirm-initial-login`);
   }
@@ -139,17 +135,15 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   return NextResponse.redirect(`${origin}/onboarding`);
 });
 
-
 const getRedirectToOnboardingV2 = async (user: User) => {
   const memoriesEnabled = Boolean(
-    await posthog.isFeatureEnabled("enable-memories", user.id),
+    await posthog.isFeatureEnabled("enable-memories", user.id)
   );
   if (!memoriesEnabled) {
     return false;
   }
-  const userHasFinishedMemoriesOnboarding = await completedMemoriesOnboarding(
-    user,
-  );
+  const userHasFinishedMemoriesOnboarding =
+    await completedMemoriesOnboarding(user);
   if (userHasFinishedMemoriesOnboarding) {
     return false;
   }

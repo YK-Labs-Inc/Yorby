@@ -170,6 +170,7 @@ const HowItWorksSection = () => {
   useEffect(() => {
     const videoElement = videoRef.current;
     let handleTimeUpdate: (() => void) | null = null;
+    let isMounted = true;
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
@@ -213,14 +214,22 @@ const HowItWorksSection = () => {
       videoElement.onended = goToNextStep;
       videoElement.addEventListener("timeupdate", handleTimeUpdate);
       videoElement.load();
-      videoElement.play().catch((error) => {
-        logError("Video play failed on step change", { error });
-      });
+      if (isMounted) {
+        const playPromise = videoElement.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            if (error.name !== "AbortError" && isMounted) {
+              logError("Video play failed on step change", { error });
+            }
+          });
+        }
+      }
     } else {
       startTimer();
     }
 
     return () => {
+      isMounted = false;
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (progressIntervalRef.current)
         clearInterval(progressIntervalRef.current);
@@ -228,6 +237,7 @@ const HowItWorksSection = () => {
         clearTimeout(programmaticScrollTimeoutRef.current);
       }
       if (videoElement) {
+        videoElement.pause();
         videoElement.onended = null;
         if (handleTimeUpdate) {
           videoElement.removeEventListener("timeupdate", handleTimeUpdate);
