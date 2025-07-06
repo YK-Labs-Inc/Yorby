@@ -1,0 +1,29 @@
+services:
+- type: pserv
+  repo: https://github.com/YK-Labs-LLC/yorby-livekit-agent 
+
+  # Change this to the path containing your Dockerfile
+  rootDir: src
+
+  name: yorby
+  runtime: image
+
+  # Free plan is not available for private services
+  plan: starter
+
+  # Environment variables are stored in a group
+  # created in the Render dashboard.
+  envVars:
+  - fromGroup: prod 
+  region: virginia
+
+  # 300s is the standard allowed maximum. Talk to render.com support if you need this increased.
+  maxShutdownDelaySeconds: 300
+
+  # Sane defaults
+  scaling:
+    minInstances: 1
+    maxInstances: 4
+    targetCPUPercent: 60
+    targetMemoryPercent: 60
+version: "1"
