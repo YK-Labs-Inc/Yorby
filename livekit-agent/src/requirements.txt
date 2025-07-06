@@ -1,7 +1,0 @@
-livekit
-livekit-agents
-livekit-plugins-openai
-livekit-plugins-silero
-livekit-plugins-turn-detector
-livekit-plugins-noise-cancellation
-python-dotenv
