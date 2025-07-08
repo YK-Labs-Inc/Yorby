@@ -6,6 +6,7 @@ import {
   type VideoGrant,
 } from "livekit-server-sdk";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { withAxiom, AxiomRequest } from "next-axiom";
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
 const API_KEY = process.env.LIVEKIT_API_KEY;
@@ -22,7 +23,13 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
-export async function GET(request: NextRequest) {
+export const GET = withAxiom(async (req: AxiomRequest) => {
+  const log = req.log.with({
+    function: "/api/livekit/connection-details",
+    method: "GET",
+    searchParams: Object.fromEntries(req.nextUrl.searchParams),
+  });
+
   try {
     if (LIVEKIT_URL === undefined) {
       throw new Error("LIVEKIT_URL is not defined");
@@ -42,18 +49,22 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
+      log.error("Unauthorized access attempt", { error: userError });
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     // Get mockInterviewId from query params
-    const searchParams = request.nextUrl.searchParams;
+    const searchParams = req.nextUrl.searchParams;
     const mockInterviewId = searchParams.get("mockInterviewId");
 
     if (!mockInterviewId) {
+      log.warn("Missing mockInterviewId in request");
       return new NextResponse("mockInterviewId is required", {
         status: 400,
       });
     }
+
+    log.info("Fetching mock interview", { mockInterviewId, userId: user.id });
 
     // Fetch the mock interview to get the interview prompt
     const { data: mockInterview, error: mockInterviewError } = await supabase
@@ -63,6 +74,10 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (mockInterviewError || !mockInterview) {
+      log.error("Failed to fetch mock interview", {
+        mockInterviewId,
+        error: mockInterviewError,
+      });
       return new NextResponse("Mock interview not found", { status: 404 });
     }
 
@@ -100,9 +115,17 @@ export async function GET(request: NextRequest) {
           }),
         }
       );
-      console.log("Created agent dispatch:", dispatch);
+      log.info("Created agent dispatch", {
+        dispatch,
+        roomName,
+        agentName,
+      });
     } catch (error) {
-      console.error("Failed to create agent dispatch:", error);
+      log.error("Failed to create agent dispatch", {
+        error,
+        roomName,
+        agentName,
+      });
       // Continue even if dispatch fails - the agent might join through other means
     }
 
@@ -113,17 +136,29 @@ export async function GET(request: NextRequest) {
       participantToken: participantToken,
       participantName,
     };
+
+    log.info("Successfully created connection details", {
+      roomName,
+      participantName,
+      userId: user.id,
+    });
+
     const headers = new Headers({
       "Cache-Control": "no-store",
     });
     return NextResponse.json(data, { headers });
   } catch (error) {
+    log.error("Error in connection details endpoint", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
     if (error instanceof Error) {
-      console.error(error);
       return new NextResponse(error.message, { status: 500 });
     }
+    return new NextResponse("Internal server error", { status: 500 });
   }
-}
+});
 
 function createParticipantToken(
   userInfo: AccessTokenOptions,
