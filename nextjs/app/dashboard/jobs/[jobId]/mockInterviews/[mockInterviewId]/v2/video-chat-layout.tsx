@@ -128,10 +128,10 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
         <div className="flex-1 bg-muted/50 rounded-lg p-4 overflow-y-auto">
           <h3 className="text-sm font-semibold text-muted-foreground mb-3">Interview Questions</h3>
           <div className="space-y-3">
-            <AnimatePresence>
-              {aiMessages.map((message) => (
+            <AnimatePresence mode="wait">
+              {aiMessages.length > 0 ? (
                 <motion.div
-                  key={message.id}
+                  key={aiMessages[aiMessages.length - 1].id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -140,15 +140,14 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
                   <ChatEntry
                     hideName
                     hideTimestamp
-                    entry={message}
+                    entry={aiMessages[aiMessages.length - 1]}
                     className="bg-background rounded-lg p-3 shadow-sm"
                   />
                 </motion.div>
-              ))}
+              ) : (
+                <p className="text-muted-foreground text-sm">Waiting for interview questions...</p>
+              )}
             </AnimatePresence>
-            {aiMessages.length === 0 && (
-              <p className="text-muted-foreground text-sm">Waiting for interview questions...</p>
-            )}
           </div>
         </div>
       </div>
