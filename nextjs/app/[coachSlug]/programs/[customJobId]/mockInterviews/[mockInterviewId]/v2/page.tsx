@@ -19,11 +19,11 @@ export default async function LiveKitInterviewPage() {
   if (!user) {
     redirect("/login");
   }
-  const isLiveKitEnabled = Boolean(
-    await posthog.isFeatureEnabled("enable-livekit", user.id)
-  );
-  if (!isLiveKitEnabled) {
-    redirect("/");
-  }
+  // const isLiveKitEnabled = Boolean(
+  //   await posthog.isFeatureEnabled("enable-livekit", user.id)
+  // );
+  // if (!isLiveKitEnabled) {
+  //   redirect("/");
+  // }
   return <LiveKitInterviewComponent appConfig={appConfig} />;
 }

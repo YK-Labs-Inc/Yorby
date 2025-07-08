@@ -1,30 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface UseConnectionDetailsProps {
   mockInterviewId: string;
 }
 
-export default function useConnectionDetails({ mockInterviewId }: UseConnectionDetailsProps) {
-  // Generate room connection details, including:
-  //   - A random Room name
-  //   - A random Participant name
-  //   - An Access Token to permit the participant to join the room
-  //   - The URL of the LiveKit server to connect to
-  //
-  // In real-world application, you would likely allow the user to specify their
-  // own participant name, and possibly to choose from existing rooms to join.
-
-  const [connectionDetails, setConnectionDetails] = useState<
-    ConnectionDetails | null
-  >(null);
+export default function useConnectionDetails({
+  mockInterviewId,
+}: UseConnectionDetailsProps) {
+  const { logError } = useAxiomLogging();
+  const [connectionDetails, setConnectionDetails] =
+    useState<ConnectionDetails | null>(null);
 
   const fetchConnectionDetails = useCallback(() => {
     setConnectionDetails(null);
     const url = new URL(
       process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ??
         "/api/livekit/connection-details",
-      window.location.origin,
+      window.location.origin
     );
     url.searchParams.set("mockInterviewId", mockInterviewId);
     fetch(url.toString())
@@ -33,7 +27,9 @@ export default function useConnectionDetails({ mockInterviewId }: UseConnectionD
         setConnectionDetails(data);
       })
       .catch((error) => {
-        console.error("Error fetching connection details:", error);
+        logError("Error fetching connection details", {
+          error,
+        });
       });
   }, [mockInterviewId]);
 
