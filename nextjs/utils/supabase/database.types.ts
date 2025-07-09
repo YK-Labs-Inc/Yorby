@@ -1129,29 +1129,29 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          raw_bucket: string
-          raw_file_path: string
+          raw_bucket: string | null
+          raw_file_path: string | null
           status: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket: string
-          transcoded_file_path: string
+          transcoded_bucket: string | null
+          transcoded_file_path: string | null
         }
         Insert: {
           created_at?: string
           id: string
-          raw_bucket: string
-          raw_file_path: string
+          raw_bucket?: string | null
+          raw_file_path?: string | null
           status: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket: string
-          transcoded_file_path: string
+          transcoded_bucket?: string | null
+          transcoded_file_path?: string | null
         }
         Update: {
           created_at?: string
           id?: string
-          raw_bucket?: string
-          raw_file_path?: string
+          raw_bucket?: string | null
+          raw_file_path?: string | null
           status?: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket?: string
-          transcoded_file_path?: string
+          transcoded_bucket?: string | null
+          transcoded_file_path?: string | null
         }
         Relationships: [
           {
