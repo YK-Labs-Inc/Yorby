@@ -1125,6 +1125,44 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_interview_google_storage_metadata: {
+        Row: {
+          created_at: string
+          id: string
+          raw_bucket: string
+          raw_file_path: string
+          status: Database["public"]["Enums"]["mux_status"]
+          transcoded_bucket: string
+          transcoded_file_path: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          raw_bucket: string
+          raw_file_path: string
+          status: Database["public"]["Enums"]["mux_status"]
+          transcoded_bucket: string
+          transcoded_file_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          raw_bucket?: string
+          raw_file_path?: string
+          status?: Database["public"]["Enums"]["mux_status"]
+          transcoded_bucket?: string
+          transcoded_file_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_google_storage_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mock_interview_message_mux_metadata: {
         Row: {
           asset_id: string | null
