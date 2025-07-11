@@ -1125,44 +1125,6 @@ export type Database = {
         }
         Relationships: []
       }
-      mock_interview_google_storage_metadata: {
-        Row: {
-          created_at: string
-          id: string
-          raw_bucket: string | null
-          raw_file_path: string | null
-          status: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket: string | null
-          transcoded_file_path: string | null
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          raw_bucket?: string | null
-          raw_file_path?: string | null
-          status: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket?: string | null
-          transcoded_file_path?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          raw_bucket?: string | null
-          raw_file_path?: string | null
-          status?: Database["public"]["Enums"]["mux_status"]
-          transcoded_bucket?: string | null
-          transcoded_file_path?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "mock_interview_google_storage_metadata_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "custom_job_mock_interviews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mock_interview_message_mux_metadata: {
         Row: {
           asset_id: string | null
@@ -1234,6 +1196,41 @@ export type Database = {
             foreignKeyName: "mock_interview_messages_mock_interview_id_fkey"
             columns: ["mock_interview_id"]
             isOneToOne: false
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_interview_mux_metadata: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          id: string
+          playback_id: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          id: string
+          playback_id?: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          upload_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          upload_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_google_storage_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
             referencedRelation: "custom_job_mock_interviews"
             referencedColumns: ["id"]
           },
