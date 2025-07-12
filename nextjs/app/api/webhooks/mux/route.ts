@@ -111,9 +111,6 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         );
         break;
       }
-      if (table === "mock_interview_mux_metadata") {
-        break;
-      }
       let messageId;
       try {
         messageId = await getMessageId(asset, table);
