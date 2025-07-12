@@ -158,6 +158,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           .from(table)
           .update({
             asset_id: asset.id,
+            upload_id: asset.upload_id,
             status: "preparing",
           })
           .eq("id", messageId);
@@ -226,6 +227,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         .update({
           asset_id: asset.id,
           playback_id: playbackId,
+          upload_id: asset.upload_id,
           status: "ready",
         })
         .eq("id", messageId);
@@ -288,6 +290,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         .from(table)
         .update({
           asset_id: asset.id,
+          upload_id: asset.upload_id,
           status: "errored",
         })
         .eq("id", messageId);
