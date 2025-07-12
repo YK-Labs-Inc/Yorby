@@ -1125,6 +1125,35 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_interview_gcp_storage_metadata: {
+        Row: {
+          bucket_name: string
+          created_at: string
+          file_path: string
+          id: string
+        }
+        Insert: {
+          bucket_name: string
+          created_at?: string
+          file_path: string
+          id: string
+        }
+        Update: {
+          bucket_name?: string
+          created_at?: string
+          file_path?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_interview_gcp_storage_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mock_interview_message_mux_metadata: {
         Row: {
           asset_id: string | null
