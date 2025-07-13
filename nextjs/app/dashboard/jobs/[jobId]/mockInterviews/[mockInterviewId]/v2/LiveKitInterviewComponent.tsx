@@ -70,7 +70,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
           );
         }
         router.push(
-          `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review`
+          `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
         );
       } catch (error) {
         logError("Error processing interview", {

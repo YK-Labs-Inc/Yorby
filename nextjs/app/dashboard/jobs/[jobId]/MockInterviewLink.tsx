@@ -10,9 +10,11 @@ import { useTranslations } from "next-intl";
 const MockInterviewLink = ({
   interview,
   jobId,
+  livekitInterviewEnabled,
 }: {
   interview: Tables<"custom_job_mock_interviews">;
   jobId: string;
+  livekitInterviewEnabled: boolean;
 }) => {
   const t = useTranslations("mockInterview");
   const { baseUrl } = useMultiTenant();
@@ -22,8 +24,8 @@ const MockInterviewLink = ({
       key={interview.id}
       href={
         interview.status === "complete"
-          ? `${mockInterviewsPath}/${interview.id}/review`
-          : `${mockInterviewsPath}/${interview.id}`
+          ? `${mockInterviewsPath}/${interview.id}/review${livekitInterviewEnabled ? '/v2' : ''}`
+          : `${mockInterviewsPath}/${interview.id}${livekitInterviewEnabled ? '/v2' : ''}`
       }
       className="group flex items-center justify-between p-6 bg-white dark:bg-gray-800/10 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors border border-gray-100 dark:border-gray-800 shadow-sm"
     >

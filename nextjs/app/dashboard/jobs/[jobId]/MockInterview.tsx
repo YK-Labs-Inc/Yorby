@@ -8,6 +8,7 @@ import LockedJobComponent from "./LockedJobComponent";
 import CreateDemoMockInterviewButton from "./CreateDemoMockInterviewButton";
 import MockInterviewOnboarding from "./MockInterviewOnboarding";
 import MockInterviewLink from "./MockInterviewLink";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 interface MockInterviewProps {
   filter: "all" | "complete" | "in_progress" | null;
@@ -54,6 +55,10 @@ export default async function MockInterview({
   } = await supabase.auth.getUser();
   const hasViewedOnboarding =
     user?.app_metadata?.viewed_mock_interview_onboarding === true;
+  
+  const livekitInterviewEnabled = user ? Boolean(
+    await posthog.isFeatureEnabled("enable-livekit", user.id)
+  ) : false;
 
   if (isLocked) {
     return (
@@ -80,6 +85,7 @@ export default async function MockInterview({
                 key={interview.id}
                 interview={interview}
                 jobId={jobId}
+                livekitInterviewEnabled={livekitInterviewEnabled}
               />
             ))}
             <LockedJobComponent
@@ -117,6 +123,7 @@ export default async function MockInterview({
               key={interview.id}
               interview={interview}
               jobId={jobId}
+              livekitInterviewEnabled={livekitInterviewEnabled}
             />
           ))}
         </div>
