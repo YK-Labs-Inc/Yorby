@@ -5,6 +5,7 @@ import MockInterviewReviewClientComponentV2 from "./MockInterviewReviewClientCom
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { getMockInterviewDataV2 } from "../../actions";
+import { useTranslations } from "next-intl";
 
 const MockInterviewReviewV2 = ({
   mockInterviewId,
@@ -12,6 +13,7 @@ const MockInterviewReviewV2 = ({
   mockInterviewId: string;
 }) => {
   const { logError, logInfo } = useAxiomLogging();
+  const t = useTranslations("mockInterviewReview");
 
   const { data, error, isLoading } = useSWR(
     [`mock-interview-review-v2`, mockInterviewId],
@@ -43,7 +45,7 @@ const MockInterviewReviewV2 = ({
       <div className="container mx-auto py-6">
         <div className="flex items-center justify-center h-64">
           <p className="text-red-500">
-            Failed to load mock interview
+            {t("error.loadFailed")}
           </p>
         </div>
       </div>

@@ -136,10 +136,10 @@ export default function MockInterviewReviewClientComponentV2({
           <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
             <span className="text-base font-medium">
-              Video is being processed...
+              {t("video.processing")}
             </span>
             <span className="text-sm text-muted-foreground mt-1">
-              This may take a few minutes. Please check back later.
+              {t("video.processingSubtext")}
             </span>
           </div>
         );
@@ -149,10 +149,10 @@ export default function MockInterviewReviewClientComponentV2({
           <div className="w-full flex flex-col items-center justify-center h-48 text-destructive text-center">
             <AlertCircle className="h-8 w-8 mb-2" />
             <span className="text-base font-medium">
-              Video processing failed
+              {t("video.failed")}
             </span>
             <span className="text-sm text-muted-foreground mt-1">
-              There was an error processing your video. Please contact support.
+              {t("video.failedSubtext")}
             </span>
           </div>
         );
@@ -164,7 +164,7 @@ export default function MockInterviewReviewClientComponentV2({
           return (
             <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
               <span className="text-base font-medium">
-                Video is ready but playback ID is missing
+                {t("video.readyNoPlayback")}
               </span>
             </div>
           );
@@ -174,7 +174,7 @@ export default function MockInterviewReviewClientComponentV2({
         return (
           <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
             <span className="text-base font-medium">
-              Unknown video status
+              {t("video.unknownStatus")}
             </span>
           </div>
         );

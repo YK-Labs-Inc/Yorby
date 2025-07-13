@@ -2368,7 +2368,13 @@
       "title": "Interview Recording",
       "description": "Review your interview performance",
       "loading": "Loading video...",
-      "emptyState": "Select a message to review your answer performance."
+      "emptyState": "Select a message to review your answer performance.",
+      "processing": "Video is being processed...",
+      "processingSubtext": "This may take a few minutes. Please check back later.",
+      "failed": "Video processing failed",
+      "failedSubtext": "There was an error processing your video. Please contact support.",
+      "readyNoPlayback": "Video is ready but playback ID is missing",
+      "unknownStatus": "Unknown video status"
     },
     "transcript": {
       "title": "Interview Transcript",
@@ -2401,6 +2407,9 @@
       "scoreValue": "{score}%",
       "strengthsTitle": "Strengths",
       "areasForImprovementTitle": "Areas for Improvement"
+    },
+    "error": {
+      "loadFailed": "Failed to load mock interview"
     }
   },
   "studentPrograms": {
