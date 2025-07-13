@@ -22,6 +22,7 @@ export const startMockInterview = async (
   const jobId = formData.get("jobId") as string;
   const onboarding = formData.get("onboarding") as string;
   const mockInterviewsPath = formData.get("mockInterviewsPath") as string;
+  const livekitEnabled = formData.get("livekitEnabled") === "true";
   const isOnboarding = onboarding === "true";
   let redirectPath = "";
 
@@ -38,6 +39,7 @@ export const startMockInterview = async (
   logger = logger.with({
     jobId,
     mockInterviewsPath,
+    livekitEnabled,
   });
 
   const supabase = await createSupabaseServerClient();
@@ -60,7 +62,10 @@ export const startMockInterview = async (
         .maybeSingle();
 
       if (existingMockInterview) {
-        redirectPath = `${mockInterviewsPath}/${existingMockInterview.id}${
+        const basePath = livekitEnabled 
+          ? `${mockInterviewsPath}/${existingMockInterview.id}/v2`
+          : `${mockInterviewsPath}/${existingMockInterview.id}`;
+        redirectPath = `${basePath}${
           isOnboarding ? "?onboarding=true" : ""
         }`;
         shouldCreateNewInterview = false;
@@ -233,7 +238,10 @@ ${
           jobId,
         },
       });
-      redirectPath = `${mockInterviewsPath}/${mockInterviewId}${
+      const basePath = livekitEnabled 
+        ? `${mockInterviewsPath}/${mockInterviewId}/v2`
+        : `${mockInterviewsPath}/${mockInterviewId}`;
+      redirectPath = `${basePath}${
         isOnboarding ? "?onboarding=true" : ""
       }`;
     }

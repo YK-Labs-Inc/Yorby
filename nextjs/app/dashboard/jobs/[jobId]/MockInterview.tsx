@@ -109,7 +109,7 @@ export default async function MockInterview({
         <div className="flex items-center gap-4">
           <InterviewFilter jobId={jobId} currentFilter={filter} />
         </div>
-        <CreateMockInterviewButton jobId={jobId} />
+        <CreateMockInterviewButton jobId={jobId} livekitEnabled={livekitInterviewEnabled} />
       </div>
 
       {allMockInterviews.length === 0 ? (

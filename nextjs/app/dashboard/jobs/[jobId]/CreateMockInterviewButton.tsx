@@ -8,8 +8,10 @@ import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 export default function CreateMockInterviewButton({
   jobId,
+  livekitEnabled,
 }: {
   jobId: string;
+  livekitEnabled: boolean;
 }) {
   const t = useTranslations("mockInterview");
   const [startInterviewState, startInterviewAction, startInterviewIsPending] =
@@ -30,6 +32,11 @@ export default function CreateMockInterviewButton({
         type="hidden"
         name="mockInterviewsPath"
         value={mockInterviewsPath}
+      />
+      <input
+        type="hidden"
+        name="livekitEnabled"
+        value={livekitEnabled ? "true" : "false"}
       />
       <Button disabled={startInterviewIsPending}>
         {startInterviewIsPending ? t("starting") : t("startNewInterview")}
