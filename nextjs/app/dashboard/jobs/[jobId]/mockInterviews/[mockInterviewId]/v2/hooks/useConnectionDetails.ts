@@ -15,13 +15,7 @@ export default function useConnectionDetails({
 
   const fetchConnectionDetails = useCallback(() => {
     setConnectionDetails(null);
-    const url = new URL(
-      process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ??
-        "/api/livekit/connection-details",
-      window.location.origin
-    );
-    url.searchParams.set("mockInterviewId", mockInterviewId);
-    fetch(url.toString())
+    fetch(`/api/livekit/connection-details?mockInterviewId=${mockInterviewId}`)
       .then((res) => res.json())
       .then((data) => {
         setConnectionDetails(data);
@@ -31,7 +25,7 @@ export default function useConnectionDetails({
           error,
         });
       });
-  }, [mockInterviewId]);
+  }, [mockInterviewId, logError]);
 
   useEffect(() => {
     fetchConnectionDetails();
