@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   type AgentState,
@@ -11,9 +11,11 @@ import { toastAlert } from "./alert-toast";
 import useChatAndTranscription from "./hooks/useChatAndTranscription";
 import { useDebugMode } from "./hooks/useDebug";
 import type { AppConfig } from "./types";
-import { cn } from "@/lib/utils";
 import { VideoChatLayout } from "./video-chat-layout";
 import { AgentControlBar } from "@/app/components/livekit/agent-control-bar/agent-control-bar";
+import { useParams } from "next/navigation";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
 function isAgentAvailable(agentState: AgentState) {
   return (
@@ -27,19 +29,98 @@ interface SessionViewProps {
   appConfig: AppConfig;
   disabled: boolean;
   sessionStarted: boolean;
+  onProcessInterview?: () => Promise<string>;
 }
 
 export const SessionView = ({
   appConfig,
   disabled,
   sessionStarted,
+  onProcessInterview,
   ref,
 }: React.ComponentProps<"div"> & SessionViewProps) => {
   const { state: agentState } = useVoiceAssistant();
   const { messages } = useChatAndTranscription();
   const room = useRoomContext();
+  const { mockInterviewId } = useParams<{ mockInterviewId: string }>();
+  const { logInfo, logError } = useAxiomLogging();
 
   useDebugMode();
+
+  const saveTranscript = useCallback(async () => {
+    const supabase = createSupabaseBrowserClient();
+
+    if (!mockInterviewId) {
+      logError("transcript_write_skipped", {
+        reason: "mock_interview_id not found",
+      });
+      return "Error: Interview ID not found";
+    }
+
+    // Process messages in reverse order to save in reverse chronological order
+    const messagesToInsert = [];
+
+    // Reverse the messages to save in reverse chronological order
+    for (const message of [...messages].reverse()) {
+      // Map role names - assistant messages from agent should be "model", user messages stay "user"
+      const dbRole = message.from?.isLocal ? "user" : "model";
+
+      // Extract text content from the message
+      const text = message.message || "";
+
+      const messageData = {
+        mock_interview_id: mockInterviewId,
+        role: dbRole as "user" | "model",
+        text: text,
+      };
+      messagesToInsert.push(messageData);
+    }
+
+    // Insert all messages into database
+    if (messagesToInsert.length > 0) {
+      try {
+        const { error } = await supabase
+          .from("mock_interview_messages")
+          .insert(messagesToInsert);
+
+        if (error) {
+          throw error;
+        }
+
+        // Log successful transcript write
+        logInfo("transcript_write_success", {
+          mock_interview_id: mockInterviewId,
+          message_count: messagesToInsert.length,
+        });
+        return "success";
+      } catch (error) {
+        // Log transcript write error
+        logError("transcript_write_error", {
+          mock_interview_id: mockInterviewId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }, [messages, mockInterviewId, logInfo, logError]);
+
+  const onDisconnect = useCallback(async () => {
+    const transcriptResult = await saveTranscript();
+
+    // If transcript save was successful, process the interview
+    if (transcriptResult === "success" && onProcessInterview) {
+      try {
+        await onProcessInterview();
+        logInfo("interview_processing_triggered", {
+          mock_interview_id: mockInterviewId,
+        });
+      } catch (error) {
+        logError("interview_processing_failed", {
+          mock_interview_id: mockInterviewId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }, [saveTranscript, onProcessInterview, mockInterviewId, logInfo, logError]);
 
   useEffect(() => {
     if (sessionStarted) {
@@ -84,7 +165,7 @@ export const SessionView = ({
   };
 
   // Filter messages to show only AI assistant messages
-  const aiMessages = messages.filter(message => !message.from?.isLocal);
+  const aiMessages = messages.filter((message) => !message.from?.isLocal);
 
   return (
     <main
@@ -109,11 +190,12 @@ export const SessionView = ({
                 ease: "easeOut",
               }}
             >
-          <div className="relative z-10 mx-auto w-fit">
-            <AgentControlBar
-              capabilities={capabilities}
-            />
-          </div>
+              <div className="relative z-10 mx-auto w-fit">
+                <AgentControlBar
+                  capabilities={capabilities}
+                  onDisconnect={onDisconnect}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

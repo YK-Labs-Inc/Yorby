@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import { motion } from "motion/react";
 import {
@@ -36,6 +36,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const { mockInterviewId, jobId } = useParams<{
     mockInterviewId: string;
     jobId: string;
@@ -47,42 +48,53 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   const router = useRouter();
   const baseUrl = usePathname();
 
+  const processInterview = useCallback(async () => {
+    setIsProcessing(true);
+    try {
+      if (!mockInterviewId) {
+        throw new Error("interview id is not found");
+      }
+      const response = await fetch("/api/mockInterviews/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mockInterviewId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to process interview: ${response.statusText}`);
+      }
+      router.push(
+        `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
+      );
+    } catch (error) {
+      logError("Error processing interview", {
+        error,
+      });
+      toastAlert({
+        title: "Error processing interview",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsProcessing(false);
+      return "Interview processed";
+    }
+  }, [mockInterviewId, router, baseUrl, jobId, logError]);
+
+  useEffect(() => {
+    room.registerRpcMethod("processInterview", processInterview);
+    
+    return () => {
+      room.unregisterRpcMethod("processInterview");
+    };
+  }, [room, processInterview]);
+
   useEffect(() => {
     const onDisconnected = async () => {
-      setIsProcessing(true);
-      try {
-        if (!mockInterviewId) {
-          throw new Error("interview id is not found");
-        }
-        const response = await fetch("/api/mockInterviews/process", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mockInterviewId,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to process interview: ${response.statusText}`
-          );
-        }
-        router.push(
-          `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
-        );
-      } catch (error) {
-        logError("Error processing interview", {
-          error,
-        });
-        toastAlert({
-          title: "Error processing interview",
-          description: error instanceof Error ? error.message : "Unknown error",
-        });
-      } finally {
-        setIsProcessing(false);
-      }
+      console.log("onDisconnected");
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
@@ -99,7 +111,8 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   }, [room, refreshConnectionDetails, mockInterviewId, logError]);
 
   useEffect(() => {
-    if (sessionStarted && room.state === "disconnected" && connectionDetails) {
+    if (sessionStarted && room.state === "disconnected" && connectionDetails && !isConnecting) {
+      setIsConnecting(true);
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
           preConnectBuffer: appConfig.isPreConnectBufferEnabled,
@@ -109,23 +122,32 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
           connectionDetails.serverUrl,
           connectionDetails.participantToken
         ),
-      ]).catch((error) => {
+      ]).then(() => {
+        setIsConnecting(false);
+      }).catch((error) => {
+        setIsConnecting(false);
         toastAlert({
           title: "There was an error connecting to the agent",
           description: `${error.name}: ${error.message}`,
         });
       });
     }
-    return () => {
-      room.disconnect();
-    };
   }, [
     room,
     sessionStarted,
     connectionDetails,
     appConfig.isPreConnectBufferEnabled,
-    mockInterviewId,
+    isConnecting,
   ]);
+
+  // Cleanup effect to disconnect room on unmount
+  useEffect(() => {
+    return () => {
+      if (room.state !== "disconnected") {
+        room.disconnect();
+      }
+    };
+  }, [room]);
 
   if (!sessionStarted) {
     return (
@@ -146,6 +168,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
             appConfig={appConfig}
             disabled={!sessionStarted}
             sessionStarted={sessionStarted}
+            onProcessInterview={processInterview}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{
