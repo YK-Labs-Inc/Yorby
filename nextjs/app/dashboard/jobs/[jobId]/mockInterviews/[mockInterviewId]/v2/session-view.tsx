@@ -59,19 +59,30 @@ export const SessionView = ({
 
     // Process messages in reverse order to save in reverse chronological order
     const messagesToInsert = [];
+    
+    // Get current time and work backwards to preserve chronological order
+    const now = new Date();
+    const reversedMessages = [...messages].reverse();
 
-    // Reverse the messages to save in reverse chronological order
-    for (const message of [...messages].reverse()) {
+    // Generate timestamps in reverse chronological order (older messages get earlier timestamps)
+    for (let i = 0; i < reversedMessages.length; i++) {
+      const message = reversedMessages[i];
+      
       // Map role names - assistant messages from agent should be "model", user messages stay "user"
       const dbRole = message.from?.isLocal ? "user" : "model";
 
       // Extract text content from the message
       const text = message.message || "";
 
+      // Create timestamp that preserves chronological order
+      // Each message gets a timestamp that's (reversedMessages.length - i) seconds before now
+      const messageTimestamp = new Date(now.getTime() - (reversedMessages.length - i) * 1000);
+
       const messageData = {
         mock_interview_id: mockInterviewId,
         role: dbRole as "user" | "model",
         text: text,
+        created_at: messageTimestamp.toISOString(),
       };
       messagesToInsert.push(messageData);
     }
