@@ -25,6 +25,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import "@livekit/components-styles";
 import "./livekit-light-theme.css";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -46,7 +47,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   });
   const { logError } = useAxiomLogging();
   const router = useRouter();
-  const baseUrl = usePathname();
+  const { baseUrl } = useMultiTenant();
 
   const processInterview = useCallback(async () => {
     setIsProcessing(true);
@@ -86,7 +87,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
 
   useEffect(() => {
     room.registerRpcMethod("processInterview", processInterview);
-    
+
     return () => {
       room.unregisterRpcMethod("processInterview");
     };
@@ -111,7 +112,12 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   }, [room, refreshConnectionDetails, mockInterviewId, logError]);
 
   useEffect(() => {
-    if (sessionStarted && room.state === "disconnected" && connectionDetails && !isConnecting) {
+    if (
+      sessionStarted &&
+      room.state === "disconnected" &&
+      connectionDetails &&
+      !isConnecting
+    ) {
       setIsConnecting(true);
       Promise.all([
         room.localParticipant.setMicrophoneEnabled(true, undefined, {
@@ -122,15 +128,17 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
           connectionDetails.serverUrl,
           connectionDetails.participantToken
         ),
-      ]).then(() => {
-        setIsConnecting(false);
-      }).catch((error) => {
-        setIsConnecting(false);
-        toastAlert({
-          title: "There was an error connecting to the agent",
-          description: `${error.name}: ${error.message}`,
+      ])
+        .then(() => {
+          setIsConnecting(false);
+        })
+        .catch((error) => {
+          setIsConnecting(false);
+          toastAlert({
+            title: "There was an error connecting to the agent",
+            description: `${error.name}: ${error.message}`,
+          });
         });
-      });
     }
   }, [
     room,
