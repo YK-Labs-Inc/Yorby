@@ -11,7 +11,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, PlayCircle, AlertCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  PlayCircle,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import remarkGfm from "remark-gfm";
 import ReactMarkdown from "react-markdown";
@@ -123,8 +128,10 @@ export default function MockInterviewReviewClientComponentV2({
     if (!muxMetadata) {
       return (
         <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
-          <span className="text-base font-medium">
-            {t("video.emptyState")}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+          <span className="text-base font-medium">{t("video.processing")}</span>
+          <span className="text-sm text-muted-foreground mt-1">
+            {t("video.processingSubtext")}
           </span>
         </div>
       );
@@ -143,23 +150,26 @@ export default function MockInterviewReviewClientComponentV2({
             </span>
           </div>
         );
-      
+
       case "errored":
         return (
           <div className="w-full flex flex-col items-center justify-center h-48 text-destructive text-center">
             <AlertCircle className="h-8 w-8 mb-2" />
-            <span className="text-base font-medium">
-              {t("video.failed")}
-            </span>
+            <span className="text-base font-medium">{t("video.failed")}</span>
             <span className="text-sm text-muted-foreground mt-1">
               {t("video.failedSubtext")}
             </span>
           </div>
         );
-      
+
       case "ready":
         if (muxMetadata.playback_id) {
-          return <MuxPlayer playbackId={muxMetadata.playback_id} className="w-full rounded-lg" />;
+          return (
+            <MuxPlayer
+              playbackId={muxMetadata.playback_id}
+              className="w-full rounded-lg"
+            />
+          );
         } else {
           return (
             <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
@@ -169,7 +179,7 @@ export default function MockInterviewReviewClientComponentV2({
             </div>
           );
         }
-      
+
       default:
         return (
           <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
@@ -198,7 +208,10 @@ export default function MockInterviewReviewClientComponentV2({
                   {t("video.loading")}
                 </div>
               ) : videoSource && videoSource.muxPlaybackId ? (
-                <MuxPlayer playbackId={videoSource.muxPlaybackId} className="w-full rounded-lg" />
+                <MuxPlayer
+                  playbackId={videoSource.muxPlaybackId}
+                  className="w-full rounded-lg"
+                />
               ) : videoSource && videoSource.supabaseUrl ? (
                 <video
                   ref={videoRef}
@@ -213,7 +226,7 @@ export default function MockInterviewReviewClientComponentV2({
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Interview Transcript - Right column */}
         <Card className={`col-span-12 lg:col-span-6 h-full min-h-[300px]`}>
           <CardHeader>
