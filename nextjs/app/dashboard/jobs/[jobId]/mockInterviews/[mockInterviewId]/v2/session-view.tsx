@@ -156,12 +156,11 @@ export const SessionView = ({
     }
   }, [agentState, sessionStarted, room]);
 
-  const { supportsChatInput, supportsVideoInput, supportsScreenShare } =
-    appConfig;
+  const { supportsChatInput, supportsVideoInput } = appConfig;
   const capabilities = {
     supportsChatInput,
     supportsVideoInput,
-    supportsScreenShare,
+    supportsScreenShare: false,
   };
 
   // Filter messages to show only AI assistant messages

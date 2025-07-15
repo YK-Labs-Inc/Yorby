@@ -2443,5 +2443,11 @@
     "enrollNow": "Enroll Now",
     "alreadyEnrolled": "You are enrolled in this program",
     "continueToProgram": "Continue to Program"
+  },
+  "agentControlBar": {
+    "ariaLabel": "Voice assistant controls",
+    "microphone": "Microphone",
+    "camera": "Camera",
+    "endCall": "End Call"
   }
 }

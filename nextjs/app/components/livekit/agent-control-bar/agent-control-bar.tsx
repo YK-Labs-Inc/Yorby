@@ -2,9 +2,7 @@
 
 import * as React from "react";
 import { Track } from "livekit-client";
-import {
-  BarVisualizer,
-} from "@livekit/components-react";
+import { BarVisualizer, MediaDeviceMenu } from "@livekit/components-react";
 import { PhoneOff } from "lucide-react";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { cn } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/utils";
@@ -14,6 +12,7 @@ import {
   useAgentControlBar,
 } from "./hooks/use-agent-control-bar";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export interface AgentControlBarProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -42,7 +41,7 @@ export function AgentControlBar({
   onDeviceError,
   ...props
 }: AgentControlBarProps) {
-
+  const t = useTranslations("agentControlBar");
   const {
     micTrackRef,
     visibleControls,
@@ -50,6 +49,8 @@ export function AgentControlBar({
     microphoneToggle,
     screenShareToggle,
     handleDisconnect,
+    handleAudioDeviceChange,
+    handleVideoDeviceChange,
   } = useAgentControlBar({
     controls,
     saveUserChoices,
@@ -62,49 +63,57 @@ export function AgentControlBar({
 
   return (
     <div
-      aria-label="Voice assistant controls"
+      aria-label={t("ariaLabel")}
       className={cn(
-        "bg-card border border-border rounded-full px-6 py-3 shadow-sm",
+        "bg-card border border-border rounded-lg px-6 py-3 shadow-sm w-full",
         className
       )}
-      {...props}
     >
       <div className="flex flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           {visibleControls.microphone && (
-            <TrackToggle
-              source={Track.Source.Microphone}
-              pressed={microphoneToggle.enabled}
-              disabled={microphoneToggle.pending}
-              onPressedChange={microphoneToggle.toggle}
-              variant={microphoneToggle.enabled ? "default" : "outline"}
-              size="lg"
-              className="h-12 w-12 rounded-full p-0"
-            >
-              {microphoneToggle.enabled && (
-                <BarVisualizer
-                  barCount={3}
-                  trackRef={micTrackRef}
-                  options={{ minHeight: 4 }}
-                  className="absolute inset-0 flex items-center justify-center gap-0.5"
-                >
-                  <span className="h-4 w-0.5 bg-primary rounded-full" />
-                </BarVisualizer>
-              )}
-            </TrackToggle>
+            <div className="lk-button-group">
+              <TrackToggle
+                source={Track.Source.Microphone}
+                pressed={microphoneToggle.enabled}
+                disabled={microphoneToggle.pending}
+                onPressedChange={microphoneToggle.toggle}
+                size="lg"
+              >
+                {t("microphone")}
+              </TrackToggle>
+              <div className="lk-button-group-menu">
+                <MediaDeviceMenu
+                  kind="audioinput"
+                  onActiveDeviceChange={(_kind, deviceId) =>
+                    handleAudioDeviceChange(deviceId ?? "default")
+                  }
+                />
+              </div>
+            </div>
           )}
 
           {capabilities.supportsVideoInput && visibleControls.camera && (
-            <TrackToggle
-              source={Track.Source.Camera}
-              pressed={cameraToggle.enabled}
-              pending={cameraToggle.pending}
-              disabled={cameraToggle.pending}
-              onPressedChange={cameraToggle.toggle}
-              variant={cameraToggle.enabled ? "default" : "outline"}
-              size="lg"
-              className="h-12 w-12 rounded-full p-0"
-            />
+            <div className="lk-button-group">
+              <TrackToggle
+                source={Track.Source.Camera}
+                pressed={cameraToggle.enabled}
+                pending={cameraToggle.pending}
+                disabled={cameraToggle.pending}
+                onPressedChange={cameraToggle.toggle}
+                size="lg"
+              >
+                {t("camera")}
+              </TrackToggle>
+              <div className="lk-button-group-menu">
+                <MediaDeviceMenu
+                  kind="videoinput"
+                  onActiveDeviceChange={(_kind, deviceId) =>
+                    handleVideoDeviceChange(deviceId ?? "default")
+                  }
+                />
+              </div>
+            </div>
           )}
 
           {capabilities.supportsScreenShare && visibleControls.screenShare && (
@@ -113,22 +122,14 @@ export function AgentControlBar({
               pressed={screenShareToggle.enabled}
               disabled={screenShareToggle.pending}
               onPressedChange={screenShareToggle.toggle}
-              variant={screenShareToggle.enabled ? "default" : "outline"}
               size="lg"
-              className="h-12 px-5 rounded-full"
             />
           )}
-
         </div>
         {visibleControls.leave && (
-          <Button 
-            variant="destructive" 
-            onClick={onLeave} 
-            size="lg"
-            className="h-12 px-6 rounded-full font-medium"
-          >
+          <Button variant="destructive" onClick={onLeave} size="lg">
             <PhoneOff className="h-5 w-5 mr-2" />
-            <span>End Call</span>
+            <span>{t("endCall")}</span>
           </Button>
         )}
       </div>
