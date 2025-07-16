@@ -101,12 +101,5 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     return response;
   }
 
-  if (hostname.includes("recruiting.yorby.ai")) {
-    const { pathname } = request.nextUrl;
-    if (pathname === "/") {
-      return NextResponse.rewrite(new URL("/auth/sign-up", request.url));
-    }
-    return response;
-  }
   return response;
 }
