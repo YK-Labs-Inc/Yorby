@@ -17,8 +17,8 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
           query?: string
+          operationName?: string
           variables?: Json
           extensions?: Json
         }
@@ -92,6 +92,146 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      companies: {
+        Row: {
+          company_size: string | null
+          created_at: string
+          id: string
+          industry: string | null
+          name: string
+          slug: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          company_size?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          company_size?: string | null
+          created_at?: string
+          id?: string
+          industry?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      company_job_candidates: {
+        Row: {
+          applied_at: string
+          candidate_email: string
+          candidate_name: string
+          candidate_phone: string | null
+          candidate_user_id: string | null
+          company_id: string
+          created_at: string
+          custom_job_id: string
+          id: string
+          notes: string | null
+          resume_data: Json | null
+          resume_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          candidate_email: string
+          candidate_name: string
+          candidate_phone?: string | null
+          candidate_user_id?: string | null
+          company_id: string
+          created_at?: string
+          custom_job_id: string
+          id?: string
+          notes?: string | null
+          resume_data?: Json | null
+          resume_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          candidate_email?: string
+          candidate_name?: string
+          candidate_phone?: string | null
+          candidate_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          custom_job_id?: string
+          id?: string
+          notes?: string | null
+          resume_data?: Json | null
+          resume_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_job_candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_job_candidates_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_members: {
+        Row: {
+          accepted_at: string | null
+          company_id: string
+          created_at: string
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          role: Database["public"]["Enums"]["company_member_role"]
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role: Database["public"]["Enums"]["company_member_role"]
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["company_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_lesson_blocks: {
         Row: {
@@ -618,6 +758,7 @@ export type Database = {
       }
       custom_job_mock_interviews: {
         Row: {
+          candidate_id: string | null
           created_at: string
           custom_job_id: string
           id: string
@@ -627,6 +768,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          candidate_id?: string | null
           created_at?: string
           custom_job_id: string
           id?: string
@@ -636,6 +778,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          candidate_id?: string | null
           created_at?: string
           custom_job_id?: string
           id?: string
@@ -645,6 +788,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "custom_job_mock_interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "company_job_candidates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "custom_job_mock_interviews_custom_job_id_fkey"
             columns: ["custom_job_id"]
@@ -851,6 +1001,7 @@ export type Database = {
         Row: {
           coach_id: string | null
           company_description: string | null
+          company_id: string | null
           company_name: string | null
           created_at: string
           id: string
@@ -862,6 +1013,7 @@ export type Database = {
         Insert: {
           coach_id?: string | null
           company_description?: string | null
+          company_id?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
@@ -873,6 +1025,7 @@ export type Database = {
         Update: {
           coach_id?: string | null
           company_description?: string | null
+          company_id?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
@@ -887,6 +1040,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "coaches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1237,7 +1397,7 @@ export type Database = {
           id: string
           playback_id: string | null
           status: Database["public"]["Enums"]["mux_status"]
-          upload_id: string
+          upload_id: string | null
         }
         Insert: {
           asset_id?: string | null
@@ -1245,7 +1405,7 @@ export type Database = {
           id: string
           playback_id?: string | null
           status: Database["public"]["Enums"]["mux_status"]
-          upload_id: string
+          upload_id?: string | null
         }
         Update: {
           asset_id?: string | null
@@ -1253,7 +1413,7 @@ export type Database = {
           id?: string
           playback_id?: string | null
           status?: Database["public"]["Enums"]["mux_status"]
-          upload_id?: string
+          upload_id?: string | null
         }
         Relationships: [
           {
@@ -1838,9 +1998,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_company_member: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_company_owner_or_admin: {
+        Args: { p_company_id: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      company_member_role: "owner" | "admin" | "recruiter" | "viewer"
       course_content_type: "text" | "pdf" | "video" | "image"
       custom_job_access: "locked" | "unlocked"
       deletion_status: "deleted" | "not_deleted"
@@ -1971,6 +2139,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      company_member_role: ["owner", "admin", "recruiter", "viewer"],
       course_content_type: ["text", "pdf", "video", "image"],
       custom_job_access: ["locked", "unlocked"],
       deletion_status: ["deleted", "not_deleted"],

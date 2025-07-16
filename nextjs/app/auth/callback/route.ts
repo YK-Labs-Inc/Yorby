@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import * as SibApiV3Sdk from "@sendinblue/client";
 import { posthog, trackServerEvent } from "@/utils/tracking/serverUtils";
 import { User } from "@supabase/supabase-js";
-import { getgroups } from "process";
 
 export const GET = withAxiom(async (request: AxiomRequest) => {
   // The `/auth/callback` route is required for the server-side auth flow implemented
