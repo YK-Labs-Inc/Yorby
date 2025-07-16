@@ -156,7 +156,7 @@ export function AppSidebar({
         setShowSidebar(false);
       }
     } else if (isYorbyRecruiting) {
-      if (isRecruitingAuthPage) {
+      if (isRecruitingAuthPage || pathname === "/company-onboarding") {
         setShowSidebar(false);
       } else {
         setShowSidebar(true);

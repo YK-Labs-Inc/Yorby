@@ -22,6 +22,21 @@ A white-labeled platform for career coaches to power their businesses:
 - Coach-only portals with dedicated authentication flow
 - Essentially a white-labeled version of Perfect Interview's job prep tool with coach-specific customization
 
+### 3. Company Interview Platform (B2B - In Development)
+A platform for companies to screen and interview candidates:
+- Companies can create organizations and manage team members with role-based access
+- Post job openings and track candidate applications
+- Conduct AI-powered screening interviews using existing mock interview infrastructure
+- Review candidate performance and interview recordings
+- Leverages existing mock interview, AI feedback, and video recording features
+
+#### Company Onboarding Flow:
+1. **New User Sign-up**: Redirected to `/company-onboarding` via `/auth/confirm`
+2. **Existing User Login**: `/auth-redirect` page checks for company membership and redirects to onboarding if needed
+3. **Company Registration**: Two-step form collecting company details
+4. **Post-Registration**: Automatic redirect to `/dashboard/company`
+5. **Protected Routes**: Middleware ensures company membership for `/dashboard/company*` routes
+
 ## Essential Commands
 
 ```bash
@@ -66,14 +81,17 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 The application uses a complex relational database with these main entities:
 - **Users & Auth**: Managed by Supabase Auth with subscription tracking
 - **Coaches**: Multi-tenant system with custom branding
-- **Jobs**: Custom job positions with descriptions
+- **Jobs**: Custom job positions with descriptions (also used by companies via `company_id`)
 - **Questions**: Interview questions with AI-generated guidelines (supports video recordings)
-- **Mock Interviews**: Full interview sessions with video recordings via Mux
+- **Mock Interviews**: Full interview sessions with video recordings via Mux (supports both users and company candidates)
 - **Resumes**: Resume builder with sections and items
 - **Interview Copilot**: Real-time interview assistance
 - **Files**: User uploads with Google Cloud Storage
 - **Enrollments**: `custom_job_enrollments` table managing student access to coach programs
 - **Submissions**: Practice question submissions with text/video responses
+- **Companies**: Organizations that can post jobs and interview candidates
+- **Company Members**: Team members with role-based access (owner, admin, recruiter, viewer)
+- **Company Job Candidates**: Candidate applications and interview tracking
 
 Key patterns:
 - Row Level Security (RLS) for data isolation with enrollment-based access
@@ -203,6 +221,13 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 3. Use SWR for real-time data updates in coach portal
 4. Test with different coach/student enrollment scenarios
 5. Ensure proper video/audio handling for submissions
+
+**Company Interview Features**:
+1. Reuse existing mock interview infrastructure for candidate interviews
+2. Add `candidate_id` to `custom_job_mock_interviews` for non-authenticated interviews
+3. Check company membership before granting access to candidate data
+4. Use role-based permissions (owner, admin, recruiter, viewer)
+5. Leverage existing AI feedback and video recording capabilities
 
 **Video/Audio Features**:
 1. Use Mux for all video processing and storage
