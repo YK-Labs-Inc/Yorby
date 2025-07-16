@@ -20,11 +20,11 @@ const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   const t = useTranslations("knowledgeBase");
   const [generatingResponse, setGeneratingResponse] = useState(false);
   const [files, setFiles] = useState<Tables<"user_files">[]>([]);
-  const { isYorby } = useMultiTenant();
+  const { isYorbyCoaching } = useMultiTenant();
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
       role: "assistant",
-      content: isYorby ? t("initialYorbyMessage") : t("initialMessage"),
+      content: isYorbyCoaching ? t("initialYorbyMessage") : t("initialMessage"),
     },
   ]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -38,12 +38,12 @@ const _UserInfoPage = ({ isOnboarding }: { isOnboarding: boolean }) => {
   } = useKnowledgeBase();
 
   useEffect(() => {
-    if (isYorby) {
+    if (isYorbyCoaching) {
       setMessages([{ role: "assistant", content: t("initialYorbyMessage") }]);
     } else {
       setMessages([{ role: "assistant", content: t("initialMessage") }]);
     }
-  }, [isYorby]);
+  }, [isYorbyCoaching]);
 
   const fetchFiles = useCallback(async () => {
     if (!user) return;
