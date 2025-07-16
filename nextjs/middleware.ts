@@ -35,23 +35,23 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const hostname = request.headers.get("host") || "";
 
   const isPersonaInterviewRedirect = PERSONA_INTERVIEW_REDIRECT_DOMAINS.some(
-    (domain) => hostname.includes(domain),
+    (domain) => hostname.includes(domain)
   );
   if (isPersonaInterviewRedirect) {
     if (hostname.includes("lebronmockinterview")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/mock-interviews/lbj`).toString(),
-        301,
+        301
       );
     } else if (hostname.includes("chaewonmockinterview")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/mock-interviews/cw`).toString(),
-        301,
+        301
       );
     } else if (hostname.includes("gogginsmockinterview")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/mock-interviews/dg`).toString(),
-        301,
+        301
       );
     }
   }
@@ -64,17 +64,17 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     if (hostname.includes("lebron2resume")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/chat-to-resume/lbj`).toString(),
-        301,
+        301
       );
     } else if (hostname.includes("chaewon2resume")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/chat-to-resume/cw`).toString(),
-        301,
+        301
       );
     } else if (hostname.includes("goggins2resume")) {
       return Response.redirect(
         new URL(`https://perfectinterview.ai/chat-to-resume/dg`).toString(),
-        301,
+        301
       );
     }
   }
@@ -93,10 +93,18 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     return Response.redirect(redirectUrl.toString(), 301);
   }
 
-  if (hostname.includes("yorby.ai")) {
+  if (hostname.includes("app.yorby.ai")) {
     const { pathname } = request.nextUrl;
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/coaches", request.url));
+    }
+    return response;
+  }
+
+  if (hostname.includes("recruiting.yorby.ai")) {
+    const { pathname } = request.nextUrl;
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/auth/sign-up", request.url));
     }
     return response;
   }

@@ -42,7 +42,8 @@ export function UserMenu({
   const posthog = usePostHog();
   const router = useRouter();
   const pathname = usePathname();
-  const { isCoachPath, isYorby, isCoachDashboardPage } = useMultiTenant();
+  const { isCoachPath, isYorbyCoaching, isCoachDashboardPage } =
+    useMultiTenant();
 
   const handleManageSubscription = () => {
     if (!pathname) {
@@ -112,7 +113,7 @@ export function UserMenu({
               <DropdownMenuSeparator />
             </>
           )}
-          {(!isYorby || (isYorby && isCoachDashboardPage)) &&
+          {(!isYorbyCoaching || (isYorbyCoaching && isCoachDashboardPage)) &&
             isMemoriesEnabled && (
               <>
                 <DropdownMenuItem

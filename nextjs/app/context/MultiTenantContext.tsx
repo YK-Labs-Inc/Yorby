@@ -34,9 +34,11 @@ interface MultiTenantContextProps {
   coachBrandingSettings: Tables<"coach_branding"> | null; // Use the specific row type
   isLoadingBranding: boolean;
   baseUrl: string;
-  isYorby: boolean;
+  isYorbyCoaching: boolean;
   isCoachPortalLandingPage: boolean;
   isCoachDashboardPage: boolean;
+  isYorbyRecruiting: boolean;
+  isRecruitingAuthPage: boolean;
 }
 
 const MultiTenantContext = createContext<MultiTenantContextProps | undefined>(
@@ -54,16 +56,28 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const { logError } = useAxiomLogging();
   const pathname = usePathname();
 
-  const isYorby = useMemo(
+  const isYorbyCoaching = useMemo(
     () =>
-      hostname.includes("yorby.ai") ||
+      hostname.includes("app.yorby.ai") ||
       process.env.NEXT_PUBLIC_IS_YORBY === "true",
     [hostname]
   );
 
+  const isYorbyRecruiting = useMemo(
+    () =>
+      hostname.includes("recruiting.yorby.ai") ||
+      process.env.NEXT_PUBLIC_IS_YORBY_RECRUITING === "true",
+    [hostname]
+  );
+
+  const isRecruitingAuthPage = useMemo(
+    () => (isYorbyRecruiting && pathname?.startsWith(`/auth`)) ?? false,
+    [pathname, isYorbyRecruiting]
+  );
+
   const isCoachHomePage = useMemo(
-    () => pathname === "/coaches" || (isYorby && pathname === "/"),
-    [pathname, isYorby]
+    () => pathname === "/coaches" || (isYorbyCoaching && pathname === "/"),
+    [pathname, isYorbyCoaching]
   );
 
   const isCoachProgramsPage = useMemo(
@@ -149,9 +163,11 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,
-      isYorby,
+      isYorbyCoaching,
       isCoachPortalLandingPage,
       isCoachDashboardPage,
+      isYorbyRecruiting,
+      isRecruitingAuthPage,
     }),
     [
       isCoachPath,
@@ -160,9 +176,11 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       coachBrandingSettings,
       isLoadingBranding,
       baseUrl,
-      isYorby,
+      isYorbyCoaching,
       isCoachPortalLandingPage,
       isCoachDashboardPage,
+      isYorbyRecruiting,
+      isRecruitingAuthPage,
     ]
   );
 

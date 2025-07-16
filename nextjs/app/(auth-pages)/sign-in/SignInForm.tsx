@@ -21,7 +21,7 @@ export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
     error: undefined,
   });
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const { isYorby } = useMultiTenant();
+  const { isYorbyCoaching } = useMultiTenant();
   let formMessage: Message | undefined;
   if (state.success) {
     formMessage = { success: state.success };
@@ -55,7 +55,9 @@ export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
           <input
             type="hidden"
             name="redirectTo"
-            value={redirectUrl || (isYorby ? "/coaches/auth" : "/onboarding")}
+            value={
+              redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "/onboarding")
+            }
           />
           <SubmitButton
             disabled={!captchaToken || pending}
