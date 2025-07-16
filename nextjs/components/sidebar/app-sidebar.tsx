@@ -130,9 +130,11 @@ export function AppSidebar({
   const authSuccess = searchParams?.get("authSuccess");
   const {
     isLoadingBranding,
-    isYorby,
+    isYorbyCoaching,
+    isYorbyRecruiting,
     isCoachProgramsPage,
     isCoachDashboardPage,
+    isRecruitingAuthPage,
   } = useMultiTenant();
   const pathname = usePathname();
 
@@ -143,7 +145,7 @@ export function AppSidebar({
   }, [authError, authSuccess]);
 
   useEffect(() => {
-    if (isYorby) {
+    if (isYorbyCoaching) {
       if (
         isCoachDashboardPage ||
         isCoachProgramsPage ||
@@ -153,10 +155,21 @@ export function AppSidebar({
       } else {
         setShowSidebar(false);
       }
+    } else if (isYorbyRecruiting) {
+      if (isRecruitingAuthPage) {
+        setShowSidebar(false);
+      } else {
+        setShowSidebar(true);
+      }
     } else {
       setShowSidebar(true);
     }
-  }, [isYorby, isCoachDashboardPage, isCoachProgramsPage]);
+  }, [
+    isYorbyCoaching,
+    isCoachDashboardPage,
+    isCoachProgramsPage,
+    isRecruitingAuthPage,
+  ]);
 
   if (!showSidebar) {
     return null;
@@ -175,7 +188,7 @@ export function AppSidebar({
           <>
             <DropdownMenu>
               {/* Only show Create dropdown if not a coach path */}
-              {!isYorby && (
+              {!isYorbyCoaching && (
                 <DropdownMenuTrigger asChild>
                   <Button className="w-full justify-between">
                     <span className="flex items-center gap-2">
@@ -273,7 +286,7 @@ export function AppSidebar({
                   <SidebarGroup>
                     <div className="px-4 py-2">
                       <h4 className="text-sm font-semibold text-muted-foreground">
-                        {isYorby ? t("programs") : t("interviewPrep")}
+                        {isYorbyCoaching ? t("programs") : t("interviewPrep")}
                       </h4>
                     </div>
                     <SidebarGroupContent>
@@ -346,11 +359,14 @@ export function AppSidebar({
             </Link>
           </>
         )}
-        {!isYorby && isSubscriptionVariant && user && !hasSubscription && (
-          <Link href="/purchase">
-            <Button className="w-full">{t("unlockAllAccess")}</Button>
-          </Link>
-        )}
+        {!isYorbyCoaching &&
+          isSubscriptionVariant &&
+          user &&
+          !hasSubscription && (
+            <Link href="/purchase">
+              <Button className="w-full">{t("unlockAllAccess")}</Button>
+            </Link>
+          )}
         {user && user.email && (
           <UserMenu
             email={user.email}
