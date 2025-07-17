@@ -1917,6 +1917,44 @@
       }
     }
   },
+  "companyJobsManager": {
+    "title": "Job Listings",
+    "subtitle": "Manage your job postings and track candidates",
+    "createJobListing": "Create Job Listing",
+    "noJobsYet": {
+      "title": "No job listings yet",
+      "description": "Create your first job listing to start recruiting candidates"
+    },
+    "jobCard": {
+      "posted": "Posted",
+      "status": {
+        "active": "Active",
+        "draft": "Draft"
+      },
+      "candidates": "{count} candidates",
+      "viewDetails": "View Details"
+    },
+    "actions": {
+      "editJob": "Edit Job",
+      "manageQuestions": "Manage Questions",
+      "archiveJob": "Archive Job"
+    }
+  },
+  "recruitingActions": {
+    "errors": {
+      "unauthorized": "Unauthorized",
+      "companyNameRequired": "Company name is required",
+      "companyAlreadyExists": "A company with this name might already exist",
+      "permissionDenied": "Permission denied. Please check your account permissions",
+      "failedToCreateCompany": "Failed to create company",
+      "unexpectedError": "An unexpected error occurred",
+      "missingRequiredFields": "Missing required fields",
+      "companyNotFound": "Company not found",
+      "notAuthorizedForCompany": "You are not authorized to create jobs for this company",
+      "noPermissionToCreateJobs": "You don't have permission to create job listings",
+      "failedToCreateJob": "Failed to create job listing"
+    }
+  },
   "practiceQuestions": {
     "filters": {
       "button": "Filters",
@@ -2533,5 +2571,118 @@
     "microphone": "Microphone",
     "camera": "Camera",
     "endCall": "End Call"
+  },
+  "recruiting": {
+    "dashboard": {
+      "title": "Company Recruiting Dashboard",
+      "description": "Manage your companies and recruitment processes",
+      "loading": "Loading..."
+    },
+    "companyDashboard": {
+      "createCard": {
+        "title": "Create a New Company",
+        "description": "Start recruiting candidates by creating your company profile",
+        "button": "Create Company"
+      },
+      "yourCompanies": "Your Companies",
+      "noIndustrySpecified": "No industry specified",
+      "website": "Website:",
+      "employees": "employees",
+      "manageJobs": "Manage Jobs"
+    },
+    "createCompanyDialog": {
+      "title": "Create New Company",
+      "description": "Set up your company profile to start recruiting candidates.",
+      "form": {
+        "companyName": {
+          "label": "Company Name",
+          "placeholder": "Acme Inc."
+        },
+        "companySlug": {
+          "label": "Company Slug",
+          "placeholder": "acme-inc",
+          "description": "This will be used in your company's URL",
+          "error": {
+            "alreadyTaken": "This slug is already taken. Please choose another."
+          }
+        },
+        "website": {
+          "label": "Website (Optional)",
+          "placeholder": "https://example.com"
+        },
+        "industry": {
+          "label": "Industry (Optional)",
+          "placeholder": "Select an industry",
+          "options": {
+            "technology": "Technology",
+            "healthcare": "Healthcare",
+            "finance": "Finance",
+            "education": "Education",
+            "retail": "Retail",
+            "manufacturing": "Manufacturing",
+            "consulting": "Consulting",
+            "realEstate": "Real Estate",
+            "mediaEntertainment": "Media & Entertainment",
+            "transportation": "Transportation",
+            "other": "Other"
+          }
+        },
+        "companySize": {
+          "label": "Company Size (Optional)",
+          "placeholder": "Select company size",
+          "employees": "employees"
+        },
+        "validation": {
+          "nameMin": "Company name must be at least 2 characters",
+          "slugMin": "Slug must be at least 2 characters",
+          "slugRegex": "Slug can only contain lowercase letters, numbers, and hyphens",
+          "urlInvalid": "Please enter a valid URL"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create Company",
+        "creating": "Creating..."
+      },
+      "success": "Company created successfully!",
+      "error": "Failed to create company. Please try again."
+    },
+    "createJobDialog": {
+      "title": "Create New Job Listing",
+      "description": "Create a job posting to start recruiting candidates.",
+      "form": {
+        "jobTitle": {
+          "label": "Job Title",
+          "placeholder": "e.g., Senior Software Engineer"
+        },
+        "jobDescription": {
+          "label": "Job Description",
+          "placeholder": "Describe the role, responsibilities, and requirements...",
+          "description": "Provide a detailed description of the position"
+        },
+        "status": {
+          "label": "Status",
+          "options": {
+            "draft": "Draft - Not visible to candidates",
+            "active": "Active - Visible to candidates"
+          }
+        },
+        "validation": {
+          "titleMin": "Job title must be at least 2 characters",
+          "descriptionMin": "Job description must be at least 10 characters"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create Job Listing",
+        "creating": "Creating..."
+      },
+      "success": "Job listing created successfully!",
+      "error": "Failed to create job listing. Please try again."
+    },
+    "companyHeader": {
+      "backToDashboard": "← Back to Dashboard",
+      "employees": "{size} employees"
+    }
   }
 }

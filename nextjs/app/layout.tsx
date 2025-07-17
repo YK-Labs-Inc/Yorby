@@ -10,7 +10,7 @@ import {
 } from "@/utils/supabase/server";
 import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import { Tables } from "@/utils/supabase/database.types";
@@ -19,6 +19,7 @@ import { posthog } from "@/utils/tracking/serverUtils";
 import Script from "next/script";
 import { KnowledgeBaseProvider } from "@/app/context/KnowledgeBaseContext";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { MultiTenantProvider } from "./context/MultiTenantContext";
 import { ReferralProvider } from "./context/referral-context";
 
@@ -341,6 +342,7 @@ export default async function RootLayout({
                                 {children}
                               </main>
                               <Toaster />
+                              <SonnerToaster />
                             </KnowledgeBaseProvider>
                           </OnboardingProvider>
                         </SidebarProvider>
