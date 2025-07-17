@@ -415,6 +415,9 @@
     "studentView": "Student View",
     "programs": "Programs"
   },
+  "recruitingSidebar": {
+    "home": "Home"
+  },
   "upgrade": {
     "locked": {
       "title": "Unlock The Full Interview Preparation Experience With 1 Credit",

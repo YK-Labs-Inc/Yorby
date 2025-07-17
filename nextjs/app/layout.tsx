@@ -11,7 +11,7 @@ import {
 import { AxiomLoggingProvider } from "@/context/AxiomLoggingContext";
 import { UserProvider } from "@/context/UserContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { SidebarWrapper } from "@/components/sidebar/sidebar-wrapper";
 import { OnboardingProvider } from "@/context/OnboardingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { DeepgramContextProvider } from "@/context/DeepgramContext";
@@ -321,7 +321,7 @@ export default async function RootLayout({
                             <KnowledgeBaseProvider
                               isMemoriesEnabled={isMemoriesEnabled}
                             >
-                              <AppSidebar
+                              <SidebarWrapper
                                 jobs={jobs}
                                 coachJobs={coachJobs}
                                 coachInfo={coachInfo}
