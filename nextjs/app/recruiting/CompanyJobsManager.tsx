@@ -116,7 +116,7 @@ export function CompanyJobsManager({
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link
-                            href={`/recruiting/companies/${companyId}/jobs/${job.id}/questions`}
+                            href={`/recruiting/companies/${companyId}/jobs/${job.id}?view=questions`}
                           >
                             {t("actions.manageQuestions")}
                           </Link>

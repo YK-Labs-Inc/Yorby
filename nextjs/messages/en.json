@@ -2686,6 +2686,110 @@
     "companyHeader": {
       "backToDashboard": "← Back to Dashboard",
       "employees": "{size} employees"
+    },
+    "questionsTable": {
+      "title": "Manage Questions",
+      "addQuestion": "Add Question",
+      "table": {
+        "headers": {
+          "question": "Question",
+          "answerGuidelines": "Answer Guidelines",
+          "status": "Status",
+          "submissions": "Submissions",
+          "actions": "Actions"
+        },
+        "status": {
+          "published": "published",
+          "draft": "draft"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        }
+      },
+      "createDialog": {
+        "title": "Create New Question",
+        "description": "Add a new interview question for this job position.",
+        "form": {
+          "question": {
+            "label": "Question",
+            "placeholder": "Enter your interview question..."
+          },
+          "answerGuidelines": {
+            "label": "Answer Guidelines",
+            "placeholder": "Provide guidelines for answering this question..."
+          },
+          "publishImmediately": "Publish immediately"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Create Question"
+        }
+      },
+      "editDialog": {
+        "title": "Edit Question",
+        "description": "Update the interview question for this job position.",
+        "form": {
+          "question": {
+            "label": "Question",
+            "placeholder": "Enter your interview question..."
+          },
+          "answerGuidelines": {
+            "label": "Answer Guidelines",
+            "placeholder": "Provide guidelines for answering this question..."
+          },
+          "published": "Published"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save Changes"
+        }
+      },
+      "deleteDialog": {
+        "title": "Delete Question",
+        "description": "Are you sure you want to delete this question? This action cannot be undone. Any submissions for this question will also be deleted.",
+        "buttons": {
+          "cancel": "Cancel",
+          "delete": "Delete"
+        }
+      },
+      "toast": {
+        "questionCreated": {
+          "title": "Question created",
+          "description": "The new question has been successfully created."
+        },
+        "questionUpdated": {
+          "title": "Question updated",
+          "description": "The question has been successfully updated."
+        },
+        "questionDeleted": {
+          "title": "Question deleted",
+          "description": "The question has been successfully deleted."
+        },
+        "error": {
+          "title": "Error",
+          "createFailed": "Failed to create question. Please try again.",
+          "updateFailed": "Failed to update question. Please try again.",
+          "deleteFailed": "Failed to delete question. Please try again."
+        }
+      },
+      "loading": {
+        "error": "Failed to load questions. Please try again."
+      },
+      "actions": {
+        "errors": {
+          "jobNotFound": "Job not found",
+          "notAuthorizedToManage": "Not authorized to manage this job",
+          "notAuthenticated": "Not authenticated",
+          "notAuthorized": "Not authorized",
+          "failedToCreate": "Failed to create question",
+          "failedToUpdate": "Failed to update question",
+          "failedToDelete": "Failed to delete question",
+          "failedToCheckSubmissions": "Failed to check question submissions",
+          "cannotDeleteWithSubmissions": "Cannot delete questions that have submissions. Consider marking as draft instead.",
+          "unexpectedError": "An unexpected error occurred"
+        }
+      }
     }
   }
 }
