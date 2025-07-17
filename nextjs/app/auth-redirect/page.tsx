@@ -13,18 +13,6 @@ export default async function ProtectedPage() {
     redirect("/auth/login");
   }
 
-  // Check if user needs company onboarding
-  const { data: membership } = await supabase
-    .from("company_members")
-    .select("id")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
-
-  if (!membership) {
-    // User doesn't have a company, redirect to company onboarding
-    redirect("/company-onboarding");
-  }
-
-  // If user has a company, redirect to company dashboard
-  redirect("/dashboard/company");
+  // Redirect to recruiting dashboard
+  redirect("/recruiting");
 }

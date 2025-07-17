@@ -100,7 +100,6 @@ export type Database = {
           id: string
           industry: string | null
           name: string
-          slug: string
           updated_at: string
           website: string | null
         }
@@ -110,7 +109,6 @@ export type Database = {
           id?: string
           industry?: string | null
           name: string
-          slug: string
           updated_at?: string
           website?: string | null
         }
@@ -120,7 +118,6 @@ export type Database = {
           id?: string
           industry?: string | null
           name?: string
-          slug?: string
           updated_at?: string
           website?: string | null
         }
