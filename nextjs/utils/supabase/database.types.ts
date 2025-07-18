@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_application_files: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          file_id: string
+          id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          file_id: string
+          id?: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          file_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_application_files_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "company_job_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_application_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "user_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_branding: {
         Row: {
           coach_id: string
