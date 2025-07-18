@@ -175,8 +175,8 @@ export const triageAction = async (
         response: z.string(),
       }),
       modelConfig: {
-        primaryModel: "gemini-2.5-pro-preview-03-25",
-        fallbackModel: "gemini-2.5-flash-preview-04-17",
+        primaryModel: "gemini-2.5-pro",
+        fallbackModel: "gemini-2.5-flash",
       },
     });
     logger = logger.with({
@@ -276,8 +276,8 @@ export const createSection = async (
         response: z.string(),
       }),
       modelConfig: {
-        primaryModel: "gemini-2.5-pro-preview-03-25",
-        fallbackModel: "gemini-2.5-flash-preview-04-17",
+        primaryModel: "gemini-2.5-pro",
+        fallbackModel: "gemini-2.5-flash",
       },
     });
     logger = logger.with({
@@ -674,8 +674,8 @@ export const handleOtherAction = async (
         response: z.string(),
       }),
       modelConfig: {
-        primaryModel: "gemini-2.5-pro-preview-03-25",
-        fallbackModel: "gemini-2.5-flash-preview-04-17",
+        primaryModel: "gemini-2.5-pro",
+        fallbackModel: "gemini-2.5-flash",
       },
     });
     logger = logger.with({
@@ -865,8 +865,8 @@ export const identifyChanges = async (
         }),
       ]),
       modelConfig: {
-        primaryModel: "gemini-2.5-pro-preview-03-25",
-        fallbackModel: "gemini-2.5-flash-preview-04-17",
+        primaryModel: "gemini-2.5-pro",
+        fallbackModel: "gemini-2.5-flash",
       },
     });
 
@@ -1011,8 +1011,8 @@ export const handleTransformConversation = async (
       ),
     }),
     modelConfig: {
-      primaryModel: "gemini-2.5-pro-preview-03-25",
-      fallbackModel: "gemini-2.5-flash-preview-04-17",
+      primaryModel: "gemini-2.5-pro",
+      fallbackModel: "gemini-2.5-flash",
     },
   });
   logger.info("Transform conversation completed", { isReady, response });

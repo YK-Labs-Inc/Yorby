@@ -16,8 +16,8 @@ import { Speechify } from "@speechify/api-sdk";
 import { UploadResponse } from "../types";
 
 export type GeminiModelName =
-  | "gemini-2.5-pro-preview-03-25"
-  | "gemini-2.5-flash-preview-04-17"
+  | "gemini-2.5-pro"
+  | "gemini-2.5-flash"
   | "gemini-2.0-flash"
   | "gemini-1.5-flash";
 
@@ -28,7 +28,7 @@ type ModelConfig = {
 
 // Default model configuration
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
-  primaryModel: "gemini-2.5-flash-preview-04-17",
+  primaryModel: "gemini-2.5-flash",
   fallbackModel: "gemini-2.0-flash",
 };
 
