@@ -78,7 +78,7 @@ export async function createQuestion(
     }
 
     // Check authorization
-    const { isAuthorized, error: authError } = await checkCompanyMembership(
+    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
       user.id,
       jobId
     );
@@ -109,7 +109,11 @@ export async function createQuestion(
     await logger.flush();
 
     // Revalidate the job page
-    revalidatePath(`/dashboard/jobs/${jobId}`);
+    if (companyId) {
+      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
+    } else {
+      revalidatePath(`/dashboard/jobs/${jobId}`);
+    }
 
     return { success: true, data };
   } catch (error: any) {
@@ -148,7 +152,7 @@ export async function updateQuestion(
     }
 
     // Check authorization
-    const { isAuthorized, error: authError } = await checkCompanyMembership(
+    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
       user.id,
       jobId
     );
@@ -178,7 +182,11 @@ export async function updateQuestion(
     await logger.flush();
 
     // Revalidate the job page
-    revalidatePath(`/dashboard/jobs/${jobId}`);
+    if (companyId) {
+      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
+    } else {
+      revalidatePath(`/dashboard/jobs/${jobId}`);
+    }
 
     return { success: true, data };
   } catch (error: any) {
@@ -209,7 +217,7 @@ export async function deleteQuestion(questionId: string, jobId: string) {
     }
 
     // Check authorization
-    const { isAuthorized, error: authError } = await checkCompanyMembership(
+    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
       user.id,
       jobId
     );
@@ -262,7 +270,11 @@ export async function deleteQuestion(questionId: string, jobId: string) {
     await logger.flush();
 
     // Revalidate the job page
-    revalidatePath(`/dashboard/jobs/${jobId}`);
+    if (companyId) {
+      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
+    } else {
+      revalidatePath(`/dashboard/jobs/${jobId}`);
+    }
 
     return { success: true };
   } catch (error: any) {
