@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -26,7 +26,10 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations("auth.login");
+
+  const redirectUrl = searchParams.get("redirect");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +43,8 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Redirect to auth-redirect page which will handle company onboarding check
-      router.push("/auth-redirect");
+
+      router.push(redirectUrl || "/auth-redirect");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : t("errorMessage"));
     } finally {
@@ -54,9 +57,7 @@ export function LoginForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
-          <CardDescription>
-            {t("description")}
-          </CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
@@ -98,7 +99,11 @@ export function LoginForm({
             <div className="mt-4 text-center text-sm">
               {t("noAccount")}{" "}
               <Link
-                href="/auth/sign-up"
+                href={
+                  redirectUrl
+                    ? `/auth/sign-up?redirect=${redirectUrl}`
+                    : "/auth/sign-up"
+                }
                 className="underline underline-offset-4"
               >
                 {t("signUpLink")}

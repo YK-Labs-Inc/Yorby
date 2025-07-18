@@ -1,41 +1,45 @@
-'use client'
+"use client";
 
-import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
+import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [repeatPassword, setRepeatPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const t = useTranslations('auth.signUp')
+export function SignUpForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const t = useTranslations("auth.signUp");
+  const searchParams = useSearchParams();
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const supabase = createClient()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    const supabase = createClient();
+    setIsLoading(true);
+    setError(null);
 
     if (password !== repeatPassword) {
-      setError(t('passwordMismatch'))
-      setIsLoading(false)
-      return
+      setError(t("passwordMismatch"));
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -43,34 +47,34 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth-redirect`,
+          emailRedirectTo: `${window.location.origin}${searchParams.get("redirect") || "/auth-redirect"}`,
         },
-      })
-      if (error) throw error
-      router.push('/auth/sign-up-success')
+      });
+      if (error) throw error;
+      router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('errorMessage'))
+      setError(error instanceof Error ? error.message : t("errorMessage"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{t('title')}</CardTitle>
-          <CardDescription>{t('description')}</CardDescription>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">{t('email.label')}</Label>
+                <Label htmlFor="email">{t("email.label")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder={t('email.placeholder')}
+                  placeholder={t("email.placeholder")}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -78,7 +82,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">{t('password.label')}</Label>
+                  <Label htmlFor="password">{t("password.label")}</Label>
                 </div>
                 <Input
                   id="password"
@@ -90,7 +94,9 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="repeat-password">{t('repeatPassword.label')}</Label>
+                  <Label htmlFor="repeat-password">
+                    {t("repeatPassword.label")}
+                  </Label>
                 </div>
                 <Input
                   id="repeat-password"
@@ -102,18 +108,18 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t('submitting') : t('submit')}
+                {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              {t('hasAccount')}{' '}
+              {t("hasAccount")}{" "}
               <Link href="/auth/login" className="underline underline-offset-4">
-                {t('loginLink')}
+                {t("loginLink")}
               </Link>
             </div>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
