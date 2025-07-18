@@ -118,8 +118,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
           userId: user.id,
         },
         modelConfig: {
-          primaryModel: "gemini-2.5-pro-preview-03-25",
-          fallbackModel: "gemini-2.5-flash-preview-04-17",
+          primaryModel: "gemini-2.5-pro",
+          fallbackModel: "gemini-2.5-flash",
         },
         schema: z.object({
           updatedKnowledgeBase: z.string(),
