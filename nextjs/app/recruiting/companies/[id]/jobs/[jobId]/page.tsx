@@ -1,11 +1,11 @@
 import { redirect, notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
-import { ArrowLeft, Users, FileText, Settings } from "lucide-react";
-import QuestionsTable from "./QuestionsTable";
+import { ArrowLeft, Users, FileQuestion } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface PageProps {
   params: Promise<{
@@ -59,19 +59,14 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     redirect(`/recruiting/companies/${companyId}`);
   }
 
-  // Fetch job details
+  // Fetch job details with counts
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
     .select(
       `
       *,
-      custom_job_questions (
-        id,
-        question,
-        answer_guidelines,
-        publication_status,
-        created_at
-      )
+      custom_job_questions (count),
+      company_job_candidates (count)
     `
     )
     .eq("id", jobId)
@@ -109,13 +104,71 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
 
         {/* Header */}
         <div className="mb-8">
-          <H1 className="text-2xl sm:text-3xl mb-2">{job.job_title}</H1>
-          {job.company_name && (
-            <p className="text-muted-foreground">{job.company_name}</p>
-          )}
+          <div className="flex items-start justify-between">
+            <div>
+              <H1 className="text-2xl sm:text-3xl mb-2">{job.job_title}</H1>
+              {job.company_name && (
+                <p className="text-muted-foreground mb-4">{job.company_name}</p>
+              )}
+              <div className="flex gap-2">
+                <Badge variant={job.status === "unlocked" ? "default" : "secondary"}>
+                  {job.status === "unlocked" ? "Active" : "Private"}
+                </Badge>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <QuestionsTable jobId={jobId} />
+        {/* Job Description */}
+        {job.job_description && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Job Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                {job.job_description}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Navigation Cards */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Link href={`/recruiting/companies/${companyId}/jobs/${jobId}/questions`}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <FileQuestion className="h-8 w-8 text-primary" />
+                  <span className="text-2xl font-bold">
+                    {job.custom_job_questions?.[0]?.count || 0}
+                  </span>
+                </div>
+                <CardTitle>Interview Questions</CardTitle>
+                <CardDescription>
+                  Manage screening questions for candidates
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href={`/recruiting/companies/${companyId}/jobs/${jobId}/candidates`}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <Users className="h-8 w-8 text-primary" />
+                  <span className="text-2xl font-bold">
+                    {job.company_job_candidates?.[0]?.count || 0}
+                  </span>
+                </div>
+                <CardTitle>Candidates</CardTitle>
+                <CardDescription>
+                  Review and manage job applicants
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
       </div>
     </div>
   );
