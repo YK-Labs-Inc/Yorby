@@ -10,10 +10,11 @@ import {
 import { google } from "@ai-sdk/google";
 import { withTracing } from "@posthog/ai";
 import { posthog } from "../tracking/serverUtils";
-import { createSupabaseServerClient } from "../supabase/server";
+import { createSupabaseServerClient, downloadFile } from "../supabase/server";
 import { OpenAI } from "@posthog/ai";
 import { Speechify } from "@speechify/api-sdk";
 import { UploadResponse } from "../types";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 
 export type GeminiModelName =
   | "gemini-2.5-pro"
@@ -429,4 +430,99 @@ export const uploadFileToGemini = async ({
   );
   const geminiUploadResponse = (await res2.json()) as UploadResponse;
   return geminiUploadResponse;
+};
+
+export type FileEntry = {
+  id: string;
+  supabaseBucketName: string;
+  supabaseFilePath: string;
+  supabaseTableName: string;
+  googleFileUri: string;
+  googleFileName: string;
+  mimeType: string;
+};
+
+const checkFileExistsInGemini = async (file: FileEntry) => {
+  try {
+    const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
+    const fileManager = new GoogleAIFileManager(apiKey);
+    await fileManager.getFile(file.googleFileName);
+    return { file, status: true };
+  } catch {
+    return { file, status: false };
+  }
+};
+
+const updateFileInDatabase = async ({
+  uploadResponse,
+  file,
+}: {
+  uploadResponse: UploadResponse;
+  file: FileEntry;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    // Assumes that the table has fields google_file_uri and google_file_name
+    // @ts-ignore
+    .from(file.supabaseTableName)
+    .update({
+      google_file_uri: uploadResponse.file.uri,
+      google_file_name: uploadResponse.file.name,
+    })
+    .eq("id", file.id);
+  if (error) {
+    throw error;
+  }
+};
+
+const processMissingFile = async ({ file }: { file: FileEntry }) => {
+  const { supabaseFilePath, supabaseBucketName } = file;
+  const data = await downloadFile({
+    filePath: supabaseFilePath,
+    bucket: supabaseBucketName,
+  });
+  const displayName = supabaseFilePath.split("/").pop() ?? supabaseFilePath;
+  const uploadResponse = await uploadFileToGemini({
+    blob: data,
+    displayName: displayName,
+  });
+  await updateFileInDatabase({
+    uploadResponse,
+    file,
+  });
+  return uploadResponse;
+};
+
+export const fetchFilesFromGemini = async ({
+  files,
+}: {
+  files: FileEntry[];
+}): Promise<
+  {
+    fileData: {
+      fileUri: string;
+      mimeType: string;
+    };
+  }[]
+> => {
+  const fileStatuses = await Promise.all(files.map(checkFileExistsInGemini));
+  return await Promise.all(
+    fileStatuses.map(async ({ file, status }) => {
+      if (!status) {
+        const uploadResponse = await processMissingFile({ file });
+        return {
+          fileData: {
+            fileUri: uploadResponse.file.uri,
+            mimeType: uploadResponse.file.mimeType,
+          },
+        };
+      }
+      return {
+        fileData: {
+          fileUri: file.googleFileUri,
+          mimeType: file.mimeType,
+        },
+      };
+    })
+  );
 };

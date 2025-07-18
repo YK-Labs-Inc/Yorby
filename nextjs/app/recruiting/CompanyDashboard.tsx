@@ -76,14 +76,7 @@ export function CompanyDashboard({ companies, userId }: CompanyDashboardProps) {
                       {company.website && (
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{t("website")}</span>
-                          <a
-                            href={company.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {new URL(company.website).hostname}
-                          </a>
+                          <p>{company.website}</p>
                         </div>
                       )}
                       {company.company_size && (

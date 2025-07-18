@@ -41,15 +41,10 @@ export function CompanyHeader({ company }: CompanyHeaderProps) {
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             {company.website && (
-              <a
-                href={company.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-foreground"
-              >
+              <p>
                 <Globe className="h-4 w-4" />
-                {new URL(company.website).hostname}
-              </a>
+                {company.website}
+              </p>
             )}
             {company.company_size && (
               <div className="flex items-center gap-2">
