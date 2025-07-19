@@ -1,7 +1,14 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 interface PageProps {
   params: Promise<{
@@ -12,6 +19,7 @@ interface PageProps {
 
 export default async function ApplicationSubmittedPage({ params }: PageProps) {
   const { companyId, jobId } = await params;
+  const t = await getTranslations("apply");
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -21,20 +29,20 @@ export default async function ApplicationSubmittedPage({ params }: PageProps) {
             <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle>Application Submitted!</CardTitle>
+            <CardTitle>{t("applicationSubmitted.title")}</CardTitle>
             <CardDescription>
-              Your application has been successfully submitted. The hiring team will review it and get back to you soon.
+              {t("applicationSubmitted.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Link href={`/apply/company/${companyId}/job/${jobId}`}>
               <Button variant="outline" className="w-full">
-                Back to Job Posting
+                {t("applicationSubmitted.buttons.backToJob")}
               </Button>
             </Link>
             <Link href="/dashboard/jobs">
               <Button className="w-full">
-                Browse More Jobs
+                {t("applicationSubmitted.buttons.viewDashboard")}
               </Button>
             </Link>
           </CardContent>
