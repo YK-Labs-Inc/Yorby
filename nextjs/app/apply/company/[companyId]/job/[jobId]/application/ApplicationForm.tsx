@@ -14,6 +14,7 @@ import { Upload, CheckCircle2 } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/utils/supabase/database.types";
 
@@ -58,7 +59,9 @@ async function uploadFiles(url: string, { arg }: { arg: File[] }) {
 // Fetcher function for application submission mutation
 async function submitApplication(
   url: string,
-  { arg }: { arg: { companyId: string; jobId: string; selectedFileIds: string[] } }
+  {
+    arg,
+  }: { arg: { companyId: string; jobId: string; selectedFileIds: string[] } }
 ) {
   const response = await fetch(url, {
     method: "POST",
@@ -93,18 +96,15 @@ export function ApplicationForm({
   const [uploadedFiles, setUploadedFiles] = useState<UserFile[]>([]);
   const { logInfo, logError } = useAxiomLogging();
   const router = useRouter();
+  const t = useTranslations("apply");
 
   // Set up the file upload mutation
-  const { trigger: uploadFilesTrigger, isMutating: isUploading } = useSWRMutation(
-    '/api/apply/upload',
-    uploadFiles
-  );
+  const { trigger: uploadFilesTrigger, isMutating: isUploading } =
+    useSWRMutation("/api/apply/upload", uploadFiles);
 
   // Set up the application submission mutation
-  const { trigger: submitApplicationTrigger, isMutating: isSubmitting } = useSWRMutation(
-    '/api/apply/submit',
-    submitApplication
-  );
+  const { trigger: submitApplicationTrigger, isMutating: isSubmitting } =
+    useSWRMutation("/api/apply/submit", submitApplication);
 
   const allFiles = [...userFiles, ...uploadedFiles];
 
@@ -131,7 +131,10 @@ export function ApplicationForm({
       // Show success message
       if (result.errors && result.errors.length > 0) {
         toast.warning(
-          `Uploaded ${result.files.length} file(s) successfully. ${result.errors.length} file(s) failed.`
+          t("applicationForm.success.filesUploadedWithErrors", {
+            successCount: result.files.length,
+            errorCount: result.errors.length,
+          })
         );
         logInfo("Files uploaded with errors", {
           successCount: result.files.length,
@@ -139,13 +142,19 @@ export function ApplicationForm({
           errors: result.errors,
         });
       } else {
-        toast.success(`Successfully uploaded ${result.files.length} file(s)`);
+        toast.success(
+          t("applicationForm.success.filesUploaded", {
+            count: result.files.length,
+          })
+        );
         logInfo("Files uploaded", { count: result.files.length });
       }
     } catch (error) {
       logError("File upload error", { error });
       toast.error(
-        error instanceof Error ? error.message : "Failed to upload files"
+        error instanceof Error
+          ? error.message
+          : t("applicationForm.errors.uploadFiles")
       );
     }
   };
@@ -157,7 +166,7 @@ export function ApplicationForm({
         newSet.delete(fileId);
       } else {
         if (newSet.size >= 5) {
-          toast.error("You can select up to 5 files");
+          toast.error(t("applicationForm.documentSelection.maxFilesError"));
           return prev;
         }
         newSet.add(fileId);
@@ -168,7 +177,7 @@ export function ApplicationForm({
 
   const handleSaveFiles = async () => {
     if (selectedFiles.size === 0) {
-      toast.error("Please select at least one file");
+      toast.error(t("applicationForm.documentSelection.noFilesError"));
       return;
     }
 
@@ -183,14 +192,14 @@ export function ApplicationForm({
         candidateId: result.candidateId,
         fileCount: selectedFiles.size,
       });
-      toast.success("Application submitted successfully!");
-      router.push(
-        `/apply/company/${companyId}/job/${jobId}/interview`
-      );
+      toast.success(t("applicationForm.success.applicationSubmitted"));
+      router.push(`/apply/company/${companyId}/job/${jobId}/interview`);
     } catch (error) {
       logError("Application submission error", { error });
       toast.error(
-        error instanceof Error ? error.message : "Failed to submit application"
+        error instanceof Error
+          ? error.message
+          : t("applicationForm.errors.submitApplication")
       );
     }
   };
@@ -208,19 +217,23 @@ export function ApplicationForm({
         {/* Application Header */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Apply to {job.job_title}</CardTitle>
-            <CardDescription>at {company.name}</CardDescription>
+            <CardTitle>
+              {t("applicationForm.title", { jobTitle: job.job_title })}
+            </CardTitle>
+            <CardDescription>
+              {t("applicationForm.subtitle", { companyName: company.name })}
+            </CardDescription>
           </CardHeader>
         </Card>
 
         {/* Document Selection */}
         <Card>
           <CardHeader>
-            <CardTitle>Application Documents</CardTitle>
+            <CardTitle>
+              {t("applicationForm.documentSelection.title")}
+            </CardTitle>
             <CardDescription>
-              Choose up to 5 documents to include with your application. You can
-              select from existing files or upload new ones. You can upload
-              documents in PDF, TXT, PNG, or JPG.
+              {t("applicationForm.documentSelection.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -247,7 +260,9 @@ export function ApplicationForm({
                   >
                     <span>
                       <Upload className="h-4 w-4 mr-2" />
-                      {isUploading ? "Uploading..." : "Upload files"}
+                      {isUploading
+                        ? t("applicationForm.buttons.uploading")
+                        : t("applicationForm.buttons.uploadFiles")}
                     </span>
                   </Button>
                 </label>
@@ -277,7 +292,7 @@ export function ApplicationForm({
                             {file.display_name}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Uploaded{" "}
+                            {t("applicationForm.fileItem.uploaded")}{" "}
                             {new Date(file.created_at).toLocaleDateString()}
                           </p>
                         </div>
@@ -293,8 +308,7 @@ export function ApplicationForm({
 
             {allFiles.length === 0 && !isUploading && (
               <p className="text-center text-sm text-gray-500 py-8">
-                No documents uploaded yet. Upload your resume and other
-                documents to apply.
+                {t("applicationForm.documentSelection.noDocuments")}
               </p>
             )}
 
@@ -302,8 +316,9 @@ export function ApplicationForm({
             {selectedFiles.size > 0 && (
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-900">
-                  {selectedFiles.size} document
-                  {selectedFiles.size !== 1 ? "s" : ""} selected
+                  {t("applicationForm.documentSelection.documentsSelected", {
+                    count: selectedFiles.size,
+                  })}
                 </p>
               </div>
             )}
@@ -316,8 +331,8 @@ export function ApplicationForm({
                 size="lg"
               >
                 {isSubmitting
-                  ? "Submitting Application..."
-                  : "Submit Application"}
+                  ? t("applicationForm.buttons.submittingApplication")
+                  : t("applicationForm.buttons.submit")}
               </Button>
             </div>
           </CardContent>

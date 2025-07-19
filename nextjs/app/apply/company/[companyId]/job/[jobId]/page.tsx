@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
@@ -96,6 +97,7 @@ export default function ApplyPage({ params }: PageProps) {
   const [jobId, setJobId] = useState<string>("");
   const router = useRouter();
   const { logInfo, logError } = useAxiomLogging();
+  const t = useTranslations("apply");
 
   // Initialize params
   useEffect(() => {
@@ -187,7 +189,7 @@ export default function ApplyPage({ params }: PageProps) {
         router.push(`/apply/company/${companyId}/job/${jobId}/application`);
       }
     } catch (error) {
-      toast.error("Failed to check application status");
+      toast.error(t("jobPage.errors.applicationStatusCheck"));
       logError("Application status check error", { error });
     }
   };
@@ -220,14 +222,18 @@ export default function ApplyPage({ params }: PageProps) {
             <h2 className="text-3xl font-bold mb-2">{job.job_title}</h2>
             <CardDescription className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
-              Posted {new Date(job.created_at).toLocaleDateString()}
+              {t("jobPage.postedDate", {
+                date: new Date(job.created_at).toLocaleDateString(),
+              })}
             </CardDescription>
           </div>
 
           {/* Job Description Section */}
           {job.job_description && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Job Description</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {t("jobPage.jobDescription.title")}
+              </h3>
               <div className="prose prose-gray max-w-none">
                 <CollapsibleJobDescription description={job.job_description} />
               </div>
@@ -247,10 +253,10 @@ export default function ApplyPage({ params }: PageProps) {
               {checkingApplication ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Checking...
+                  {t("jobPage.buttons.checking")}
                 </>
               ) : (
-                "Apply Now"
+                t("jobPage.buttons.applyNow")
               )}
             </Button>
           ) : (
@@ -258,7 +264,7 @@ export default function ApplyPage({ params }: PageProps) {
               href={`/auth/login?redirect=/apply/company/${companyId}/job/${jobId}`}
             >
               <Button size="lg" className="w-full sm:w-auto">
-                Sign In to Apply
+                {t("jobPage.buttons.signInToApply")}
               </Button>
             </Link>
           )}

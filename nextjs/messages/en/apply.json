@@ -1,0 +1,137 @@
+{
+  "jobPage": {
+    "loading": "Loading...",
+    "notFound": "Job not found",
+    "errors": {
+      "fetchData": "Failed to fetch data",
+      "apiRequest": "API request failed",
+      "checkApplicationStatus": "Failed to check application status",
+      "applicationStatusCheck": "Failed to check application status"
+    },
+    "jobDescription": {
+      "title": "Job Description"
+    },
+    "postedDate": "Posted {date}",
+    "buttons": {
+      "checking": "Checking...",
+      "applyNow": "Apply Now",
+      "signInToApply": "Sign In to Apply"
+    }
+  },
+  "applicationForm": {
+    "title": "Apply for {jobTitle}",
+    "subtitle": "at {companyName}",
+    "errors": {
+      "uploadFiles": "Failed to upload files",
+      "submitApplication": "Failed to submit application",
+      "noFilesSelected": "Please select at least one file to submit",
+      "fileUploadFailed": "File upload failed: {error}"
+    },
+    "sections": {
+      "uploadDocuments": {
+        "title": "Upload Your Documents",
+        "description": "Upload your resume/CV and any other relevant documents (PDF, DOC, DOCX, Max 10MB per file)",
+        "uploadButton": "Upload New Files",
+        "uploading": "Uploading...",
+        "selectedCount": "{count} file(s) selected"
+      },
+      "existingDocuments": {
+        "title": "Your Existing Documents",
+        "description": "Select which documents you'd like to include with this application",
+        "noDocuments": "No existing documents found. Please upload your resume/CV."
+      },
+      "selectedDocuments": {
+        "title": "Selected Documents",
+        "description": "These documents will be submitted with your application"
+      }
+    },
+    "documentSelection": {
+      "title": "Application Documents",
+      "description": "Choose up to 5 documents to include with your application. You can select from existing files or upload new ones. You can upload documents in PDF, TXT, PNG, or JPG.",
+      "maxFilesError": "You can select up to 5 files",
+      "noFilesError": "Please select at least one file",
+      "noDocuments": "No documents uploaded yet. Upload your resume and other documents to apply.",
+      "documentsSelected": "{count} document{count, plural, =1 {} other {s}} selected"
+    },
+    "fileItem": {
+      "uploadedOn": "Uploaded on {date}",
+      "uploaded": "Uploaded"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Submit Application",
+      "submitting": "Submitting...",
+      "uploadFiles": "Upload files",
+      "uploading": "Uploading...",
+      "submittingApplication": "Submitting Application..."
+    },
+    "success": {
+      "filesUploaded": "Successfully uploaded {count} file(s)",
+      "filesUploadedWithErrors": "Uploaded {successCount} file(s) successfully. {errorCount} file(s) failed.",
+      "applicationSubmitted": "Application submitted successfully!"
+    }
+  },
+  "applicationSubmitted": {
+    "title": "Application Submitted!",
+    "description": "Your application has been successfully submitted. The hiring team will review it and get back to you soon.",
+    "buttons": {
+      "backToJob": "Back to Job Listing",
+      "viewDashboard": "View My Dashboard"
+    }
+  },
+  "interview": {
+    "header": {
+      "title": "AI Interview Ready",
+      "description": "Your application has been submitted successfully. Now let's proceed with a quick AI interview to complete your application."
+    },
+    "instructions": {
+      "title": "Interview Instructions",
+      "sections": {
+        "preparation": {
+          "title": "Preparation",
+          "description": "Find a quiet place with good lighting. Make sure your camera and microphone are working properly."
+        },
+        "duration": {
+          "title": "Interview Duration",
+          "description": "The interview will take approximately 10-15 minutes."
+        },
+        "questions": {
+          "title": "Questions",
+          "description": "You'll be asked relevant questions based on the job requirements and your application."
+        }
+      }
+    },
+    "tips": {
+      "title": "Tips for Success",
+      "items": [
+        "Be yourself and answer honestly",
+        "Speak clearly and at a moderate pace",
+        "Take a moment to think before answering",
+        "Have specific examples ready to share"
+      ]
+    },
+    "buttons": {
+      "startLater": "Start Later",
+      "startNow": "Start Interview Now"
+    },
+    "placeholder": "This is a placeholder interview page. The actual interview functionality will be implemented next."
+  },
+  "api": {
+    "errors": {
+      "notAuthenticated": "Not authenticated",
+      "invalidRequest": "Invalid request",
+      "companyNotFound": "Company not found",
+      "jobNotFound": "Job not found",
+      "fetchJobFailed": "Failed to fetch job details",
+      "fetchApplicationFailed": "Failed to fetch application status",
+      "serverError": "Internal server error",
+      "noFilesUploaded": "No files were uploaded",
+      "fileTooLarge": "File {fileName} is too large. Maximum size is 10MB",
+      "invalidFileType": "File {fileName} has an invalid type. Allowed types: PDF, DOC, DOCX",
+      "uploadFailed": "Failed to upload files",
+      "applicationExists": "You have already applied for this position",
+      "createApplicationFailed": "Failed to create application",
+      "invalidFileIds": "Invalid file IDs provided"
+    }
+  }
+} 
