@@ -1,11 +1,14 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
-import { Logger } from "next-axiom";
+import { NextResponse } from "next/server";
+import { AxiomRequest, withAxiom } from "next-axiom";
 
 // GET /api/jobs - List jobs
-export async function GET(request: NextRequest) {
-  const logger = new Logger().with({ endpoint: "/api/jobs", method: "GET" });
-  
+export const GET = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    method: request.method,
+    path: "/api/jobs",
+  });
+
   try {
     const supabase = await createSupabaseServerClient();
     const { searchParams } = new URL(request.url);
@@ -49,17 +52,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    logger.info("Jobs fetched successfully", { 
+    logger.info("Jobs fetched successfully", {
       count: jobs.length,
       userId: user.id,
-      companyId 
+      companyId,
     });
 
     return NextResponse.json({
       success: true,
       data: jobs,
     });
-
   } catch (error) {
     logger.error("Unexpected error in jobs GET", { error });
     return NextResponse.json(
@@ -67,12 +69,15 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/jobs - Create a new job
-export async function POST(request: NextRequest) {
-  const logger = new Logger().with({ endpoint: "/api/jobs", method: "POST" });
-  
+export const POST = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    method: request.method,
+    path: "/api/jobs",
+  });
+
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -91,12 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      job_title, 
-      job_description, 
-      company_id, 
-      coach_id
-    } = body;
+    const { job_title, job_description, company_id, coach_id } = body;
 
     if (!job_title) {
       logger.error("Missing required fields", { job_title });
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
         company_id,
         coach_id,
         user_id: user.id,
-        status: "unlocked" // Use the status field instead of deletion_status
+        status: "unlocked", // Use the status field instead of deletion_status
       })
       .select()
       .single();
@@ -128,17 +128,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.info("Job created successfully", { 
+    logger.info("Job created successfully", {
       jobId: job.id,
       userId: user.id,
-      companyId: company_id
+      companyId: company_id,
     });
 
     return NextResponse.json({
       success: true,
       data: job,
     });
-
   } catch (error) {
     logger.error("Unexpected error in jobs POST", { error });
     return NextResponse.json(
@@ -146,4 +145,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

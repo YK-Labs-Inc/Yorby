@@ -1,11 +1,14 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
-import { Logger } from "next-axiom";
+import { NextResponse } from "next/server";
+import { AxiomRequest, withAxiom } from "next-axiom";
 
 // GET /api/companies - List companies
-export async function GET(request: NextRequest) {
-  const logger = new Logger().with({ endpoint: "/api/companies", method: "GET" });
-  
+export const GET = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    method: request.method,
+    path: "/api/companies",
+  });
+
   try {
     const supabase = await createSupabaseServerClient();
     const { searchParams } = new URL(request.url);
@@ -41,16 +44,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    logger.info("Companies fetched successfully", { 
+    logger.info("Companies fetched successfully", {
       count: companies.length,
-      userId: user.id 
+      userId: user.id,
     });
 
     return NextResponse.json({
       success: true,
       data: companies,
     });
-
   } catch (error) {
     logger.error("Unexpected error in companies GET", { error });
     return NextResponse.json(
@@ -58,12 +60,15 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/companies - Create a new company
-export async function POST(request: NextRequest) {
-  const logger = new Logger().with({ endpoint: "/api/companies", method: "POST" });
-  
+export const POST = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    method: request.method,
+    path: "/api/companies",
+  });
+
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -113,16 +118,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.info("Company created successfully", { 
+    logger.info("Company created successfully", {
       companyId: company.id,
-      userId: user.id 
+      userId: user.id,
     });
 
     return NextResponse.json({
       success: true,
       data: company,
     });
-
   } catch (error) {
     logger.error("Unexpected error in companies POST", { error });
     return NextResponse.json(
@@ -130,4 +134,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

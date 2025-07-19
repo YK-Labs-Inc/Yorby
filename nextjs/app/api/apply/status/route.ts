@@ -1,9 +1,12 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
-import { Logger } from "next-axiom";
+import { NextResponse } from "next/server";
+import { AxiomRequest, withAxiom } from "next-axiom";
 
-export async function POST(request: NextRequest) {
-  const logger = new Logger().with({ endpoint: "/api/apply/status" });
+export const POST = withAxiom(async (request: AxiomRequest) => {
+  const logger = request.log.with({
+    method: request.method,
+    path: "/api/apply/status",
+  });
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -108,4 +111,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
