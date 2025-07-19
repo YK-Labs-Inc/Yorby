@@ -185,7 +185,7 @@ export function ApplicationForm({
       });
       toast.success("Application submitted successfully!");
       router.push(
-        `/apply/company/${companyId}/job/${jobId}/application/submitted`
+        `/apply/company/${companyId}/job/${jobId}/interview`
       );
     } catch (error) {
       logError("Application submission error", { error });
