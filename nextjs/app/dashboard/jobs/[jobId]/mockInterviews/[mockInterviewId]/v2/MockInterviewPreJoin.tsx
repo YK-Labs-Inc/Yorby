@@ -17,17 +17,18 @@ interface MockInterviewPreJoinProps {
 }
 
 export function MockInterviewPreJoin({ onSubmit }: MockInterviewPreJoinProps) {
-  const t = useTranslations("interviews.mockInterview");
-  const tLabels = useTranslations("interviews.livekit.labels");
+  const t = useTranslations("apply.interviews.mockInterview");
+  console.log("t", t("button"));
+  const tLabels = useTranslations("apply.interviews.livekit.labels");
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>{t("alert")}</AlertDescription>
@@ -67,17 +68,17 @@ export function MockInterviewPreJoin({ onSubmit }: MockInterviewPreJoinProps) {
               {t("equipmentCheck.description")}
             </p>
           </div>
+
+          <div data-lk-theme="default" className="rounded-lg overflow-hidden">
+            <PreJoin
+              onSubmit={onSubmit}
+              joinLabel={t("button")}
+              micLabel={tLabels("microphone")}
+              camLabel={tLabels("camera")}
+            />
+          </div>
         </CardContent>
       </Card>
-
-      <div data-lk-theme="default" className="rounded-lg overflow-hidden">
-        <PreJoin
-          onSubmit={onSubmit}
-          joinLabel={t("button")}
-          micLabel={tLabels("microphone")}
-          camLabel={tLabels("camera")}
-        />
-      </div>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export function LiveKitInterviewComponent({
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const { baseUrl } = useMultiTenant();
-  const t = useTranslations("interviews.livekit");
+  const t = useTranslations("apply.interviews.livekit");
 
   const processInterview = useCallback(async () => {
     setIsProcessing(true);

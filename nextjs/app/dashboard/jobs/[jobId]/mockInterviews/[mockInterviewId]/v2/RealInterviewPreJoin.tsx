@@ -18,12 +18,12 @@ interface RealInterviewPreJoinProps {
 }
 
 export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
-  const t = useTranslations("interviews.realInterview");
-  const tLabels = useTranslations("interviews.livekit.labels");
+  const t = useTranslations("apply.interviews.realInterview");
+  const tLabels = useTranslations("apply.interviews.livekit.labels");
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Card className="mb-6 border-orange-200 dark:border-orange-900">
+      <Card className="border-orange-200 dark:border-orange-900">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
             <AlertCircle className="h-6 w-6 text-orange-500" />
@@ -31,7 +31,7 @@ export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
           </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <Alert
             variant="default"
             className="border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950"
@@ -123,17 +123,17 @@ export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
               </p>
             </div>
           </div>
+
+          <div data-lk-theme="default" className="rounded-lg overflow-hidden">
+            <PreJoin
+              onSubmit={onSubmit}
+              joinLabel={t("button")}
+              micLabel={tLabels("microphone")}
+              camLabel={tLabels("camera")}
+            />
+          </div>
         </CardContent>
       </Card>
-
-      <div data-lk-theme="default" className="rounded-lg overflow-hidden">
-        <PreJoin
-          onSubmit={onSubmit}
-          joinLabel={t("button")}
-          micLabel={tLabels("microphone")}
-          camLabel={tLabels("camera")}
-        />
-      </div>
     </div>
   );
 }
