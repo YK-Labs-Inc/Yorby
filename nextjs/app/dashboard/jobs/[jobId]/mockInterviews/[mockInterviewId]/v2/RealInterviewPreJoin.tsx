@@ -1,0 +1,45 @@
+"use client";
+
+import { PreJoin } from "@livekit/components-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+interface RealInterviewPreJoinProps {
+  onSubmit: () => void;
+}
+
+export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
+  const t = useTranslations("apply.interviews.realInterview");
+  const tLabels = useTranslations("apply.interviews.livekit.labels");
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <Card className="border-orange-200 dark:border-orange-900">
+        <CardHeader>
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <AlertCircle className="h-6 w-6 text-orange-500" />
+            {t("title")}
+          </CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div data-lk-theme="default" className="rounded-lg overflow-hidden">
+            <PreJoin
+              onSubmit={onSubmit}
+              joinLabel={t("button")}
+              micLabel={tLabels("microphone")}
+              camLabel={tLabels("camera")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

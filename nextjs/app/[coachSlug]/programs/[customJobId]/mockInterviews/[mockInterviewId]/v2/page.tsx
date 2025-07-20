@@ -8,7 +8,15 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { posthog } from "@/utils/tracking/serverUtils";
 
-export default async function LiveKitInterviewPage() {
+interface PageProps {
+  params: Promise<{
+    customJobId: string;
+    mockInterviewId: string;
+  }>;
+}
+
+export default async function LiveKitInterviewPage({ params }: PageProps) {
+  const { customJobId, mockInterviewId } = await params;
   const hdrs = await headers();
   const origin = getOrigin(hdrs);
   const appConfig = await getAppConfig(origin);
@@ -25,5 +33,10 @@ export default async function LiveKitInterviewPage() {
   if (!isLiveKitEnabled) {
     redirect("/");
   }
-  return <LiveKitInterviewComponent appConfig={appConfig} />;
+  return (
+    <LiveKitInterviewComponent
+      appConfig={appConfig}
+      interviewType="mock-interview"
+    />
+  );
 }

@@ -81,40 +81,78 @@
   },
   "interview": {
     "header": {
-      "title": "AI Interview Ready",
-      "description": "Your application has been submitted successfully. Now let's proceed with a quick AI interview to complete your application."
+      "title": "AI Interview for {jobTitle}",
+      "subtitle": "at {companyName}",
+      "defaultJobTitle": "Position"
     },
     "instructions": {
-      "title": "Interview Instructions",
+      "title": "Before You Begin",
       "sections": {
-        "preparation": {
-          "title": "Preparation",
-          "description": "Find a quiet place with good lighting. Make sure your camera and microphone are working properly."
+        "technicalRequirements": {
+          "title": "Technical Requirements",
+          "description": "Ensure you have a working camera and microphone. The AI interviewer will interact with you in real-time."
         },
         "duration": {
           "title": "Interview Duration",
-          "description": "The interview will take approximately 10-15 minutes."
+          "description": "The interview typically takes 15-30 minutes. Make sure you have enough time to complete it."
         },
-        "questions": {
-          "title": "Questions",
-          "description": "You'll be asked relevant questions based on the job requirements and your application."
+        "expectations": {
+          "title": "What to Expect",
+          "description": "The AI interviewer will ask you questions relevant to the position. Answer naturally as you would in a real interview."
         }
       }
     },
     "tips": {
       "title": "Tips for Success",
       "items": [
-        "Be yourself and answer honestly",
-        "Speak clearly and at a moderate pace",
-        "Take a moment to think before answering",
-        "Have specific examples ready to share"
+        "Find a quiet, well-lit environment",
+        "Test your audio and video before starting",
+        "Speak clearly and maintain eye contact with the camera",
+        "Be yourself and answer honestly"
       ]
     },
     "buttons": {
       "startLater": "Start Later",
-      "startNow": "Start Interview Now"
+      "startNow": "Start Interview",
+      "processing": "Processing..."
     },
-    "placeholder": "This is a placeholder interview page. The actual interview functionality will be implemented next."
+    "errors": {
+      "authenticationRequired": "Authentication required",
+      "fetchInterviewStatus": "Failed to fetch interview status",
+      "createInterview": "Failed to create interview"
+    }
+  },
+  "interviews": {
+    "livekit": {
+      "errors": {
+        "processingInterview": "Error processing interview",
+        "connectingToAgent": "There was an error connecting to the agent",
+        "mediaDevices": "Encountered an error with your media devices",
+        "unknownError": "Unknown error"
+      },
+      "processing": {
+        "title": "Processing Interview",
+        "description": "Please wait while we process your interview",
+        "status": "Processing...",
+        "wait": "Please wait while we process your interview",
+        "emailNotification": "You'll receive an email when it's ready"
+      },
+      "labels": {
+        "startAudio": "Start Audio",
+        "microphone": "Microphone",
+        "camera": "Camera"
+      }
+    },
+    "mockInterview": {
+      "title": "Practice Interview Setup",
+      "description": "Prepare for your mock interview with our AI interviewer",
+      "button": "Start Practice Interview"
+    },
+    "realInterview": {
+      "title": "Real Interview Preparation",
+      "description": "This is your official interview that will be submitted for evaluation",
+      "button": "Begin Interview"
+    }
   },
   "api": {
     "errors": {
