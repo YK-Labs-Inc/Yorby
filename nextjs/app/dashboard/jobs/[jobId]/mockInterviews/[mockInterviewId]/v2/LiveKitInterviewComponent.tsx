@@ -21,19 +21,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useConnectionDetails from "./hooks/useConnectionDetails";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import "@livekit/components-styles";
 import "./livekit-light-theme.css";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
+import { MockInterviewPreJoin } from "./MockInterviewPreJoin";
+import { RealInterviewPreJoin } from "./RealInterviewPreJoin";
+import { useTranslations } from "next-intl";
 
 const MotionSessionView = motion.create(SessionView);
 
 interface AppProps {
   appConfig: AppConfig;
+  interviewType: "mock-interview" | "real-interview";
 }
 
-export function LiveKitInterviewComponent({ appConfig }: AppProps) {
+export function LiveKitInterviewComponent({
+  appConfig,
+  interviewType,
+}: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -48,6 +55,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const { baseUrl } = useMultiTenant();
+  const t = useTranslations("interviews.livekit");
 
   const processInterview = useCallback(async () => {
     setIsProcessing(true);
@@ -76,14 +84,15 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
         error,
       });
       toastAlert({
-        title: "Error processing interview",
-        description: error instanceof Error ? error.message : "Unknown error",
+        title: t("errors.processingInterview"),
+        description:
+          error instanceof Error ? error.message : t("errors.unknownError"),
       });
     } finally {
       setIsProcessing(false);
       return "Interview processed";
     }
-  }, [mockInterviewId, router, baseUrl, jobId, logError]);
+  }, [mockInterviewId, router, baseUrl, jobId, logError, t]);
 
   useEffect(() => {
     room.registerRpcMethod("processInterview", processInterview);
@@ -99,7 +108,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
     };
     const onMediaDevicesError = (error: Error) => {
       toastAlert({
-        title: "Encountered an error with your media devices",
+        title: t("errors.mediaDevices"),
         description: `${error.name}: ${error.message}`,
       });
     };
@@ -109,7 +118,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
       room.off(RoomEvent.Disconnected, onDisconnected);
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
-  }, [room, refreshConnectionDetails, mockInterviewId, logError]);
+  }, [room, refreshConnectionDetails, mockInterviewId, logError, t]);
 
   useEffect(() => {
     if (
@@ -135,7 +144,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
         .catch((error) => {
           setIsConnecting(false);
           toastAlert({
-            title: "There was an error connecting to the agent",
+            title: t("errors.connectingToAgent"),
             description: `${error.name}: ${error.message}`,
           });
         });
@@ -146,6 +155,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
     connectionDetails,
     appConfig.isPreConnectBufferEnabled,
     isConnecting,
+    t,
   ]);
 
   // Cleanup effect to disconnect room on unmount
@@ -159,9 +169,13 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
 
   if (!sessionStarted) {
     return (
-      <div data-lk-theme="default">
-        <PreJoin onSubmit={() => setSessionStarted(true)} />
-      </div>
+      <>
+        {interviewType === "mock-interview" ? (
+          <MockInterviewPreJoin onSubmit={() => setSessionStarted(true)} />
+        ) : (
+          <RealInterviewPreJoin onSubmit={() => setSessionStarted(true)} />
+        )}
+      </>
     );
   }
 
@@ -170,7 +184,7 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
       <div data-lk-theme="default">
         <RoomContext.Provider value={room}>
           <RoomAudioRenderer />
-          <StartAudio label="Start Audio" />
+          <StartAudio label={t("labels.startAudio")} />
           <MotionSessionView
             key="session-view"
             appConfig={appConfig}
@@ -193,23 +207,19 @@ export function LiveKitInterviewComponent({ appConfig }: AppProps) {
       <Dialog open={isProcessing} onOpenChange={() => {}}>
         <DialogContent hideClose className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Processing Interview</DialogTitle>
-            <DialogDescription>
-              Please wait while we process your interview
-            </DialogDescription>
+            <DialogTitle>{t("processing.title")}</DialogTitle>
+            <DialogDescription>{t("processing.description")}</DialogDescription>
           </DialogHeader>
           <div className="mt-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Processing...
+              {t("processing.status")}
             </div>
             <div className="flex gap-2 items-center mt-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-gray-100" />
-              <span className="text-sm">
-                Please wait while we process your interview
-              </span>
+              <span className="text-sm">{t("processing.wait")}</span>
             </div>
             <span className="text-sm text-gray-500 dark:text-gray-400 block mt-2">
-              You'll receive an email when it's ready
+              {t("processing.emailNotification")}
             </span>
           </div>
         </DialogContent>
