@@ -8,9 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertCircle, Clock, Mic, Video, CheckCircle2 } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface RealInterviewPreJoinProps {
@@ -32,98 +30,6 @@ export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Alert
-            variant="default"
-            className="border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950"
-          >
-            <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-            <AlertTitle className="text-orange-900 dark:text-orange-100">
-              {t("alert.title")}
-            </AlertTitle>
-            <AlertDescription className="text-orange-800 dark:text-orange-200">
-              {t("alert.description")}
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-lg mb-3">
-                {t("beforeYouBegin.heading")}
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">
-                      {t("beforeYouBegin.checklist.quietEnvironment.title")}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t(
-                        "beforeYouBegin.checklist.quietEnvironment.description"
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">
-                      {t("beforeYouBegin.checklist.testEquipment.title")}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("beforeYouBegin.checklist.testEquipment.description")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">
-                      {t("beforeYouBegin.checklist.materials.title")}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("beforeYouBegin.checklist.materials.description")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">
-                      {t("beforeYouBegin.checklist.dress.title")}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t("beforeYouBegin.checklist.dress.description")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-3">
-              <h4 className="font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                {t("duration.heading")}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t("duration.description")}
-              </p>
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 space-y-3">
-              <h4 className="font-medium flex items-center gap-2">
-                <Mic className="h-4 w-4" />
-                <Video className="h-4 w-4" />
-                {t("finalCheck.heading")}
-              </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {t("finalCheck.description")}
-              </p>
-            </div>
-          </div>
-
           <div data-lk-theme="default" className="rounded-lg overflow-hidden">
             <PreJoin
               onSubmit={onSubmit}
