@@ -1,8 +1,5 @@
-"use client";
-
 import { LiveKitInterviewComponent } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/LiveKitInterviewComponent";
 import { APP_CONFIG_DEFAULTS } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/app-config";
-import { use } from "react";
 
 interface PageProps {
   params: Promise<{
@@ -12,8 +9,8 @@ interface PageProps {
   }>;
 }
 
-export default function InterviewPage({ params }: PageProps) {
-  const { companyId, jobId, interviewId } = use(params);
+export default async function InterviewPage({ params }: PageProps) {
+  const { companyId, jobId, interviewId } = await params;
 
   return (
     <LiveKitInterviewComponent
