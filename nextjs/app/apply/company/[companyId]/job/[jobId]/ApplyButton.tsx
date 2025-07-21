@@ -15,6 +15,7 @@ interface ApplicationStatusResponse {
     status: string;
     applied_at: string;
   } | null;
+  interviewId?: string | null;
 }
 
 async function checkApplicationStatus(
@@ -53,13 +54,14 @@ async function checkApplicationStatus(
 
   // Check if the user has completed an interview for this job
   let hasCompletedInterview = false;
+  let interviewId: string | null = null;
+
   if (existingCandidate) {
-    const { data: completedInterview, error: interviewError } = await supabase
+    const { data: interviews, error: interviewError } = await supabase
       .from("custom_job_mock_interviews")
       .select("id, status")
       .eq("candidate_id", existingCandidate.id)
-      .eq("status", "complete")
-      .maybeSingle();
+      .order("created_at", { ascending: false });
 
     if (interviewError) {
       logger.error("Database error checking interview completion", {
@@ -71,7 +73,16 @@ async function checkApplicationStatus(
       throw new Error("Failed to check interview status");
     }
 
+    // Check if any interview is complete
+    const completedInterview = interviews?.find(
+      (interview) => interview.status === "complete"
+    );
     hasCompletedInterview = !!completedInterview;
+
+    // Get the most recent interview ID (completed or in-progress)
+    if (interviews && interviews.length > 0) {
+      interviewId = interviews[0].id;
+    }
   }
 
   logger.info("Application and interview status checked", {
@@ -81,6 +92,7 @@ async function checkApplicationStatus(
     hasApplied,
     hasCompletedInterview,
     applicationId: existingCandidate?.id,
+    interviewId,
   });
 
   await logger.flush();
@@ -90,6 +102,7 @@ async function checkApplicationStatus(
     hasApplied,
     hasCompletedInterview,
     application: existingCandidate || null,
+    interviewId,
   };
 }
 
@@ -111,8 +124,13 @@ async function handleApplyAction(formData: FormData) {
       redirect(
         `/apply/company/${companyId}/job/${jobId}/application/submitted`
       );
+    } else if (result.interviewId) {
+      // User has applied and has an interview ID, redirect to specific interview page
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
+      );
     } else {
-      // User has applied but hasn't completed interview, redirect to interview page
+      // User has applied but no interview exists (shouldn't happen in normal flow)
       redirect(`/apply/company/${companyId}/job/${jobId}/interview`);
     }
   } else {
