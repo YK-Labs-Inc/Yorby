@@ -124,14 +124,11 @@ async function handleApplyAction(formData: FormData) {
       redirect(
         `/apply/company/${companyId}/job/${jobId}/application/submitted`
       );
-    } else if (result.interviewId) {
+    } else if (!result.hasCompletedInterview && result.interviewId) {
       // User has applied and has an interview ID, redirect to specific interview page
       redirect(
         `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
       );
-    } else {
-      // User has applied but no interview exists (shouldn't happen in normal flow)
-      redirect(`/apply/company/${companyId}/job/${jobId}/interview`);
     }
   } else {
     // User hasn't applied yet, redirect to application page
