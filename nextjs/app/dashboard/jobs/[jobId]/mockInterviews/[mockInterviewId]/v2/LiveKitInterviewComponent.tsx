@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import useConnectionDetails from "./hooks/useConnectionDetails";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import "@livekit/components-styles";
 import "./livekit-light-theme.css";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
@@ -35,20 +35,22 @@ const MotionSessionView = motion.create(SessionView);
 interface AppProps {
   appConfig: AppConfig;
   interviewType: "mock-interview" | "real-interview";
+  mockInterviewId: string;
+  jobId: string;
+  companyId?: string;
 }
 
 export function LiveKitInterviewComponent({
   appConfig,
   interviewType,
+  mockInterviewId,
+  jobId,
+  companyId,
 }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const { mockInterviewId, jobId } = useParams<{
-    mockInterviewId: string;
-    jobId: string;
-  }>();
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
     mockInterviewId,
   });
@@ -76,9 +78,18 @@ export function LiveKitInterviewComponent({
       if (!response.ok) {
         throw new Error(`Failed to process interview: ${response.statusText}`);
       }
-      router.push(
-        `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
-      );
+
+      // Redirect to application submitted page if companyId is present (real interview)
+      // Otherwise redirect to mock interview review page
+      if (companyId) {
+        router.push(
+          `/apply/company/${companyId}/job/${jobId}/application/submitted`
+        );
+      } else {
+        router.push(
+          `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
+        );
+      }
     } catch (error) {
       logError("Error processing interview", {
         error,
@@ -92,7 +103,7 @@ export function LiveKitInterviewComponent({
       setIsProcessing(false);
       return "Interview processed";
     }
-  }, [mockInterviewId, router, baseUrl, jobId, logError, t]);
+  }, [mockInterviewId, router, baseUrl, jobId, companyId, logError, t]);
 
   useEffect(() => {
     room.registerRpcMethod("processInterview", processInterview);

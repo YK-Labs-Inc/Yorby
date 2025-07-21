@@ -37,6 +37,8 @@ export default async function LiveKitInterviewPage({ params }: PageProps) {
     <LiveKitInterviewComponent
       appConfig={appConfig}
       interviewType="mock-interview"
+      mockInterviewId={mockInterviewId}
+      jobId={customJobId}
     />
   );
 }
