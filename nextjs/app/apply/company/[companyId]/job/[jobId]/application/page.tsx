@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
+import { C } from "@upstash/redis/zmscore-DzNHSWxc";
 
 interface PageProps {
   params: Promise<{
@@ -25,7 +26,9 @@ export default async function ApplicationPage({ params }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/auth/login?redirect=/apply/company/${companyId}/job/${jobId}/application`);
+    redirect(
+      `/auth/login?redirect=/apply/company/${companyId}/job/${jobId}/application`
+    );
   }
 
   // Fetch company info
@@ -62,7 +65,27 @@ export default async function ApplicationPage({ params }: PageProps) {
     .single();
 
   if (existingApplication) {
-    redirect(`/apply/company/${companyId}/job/${jobId}/application/submitted`);
+    // Check if there's a completed mock interview for this application
+    const { data: interview } = await supabase
+      .from("custom_job_mock_interviews")
+      .select("id, status")
+      .eq("custom_job_id", jobId)
+      .eq("candidate_id", existingApplication.id)
+      .single();
+
+    if (interview) {
+      if (interview.status === "complete") {
+        // If there's a completed interview, redirect to submitted page
+        redirect(
+          `/apply/company/${companyId}/job/${jobId}/application/submitted`
+        );
+      } else {
+        redirect(
+          `/apply/company/${companyId}/job/${jobId}/interview/${interview.id}`
+        );
+      }
+    }
+    throw new Error("No interview found for job application");
   }
 
   // Fetch user's existing files

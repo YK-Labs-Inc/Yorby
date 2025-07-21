@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useActionState, useEffect } from "react";
 import useSWRMutation from "swr/mutation";
 import {
   Card,
@@ -10,13 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, CheckCircle2 } from "lucide-react";
+import { Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/utils/supabase/database.types";
+import { submitApplication } from "../actions";
 
 type UserFile = Database["public"]["Tables"]["user_files"]["Row"];
 type Company = Database["public"]["Tables"]["companies"]["Row"];
@@ -56,34 +57,6 @@ async function uploadFiles(url: string, { arg }: { arg: File[] }) {
   return result;
 }
 
-// Fetcher function for application submission mutation
-async function submitApplication(
-  url: string,
-  {
-    arg,
-  }: { arg: { companyId: string; jobId: string; selectedFileIds: string[] } }
-) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(arg),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to submit application");
-  }
-
-  const result = await response.json();
-  if (!result.success) {
-    throw new Error(result.error || "Failed to submit application");
-  }
-
-  return result;
-}
-
 export function ApplicationForm({
   company,
   job,
@@ -102,9 +75,16 @@ export function ApplicationForm({
   const { trigger: uploadFilesTrigger, isMutating: isUploading } =
     useSWRMutation("/api/apply/upload", uploadFiles);
 
-  // Set up the application submission mutation
-  const { trigger: submitApplicationTrigger, isMutating: isSubmitting } =
-    useSWRMutation("/api/apply/submit", submitApplication);
+  // Set up the application submission with useActionState
+  const [state, formAction, isPending] = useActionState(submitApplication, {
+    error: "",
+  });
+
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error);
+    }
+  }, [state.error]);
 
   const allFiles = [...userFiles, ...uploadedFiles];
 
@@ -173,35 +153,6 @@ export function ApplicationForm({
       }
       return newSet;
     });
-  };
-
-  const handleSaveFiles = async () => {
-    if (selectedFiles.size === 0) {
-      toast.error(t("applicationForm.documentSelection.noFilesError"));
-      return;
-    }
-
-    try {
-      const result = await submitApplicationTrigger({
-        companyId,
-        jobId,
-        selectedFileIds: Array.from(selectedFiles),
-      });
-
-      logInfo("Application submitted", {
-        candidateId: result.candidateId,
-        fileCount: selectedFiles.size,
-      });
-      toast.success(t("applicationForm.success.applicationSubmitted"));
-      router.push(`/apply/company/${companyId}/job/${jobId}/interview`);
-    } catch (error) {
-      logError("Application submission error", { error });
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t("applicationForm.errors.submitApplication")
-      );
-    }
   };
 
   const getFileIcon = (mimeType: string) => {
@@ -323,18 +274,32 @@ export function ApplicationForm({
               </div>
             )}
 
-            {/* Submit button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleSaveFiles}
-                disabled={selectedFiles.size === 0 || isSubmitting}
-                size="lg"
-              >
-                {isSubmitting
-                  ? t("applicationForm.buttons.submittingApplication")
-                  : t("applicationForm.buttons.submit")}
-              </Button>
-            </div>
+            {/* Submit form */}
+            <form action={formAction}>
+              <input type="hidden" name="companyId" value={companyId} />
+              <input type="hidden" name="jobId" value={jobId} />
+              <input
+                type="hidden"
+                name="selectedFileIds"
+                value={Array.from(selectedFiles)}
+              />
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={selectedFiles.size === 0 || isPending}
+                  size="lg"
+                >
+                  {isPending ? (
+                    <div className="flex items-center">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t("applicationForm.buttons.submittingApplication")}
+                    </div>
+                  ) : (
+                    t("applicationForm.buttons.submit")
+                  )}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>
