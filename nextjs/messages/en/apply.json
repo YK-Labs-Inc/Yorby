@@ -171,5 +171,62 @@
       "createApplicationFailed": "Failed to create application",
       "invalidFileIds": "Invalid file IDs provided"
     }
+  },
+  "recruiting": {
+    "candidates": {
+      "page": {
+        "breadcrumb": {
+          "candidates": "Candidates"
+        },
+        "backToJobDetails": "Back to Job Details"
+      },
+      "list": {
+        "title": "Candidates ({count})",
+        "searchPlaceholder": "Search candidates...",
+        "noCandidates": "No candidates",
+        "noMatches": "No matches found",
+        "noApplicants": "No applicants yet",
+        "applied": "Applied {date}",
+        "loadingMore": "Loading more candidates..."
+      },
+      "overview": {
+        "appliedOn": "Applied on {date}",
+        "contactInformation": "Contact Information",
+        "viewResume": "View Resume",
+        "notes": "Notes",
+        "applicationFiles": "Application Files ({count})",
+        "unknownFile": "Unknown file",
+        "unknownType": "Unknown type",
+        "mockInterview": "Mock Interview",
+        "status": "Status:",
+        "created": "Created:",
+        "complete": "complete",
+        "noMockInterview": "No mock interview completed yet",
+        "interviewRecording": "Interview Recording",
+        "interviewTranscript": "Interview Transcript",
+        "videoProcessing": "Video processing",
+        "videoProcessingDescription": "This may take a few minutes",
+        "videoProcessingFailed": "Video processing failed",
+        "videoProcessingFailedDescription": "There was an error processing the interview recording",
+        "videoReady": "Video ready but playback ID not available",
+        "unknownVideoStatus": "Unknown video status"
+      },
+      "emptyState": {
+        "title": "Select a candidate",
+        "description": "Choose a candidate from the list to view their details"
+      },
+      "error": {
+        "title": "Something went wrong",
+        "description": "We encountered an error while loading the candidates page. This might be due to a temporary issue with our servers.",
+        "tryAgain": "Try again",
+        "backToRecruiting": "Back to Recruiting"
+      },
+      "chatTranscript": {
+        "defaultUserLabel": "You",
+        "defaultAssistantLabel": "Assistant",
+        "candidate": "Candidate",
+        "interviewer": "Interviewer"
+      }
+    }
   }
 } 
