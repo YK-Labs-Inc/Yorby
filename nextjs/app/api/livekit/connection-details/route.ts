@@ -85,7 +85,7 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const participantName =
       user.user_metadata?.full_name || user.email || "User";
     const participantIdentity = user.id;
-    const roomName = mockInterviewId;
+    const roomName = crypto.randomUUID();
     const participantToken = await createParticipantToken(
       {
         identity: participantIdentity,
