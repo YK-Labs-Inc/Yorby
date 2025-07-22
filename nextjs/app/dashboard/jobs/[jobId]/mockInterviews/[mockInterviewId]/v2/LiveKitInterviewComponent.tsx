@@ -58,6 +58,12 @@ export function LiveKitInterviewComponent({
   const router = useRouter();
   const { baseUrl } = useMultiTenant();
   const t = useTranslations("apply.interviews.livekit");
+  const interviewProcessUrl = useMemo(() => {}, [
+    baseUrl,
+    jobId,
+    mockInterviewId,
+    companyId,
+  ]);
 
   const processInterview = useCallback(async () => {
     setIsProcessing(true);
@@ -65,7 +71,11 @@ export function LiveKitInterviewComponent({
       if (!mockInterviewId) {
         throw new Error("interview id is not found");
       }
-      const response = await fetch("/api/mockInterviews/process", {
+      const processingURL =
+        interviewType === "mock-interview"
+          ? "/api/mockInterviews/process"
+          : `/api/candidate-interviews/${mockInterviewId}`;
+      const response = await fetch(processingURL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +113,16 @@ export function LiveKitInterviewComponent({
       setIsProcessing(false);
       return "Interview processed";
     }
-  }, [mockInterviewId, router, baseUrl, jobId, companyId, logError, t]);
+  }, [
+    interviewType,
+    mockInterviewId,
+    router,
+    baseUrl,
+    jobId,
+    companyId,
+    logError,
+    t,
+  ]);
 
   useEffect(() => {
     room.registerRpcMethod("processInterview", processInterview);

@@ -173,6 +173,28 @@
     }
   },
   "recruiting": {
+    "jobDetail": {
+      "breadcrumb": {
+        "defaultCompany": "Company"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "sections": {
+        "jobDescription": {
+          "title": "Job Description"
+        },
+        "interviewQuestions": {
+          "title": "Interview Questions",
+          "description": "Manage screening questions for candidates"
+        },
+        "candidates": {
+          "title": "Candidates",
+          "description": "Review and manage job applicants"
+        }
+      }
+    },
     "candidates": {
       "page": {
         "breadcrumb": {

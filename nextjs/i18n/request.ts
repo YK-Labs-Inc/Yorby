@@ -22,11 +22,20 @@ export default getRequestConfig(async () => {
     console.info(`Apply messages not found for ${locale}, using defaults`);
   }
 
+  let commonMessages = {};
+  try {
+    commonMessages = (await import(`../messages/${locale}/common.json`)).default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(`Common messages not found for ${locale}, using defaults`);
+  }
+
   // Merge all messages
   // Feature-specific messages override main messages if there are conflicts
   const messages = {
     ...mainMessages,
     apply: applyMessages,
+    common: commonMessages,
   };
 
   return {

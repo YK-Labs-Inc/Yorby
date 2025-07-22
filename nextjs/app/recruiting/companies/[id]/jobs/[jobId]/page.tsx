@@ -1,11 +1,20 @@
 import { redirect, notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerOrigin } from "@/utils/server/common/utils";
 import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
 import { ArrowLeft, Users, FileQuestion } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ShareButton } from "@/components/ui/share-button";
 
 interface PageProps {
   params: Promise<{
@@ -22,6 +31,12 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     function: "CompanyJobDetailPage",
     params: { companyId, jobId },
   });
+
+  // Get the origin from headers
+  const origin = await getServerOrigin();
+
+  // Get translations
+  const t = await getTranslations("apply.recruiting.jobDetail");
 
   const {
     data: { user },
@@ -96,7 +111,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
             className="hover:text-foreground flex items-center gap-1"
           >
             <ArrowLeft className="h-4 w-4" />
-            {company?.name || "Company"}
+            {company?.name || t("breadcrumb.defaultCompany")}
           </Link>
           <span>/</span>
           <span>{job.job_title}</span>
@@ -110,10 +125,17 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
               {job.company_name && (
                 <p className="text-muted-foreground mb-4">{job.company_name}</p>
               )}
-              <div className="flex gap-2">
-                <Badge variant={job.status === "unlocked" ? "default" : "secondary"}>
-                  {job.status === "unlocked" ? "Active" : "Private"}
+              <div className="flex gap-2 items-center">
+                <Badge
+                  variant={job.status === "unlocked" ? "default" : "secondary"}
+                >
+                  {job.status === "unlocked"
+                    ? t("status.published")
+                    : t("status.draft")}
                 </Badge>
+                <ShareButton
+                  url={`${origin}/apply/company/${companyId}/job/${jobId}`}
+                />
               </div>
             </div>
           </div>
@@ -123,19 +145,23 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
         {job.job_description && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Job Description</CardTitle>
+              <CardTitle>{t("sections.jobDescription.title")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                {job.job_description}
-              </p>
+              <div className="max-h-96 overflow-y-auto">
+                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {job.job_description}
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
 
         {/* Navigation Cards */}
         <div className="grid gap-4 md:grid-cols-2">
-          <Link href={`/recruiting/companies/${companyId}/jobs/${jobId}/questions`}>
+          <Link
+            href={`/recruiting/companies/${companyId}/jobs/${jobId}/questions`}
+          >
             <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -144,15 +170,17 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                     {job.custom_job_questions?.[0]?.count || 0}
                   </span>
                 </div>
-                <CardTitle>Interview Questions</CardTitle>
+                <CardTitle>{t("sections.interviewQuestions.title")}</CardTitle>
                 <CardDescription>
-                  Manage screening questions for candidates
+                  {t("sections.interviewQuestions.description")}
                 </CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
-          <Link href={`/recruiting/companies/${companyId}/jobs/${jobId}/candidates`}>
+          <Link
+            href={`/recruiting/companies/${companyId}/jobs/${jobId}/candidates`}
+          >
             <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -161,9 +189,9 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                     {job.company_job_candidates?.[0]?.count || 0}
                   </span>
                 </div>
-                <CardTitle>Candidates</CardTitle>
+                <CardTitle>{t("sections.candidates.title")}</CardTitle>
                 <CardDescription>
-                  Review and manage job applicants
+                  {t("sections.candidates.description")}
                 </CardDescription>
               </CardHeader>
             </Card>

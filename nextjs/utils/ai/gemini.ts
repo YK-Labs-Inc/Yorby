@@ -19,8 +19,7 @@ import { GoogleAIFileManager } from "@google/generative-ai/server";
 export type GeminiModelName =
   | "gemini-2.5-pro"
   | "gemini-2.5-flash"
-  | "gemini-2.0-flash"
-  | "gemini-1.5-flash";
+  | "gemini-2.0-flash";
 
 type ModelConfig = {
   primaryModel?: GeminiModelName;
