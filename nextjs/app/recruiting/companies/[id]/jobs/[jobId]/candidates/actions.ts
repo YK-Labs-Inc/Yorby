@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 import { cache } from "react";
+import type { TypedInterviewAnalysis } from "./types";
 
 export type Candidate = Tables<"company_job_candidates">;
 export type Company = Tables<"companies">;
@@ -16,6 +17,7 @@ export type ApplicationFile = Tables<"candidate_application_files"> & {
 export type MockInterview = Tables<"custom_job_mock_interviews">;
 export type MuxMetadata = Tables<"mock_interview_mux_metadata">;
 export type MockInterviewMessage = Tables<"mock_interview_messages">;
+export type InterviewAnalysis = TypedInterviewAnalysis;
 
 export interface AccessValidation {
   company: Company;
@@ -29,6 +31,7 @@ export interface CandidateData {
   mockInterview: MockInterview | null;
   muxMetadata: MuxMetadata | null;
   mockInterviewMessages: MockInterviewMessage[];
+  interviewAnalysis: InterviewAnalysis | null;
 }
 
 // Cache for 60 seconds to avoid repeated queries
@@ -144,10 +147,9 @@ export const getCandidateData = cache(
     const filesWithUrls = await Promise.all(
       (applicationFiles || []).map(async (appFile) => {
         if (appFile.user_file) {
-          const { data: signedUrlData, error: signedUrlError } =
-            await supabase.storage
-              .from(appFile.user_file.bucket_name)
-              .createSignedUrl(appFile.user_file.file_path, 3600); // 1 hour expiry
+          const { data: signedUrlData } = await supabase.storage
+            .from(appFile.user_file.bucket_name)
+            .createSignedUrl(appFile.user_file.file_path, 3600); // 1 hour expiry
           return {
             ...appFile,
             user_file: {
@@ -205,12 +207,29 @@ export const getCandidateData = cache(
       }
     }
 
+    // Fetch interview analysis if mock interview exists
+    let interviewAnalysis = null;
+    if (mockInterview) {
+      const { data: analysis, error: analysisError } = await supabase
+        .from("recruiter_interview_analysis_complete")
+        .select("*")
+        .eq("mock_interview_id", mockInterview.id)
+        .maybeSingle();
+
+      if (analysisError && analysisError.code !== "PGRST116") {
+        console.error("Error fetching interview analysis:", analysisError);
+      } else {
+        interviewAnalysis = analysis as InterviewAnalysis;
+      }
+    }
+
     return {
       candidate,
       applicationFiles: filesWithUrls as ApplicationFile[],
       mockInterview: mockInterview || null,
       muxMetadata: muxMetadata || null,
       mockInterviewMessages,
+      interviewAnalysis: interviewAnalysis || null,
     };
   }
 );

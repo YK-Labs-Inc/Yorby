@@ -1,4 +1,5 @@
 import { AxiomRequest, withAxiom } from "next-axiom";
+import type { Logger } from "next-axiom";
 import {
   createSupabaseServerClient,
   downloadFile,
@@ -37,12 +38,12 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     previousQA,
   });
   try {
-    const files = await getAllInterviewCopilotFiles(interviewCopilotId);
+    const files = await getAllInterviewCopilotFiles(interviewCopilotId, logger);
     const { files: userFiles, knowledge_base } =
       await getAllUserMemories(interviewCopilotId);
     const combinedFiles = [...files, ...userFiles];
     const { job_title, job_description, company_name, company_description } =
-      await getInterviewCopilot(interviewCopilotId);
+      await getInterviewCopilot(interviewCopilotId, logger);
 
     // Get the current user for tracking
     const supabase = await createSupabaseServerClient();
@@ -129,7 +130,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   }
 });
 
-const getInterviewCopilot = async (interviewCopilotId: string) => {
+const getInterviewCopilot = async (interviewCopilotId: string, logger: Logger) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("interview_copilots")
@@ -137,6 +138,10 @@ const getInterviewCopilot = async (interviewCopilotId: string) => {
     .eq("id", interviewCopilotId)
     .single();
   if (error) {
+    logger.error("Failed to fetch interview copilot", {
+      error: error.message,
+      interviewCopilotId,
+    });
     throw error;
   }
   return data;
@@ -261,40 +266,55 @@ A${index + 1}: ${qa.answer}
 }
 `;
 
-const getAllInterviewCopilotFiles = async (interviewCopilotId: string) => {
-  const interviewCopilotFiles =
-    await fetchInterviewCopilotFiles(interviewCopilotId);
-  const fileStatuses = await Promise.all(
-    interviewCopilotFiles.map(checkFileExists)
-  );
-  return await Promise.all(
-    fileStatuses.map(async ({ file, status }) => {
-      if (!status) {
-        const uploadResponse = await processMissingFile({ file });
+const getAllInterviewCopilotFiles = async (interviewCopilotId: string, logger: Logger) => {
+  try {
+    const interviewCopilotFiles =
+      await fetchInterviewCopilotFiles(interviewCopilotId, logger);
+    const fileStatuses = await Promise.all(
+      interviewCopilotFiles.map(checkFileExists)
+    );
+    const result = await Promise.all(
+      fileStatuses.map(async ({ file, status }) => {
+        if (!status) {
+          const uploadResponse = await processMissingFile({ file }, logger);
+          return {
+            fileData: {
+              fileUri: uploadResponse.file.uri,
+              mimeType: uploadResponse.file.mimeType,
+            },
+          };
+        }
         return {
           fileData: {
-            fileUri: uploadResponse.file.uri,
-            mimeType: uploadResponse.file.mimeType,
+            fileUri: file.google_file_uri,
+            mimeType: file.mime_type,
           },
         };
-      }
-      return {
-        fileData: {
-          fileUri: file.google_file_uri,
-          mimeType: file.mime_type,
-        },
-      };
-    })
-  );
+      })
+    );
+    logger.info("Successfully retrieved all interview copilot files", {
+      filesCount: result.length,
+    });
+    return result;
+  } catch (error) {
+    logger.error("Failed to get all interview copilot files", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
-const fetchInterviewCopilotFiles = async (interviewCopilotId: string) => {
+const fetchInterviewCopilotFiles = async (interviewCopilotId: string, logger: Logger) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("interview_copilot_files")
     .select("*")
     .eq("interview_copilot_id", interviewCopilotId);
   if (error) {
+    logger.error("Failed to fetch interview copilot files", {
+      error: error.message,
+      interviewCopilotId,
+    });
     throw error;
   }
   return data;
@@ -314,22 +334,34 @@ const processMissingFile = async ({
   file,
 }: {
   file: Tables<"interview_copilot_files">;
-}) => {
-  const { file_path } = file;
-  const data = await downloadFile({
-    filePath: file_path,
-    bucket: "interview_copilot_files",
-  });
-  const displayName = file_path.split("/").pop() ?? file_path;
-  const uploadResponse = await uploadFileToGemini({
-    blob: data,
-    displayName: displayName,
-  });
-  await updateFileInDatabase({
-    uploadResponse,
-    fileId: file.id,
-  });
-  return uploadResponse;
+}, logger: Logger) => {
+  try {
+    const { file_path } = file;
+    const data = await downloadFile({
+      filePath: file_path,
+      bucket: "interview_copilot_files",
+    });
+    const displayName = file_path.split("/").pop() ?? file_path;
+    const uploadResponse = await uploadFileToGemini({
+      blob: data,
+      displayName: displayName,
+    });
+    await updateFileInDatabase({
+      uploadResponse,
+      fileId: file.id,
+    }, logger);
+    logger.info("Successfully processed missing file", {
+      fileId: file.id,
+      googleFileUri: uploadResponse.file.uri,
+    });
+    return uploadResponse;
+  } catch (error) {
+    logger.error("Failed to process missing file", {
+      fileId: file.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 const updateFileInDatabase = async ({
@@ -338,7 +370,7 @@ const updateFileInDatabase = async ({
 }: {
   uploadResponse: UploadResponse;
   fileId: string;
-}) => {
+}, logger: Logger) => {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("interview_copilot_files")
@@ -348,37 +380,10 @@ const updateFileInDatabase = async ({
     })
     .eq("id", fileId);
   if (error) {
+    logger.error("Failed to update file in database", {
+      error: error.message,
+      fileId,
+    });
     throw error;
   }
-};
-
-const incrementTokenCounts = async (
-  interviewCopilotId: string,
-  inputTokens: number,
-  outputTokens: number
-) => {
-  const supabase = await createSupabaseServerClient();
-
-  // First get current values
-  const { data: currentData, error: fetchError } = await supabase
-    .from("interview_copilots")
-    .select("input_tokens_count, output_tokens_count")
-    .eq("id", interviewCopilotId)
-    .single();
-
-  if (fetchError) {
-    return { error: fetchError };
-  }
-
-  // Then update with incremented values
-  const { error: updateError } = await supabase
-    .from("interview_copilots")
-    .update({
-      input_tokens_count: (currentData.input_tokens_count || 0) + inputTokens,
-      output_tokens_count:
-        (currentData.output_tokens_count || 0) + outputTokens,
-    })
-    .eq("id", interviewCopilotId);
-
-  return { error: updateError };
 };

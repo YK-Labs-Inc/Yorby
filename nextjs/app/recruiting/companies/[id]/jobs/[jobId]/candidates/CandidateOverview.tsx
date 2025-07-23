@@ -26,6 +26,9 @@ import {
 import type { CandidateData } from "./actions";
 import MuxPlayer from "@mux/mux-player-react";
 import { useTranslations } from "next-intl";
+import InterviewAnalysis from "./InterviewAnalysis";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 interface CandidateOverviewProps {
   candidateData: CandidateData;
@@ -38,12 +41,15 @@ export default function CandidateOverview({
   const tTranscript = useTranslations(
     "apply.recruiting.candidates.chatTranscript"
   );
+  const router = useRouter();
+  const [isProcessingAnalysis, setIsProcessingAnalysis] = useState(false);
   const {
     candidate,
     applicationFiles,
     mockInterview,
     muxMetadata,
     mockInterviewMessages,
+    interviewAnalysis,
   } = candidateData;
 
   const formatDate = (dateString: string) => {
@@ -71,6 +77,31 @@ export default function CandidateOverview({
     if (mimeType.startsWith("text/")) return "📝";
     return "📎";
   };
+
+  const handleProcessAnalysis = useCallback(async () => {
+    if (!mockInterview?.id) return;
+
+    setIsProcessingAnalysis(true);
+    try {
+      const response = await fetch(
+        `/api/candidate-interviews/${mockInterview.id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      if (response.ok) {
+        // Refresh the page to show the new analysis
+        router.refresh();
+      } else {
+        console.error("Failed to process analysis");
+      }
+    } catch (error) {
+      console.error("Error processing analysis:", error);
+    } finally {
+      setIsProcessingAnalysis(false);
+    }
+  }, [mockInterview?.id, router]);
 
   const renderInterviewVideo = () => {
     if (!muxMetadata) {
@@ -143,8 +174,8 @@ export default function CandidateOverview({
     <Card className="h-full flex flex-col bg-white border shadow-sm">
       <CardHeader className="flex-shrink-0 border-b">
         <div>
-          <CardTitle className="text-2xl">{candidate.candidate_name}</CardTitle>
-          <CardDescription>{formatDate(candidate.applied_at)}</CardDescription>
+          <CardTitle className="text-2xl break-words">{candidate.candidate_name}</CardTitle>
+          <CardDescription className="break-words">{formatDate(candidate.applied_at)}</CardDescription>
         </div>
       </CardHeader>
 
@@ -157,12 +188,12 @@ export default function CandidateOverview({
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span>{candidate.candidate_email}</span>
+              <span className="break-all">{candidate.candidate_email}</span>
             </div>
             {candidate.candidate_phone && (
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span>{candidate.candidate_phone}</span>
+                <span className="break-all">{candidate.candidate_phone}</span>
               </div>
             )}
             {candidate.resume_url && (
@@ -190,7 +221,7 @@ export default function CandidateOverview({
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 {t("notes")}
               </h3>
-              <p className="text-sm">{candidate.notes}</p>
+              <p className="text-sm break-words">{candidate.notes}</p>
             </div>
             <Separator />
           </>
@@ -208,14 +239,14 @@ export default function CandidateOverview({
                 {applicationFiles.map((file: (typeof applicationFiles)[0]) => (
                   <div
                     key={file.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-2xl flex-shrink-0">
                         {getMimeTypeIcon(file.user_file?.mime_type || "")}
                       </span>
-                      <div>
-                        <p className="text-sm font-medium">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium break-words">
                           {file.user_file?.display_name || t("unknownFile")}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -223,7 +254,7 @@ export default function CandidateOverview({
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       {file.user_file?.signed_url && (
                         <>
                           <Button
@@ -312,6 +343,15 @@ export default function CandidateOverview({
                     />
                   </div>
                 )}
+
+              {/* Interview Analysis */}
+              {mockInterview.status === "complete" && (
+                <InterviewAnalysis
+                  analysis={interviewAnalysis}
+                  onProcessAnalysis={handleProcessAnalysis}
+                  isProcessing={isProcessingAnalysis}
+                />
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
