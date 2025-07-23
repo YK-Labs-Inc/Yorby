@@ -248,6 +248,44 @@
         "defaultAssistantLabel": "Assistant",
         "candidate": "Candidate",
         "interviewer": "Interviewer"
+      },
+      "analysis": {
+        "title": "AI Interview Analysis",
+        "noAnalysis": "No analysis has been generated yet for this interview.",
+        "processing": "Processing...",
+        "generateAnalysis": "Generate Analysis",
+        "errorState": {
+          "noAnalysis": "Unable to generate analysis for this interview.",
+          "contactSupport": "Please contact support at <emailLink>{email}</emailLink> for assistance."
+        },
+        "verdict": {
+          "advance": "Advance to Next Round",
+          "reject": "Do Not Proceed",
+          "borderline": "Further Review Needed"
+        },
+        "overallMatch": "Overall Job Match",
+        "tabs": {
+          "overview": "Overview",
+          "strengths": "Strengths",
+          "concerns": "Concerns",
+          "alignment": "Job Alignment"
+        },
+        "keyHighlights": "Key Interview Highlights",
+        "questionPerformance": "Question Performance",
+        "noStrengths": "No strengths identified yet.",
+        "noConcerns": "No concerns identified.",
+        "redFlag": "Red Flag",
+        "impact": "Impact",
+        "severity": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low"
+        },
+        "matchedRequirements": "Matched Requirements",
+        "exceededRequirements": "Exceeded Requirements",
+        "missingRequirements": "Missing Requirements",
+        "processedAt": "Processed: {date}"
       }
     }
   }

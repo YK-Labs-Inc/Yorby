@@ -56,7 +56,9 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
 
   if (memberError || !membership) {
     logger.error("User is not a member of this company", {
-      error: memberError,
+      error: memberError?.message,
+      userId: user.id,
+      companyId,
     });
     await logger.flush();
     redirect("/recruiting");
@@ -69,6 +71,9 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
   if (!canManageJob) {
     logger.error("User does not have permission to manage jobs", {
       role: membership.role,
+      userId: user.id,
+      companyId,
+      jobId,
     });
     await logger.flush();
     redirect(`/recruiting/companies/${companyId}`);
@@ -89,17 +94,30 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     .single();
 
   if (jobError || !job) {
-    logger.error("Job not found", { error: jobError });
+    logger.error("Job not found", { 
+      error: jobError?.message,
+      jobId,
+      companyId,
+      userId: user.id,
+    });
     await logger.flush();
     notFound();
   }
 
   // Get company details for breadcrumb
-  const { data: company } = await supabase
+  const { data: company, error: companyError } = await supabase
     .from("companies")
     .select("name")
     .eq("id", companyId)
     .single();
+  
+  if (companyError) {
+    logger.error("Failed to fetch company details", {
+      error: companyError.message,
+      companyId,
+    });
+    await logger.flush();
+  }
 
   return (
     <div className="min-h-screen bg-background">

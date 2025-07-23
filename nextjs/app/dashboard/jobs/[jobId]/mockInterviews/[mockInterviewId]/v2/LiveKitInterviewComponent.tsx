@@ -133,22 +133,30 @@ export function LiveKitInterviewComponent({
   }, [room, processInterview]);
 
   useEffect(() => {
-    const onDisconnected = async () => {
-      console.log("onDisconnected");
-    };
     const onMediaDevicesError = (error: Error) => {
+      logError("Media devices error", {
+        error: error.message,
+        errorName: error.name,
+        mockInterviewId,
+        interviewType,
+      });
       toastAlert({
         title: t("errors.mediaDevices"),
         description: `${error.name}: ${error.message}`,
       });
     };
     room.on(RoomEvent.MediaDevicesError, onMediaDevicesError);
-    room.on(RoomEvent.Disconnected, onDisconnected);
     return () => {
-      room.off(RoomEvent.Disconnected, onDisconnected);
       room.off(RoomEvent.MediaDevicesError, onMediaDevicesError);
     };
-  }, [room, refreshConnectionDetails, mockInterviewId, logError, t]);
+  }, [
+    room,
+    refreshConnectionDetails,
+    mockInterviewId,
+    interviewType,
+    logError,
+    t,
+  ]);
 
   useEffect(() => {
     if (
@@ -173,6 +181,13 @@ export function LiveKitInterviewComponent({
         })
         .catch((error) => {
           setIsConnecting(false);
+          logError("Failed to connect to LiveKit room", {
+            error: error.message,
+            errorName: error.name,
+            mockInterviewId,
+            interviewType,
+            serverUrl: connectionDetails.serverUrl,
+          });
           toastAlert({
             title: t("errors.connectingToAgent"),
             description: `${error.name}: ${error.message}`,
