@@ -93,8 +93,8 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
         previousQA,
       },
       modelConfig: {
-        primaryModel: "gemini-2.0-flash",
-        fallbackModel: "gemini-1.5-flash",
+        primaryModel: "gemini-2.5-flash",
+        fallbackModel: "gemini-2.0-flash",
       },
     });
 

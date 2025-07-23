@@ -1545,6 +1545,357 @@ export type Database = {
           },
         ]
       }
+      recruiter_interview_analysis: {
+        Row: {
+          created_at: string
+          hiring_verdict: Database["public"]["Enums"]["hiring_verdict"]
+          id: string
+          input_token_count: number | null
+          mock_interview_id: string
+          model_used: string | null
+          output_token_count: number | null
+          overall_match_score: number
+          processing_duration_ms: number | null
+          updated_at: string
+          verdict_summary: string
+        }
+        Insert: {
+          created_at?: string
+          hiring_verdict: Database["public"]["Enums"]["hiring_verdict"]
+          id?: string
+          input_token_count?: number | null
+          mock_interview_id: string
+          model_used?: string | null
+          output_token_count?: number | null
+          overall_match_score: number
+          processing_duration_ms?: number | null
+          updated_at?: string
+          verdict_summary: string
+        }
+        Update: {
+          created_at?: string
+          hiring_verdict?: Database["public"]["Enums"]["hiring_verdict"]
+          id?: string
+          input_token_count?: number | null
+          mock_interview_id?: string
+          model_used?: string | null
+          output_token_count?: number | null
+          overall_match_score?: number
+          processing_duration_ms?: number | null
+          updated_at?: string
+          verdict_summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_analysis_mock_interview_id_fkey"
+            columns: ["mock_interview_id"]
+            isOneToOne: true
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_interview_concerns: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          description: string
+          display_order: number | null
+          evidence: string | null
+          id: string
+          impact: string
+          severity: string
+          title: string
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          description: string
+          display_order?: number | null
+          evidence?: string | null
+          id?: string
+          impact: string
+          severity: string
+          title: string
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          description?: string
+          display_order?: number | null
+          evidence?: string | null
+          id?: string
+          impact?: string
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_concerns_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_concerns_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_interview_highlights: {
+        Row: {
+          analysis_id: string
+          context: string
+          created_at: string
+          display_order: number | null
+          highlight_type: string
+          id: string
+          quote: string
+          timestamp_seconds: number | null
+        }
+        Insert: {
+          analysis_id: string
+          context: string
+          created_at?: string
+          display_order?: number | null
+          highlight_type: string
+          id?: string
+          quote: string
+          timestamp_seconds?: number | null
+        }
+        Update: {
+          analysis_id?: string
+          context?: string
+          created_at?: string
+          display_order?: number | null
+          highlight_type?: string
+          id?: string
+          quote?: string
+          timestamp_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_highlights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_highlights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_interview_insights: {
+        Row: {
+          analysis_id: string
+          category: string | null
+          created_at: string
+          description: string
+          evidence: Json | null
+          id: string
+          insight_type: string
+          priority: number | null
+          title: string
+        }
+        Insert: {
+          analysis_id: string
+          category?: string | null
+          created_at?: string
+          description: string
+          evidence?: Json | null
+          id?: string
+          insight_type: string
+          priority?: number | null
+          title: string
+        }
+        Update: {
+          analysis_id?: string
+          category?: string | null
+          created_at?: string
+          description?: string
+          evidence?: Json | null
+          id?: string
+          insight_type?: string
+          priority?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_insights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_insights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_interview_strengths: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          display_order: number | null
+          evidence: string
+          id: string
+          relevance: string
+          title: string
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          display_order?: number | null
+          evidence: string
+          id?: string
+          relevance: string
+          title: string
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          display_order?: number | null
+          evidence?: string
+          id?: string
+          relevance?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_strengths_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_strengths_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_job_alignment_details: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          exceeded_requirements: string[] | null
+          id: string
+          matched_requirements: string[] | null
+          missing_requirements: string[] | null
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          exceeded_requirements?: string[] | null
+          id?: string
+          matched_requirements?: string[] | null
+          missing_requirements?: string[] | null
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          exceeded_requirements?: string[] | null
+          id?: string
+          matched_requirements?: string[] | null
+          missing_requirements?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_job_alignment_details_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: true
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_job_alignment_details_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: true
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recruiter_question_analysis: {
+        Row: {
+          analysis_id: string
+          answer_quality_score: number | null
+          answer_summary: string
+          concerns: string[] | null
+          created_at: string
+          display_order: number | null
+          examples_provided: string[] | null
+          id: string
+          key_points: string[] | null
+          question_id: string | null
+          question_text: string
+        }
+        Insert: {
+          analysis_id: string
+          answer_quality_score?: number | null
+          answer_summary: string
+          concerns?: string[] | null
+          created_at?: string
+          display_order?: number | null
+          examples_provided?: string[] | null
+          id?: string
+          key_points?: string[] | null
+          question_id?: string | null
+          question_text: string
+        }
+        Update: {
+          analysis_id?: string
+          answer_quality_score?: number | null
+          answer_summary?: string
+          concerns?: string[] | null
+          created_at?: string
+          display_order?: number | null
+          examples_provided?: string[] | null
+          id?: string
+          key_points?: string[] | null
+          question_id?: string | null
+          question_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_question_analysis_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_question_analysis_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "recruiter_interview_analysis_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_question_analysis_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "custom_job_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           id: string
@@ -2028,7 +2379,38 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      recruiter_interview_analysis_complete: {
+        Row: {
+          concerns: Json | null
+          created_at: string | null
+          exceeded_requirements: string[] | null
+          highlights: Json | null
+          hiring_verdict: Database["public"]["Enums"]["hiring_verdict"] | null
+          id: string | null
+          input_token_count: number | null
+          insights: Json | null
+          matched_requirements: string[] | null
+          missing_requirements: string[] | null
+          mock_interview_id: string | null
+          model_used: string | null
+          output_token_count: number | null
+          overall_match_score: number | null
+          processing_duration_ms: number | null
+          question_analysis: Json | null
+          strengths: Json | null
+          updated_at: string | null
+          verdict_summary: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_analysis_mock_interview_id_fkey"
+            columns: ["mock_interview_id"]
+            isOneToOne: true
+            referencedRelation: "custom_job_mock_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       is_company_member: {
@@ -2046,6 +2428,7 @@ export type Database = {
       custom_job_access: "locked" | "unlocked"
       deletion_status: "deleted" | "not_deleted"
       feedback_role: "ai" | "user"
+      hiring_verdict: "ADVANCE" | "REJECT" | "BORDERLINE"
       interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
@@ -2177,6 +2560,7 @@ export const Constants = {
       custom_job_access: ["locked", "unlocked"],
       deletion_status: ["deleted", "not_deleted"],
       feedback_role: ["ai", "user"],
+      hiring_verdict: ["ADVANCE", "REJECT", "BORDERLINE"],
       interview_copilot_access: ["locked", "unlocked"],
       interview_copilot_status: ["in_progress", "complete"],
       interview_status: ["in_progress", "complete"],
