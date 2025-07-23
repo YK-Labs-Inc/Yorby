@@ -254,6 +254,10 @@
         "noAnalysis": "No analysis has been generated yet for this interview.",
         "processing": "Processing...",
         "generateAnalysis": "Generate Analysis",
+        "errorState": {
+          "noAnalysis": "Unable to generate analysis for this interview.",
+          "contactSupport": "Please contact support at <emailLink>{email}</emailLink> for assistance."
+        },
         "verdict": {
           "advance": "Advance to Next Round",
           "reject": "Do Not Proceed",

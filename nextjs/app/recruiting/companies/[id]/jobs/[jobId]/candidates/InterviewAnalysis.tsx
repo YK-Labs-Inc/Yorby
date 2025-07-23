@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/ui/share-button";
 import {
   CheckCircle2,
@@ -17,7 +16,6 @@ import {
   MessageSquareQuote,
   BarChart3,
   BrainCircuit,
-  Sparkles,
 } from "lucide-react";
 import type { InterviewAnalysis } from "./actions";
 import { useState } from "react";
@@ -25,14 +23,10 @@ import { useTranslations } from "next-intl";
 
 interface InterviewAnalysisProps {
   analysis: InterviewAnalysis | null;
-  onProcessAnalysis?: () => void;
-  isProcessing?: boolean;
 }
 
 export default function InterviewAnalysis({
   analysis,
-  onProcessAnalysis,
-  isProcessing = false,
 }: InterviewAnalysisProps) {
   const t = useTranslations("apply.recruiting.candidates.analysis");
   const [activeTab, setActiveTab] = useState("overview");
@@ -78,24 +72,18 @@ export default function InterviewAnalysis({
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">{t("noAnalysis")}</p>
-            <Button
-              onClick={onProcessAnalysis}
-              disabled={isProcessing}
-              className="gap-2"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  {t("processing")}
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  {t("generateAnalysis")}
-                </>
-              )}
-            </Button>
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-2">{t("errorState.noAnalysis")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t.rich("errorState.contactSupport", {
+                email: "support@yklabs.io",
+                emailLink: (chunks) => (
+                  <a href="mailto:support@yklabs.io" className="text-primary underline">
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
           </div>
         </CardContent>
       </Card>

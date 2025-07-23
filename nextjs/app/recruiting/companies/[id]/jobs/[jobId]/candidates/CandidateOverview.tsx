@@ -27,8 +27,6 @@ import type { CandidateData } from "./actions";
 import MuxPlayer from "@mux/mux-player-react";
 import { useTranslations } from "next-intl";
 import InterviewAnalysis from "./InterviewAnalysis";
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 interface CandidateOverviewProps {
   candidateData: CandidateData;
@@ -41,8 +39,6 @@ export default function CandidateOverview({
   const tTranscript = useTranslations(
     "apply.recruiting.candidates.chatTranscript"
   );
-  const router = useRouter();
-  const [isProcessingAnalysis, setIsProcessingAnalysis] = useState(false);
   const {
     candidate,
     applicationFiles,
@@ -78,30 +74,6 @@ export default function CandidateOverview({
     return "📎";
   };
 
-  const handleProcessAnalysis = useCallback(async () => {
-    if (!mockInterview?.id) return;
-
-    setIsProcessingAnalysis(true);
-    try {
-      const response = await fetch(
-        `/api/candidate-interviews/${mockInterview.id}`,
-        {
-          method: "POST",
-        }
-      );
-
-      if (response.ok) {
-        // Refresh the page to show the new analysis
-        router.refresh();
-      } else {
-        console.error("Failed to process analysis");
-      }
-    } catch (error) {
-      console.error("Error processing analysis:", error);
-    } finally {
-      setIsProcessingAnalysis(false);
-    }
-  }, [mockInterview?.id, router]);
 
   const renderInterviewVideo = () => {
     if (!muxMetadata) {
@@ -348,8 +320,6 @@ export default function CandidateOverview({
               {mockInterview.status === "complete" && (
                 <InterviewAnalysis
                   analysis={interviewAnalysis}
-                  onProcessAnalysis={handleProcessAnalysis}
-                  isProcessing={isProcessingAnalysis}
                 />
               )}
             </div>
