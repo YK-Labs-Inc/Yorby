@@ -10,7 +10,7 @@ import { Tables } from "@/utils/supabase/database.types";
 const HiringVerdictSchema = z.object({
   hiring_verdict: z.enum(["ADVANCE", "REJECT", "BORDERLINE"]),
   verdict_summary: z.string(),
-  overall_match_score: z.number().min(0).max(100),
+  overall_match_score: z.number().int().min(0).max(100),
 });
 
 const StrengthSchema = z.object({
@@ -35,17 +35,6 @@ const ConcernsResponseSchema = z.object({
   concerns: z.array(ConcernSchema),
 });
 
-const HighlightSchema = z.object({
-  highlight_type: z.string(),
-  quote: z.string(),
-  context: z.string(),
-  timestamp_seconds: z.number().optional(),
-});
-
-const HighlightsResponseSchema = z.object({
-  highlights: z.array(HighlightSchema),
-});
-
 const JobAlignmentSchema = z.object({
   matched_requirements: z.array(z.string()),
   missing_requirements: z.array(z.string()),
@@ -55,8 +44,8 @@ const JobAlignmentSchema = z.object({
 const QuestionAnalysisSchema = z.object({
   question_id: z.string(),
   question_text: z.string(),
-  answer_summary: z.string(),
-  answer_quality_score: z.number().min(0).max(100),
+  user_answer: z.string(),
+  answer_quality_score: z.number().int().min(0).max(100),
   key_points: z.array(z.string()),
   concerns: z.array(z.string()),
   examples_provided: z.array(z.string()),
@@ -66,7 +55,6 @@ const QuestionAnalysisSchema = z.object({
 type HiringVerdict = z.infer<typeof HiringVerdictSchema>;
 type Strength = z.infer<typeof StrengthSchema>;
 type Concern = z.infer<typeof ConcernSchema>;
-type Highlight = z.infer<typeof HighlightSchema>;
 type JobAlignment = z.infer<typeof JobAlignmentSchema>;
 type QuestionAnalysis = z.infer<typeof QuestionAnalysisSchema>;
 
@@ -95,7 +83,6 @@ async function generateHiringVerdict(
   baseContext: string,
   strengths: Strength[],
   concerns: Concern[],
-  highlights: Highlight[],
   jobAlignment: JobAlignment,
   questionAnalysis: QuestionAnalysis[],
   logger: Logger
@@ -127,19 +114,6 @@ ${
     : "No significant concerns identified."
 }
 
-## KEY INTERVIEW HIGHLIGHTS
-${
-  highlights.length > 0
-    ? highlights
-        .map(
-          (h, i) => `${i + 1}. ${h.highlight_type}
-   - Quote: "${h.quote}"
-   - Context: ${h.context}`
-        )
-        .join("\n\n")
-    : "No standout highlights."
-}
-
 ## JOB ALIGNMENT ANALYSIS
 Matched Requirements: ${jobAlignment.matched_requirements.join(", ") || "None"}
 Missing Requirements: ${jobAlignment.missing_requirements.join(", ") || "None"}
@@ -150,7 +124,7 @@ ${questionAnalysis
   .map(
     (q, i) => `${i + 1}. ${q.question_text}
    - Quality Score: ${q.answer_quality_score}/100
-   - Summary: ${q.answer_summary}
+   - Summary: ${q.user_answer}
    - Key Points: ${q.key_points.join("; ")}
    - Concerns: ${q.concerns.join("; ") || "None"}`
   )
@@ -165,7 +139,9 @@ Consider:
 - Any critical red flags that would disqualify them
 - Their potential for success in this specific role
 
-Be decisive - BORDERLINE should only be used when the positives and negatives are truly balanced and you cannot make a clear recommendation.`;
+Be decisive - BORDERLINE should only be used when the positives and negatives are truly balanced and you cannot make a clear recommendation.
+
+IMPORTANT: The overall_match_score MUST be a whole number (integer) between 0 and 100. Do not use decimal points.`;
 
   logger.info("Generating comprehensive hiring verdict with all analysis data");
 
@@ -224,41 +200,6 @@ Include up to 5 most important concerns. If no concerns, return empty array.`;
   });
 
   return result.concerns;
-}
-
-// Generate transcript highlights
-async function generateHighlights(
-  baseContext: string,
-  logger: Logger
-): Promise<Highlight[]> {
-  const prompt = `${baseContext}
-
-Extract key transcript highlights that are genuinely noteworthy from the interview.
-
-Guidelines:
-- Be completely objective - only highlight moments that truly stand out
-- Do NOT force positive highlights if the candidate didn't demonstrate exceptional qualities
-- Do NOT force negative highlights if there were no concerning moments
-- An average interview may have few or no notable highlights, and that's acceptable
-- Quality over quantity - only include highlights that would genuinely influence a hiring decision
-- If the interview was unremarkable, return fewer highlights or even an empty array
-
-For any highlights you do identify:
-- Use descriptive highlight_type values (e.g., "exceptional_technical_knowledge", "communication_concern", "strong_leadership_example")
-- Include the exact quote that demonstrates the highlight
-- Provide context for why this moment is significant
-
-Return 0-6 highlights based on what actually occurred in the interview.`;
-
-  logger.info("Generating highlights");
-
-  const result = await generateObjectWithFallback({
-    prompt,
-    schema: HighlightsResponseSchema,
-    loggingContext: { function: "generateHighlights" },
-  });
-
-  return result.highlights;
 }
 
 // Generate job alignment analysis
@@ -440,7 +381,6 @@ async function gradeAnswer(
   },
   logger: Logger
 ): Promise<{
-  answer_summary: string;
   answer_quality_score: number;
   key_points: string[];
   concerns: string[];
@@ -458,15 +398,14 @@ ${
 Note: The question and answer have been synthesized from multiple exchanges to capture the complete discussion of this topic.
 
 Analyze the response and provide:
-1. A concise summary of what the candidate communicated
-2. A quality score (0-100) based on ${
+1. A quality score (0-100, MUST be a whole number/integer with no decimals) based on ${
     answerGuidelines
       ? "how well they met the guidelines"
       : "relevance and quality for the role"
   }
-3. Key points that stood out positively
-4. Any concerns or gaps in the answer
-5. Specific examples the candidate provided
+2. Key points that stood out positively
+3. Any concerns or gaps in the answer
+4. Specific examples the candidate provided
 
 Consider:
 - The depth and completeness of their response
@@ -495,8 +434,7 @@ ${answerGuidelines ? `## Answer Guidelines\n${answerGuidelines}` : ""}`;
   const result = await generateObjectWithFallback({
     prompt,
     schema: z.object({
-      answer_summary: z.string(),
-      answer_quality_score: z.number().min(0).max(100),
+      answer_quality_score: z.number().int().min(0).max(100),
       key_points: z.array(z.string()),
       concerns: z.array(z.string()),
       examples_provided: z.array(z.string()),
@@ -547,7 +485,7 @@ async function generateRecruiterQuestionAnalysis(
       return {
         question_id: matchedQuestion?.id || "",
         question_text: groupedQA.synthesized_question,
-        answer_summary: grading.answer_summary,
+        user_answer: groupedQA.synthesized_answer,
         answer_quality_score: grading.answer_quality_score,
         key_points: grading.key_points,
         concerns: grading.concerns,
@@ -744,25 +682,19 @@ export const POST = withAxiom(
       logger.info("Generating AI analysis", { interviewId });
 
       // Generate all analysis sections in parallel (except hiring verdict)
-      const [
-        strengths,
-        concerns,
-        highlights,
-        jobAlignment,
-        recruiterQuestionAnalysis,
-      ] = await Promise.all([
-        generateStrengths(baseContext, logger),
-        generateConcerns(baseContext, logger),
-        generateHighlights(baseContext, logger),
-        generateJobAlignment(baseContext, logger),
-        generateRecruiterQuestionAnalysis(
-          interviewId,
-          transcript,
-          questionsList,
-          interview.custom_jobs,
-          logger
-        ),
-      ]);
+      const [strengths, concerns, jobAlignment, recruiterQuestionAnalysis] =
+        await Promise.all([
+          generateStrengths(baseContext, logger),
+          generateConcerns(baseContext, logger),
+          generateJobAlignment(baseContext, logger),
+          generateRecruiterQuestionAnalysis(
+            interviewId,
+            transcript,
+            questionsList,
+            interview.custom_jobs,
+            logger
+          ),
+        ]);
 
       // Generate hiring verdict AFTER all other analysis is complete
       // This ensures the verdict is based on ALL insights
@@ -771,7 +703,6 @@ export const POST = withAxiom(
         {
           strengthsCount: strengths.length,
           concernsCount: concerns.length,
-          highlightsCount: highlights.length,
           questionAnalysisCount: recruiterQuestionAnalysis.length,
         }
       );
@@ -780,7 +711,6 @@ export const POST = withAxiom(
         baseContext,
         strengths,
         concerns,
-        highlights,
         jobAlignment,
         recruiterQuestionAnalysis,
         logger
@@ -841,19 +771,6 @@ export const POST = withAxiom(
             }))
           ),
 
-        // Highlights
-        highlights.length > 0 &&
-          supabase.from("recruiter_interview_highlights").insert(
-            highlights.map((h, idx) => ({
-              analysis_id: analysisId,
-              highlight_type: h.highlight_type,
-              quote: h.quote,
-              context: h.context,
-              timestamp_seconds: h.timestamp_seconds,
-              display_order: idx,
-            }))
-          ),
-
         // Job alignment
         supabase.from("recruiter_job_alignment_details").insert({
           analysis_id: analysisId,
@@ -869,7 +786,7 @@ export const POST = withAxiom(
               analysis_id: analysisId,
               question_id: q.question_id || null,
               question_text: q.question_text,
-              answer_summary: q.answer_summary,
+              user_answer: q.user_answer,
               answer_quality_score: q.answer_quality_score,
               key_points: q.key_points,
               concerns: q.concerns,

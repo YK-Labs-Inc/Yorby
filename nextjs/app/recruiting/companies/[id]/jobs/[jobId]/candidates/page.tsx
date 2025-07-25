@@ -87,26 +87,28 @@ export default async function CandidatesPage({
       </div>
 
       {/* Main Content Area - Takes remaining height */}
-      <div className="container mx-auto px-4 pb-4 flex-1 flex gap-6 min-h-0 overflow-hidden">
-        {/* Left Sidebar - Candidate List (Client Component) */}
-        <CandidatesList
-          initialCandidates={initialCandidates}
-          companyId={companyId}
-          jobId={jobId}
-          selectedCandidateId={effectiveCandidateId || undefined}
-        />
+      <div className="container mx-auto px-4 pb-4 flex-1 flex min-h-0 overflow-hidden">
+        <div className="flex h-full shadow-sm rounded-lg">
+          {/* Left Sidebar - Candidate List (Client Component) */}
+          <CandidatesList
+            initialCandidates={initialCandidates}
+            companyId={companyId}
+            jobId={jobId}
+            selectedCandidateId={effectiveCandidateId || undefined}
+          />
 
-        {/* Right Content - Candidate Overview */}
-        <div className="flex-1 min-w-0 overflow-hidden">
-          <Suspense fallback={<CandidateOverviewSkeleton />}>
-            {effectiveSelectedCandidateData ? (
-              <CandidateOverview
-                candidateData={effectiveSelectedCandidateData}
-              />
-            ) : (
-              <EmptyState />
-            )}
-          </Suspense>
+          {/* Right Content - Candidate Overview */}
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <Suspense fallback={<CandidateOverviewSkeleton />}>
+              {effectiveSelectedCandidateData ? (
+                <CandidateOverview
+                  candidateData={effectiveSelectedCandidateData}
+                />
+              ) : (
+                <EmptyState />
+              )}
+            </Suspense>
+          </div>
         </div>
       </div>
     </div>

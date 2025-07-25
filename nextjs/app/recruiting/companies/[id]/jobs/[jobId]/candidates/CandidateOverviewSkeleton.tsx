@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function CandidateOverviewSkeleton() {
   return (
-    <Card className="h-full flex flex-col bg-white border shadow-sm">
+    <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
       <CardHeader className="flex-shrink-0 border-b">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
