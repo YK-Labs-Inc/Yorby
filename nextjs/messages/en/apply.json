@@ -211,6 +211,12 @@
         "applied": "Applied {date}",
         "loadingMore": "Loading more candidates..."
       },
+      "info": {
+        "contactInfo": "Contact Information",
+        "applicationFiles": "Application Files",
+        "filesCount": "{count} files uploaded",
+        "applied": "Applied on {date}"
+      },
       "overview": {
         "appliedOn": "Applied on {date}",
         "contactInformation": "Contact Information",
@@ -268,7 +274,8 @@
           "overview": "Overview",
           "strengths": "Strengths",
           "concerns": "Concerns",
-          "alignment": "Job Alignment"
+          "alignment": "Job Alignment",
+          "questions": "Questions"
         },
         "keyHighlights": "Key Interview Highlights",
         "questionPerformance": "Question Performance",
@@ -285,7 +292,21 @@
         "matchedRequirements": "Matched Requirements",
         "exceededRequirements": "Exceeded Requirements",
         "missingRequirements": "Missing Requirements",
-        "processedAt": "Processed: {date}"
+        "processedAt": "Processed: {date}",
+        "questionTab": "Question {number}",
+        "questionTitle": "Question",
+        "answerSummary": "Answer Summary",
+        "userAnswer": "User Answer",
+        "qualityScore": "Quality Score",
+        "keyPoints": "Key Points",
+        "concerns": "Concerns",
+        "examplesProvided": "Examples Provided",
+        "yes": "Yes",
+        "no": "No",
+        "noExamplesProvided": "No specific examples provided",
+        "noQuestionAnalysis": "No analysis available for this question",
+        "candidateResponse": "Candidate's Response",
+        "answerAnalysis": "Answer Analysis"
       }
     }
   }

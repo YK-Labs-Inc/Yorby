@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          query?: string
-          operationName?: string
           variables?: Json
           extensions?: Json
+          operationName?: string
+          query?: string
         }
         Returns: Json
       }
@@ -1836,7 +1836,6 @@ export type Database = {
         Row: {
           analysis_id: string
           answer_quality_score: number | null
-          answer_summary: string
           concerns: string[] | null
           created_at: string
           display_order: number | null
@@ -1845,11 +1844,11 @@ export type Database = {
           key_points: string[] | null
           question_id: string | null
           question_text: string
+          user_answer: string
         }
         Insert: {
           analysis_id: string
           answer_quality_score?: number | null
-          answer_summary: string
           concerns?: string[] | null
           created_at?: string
           display_order?: number | null
@@ -1858,11 +1857,11 @@ export type Database = {
           key_points?: string[] | null
           question_id?: string | null
           question_text: string
+          user_answer: string
         }
         Update: {
           analysis_id?: string
           answer_quality_score?: number | null
-          answer_summary?: string
           concerns?: string[] | null
           created_at?: string
           display_order?: number | null
@@ -1871,6 +1870,7 @@ export type Database = {
           key_points?: string[] | null
           question_id?: string | null
           question_text?: string
+          user_answer?: string
         }
         Relationships: [
           {
@@ -2418,7 +2418,7 @@ export type Database = {
         Returns: boolean
       }
       is_company_owner_or_admin: {
-        Args: { p_company_id: string; p_user_id: string }
+        Args: { p_user_id: string; p_company_id: string }
         Returns: boolean
       }
     }

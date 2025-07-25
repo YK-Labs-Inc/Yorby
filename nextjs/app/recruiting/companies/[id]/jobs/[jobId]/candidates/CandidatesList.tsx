@@ -110,8 +110,8 @@ export default function CandidatesList({
   );
 
   return (
-    <div className="w-[400px] flex-shrink-0">
-      <Card className="h-full flex flex-col border shadow-sm">
+    <div className="w-1/4 max-w-[320px] min-w-[240px] flex-shrink-0">
+      <Card className="h-full flex flex-col border shadow-none rounded-r-none">
         <CardHeader className="pb-3 flex-shrink-0 border-b">
           <CardTitle className="text-lg">
             {t("title", { count: candidates.length })}
@@ -141,7 +141,7 @@ export default function CandidatesList({
                 </p>
               </div>
             ) : (
-              <div className="p-2">
+              <div>
                 {filteredCandidates.map((candidate, index) => (
                   <div
                     key={candidate.id}
@@ -151,12 +151,12 @@ export default function CandidatesList({
                         : null
                     }
                     className={cn(
-                      "p-3 rounded-lg cursor-pointer transition-colors border",
+                      "px-4 py-3 cursor-pointer transition-colors border-b",
                       "hover:bg-gray-50",
                       selectedCandidateId === candidate.id
-                        ? "bg-gray-50 border-gray-300"
-                        : "bg-white border-transparent",
-                      index !== 0 && "mt-1"
+                        ? "bg-gray-50"
+                        : "bg-white",
+                      index === filteredCandidates.length - 1 && "border-b-0"
                     )}
                     onClick={() => handleCandidateSelect(candidate.id)}
                   >

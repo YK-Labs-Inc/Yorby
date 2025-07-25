@@ -8,7 +8,7 @@ export default function EmptyState() {
   const t = useTranslations("apply.recruiting.candidates.emptyState");
 
   return (
-    <Card className="h-full flex items-center justify-center border shadow-sm">
+    <Card className="h-full flex items-center justify-center border shadow-sm rounded-l-none border-l-0">
       <CardContent className="text-center">
         <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-medium mb-2">{t("title")}</h3>
