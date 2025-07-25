@@ -26,9 +26,7 @@ const StrengthsResponseSchema = z.object({
 const ConcernSchema = z.object({
   title: z.string(),
   description: z.string(),
-  evidence: z.string().optional(),
-  impact: z.string(),
-  severity: z.enum(["critical", "high", "medium", "low"]),
+  evidence: z.string(),
 });
 
 const ConcernsResponseSchema = z.object({
@@ -105,10 +103,9 @@ ${
   concerns.length > 0
     ? concerns
         .map(
-          (c, i) => `${i + 1}. ${c.title} (Severity: ${c.severity})
+          (c, i) => `${i + 1}. ${c.title}
    - Description: ${c.description}
-   - Evidence: ${c.evidence || "N/A"}
-   - Impact: ${c.impact}`
+   - Evidence: ${c.evidence}`
         )
         .join("\n\n")
     : "No significant concerns identified."
@@ -181,15 +178,28 @@ async function generateConcerns(
 ): Promise<Concern[]> {
   const prompt = `${baseContext}
 
-Identify ALL concerns and red flags.
+As an experienced recruiter, identify ONLY meaningful concerns that would genuinely impact the candidate's success or indicate risk to the organization.
 
-Guidelines:
-- "critical" = deal-breaker red flags (dishonesty, major skill gaps, etc.)
-- "high" = significant concerns that could impact success
-- "medium" = notable gaps that need addressing
-- "low" = minor concerns or areas for development
+IMPORTANT: Do NOT flag concerns about:
+- Skills not explicitly mentioned but reasonably implied (e.g., TypeScript for React developers)
+- Minor technical gaps that can be learned on the job
+- Standard industry tool variations (e.g., Jest vs Mocha)
+- Seniority-appropriate knowledge (don't expect junior-level candidates to know everything)
 
-Include up to 5 most important concerns. If no concerns, return empty array.`;
+DO flag concerns about:
+- Behavioral red flags (defensiveness, blame-shifting, inability to discuss failures)
+- Communication issues (incoherent responses, inability to explain technical concepts)
+- Ethical concerns (taking credit for others' work, dishonesty)
+- Critical skill misalignment (claims expertise but demonstrates fundamental misunderstanding)
+- Cultural fit issues based on their described work style
+- Concerning patterns across multiple answers (consistently vague, avoids specifics)
+
+For each concern, you MUST:
+1. Provide a clear title that summarizes the issue
+2. Write a detailed description explaining why this is a genuine risk
+3. Cite specific evidence from the transcript (this is REQUIRED)
+
+Return empty array if no meaningful concerns exist. Quality over quantity - only flag what truly matters for hiring decision.`;
 
   logger.info("Generating concerns");
 
@@ -209,7 +219,29 @@ async function generateJobAlignment(
 ): Promise<JobAlignment> {
   const prompt = `${baseContext}
 
-Analyze job requirement alignment.
+Analyze how the candidate aligns with the job requirements.
+
+IMPORTANT GUIDELINES:
+- Focus on EXPLICIT requirements from the job description
+- Consider reasonably implied skills (e.g., CSS knowledge for front-end developers, TypeScript for React roles)
+- Don't penalize for missing tools/technologies that are industry-standard variations
+- Consider the seniority level - junior roles have different expectations than senior roles
+
+For matched_requirements:
+- List skills/experiences the candidate clearly demonstrated
+- Include both explicitly mentioned and reasonably demonstrated capabilities
+
+For missing_requirements:
+- ONLY list truly critical gaps that would impact job performance
+- Do NOT include:
+  * Skills reasonably implied by their demonstrated expertise (CSS for React devs, etc.)
+  * Minor tooling differences (Jest vs Mocha, npm vs yarn)
+  * Nice-to-have skills not marked as required
+  * Skills that can be quickly learned on the job
+
+For exceeded_requirements:
+- Highlight skills/experiences beyond what's required
+- Include leadership experience, additional technical skills, or domain expertise
 
 Be specific and reference the job description directly. Keep each item concise.`;
 
@@ -760,14 +792,11 @@ export const POST = withAxiom(
         // Concerns
         concerns.length > 0 &&
           supabase.from("recruiter_interview_concerns").insert(
-            concerns.map((c, idx) => ({
+            concerns.map((c) => ({
               analysis_id: analysisId,
               title: c.title,
               description: c.description,
               evidence: c.evidence,
-              impact: c.impact,
-              severity: c.severity,
-              display_order: idx,
             }))
           ),
 
