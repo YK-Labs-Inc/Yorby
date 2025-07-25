@@ -9,9 +9,7 @@ import { ShareButton } from "@/components/ui/share-button";
 import {
   CheckCircle2,
   AlertCircle,
-  AlertTriangle,
   TrendingUp,
-  Target,
   XCircle,
   BarChart3,
   ChevronLeft,
@@ -155,21 +153,6 @@ export default function InterviewAnalysis({
     }
   };
 
-  // Helper function to get severity icon
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case "critical":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      case "high":
-        return <AlertCircle className="h-4 w-4 text-orange-600" />;
-      case "medium":
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case "low":
-        return <AlertCircle className="h-4 w-4 text-blue-600" />;
-      default:
-        return null;
-    }
-  };
 
   // Navigate between questions
   const navigateQuestion = (direction: "prev" | "next") => {
@@ -710,57 +693,27 @@ export default function InterviewAnalysis({
               {analysis.concerns.map((concern, idx) => (
                 <Card
                   key={idx}
-                  className={`p-4 border-l-4 ${
-                    concern.severity === "critical"
-                      ? "border-l-red-500"
-                      : concern.severity === "high"
-                        ? "border-l-orange-500"
-                        : concern.severity === "medium"
-                          ? "border-l-yellow-500"
-                          : "border-l-blue-500"
-                  }`}
+                  className="p-4 border-l-4 border-l-orange-500"
                 >
                   <div className="flex items-start gap-3">
-                    {getSeverityIcon(concern.severity)}
+                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h5 className="font-medium text-sm break-words">
-                          {concern.title}
-                        </h5>
-                        {concern.is_red_flag && (
-                          <Badge variant="destructive" className="text-xs">
-                            {t("redFlag")}
-                          </Badge>
-                        )}
-                      </div>
+                      <h5 className="font-medium text-sm mb-2 break-words">
+                        {concern.title}
+                      </h5>
                       <p className="text-sm text-gray-700 mb-2 break-words">
                         {concern.description}
                       </p>
                       {concern.evidence && (
-                        <p className="text-xs text-gray-600 italic mb-2 break-words">
-                          {concern.evidence}
-                        </p>
+                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                          <p className="text-xs font-medium text-gray-600 mb-1 uppercase tracking-wider">
+                            {t("evidence")}
+                          </p>
+                          <p className="text-xs text-gray-600 italic break-words">
+                            "{concern.evidence}"
+                          </p>
+                        </div>
                       )}
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Target className="h-3 w-3" />
-                          {t("impact")}: {concern.impact}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${
-                            concern.severity === "critical"
-                              ? "text-red-700"
-                              : concern.severity === "high"
-                                ? "text-orange-700"
-                                : concern.severity === "medium"
-                                  ? "text-yellow-700"
-                                  : "text-blue-700"
-                          }`}
-                        >
-                          {t(`severity.${concern.severity}`)}
-                        </Badge>
-                      </div>
                     </div>
                   </div>
                 </Card>

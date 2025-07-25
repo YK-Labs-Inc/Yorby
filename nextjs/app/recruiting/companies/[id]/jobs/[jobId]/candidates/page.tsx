@@ -88,7 +88,7 @@ export default async function CandidatesPage({
 
       {/* Main Content Area - Takes remaining height */}
       <div className="container mx-auto px-4 pb-4 flex-1 flex min-h-0 overflow-hidden">
-        <div className="flex h-full shadow-sm rounded-lg">
+        <div className="flex h-full w-full shadow-sm rounded-lg">
           {/* Left Sidebar - Candidate List (Client Component) */}
           <CandidatesList
             initialCandidates={initialCandidates}
