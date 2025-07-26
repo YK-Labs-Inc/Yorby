@@ -6,6 +6,7 @@ import {
   streamText,
   generateText,
   streamObject,
+  StreamTextResult,
 } from "ai";
 import { google } from "@ai-sdk/google";
 import { withTracing } from "@posthog/ai";
@@ -255,6 +256,72 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
       logger.info("Fallback model completed successfully");
       await logger.flush();
       return result.textStream;
+    } catch (fallbackError) {
+      logger.error("Both primary and fallback models failed", {
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : String(fallbackError),
+      });
+      await logger.flush();
+      throw fallbackError;
+    }
+  }
+};
+
+/**
+ * Execute a streaming content generation with automatic fallback
+ */
+export const createTextStream = async ({
+  messages,
+  prompt,
+  systemPrompt,
+  loggingContext = {},
+  modelConfig = DEFAULT_MODEL_CONFIG,
+}: MutuallyExclusiveParams) => {
+  const logger = new Logger().with({
+    ...loggingContext,
+    ...modelConfig,
+  });
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  try {
+    const model = withTracing(google(modelConfig.primaryModel!), posthog, {
+      posthogDistinctId: user?.id,
+      posthogProperties: loggingContext,
+    });
+    const result = streamText({
+      model,
+      messages: messages?.filter((message) => message.content),
+      prompt,
+      system: systemPrompt,
+    });
+    logger.info("Primary model completed successfully");
+    await logger.flush();
+    return result;
+  } catch (error) {
+    logger.error(`Primary model failed, trying fallback model`, {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await logger.flush();
+
+    try {
+      const model = withTracing(google(modelConfig.fallbackModel!), posthog, {
+        posthogDistinctId: user?.id,
+        posthogProperties: loggingContext,
+      });
+      const result = streamText({
+        model,
+        messages: messages?.filter((message) => message.content),
+        prompt,
+        system: systemPrompt,
+      });
+
+      logger.info("Fallback model completed successfully");
+      await logger.flush();
+      return result;
     } catch (fallbackError) {
       logger.error("Both primary and fallback models failed", {
         error:

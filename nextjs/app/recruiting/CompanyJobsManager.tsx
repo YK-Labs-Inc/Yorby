@@ -49,9 +49,7 @@ export function CompanyJobsManager({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">{t("title")}</h2>
-            <p className="text-muted-foreground">
-              {t("subtitle")}
-            </p>
+            <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -96,7 +94,9 @@ export function CompanyJobsManager({
                             job.status === "unlocked" ? "default" : "secondary"
                           }
                         >
-                          {job.status === "unlocked" ? t("jobCard.status.active") : t("jobCard.status.draft")}
+                          {job.status === "unlocked"
+                            ? t("jobCard.status.active")
+                            : t("jobCard.status.draft")}
                         </Badge>
                       </CardDescription>
                     </div>
@@ -107,20 +107,6 @@ export function CompanyJobsManager({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/recruiting/companies/${companyId}/jobs/${job.id}/edit`}
-                          >
-                            {t("actions.editJob")}
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/recruiting/companies/${companyId}/jobs/${job.id}?view=questions`}
-                          >
-                            {t("actions.manageQuestions")}
-                          </Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                           {t("actions.archiveJob")}
                         </DropdownMenuItem>
@@ -137,7 +123,11 @@ export function CompanyJobsManager({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span>{t("jobCard.candidates", { count: getCandidateCount(job) })}</span>
+                      <span>
+                        {t("jobCard.candidates", {
+                          count: getCandidateCount(job),
+                        })}
+                      </span>
                     </div>
                     <Link
                       href={`/recruiting/companies/${companyId}/jobs/${job.id}`}

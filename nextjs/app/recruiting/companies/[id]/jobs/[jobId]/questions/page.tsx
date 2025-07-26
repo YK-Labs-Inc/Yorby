@@ -4,7 +4,24 @@ import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import QuestionsTable from "../QuestionsTable";
+import { Suspense } from "react";
+import QuestionsTable from "./QuestionsTable";
+import { Tables } from "@/utils/supabase/database.types";
+import QuestionsTableLoading from "./QuestionsTableLoading";
+
+async function fetchQuestions(
+  jobId: string
+): Promise<Tables<"custom_job_questions">[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("custom_job_questions")
+    .select("*")
+    .eq("custom_job_id", jobId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as Tables<"custom_job_questions">[];
+}
 
 interface PageProps {
   params: Promise<{
@@ -116,8 +133,35 @@ export default async function QuestionsPage({ params }: PageProps) {
           </p>
         </div>
 
-        <QuestionsTable jobId={jobId} />
+        <Suspense fallback={<QuestionsTableLoading />}>
+          <QuestionsTableWrapper
+            jobId={jobId}
+            jobTitle={job.job_title}
+            companyId={companyId}
+          />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+async function QuestionsTableWrapper({
+  jobId,
+  jobTitle,
+  companyId,
+}: {
+  jobId: string;
+  jobTitle: string;
+  companyId: string;
+}) {
+  const questions = await fetchQuestions(jobId);
+
+  return (
+    <QuestionsTable
+      jobId={jobId}
+      jobTitle={jobTitle}
+      companyId={companyId}
+      questions={questions}
+    />
   );
 }

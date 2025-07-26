@@ -55,56 +55,46 @@ export function CompanyDashboard({ companies, userId }: CompanyDashboardProps) {
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {companies.map((company) => (
-                <Card
+                <Link
+                  href={`/recruiting/companies/${company.id}`}
                   key={company.id}
-                  className="hover:shadow-lg transition-shadow"
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-lg">
-                          {company.name}
-                        </CardTitle>
-                        <CardDescription>
-                          {company.industry || t("noIndustrySpecified")}
-                        </CardDescription>
+                  <Card
+                    key={company.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <CardTitle className="text-lg">
+                            {company.name}
+                          </CardTitle>
+                          <CardDescription>
+                            {company.industry || t("noIndustrySpecified")}
+                          </CardDescription>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      {company.website && (
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{t("website")}</span>
-                          <p>{company.website}</p>
-                        </div>
-                      )}
-                      {company.company_size && (
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          <span>
-                            {company.company_size} {t("employees")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t">
-                      <Link href={`/recruiting/companies/${company.id}`}>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-between"
-                        >
-                          <span className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4" />
-                            {t("manageJobs")}
-                          </span>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        {company.website && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{t("website")}</span>
+                            <p>{company.website}</p>
+                          </div>
+                        )}
+                        {company.company_size && (
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span>
+                              {company.company_size} {t("employees")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </>
