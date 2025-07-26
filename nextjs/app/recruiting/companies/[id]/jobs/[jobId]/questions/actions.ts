@@ -5,6 +5,7 @@ import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import { Tables } from "@/utils/supabase/database.types";
 import { getTranslations } from "next-intl/server";
+import type { Question } from "./AIChatPanel";
 
 // Helper function to check if user is a company member
 async function checkCompanyMembership(
@@ -78,10 +79,14 @@ export async function createQuestion(
     }
 
     // Check authorization
-    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
-      user.id,
-      jobId
-    );
+    const {
+      isAuthorized,
+      companyId,
+      error: authError,
+    } = await checkCompanyMembership(user.id, jobId);
+    if (!companyId) {
+      return { success: false, error: t("notAuthorized") };
+    }
 
     if (!isAuthorized) {
       logger.error("User not authorized", { userId: user.id, authError });
@@ -109,15 +114,15 @@ export async function createQuestion(
     await logger.flush();
 
     // Revalidate the job page
-    if (companyId) {
-      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
-    } else {
-      revalidatePath(`/dashboard/jobs/${jobId}`);
-    }
+    revalidatePath(
+      `/recruiting/companies/${companyId}/jobs/${jobId}/questions`
+    );
 
     return { success: true, data };
   } catch (error: any) {
-    logger.error("Unexpected error creating question", { error: error.message });
+    logger.error("Unexpected error creating question", {
+      error: error.message,
+    });
     await logger.flush();
     return { success: false, error: t("unexpectedError") };
   }
@@ -152,10 +157,15 @@ export async function updateQuestion(
     }
 
     // Check authorization
-    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
-      user.id,
-      jobId
-    );
+    const {
+      isAuthorized,
+      companyId,
+      error: authError,
+    } = await checkCompanyMembership(user.id, jobId);
+
+    if (!companyId) {
+      return { success: false, error: t("notAuthorized") };
+    }
 
     if (!isAuthorized) {
       logger.error("User not authorized", { userId: user.id, authError });
@@ -182,15 +192,14 @@ export async function updateQuestion(
     await logger.flush();
 
     // Revalidate the job page
-    if (companyId) {
-      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
-    } else {
-      revalidatePath(`/dashboard/jobs/${jobId}`);
-    }
-
+    revalidatePath(
+      `/recruiting/companies/${companyId}/jobs/${jobId}/questions`
+    );
     return { success: true, data };
   } catch (error: any) {
-    logger.error("Unexpected error updating question", { error: error.message });
+    logger.error("Unexpected error updating question", {
+      error: error.message,
+    });
     await logger.flush();
     return { success: false, error: t("unexpectedError") };
   }
@@ -217,10 +226,15 @@ export async function deleteQuestion(questionId: string, jobId: string) {
     }
 
     // Check authorization
-    const { isAuthorized, companyId, error: authError } = await checkCompanyMembership(
-      user.id,
-      jobId
-    );
+    const {
+      isAuthorized,
+      companyId,
+      error: authError,
+    } = await checkCompanyMembership(user.id, jobId);
+
+    if (!companyId) {
+      return { success: false, error: t("notAuthorized") };
+    }
 
     if (!isAuthorized) {
       logger.error("User not authorized", { userId: user.id, authError });
@@ -270,16 +284,132 @@ export async function deleteQuestion(questionId: string, jobId: string) {
     await logger.flush();
 
     // Revalidate the job page
-    if (companyId) {
-      revalidatePath(`/recruiting/companies/${companyId}/jobs/${jobId}`);
-    } else {
-      revalidatePath(`/dashboard/jobs/${jobId}`);
-    }
+    revalidatePath(
+      `/recruiting/companies/${companyId}/jobs/${jobId}/questions`
+    );
 
     return { success: true };
   } catch (error: any) {
-    logger.error("Unexpected error deleting question", { error: error.message });
+    logger.error("Unexpected error deleting question", {
+      error: error.message,
+    });
     await logger.flush();
     return { success: false, error: t("unexpectedError") };
+  }
+}
+
+export type SaveQuestionsState = {
+  error?: string;
+  success?: boolean;
+};
+
+export async function saveQuestions(
+  prevState: SaveQuestionsState | null,
+  formData: FormData
+): Promise<SaveQuestionsState> {
+  const logger = new Logger().with({
+    function: "saveQuestions",
+  });
+
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // Get the current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      logger.error("Authentication error", { error: userError });
+      await logger.flush();
+      return { error: "You must be logged in to save questions" };
+    }
+
+    // Get questions and jobId from formData
+    const questionsJson = formData.get("questions");
+    const jobId = formData.get("jobId");
+    const companyId = formData.get("companyId");
+
+    if (!questionsJson || !jobId || !companyId) {
+      return { error: "Missing required data" };
+    }
+
+    const questions: Question[] = JSON.parse(questionsJson as string);
+
+    // Check authorization using existing helper
+    const { isAuthorized, error: authError } = await checkCompanyMembership(
+      user.id,
+      jobId as string
+    );
+
+    if (!isAuthorized) {
+      logger.error("User not authorized", { userId: user.id, authError });
+      await logger.flush();
+      return {
+        error: authError || "You don't have permission to manage questions",
+      };
+    }
+
+    // Filter out questions without required fields and prepare for insert
+    const questionsToInsert = questions
+      .filter(
+        (q): q is Question & { question: string } =>
+          q.question !== null &&
+          q.question !== undefined &&
+          q.question.trim() !== ""
+      )
+      .map((q) => ({
+        custom_job_id: jobId as string,
+        question: q.question.trim(),
+        answer_guidelines: q.answer_guidelines || "",
+        question_type: q.question_type ?? "ai_generated",
+        publication_status: q.publication_status || "published",
+      }));
+
+    if (questionsToInsert.length === 0) {
+      logger.warn("No valid questions to save", {
+        originalCount: questions.length,
+        userId: user.id,
+      });
+      await logger.flush();
+      return {
+        error:
+          "No valid questions to save. Please ensure all questions have content.",
+      };
+    }
+
+    const { error: insertError } = await supabase
+      .from("custom_job_questions")
+      .insert(questionsToInsert);
+
+    if (insertError) {
+      logger.error("Failed to insert questions", {
+        error: insertError,
+        questionsCount: questions.length,
+      });
+      await logger.flush();
+      return { error: "Failed to save questions. Please try again." };
+    }
+
+    logger.info("Questions saved successfully", {
+      jobId,
+      questionsCount: questionsToInsert.length,
+      originalCount: questions.length,
+      userId: user.id,
+    });
+    await logger.flush();
+
+    // Revalidate the questions page
+    revalidatePath(
+      `/recruiting/companies/${companyId}/jobs/${jobId}/questions`
+    );
+
+    return { success: true };
+  } catch (error) {
+    logger.error("Unexpected error saving questions", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    await logger.flush();
+    return { error: "An unexpected error occurred. Please try again." };
   }
 }
