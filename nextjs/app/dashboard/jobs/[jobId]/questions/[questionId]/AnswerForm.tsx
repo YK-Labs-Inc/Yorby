@@ -48,6 +48,7 @@ export default function AnswerForm({
   coachUserId: string | null;
 }) {
   const t = useTranslations("interviewQuestion");
+  const { isPerfectInterview } = useMultiTenant();
 
   const [activeTab, setActiveTab] = useState<
     "question" | "guidelines" | "samples" | "submissions" | "feedback"
@@ -117,16 +118,18 @@ export default function AnswerForm({
               >
                 📖 Guidelines
               </button>
-              <button
-                onClick={() => setActiveTab("samples")}
-                className={`flex-1 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
-                  activeTab === "samples"
-                    ? "border-primary text-primary bg-primary/5"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
-                }`}
-              >
-                🧪 Samples
-              </button>
+              {isPerfectInterview && (
+                <button
+                  onClick={() => setActiveTab("samples")}
+                  className={`flex-1 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
+                    activeTab === "samples"
+                      ? "border-primary text-primary bg-primary/5"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
+                  }`}
+                >
+                  🧪 Samples
+                </button>
+              )}
               <button
                 onClick={() => setActiveTab("submissions")}
                 className={`flex-1 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${

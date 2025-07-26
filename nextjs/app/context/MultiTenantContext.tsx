@@ -39,6 +39,7 @@ interface MultiTenantContextProps {
   isCoachDashboardPage: boolean;
   isYorbyRecruiting: boolean;
   isRecruitingAuthPage: boolean;
+  isPerfectInterview: boolean;
 }
 
 const MultiTenantContext = createContext<MultiTenantContextProps | undefined>(
@@ -73,6 +74,11 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   const isRecruitingAuthPage = useMemo(
     () => (isYorbyRecruiting && pathname?.startsWith(`/auth`)) ?? false,
     [pathname, isYorbyRecruiting]
+  );
+
+  const isPerfectInterview = useMemo(
+    () => hostname.includes("perfectinterview.ai"),
+    [hostname]
   );
 
   const isCoachHomePage = useMemo(
@@ -168,6 +174,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       isCoachDashboardPage,
       isYorbyRecruiting,
       isRecruitingAuthPage,
+      isPerfectInterview,
     }),
     [
       isCoachPath,
@@ -181,6 +188,7 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
       isCoachDashboardPage,
       isYorbyRecruiting,
       isRecruitingAuthPage,
+      isPerfectInterview,
     ]
   );
 
