@@ -58,6 +58,7 @@ export default function QuestionsTable({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     question: "",
@@ -156,12 +157,50 @@ export default function QuestionsTable({
     }
   };
 
+  // Create new question
+  const handleCreateQuestion = async () => {
+    try {
+      const result = await createQuestion(jobId, {
+        ...createForm,
+        question_type: "user_generated",
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create question");
+      }
+
+      logInfo("Question created successfully", { jobId });
+      toast({
+        title: t("toast.questionCreated.title"),
+        description: t("toast.questionCreated.description"),
+      });
+
+      // Revalidate the data
+      setIsCreateDialogOpen(false);
+      setCreateForm({
+        question: "",
+        answer_guidelines: "",
+        publication_status: "published",
+      });
+    } catch (error: any) {
+      logError("Failed to create question", {
+        error: error.message,
+        jobId,
+      });
+      toast({
+        title: t("toast.error.title"),
+        description: error.message || t("toast.error.createFailed"),
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="relative">
       <div className={cn("transition-all duration-300 ease-in-out")}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">{t("title")}</h2>
-          <Button onClick={() => setIsAIPanelOpen(true)}>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             {t("addQuestion")}
           </Button>
@@ -232,6 +271,79 @@ export default function QuestionsTable({
             </TableBody>
           </Table>
         </div>
+
+        {/* Create Question Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{t("createDialog.title")}</DialogTitle>
+              <DialogDescription>
+                {t("createDialog.description")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="question">
+                  {t("createDialog.form.question.label")}
+                </Label>
+                <Textarea
+                  id="question"
+                  value={createForm.question}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, question: e.target.value })
+                  }
+                  placeholder={t("createDialog.form.question.placeholder")}
+                  className="min-h-[100px]"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="answer_guidelines">
+                  {t("createDialog.form.answerGuidelines.label")}
+                </Label>
+                <Textarea
+                  id="answer_guidelines"
+                  value={createForm.answer_guidelines}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      answer_guidelines: e.target.value,
+                    })
+                  }
+                  placeholder={t(
+                    "createDialog.form.answerGuidelines.placeholder"
+                  )}
+                  className="min-h-[100px]"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="publication_status"
+                  checked={createForm.publication_status === "published"}
+                  onCheckedChange={(checked) =>
+                    setCreateForm({
+                      ...createForm,
+                      publication_status: checked ? "published" : "draft",
+                    })
+                  }
+                />
+                <Label htmlFor="publication_status">
+                  {t("createDialog.form.publishImmediately")}
+                </Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateDialogOpen(false)}
+              >
+                {t("createDialog.buttons.cancel")}
+              </Button>
+              <Button onClick={handleCreateQuestion}>
+                {t("createDialog.buttons.create")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Question Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
