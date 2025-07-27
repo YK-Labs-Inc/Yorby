@@ -443,16 +443,9 @@ export async function handleApplyAction(
 
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    logger.error("User not authenticated", { error: userError });
-    await logger.flush();
-    return { error: t("userNotAuthenticated") };
-  }
-
-  const userId = user.id;
+  const userId = user?.id;
 
   // If no userId, create anonymous user
   if (!userId) {
