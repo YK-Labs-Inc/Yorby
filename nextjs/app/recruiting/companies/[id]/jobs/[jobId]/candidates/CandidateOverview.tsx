@@ -12,6 +12,7 @@ import type { CandidateData } from "./actions";
 import { useTranslations } from "next-intl";
 import InterviewAnalysis from "./InterviewAnalysis";
 import CandidateInfoSection from "./CandidateInfoSection";
+import CandidateApplicationFilesSection from "./CandidateApplicationFilesSection";
 
 interface CandidateOverviewProps {
   candidateData: CandidateData;
@@ -36,19 +37,12 @@ export default function CandidateOverview({
 
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
-      <CardHeader className="flex-shrink-0 border-b">
-        <div>
-          <CardTitle className="text-2xl break-words">
-            {candidate.candidate_name}
-          </CardTitle>
-          <CardDescription className="break-words">
-            {formatDate(candidate.applied_at)}
-          </CardDescription>
-        </div>
-      </CardHeader>
-
       <CardContent className="flex-1 overflow-y-auto py-6 px-0">
         <CandidateInfoSection candidateData={candidateData} />
+
+        <Separator className="my-6" />
+
+        <CandidateApplicationFilesSection candidateData={candidateData} />
 
         <Separator className="my-6" />
 

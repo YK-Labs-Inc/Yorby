@@ -1,12 +1,19 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import {
+  createSupabaseServerClient,
+  createAdminClient,
+} from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 import { cache } from "react";
 import type { TypedInterviewAnalysis } from "./types";
 
-export type Candidate = Tables<"company_job_candidates">;
+export type Candidate = Tables<"company_job_candidates"> & {
+  candidateName: string | null;
+  candidateEmail: string | null;
+  candidatePhoneNumber: string | null;
+};
 export type Company = Tables<"companies">;
 export type Job = Tables<"custom_jobs">;
 export type ApplicationFile = Tables<"candidate_application_files"> & {
@@ -94,6 +101,7 @@ export const getInitialCandidates = cache(
     limit: number = 10
   ): Promise<Candidate[]> => {
     const supabase = await createSupabaseServerClient();
+    const supabaseAdmin = await createAdminClient();
 
     const { data, error } = await supabase
       .from("company_job_candidates")
@@ -108,13 +116,53 @@ export const getInitialCandidates = cache(
       return [];
     }
 
-    return data || [];
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Fetch user data for each candidate
+    const candidatesWithUserData = await Promise.all(
+      data.map(async (candidate) => {
+        let candidateName: string | null = null;
+        let candidateEmail: string | null = null;
+        let candidatePhoneNumber: string | null = null;
+
+        if (candidate.candidate_user_id) {
+          const { data: userData, error: userError } =
+            await supabaseAdmin.auth.admin.getUserById(
+              candidate.candidate_user_id
+            );
+
+          if (userError) {
+            console.error("Error fetching user data:", userError);
+          } else if (userData && userData.user) {
+            candidateEmail = userData.user.email || null;
+            candidateName =
+              userData.user.user_metadata?.display_name ||
+              userData.user.user_metadata?.full_name ||
+              null;
+            candidatePhoneNumber =
+              userData.user.user_metadata?.phone_number || null;
+          }
+        }
+
+        return {
+          ...candidate,
+          candidateName,
+          candidateEmail,
+          candidatePhoneNumber,
+        };
+      })
+    );
+
+    return candidatesWithUserData;
   }
 );
 
 export const getCandidateData = cache(
   async (candidateId: string): Promise<CandidateData | null> => {
     const supabase = await createSupabaseServerClient();
+    const supabaseAdmin = await createAdminClient();
 
     // Fetch candidate data
     const { data: candidate, error: candidateError } = await supabase
@@ -126,6 +174,31 @@ export const getCandidateData = cache(
     if (candidateError || !candidate) {
       console.error("Error fetching candidate:", candidateError);
       return null;
+    }
+
+    // Fetch user data using admin client
+    let candidateName: string | null = null;
+    let candidateEmail: string | null = null;
+    let candidatePhoneNumber: string | null = null;
+
+    if (candidate.candidate_user_id) {
+      const { data: userData, error: userError } =
+        await supabaseAdmin.auth.admin.getUserById(candidate.candidate_user_id);
+
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+      } else if (userData && userData.user) {
+        candidateEmail = userData.user.email || null;
+        if (!candidateEmail) {
+          throw new Error("Candidate email not found");
+        }
+        candidateName =
+          userData.user.user_metadata?.display_name ||
+          userData.user.user_metadata?.full_name ||
+          null;
+        candidatePhoneNumber =
+          userData.user.user_metadata?.phone_number || null;
+      }
     }
 
     // Fetch application files with user_files data
@@ -224,7 +297,12 @@ export const getCandidateData = cache(
     }
 
     return {
-      candidate,
+      candidate: {
+        ...candidate,
+        candidateName,
+        candidateEmail,
+        candidatePhoneNumber,
+      },
       applicationFiles: filesWithUrls as ApplicationFile[],
       mockInterview: mockInterview || null,
       muxMetadata: muxMetadata || null,
@@ -242,6 +320,7 @@ export async function fetchMoreCandidates(
   limit: number = 10
 ): Promise<Candidate[]> {
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createAdminClient();
 
   const { data, error } = await supabase
     .from("company_job_candidates")
@@ -256,5 +335,44 @@ export async function fetchMoreCandidates(
     return [];
   }
 
-  return data || [];
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Fetch user data for each candidate
+  const candidatesWithUserData = await Promise.all(
+    data.map(async (candidate) => {
+      let candidateName: string | null = null;
+      let candidateEmail: string | null = null;
+      let candidatePhoneNumber: string | null = null;
+
+      if (candidate.candidate_user_id) {
+        const { data: userData, error: userError } =
+          await supabaseAdmin.auth.admin.getUserById(
+            candidate.candidate_user_id
+          );
+
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+        } else if (userData && userData.user) {
+          candidateEmail = userData.user.email || null;
+          candidateName =
+            userData.user.user_metadata?.display_name ||
+            userData.user.user_metadata?.full_name ||
+            null;
+          candidatePhoneNumber =
+            userData.user.user_metadata?.phone_number || null;
+        }
+      }
+
+      return {
+        ...candidate,
+        candidateName,
+        candidateEmail,
+        candidatePhoneNumber,
+      };
+    })
+  );
+
+  return candidatesWithUserData;
 }

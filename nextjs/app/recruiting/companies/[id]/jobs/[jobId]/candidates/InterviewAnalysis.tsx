@@ -283,18 +283,6 @@ export default function InterviewAnalysis({
                 </>
               )}
 
-              {/* Notes Section */}
-              {candidate?.notes && (
-                <>
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                      {tOverview("notes")}
-                    </h3>
-                    <p className="text-sm break-words">{candidate.notes}</p>
-                  </div>
-                  <Separator />
-                </>
-              )}
 
               {/* Application Files Section */}
               {applicationFiles && applicationFiles.length > 0 && (
