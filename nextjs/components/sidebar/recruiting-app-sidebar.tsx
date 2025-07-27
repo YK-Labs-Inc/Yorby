@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { User } from "@supabase/supabase-js";
+import { usePathname } from "next/navigation";
 
 interface RecruitingAppSidebarProps {
   user: User | null;
@@ -33,6 +34,11 @@ export function RecruitingAppSidebar({ user }: RecruitingAppSidebarProps) {
   const t = useTranslations("userMenu");
   const recruitingSidebarT = useTranslations("recruitingSidebar");
   const posthog = usePostHog();
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth") || pathname.startsWith("/apply")) {
+    return null;
+  }
 
   return (
     <Sidebar>
