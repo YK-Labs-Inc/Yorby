@@ -90,11 +90,10 @@
     }
   },
   "confirmEmail": {
-    "title": "Check Your Email",
-    "description": "We've sent a confirmation email to",
-    "instructions": "Please check your inbox and click the confirmation link to continue with your application for:",
+    "title": "You Have Been Invited to Interview With Us",
+    "description": "But first, you must confirm your email address",
     "at": "at",
-    "redirectInfo": "Once you confirm your email, you'll be redirected to complete your interview.",
+    "redirectInfo": "After confirming your email address, you will be redirected to our interview portal where you will do a short video interview for us to learn about you.",
     "resendButton": "Resend Confirmation Email",
     "cannotFindEmail": "Can't find the email? Check your spam folder or",
     "returnToJobListing": "return to job listing",

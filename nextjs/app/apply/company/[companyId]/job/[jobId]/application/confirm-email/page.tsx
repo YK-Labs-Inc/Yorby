@@ -125,7 +125,9 @@ export default async function ConfirmEmailPage({
             <div className="mx-auto mb-4 h-12 w-12 text-blue-600">
               <Mail className="h-12 w-12" />
             </div>
-            <CardTitle className="text-2xl">{t("confirmEmail.title")}</CardTitle>
+            <CardTitle className="text-2xl">
+              {t("confirmEmail.title")}
+            </CardTitle>
             <CardDescription className="text-lg mt-2">
               {t("confirmEmail.description")}{" "}
               <span className="font-semibold">{user.email}</span>
@@ -133,13 +135,11 @@ export default async function ConfirmEmailPage({
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-4">
-              <p className="text-gray-600">
-                {t("confirmEmail.instructions")}
-              </p>
-
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold text-lg">{job.job_title}</p>
-                <p className="text-gray-600">{t("confirmEmail.at")} {company.name}</p>
+                <p className="text-gray-600">
+                  {t("confirmEmail.at")} {company.name}
+                </p>
               </div>
 
               <p className="text-sm text-gray-500">

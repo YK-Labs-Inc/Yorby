@@ -10,14 +10,9 @@ import { toast } from "sonner";
 interface ApplyButtonProps {
   companyId: string;
   jobId: string;
-  userId: string | null;
 }
 
-export default function ApplyButton({
-  companyId,
-  jobId,
-  userId,
-}: ApplyButtonProps) {
+export default function ApplyButton({ companyId, jobId }: ApplyButtonProps) {
   const t = useTranslations("apply");
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const [state, formAction, isPending] = useActionState(handleApplyAction, {
@@ -34,7 +29,6 @@ export default function ApplyButton({
     <form action={formAction}>
       <input type="hidden" name="companyId" value={companyId} />
       <input type="hidden" name="jobId" value={jobId} />
-      <input type="hidden" name="userId" value={userId || ""} />
       <input type="hidden" name="captchaToken" value={captchaToken} />
 
       <div className="space-y-4">

@@ -105,11 +105,7 @@ export default async function ApplyPage({
 
         {/* Apply Button Section */}
         <CardFooter className="border-t p-6">
-          <ApplyButton
-            companyId={companyId}
-            jobId={jobId}
-            userId={user?.id || null}
-          />
+          <ApplyButton companyId={companyId} jobId={jobId} />
         </CardFooter>
       </Card>
     </div>

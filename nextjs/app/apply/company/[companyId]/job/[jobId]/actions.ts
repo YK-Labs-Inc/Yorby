@@ -372,13 +372,11 @@ export async function handleApplyAction(
   const t = await getTranslations("apply.api.errors");
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
-  const userId = formData.get("userId") as string | null;
   const captchaToken = formData.get("captchaToken") as string;
   const logger = new Logger().with({
     function: "handleApplyAction",
     companyId,
     jobId,
-    userId,
   });
 
   if (!companyId || !jobId) {
@@ -386,6 +384,19 @@ export async function handleApplyAction(
     await logger.flush();
     return { error: t("missingParameters") };
   }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    logger.error("User not authenticated", { error: userError });
+    await logger.flush();
+    return { error: t("userNotAuthenticated") };
+  }
+
+  const userId = user.id;
 
   // If no userId, create anonymous user
   if (!userId) {
@@ -412,6 +423,11 @@ export async function handleApplyAction(
         `/apply/company/${companyId}/job/${jobId}/application/submitted`
       );
     } else if (!result.hasCompletedInterview && result.interviewId) {
+      if (user.is_anonymous) {
+        redirect(
+          `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${result.interviewId}`
+        );
+      }
       // User has applied and has an interview ID, redirect to specific interview page
       redirect(
         `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
