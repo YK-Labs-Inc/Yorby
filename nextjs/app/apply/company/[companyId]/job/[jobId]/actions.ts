@@ -132,6 +132,7 @@ export const createInterviewForCandidate = async ({
   jobId: string;
 }) => {
   const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "createInterviewForCandidate",
     candidateId,
@@ -148,12 +149,12 @@ export const createInterviewForCandidate = async ({
 
     if (candidateError || !candidate) {
       logger.error("Failed to fetch candidate", { error: candidateError });
-      throw new Error("Candidate not found");
+      throw new Error(t("candidateNotFound"));
     }
 
     if (!candidate.candidate_user_id) {
       logger.error("Candidate has no user_id", { candidateId });
-      throw new Error("Candidate has no associated user account");
+      throw new Error(t("candidateNoUser"));
     }
 
     // Fetch the custom job questions for this job
@@ -164,12 +165,12 @@ export const createInterviewForCandidate = async ({
 
     if (questionError) {
       logger.error("Failed to fetch job questions", { error: questionError });
-      throw new Error("Failed to fetch job questions");
+      throw new Error(t("fetchJobQuestions"));
     }
 
     if (!jobQuestions || jobQuestions.length === 0) {
       logger.error("No questions found for this job", { jobId });
-      throw new Error("No questions found for this job");
+      throw new Error(t("noQuestionsFound"));
     }
 
     // Generate candidate context from their application files
@@ -256,7 +257,7 @@ Thank the candidate for their time and tell them that the interview has ended.`;
       logger.error("Failed to create mock interview", {
         error: interviewError,
       });
-      throw new Error("Failed to create mock interview");
+      throw new Error(t("createMockInterview"));
     }
 
     logger.info("Successfully created mock interview", {
@@ -280,6 +281,7 @@ async function checkApplicationStatus(
   userId: string
 ) {
   const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "checkApplicationStatus",
     companyId,
@@ -303,7 +305,7 @@ async function checkApplicationStatus(
       jobId,
       userId,
     });
-    throw new Error("Failed to check application status");
+    throw new Error(t("checkApplicationStatus"));
   }
 
   const hasApplied = !!existingCandidate;
@@ -326,7 +328,7 @@ async function checkApplicationStatus(
         jobId,
         userId,
       });
-      throw new Error("Failed to check interview status");
+      throw new Error(t("checkInterviewStatus"));
     }
 
     // Check if any interview is complete
@@ -367,6 +369,7 @@ export async function handleApplyAction(
   formData: FormData
 ) {
   const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
   const userId = formData.get("userId") as string | null;
@@ -381,7 +384,7 @@ export async function handleApplyAction(
   if (!companyId || !jobId) {
     logger.error("Missing required parameters");
     await logger.flush();
-    return { error: "Missing required parameters" };
+    return { error: t("missingParameters") };
   }
 
   // If no userId, create anonymous user
@@ -394,7 +397,7 @@ export async function handleApplyAction(
     if (error) {
       logger.error("Failed to sign in anonymously", { error });
       await logger.flush();
-      return { error: "sorry, something went wrong. Please try again." };
+      return { error: t("signInAnonymously") };
     }
     redirect(`/apply/company/${companyId}/job/${jobId}/application`);
   }
@@ -452,7 +455,7 @@ export const submitApplication = async (
       !selectedFileIds ||
       selectedFileIds.length === 0
     ) {
-      throw new Error("Missing required fields");
+      throw new Error(t("missingRequiredFields"));
     }
 
     logger.info("Processing application submission", {
@@ -469,7 +472,7 @@ export const submitApplication = async (
 
     if (userError || !user) {
       logger.error("User not authenticated", { error: userError });
-      throw new Error("User not authenticated");
+      throw new Error(t("userNotAuthenticated"));
     }
 
     // Check if this is an anonymous user (no email)
@@ -483,7 +486,7 @@ export const submitApplication = async (
 
     if (filesError || !userFiles) {
       logger.error("Failed to fetch user files", { error: filesError });
-      throw new Error("Failed to fetch application files");
+      throw new Error(t("fetchApplicationFiles"));
     }
 
     // Convert user files to FileEntry format and upload to Gemini if needed
@@ -525,7 +528,7 @@ export const submitApplication = async (
 
     if (candidateError) {
       logger.error("Failed to create candidate", { error: candidateError });
-      throw new Error("Failed to create candidate application");
+      throw new Error(t("createCandidateApplication"));
     }
 
     // Create candidate_application_files entries
@@ -540,7 +543,7 @@ export const submitApplication = async (
 
     if (linkFilesError) {
       logger.error("Failed to link files", { error: linkFilesError });
-      throw new Error("Failed to link application files");
+      throw new Error(t("linkApplicationFiles"));
     }
 
     logger.info("Application submitted successfully", {
@@ -573,7 +576,7 @@ export const submitApplication = async (
 
       if (updateError) {
         logger.error("Failed to update user email", { error: updateError });
-        throw new Error("Failed to update user information");
+        throw new Error(t("updateUserInformation"));
       }
     }
     await logger.flush();

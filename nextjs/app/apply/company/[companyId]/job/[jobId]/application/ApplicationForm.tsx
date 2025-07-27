@@ -188,44 +188,43 @@ export function ApplicationForm({
               <div className="space-y-4 pb-6 border-b">
                 <div>
                   <h3 className="text-lg font-semibold mb-1">
-                    Your Information
+                    {t("applicationForm.userInfo.title")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Please provide your contact information to continue with
-                    your application
+                    {t("applicationForm.userInfo.description")}
                   </p>
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address *</Label>
+                    <Label htmlFor="email">{t("applicationForm.userInfo.emailLabel")}</Label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your.email@example.com"
+                      placeholder={t("applicationForm.userInfo.emailPlaceholder")}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Label htmlFor="fullName">{t("applicationForm.userInfo.fullNameLabel")}</Label>
                     <Input
                       id="fullName"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="John Doe"
+                      placeholder={t("applicationForm.userInfo.fullNamePlaceholder")}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
+                    <Label htmlFor="phoneNumber">{t("applicationForm.userInfo.phoneLabel")}</Label>
                     <Input
                       id="phoneNumber"
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="+1 (555) 123-4567"
+                      placeholder={t("applicationForm.userInfo.phonePlaceholder")}
                     />
                   </div>
                 </div>

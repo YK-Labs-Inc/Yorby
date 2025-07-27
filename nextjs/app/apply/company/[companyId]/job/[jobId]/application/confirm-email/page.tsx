@@ -19,9 +19,7 @@ interface PageProps {
     companyId: string;
     jobId: string;
   }>;
-  searchParams: Promise<{
-    interviewId?: string;
-  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ConfirmEmailPage({
@@ -29,7 +27,7 @@ export default async function ConfirmEmailPage({
   searchParams,
 }: PageProps) {
   const { companyId, jobId } = await params;
-  const { interviewId } = await searchParams;
+  const { interviewId } = (await searchParams) as { interviewId: string };
 
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
@@ -60,7 +58,7 @@ export default async function ConfirmEmailPage({
 
   if (companyError || !company) {
     logger.error("Company not found", { companyId });
-    redirect("/");
+    redirect(`/apply/company/${companyId}/job/${jobId}`);
   }
 
   // Fetch job info
@@ -73,7 +71,7 @@ export default async function ConfirmEmailPage({
 
   if (jobError || !job) {
     logger.error("Job not found", { jobId });
-    redirect("/");
+    redirect(`/apply/company/${companyId}/job/${jobId}`);
   }
 
   await logger.flush();
@@ -82,6 +80,7 @@ export default async function ConfirmEmailPage({
   async function resendConfirmationEmail() {
     "use server";
     const supabase = await createSupabaseServerClient();
+    const t = await getTranslations("apply.confirmEmail.errors");
     const logger = new Logger().with({
       function: "resendConfirmationEmail",
     });
@@ -92,7 +91,7 @@ export default async function ConfirmEmailPage({
       } = await supabase.auth.getUser();
 
       if (!user || !user.email) {
-        throw new Error("No user or email found");
+        throw new Error(t("noUserOrEmail"));
       }
 
       const origin = (await headers()).get("origin");
@@ -126,45 +125,43 @@ export default async function ConfirmEmailPage({
             <div className="mx-auto mb-4 h-12 w-12 text-blue-600">
               <Mail className="h-12 w-12" />
             </div>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
+            <CardTitle className="text-2xl">{t("confirmEmail.title")}</CardTitle>
             <CardDescription className="text-lg mt-2">
-              We've sent a confirmation email to{" "}
+              {t("confirmEmail.description")}{" "}
               <span className="font-semibold">{user.email}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-4">
               <p className="text-gray-600">
-                Please check your inbox and click the confirmation link to
-                continue with your application for:
+                {t("confirmEmail.instructions")}
               </p>
 
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold text-lg">{job.job_title}</p>
-                <p className="text-gray-600">at {company.name}</p>
+                <p className="text-gray-600">{t("confirmEmail.at")} {company.name}</p>
               </div>
 
               <p className="text-sm text-gray-500">
-                Once you confirm your email, you'll be redirected to complete
-                your interview.
+                {t("confirmEmail.redirectInfo")}
               </p>
             </div>
 
             <div className="space-y-4">
               <form action={resendConfirmationEmail} className="w-full">
                 <Button type="submit" variant="outline" className="w-full">
-                  Resend Confirmation Email
+                  {t("confirmEmail.resendButton")}
                 </Button>
               </form>
 
               <div className="text-center text-sm text-gray-500">
                 <p>
-                  Can't find the email? Check your spam folder or{" "}
+                  {t("confirmEmail.cannotFindEmail")}{" "}
                   <Link
                     href={`/apply/company/${companyId}/job/${jobId}`}
                     className="text-blue-600 hover:underline"
                   >
-                    return to job listing
+                    {t("confirmEmail.returnToJobListing")}
                   </Link>
                 </p>
               </div>

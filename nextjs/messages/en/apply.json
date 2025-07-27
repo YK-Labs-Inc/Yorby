@@ -53,6 +53,16 @@
       "noDocuments": "No documents uploaded yet. Upload your resume and other documents to apply.",
       "documentsSelected": "{count} document{count, plural, =1 {} other {s}} selected"
     },
+    "userInfo": {
+      "title": "Your Information",
+      "description": "Please provide your contact information to continue with your application",
+      "emailLabel": "Email Address *",
+      "emailPlaceholder": "your.email@example.com",
+      "fullNameLabel": "Full Name *",
+      "fullNamePlaceholder": "John Doe",
+      "phoneLabel": "Phone Number (Optional)",
+      "phonePlaceholder": "+1 (555) 123-4567"
+    },
     "fileItem": {
       "uploadedOn": "Uploaded on {date}",
       "uploaded": "Uploaded"
@@ -77,6 +87,20 @@
     "buttons": {
       "backToJob": "Back to Job Listing",
       "viewDashboard": "View My Dashboard"
+    }
+  },
+  "confirmEmail": {
+    "title": "Check Your Email",
+    "description": "We've sent a confirmation email to",
+    "instructions": "Please check your inbox and click the confirmation link to continue with your application for:",
+    "at": "at",
+    "redirectInfo": "Once you confirm your email, you'll be redirected to complete your interview.",
+    "resendButton": "Resend Confirmation Email",
+    "cannotFindEmail": "Can't find the email? Check your spam folder or",
+    "returnToJobListing": "return to job listing",
+    "errors": {
+      "noUserOrEmail": "No user or email found",
+      "resendFailed": "Failed to resend confirmation email"
     }
   },
   "interview": {
@@ -169,7 +193,32 @@
       "uploadFailed": "Failed to upload files",
       "applicationExists": "You have already applied for this position",
       "createApplicationFailed": "Failed to create application",
-      "invalidFileIds": "Invalid file IDs provided"
+      "invalidFileIds": "Invalid file IDs provided",
+      "fetchingCandidates": "Error fetching candidates",
+      "fetchingCandidate": "Error fetching candidate",
+      "fetchingUserData": "Error fetching user data",
+      "candidateEmailNotFound": "Candidate email not found",
+      "fetchingApplicationFiles": "Error fetching application files",
+      "fetchingMockInterview": "Error fetching mock interview",
+      "fetchingMuxMetadata": "Error fetching mux metadata",
+      "fetchingInterviewMessages": "Error fetching mock interview messages",
+      "fetchingInterviewAnalysis": "Error fetching interview analysis",
+      "fetchingMoreCandidates": "Error loading more candidates",
+      "candidateNotFound": "Candidate not found",
+      "candidateNoUser": "Candidate has no associated user account",
+      "fetchJobQuestions": "Failed to fetch job questions",
+      "noQuestionsFound": "No questions found for this job",
+      "createMockInterview": "Failed to create mock interview",
+      "checkApplicationStatus": "Failed to check application status",
+      "checkInterviewStatus": "Failed to check interview status",
+      "missingParameters": "Missing required parameters",
+      "signInAnonymously": "Sorry, something went wrong. Please try again.",
+      "missingRequiredFields": "Missing required fields",
+      "userNotAuthenticated": "User not authenticated",
+      "fetchApplicationFiles": "Failed to fetch application files",
+      "createCandidateApplication": "Failed to create candidate application",
+      "linkApplicationFiles": "Failed to link application files",
+      "updateUserInformation": "Failed to update user information"
     }
   },
   "recruiting": {
@@ -255,7 +304,13 @@
         "candidate": "Candidate",
         "interviewer": "Interviewer"
       },
+      "applicationFiles": {
+        "resume": "Resume",
+        "otherDocuments": "Other Documents"
+      },
       "analysis": {
+        "overviewContent": "Interview analysis overview",
+        "evidence": "Evidence",
         "title": "AI Interview Analysis",
         "noAnalysis": "No analysis has been generated yet for this interview.",
         "processing": "Processing...",
