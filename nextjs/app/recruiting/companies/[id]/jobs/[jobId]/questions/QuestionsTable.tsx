@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { createQuestion, updateQuestion, deleteQuestion } from "./actions";
 import {
   Table,
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MoreHorizontal, Pencil, Trash, Plus } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash, Plus, Sparkles } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
@@ -54,7 +53,7 @@ export default function QuestionsTable({
 }: QuestionsTableProps) {
   const { toast } = useToast();
   const { logInfo, logError } = useAxiomLogging();
-  const t = useTranslations("recruiting.questionsTable");
+  const t = useTranslations("apply.recruiting.questionsTable");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -206,71 +205,94 @@ export default function QuestionsTable({
           </Button>
         </div>
 
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("table.headers.question")}</TableHead>
-                <TableHead>{t("table.headers.answerGuidelines")}</TableHead>
-                <TableHead className="w-[100px]">
-                  {t("table.headers.status")}
-                </TableHead>
-                <TableHead className="w-[70px]">
-                  {t("table.headers.actions")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {questions?.map((question) => (
-                <TableRow key={question.id}>
-                  <TableCell>
-                    <p className="whitespace-pre-wrap">{question.question}</p>
-                  </TableCell>
-                  <TableCell>
-                    <p className="whitespace-pre-wrap line-clamp-3">
-                      {question.answer_guidelines}
-                    </p>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        question.publication_status === "published"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {t(`table.status.${question.publication_status}`)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => startEditing(question)}
-                        >
-                          <Pencil className="h-4 w-4 mr-2" />
-                          {t("table.actions.edit")}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => setDeletingId(question.id)}
-                          className="text-destructive"
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          {t("table.actions.delete")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+        {questions.length === 0 ? (
+          <div className="py-12">
+            <div className="max-w-4xl mx-auto px-4">
+              {/* Header Section */}
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold text-foreground mb-2">
+                  {t("emptyState.title")}
+                </h3>
+                <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+                  {t("emptyState.subtitle")}
+                </p>
+              </div>
+
+              {/* Optional Badge and CTA Section */}
+              <div className="text-center space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 text-sm text-muted-foreground">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  {t("emptyState.badge")}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={() => setIsCreateDialogOpen(true)} size="lg">
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("emptyState.firstQuestionButton")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("table.headers.question")}</TableHead>
+                  <TableHead>{t("table.headers.answerGuidelines")}</TableHead>
+                  <TableHead className="w-[70px]">
+                    {t("table.headers.actions")}
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {questions.map((question) => (
+                  <TableRow key={question.id}>
+                    <TableCell>
+                      <p className="whitespace-pre-wrap">{question.question}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="whitespace-pre-wrap line-clamp-3">
+                        {question.answer_guidelines}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => startEditing(question)}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            {t("table.actions.edit")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setDeletingId(question.id)}
+                            className="text-destructive"
+                          >
+                            <Trash className="h-4 w-4 mr-2" />
+                            {t("table.actions.delete")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {/* Create Question Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
