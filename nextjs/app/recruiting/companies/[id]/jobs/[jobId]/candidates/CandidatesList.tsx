@@ -6,11 +6,8 @@ import { Search, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Tables } from "@/utils/supabase/database.types";
-import { fetchMoreCandidates } from "./actions";
+import { Candidate, fetchMoreCandidates } from "./actions";
 import { useTranslations } from "next-intl";
-
-type Candidate = Tables<"company_job_candidates">;
 
 interface CandidatesListProps {
   initialCandidates: Candidate[];
@@ -101,11 +98,11 @@ export default function CandidatesList({
 
   const filteredCandidates = candidates.filter(
     (candidate) =>
-      candidate.candidate_name
-        .toLowerCase()
+      candidate.candidateName
+        ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      candidate.candidate_email
-        .toLowerCase()
+      candidate.candidateEmail
+        ?.toLowerCase()
         .includes(searchQuery.toLowerCase())
   );
 
@@ -162,10 +159,10 @@ export default function CandidatesList({
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">
-                        {candidate.candidate_name}
+                        {candidate.candidateName}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {candidate.candidate_email}
+                        {candidate.candidateEmail}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {formatDate(candidate.applied_at)}

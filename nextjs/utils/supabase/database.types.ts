@@ -162,49 +162,31 @@ export type Database = {
       company_job_candidates: {
         Row: {
           applied_at: string
-          candidate_email: string
-          candidate_name: string
-          candidate_phone: string | null
-          candidate_user_id: string | null
+          candidate_user_id: string
           company_id: string
           created_at: string
           custom_job_id: string
           id: string
-          notes: string | null
-          resume_data: Json | null
-          resume_url: string | null
           status: string
           updated_at: string
         }
         Insert: {
           applied_at?: string
-          candidate_email: string
-          candidate_name: string
-          candidate_phone?: string | null
-          candidate_user_id?: string | null
+          candidate_user_id: string
           company_id: string
           created_at?: string
           custom_job_id: string
           id?: string
-          notes?: string | null
-          resume_data?: Json | null
-          resume_url?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           applied_at?: string
-          candidate_email?: string
-          candidate_name?: string
-          candidate_phone?: string | null
-          candidate_user_id?: string | null
+          candidate_user_id?: string
           company_id?: string
           created_at?: string
           custom_job_id?: string
           id?: string
-          notes?: string | null
-          resume_data?: Json | null
-          resume_url?: string | null
           status?: string
           updated_at?: string
         }

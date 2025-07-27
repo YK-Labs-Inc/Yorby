@@ -40,8 +40,8 @@ INSERT INTO "public"."custom_job_questions" ("id", "custom_job_id", "question", 
 	('55555555-5555-5555-5555-555555555555', 'd4e5f6a7-b8c9-0123-defa-456789012345', 'How do you approach testing in frontend applications? What tools and strategies do you use?', 'Look for: Knowledge of testing pyramid, unit testing with Jest/React Testing Library, integration testing, E2E testing tools like Cypress/Playwright, TDD approach, code coverage strategies.', 'user_generated', 'published', '2025-07-24 14:10:00.000000+00');
 
 -- Create candidate application
-INSERT INTO "public"."company_job_candidates" ("id", "company_id", "custom_job_id", "candidate_user_id", "candidate_name", "candidate_email", "candidate_phone", "status", "resume_url", "resume_data", "applied_at", "created_at", "updated_at") VALUES
-	('66666666-6666-6666-6666-666666666666', 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'd4e5f6a7-b8c9-0123-defa-456789012345', 'b2c3d4e5-f6a7-8901-bcde-f23456789012', 'Jane Smith', 'candidate@test.com', '+1-555-0123', 'applied', 'https://example.com/resumes/jane-smith.pdf', '{"skills": ["React", "TypeScript", "Node.js", "GraphQL"], "experience": "7 years", "education": "BS Computer Science"}', '2025-07-24 15:00:00.000000+00', '2025-07-24 15:00:00.000000+00', '2025-07-24 15:00:00.000000+00');
+INSERT INTO "public"."company_job_candidates" ("id", "company_id", "custom_job_id", "candidate_user_id", "status", "applied_at", "created_at", "updated_at") VALUES
+	('66666666-6666-6666-6666-666666666666', 'c3d4e5f6-a7b8-9012-cdef-345678901234', 'd4e5f6a7-b8c9-0123-defa-456789012345', 'b2c3d4e5-f6a7-8901-bcde-f23456789012', 'applied', '2025-07-24 15:00:00.000000+00', '2025-07-24 15:00:00.000000+00', '2025-07-24 15:00:00.000000+00');
 
 -- Create mock interview
 INSERT INTO "public"."custom_job_mock_interviews" ("id", "custom_job_id", "candidate_id", "user_id", "interview_prompt", "status", "created_at") VALUES
