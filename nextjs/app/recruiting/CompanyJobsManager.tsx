@@ -1,26 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Briefcase, Users, Clock, MoreVertical } from "lucide-react";
+import { Plus, Briefcase, Users, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Link from "next/link";
 import { CreateJobDialog } from "./CreateJobDialog";
 import { Tables } from "@/utils/supabase/database.types";
-import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 
 type Job = Tables<"custom_jobs"> & {
@@ -37,7 +37,7 @@ export function CompanyJobsManager({
   jobs,
 }: CompanyJobsManagerProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const t = useTranslations("companyJobsManager");
+  const t = useTranslations("apply.recruiting.companyJobsManager");
 
   const getCandidateCount = (job: Job) => {
     return job.company_job_candidates?.[0]?.count || 0;
@@ -74,72 +74,66 @@ export function CompanyJobsManager({
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
-            {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-xl">{job.job_title}</CardTitle>
-                      <CardDescription className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {t("jobCard.posted")}{" "}
-                          {formatDistanceToNow(new Date(job.created_at), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                        <Badge
-                          variant={
-                            job.status === "unlocked" ? "default" : "secondary"
-                          }
+          <div className="border rounded-lg">
+            <div className="max-h-[600px] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[35%]">
+                      {t("table.jobTitle")}
+                    </TableHead>
+                    <TableHead className="w-[30%]">
+                      {t("table.description")}
+                    </TableHead>
+                    <TableHead className="w-[15%]">
+                      {t("table.candidates")}
+                    </TableHead>
+                    <TableHead className="w-[5%]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow key={job.id}>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/recruiting/companies/${companyId}/jobs/${job.id}`}
+                          className="hover:underline"
                         >
-                          {job.status === "unlocked"
-                            ? t("jobCard.status.active")
-                            : t("jobCard.status.draft")}
-                        </Badge>
-                      </CardDescription>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="text-destructive">
-                          {t("actions.archiveJob")}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {job.job_description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                      {job.job_description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>
-                        {t("jobCard.candidates", {
-                          count: getCandidateCount(job),
-                        })}
-                      </span>
-                    </div>
-                    <Link
-                      href={`/recruiting/companies/${companyId}/jobs/${job.id}`}
-                    >
-                      <Button variant="outline" size="sm">
-                        {t("jobCard.viewDetails")}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                          {job.job_title}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {job.job_description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {job.job_description}
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span>{getCandidateCount(job)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="text-destructive">
+                              {t("actions.archiveJob")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </div>

@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ShareButton } from "@/components/ui/share-button";
 
 interface PageProps {
@@ -94,7 +93,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     .single();
 
   if (jobError || !job) {
-    logger.error("Job not found", { 
+    logger.error("Job not found", {
       error: jobError?.message,
       jobId,
       companyId,
@@ -110,7 +109,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     .select("name")
     .eq("id", companyId)
     .single();
-  
+
   if (companyError) {
     logger.error("Failed to fetch company details", {
       error: companyError.message,
@@ -144,13 +143,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 <p className="text-muted-foreground mb-4">{job.company_name}</p>
               )}
               <div className="flex gap-2 items-center">
-                <Badge
-                  variant={job.status === "unlocked" ? "default" : "secondary"}
-                >
-                  {job.status === "unlocked"
-                    ? t("status.published")
-                    : t("status.draft")}
-                </Badge>
                 <ShareButton
                   url={`${origin}/apply/company/${companyId}/job/${jobId}`}
                 />

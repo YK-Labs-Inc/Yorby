@@ -23,7 +23,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -34,7 +33,6 @@ const createFormSchema = (t: (key: string) => string) =>
   z.object({
     job_title: z.string().min(2, t("form.validation.titleMin")),
     job_description: z.string().min(10, t("form.validation.descriptionMin")),
-    status: z.enum(["locked", "unlocked"]),
   });
 
 type FormData = z.infer<ReturnType<typeof createFormSchema>>;
@@ -61,7 +59,6 @@ export function CreateJobDialog({
     defaultValues: {
       job_title: "",
       job_description: "",
-      status: "locked",
     },
   });
 
@@ -137,41 +134,6 @@ export function CreateJobDialog({
                   <FormDescription>
                     {t("form.jobDescription.description")}
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>{t("form.status.label")}</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="locked" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {t("form.status.options.draft")}
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="unlocked" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {t("form.status.options.active")}
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
