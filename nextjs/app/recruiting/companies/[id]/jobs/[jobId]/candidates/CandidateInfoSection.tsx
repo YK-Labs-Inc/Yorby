@@ -28,24 +28,24 @@ export default function CandidateInfoSection({
         <h3 className="text-lg font-semibold mb-4">{t("contactInfo")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Email */}
-          {candidateData.candidateEmail && (
+          {candidateData.candidate.candidateEmail && (
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <a
-                href={`mailto:${candidateData.candidateEmail}`}
+                href={`mailto:${candidateData.candidate.candidateEmail}`}
                 className="text-sm hover:underline"
               >
-                {candidateData.candidateEmail}
+                {candidateData.candidate.candidateEmail}
               </a>
             </div>
           )}
 
           {/* Phone */}
-          {candidateData.candidatePhoneNumber && (
+          {candidateData.candidate.candidatePhoneNumber && (
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <p className="text-sm hover:underline">
-                {candidateData.candidatePhoneNumber}
+                {candidateData.candidate.candidatePhoneNumber}
               </p>
             </div>
           )}
