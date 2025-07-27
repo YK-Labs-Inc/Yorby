@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
 import { C } from "@upstash/redis/zmscore-DzNHSWxc";
+import { Tables } from "@/utils/supabase/database.types";
 
 interface PageProps {
   params: Promise<{
@@ -20,16 +21,10 @@ export default async function ApplicationPage({ params }: PageProps) {
     jobId,
   });
 
-  // Check if user is logged in
+  // Get user if logged in (may be anonymous)
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect(
-      `/auth/login?redirect=/apply/company/${companyId}/job/${jobId}/application`
-    );
-  }
 
   // Fetch company info
   const { data: company, error: companyError } = await supabase
@@ -56,47 +51,57 @@ export default async function ApplicationPage({ params }: PageProps) {
     redirect("/");
   }
 
-  // Check if user has already applied
-  const { data: existingApplication } = await supabase
-    .from("company_job_candidates")
-    .select("id")
-    .eq("custom_job_id", jobId)
-    .eq("candidate_user_id", user.id)
-    .single();
+  // Check if user has already applied (only if user is authenticated)
+  let existingApplication: Pick<Tables<"company_job_candidates">, "id"> | null =
+    null;
+  let userFiles: Tables<"user_files">[] = [];
 
-  if (existingApplication) {
-    // Check if there's a completed mock interview for this application
-    const { data: interview } = await supabase
-      .from("custom_job_mock_interviews")
-      .select("id, status")
+  if (user) {
+    const { data } = await supabase
+      .from("company_job_candidates")
+      .select("id")
       .eq("custom_job_id", jobId)
-      .eq("candidate_id", existingApplication.id)
+      .eq("candidate_user_id", user.id)
       .single();
 
-    if (interview) {
-      if (interview.status === "complete") {
-        // If there's a completed interview, redirect to submitted page
-        redirect(
-          `/apply/company/${companyId}/job/${jobId}/application/submitted`
-        );
-      } else {
-        redirect(
-          `/apply/company/${companyId}/job/${jobId}/interview/${interview.id}`
-        );
+    existingApplication = data;
+
+    if (existingApplication) {
+      // Check if there's a completed mock interview for this application
+      const { data: interview } = await supabase
+        .from("custom_job_mock_interviews")
+        .select("id, status")
+        .eq("custom_job_id", jobId)
+        .eq("candidate_id", existingApplication.id)
+        .single();
+
+      if (interview) {
+        if (interview.status === "complete") {
+          // If there's a completed interview, redirect to submitted page
+          redirect(
+            `/apply/company/${companyId}/job/${jobId}/application/submitted`
+          );
+        } else {
+          redirect(
+            `/apply/company/${companyId}/job/${jobId}/interview/${interview.id}`
+          );
+        }
       }
+      throw new Error("No interview found for job application");
     }
-    throw new Error("No interview found for job application");
-  }
 
-  // Fetch user's existing files
-  const { data: userFiles, error: filesError } = await supabase
-    .from("user_files")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    // Fetch user's existing files
+    const { data: files, error: filesError } = await supabase
+      .from("user_files")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-  if (filesError) {
-    logger.error("Error fetching user files", { error: filesError });
+    if (filesError) {
+      logger.error("Error fetching user files", { error: filesError });
+    } else {
+      userFiles = files || [];
+    }
   }
 
   return (
@@ -104,7 +109,7 @@ export default async function ApplicationPage({ params }: PageProps) {
       company={company}
       job={job}
       user={user}
-      userFiles={userFiles || []}
+      userFiles={userFiles}
       companyId={companyId}
       jobId={jobId}
     />
