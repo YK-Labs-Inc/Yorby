@@ -47,7 +47,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${searchParams.get("redirect") || "/auth-redirect"}`,
+          emailRedirectTo: `${window.location.origin}${searchParams.get("redirect") || "/auth-redirect"}`,
         },
       });
       if (error) throw error;

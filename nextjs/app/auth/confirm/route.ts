@@ -7,8 +7,7 @@ export const GET = withAxiom(async function GET(request: AxiomRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const _next = searchParams.get("next");
-  const next = _next?.startsWith("/") ? _next : "/";
+  const next = searchParams.get("next");
 
   const logger = request.log.with({
     method: "GET",
@@ -16,7 +15,6 @@ export const GET = withAxiom(async function GET(request: AxiomRequest) {
     token_hash: token_hash ? "present" : "missing",
     type,
     next,
-    originalNext: _next,
   });
 
   logger.info("Auth confirmation attempt");
@@ -34,7 +32,7 @@ export const GET = withAxiom(async function GET(request: AxiomRequest) {
         redirectTo: next,
       });
       // redirect user to specified redirect URL or root of app
-      redirect(next);
+      redirect(next || "/");
     } else {
       logger.error("OTP verification failed", {
         error: error.message,
