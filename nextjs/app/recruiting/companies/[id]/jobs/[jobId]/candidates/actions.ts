@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
 import { cache } from "react";
 import type { TypedInterviewAnalysis } from "./types";
+import { getTranslations } from "next-intl/server";
+import { Logger } from "next-axiom";
 
 export type Candidate = Tables<"company_job_candidates"> & {
   candidateName: string | null;
@@ -100,6 +102,12 @@ export const getInitialCandidates = cache(
     jobId: string,
     limit: number = 10
   ): Promise<Candidate[]> => {
+    const log = new Logger().with({
+      functionName: "getInitialCandidates",
+      companyId,
+      jobId,
+      limit,
+    });
     const supabase = await createSupabaseServerClient();
     const supabaseAdmin = await createAdminClient();
 
@@ -112,7 +120,8 @@ export const getInitialCandidates = cache(
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching candidates:", error);
+      log.error("Error fetching candidates", { error });
+      await log.flush();
       return [];
     }
 
@@ -134,7 +143,10 @@ export const getInitialCandidates = cache(
             );
 
           if (userError) {
-            console.error("Error fetching user data:", userError);
+            log.error("Error fetching user data", {
+              userError,
+              candidateUserId: candidate.candidate_user_id,
+            });
           } else if (userData && userData.user) {
             candidateEmail = userData.user.email || null;
             candidateName =
@@ -155,14 +167,20 @@ export const getInitialCandidates = cache(
       })
     );
 
+    await log.flush();
     return candidatesWithUserData;
   }
 );
 
 export const getCandidateData = cache(
   async (candidateId: string): Promise<CandidateData | null> => {
+    const log = new Logger().with({
+      functionName: "getCandidateData",
+      candidateId,
+    });
     const supabase = await createSupabaseServerClient();
     const supabaseAdmin = await createAdminClient();
+    const t = await getTranslations("apply.api.errors");
 
     // Fetch candidate data
     const { data: candidate, error: candidateError } = await supabase
@@ -172,7 +190,8 @@ export const getCandidateData = cache(
       .single();
 
     if (candidateError || !candidate) {
-      console.error("Error fetching candidate:", candidateError);
+      log.error("Error fetching candidate", { candidateError, candidateId });
+      await log.flush();
       return null;
     }
 
@@ -186,11 +205,14 @@ export const getCandidateData = cache(
         await supabaseAdmin.auth.admin.getUserById(candidate.candidate_user_id);
 
       if (userError) {
-        console.error("Error fetching user data:", userError);
+        log.error("Error fetching user data", {
+          userError,
+          candidateUserId: candidate.candidate_user_id,
+        });
       } else if (userData && userData.user) {
         candidateEmail = userData.user.email || null;
         if (!candidateEmail) {
-          throw new Error("Candidate email not found");
+          throw new Error(t("candidateEmailNotFound"));
         }
         candidateName =
           userData.user.user_metadata?.display_name ||
@@ -213,7 +235,10 @@ export const getCandidateData = cache(
       .eq("candidate_id", candidateId);
 
     if (filesError) {
-      console.error("Error fetching application files:", filesError);
+      log.error("Error fetching application files", {
+        filesError,
+        candidateId,
+      });
     }
 
     // Generate signed URLs for each file
@@ -235,7 +260,9 @@ export const getCandidateData = cache(
       })
     );
 
-    console.log("filesWithUrls", filesWithUrls);
+    log.info("Fetched application files with URLs", {
+      filesCount: filesWithUrls.length,
+    });
 
     // Fetch mock interview data
     const { data: mockInterview, error: interviewError } = await supabase
@@ -245,7 +272,10 @@ export const getCandidateData = cache(
       .maybeSingle(); // Use maybeSingle since there should only be one per candidate
 
     if (interviewError) {
-      console.error("Error fetching mock interview:", interviewError);
+      log.error("Error fetching mock interview", {
+        interviewError,
+        candidateId,
+      });
     }
 
     // Fetch mux metadata if mock interview exists
@@ -258,7 +288,10 @@ export const getCandidateData = cache(
         .maybeSingle();
 
       if (muxError && muxError.code !== "PGRST116") {
-        console.error("Error fetching mux metadata:", muxError);
+        log.error("Error fetching mux metadata", {
+          muxError,
+          mockInterviewId: mockInterview.id,
+        });
       } else {
         muxMetadata = muxData;
       }
@@ -274,7 +307,10 @@ export const getCandidateData = cache(
         .order("created_at", { ascending: true });
 
       if (messagesError) {
-        console.error("Error fetching mock interview messages:", messagesError);
+        log.error("Error fetching mock interview messages", {
+          messagesError,
+          mockInterviewId: mockInterview.id,
+        });
       } else {
         mockInterviewMessages = messages || [];
       }
@@ -290,12 +326,16 @@ export const getCandidateData = cache(
         .maybeSingle();
 
       if (analysisError && analysisError.code !== "PGRST116") {
-        console.error("Error fetching interview analysis:", analysisError);
+        log.error("Error fetching interview analysis", {
+          analysisError,
+          mockInterviewId: mockInterview.id,
+        });
       } else {
         interviewAnalysis = analysis as InterviewAnalysis;
       }
     }
 
+    await log.flush();
     return {
       candidate: {
         ...candidate,
@@ -319,6 +359,13 @@ export async function fetchMoreCandidates(
   offset: number,
   limit: number = 10
 ): Promise<Candidate[]> {
+  const log = new Logger().with({
+    functionName: "fetchMoreCandidates",
+    companyId,
+    jobId,
+    offset,
+    limit,
+  });
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = await createAdminClient();
 
@@ -331,11 +378,13 @@ export async function fetchMoreCandidates(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error fetching more candidates:", error);
+    log.error("Error fetching more candidates", { error });
+    await log.flush();
     return [];
   }
 
   if (!data || data.length === 0) {
+    await log.flush();
     return [];
   }
 
@@ -353,7 +402,10 @@ export async function fetchMoreCandidates(
           );
 
         if (userError) {
-          console.error("Error fetching user data:", userError);
+          log.error("Error fetching user data", {
+            userError,
+            candidateUserId: candidate.candidate_user_id,
+          });
         } else if (userData && userData.user) {
           candidateEmail = userData.user.email || null;
           candidateName =
@@ -374,5 +426,6 @@ export async function fetchMoreCandidates(
     })
   );
 
+  await log.flush();
   return candidatesWithUserData;
 }

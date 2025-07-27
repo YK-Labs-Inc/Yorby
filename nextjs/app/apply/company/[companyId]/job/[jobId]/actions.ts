@@ -6,6 +6,7 @@ import { fetchFilesFromGemini, FileEntry } from "@/utils/ai/gemini";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
+import { headers } from "next/headers";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -131,6 +132,7 @@ export const createInterviewForCandidate = async ({
   jobId: string;
 }) => {
   const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "createInterviewForCandidate",
     candidateId,
@@ -147,12 +149,12 @@ export const createInterviewForCandidate = async ({
 
     if (candidateError || !candidate) {
       logger.error("Failed to fetch candidate", { error: candidateError });
-      throw new Error("Candidate not found");
+      throw new Error(t("candidateNotFound"));
     }
 
     if (!candidate.candidate_user_id) {
       logger.error("Candidate has no user_id", { candidateId });
-      throw new Error("Candidate has no associated user account");
+      throw new Error(t("candidateNoUser"));
     }
 
     // Fetch the custom job questions for this job
@@ -163,12 +165,12 @@ export const createInterviewForCandidate = async ({
 
     if (questionError) {
       logger.error("Failed to fetch job questions", { error: questionError });
-      throw new Error("Failed to fetch job questions");
+      throw new Error(t("fetchJobQuestions"));
     }
 
     if (!jobQuestions || jobQuestions.length === 0) {
       logger.error("No questions found for this job", { jobId });
-      throw new Error("No questions found for this job");
+      throw new Error(t("noQuestionsFound"));
     }
 
     // Generate candidate context from their application files
@@ -255,7 +257,7 @@ Thank the candidate for their time and tell them that the interview has ended.`;
       logger.error("Failed to create mock interview", {
         error: interviewError,
       });
-      throw new Error("Failed to create mock interview");
+      throw new Error(t("createMockInterview"));
     }
 
     logger.info("Successfully created mock interview", {
@@ -273,8 +275,173 @@ Thank the candidate for their time and tell them that the interview has ended.`;
   }
 };
 
+async function checkApplicationStatus(
+  companyId: string,
+  jobId: string,
+  userId: string
+) {
+  const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
+  const logger = new Logger().with({
+    function: "checkApplicationStatus",
+    companyId,
+    jobId,
+    userId,
+  });
+
+  // Check if the user has already applied to this job
+  const { data: existingCandidate, error: applicationError } = await supabase
+    .from("company_job_candidates")
+    .select("id, status, applied_at")
+    .eq("custom_job_id", jobId)
+    .eq("company_id", companyId)
+    .eq("candidate_user_id", userId)
+    .maybeSingle();
+
+  if (applicationError) {
+    logger.error("Database error checking application", {
+      error: applicationError,
+      companyId,
+      jobId,
+      userId,
+    });
+    throw new Error(t("checkApplicationStatus"));
+  }
+
+  const hasApplied = !!existingCandidate;
+
+  // Check if the user has completed an interview for this job
+  let hasCompletedInterview = false;
+  let interviewId: string | null = null;
+
+  if (existingCandidate) {
+    const { data: interviews, error: interviewError } = await supabase
+      .from("custom_job_mock_interviews")
+      .select("id, status")
+      .eq("candidate_id", existingCandidate.id)
+      .order("created_at", { ascending: false });
+
+    if (interviewError) {
+      logger.error("Database error checking interview completion", {
+        error: interviewError,
+        candidateId: existingCandidate.id,
+        jobId,
+        userId,
+      });
+      throw new Error(t("checkInterviewStatus"));
+    }
+
+    // Check if any interview is complete
+    const completedInterview = interviews?.find(
+      (interview) => interview.status === "complete"
+    );
+    hasCompletedInterview = !!completedInterview;
+
+    // Get the most recent interview ID (completed or in-progress)
+    if (interviews && interviews.length > 0) {
+      interviewId = interviews[0].id;
+    }
+  }
+
+  logger.info("Application and interview status checked", {
+    companyId,
+    jobId,
+    userId,
+    hasApplied,
+    hasCompletedInterview,
+    applicationId: existingCandidate?.id,
+    interviewId,
+  });
+
+  await logger.flush();
+
+  return {
+    success: true,
+    hasApplied,
+    hasCompletedInterview,
+    application: existingCandidate || null,
+    interviewId,
+  };
+}
+
+export async function handleApplyAction(
+  prevState: { error?: string },
+  formData: FormData
+) {
+  const supabase = await createSupabaseServerClient();
+  const t = await getTranslations("apply.api.errors");
+  const companyId = formData.get("companyId") as string;
+  const jobId = formData.get("jobId") as string;
+  const captchaToken = formData.get("captchaToken") as string;
+  const logger = new Logger().with({
+    function: "handleApplyAction",
+    companyId,
+    jobId,
+  });
+
+  if (!companyId || !jobId) {
+    logger.error("Missing required parameters");
+    await logger.flush();
+    return { error: t("missingParameters") };
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    logger.error("User not authenticated", { error: userError });
+    await logger.flush();
+    return { error: t("userNotAuthenticated") };
+  }
+
+  const userId = user.id;
+
+  // If no userId, create anonymous user
+  if (!userId) {
+    const { error } = await supabase.auth.signInAnonymously({
+      options: {
+        captchaToken,
+      },
+    });
+    if (error) {
+      logger.error("Failed to sign in anonymously", { error });
+      await logger.flush();
+      return { error: t("signInAnonymously") };
+    }
+    redirect(`/apply/company/${companyId}/job/${jobId}/application`);
+  }
+
+  // Otherwise check application status for existing user
+  const result = await checkApplicationStatus(companyId, jobId, userId);
+
+  if (result.hasApplied) {
+    if (result.hasCompletedInterview) {
+      // User has already applied and completed interview, redirect to submitted page
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/application/submitted`
+      );
+    } else if (!result.hasCompletedInterview && result.interviewId) {
+      if (user.is_anonymous) {
+        redirect(
+          `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${result.interviewId}`
+        );
+      }
+      // User has applied and has an interview ID, redirect to specific interview page
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
+      );
+    }
+  } else {
+    // User hasn't applied yet, redirect to application page
+    redirect(`/apply/company/${companyId}/job/${jobId}/application`);
+  }
+  return { error: undefined };
+}
+
 export const submitApplication = async (
-  prevState: { error: string },
+  _prevState: { error: string },
   formData: FormData
 ) => {
   const supabase = await createSupabaseServerClient();
@@ -284,7 +451,11 @@ export const submitApplication = async (
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
   const selectedFileIds = formData.getAll("selectedFileIds") as string[];
+  const email = formData.get("email") as string;
+  const fullName = formData.get("fullName") as string;
+  const phoneNumber = formData.get("phoneNumber") as string;
   let interviewId: string | null = null;
+  let isAnonymous = false;
 
   const logger = new Logger().with({
     function: "submitApplication",
@@ -300,7 +471,7 @@ export const submitApplication = async (
       !selectedFileIds ||
       selectedFileIds.length === 0
     ) {
-      throw new Error("Missing required fields");
+      throw new Error(t("missingRequiredFields"));
     }
 
     logger.info("Processing application submission", {
@@ -317,8 +488,11 @@ export const submitApplication = async (
 
     if (userError || !user) {
       logger.error("User not authenticated", { error: userError });
-      throw new Error("User not authenticated");
+      throw new Error(t("userNotAuthenticated"));
     }
+
+    // Check if this is an anonymous user (no email)
+    isAnonymous = user.is_anonymous || false;
 
     // Fetch the files to check if they need Gemini upload
     const { data: userFiles, error: filesError } = await supabase
@@ -328,7 +502,7 @@ export const submitApplication = async (
 
     if (filesError || !userFiles) {
       logger.error("Failed to fetch user files", { error: filesError });
-      throw new Error("Failed to fetch application files");
+      throw new Error(t("fetchApplicationFiles"));
     }
 
     // Convert user files to FileEntry format and upload to Gemini if needed
@@ -363,9 +537,6 @@ export const submitApplication = async (
         company_id: companyId,
         custom_job_id: jobId,
         candidate_user_id: user.id,
-        candidate_email: user.email!,
-        candidate_name:
-          user.user_metadata.full_name || user.email!.split("@")[0],
         status: "applied",
       })
       .select()
@@ -373,7 +544,7 @@ export const submitApplication = async (
 
     if (candidateError) {
       logger.error("Failed to create candidate", { error: candidateError });
-      throw new Error("Failed to create candidate application");
+      throw new Error(t("createCandidateApplication"));
     }
 
     // Create candidate_application_files entries
@@ -388,7 +559,7 @@ export const submitApplication = async (
 
     if (linkFilesError) {
       logger.error("Failed to link files", { error: linkFilesError });
-      throw new Error("Failed to link application files");
+      throw new Error(t("linkApplicationFiles"));
     }
 
     logger.info("Application submitted successfully", {
@@ -399,6 +570,31 @@ export const submitApplication = async (
       candidateId: candidate.id,
       jobId,
     });
+
+    if (isAnonymous && email) {
+      logger.info("Updating anonymous user with email", {
+        userId: user.id,
+        email,
+      });
+      const origin = (await headers()).get("origin");
+      const { error: updateError } = await supabase.auth.updateUser(
+        {
+          email,
+          data: {
+            full_name: fullName,
+            phone_number: phoneNumber,
+          },
+        },
+        {
+          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
+        }
+      );
+
+      if (updateError) {
+        logger.error("Failed to update user email", { error: updateError });
+        throw new Error(t("updateUserInformation"));
+      }
+    }
     await logger.flush();
   } catch (error) {
     logger.error("Application submission error", { error });
@@ -412,5 +608,16 @@ export const submitApplication = async (
     await logger.flush();
     return { error: t("applicationForm.errors.submitApplication") };
   }
-  redirect(`/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`);
+  // Redirect based on whether user was anonymous
+  if (isAnonymous) {
+    // Redirect to email confirmation page
+    redirect(
+      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${interviewId}`
+    );
+  } else {
+    // Regular users go directly to interview
+    redirect(
+      `/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`
+    );
+  }
 };

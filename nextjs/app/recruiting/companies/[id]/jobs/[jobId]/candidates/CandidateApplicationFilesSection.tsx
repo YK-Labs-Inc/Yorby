@@ -13,6 +13,7 @@ export default function CandidateApplicationFilesSection({
   candidateData,
 }: CandidateApplicationFilesSectionProps) {
   const t = useTranslations("apply.recruiting.candidates.info");
+  const tFiles = useTranslations("apply.recruiting.candidates.applicationFiles");
   const { applicationFiles } = candidateData;
 
   const formatDate = (dateString: string) => {
@@ -53,7 +54,7 @@ export default function CandidateApplicationFilesSection({
           {resumeFiles.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                Resume
+                {tFiles("resume")}
               </h4>
               <div className="space-y-2">
                 {resumeFiles.map((file) => (
@@ -92,7 +93,7 @@ export default function CandidateApplicationFilesSection({
           {/* Other application files */}
           {otherFiles.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">Other Documents</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">{tFiles("otherDocuments")}</h4>
               <div className="space-y-2">
                 {otherFiles.map((file) => (
                   <div

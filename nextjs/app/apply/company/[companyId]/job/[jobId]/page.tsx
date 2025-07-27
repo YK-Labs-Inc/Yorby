@@ -3,8 +3,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -107,17 +105,7 @@ export default async function ApplyPage({
 
         {/* Apply Button Section */}
         <CardFooter className="border-t p-6">
-          {user ? (
-            <ApplyButton companyId={companyId} jobId={jobId} userId={user.id} />
-          ) : (
-            <Link
-              href={`/auth/login?redirect=/apply/company/${companyId}/job/${jobId}`}
-            >
-              <Button size="lg" className="w-full sm:w-auto">
-                {t("jobPage.buttons.signInToApply")}
-              </Button>
-            </Link>
-          )}
+          <ApplyButton companyId={companyId} jobId={jobId} />
         </CardFooter>
       </Card>
     </div>
