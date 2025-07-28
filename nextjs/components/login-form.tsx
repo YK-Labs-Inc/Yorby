@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export function LoginForm({
   className,
@@ -25,6 +26,7 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("auth.login");
@@ -37,10 +39,19 @@ export function LoginForm({
     setIsLoading(true);
     setError(null);
 
+    if (!captchaToken) {
+      setError("Please complete the captcha verification");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken,
+        },
       });
       if (error) throw error;
 
@@ -92,7 +103,15 @@ export function LoginForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
                 {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>

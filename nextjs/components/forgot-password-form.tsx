@@ -15,12 +15,14 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string>('')
   const t = useTranslations('auth.forgotPassword')
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -29,10 +31,17 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     setIsLoading(true)
     setError(null)
 
+    if (!captchaToken) {
+      setError("Please complete the captcha verification")
+      setIsLoading(false)
+      return
+    }
+
     try {
       // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
+        captchaToken,
       })
       if (error) throw error
       setSuccess(true)
@@ -80,7 +89,15 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                   />
                 </div>
                 {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <div className="flex justify-center">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                    onSuccess={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
                   {isLoading ? t('submitting') : t('submit')}
                 </Button>
               </div>
