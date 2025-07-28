@@ -494,7 +494,7 @@ export const submitApplication = async (
   formData: FormData
 ) => {
   const supabase = await createSupabaseServerClient();
-  const t = await getTranslations("apply");
+  const t = await getTranslations("apply.api.errors");
 
   // Parse form data
   const companyId = formData.get("companyId") as string;
