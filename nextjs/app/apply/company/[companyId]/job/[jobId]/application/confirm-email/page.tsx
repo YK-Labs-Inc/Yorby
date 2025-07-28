@@ -100,22 +100,20 @@ export default async function ConfirmEmailPage({
       }
 
       // For anonymous users, use the email from user metadata
-      const userEmail =
-        user.email || user.user_metadata?.user_entered_email_address;
-
+      const userEmail = user.new_email;
       if (!userEmail) {
         throw new Error(t("noUserOrEmail"));
       }
 
       const origin = (await headers()).get("origin");
-      const { error } = await supabase.auth.resend({
-        type: "email_change",
-        email: userEmail,
-        options: {
-          captchaToken,
-          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
+      const { error } = await supabase.auth.updateUser(
+        {
+          email: userEmail,
         },
-      });
+        {
+          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
+        }
+      );
 
       if (error) {
         logger.error("Failed to resend confirmation email", { error });

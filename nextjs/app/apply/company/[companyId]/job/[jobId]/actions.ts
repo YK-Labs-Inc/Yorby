@@ -632,7 +632,6 @@ export const submitApplication = async (
           data: {
             full_name: fullName,
             phone_number: phoneNumber,
-            user_entered_email_address: email,
           },
         },
         {

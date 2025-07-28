@@ -1,0 +1,9 @@
+<h2>Verify Your Email Address</h2>
+
+<p>Click on the link below to verify your emaill address of {{ .NewEmail }}:</p>
+<p>
+  <a
+    href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email_change&next={{ .RedirectTo }}"
+    >Confirm your email</a
+  >
+</p>
