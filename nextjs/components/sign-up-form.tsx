@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export function SignUpForm({
   className,
@@ -26,6 +27,7 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
   const router = useRouter();
   const t = useTranslations("auth.signUp");
   const searchParams = useSearchParams();
@@ -35,6 +37,12 @@ export function SignUpForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+
+    if (!captchaToken) {
+      setError("Please complete the captcha verification");
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== repeatPassword) {
       setError(t("passwordMismatch"));
@@ -48,6 +56,7 @@ export function SignUpForm({
         password,
         options: {
           emailRedirectTo: `${window.location.origin}${searchParams.get("redirect") || "/auth-redirect"}`,
+          captchaToken,
         },
       });
       if (error) throw error;
@@ -107,7 +116,15 @@ export function SignUpForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => {
+                    setCaptchaToken(token);
+                  }}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
                 {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>
