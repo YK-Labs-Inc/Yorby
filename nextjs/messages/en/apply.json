@@ -226,6 +226,7 @@
     }
   },
   "recruiting": {
+    "shareApplicationLink": "Share Application Link",
     "companyJobsManager": {
       "title": "Job Listings",
       "subtitle": "Manage your company's job postings",

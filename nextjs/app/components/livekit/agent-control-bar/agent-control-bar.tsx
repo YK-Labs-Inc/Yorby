@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Track } from "livekit-client";
-import { BarVisualizer, MediaDeviceMenu } from "@livekit/components-react";
+import { MediaDeviceMenu } from "@livekit/components-react";
 import { PhoneOff } from "lucide-react";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { cn } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/utils";
@@ -43,7 +43,6 @@ export function AgentControlBar({
 }: AgentControlBarProps) {
   const t = useTranslations("agentControlBar");
   const {
-    micTrackRef,
     visibleControls,
     cameraToggle,
     microphoneToggle,

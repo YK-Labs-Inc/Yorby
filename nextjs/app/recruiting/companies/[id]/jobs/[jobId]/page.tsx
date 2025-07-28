@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ShareButton } from "@/components/ui/share-button";
+import ShareApplicationLink from "./ShareApplicationLink";
 
 interface PageProps {
   params: Promise<{
@@ -143,9 +144,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 <p className="text-muted-foreground mb-4">{job.company_name}</p>
               )}
               <div className="flex gap-2 items-center">
-                <ShareButton
-                  url={`${origin}/apply/company/${companyId}/job/${jobId}`}
-                />
+                <ShareApplicationLink companyId={companyId} jobId={jobId} />
               </div>
             </div>
           </div>
