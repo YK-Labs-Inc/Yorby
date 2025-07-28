@@ -9,10 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
+import ResendEmailForm from "./ResendEmailForm";
 
 interface PageProps {
   params: Promise<{
@@ -77,8 +77,9 @@ export default async function ConfirmEmailPage({
   await logger.flush();
 
   // Server action to resend confirmation email
-  async function resendConfirmationEmail() {
+  async function resendConfirmationEmail(prevState: any, formData: FormData) {
     "use server";
+    const captchaToken = formData.get("captchaToken") as string;
     const supabase = await createSupabaseServerClient();
     const t = await getTranslations("apply.confirmEmail.errors");
     const logger = new Logger().with({
@@ -86,6 +87,10 @@ export default async function ConfirmEmailPage({
     });
 
     try {
+      if (!captchaToken) {
+        throw new Error(t("captchaRequired"));
+      }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -95,8 +100,9 @@ export default async function ConfirmEmailPage({
       }
 
       // For anonymous users, use the email from user metadata
-      const userEmail = user.email || user.user_metadata?.user_entered_email_address;
-      
+      const userEmail =
+        user.email || user.user_metadata?.user_entered_email_address;
+
       if (!userEmail) {
         throw new Error(t("noUserOrEmail"));
       }
@@ -106,6 +112,7 @@ export default async function ConfirmEmailPage({
         type: "email_change",
         email: userEmail,
         options: {
+          captchaToken,
           emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
         },
       });
@@ -116,9 +123,15 @@ export default async function ConfirmEmailPage({
       }
 
       logger.info("Confirmation email resent successfully");
+      return { success: true };
     } catch (error) {
       logger.error("Error in resendConfirmationEmail", { error });
-      throw error;
+      return {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to resend confirmation email",
+      };
     } finally {
       await logger.flush();
     }
@@ -155,11 +168,10 @@ export default async function ConfirmEmailPage({
             </div>
 
             <div className="space-y-4">
-              <form action={resendConfirmationEmail} className="w-full">
-                <Button type="submit" variant="outline" className="w-full">
-                  {t("confirmEmail.resendButton")}
-                </Button>
-              </form>
+              <ResendEmailForm
+                resendAction={resendConfirmationEmail}
+                resendButtonText={t("confirmEmail.resendButton")}
+              />
 
               <div className="text-center text-sm text-gray-500">
                 <p>

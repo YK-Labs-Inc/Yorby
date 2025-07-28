@@ -99,7 +99,12 @@
     "returnToJobListing": "return to job listing",
     "errors": {
       "noUserOrEmail": "No user or email found",
-      "resendFailed": "Failed to resend confirmation email"
+      "resendFailed": "Failed to resend confirmation email",
+      "captchaRequired": "Please complete the captcha verification"
+    },
+    "resendForm": {
+      "sendingButton": "Sending...",
+      "successMessage": "Email sent successfully! Please check your inbox."
     }
   },
   "interview": {
