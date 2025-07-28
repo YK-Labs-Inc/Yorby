@@ -8,9 +8,10 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface ShareButtonProps {
   url: string;
+  titleOverride?: string;
 }
 
-export function ShareButton({ url }: ShareButtonProps) {
+export function ShareButton({ url, titleOverride }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
   const t = useTranslations("common");
   const { logError } = useAxiomLogging();
@@ -21,20 +22,15 @@ export function ShareButton({ url }: ShareButtonProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      logError("Failed to copy to clipboard", { 
+      logError("Failed to copy to clipboard", {
         error: error instanceof Error ? error.message : String(error),
-        url 
+        url,
       });
     }
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleCopy}
-      className="gap-2"
-    >
+    <Button onClick={handleCopy} className="gap-2">
       {copied ? (
         <>
           <Check className="h-4 w-4" />
@@ -43,7 +39,7 @@ export function ShareButton({ url }: ShareButtonProps) {
       ) : (
         <>
           <Share2 className="h-4 w-4" />
-          {t("share.button")}
+          {titleOverride || t("share.button")}
         </>
       )}
     </Button>

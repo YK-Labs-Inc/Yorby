@@ -242,6 +242,7 @@ export function LiveKitInterviewComponent({
               duration: 0.5,
               ease: "linear",
             }}
+            interviewId={mockInterviewId}
           />
         </RoomContext.Provider>
 

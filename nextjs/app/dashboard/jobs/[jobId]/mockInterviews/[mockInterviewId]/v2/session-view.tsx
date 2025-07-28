@@ -30,6 +30,7 @@ interface SessionViewProps {
   disabled: boolean;
   sessionStarted: boolean;
   onProcessInterview?: () => Promise<string>;
+  interviewId: string;
 }
 
 export const SessionView = ({
@@ -38,11 +39,11 @@ export const SessionView = ({
   sessionStarted,
   onProcessInterview,
   ref,
+  interviewId,
 }: React.ComponentProps<"div"> & SessionViewProps) => {
   const { state: agentState } = useVoiceAssistant();
   const { messages } = useChatAndTranscription();
   const room = useRoomContext();
-  const { mockInterviewId } = useParams<{ mockInterviewId: string }>();
   const { logInfo, logError } = useAxiomLogging();
 
   useDebugMode();
@@ -50,7 +51,7 @@ export const SessionView = ({
   const saveTranscript = useCallback(async () => {
     const supabase = createSupabaseBrowserClient();
 
-    if (!mockInterviewId) {
+    if (!interviewId) {
       logError("transcript_write_skipped", {
         reason: "mock_interview_id not found",
       });
@@ -59,7 +60,7 @@ export const SessionView = ({
 
     // Process messages in reverse order to save in reverse chronological order
     const messagesToInsert = [];
-    
+
     // Get current time and work backwards to preserve chronological order
     const now = new Date();
     const reversedMessages = [...messages].reverse();
@@ -67,7 +68,7 @@ export const SessionView = ({
     // Generate timestamps in reverse chronological order (older messages get earlier timestamps)
     for (let i = 0; i < reversedMessages.length; i++) {
       const message = reversedMessages[i];
-      
+
       // Map role names - assistant messages from agent should be "model", user messages stay "user"
       const dbRole = message.from?.isLocal ? "user" : "model";
 
@@ -76,10 +77,12 @@ export const SessionView = ({
 
       // Create timestamp that preserves chronological order
       // Each message gets a timestamp that's (reversedMessages.length - i) seconds before now
-      const messageTimestamp = new Date(now.getTime() - (reversedMessages.length - i) * 1000);
+      const messageTimestamp = new Date(
+        now.getTime() - (reversedMessages.length - i) * 1000
+      );
 
       const messageData = {
-        mock_interview_id: mockInterviewId,
+        mock_interview_id: interviewId,
         role: dbRole as "user" | "model",
         text: text,
         created_at: messageTimestamp.toISOString(),
@@ -100,19 +103,19 @@ export const SessionView = ({
 
         // Log successful transcript write
         logInfo("transcript_write_success", {
-          mock_interview_id: mockInterviewId,
+          mock_interview_id: interviewId,
           message_count: messagesToInsert.length,
         });
         return "success";
       } catch (error) {
         // Log transcript write error
         logError("transcript_write_error", {
-          mock_interview_id: mockInterviewId,
+          mock_interview_id: interviewId,
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }
-  }, [messages, mockInterviewId, logInfo, logError]);
+  }, [messages, interviewId, logInfo, logError]);
 
   const onDisconnect = useCallback(async () => {
     const transcriptResult = await saveTranscript();
@@ -122,16 +125,16 @@ export const SessionView = ({
       try {
         await onProcessInterview();
         logInfo("interview_processing_triggered", {
-          mock_interview_id: mockInterviewId,
+          mock_interview_id: interviewId,
         });
       } catch (error) {
         logError("interview_processing_failed", {
-          mock_interview_id: mockInterviewId,
+          mock_interview_id: interviewId,
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }
-  }, [saveTranscript, onProcessInterview, mockInterviewId, logInfo, logError]);
+  }, [saveTranscript, onProcessInterview, interviewId, logInfo, logError]);
 
   useEffect(() => {
     if (sessionStarted) {

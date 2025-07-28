@@ -1,11 +1,10 @@
 "use client";
 
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShareButton } from "@/components/ui/share-button";
 import {
   CheckCircle2,
   AlertCircle,
@@ -153,7 +152,6 @@ export default function InterviewAnalysis({
     }
   };
 
-
   // Navigate between questions
   const navigateQuestion = (direction: "prev" | "next") => {
     if (!analysis?.question_analysis) return;
@@ -282,7 +280,6 @@ export default function InterviewAnalysis({
                   <Separator />
                 </>
               )}
-
 
               {/* Application Files Section */}
               {applicationFiles && applicationFiles.length > 0 && (
@@ -679,10 +676,7 @@ export default function InterviewAnalysis({
           analysis.concerns.length > 0 ? (
             <div className="space-y-3">
               {analysis.concerns.map((concern, idx) => (
-                <Card
-                  key={idx}
-                  className="p-4 border-l-4 border-l-orange-500"
-                >
+                <Card key={idx} className="p-4 border-l-4 border-l-orange-500">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
                     <div className="flex-1">
