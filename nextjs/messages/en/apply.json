@@ -84,6 +84,9 @@
   "applicationSubmitted": {
     "title": "Application Submitted!",
     "description": "Your application has been successfully submitted. The hiring team will review it and get back to you soon.",
+    "appliedAs": "Applied as",
+    "notYou": "Not you? You can apply again with a different email address.",
+    "applyDifferentEmail": "Apply With Different Email",
     "buttons": {
       "backToJob": "Back to Job Listing",
       "viewDashboard": "View My Dashboard"

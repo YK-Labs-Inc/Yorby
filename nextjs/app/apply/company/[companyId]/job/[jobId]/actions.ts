@@ -331,7 +331,7 @@ When you have gathered enough information to assess the candidate's qualificatio
   }
 };
 
-async function checkApplicationStatus(
+export async function checkApplicationStatus(
   companyId: string,
   jobId: string,
   userId: string

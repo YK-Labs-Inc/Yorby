@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import {
@@ -28,6 +28,9 @@ export default async function ConfirmEmailPage({
 }: PageProps) {
   const { companyId, jobId } = await params;
   const { interviewId } = (await searchParams) as { interviewId: string };
+  if (!companyId || !jobId || !interviewId) {
+    return notFound();
+  }
 
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
