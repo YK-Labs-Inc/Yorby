@@ -5,10 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { CheckCircle2, UserCircle } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { notFound, redirect } from "next/navigation";
+import { checkApplicationStatus } from "../../actions";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: Promise<{
@@ -19,7 +21,50 @@ interface PageProps {
 
 export default async function ApplicationSubmittedPage({ params }: PageProps) {
   const { companyId, jobId } = await params;
+  if (!companyId || !jobId) {
+    return notFound();
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/apply/company/${companyId}/job/${jobId}`);
+  }
+
+  const result = await checkApplicationStatus(companyId, jobId, user.id);
+
+  if (result.hasApplied) {
+    if (!result.hasCompletedInterview && result.interviewId) {
+      if (user.is_anonymous) {
+        redirect(
+          `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${result.interviewId}`
+        );
+      }
+      // User has applied and has an interview ID, redirect to specific interview page
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
+      );
+    }
+  } else {
+    redirect(`/apply/company/${companyId}/job/${jobId}`);
+  }
+
   const t = await getTranslations("apply");
+
+  // Get the user's email to display
+  const userEmail = user.email || user.new_email || "Anonymous";
+
+  // Server action to sign out and redirect
+  async function applyWithDifferentEmail() {
+    "use server";
+    const supabase = await createSupabaseServerClient();
+    await supabase.auth.signOut();
+    redirect(`/apply/company/${companyId}/job/${jobId}`);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -34,17 +79,25 @@ export default async function ApplicationSubmittedPage({ params }: PageProps) {
               {t("applicationSubmitted.description")}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Link href={`/apply/company/${companyId}/job/${jobId}`}>
-              <Button variant="outline" className="w-full">
-                {t("applicationSubmitted.buttons.backToJob")}
-              </Button>
-            </Link>
-            <Link href="/dashboard/jobs">
-              <Button className="w-full">
-                {t("applicationSubmitted.buttons.viewDashboard")}
-              </Button>
-            </Link>
+          <CardContent className="space-y-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <UserCircle className="h-5 w-5 text-gray-600" />
+                <p className="text-sm text-gray-600">{t("applicationSubmitted.appliedAs")}</p>
+              </div>
+              <p className="font-semibold text-lg">{userEmail}</p>
+            </div>
+            
+            <div className="border-t pt-6">
+              <p className="text-sm text-gray-600 mb-4">
+                {t("applicationSubmitted.notYou")}
+              </p>
+              <form action={applyWithDifferentEmail}>
+                <Button type="submit" variant="outline" className="w-full">
+                  {t("applicationSubmitted.applyDifferentEmail")}
+                </Button>
+              </form>
+            </div>
           </CardContent>
         </Card>
       </div>
