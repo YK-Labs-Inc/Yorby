@@ -2,7 +2,6 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
-import { C } from "@upstash/redis/zmscore-DzNHSWxc";
 import { Tables } from "@/utils/supabase/database.types";
 
 interface PageProps {

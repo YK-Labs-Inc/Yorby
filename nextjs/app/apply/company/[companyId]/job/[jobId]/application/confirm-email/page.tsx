@@ -90,14 +90,21 @@ export default async function ConfirmEmailPage({
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user || !user.email) {
+      if (!user) {
+        throw new Error(t("noUserOrEmail"));
+      }
+
+      // For anonymous users, use the email from user metadata
+      const userEmail = user.email || user.user_metadata?.user_entered_email_address;
+      
+      if (!userEmail) {
         throw new Error(t("noUserOrEmail"));
       }
 
       const origin = (await headers()).get("origin");
       const { error } = await supabase.auth.resend({
         type: "email_change",
-        email: user.email,
+        email: userEmail,
         options: {
           emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
         },
