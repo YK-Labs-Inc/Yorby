@@ -24,10 +24,19 @@ export default getRequestConfig(async () => {
 
   let commonMessages = {};
   try {
-    commonMessages = (await import(`../messages/${locale}/common.json`)).default;
+    commonMessages = (await import(`../messages/${locale}/common.json`))
+      .default;
   } catch (error) {
     // It's okay if the file doesn't exist yet
     console.info(`Common messages not found for ${locale}, using defaults`);
+  }
+
+  let authMessages = {};
+  try {
+    authMessages = (await import(`../messages/${locale}/auth.json`)).default;
+  } catch (error) {
+    // It' okay if the file doesn't exist yet
+    console.info(`Auth messages not found for ${locale}, using defaults`);
   }
 
   // Merge all messages
@@ -36,6 +45,7 @@ export default getRequestConfig(async () => {
     ...mainMessages,
     apply: applyMessages,
     common: commonMessages,
+    auth: authMessages,
   };
 
   return {
