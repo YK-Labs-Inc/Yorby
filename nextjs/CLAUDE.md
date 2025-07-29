@@ -7,13 +7,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repository contains the source code for two applications:
 
 ### 1. Perfect Interview (B2C)
+
 A comprehensive suite of AI-powered job preparation tools featuring:
+
 - **Resume Builder**: AI-powered resume creation through a conversational chat interface
 - **Job Prep Generator**: Upload job descriptions to generate practice interview questions, with AI mock interview capabilities for realistic practice sessions
 - **Interview Copilot**: Real-time interview assistance that joins meetings and helps answer questions during live interviews
 
 ### 2. Yorby (B2B)
+
 A white-labeled platform for career coaches to power their businesses:
+
 - Coaches can upload custom questions for their clients to practice
 - Students can practice with questions and perform mock interviews (both text and video)
 - Admin dashboard for coaches to monitor student performance and enrollments
@@ -22,15 +26,52 @@ A white-labeled platform for career coaches to power their businesses:
 - Coach-only portals with dedicated authentication flow
 - Essentially a white-labeled version of Perfect Interview's job prep tool with coach-specific customization
 
-### 3. Company Interview Platform (B2B - In Development)
-A platform for companies to screen and interview candidates:
-- Companies can create organizations and manage team members with role-based access
-- Post job openings and track candidate applications
-- Conduct AI-powered screening interviews using existing mock interview infrastructure
-- Review candidate performance and interview recordings
-- Leverages existing mock interview, AI feedback, and video recording features
+### 3. Company Interview Platform (B2B)
+
+A comprehensive recruiting platform for companies to screen and interview candidates:
+
+#### Core Features:
+- **Company Management**: Create organizations with team member roles (owner, admin, recruiter, viewer)
+- **Job Listings**: Post detailed job openings with descriptions and custom interview questions
+- **Candidate Applications**: Track applicants through various stages (applied → screening → interviewed → reviewing → offered/rejected)
+- **AI-Powered Interviews**: Automated mock interviews with candidates using existing infrastructure
+- **Interview Analysis**: AI-generated comprehensive analysis of candidate performance including:
+  - Hiring verdict (Advance/Reject/Borderline) with match score
+  - Question-by-question breakdown with quality scores
+  - Identified strengths and concerns with evidence from responses
+  - Job requirement alignment (matched/missing/exceeded)
+  - Interview recordings with Mux video player integration
+  - Full transcript with timestamps
+- **Application Files**: Support for resume and document uploads with preview/download capabilities
+
+#### Technical Architecture:
+
+**Database Schema**:
+- `companies`: Organization profiles with slugs
+- `company_members`: User-company relationships with role-based access
+- `company_job_candidates`: Candidate applications and status tracking
+- `candidate_application_files`: Uploaded documents linked to applications
+- `custom_job_mock_interviews`: Extended with `candidate_id` for non-authenticated interviews
+- `recruiter_interview_analysis`: Comprehensive AI analysis results
+- Related tables: `recruiter_interview_strengths`, `recruiter_interview_concerns`, `recruiter_question_analysis`, etc.
+
+**Key Routes**:
+- `/recruiting`: Main dashboard for company recruiters
+- `/recruiting/companies/[id]/jobs/[jobId]`: Job detail page with navigation to questions and candidates
+- `/recruiting/companies/[id]/jobs/[jobId]/questions`: Manage interview questions with AI assistance
+- `/recruiting/companies/[id]/jobs/[jobId]/candidates`: View and analyze candidate applications
+- `/apply/[companyId]/[jobId]`: Public application page for candidates
+
+**Interview Analysis Flow**:
+1. Candidate applies and uploads documents
+2. Candidate completes AI mock interview
+3. Video is processed through Mux for streaming
+4. AI analyzes responses and generates detailed feedback
+5. Recruiters review analysis, recordings, and transcripts
+6. Hiring decision tracked through candidate status
 
 #### Company Onboarding Flow:
+
 1. **New User Sign-up**: Redirected to `/company-onboarding` via `/auth/confirm`
 2. **Existing User Login**: `/auth-redirect` page checks for company membership and redirects to onboarding if needed
 3. **Company Registration**: Two-step form collecting company details
@@ -57,6 +98,7 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 ## Architecture Overview
 
 ### Tech Stack
+
 - **Frontend**: Next.js 15.1.5 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Backend**: Supabase (Auth, Database, Storage)
@@ -67,6 +109,7 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 - **Data Fetching**: SWR for real-time updates in coach portal
 
 ### Key Directories
+
 - `/app` - Next.js App Router pages and API routes
 - `/components` - Reusable React components and UI library
 - `/context` - React context providers for global state
@@ -79,6 +122,7 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 ### Database Schema
 
 The application uses a complex relational database with these main entities:
+
 - **Users & Auth**: Managed by Supabase Auth with subscription tracking
 - **Coaches**: Multi-tenant system with custom branding
 - **Jobs**: Custom job positions with descriptions (also used by companies via `company_id`)
@@ -92,8 +136,14 @@ The application uses a complex relational database with these main entities:
 - **Companies**: Organizations that can post jobs and interview candidates
 - **Company Members**: Team members with role-based access (owner, admin, recruiter, viewer)
 - **Company Job Candidates**: Candidate applications and interview tracking
+- **Recruiter Interview Analysis**: AI-generated analysis with structured insights:
+  - Main analysis with verdict and match score
+  - Question-level breakdowns with quality scores
+  - Strengths and concerns with evidence
+  - Job requirement alignment tracking
 
 Key patterns:
+
 - Row Level Security (RLS) for data isolation with enrollment-based access
 - Soft deletes with `deletion_status`
 - Token usage tracking for AI features
@@ -103,6 +153,7 @@ Key patterns:
 ### Routing Architecture
 
 **Public Routes**:
+
 - `/` - Main landing page
 - `/[coachSlug]` - Coach-specific branded portals
 - `/coaches` - Coach portal landing page
@@ -110,6 +161,7 @@ Key patterns:
 - `/sign-in`, `/sign-up` - Authentication
 
 **Protected Routes**:
+
 - `/dashboard/jobs` - Job management
 - `/dashboard/resumes` - Resume builder
 - `/dashboard/interview-copilots` - Real-time assistance
@@ -120,6 +172,7 @@ Key patterns:
 - `/dashboard/coach-admin/students/[studentId]/jobs/[jobId]/mockInterviews/[mockInterviewId]` - Review mock interviews
 
 **API Routes**:
+
 - `/api/chat` - AI chat functionality
 - `/api/transcribe` - Audio transcription
 - `/api/resume/*` - Resume operations
@@ -131,6 +184,7 @@ Key patterns:
 ### Multi-Tenant Coach System
 
 Coaches can create branded experiences:
+
 1. Custom domain/slug routing
 2. Program creation and student management
 3. Enrollment-based access control via `custom_job_enrollments` table
@@ -142,6 +196,7 @@ Coaches can create branded experiences:
 ### State Management
 
 Context providers handle global state:
+
 - `UserProvider` - Authentication state
 - `MultiTenantProvider` - Coach/tenant logic
 - `DeepgramContextProvider` - Voice processing
@@ -150,6 +205,7 @@ Context providers handle global state:
 ### Environment Variables
 
 Key required variables:
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -175,6 +231,7 @@ Key required variables:
 ### Next.js App Router
 
 This is a Next.js application using the App Router paradigm:
+
 - All routes are defined in the `/app` directory
 - Server Components are the default
 - Client Components require the `"use client"` directive
@@ -185,23 +242,27 @@ This is a Next.js application using the App Router paradigm:
 The application uses Axiom for structured logging via the `next-axiom` package:
 
 **Server Components and Server Actions**:
+
 - Import `Logger` from `next-axiom`
 - Example: `import { Logger } from "next-axiom"`
 - Use `log.info()`, `log.error()`, `log.warn()` methods
 - **IMPORTANT**: When initializing the logger, always use the `with()` function and pass a JSON object containing the function name and its parameters
 
 **Client Components**:
+
 - Use the `useAxiomLogging` hook from `@context/AxiomLoggingContext.tsx`
 - Example: `const { logInfo, logError, logWarning } = useAxiomLogging()`
 - Automatically includes userId in all logs
 
 **Route Handlers**:
+
 - Use `req.log` from the `AxiomRequest` object
 - Example: `req.log.info("Processing request", { endpoint: "/api/example" })`
 
 ### Common Workflows
 
 **Adding a new feature**:
+
 1. Check existing patterns in similar features
 2. Use shadcn/ui components for UI consistency
 3. Follow the established file structure
@@ -210,12 +271,14 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 6. Consider enrollment-based access for coach features
 
 **Working with AI features**:
+
 1. Use streaming responses where appropriate
 2. Track token usage for billing
 3. Implement proper error handling for API failures
 4. Consider rate limiting for expensive operations
 
 **Coach/Multi-tenant features**:
+
 1. Always filter by coach context and enrollment status
 2. Implement enrollment-based RLS policies
 3. Use SWR for real-time data updates in coach portal
@@ -223,13 +286,20 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 5. Ensure proper video/audio handling for submissions
 
 **Company Interview Features**:
+
 1. Reuse existing mock interview infrastructure for candidate interviews
 2. Add `candidate_id` to `custom_job_mock_interviews` for non-authenticated interviews
 3. Check company membership before granting access to candidate data
 4. Use role-based permissions (owner, admin, recruiter, viewer)
 5. Leverage existing AI feedback and video recording capabilities
+6. Interview analysis stored in `recruiter_interview_analysis_complete` view
+7. Support for both authenticated (user account) and non-authenticated candidates
+8. Automatic AI analysis generation after interview completion
+9. File uploads handled through `candidate_application_files` table
+10. Real-time status tracking through interview lifecycle
 
 **Video/Audio Features**:
+
 1. Use Mux for all video processing and storage
 2. Implement proper webhook handlers for async processing
 3. Track upload progress and block UI during uploads
@@ -237,6 +307,7 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 5. Ensure proper cleanup of Mux assets when deleted
 
 **Working with Enrollments**:
+
 1. Check enrollment status before granting access
 2. Use the `custom_job_enrollments` table for access control
 3. Implement proper cascade deletes for enrollment-related data
