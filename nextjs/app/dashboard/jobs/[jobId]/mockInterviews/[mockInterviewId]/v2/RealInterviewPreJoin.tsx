@@ -1,6 +1,6 @@
 "use client";
 
-import { PreJoin } from "@livekit/components-react";
+import { LocalUserChoices, PreJoin } from "@livekit/components-react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface RealInterviewPreJoinProps {
-  onSubmit: () => void;
+  onSubmit: (values: LocalUserChoices) => void;
 }
 
 export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {

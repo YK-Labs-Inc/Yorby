@@ -1,6 +1,6 @@
 "use client";
 
-import { PreJoin } from "@livekit/components-react";
+import { LocalUserChoices, PreJoin } from "@livekit/components-react";
 import {
   Card,
   CardContent,
@@ -11,12 +11,11 @@ import {
 import { useTranslations } from "next-intl";
 
 interface MockInterviewPreJoinProps {
-  onSubmit: () => void;
+  onSubmit: (values: LocalUserChoices) => void;
 }
 
 export function MockInterviewPreJoin({ onSubmit }: MockInterviewPreJoinProps) {
   const t = useTranslations("apply.interviews.mockInterview");
-  console.log("t", t("button"));
   const tLabels = useTranslations("apply.interviews.livekit.labels");
 
   return (
