@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,10 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useActionState, useEffect } from "react";
 import { ChevronLeft, Briefcase } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { signInWithOTP, verifyOTP } from "@/app/(auth-pages)/actions";
 
 export function CandidateAuthForm({
   className,
@@ -25,61 +25,26 @@ export function CandidateAuthForm({
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("auth.candidateAuth");
-
+  
   const redirectUrl = searchParams.get("redirect");
+  
+  const [state, formAction, isPending] = useActionState(
+    signInWithOTP,
+    null
+  );
+  
+  const [otpState, otpFormAction, isOtpPending] = useActionState(
+    verifyOTP,
+    null
+  );
 
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: redirectUrl || `${window.location.origin}/auth-redirect`,
-        },
-      });
-      
-      if (error) throw error;
-      
+  useEffect(() => {
+    if (state?.success) {
       setStep("otp");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("errors.sendOtp"));
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: "email",
-      });
-      
-      if (error) throw error;
-
-      router.push(redirectUrl || "/auth-redirect");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("errors.verifyOtp"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [state?.success]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -96,27 +61,35 @@ export function CandidateAuthForm({
         </CardHeader>
         <CardContent>
           {step === "email" ? (
-            <form onSubmit={handleSendOTP}>
+            <form action={formAction}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">{t("email.label")}</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     placeholder={t("email.placeholder")}
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  <input type="hidden" name="redirectTo" value={redirectUrl || ""} />
+                  <input type="hidden" name="captchaToken" value="" />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t("sending") : t("sendOtp")}
+                {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+                {state?.success && (
+                  <div className="rounded-md bg-green-50 p-3">
+                    <p className="text-sm text-green-800">{state.success}</p>
+                  </div>
+                )}
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {isPending ? t("sending") : t("sendOtp")}
                 </Button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOTP}>
+            <form action={otpFormAction}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="otp">{t("otp.label")}</Label>
@@ -125,16 +98,19 @@ export function CandidateAuthForm({
                   </p>
                   <Input
                     id="otp"
+                    name="token"
                     type="text"
                     placeholder={t("otp.placeholder")}
                     required
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                   />
+                  <input type="hidden" name="email" value={email} />
+                  <input type="hidden" name="redirectTo" value={redirectUrl || ""} />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t("verifying") : t("verify")}
+                {otpState?.error && <p className="text-sm text-red-500">{otpState.error}</p>}
+                <Button type="submit" className="w-full" disabled={isOtpPending}>
+                  {isOtpPending ? t("verifying") : t("verify")}
                 </Button>
                 <Button
                   type="button"
@@ -143,9 +119,7 @@ export function CandidateAuthForm({
                   onClick={() => {
                     setStep("email");
                     setOtp("");
-                    setError(null);
                   }}
-                  disabled={isLoading}
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
                   {t("backToEmail")}
