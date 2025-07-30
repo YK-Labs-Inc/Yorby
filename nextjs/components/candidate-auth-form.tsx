@@ -27,14 +27,11 @@ export function CandidateAuthForm({
   const [step, setStep] = useState<"email" | "otp">("email");
   const searchParams = useSearchParams();
   const t = useTranslations("auth.candidateAuth");
-  
-  const redirectUrl = searchParams.get("redirect");
-  
-  const [state, formAction, isPending] = useActionState(
-    signInWithOTP,
-    null
-  );
-  
+
+  const redirectUrl = searchParams.get("redirect") ?? "/candidate-dashboard";
+
+  const [state, formAction, isPending] = useActionState(signInWithOTP, null);
+
   const [otpState, otpFormAction, isOtpPending] = useActionState(
     verifyOTP,
     null
@@ -52,12 +49,12 @@ export function CandidateAuthForm({
         <CardHeader>
           <div className="flex items-center gap-2 mb-2">
             <Briefcase className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">{t("badge")}</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              {t("badge")}
+            </span>
           </div>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
-          <CardDescription>
-            {t("description")}
-          </CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {step === "email" ? (
@@ -74,10 +71,12 @@ export function CandidateAuthForm({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <input type="hidden" name="redirectTo" value={redirectUrl || ""} />
+                  <input type="hidden" name="redirectTo" value={redirectUrl} />
                   <input type="hidden" name="captchaToken" value="" />
                 </div>
-                {state?.error && <p className="text-sm text-red-500">{state.error}</p>}
+                {state?.error && (
+                  <p className="text-sm text-red-500">{state.error}</p>
+                )}
                 {state?.success && (
                   <div className="rounded-md bg-green-50 p-3">
                     <p className="text-sm text-green-800">{state.success}</p>
@@ -106,10 +105,16 @@ export function CandidateAuthForm({
                     onChange={(e) => setOtp(e.target.value)}
                   />
                   <input type="hidden" name="email" value={email} />
-                  <input type="hidden" name="redirectTo" value={redirectUrl || ""} />
+                  <input type="hidden" name="redirectTo" value={redirectUrl} />
                 </div>
-                {otpState?.error && <p className="text-sm text-red-500">{otpState.error}</p>}
-                <Button type="submit" className="w-full" disabled={isOtpPending}>
+                {otpState?.error && (
+                  <p className="text-sm text-red-500">{otpState.error}</p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isOtpPending}
+                >
                   {isOtpPending ? t("verifying") : t("verify")}
                 </Button>
                 <Button

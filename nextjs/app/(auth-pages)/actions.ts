@@ -44,7 +44,8 @@ export async function signInWithOTP(prevState: any, formData: FormData) {
 export async function verifyOTP(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
   const token = formData.get("token") as string;
-  const redirectTo = formData.get("redirectTo") as string | null;
+  const redirectTo = formData.get("redirectTo") as string;
+  const origin = (await headers()).get("origin");
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     email,
@@ -64,5 +65,5 @@ export async function verifyOTP(prevState: any, formData: FormData) {
   }
 
   // Successful verification - redirect directly
-  redirect(redirectTo || "/auth-redirect");
+  redirect(redirectTo.includes("http") ? redirectTo : `${origin}${redirectTo}`);
 }
