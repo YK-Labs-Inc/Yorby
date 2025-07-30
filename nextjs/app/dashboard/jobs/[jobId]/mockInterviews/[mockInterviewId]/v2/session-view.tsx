@@ -13,7 +13,6 @@ import { useDebugMode } from "./hooks/useDebug";
 import type { AppConfig } from "./types";
 import { VideoChatLayout } from "./video-chat-layout";
 import { AgentControlBar } from "@/app/components/livekit/agent-control-bar/agent-control-bar";
-import { useParams } from "next/navigation";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 
@@ -135,40 +134,6 @@ export const SessionView = ({
       }
     }
   }, [saveTranscript, onProcessInterview, interviewId, logInfo, logError]);
-
-  useEffect(() => {
-    if (sessionStarted) {
-      const timeout = setTimeout(() => {
-        if (!isAgentAvailable(agentState)) {
-          const reason =
-            agentState === "connecting"
-              ? "Agent did not join the room. "
-              : "Agent connected but did not complete initializing. ";
-
-          toastAlert({
-            title: "Session ended",
-            description: (
-              <p className="w-full">
-                {reason}
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://docs.livekit.io/agents/start/voice-ai/"
-                  className="whitespace-nowrap underline"
-                >
-                  See quickstart guide
-                </a>
-                .
-              </p>
-            ),
-          });
-          room.disconnect();
-        }
-      }, 10_000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [agentState, sessionStarted, room]);
 
   const { supportsChatInput, supportsVideoInput } = appConfig;
   const capabilities = {

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import { motion } from "motion/react";
 import {
+  LocalUserChoices,
   PreJoin,
   RoomAudioRenderer,
   RoomContext,
@@ -54,16 +55,11 @@ export function LiveKitInterviewComponent({
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
     mockInterviewId,
   });
+  const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();
   const router = useRouter();
   const { baseUrl } = useMultiTenant();
   const t = useTranslations("apply.interviews.livekit");
-  const interviewProcessUrl = useMemo(() => {}, [
-    baseUrl,
-    jobId,
-    mockInterviewId,
-    companyId,
-  ]);
 
   const processInterview = useCallback(async () => {
     setIsProcessing(true);
@@ -167,10 +163,16 @@ export function LiveKitInterviewComponent({
     ) {
       setIsConnecting(true);
       Promise.all([
-        room.localParticipant.setMicrophoneEnabled(true, undefined, {
-          preConnectBuffer: appConfig.isPreConnectBufferEnabled,
+        room.localParticipant.setMicrophoneEnabled(
+          true,
+          { deviceId: localUserChoices?.audioDeviceId },
+          {
+            preConnectBuffer: appConfig.isPreConnectBufferEnabled,
+          }
+        ),
+        room.localParticipant.setCameraEnabled(true, {
+          deviceId: localUserChoices?.videoDeviceId,
         }),
-        room.localParticipant.setCameraEnabled(true),
         room.connect(
           connectionDetails.serverUrl,
           connectionDetails.participantToken
@@ -200,6 +202,7 @@ export function LiveKitInterviewComponent({
     connectionDetails,
     appConfig.isPreConnectBufferEnabled,
     isConnecting,
+    localUserChoices,
     t,
   ]);
 
@@ -216,9 +219,19 @@ export function LiveKitInterviewComponent({
     return (
       <>
         {interviewType === "mock-interview" ? (
-          <MockInterviewPreJoin onSubmit={() => setSessionStarted(true)} />
+          <MockInterviewPreJoin
+            onSubmit={(values) => {
+              setSessionStarted(true);
+              setLocalUserChoices(values);
+            }}
+          />
         ) : (
-          <RealInterviewPreJoin onSubmit={() => setSessionStarted(true)} />
+          <RealInterviewPreJoin
+            onSubmit={(values) => {
+              setSessionStarted(true);
+              setLocalUserChoices(values);
+            }}
+          />
         )}
       </>
     );
