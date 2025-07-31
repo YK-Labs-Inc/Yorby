@@ -841,6 +841,20 @@ export const POST = withAxiom(
         .eq("id", analysisId)
         .single();
 
+      // Update the interview status to complete
+      const { error: updateError } = await supabase
+        .from("custom_job_mock_interviews")
+        .update({ status: "complete" })
+        .eq("id", interviewId);
+
+      if (updateError) {
+        logger.error("Failed to update interview status", {
+          interviewId,
+          error: updateError,
+        });
+        // Don't throw here - the analysis is already saved successfully
+      }
+
       return NextResponse.json({
         success: true,
         data: completeAnalysis,
