@@ -1,45 +1,78 @@
 "use client";
 
-import { LocalUserChoices, PreJoin } from "@livekit/components-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { LocalUserChoices } from "@livekit/components-react";
+import { useState } from "react";
+import { MediaDeviceProvider, useMediaDevice } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
+import InterviewSetup from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/InterviewSetupComponent";
+import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
 interface RealInterviewPreJoinProps {
   onSubmit: (values: LocalUserChoices) => void;
 }
 
 export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
-  const t = useTranslations("apply.interviews.realInterview");
-  const tLabels = useTranslations("apply.interviews.livekit.labels");
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(
+    VOICE_OPTIONS[0]
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Card className="border-orange-200 dark:border-orange-900">
-        <CardHeader>
-          <CardTitle className="text-2xl flex items-center gap-2">
-            <AlertCircle className="h-6 w-6 text-orange-500" />
-            {t("title")}
-          </CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div data-lk-theme="default" className="rounded-lg overflow-hidden">
-            <PreJoin
-              onSubmit={onSubmit}
-              joinLabel={t("button")}
-              micLabel={tLabels("microphone")}
-              camLabel={tLabels("camera")}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <MediaDeviceProvider mediaType="audio-video">
+      <RealInterviewPreJoinContent
+        onSubmit={onSubmit}
+        selectedVoice={selectedVoice}
+        setSelectedVoice={setSelectedVoice}
+      />
+    </MediaDeviceProvider>
+  );
+}
+
+interface RealInterviewPreJoinContentProps {
+  onSubmit: (values: LocalUserChoices) => void;
+  selectedVoice: VoiceOption;
+  setSelectedVoice: React.Dispatch<React.SetStateAction<VoiceOption>>;
+}
+
+function RealInterviewPreJoinContent({
+  onSubmit,
+  selectedVoice,
+  setSelectedVoice,
+}: RealInterviewPreJoinContentProps) {
+  const {
+    videoDevices,
+    audioDevices,
+    selectedVideo,
+    selectedAudio,
+    stream,
+    isRecording,
+    setSelectedVideo,
+    setSelectedAudio,
+    startTestRecording,
+    stopTestRecording,
+  } = useMediaDevice();
+
+  const handleStartInterview = () => {
+    onSubmit({
+      audioDeviceId: selectedAudio,
+      videoDeviceId: selectedVideo,
+    } as LocalUserChoices);
+  };
+
+  return (
+    <InterviewSetup
+      videoDevices={videoDevices}
+      audioDevices={audioDevices}
+      selectedVideo={selectedVideo}
+      selectedAudio={selectedAudio}
+      stream={stream}
+      isRecording={isRecording}
+      jobId=""
+      selectedVoice={selectedVoice}
+      setSelectedVoice={setSelectedVoice}
+      startInterviewAction={handleStartInterview}
+      onVideoChange={setSelectedVideo}
+      onAudioChange={setSelectedAudio}
+      onStartTestRecording={startTestRecording}
+      onStopTestRecording={stopTestRecording}
+    />
   );
 }
