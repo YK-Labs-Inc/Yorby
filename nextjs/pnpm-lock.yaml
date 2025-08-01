@@ -38,6 +38,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.57.0(react@19.0.0))
+      '@livekit/components-core':
+        specifier: ^0.12.9
+        version: 0.12.9(livekit-client@2.15.2(@types/dom-mediacapture-record@1.0.22))(tslib@2.8.1)
       '@livekit/components-react':
         specifier: ^2.9.13
         version: 2.9.13(livekit-client@2.15.2(@types/dom-mediacapture-record@1.0.22))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tslib@2.8.1)
@@ -662,6 +665,13 @@ packages:
 
   '@livekit/components-core@0.12.8':
     resolution: {integrity: sha512-ZqQ88DkZZw6h4XY/lFklOFsM76zZX0mIpa6HKxDgMgW3QpDjl7oOpQCHZYvaDhmJJ9X2m58oOCuf3RUdTKSJMA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      livekit-client: ^2.13.3
+      tslib: ^2.6.2
+
+  '@livekit/components-core@0.12.9':
+    resolution: {integrity: sha512-bwrZsHf6GaHIO+lLyA6Yps1STTX9YIeL3ixwt+Ufi88OgkNYdp41Ug8oeVDlf7tzdxa+r3Xkfaj/qvIG84Yo6A==}
     engines: {node: '>=18'}
     peerDependencies:
       livekit-client: ^2.13.3
@@ -5023,6 +5033,14 @@ snapshots:
       js-tiktoken: 1.0.20
 
   '@livekit/components-core@0.12.8(livekit-client@2.15.2(@types/dom-mediacapture-record@1.0.22))(tslib@2.8.1)':
+    dependencies:
+      '@floating-ui/dom': 1.6.13
+      livekit-client: 2.15.2(@types/dom-mediacapture-record@1.0.22)
+      loglevel: 1.9.1
+      rxjs: 7.8.2
+      tslib: 2.8.1
+
+  '@livekit/components-core@0.12.9(livekit-client@2.15.2(@types/dom-mediacapture-record@1.0.22))(tslib@2.8.1)':
     dependencies:
       '@floating-ui/dom': 1.6.13
       livekit-client: 2.15.2(@types/dom-mediacapture-record@1.0.22)
