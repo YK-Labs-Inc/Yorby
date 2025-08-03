@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Track } from "livekit-client";
-import { MediaDeviceMenu } from "@livekit/components-react";
 import { PhoneOff } from "lucide-react";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { cn } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/utils";
@@ -13,7 +12,7 @@ import {
 } from "./hooks/use-agent-control-bar";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-
+import { MediaDeviceMenu } from "@livekit/components-react";
 export interface AgentControlBarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     UseAgentControlBarProps {
@@ -39,7 +38,6 @@ export function AgentControlBar({
   onChatOpenChange,
   onDisconnect,
   onDeviceError,
-  ...props
 }: AgentControlBarProps) {
   const t = useTranslations("agentControlBar");
   const {
@@ -81,14 +79,12 @@ export function AgentControlBar({
               >
                 {t("microphone")}
               </TrackToggle>
-              <div className="lk-button-group-menu">
-                <MediaDeviceMenu
-                  kind="audioinput"
-                  onActiveDeviceChange={(_kind, deviceId) =>
-                    handleAudioDeviceChange(deviceId ?? "default")
-                  }
-                />
-              </div>
+              <MediaDeviceMenu
+                kind="audioinput"
+                onActiveDeviceChange={(_kind, deviceId) =>
+                  handleAudioDeviceChange(deviceId ?? "default")
+                }
+              />
             </div>
           )}
 
@@ -104,14 +100,12 @@ export function AgentControlBar({
               >
                 {t("camera")}
               </TrackToggle>
-              <div className="lk-button-group-menu">
-                <MediaDeviceMenu
-                  kind="videoinput"
-                  onActiveDeviceChange={(_kind, deviceId) =>
-                    handleVideoDeviceChange(deviceId ?? "default")
-                  }
-                />
-              </div>
+              <MediaDeviceMenu
+                kind="videoinput"
+                onActiveDeviceChange={(_kind, deviceId) =>
+                  handleVideoDeviceChange(deviceId ?? "default")
+                }
+              />
             </div>
           )}
 
