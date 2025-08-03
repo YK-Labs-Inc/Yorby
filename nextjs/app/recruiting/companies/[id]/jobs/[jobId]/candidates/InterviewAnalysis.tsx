@@ -48,7 +48,6 @@ export default function InterviewAnalysis({
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   // Extract data from candidateData if provided
-  const candidate = candidateData?.candidate;
   const applicationFiles = candidateData?.applicationFiles;
   const mockInterview = candidateData?.mockInterview;
   const muxMetadata = candidateData?.muxMetadata;
@@ -82,6 +81,17 @@ export default function InterviewAnalysis({
   };
 
   const renderInterviewVideo = () => {
+    // First check if playback_id is present
+    if (muxMetadata?.playback_id) {
+      return (
+        <MuxPlayer
+          playbackId={muxMetadata.playback_id}
+          className="w-full rounded-lg"
+        />
+      );
+    }
+
+    // If no playback_id, show appropriate status
     if (!muxMetadata) {
       return (
         <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-gray-50 rounded-lg">
@@ -124,22 +134,13 @@ export default function InterviewAnalysis({
         );
 
       case "ready":
-        if (muxMetadata.playback_id) {
-          return (
-            <MuxPlayer
-              playbackId={muxMetadata.playback_id}
-              className="w-full rounded-lg"
-            />
-          );
-        } else {
-          return (
-            <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-gray-50 rounded-lg">
-              <span className="text-base font-medium">
-                {tOverview("videoReady")}
-              </span>
-            </div>
-          );
-        }
+        return (
+          <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-gray-50 rounded-lg">
+            <span className="text-base font-medium">
+              {tOverview("videoReady")}
+            </span>
+          </div>
+        );
 
       default:
         return (
