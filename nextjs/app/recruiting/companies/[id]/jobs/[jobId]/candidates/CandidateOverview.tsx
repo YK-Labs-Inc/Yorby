@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { CandidateData } from "./actions";
-import { useTranslations } from "next-intl";
 import InterviewAnalysis from "./InterviewAnalysis";
 import CandidateInfoSection from "./CandidateInfoSection";
 import CandidateApplicationFilesSection from "./CandidateApplicationFilesSection";
@@ -21,19 +14,7 @@ interface CandidateOverviewProps {
 export default function CandidateOverview({
   candidateData,
 }: CandidateOverviewProps) {
-  const t = useTranslations("apply.recruiting.candidates.overview");
-  const { candidate, interviewAnalysis } = candidateData;
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return t("appliedOn", { date });
-  };
+  const { interviewAnalysis } = candidateData;
 
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
