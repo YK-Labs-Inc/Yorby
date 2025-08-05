@@ -23,10 +23,10 @@ export type ApplicationFile = Tables<"candidate_application_files"> & {
     signed_url?: string;
   };
 };
-export type MockInterview = Tables<"custom_job_mock_interviews">;
-export type MuxMetadata = Tables<"mock_interview_mux_metadata">;
-export type MockInterviewMessage = Tables<"mock_interview_messages">;
+export type JobInterview = Tables<"candidate_job_interviews">;
+export type JobInterviewMessage = Tables<"job_interview_messages">;
 export type InterviewAnalysis = TypedInterviewAnalysis;
+export type JobInterviewRecording = Tables<"job_interview_recordings">;
 
 export interface AccessValidation {
   company: Company;
@@ -37,9 +37,9 @@ export interface AccessValidation {
 export interface CandidateData {
   candidate: Candidate;
   applicationFiles: ApplicationFile[];
-  mockInterview: MockInterview | null;
-  muxMetadata: MuxMetadata | null;
-  mockInterviewMessages: MockInterviewMessage[];
+  jobInterview: JobInterview | null;
+  jobInterviewRecording: JobInterviewRecording | null;
+  jobInterviewMessages: JobInterviewMessage[];
   interviewAnalysis: InterviewAnalysis | null;
 }
 
@@ -264,71 +264,69 @@ export const getCandidateData = cache(
       filesCount: filesWithUrls.length,
     });
 
-    // Fetch mock interview data
-    const { data: mockInterview, error: interviewError } = await supabase
-      .from("custom_job_mock_interviews")
+    // Fetch job interview data
+    const { data: jobInterview, error: interviewError } = await supabase
+      .from("candidate_job_interviews")
       .select("*")
       .eq("candidate_id", candidateId)
       .maybeSingle(); // Use maybeSingle since there should only be one per candidate
 
     if (interviewError) {
-      log.error("Error fetching mock interview", {
+      log.error("Error fetching job interview", {
         interviewError,
         candidateId,
       });
     }
 
-    // Fetch mux metadata if mock interview exists
-    let muxMetadata = null;
-    if (mockInterview) {
-      const { data: muxData, error: muxError } = await supabase
-        .from("mock_interview_mux_metadata")
+    // Fetch job interview recording if job interview exists
+    let jobInterviewRecording = null;
+    if (jobInterview) {
+      const { data: jobInterviewRecording, error: muxError } = await supabase
+        .from("job_interview_recordings")
         .select("*")
-        .eq("id", mockInterview.id)
+        .eq("id", jobInterview.id)
         .maybeSingle();
 
       if (muxError && muxError.code !== "PGRST116") {
-        log.error("Error fetching mux metadata", {
+        log.error("Error fetching job interview recording", {
           muxError,
-          mockInterviewId: mockInterview.id,
+          jobInterviewId: jobInterview.id,
         });
-      } else {
-        muxMetadata = muxData;
       }
     }
 
-    // Fetch mock interview messages if mock interview exists
-    let mockInterviewMessages: MockInterviewMessage[] = [];
-    if (mockInterview) {
+    // Fetch job interview messages if job interview exists
+    let jobInterviewMessages: JobInterviewMessage[] = [];
+    if (jobInterview) {
       const { data: messages, error: messagesError } = await supabase
-        .from("mock_interview_messages")
+        .from("job_interview_messages")
         .select("*")
-        .eq("mock_interview_id", mockInterview.id)
+        .eq("candidate_interview_id", jobInterview.id)
         .order("created_at", { ascending: true });
 
       if (messagesError) {
-        log.error("Error fetching mock interview messages", {
+        log.error("Error fetching job interview messages", {
           messagesError,
-          mockInterviewId: mockInterview.id,
+          jobInterviewId: jobInterview.id,
         });
       } else {
-        mockInterviewMessages = messages || [];
+        jobInterviewMessages = messages || [];
       }
     }
 
-    // Fetch interview analysis if mock interview exists
+    // Fetch interview analysis if job interview exists
     let interviewAnalysis = null;
-    if (mockInterview) {
+    if (jobInterview) {
       const { data: analysis, error: analysisError } = await supabase
         .from("recruiter_interview_analysis_complete")
         .select("*")
-        .eq("mock_interview_id", mockInterview.id)
+        .eq("candidate_interview_id", jobInterview.id)
         .maybeSingle();
 
       if (analysisError && analysisError.code !== "PGRST116") {
         log.error("Error fetching interview analysis", {
           analysisError,
-          mockInterviewId: mockInterview.id,
+          jobInterviewId: jobInterview.id,
         });
       } else {
         interviewAnalysis = analysis as InterviewAnalysis;
@@ -344,9 +342,9 @@ export const getCandidateData = cache(
         candidatePhoneNumber,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
-      mockInterview: mockInterview || null,
-      muxMetadata: muxMetadata || null,
-      mockInterviewMessages,
+      jobInterview,
+      jobInterviewRecording,
+      jobInterviewMessages,
       interviewAnalysis: interviewAnalysis || null,
     };
   }

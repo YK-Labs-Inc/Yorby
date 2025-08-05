@@ -41,7 +41,7 @@ export interface QuestionAnalysis {
 // Type for the complete interview analysis with properly typed JSON fields
 export interface TypedInterviewAnalysis {
   id: string | null;
-  mock_interview_id: string | null;
+  candidate_interview_id: string | null;
   hiring_verdict: "ADVANCE" | "REJECT" | "BORDERLINE" | null;
   overall_match_score: number | null;
   verdict_summary: string | null;
