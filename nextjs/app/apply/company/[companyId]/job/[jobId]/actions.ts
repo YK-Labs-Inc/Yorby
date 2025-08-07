@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { headers } from "next/headers";
+import { Tables } from "@/utils/supabase/database.types";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -369,6 +370,10 @@ export async function checkApplicationStatus(
   // Check if the user has completed an interview for this job
   let hasCompletedInterview = false;
   let interviewId: string | null = null;
+  let finalizedCandidateJobInterviews: Pick<
+    Tables<"candidate_job_interviews">,
+    "id" | "status"
+  >[] = [];
 
   if (existingCandidate) {
     // Fetch the job interviews for the job
@@ -387,14 +392,15 @@ export async function checkApplicationStatus(
     }
 
     // Check if the current candidate has completed the job interviews or not
-    let { data: interviews, error: interviewsError } = await supabase
-      .from("candidate_job_interviews")
-      .select("id, status")
-      .in(
-        "interview_id",
-        jobInterviews.map((interview) => interview.id)
-      )
-      .eq("candidate_id", existingCandidate.id);
+    let { data: candidateJobInterviews, error: interviewsError } =
+      await supabase
+        .from("candidate_job_interviews")
+        .select("id, status")
+        .in(
+          "interview_id",
+          jobInterviews.map((interview) => interview.id)
+        )
+        .eq("candidate_id", existingCandidate.id);
 
     if (interviewsError) {
       logger.error("Error fetching interviews", {
@@ -404,26 +410,28 @@ export async function checkApplicationStatus(
       throw new Error(t("checkInterviewStatus"));
     }
 
-    if (interviews && interviews.length > 0) {
-      interviews = interviews.sort(
+    if (candidateJobInterviews && candidateJobInterviews.length > 0) {
+      candidateJobInterviews = candidateJobInterviews.sort(
         (a, b) =>
           (jobInterviews.find((interview) => interview.id === a.id)
             ?.order_index || 0) -
           (jobInterviews.find((interview) => interview.id === b.id)
             ?.order_index || 0)
       );
+      finalizedCandidateJobInterviews = candidateJobInterviews;
 
       // Check if any interview is complete
-      hasCompletedInterview = interviews.every(
+      hasCompletedInterview = candidateJobInterviews.every(
         (interview) => interview.status === "completed"
       );
     }
 
     // Get the most recent interview ID (completed or in-progress)
-    if (interviews && interviews.length > 0) {
+    if (candidateJobInterviews && candidateJobInterviews.length > 0) {
       interviewId =
-        interviews.find((interview) => interview.status !== "completed")?.id ??
-        null;
+        candidateJobInterviews.find(
+          (interview) => interview.status !== "completed"
+        )?.id ?? null;
     }
   }
 
@@ -445,6 +453,7 @@ export async function checkApplicationStatus(
     hasCompletedInterview,
     application: existingCandidate || null,
     interviewId,
+    candidateJobInterviews: finalizedCandidateJobInterviews,
   };
 }
 
@@ -507,7 +516,7 @@ export async function handleApplyAction(
       }
       // User has applied and has an interview ID, redirect to specific interview page
       redirect(
-        `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
+        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${result.interviewId}`
       );
     } else {
       const interviewId = await createInterviewsForJobAndReturnFirstInterviewId(
@@ -517,14 +526,13 @@ export async function handleApplyAction(
         }
       );
       redirect(
-        `/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`
+        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
       );
     }
   } else {
     // User hasn't applied yet, redirect to application page
     redirect(`/apply/company/${companyId}/job/${jobId}/application`);
   }
-  return { error: undefined };
 }
 
 export const submitApplication = async (

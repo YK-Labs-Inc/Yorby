@@ -575,5 +575,28 @@
       "success": "Interview round created successfully",
       "error": "Failed to create interview round"
     }
+  },
+  "interviewLayout": {
+    "sidebar": {
+      "title": "Interviews",
+      "round": "Round {number}: {name}"
+    },
+    "errors": {
+      "userNotAuthenticated": "User not authenticated",
+      "candidateNotFound": "Candidate not found",
+      "noInterviewsFound": "No job interviews found",
+      "fetchCandidateInterviews": "Failed to fetch candidate interviews",
+      "layoutError": "Error in interview layout"
+    }
+  },
+  "candidateInterview": {
+    "interviewProcessed": {
+      "nextRound": "Your interview has been processed. Click below to continue to the next interview round.",
+      "complete": "Your interview has been processed successfully. Click below to complete your application."
+    },
+    "buttons": {
+      "continueToNext": "Continue to Next Interview",
+      "completeApplication": "Complete Application"
+    }
   }
 } 
