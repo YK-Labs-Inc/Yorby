@@ -8,31 +8,41 @@ import { Suspense } from "react";
 import QuestionsTable from "./QuestionsTable";
 import { Tables } from "@/utils/supabase/database.types";
 import QuestionsTableLoading from "./QuestionsTableLoading";
+import { getTranslations } from "next-intl/server";
+
+export type InterviewQuestion = Tables<"job_interview_questions"> & {
+  company_interview_question_bank: Tables<"company_interview_question_bank">;
+};
 
 async function fetchQuestions(
-  jobId: string
-): Promise<Tables<"custom_job_questions">[]> {
+  interviewId: string
+): Promise<InterviewQuestion[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("custom_job_questions")
-    .select("*")
-    .eq("custom_job_id", jobId)
-    .order("created_at", { ascending: false });
+    .from("job_interview_questions")
+    .select(
+      `
+      *,
+      company_interview_question_bank(*)
+    `
+    )
+    .eq("interview_id", interviewId)
+    .order("order_index", { ascending: true });
 
   if (error) throw error;
-  return data as Tables<"custom_job_questions">[];
+  return data;
 }
 
 interface PageProps {
   params: Promise<{
     id: string;
     jobId: string;
+    interviewId: string;
   }>;
 }
 
 export default async function QuestionsPage({ params }: PageProps) {
-  const { id: companyId, jobId } = await params;
-
+  const { id: companyId, jobId, interviewId } = await params;
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     function: "QuestionsPage",
@@ -89,48 +99,60 @@ export default async function QuestionsPage({ params }: PageProps) {
     notFound();
   }
 
+  const t = await getTranslations("apply.recruiting.jobDetail");
+
   // Get company details for breadcrumb
-  const { data: company } = await supabase
+  const { data: company, error: companyError } = await supabase
     .from("companies")
     .select("name")
     .eq("id", companyId)
     .single();
 
+  if (companyError || !company) {
+    logger.error("Company not found", { error: companyError });
+    await logger.flush();
+    notFound();
+  }
+
+  const { data: interview, error: interviewError } = await supabase
+    .from("job_interviews")
+    .select("*")
+    .eq("id", interviewId)
+    .single();
+
+  if (interviewError || !interview) {
+    logger.error("Interview not found", { error: interviewError });
+    await logger.flush();
+    notFound();
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link
             href={`/recruiting/companies/${companyId}`}
-            className="hover:text-foreground"
-          >
-            {company?.name || "Company"}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
-            className="hover:text-foreground"
-          >
-            {job.job_title}
-          </Link>
-          <span>/</span>
-          <span>Questions</span>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+            className="hover:text-foreground flex items-center gap-1"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Job Details
+            {company?.name || t("breadcrumb.defaultCompany")}
           </Link>
-          <H1 className="text-2xl sm:text-3xl">Interview Questions</H1>
-          <p className="text-muted-foreground mt-2">
-            Manage screening questions for {job.job_title}
-          </p>
+          <span>/</span>
+          <Link
+            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
+            className="hover:text-foreground flex items-center gap-1"
+          >
+            {job.job_title || t("breadcrumb.defaultJob")}
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
+            className="hover:text-foreground flex items-center gap-1"
+          >
+            {t("sections.interviewRounds.title")}
+          </Link>
+          <span>/</span>
+          <span>{interview.name}</span>
         </div>
 
         <Suspense fallback={<QuestionsTableLoading />}>
@@ -138,6 +160,7 @@ export default async function QuestionsPage({ params }: PageProps) {
             jobId={jobId}
             jobTitle={job.job_title}
             companyId={companyId}
+            interview={interview}
           />
         </Suspense>
       </div>
@@ -149,15 +172,18 @@ async function QuestionsTableWrapper({
   jobId,
   jobTitle,
   companyId,
+  interview,
 }: {
   jobId: string;
   jobTitle: string;
   companyId: string;
+  interview: Tables<"job_interviews">;
 }) {
-  const questions = await fetchQuestions(jobId);
+  const questions = await fetchQuestions(interview.id);
 
   return (
     <QuestionsTable
+      interview={interview}
       jobId={jobId}
       jobTitle={jobTitle}
       companyId={companyId}

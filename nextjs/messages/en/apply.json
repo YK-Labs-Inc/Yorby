@@ -271,6 +271,10 @@
         "candidates": {
           "title": "Candidates",
           "description": "Review and manage job applicants"
+        },
+        "interviewRounds": {
+          "title": "Interviews",
+          "description": "Manage your interviews for this job listing"
         }
       }
     },
@@ -395,7 +399,8 @@
       }
     },
     "questionsTable": {
-      "title": "Manage Questions",
+      "title": "Interview Questions",
+      "subtitle": "Manage the interview questions that will be asked in this interview round",
       "addQuestion": "Add Question",
       "emptyState": {
         "title": "Add Specific Question You Want Your AI Recruiter To Ask",
@@ -438,6 +443,9 @@
           "cancel": "Cancel",
           "create": "Create Question"
         }
+      },
+      "detailPanel": {
+        "title": "Question Details"
       },
       "editDialog": {
         "title": "Edit Question",
@@ -503,6 +511,68 @@
           "unexpectedError": "An unexpected error occurred"
         }
       }
+    },
+    "interviewRoundsManager": {
+      "title": "Interview Rounds",
+      "subtitle": "Manage interview rounds for this job position",
+      "createInterviewRound": "Create Interview Round",
+      "noInterviews": {
+        "title": "No Interview Rounds",
+        "description": "Create interview rounds to structure your hiring process"
+      },
+      "table": {
+        "roundName": "Round Name",
+        "type": "Type",
+        "questions": "Questions",
+        "candidates": "Candidates",
+        "order": "Order"
+      },
+      "interviewType": {
+        "general": "Behavioral",
+        "coding": "Technical"
+      },
+      "actions": {
+        "editRound": "Edit Round",
+        "manageQuestions": "Manage Questions",
+        "deleteRound": "Delete Round"
+      },
+      "errors": {
+        "updateOrderFailed": "Failed to update interview order"
+      },
+      "success": {
+        "orderUpdated": "Interview order updated successfully"
+      },
+      "updating": "Updating order"
+    },
+    "createJobInterviewDialog": {
+      "title": "Create Interview Round",
+      "description": "Add a new interview round to your hiring process.",
+      "form": {
+        "name": {
+          "label": "Round Name",
+          "placeholder": "e.g., Technical Screen, Behavioral Interview",
+          "description": "Give this interview round a descriptive name"
+        },
+        "interviewType": {
+          "label": "Interview Type",
+          "placeholder": "Select interview type",
+          "description": "Choose the type of questions for this round",
+          "options": {
+            "general": "Behavioral Interview",
+            "coding": "Technical/Coding Interview"
+          }
+        },
+        "validation": {
+          "nameMin": "Round name must be at least 2 characters"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create Round",
+        "creating": "Creating..."
+      },
+      "success": "Interview round created successfully",
+      "error": "Failed to create interview round"
     }
   }
 } 

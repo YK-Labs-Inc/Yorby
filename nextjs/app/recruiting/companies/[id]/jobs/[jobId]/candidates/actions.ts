@@ -23,7 +23,7 @@ export type ApplicationFile = Tables<"candidate_application_files"> & {
     signed_url?: string;
   };
 };
-export type JobInterview = Tables<"candidate_job_interviews">;
+export type CandidateJobInterview = Tables<"candidate_job_interviews">;
 export type JobInterviewMessage = Tables<"job_interview_messages">;
 export type InterviewAnalysis = TypedInterviewAnalysis;
 export type JobInterviewRecording = Tables<"job_interview_recordings">;
@@ -37,7 +37,7 @@ export interface AccessValidation {
 export interface CandidateData {
   candidate: Candidate;
   applicationFiles: ApplicationFile[];
-  jobInterview: JobInterview | null;
+  candidateJobInterview: CandidateJobInterview | null;
   jobInterviewRecording: JobInterviewRecording | null;
   jobInterviewMessages: JobInterviewMessage[];
   interviewAnalysis: InterviewAnalysis | null;
@@ -265,11 +265,12 @@ export const getCandidateData = cache(
     });
 
     // Fetch job interview data
-    const { data: jobInterview, error: interviewError } = await supabase
-      .from("candidate_job_interviews")
-      .select("*")
-      .eq("candidate_id", candidateId)
-      .maybeSingle(); // Use maybeSingle since there should only be one per candidate
+    const { data: candidateJobInterview, error: interviewError } =
+      await supabase
+        .from("candidate_job_interviews")
+        .select("*")
+        .eq("candidate_id", candidateId)
+        .maybeSingle(); // Use maybeSingle since there should only be one per candidate
 
     if (interviewError) {
       log.error("Error fetching job interview", {
@@ -280,34 +281,34 @@ export const getCandidateData = cache(
 
     // Fetch job interview recording if job interview exists
     let jobInterviewRecording = null;
-    if (jobInterview) {
+    if (candidateJobInterview) {
       const { data: jobInterviewRecording, error: muxError } = await supabase
         .from("job_interview_recordings")
         .select("*")
-        .eq("id", jobInterview.id)
+        .eq("id", candidateJobInterview.id)
         .maybeSingle();
 
       if (muxError && muxError.code !== "PGRST116") {
         log.error("Error fetching job interview recording", {
           muxError,
-          jobInterviewId: jobInterview.id,
+          jobInterviewId: candidateJobInterview.id,
         });
       }
     }
 
     // Fetch job interview messages if job interview exists
     let jobInterviewMessages: JobInterviewMessage[] = [];
-    if (jobInterview) {
+    if (candidateJobInterview) {
       const { data: messages, error: messagesError } = await supabase
         .from("job_interview_messages")
         .select("*")
-        .eq("candidate_interview_id", jobInterview.id)
+        .eq("candidate_interview_id", candidateJobInterview.id)
         .order("created_at", { ascending: true });
 
       if (messagesError) {
         log.error("Error fetching job interview messages", {
           messagesError,
-          jobInterviewId: jobInterview.id,
+          jobInterviewId: candidateJobInterview.id,
         });
       } else {
         jobInterviewMessages = messages || [];
@@ -316,17 +317,17 @@ export const getCandidateData = cache(
 
     // Fetch interview analysis if job interview exists
     let interviewAnalysis = null;
-    if (jobInterview) {
+    if (candidateJobInterview) {
       const { data: analysis, error: analysisError } = await supabase
         .from("recruiter_interview_analysis_complete")
         .select("*")
-        .eq("candidate_interview_id", jobInterview.id)
+        .eq("candidate_interview_id", candidateJobInterview.id)
         .maybeSingle();
 
       if (analysisError && analysisError.code !== "PGRST116") {
         log.error("Error fetching interview analysis", {
           analysisError,
-          jobInterviewId: jobInterview.id,
+          jobInterviewId: candidateJobInterview.id,
         });
       } else {
         interviewAnalysis = analysis as InterviewAnalysis;
@@ -342,7 +343,7 @@ export const getCandidateData = cache(
         candidatePhoneNumber,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
-      jobInterview,
+      candidateJobInterview,
       jobInterviewRecording,
       jobInterviewMessages,
       interviewAnalysis: interviewAnalysis || null,
