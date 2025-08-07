@@ -396,7 +396,10 @@
         "noExamplesProvided": "No specific examples provided",
         "noQuestionAnalysis": "No analysis available for this question",
         "candidateResponse": "Candidate's Response",
-        "answerAnalysis": "Answer Analysis"
+        "answerAnalysis": "Answer Analysis",
+        "roundOf": "Round {current} of {total}",
+        "previousRound": "Previous",
+        "nextRound": "Next"
       }
     },
     "questionsTable": {

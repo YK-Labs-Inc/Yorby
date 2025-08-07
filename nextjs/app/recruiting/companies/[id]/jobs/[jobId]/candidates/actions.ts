@@ -37,10 +37,12 @@ export interface AccessValidation {
 export interface CandidateData {
   candidate: Candidate;
   applicationFiles: ApplicationFile[];
-  candidateJobInterview: CandidateJobInterview | null;
-  jobInterviewRecording: JobInterviewRecording | null;
-  jobInterviewMessages: JobInterviewMessage[];
-  interviewAnalysis: InterviewAnalysis | null;
+  interviewResults: {
+    candidateJobInterview: CandidateJobInterview | null;
+    jobInterviewRecording: JobInterviewRecording | null;
+    jobInterviewMessages: JobInterviewMessage[];
+    interviewAnalysis: InterviewAnalysis | null;
+  }[];
 }
 
 // Cache for 60 seconds to avoid repeated queries
@@ -265,73 +267,92 @@ export const getCandidateData = cache(
     });
 
     // Fetch job interview data
-    const { data: candidateJobInterview, error: interviewError } =
+    const { data: candidateJobInterviews, error: interviewError } =
       await supabase
         .from("candidate_job_interviews")
         .select("*")
-        .eq("candidate_id", candidateId)
-        .maybeSingle(); // Use maybeSingle since there should only be one per candidate
+        .eq("candidate_id", candidateId);
 
     if (interviewError) {
       log.error("Error fetching job interview", {
         interviewError,
         candidateId,
       });
+      throw interviewError;
     }
 
-    // Fetch job interview recording if job interview exists
-    let jobInterviewRecording = null;
-    if (candidateJobInterview) {
-      const { data: jobInterviewRecording, error: muxError } = await supabase
-        .from("job_interview_recordings")
-        .select("*")
-        .eq("id", candidateJobInterview.id)
-        .maybeSingle();
-
-      if (muxError && muxError.code !== "PGRST116") {
-        log.error("Error fetching job interview recording", {
-          muxError,
-          jobInterviewId: candidateJobInterview.id,
-        });
-      }
+    if (candidateJobInterviews.length === 0) {
+      log.info("No job interviews found for candidate", {
+        candidateId,
+      });
+      throw new Error("No job interviews found for candidate");
     }
 
-    // Fetch job interview messages if job interview exists
-    let jobInterviewMessages: JobInterviewMessage[] = [];
-    if (candidateJobInterview) {
-      const { data: messages, error: messagesError } = await supabase
-        .from("job_interview_messages")
-        .select("*")
-        .eq("candidate_interview_id", candidateJobInterview.id)
-        .order("created_at", { ascending: true });
+    let interviewResults: CandidateData["interviewResults"] = [];
+    for (const candidateJobInterview of candidateJobInterviews) {
+      // Fetch job interview recording if job interview exists
+      let jobInterviewRecording = null;
+      if (candidateJobInterview) {
+        const { data: jobInterviewRecordingData, error: muxError } =
+          await supabase
+            .from("job_interview_recordings")
+            .select("*")
+            .eq("id", candidateJobInterview.id)
+            .maybeSingle();
 
-      if (messagesError) {
-        log.error("Error fetching job interview messages", {
-          messagesError,
-          jobInterviewId: candidateJobInterview.id,
-        });
-      } else {
-        jobInterviewMessages = messages || [];
+        if (muxError) {
+          log.error("Error fetching job interview recording", {
+            muxError,
+            jobInterviewId: candidateJobInterview.id,
+          });
+        }
+        jobInterviewRecording = jobInterviewRecordingData;
       }
-    }
 
-    // Fetch interview analysis if job interview exists
-    let interviewAnalysis = null;
-    if (candidateJobInterview) {
-      const { data: analysis, error: analysisError } = await supabase
-        .from("recruiter_interview_analysis_complete")
-        .select("*")
-        .eq("candidate_interview_id", candidateJobInterview.id)
-        .maybeSingle();
+      // Fetch job interview messages if job interview exists
+      let jobInterviewMessages: JobInterviewMessage[] = [];
+      if (candidateJobInterview) {
+        const { data: messages, error: messagesError } = await supabase
+          .from("job_interview_messages")
+          .select("*")
+          .eq("candidate_interview_id", candidateJobInterview.id)
+          .order("created_at", { ascending: true });
 
-      if (analysisError && analysisError.code !== "PGRST116") {
-        log.error("Error fetching interview analysis", {
-          analysisError,
-          jobInterviewId: candidateJobInterview.id,
-        });
-      } else {
-        interviewAnalysis = analysis as InterviewAnalysis;
+        if (messagesError) {
+          log.error("Error fetching job interview messages", {
+            messagesError,
+            jobInterviewId: candidateJobInterview.id,
+          });
+        } else {
+          jobInterviewMessages = messages || [];
+        }
       }
+
+      // Fetch interview analysis if job interview exists
+      let interviewAnalysis = null;
+      if (candidateJobInterview) {
+        const { data: analysis, error: analysisError } = await supabase
+          .from("recruiter_interview_analysis_complete")
+          .select("*")
+          .eq("candidate_interview_id", candidateJobInterview.id)
+          .maybeSingle();
+
+        if (analysisError && analysisError.code !== "PGRST116") {
+          log.error("Error fetching interview analysis", {
+            analysisError,
+            jobInterviewId: candidateJobInterview.id,
+          });
+        } else {
+          interviewAnalysis = analysis as InterviewAnalysis;
+        }
+      }
+
+      interviewResults.push({
+        candidateJobInterview,
+        jobInterviewRecording,
+        jobInterviewMessages,
+        interviewAnalysis,
+      });
     }
 
     await log.flush();
@@ -343,10 +364,7 @@ export const getCandidateData = cache(
         candidatePhoneNumber,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
-      candidateJobInterview,
-      jobInterviewRecording,
-      jobInterviewMessages,
-      interviewAnalysis: interviewAnalysis || null,
+      interviewResults,
     };
   }
 );

@@ -45,13 +45,14 @@ export default function InterviewAnalysis({
   );
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
+  const [selectedInterviewRound, setSelectedInterviewRound] = useState(0);
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   // Extract data from candidateData if provided
   const applicationFiles = candidateData?.applicationFiles;
-  const mockInterview = candidateData?.mockInterview;
-  const muxMetadata = candidateData?.muxMetadata;
-  const mockInterviewMessages = candidateData?.mockInterviewMessages;
+  const interviewResults = candidateData?.interviewResults;
+  const interviewResult = interviewResults?.[selectedInterviewRound];
+  const hasMultipleRounds = interviewResults && interviewResults.length > 1;
 
   // Helper functions
   const formatDate = (dateString: string) => {
@@ -81,18 +82,20 @@ export default function InterviewAnalysis({
   };
 
   const renderInterviewVideo = () => {
+    if (!interviewResult) return null;
+
     // First check if playback_id is present
-    if (muxMetadata?.playback_id) {
+    if (interviewResult.jobInterviewRecording?.playback_id) {
       return (
         <MuxPlayer
-          playbackId={muxMetadata.playback_id}
+          playbackId={interviewResult.jobInterviewRecording.playback_id}
           className="w-full rounded-lg"
         />
       );
     }
 
     // If no playback_id, show appropriate status
-    if (!muxMetadata) {
+    if (!interviewResult.jobInterviewRecording?.playback_id) {
       return (
         <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-gray-50 rounded-lg">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
@@ -106,7 +109,7 @@ export default function InterviewAnalysis({
       );
     }
 
-    switch (muxMetadata.status) {
+    switch (interviewResult.jobInterviewRecording?.status) {
       case "preparing":
         return (
           <div className="w-full flex flex-col items-center justify-center h-48 text-muted-foreground text-center bg-gray-50 rounded-lg">
@@ -351,13 +354,77 @@ export default function InterviewAnalysis({
                 </>
               )}
 
-              {/* Mock Interview Section */}
+              {/* Interview Section */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {tOverview("mockInterview")}
-                </h3>
-                {mockInterview ? (
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    {tOverview("mockInterview")}
+                    {hasMultipleRounds && (
+                      <span className="text-xs font-normal">
+                        (
+                        {t("roundOf", {
+                          current: selectedInterviewRound + 1,
+                          total: interviewResults.length,
+                        })}
+                        )
+                      </span>
+                    )}
+                  </h3>
+                  {hasMultipleRounds && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setSelectedInterviewRound(
+                            Math.max(0, selectedInterviewRound - 1)
+                          )
+                        }
+                        disabled={selectedInterviewRound === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-1" />
+                        {t("previousRound")}
+                      </Button>
+                      <div className="flex gap-1">
+                        {interviewResults.map((_, index) => (
+                          <Button
+                            key={index}
+                            variant={
+                              index === selectedInterviewRound
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setSelectedInterviewRound(index)}
+                            className="w-8 h-8 p-0"
+                          >
+                            {index + 1}
+                          </Button>
+                        ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setSelectedInterviewRound(
+                            Math.min(
+                              interviewResults.length - 1,
+                              selectedInterviewRound + 1
+                            )
+                          )
+                        }
+                        disabled={
+                          selectedInterviewRound === interviewResults.length - 1
+                        }
+                      >
+                        {t("nextRound")}
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {interviewResult ? (
                   <div className="space-y-4">
                     <div className="p-4 border rounded-lg">
                       <div className="space-y-2">
@@ -367,14 +434,16 @@ export default function InterviewAnalysis({
                           </span>
                           <span
                             className={`text-sm px-2 py-1 rounded-full ${
-                              mockInterview.status === "complete"
+                              interviewResult.candidateJobInterview?.status ===
+                              "completed"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {mockInterview.status === "complete"
+                            {interviewResult.candidateJobInterview?.status ===
+                            "completed"
                               ? tOverview("complete")
-                              : mockInterview.status}
+                              : interviewResult.candidateJobInterview?.status}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -382,14 +451,17 @@ export default function InterviewAnalysis({
                             {tOverview("created")}
                           </span>
                           <span className="text-sm text-muted-foreground">
-                            {formatDate(mockInterview.created_at)}
+                            {formatDate(
+                              interviewResult.candidateJobInterview?.created_at!
+                            )}
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Interview Video */}
-                    {mockInterview.status === "complete" && (
+                    {interviewResult.candidateJobInterview?.status ===
+                      "completed" && (
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium">
                           {tOverview("interviewRecording")}
@@ -399,15 +471,18 @@ export default function InterviewAnalysis({
                     )}
 
                     {/* Interview Transcript */}
-                    {mockInterview.status === "complete" &&
-                      mockInterviewMessages &&
-                      mockInterviewMessages.length > 0 && (
+                    {interviewResult.candidateJobInterview?.status ===
+                      "completed" &&
+                      interviewResult.jobInterviewMessages &&
+                      interviewResult.jobInterviewMessages.length > 0 && (
                         <div className="space-y-2">
                           <h4 className="text-sm font-medium">
                             {tOverview("interviewTranscript")}
                           </h4>
                           <ChatTranscript
-                            messages={mockInterviewMessages as ChatMessage[]}
+                            messages={
+                              interviewResult.jobInterviewMessages as ChatMessage[]
+                            }
                             userLabel={tTranscript("candidate")}
                             assistantLabel={tTranscript("interviewer")}
                             formatTimestamp={formatMessageTime}
