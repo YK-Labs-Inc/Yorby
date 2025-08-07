@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import type { User } from "@supabase/supabase-js";
@@ -196,35 +195,47 @@ export function ApplicationForm({
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">{t("applicationForm.userInfo.emailLabel")}</Label>
+                    <Label htmlFor="email">
+                      {t("applicationForm.userInfo.emailLabel")}
+                    </Label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("applicationForm.userInfo.emailPlaceholder")}
+                      placeholder={t(
+                        "applicationForm.userInfo.emailPlaceholder"
+                      )}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">{t("applicationForm.userInfo.fullNameLabel")}</Label>
+                    <Label htmlFor="fullName">
+                      {t("applicationForm.userInfo.fullNameLabel")}
+                    </Label>
                     <Input
                       id="fullName"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder={t("applicationForm.userInfo.fullNamePlaceholder")}
+                      placeholder={t(
+                        "applicationForm.userInfo.fullNamePlaceholder"
+                      )}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">{t("applicationForm.userInfo.phoneLabel")}</Label>
+                    <Label htmlFor="phoneNumber">
+                      {t("applicationForm.userInfo.phoneLabel")}
+                    </Label>
                     <Input
                       id="phoneNumber"
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder={t("applicationForm.userInfo.phonePlaceholder")}
+                      placeholder={t(
+                        "applicationForm.userInfo.phonePlaceholder"
+                      )}
                     />
                   </div>
                 </div>
@@ -352,9 +363,7 @@ export function ApplicationForm({
                   <Button
                     type="submit"
                     disabled={
-                      selectedFiles.size === 0 ||
-                      isPending ||
-                      (!user?.email && (!email || !fullName))
+                      isPending || (!user?.email && (!email || !fullName))
                     }
                     size="lg"
                   >

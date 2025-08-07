@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
 import { Tables } from "@/utils/supabase/database.types";
@@ -66,27 +66,57 @@ export default async function ApplicationPage({ params }: PageProps) {
     existingApplication = data;
 
     if (existingApplication) {
-      // Check if there's a completed mock interview for this application
-      const { data: interview } = await supabase
-        .from("custom_job_mock_interviews")
-        .select("id, status")
+      // Fetch the job interviews for the job
+      const { data: jobInterviews, error: jobInterviewsError } = await supabase
+        .from("job_interviews")
+        .select("id, order_index")
         .eq("custom_job_id", jobId)
-        .eq("candidate_id", existingApplication.id)
-        .single();
+        .order("order_index", { ascending: true });
 
-      if (interview) {
-        if (interview.status === "complete") {
+      if (jobInterviewsError) {
+        logger.error("Error fetching job interviews", {
+          error: jobInterviewsError,
+        });
+        return notFound();
+      }
+
+      // Check if the current candidate has completed the job interviews or not
+      let { data: interviews } = await supabase
+        .from("candidate_job_interviews")
+        .select("id, status")
+        .in(
+          "interview_id",
+          jobInterviews.map((interview) => interview.id)
+        )
+        .eq("candidate_id", existingApplication.id);
+
+      if (interviews) {
+        interviews = interviews.sort(
+          (a, b) =>
+            (jobInterviews.find((interview) => interview.id === a.id)
+              ?.order_index || 0) -
+            (jobInterviews.find((interview) => interview.id === b.id)
+              ?.order_index || 0)
+        );
+        if (interviews.every((interview) => interview.status === "completed")) {
           // If there's a completed interview, redirect to submitted page
           redirect(
             `/apply/company/${companyId}/job/${jobId}/application/submitted`
           );
         } else {
-          redirect(
-            `/apply/company/${companyId}/job/${jobId}/interview/${interview.id}`
+          const lastIncompleteInterview = interviews.find(
+            (interview) => interview.status !== "completed"
           );
+          if (lastIncompleteInterview) {
+            redirect(
+              `/apply/company/${companyId}/job/${jobId}/interview/${lastIncompleteInterview.id}`
+            );
+          }
+          logger.error("No incomplete interview found for job application");
+          await logger.flush();
+          notFound();
         }
       }
-      throw new Error("No interview found for job application");
     }
 
     // Fetch user's existing files

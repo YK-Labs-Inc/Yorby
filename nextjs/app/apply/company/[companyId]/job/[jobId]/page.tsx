@@ -58,18 +58,6 @@ export default async function ApplyPage({
     notFound();
   }
 
-  // Check if user is authenticated
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError) {
-    logger.error("User fetch error", { error: userError });
-  }
-
-  await logger.flush();
-
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <Card>

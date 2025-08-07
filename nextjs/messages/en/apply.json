@@ -225,7 +225,8 @@
       "fetchApplicationFiles": "Failed to fetch application files",
       "createCandidateApplication": "Failed to create candidate application",
       "linkApplicationFiles": "Failed to link application files",
-      "updateUserInformation": "Failed to update user information"
+      "updateUserInformation": "Failed to update user information",
+      "submitApplication": "Failed to submit application"
     }
   },
   "recruiting": {
