@@ -30,12 +30,10 @@ import {
 } from "@/components/ui/chat-transcript";
 
 interface InterviewAnalysisProps {
-  analysis: InterviewAnalysis | null;
   candidateData?: CandidateData;
 }
 
 export default function InterviewAnalysis({
-  analysis,
   candidateData,
 }: InterviewAnalysisProps) {
   const t = useTranslations("apply.recruiting.candidates.analysis");
@@ -52,6 +50,7 @@ export default function InterviewAnalysis({
   const applicationFiles = candidateData?.applicationFiles;
   const interviewResults = candidateData?.interviewResults;
   const interviewResult = interviewResults?.[selectedInterviewRound];
+  const analysis = interviewResult?.interviewAnalysis;
   const hasMultipleRounds = interviewResults && interviewResults.length > 1;
 
   // Helper functions

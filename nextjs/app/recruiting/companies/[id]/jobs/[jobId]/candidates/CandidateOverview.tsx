@@ -14,8 +14,6 @@ interface CandidateOverviewProps {
 export default function CandidateOverview({
   candidateData,
 }: CandidateOverviewProps) {
-  const { interviewAnalysis } = candidateData;
-
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
       <CardContent className="flex-1 overflow-y-auto py-6 px-0">
@@ -27,10 +25,7 @@ export default function CandidateOverview({
 
         <Separator className="my-6" />
 
-        <InterviewAnalysis
-          analysis={interviewAnalysis}
-          candidateData={candidateData}
-        />
+        <InterviewAnalysis candidateData={candidateData} />
       </CardContent>
     </Card>
   );
