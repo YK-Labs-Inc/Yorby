@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Table,
   TableBody,
@@ -53,6 +53,11 @@ export default function QuestionsTable({
     setPanelMode("create");
     setIsDetailPanelOpen(true);
   };
+
+  const onClose = useCallback(() => {
+    setIsDetailPanelOpen(false);
+    setSelectedQuestion(null);
+  }, []);
 
   return (
     <div className="relative">
@@ -111,7 +116,6 @@ export default function QuestionsTable({
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("table.headers.question")}</TableHead>
-                  <TableHead>{t("table.headers.answerGuidelines")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -126,11 +130,6 @@ export default function QuestionsTable({
                         {question.company_interview_question_bank.question}
                       </p>
                     </TableCell>
-                    <TableCell className="max-w-md">
-                      <p className="line-clamp-2 text-muted-foreground">
-                        {question.company_interview_question_bank.answer}
-                      </p>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -141,10 +140,7 @@ export default function QuestionsTable({
         {/* Question Detail Panel */}
         <QuestionDetailPanel
           isOpen={isDetailPanelOpen}
-          onClose={() => {
-            setIsDetailPanelOpen(false);
-            setSelectedQuestion(null);
-          }}
+          onClose={onClose}
           mode={panelMode}
           question={selectedQuestion}
           interview={interview}
