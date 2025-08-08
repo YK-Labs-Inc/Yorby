@@ -250,7 +250,8 @@
         "candidates": "{count, plural, =0 {No candidates} =1 {1 candidate} other {# candidates}}"
       },
       "actions": {
-        "archiveJob": "Archive Job"
+        "edit": "Edit",
+        "viewDetails": "View Details"
       }
     },
     "jobDetail": {
@@ -512,7 +513,8 @@
           "failedToDelete": "Failed to delete question",
           "failedToCheckSubmissions": "Failed to check question submissions",
           "cannotDeleteWithSubmissions": "Cannot delete questions that have submissions. Consider marking as draft instead.",
-          "unexpectedError": "An unexpected error occurred"
+          "unexpectedError": "An unexpected error occurred",
+          "missingRequiredFields": "Missing required fields"
         }
       }
     },
@@ -614,6 +616,51 @@
     "buttons": {
       "continueToNext": "Continue to Next Interview",
       "completeApplication": "Complete Application"
+    }
+  },
+  "createJobDialog": {
+    "title": "Create New Job Listing",
+    "description": "Create a job posting to start recruiting candidates.",
+    "form": {
+      "jobTitle": {
+        "label": "Job Title",
+        "placeholder": "e.g., Senior Software Engineer"
+      },
+      "jobDescription": {
+        "label": "Job Description",
+        "placeholder": "Describe the role, responsibilities, and requirements...",
+        "description": "Provide a detailed description of the position"
+      },
+      "status": {
+        "label": "Status",
+        "options": {
+          "draft": "Draft - Not visible to candidates",
+          "active": "Active - Visible to candidates"
+        }
+      },
+      "validation": {
+        "titleMin": "Job title must be at least 2 characters",
+        "descriptionMin": "Job description must be at least 10 characters"
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Job Listing",
+      "creating": "Creating...",
+      "update": "Update Job Listing",
+      "updating": "Updating...",
+      "delete": "Delete",
+      "deleting": "Deleting..."
+    },
+    "createSuccess": "Job listing created successfully!",
+    "createError": "Failed to create job listing. Please try again.",
+    "updateSuccess": "Job listing updated successfully!",
+    "updateError": "Failed to update job listing. Please try again.",
+    "deleteSuccess": "Job listing deleted successfully!",
+    "deleteError": "Failed to delete job listing. Please try again.",
+    "deleteDialog": {
+      "title": "Delete Job Listing?",
+      "description": "This action cannot be undone. This will permanently delete the job listing and all associated data including candidates, interviews, and questions."
     }
   }
 } 

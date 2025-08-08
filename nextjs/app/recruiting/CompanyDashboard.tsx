@@ -1,19 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Building2, Users, Briefcase, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Plus,
+  Building2,
+  Users,
+  MoreVertical,
+  Edit,
+  ExternalLink,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Link from "next/link";
-import { CreateCompanyDialog } from "./CreateCompanyDialog";
+import { CompanyDetailPanel } from "./CompanyDetailPanel";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 interface CompanyDashboardProps {
   companies: Tables<"companies">[];
@@ -21,14 +37,34 @@ interface CompanyDashboardProps {
 }
 
 export function CompanyDashboard({ companies, userId }: CompanyDashboardProps) {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  const [panelMode, setPanelMode] = useState<"create" | "edit">("create");
+  const [selectedCompany, setSelectedCompany] =
+    useState<Tables<"companies"> | null>(null);
   const t = useTranslations("recruiting.companyDashboard");
+  const router = useRouter();
 
   return (
     <>
-      <div className="grid gap-6">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">{t("title")}</h2>
+            <p className="text-muted-foreground">{t("subtitle")}</p>
+          </div>
+          <Button
+            onClick={() => {
+              setPanelMode("create");
+              setSelectedCompany(null);
+              setShowPanel(true);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t("createCard.button")}
+          </Button>
+        </div>
+
         {companies.length === 0 ? (
-          /* Create Company Card - Only show when no companies */
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
@@ -38,73 +74,115 @@ export function CompanyDashboard({ companies, userId }: CompanyDashboardProps) {
               <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
                 {t("createCard.description")}
               </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
+              <Button
+                onClick={() => {
+                  setPanelMode("create");
+                  setSelectedCompany(null);
+                  setShowPanel(true);
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t("createCard.button")}
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">{t("yourCompanies")}</h2>
-              <Button onClick={() => setShowCreateDialog(true)} size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                {t("createCard.button")}
-              </Button>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {companies.map((company) => (
-                <Link
-                  href={`/recruiting/companies/${company.id}`}
-                  key={company.id}
-                >
-                  <Card
-                    key={company.id}
-                    className="hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle className="text-lg">
-                            {company.name}
-                          </CardTitle>
-                          <CardDescription>
-                            {company.industry || t("noIndustrySpecified")}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        {company.website && (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{t("website")}</span>
-                            <p>{company.website}</p>
-                          </div>
+          <div className="border rounded-lg">
+            <div className="max-h-[600px] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30%]">
+                      {t("table.companyName")}
+                    </TableHead>
+                    <TableHead className="w-[25%]">
+                      {t("table.industry")}
+                    </TableHead>
+                    <TableHead className="w-[20%]">
+                      {t("table.website")}
+                    </TableHead>
+                    <TableHead className="w-[15%]">{t("table.size")}</TableHead>
+                    <TableHead className="w-[5%]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {companies.map((company) => (
+                    <TableRow key={company.id}>
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/recruiting/companies/${company.id}`}
+                          className="hover:underline"
+                        >
+                          {company.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        {company.industry || t("noIndustrySpecified")}
+                      </TableCell>
+                      <TableCell>
+                        {company.website ? (
+                          <a
+                            href={company.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-muted-foreground hover:underline"
+                          >
+                            {company.website}
+                          </a>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            -
+                          </span>
                         )}
-                        {company.company_size && (
-                          <div className="flex items-center gap-2">
+                      </TableCell>
+                      <TableCell>
+                        {company.company_size ? (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Users className="h-4 w-4" />
-                            <span>
-                              {company.company_size} {t("employees")}
-                            </span>
+                            <span>{company.company_size}</span>
                           </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            -
+                          </span>
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setPanelMode("edit");
+                                setSelectedCompany(company);
+                                setShowPanel(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              {t("actions.edit") || "Edit"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      <CreateCompanyDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+      <CompanyDetailPanel
+        open={showPanel}
+        onOpenChange={setShowPanel}
         userId={userId}
+        mode={panelMode}
+        company={selectedCompany}
       />
     </>
   );

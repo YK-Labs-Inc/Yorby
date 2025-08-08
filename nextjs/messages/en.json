@@ -2498,6 +2498,8 @@
       "loading": "Loading..."
     },
     "companyDashboard": {
+      "title": "Companies",
+      "subtitle": "Manage your company profiles and recruiting",
       "createCard": {
         "title": "Create a New Company",
         "description": "Start recruiting candidates by creating your company profile",
@@ -2507,7 +2509,17 @@
       "noIndustrySpecified": "No industry specified",
       "website": "Website:",
       "employees": "employees",
-      "manageJobs": "Manage Jobs"
+      "manageJobs": "Manage Jobs",
+      "table": {
+        "companyName": "Company Name",
+        "industry": "Industry",
+        "website": "Website",
+        "size": "Size"
+      },
+      "actions": {
+        "edit": "Edit",
+        "viewDetails": "View Details"
+      }
     },
     "createCompanyDialog": {
       "title": "Create New Company",
@@ -2561,43 +2573,24 @@
       "buttons": {
         "cancel": "Cancel",
         "create": "Create Company",
-        "creating": "Creating..."
+        "creating": "Creating...",
+        "update": "Update Company",
+        "updating": "Updating...",
+        "delete": "Delete",
+        "deleting": "Deleting..."
       },
       "success": "Company created successfully!",
-      "error": "Failed to create company. Please try again."
-    },
-    "createJobDialog": {
-      "title": "Create New Job Listing",
-      "description": "Create a job posting to start recruiting candidates.",
-      "form": {
-        "jobTitle": {
-          "label": "Job Title",
-          "placeholder": "e.g., Senior Software Engineer"
-        },
-        "jobDescription": {
-          "label": "Job Description",
-          "placeholder": "Describe the role, responsibilities, and requirements...",
-          "description": "Provide a detailed description of the position"
-        },
-        "status": {
-          "label": "Status",
-          "options": {
-            "draft": "Draft - Not visible to candidates",
-            "active": "Active - Visible to candidates"
-          }
-        },
-        "validation": {
-          "titleMin": "Job title must be at least 2 characters",
-          "descriptionMin": "Job description must be at least 10 characters"
-        }
+      "error": "Failed to create company. Please try again.",
+      "updateSuccess": "Company updated successfully!",
+      "updateError": "Failed to update company. Please try again.",
+      "deleteSuccess": "Company deleted successfully!",
+      "deleteError": "Failed to delete company. Please try again.",
+      "deleteDialog": {
+        "title": "Delete Company?",
+        "description": "This action cannot be undone. This will permanently delete the company and all associated data including jobs, candidates, and interviews."
       },
-      "buttons": {
-        "cancel": "Cancel",
-        "create": "Create Job Listing",
-        "creating": "Creating..."
-      },
-      "success": "Job listing created successfully!",
-      "error": "Failed to create job listing. Please try again."
+      "editTitle": "Edit Company",
+      "editDescription": "Update the company information"
     },
     "companyHeader": {
       "backToDashboard": "← Back to Dashboard",

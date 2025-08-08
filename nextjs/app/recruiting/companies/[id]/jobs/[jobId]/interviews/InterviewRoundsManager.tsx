@@ -107,7 +107,14 @@ function SortableRow({
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
       </TableCell>
-      <TableCell className="font-medium">{interview.name}</TableCell>
+      <TableCell className="font-medium">
+        <Link
+          href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interview.id}`}
+          className="hover:underline"
+        >
+          {interview.name}
+        </Link>
+      </TableCell>
       <TableCell>
         <Badge
           variant="secondary"
@@ -142,13 +149,6 @@ function SortableRow({
               }}
             >
               {t("actions.editRound")}
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link
-                href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interview.id}`}
-              >
-                {t("actions.manageQuestions")}
-              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

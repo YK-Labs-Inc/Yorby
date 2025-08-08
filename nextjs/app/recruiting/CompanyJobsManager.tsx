@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Briefcase, Users, MoreVertical } from "lucide-react";
+import {
+  Plus,
+  Briefcase,
+  Users,
+  MoreVertical,
+  Edit,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,9 +26,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import { CreateJobDialog } from "./CreateJobDialog";
+import { JobDetailPanel } from "./JobDetailPanel";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 type Job = Tables<"custom_jobs"> & {
   company_job_candidates?: { count: number }[];
@@ -36,8 +44,11 @@ export function CompanyJobsManager({
   companyId,
   jobs,
 }: CompanyJobsManagerProps) {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  const [panelMode, setPanelMode] = useState<"create" | "edit">("create");
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const t = useTranslations("apply.recruiting.companyJobsManager");
+  const router = useRouter();
 
   const getCandidateCount = (job: Job) => {
     return job.company_job_candidates?.[0]?.count || 0;
@@ -51,7 +62,13 @@ export function CompanyJobsManager({
             <h2 className="text-2xl font-semibold">{t("title")}</h2>
             <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}>
+          <Button
+            onClick={() => {
+              setPanelMode("create");
+              setSelectedJob(null);
+              setShowPanel(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {t("createJobListing")}
           </Button>
@@ -67,7 +84,13 @@ export function CompanyJobsManager({
               <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
                 {t("noJobsYet.description")}
               </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
+              <Button
+                onClick={() => {
+                  setPanelMode("create");
+                  setSelectedJob(null);
+                  setShowPanel(true);
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t("createJobListing")}
               </Button>
@@ -123,8 +146,15 @@ export function CompanyJobsManager({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="text-destructive">
-                              {t("actions.archiveJob")}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setPanelMode("edit");
+                                setSelectedJob(job);
+                                setShowPanel(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              {t("actions.edit") || "Edit"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -138,10 +168,12 @@ export function CompanyJobsManager({
         )}
       </div>
 
-      <CreateJobDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+      <JobDetailPanel
+        open={showPanel}
+        onOpenChange={setShowPanel}
         companyId={companyId}
+        mode={panelMode}
+        job={selectedJob}
       />
     </>
   );
