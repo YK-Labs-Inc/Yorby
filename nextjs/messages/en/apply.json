@@ -550,7 +550,9 @@
     },
     "createJobInterviewDialog": {
       "title": "Create Interview Round",
+      "editTitle": "Edit Interview Round",
       "description": "Add a new interview round to your hiring process.",
+      "editDescription": "Update the details of this interview round.",
       "form": {
         "name": {
           "label": "Round Name",
@@ -573,10 +575,22 @@
       "buttons": {
         "cancel": "Cancel",
         "create": "Create Round",
-        "creating": "Creating..."
+        "creating": "Creating...",
+        "update": "Update Round",
+        "updating": "Updating...",
+        "delete": "Delete Round",
+        "deleting": "Deleting..."
       },
       "success": "Interview round created successfully",
-      "error": "Failed to create interview round"
+      "updateSuccess": "Interview round updated successfully",
+      "deleteSuccess": "Interview round deleted successfully",
+      "error": "Failed to create interview round",
+      "updateError": "Failed to update interview round",
+      "deleteError": "Failed to delete interview round",
+      "deleteDialog": {
+        "title": "Delete Interview Round",
+        "description": "Are you sure you want to delete this interview round? This action cannot be undone and will also delete all associated questions."
+      }
     }
   },
   "interviewLayout": {
