@@ -54,21 +54,24 @@ async function getNextOrderIndex(interviewId: string): Promise<number> {
 }
 
 export async function createQuestion(
-  interviewId: string,
-  jobId: string,
-  companyId: string,
-  questionData: {
-    question: string;
-    answer: string;
-  }
+  prevState: { success?: boolean; error?: string },
+  formData: FormData
 ) {
+  const interviewId = formData.get("interview_id") as string;
+  const jobId = formData.get("job_id") as string;
+  const companyId = formData.get("company_id") as string;
+  const question = formData.get("question") as string;
+  const answer = formData.get("answer") as string;
+
   const logger = new Logger().with({
     function: "createQuestion",
     interviewId,
     jobId,
     companyId,
   });
-  const t = await getTranslations("recruiting.questionsTable.actions.errors");
+  const t = await getTranslations(
+    "apply.recruiting.questionsTable.actions.errors"
+  );
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -80,6 +83,14 @@ export async function createQuestion(
       logger.error("User not authenticated");
       await logger.flush();
       return { success: false, error: t("notAuthenticated") };
+    }
+
+    // Validate required fields
+    if (!question || !interviewId || !jobId || !companyId) {
+      return {
+        success: false,
+        error: t("missingRequiredFields") || "Missing required fields",
+      };
     }
 
     // Check authorization
@@ -112,8 +123,8 @@ export async function createQuestion(
       .from("company_interview_question_bank")
       .insert({
         company_id: companyId,
-        question: questionData.question,
-        answer: questionData.answer,
+        question: question,
+        answer: answer,
         question_type: interview.interview_type,
       })
       .select()
@@ -162,7 +173,7 @@ export async function createQuestion(
       `/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interviewId}`
     );
 
-    return { success: true, data: questionBankEntry };
+    return { success: true };
   } catch (error: any) {
     logger.error("Unexpected error creating question", {
       error: error.message,
@@ -173,15 +184,16 @@ export async function createQuestion(
 }
 
 export async function updateQuestion(
-  questionId: string,
-  interviewId: string,
-  companyId: string,
-  jobId: string,
-  updates: {
-    question: string;
-    answer: string;
-  }
+  prevState: { success?: boolean; error?: string },
+  formData: FormData
 ) {
+  const questionId = formData.get("question_id") as string;
+  const interviewId = formData.get("interview_id") as string;
+  const companyId = formData.get("company_id") as string;
+  const jobId = formData.get("job_id") as string;
+  const question = formData.get("question") as string;
+  const answer = formData.get("answer") as string;
+
   const logger = new Logger().with({
     function: "updateQuestion",
     questionId,
@@ -215,16 +227,29 @@ export async function updateQuestion(
       return { success: false, error: authError || t("notAuthorized") };
     }
 
+    // Validate required fields
+    if (
+      !questionId ||
+      !question ||
+      !answer ||
+      !interviewId ||
+      !jobId ||
+      !companyId
+    ) {
+      return {
+        success: false,
+        error: t("missingRequiredFields") || "Missing required fields",
+      };
+    }
+
     // Update the question in the bank
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("company_interview_question_bank")
       .update({
-        question: updates.question,
-        answer: updates.answer,
+        question: question,
+        answer: answer,
       })
-      .eq("id", questionId)
-      .select()
-      .single();
+      .eq("id", questionId);
 
     if (error) {
       logger.error("Failed to update question in question", { error });
@@ -238,7 +263,7 @@ export async function updateQuestion(
     revalidatePath(
       `/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interviewId}`
     );
-    return { success: true, data };
+    return { success: true };
   } catch (error: any) {
     logger.error("Unexpected error updating question", {
       error: error.message,
@@ -249,11 +274,16 @@ export async function updateQuestion(
 }
 
 export async function deleteQuestion(
-  jobInterviewQuestionId: string,
-  interviewId: string,
-  jobId: string,
-  companyId: string
+  prevState: { success?: boolean; error?: string },
+  formData: FormData
 ) {
+  const jobInterviewQuestionId = formData.get(
+    "job_interview_question_id"
+  ) as string;
+  const interviewId = formData.get("interview_id") as string;
+  const jobId = formData.get("job_id") as string;
+  const companyId = formData.get("company_id") as string;
+
   const logger = new Logger().with({
     function: "deleteQuestion",
     jobInterviewQuestionId,
@@ -272,6 +302,11 @@ export async function deleteQuestion(
       logger.error("User not authenticated");
       await logger.flush();
       return { success: false, error: t("notAuthenticated") };
+    }
+
+    // Validate required fields
+    if (!jobInterviewQuestionId || !interviewId || !jobId || !companyId) {
+      return { success: false, error: "Missing required fields" };
     }
 
     // Check authorization

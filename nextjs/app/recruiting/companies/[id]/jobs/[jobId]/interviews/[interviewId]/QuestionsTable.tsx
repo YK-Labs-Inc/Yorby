@@ -118,7 +118,7 @@ export default function QuestionsTable({
                 {questions.map((question) => (
                   <TableRow
                     key={question.id}
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="cursor-pointer hover:bg-muted/50 transition-colors hover:underline"
                     onClick={() => openQuestionDetail(question)}
                   >
                     <TableCell className="max-w-md">

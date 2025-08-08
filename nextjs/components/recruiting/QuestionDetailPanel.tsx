@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,6 @@ import { X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -53,9 +52,27 @@ export default function QuestionDetailPanel({
     question: "",
     answer: "",
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Server action states
+  const [createState, createFormAction, isCreating] = useActionState(
+    createQuestion,
+    { success: false, error: undefined }
+  );
+
+  const [updateState, updateFormAction, isUpdating] = useActionState(
+    updateQuestion,
+    { success: false, error: undefined }
+  );
+
+  const [deleteState, deleteFormAction, isDeleting] = useActionState(
+    deleteQuestion,
+    { success: false, error: undefined }
+  );
+
+  // Determine which action to use based on mode
+  const formAction = mode === "create" ? createFormAction : updateFormAction;
+  const isSaving = mode === "create" ? isCreating : isUpdating;
 
   // Update form data when question changes or mode changes
   useEffect(() => {
@@ -72,113 +89,69 @@ export default function QuestionDetailPanel({
     }
   }, [question, mode]);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      if (mode === "create") {
-        // Create new question
-        const result = await createQuestion(
-          interview.id,
-          jobId,
-          companyId,
-          formData
-        );
-
-        if (!result.success) {
-          throw new Error(result.error || "Failed to create question");
-        }
-
-        logInfo("Question created successfully", {
-          interviewId: interview.id,
-        });
-        toast({
-          title: "Question created",
-          description: "The new question has been successfully created.",
-        });
-      } else if (mode === "edit" && question) {
-        // Update existing question
-        const result = await updateQuestion(
-          question.company_interview_question_bank.id,
-          interview.id,
-          companyId,
-          jobId,
-          formData
-        );
-
-        if (!result.success) {
-          throw new Error(result.error || "Failed to update question");
-        }
-
-        logInfo("Question updated successfully", {
-          questionId: question.id,
-          interviewId: interview.id,
-        });
-        toast({
-          title: "Question updated",
-          description: "The question has been successfully updated.",
-        });
-      }
-
+  // Handle create state changes
+  useEffect(() => {
+    if (createState.success) {
+      logInfo("Question created successfully");
+      toast({
+        title: "Question created",
+        description: "The new question has been successfully created.",
+      });
       onClose();
-    } catch (error: any) {
-      const action = mode === "create" ? "create" : "update";
-      logError(`Failed to ${action} question`, {
-        error: error.message,
-        interviewId: interview.id,
-        questionId: question?.id,
+    } else if (createState.error) {
+      logError("Failed to create question", {
+        error: createState.error,
       });
       toast({
         title: "Error",
-        description: error.message || `Failed to ${action} question`,
+        description: createState.error || "Failed to create question",
         variant: "destructive",
       });
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [createState, logInfo, logError, toast]);
 
-  const handleDelete = async () => {
-    if (!question) return;
-
-    setIsDeleting(true);
-    try {
-      const result = await deleteQuestion(
-        question.id,
-        interview.id,
-        jobId,
-        companyId
-      );
-
-      if (!result.success) {
-        throw new Error(result.error || "Failed to delete question");
-      }
-
-      logInfo("Question deleted successfully", {
-        questionId: question.id,
-        interviewId: interview.id,
+  // Handle update state changes
+  useEffect(() => {
+    if (updateState.success) {
+      logInfo("Question updated successfully");
+      toast({
+        title: "Question updated",
+        description: "The question has been successfully updated.",
       });
+      onClose();
+    } else if (updateState.error) {
+      logError("Failed to update question", {
+        error: updateState.error,
+      });
+      toast({
+        title: "Error",
+        description: updateState.error || "Failed to update question",
+        variant: "destructive",
+      });
+    }
+  }, [updateState, logInfo, logError, toast]);
+
+  // Handle delete state changes
+  useEffect(() => {
+    if (deleteState.success) {
+      logInfo("Question deleted successfully");
       toast({
         title: "Question deleted",
         description: "The question has been successfully deleted.",
       });
-
       setShowDeleteDialog(false);
       onClose();
-    } catch (error: any) {
+    } else if (deleteState.error) {
       logError("Failed to delete question", {
-        error: error.message,
-        questionId: question.id,
-        interviewId: interview.id,
+        error: deleteState.error,
       });
       toast({
         title: "Error",
-        description: error.message || "Failed to delete question",
+        description: deleteState.error || "Failed to delete question",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
     }
-  };
+  }, [deleteState, logInfo, logError, toast]);
 
   const handleClose = () => {
     setFormData({ question: "", answer: "" });
@@ -222,82 +195,101 @@ export default function QuestionDetailPanel({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-6">
-              {/* Question Field */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="panel-question"
-                  className="text-base font-medium"
-                >
-                  {t("editDialog.form.question.label")}
-                </Label>
-                <Textarea
-                  id="panel-question"
-                  value={formData.question}
-                  onChange={(e) =>
-                    setFormData({ ...formData, question: e.target.value })
-                  }
-                  placeholder={t("editDialog.form.question.placeholder")}
-                  className="min-h-[150px] resize-none text-base"
+          <form id="question-form" action={formAction}>
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Hidden fields */}
+              <input type="hidden" name="interview_id" value={interview.id} />
+              <input type="hidden" name="job_id" value={jobId} />
+              <input type="hidden" name="company_id" value={companyId} />
+              {mode === "edit" && question && (
+                <input
+                  type="hidden"
+                  name="question_id"
+                  value={question.company_interview_question_bank.id}
                 />
-              </div>
-
-              {/* Answer Guidelines Field */}
-              <div className="space-y-2">
-                <Label htmlFor="panel-answer" className="text-base font-medium">
-                  {t("editDialog.form.answerGuidelines.label")}
-                </Label>
-                <Textarea
-                  id="panel-answer"
-                  value={formData.answer}
-                  onChange={(e) =>
-                    setFormData({ ...formData, answer: e.target.value })
-                  }
-                  placeholder={t(
-                    "editDialog.form.answerGuidelines.placeholder"
-                  )}
-                  className="min-h-[200px] resize-none text-base"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="p-6 border-t">
-            <div className="flex items-center justify-between">
-              {mode === "edit" && (
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t("table.actions.delete")}
-                </Button>
               )}
-              {mode === "create" && <div />}
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={isSaving}
-                >
-                  {t("editDialog.buttons.cancel")}
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving || !formData.question.trim()}
-                >
-                  {isSaving
-                    ? "Saving..."
-                    : mode === "create"
-                      ? t("createDialog.buttons.create")
-                      : t("editDialog.buttons.save")}
-                </Button>
+
+              <div className="space-y-6">
+                {/* Question Field */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="panel-question"
+                    className="text-base font-medium"
+                  >
+                    {t("editDialog.form.question.label")}
+                  </Label>
+                  <Textarea
+                    id="panel-question"
+                    name="question"
+                    value={formData.question}
+                    onChange={(e) =>
+                      setFormData({ ...formData, question: e.target.value })
+                    }
+                    placeholder={t("editDialog.form.question.placeholder")}
+                    className="min-h-[150px] resize-none text-base"
+                  />
+                </div>
+
+                {/* Answer Guidelines Field */}
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="panel-answer"
+                    className="text-base font-medium"
+                  >
+                    {t("editDialog.form.answerGuidelines.label")}
+                  </Label>
+                  <Textarea
+                    id="panel-answer"
+                    name="answer"
+                    value={formData.answer}
+                    onChange={(e) =>
+                      setFormData({ ...formData, answer: e.target.value })
+                    }
+                    placeholder={t(
+                      "editDialog.form.answerGuidelines.placeholder"
+                    )}
+                    className="min-h-[200px] resize-none text-base"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t">
+              <div className="flex items-center justify-between">
+                {mode === "edit" && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t("table.actions.delete")}
+                  </Button>
+                )}
+                {mode === "create" && <div />}
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleClose}
+                    disabled={isSaving}
+                  >
+                    {t("editDialog.buttons.cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSaving || !formData.question.trim()}
+                  >
+                    {isSaving
+                      ? "Saving..."
+                      : mode === "create"
+                        ? t("createDialog.buttons.create")
+                        : t("editDialog.buttons.save")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -314,13 +306,19 @@ export default function QuestionDetailPanel({
             <AlertDialogCancel disabled={isDeleting}>
               {t("deleteDialog.buttons.cancel")}
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? "Deleting..." : t("deleteDialog.buttons.delete")}
-            </AlertDialogAction>
+            <form id="delete-form" action={deleteFormAction}>
+              <input
+                type="hidden"
+                name="job_interview_question_id"
+                value={question?.id}
+              />
+              <input type="hidden" name="interview_id" value={interview.id} />
+              <input type="hidden" name="job_id" value={jobId} />
+              <input type="hidden" name="company_id" value={companyId} />
+              <Button type="submit" disabled={isDeleting} variant="destructive">
+                {isDeleting ? "Deleting..." : t("deleteDialog.buttons.delete")}
+              </Button>
+            </form>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
