@@ -114,7 +114,7 @@ export default async function ConfirmEmailPage({
           email: userEmail,
         },
         {
-          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
+          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`,
         }
       );
 

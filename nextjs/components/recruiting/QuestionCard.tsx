@@ -6,10 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Question } from "@/app/recruiting/companies/[id]/jobs/[jobId]/questions/AIChatPanel";
+import { InterviewQuestion } from "@/app/recruiting/companies/[id]/jobs/[jobId]/interviews/[interviewId]/page";
 
 interface QuestionCardProps {
-  question: Question;
+  question: InterviewQuestion;
 }
 
 export function QuestionCard({ question }: QuestionCardProps) {
@@ -19,15 +19,19 @@ export function QuestionCard({ question }: QuestionCardProps) {
         <CardTitle className="text-md">Interview Question</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">{question.question}</p>
+        <p className="text-sm">
+          {question.company_interview_question_bank.question}
+        </p>
       </CardContent>
-      {question.answer_guidelines && (
+      {question.company_interview_question_bank.answer && (
         <>
           <CardHeader>
             <CardTitle className="text-md">Answer Guidelines</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm">{question.answer_guidelines}</p>
+            <p className="text-sm">
+              {question.company_interview_question_bank.answer}
+            </p>
           </CardContent>
         </>
       )}

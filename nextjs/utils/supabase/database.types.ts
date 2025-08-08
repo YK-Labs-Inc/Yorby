@@ -70,6 +70,54 @@ export type Database = {
           },
         ]
       }
+      candidate_job_interviews: {
+        Row: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          interview_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["job_interview_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          interview_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_interview_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          interview_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_interview_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_job_interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "company_job_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_job_interviews_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_branding: {
         Row: {
           coach_id: string
@@ -158,6 +206,44 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      company_interview_question_bank: {
+        Row: {
+          answer: string
+          company_id: string
+          created_at: string | null
+          id: string
+          question: string
+          question_type: Database["public"]["Enums"]["job_interview_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          question: string
+          question_type?: Database["public"]["Enums"]["job_interview_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          question?: string
+          question_type?: Database["public"]["Enums"]["job_interview_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_interview_question_bank_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_job_candidates: {
         Row: {
@@ -1300,6 +1386,198 @@ export type Database = {
         }
         Relationships: []
       }
+      job_interview_coding_submissions: {
+        Row: {
+          candidate_interview_id: string
+          created_at: string | null
+          id: string
+          question_id: string
+          submission_number: number
+          submission_text: string
+        }
+        Insert: {
+          candidate_interview_id: string
+          created_at?: string | null
+          id?: string
+          question_id: string
+          submission_number: number
+          submission_text: string
+        }
+        Update: {
+          candidate_interview_id?: string
+          created_at?: string | null
+          id?: string
+          question_id?: string
+          submission_number?: number
+          submission_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_coding_submissions_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_job_interviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_interview_coding_submissions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "company_interview_question_bank"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_interview_messages: {
+        Row: {
+          candidate_interview_id: string
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Insert: {
+          candidate_interview_id: string
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Update: {
+          candidate_interview_id?: string
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_messages_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_interview_questions: {
+        Row: {
+          created_at: string | null
+          id: string
+          interview_id: string
+          order_index: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interview_id: string
+          order_index: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interview_id?: string
+          order_index?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_questions_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "job_interviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_interview_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "company_interview_question_bank"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_interview_recordings: {
+        Row: {
+          asset_id: string | null
+          candidate_interview_id: string
+          created_at: string | null
+          id: string
+          playback_id: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          updated_at: string | null
+          upload_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          candidate_interview_id: string
+          created_at?: string | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          updated_at?: string | null
+          upload_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          candidate_interview_id?: string
+          created_at?: string | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          updated_at?: string | null
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_interviews: {
+        Row: {
+          created_at: string | null
+          custom_job_id: string
+          id: string
+          interview_type: Database["public"]["Enums"]["job_interview_type"]
+          name: string
+          order_index: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_job_id: string
+          id?: string
+          interview_type?: Database["public"]["Enums"]["job_interview_type"]
+          name: string
+          order_index: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_job_id?: string
+          id?: string
+          interview_type?: Database["public"]["Enums"]["job_interview_type"]
+          name?: string
+          order_index?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interviews_custom_job_id_fkey"
+            columns: ["custom_job_id"]
+            isOneToOne: false
+            referencedRelation: "custom_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mock_interview_gcp_storage_metadata: {
         Row: {
           bucket_name: string
@@ -1529,11 +1807,11 @@ export type Database = {
       }
       recruiter_interview_analysis: {
         Row: {
+          candidate_interview_id: string
           created_at: string
           hiring_verdict: Database["public"]["Enums"]["hiring_verdict"]
           id: string
           input_token_count: number | null
-          mock_interview_id: string
           model_used: string | null
           output_token_count: number | null
           overall_match_score: number
@@ -1542,11 +1820,11 @@ export type Database = {
           verdict_summary: string
         }
         Insert: {
+          candidate_interview_id: string
           created_at?: string
           hiring_verdict: Database["public"]["Enums"]["hiring_verdict"]
           id?: string
           input_token_count?: number | null
-          mock_interview_id: string
           model_used?: string | null
           output_token_count?: number | null
           overall_match_score: number
@@ -1555,11 +1833,11 @@ export type Database = {
           verdict_summary: string
         }
         Update: {
+          candidate_interview_id?: string
           created_at?: string
           hiring_verdict?: Database["public"]["Enums"]["hiring_verdict"]
           id?: string
           input_token_count?: number | null
-          mock_interview_id?: string
           model_used?: string | null
           output_token_count?: number | null
           overall_match_score?: number
@@ -1569,10 +1847,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "recruiter_interview_analysis_mock_interview_id_fkey"
-            columns: ["mock_interview_id"]
+            foreignKeyName: "recruiter_interview_analysis_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
             isOneToOne: true
-            referencedRelation: "custom_job_mock_interviews"
+            referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
         ]
@@ -1864,7 +2142,7 @@ export type Database = {
             foreignKeyName: "recruiter_question_analysis_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
-            referencedRelation: "custom_job_questions"
+            referencedRelation: "company_interview_question_bank"
             referencedColumns: ["id"]
           },
         ]
@@ -2354,6 +2632,7 @@ export type Database = {
     Views: {
       recruiter_interview_analysis_complete: {
         Row: {
+          candidate_interview_id: string | null
           concerns: Json | null
           created_at: string | null
           exceeded_requirements: string[] | null
@@ -2364,7 +2643,6 @@ export type Database = {
           insights: Json | null
           matched_requirements: string[] | null
           missing_requirements: string[] | null
-          mock_interview_id: string | null
           model_used: string | null
           output_token_count: number | null
           overall_match_score: number | null
@@ -2376,10 +2654,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "recruiter_interview_analysis_mock_interview_id_fkey"
-            columns: ["mock_interview_id"]
+            foreignKeyName: "recruiter_interview_analysis_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
             isOneToOne: true
-            referencedRelation: "custom_job_mock_interviews"
+            referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
         ]
@@ -2405,6 +2683,8 @@ export type Database = {
       interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
+      job_interview_status: "pending" | "in_progress" | "completed"
+      job_interview_type: "general" | "coding"
       locked_status: "locked" | "unlocked"
       message_role: "user" | "model"
       mux_status: "preparing" | "ready" | "errored"
@@ -2537,6 +2817,8 @@ export const Constants = {
       interview_copilot_access: ["locked", "unlocked"],
       interview_copilot_status: ["in_progress", "complete"],
       interview_status: ["in_progress", "complete"],
+      job_interview_status: ["pending", "in_progress", "completed"],
+      job_interview_type: ["general", "coding"],
       locked_status: ["locked", "unlocked"],
       message_role: ["user", "model"],
       mux_status: ["preparing", "ready", "errored"],

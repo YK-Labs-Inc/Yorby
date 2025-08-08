@@ -1,19 +1,19 @@
-import { LiveKitInterviewComponent } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/LiveKitInterviewComponent";
 import { APP_CONFIG_DEFAULTS } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/app-config";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
+import { InterviewComponent } from "./InterviewComponent";
 
 interface PageProps {
   params: Promise<{
     companyId: string;
     jobId: string;
-    interviewId: string;
+    candidateInterviewId: string;
   }>;
 }
 
-export default async function InterviewPage({ params }: PageProps) {
-  const { companyId, jobId, interviewId } = await params;
+export default async function CandidateInterviewPage({ params }: PageProps) {
+  const { companyId, jobId, candidateInterviewId } = await params;
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -26,7 +26,7 @@ export default async function InterviewPage({ params }: PageProps) {
 
   if (user.is_anonymous) {
     redirect(
-      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${interviewId}`
+      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?candidateInterviewId=${candidateInterviewId}`
     );
   }
 
@@ -35,12 +35,22 @@ export default async function InterviewPage({ params }: PageProps) {
   if (result.hasCompletedInterview) {
     redirect(`/apply/company/${companyId}/job/${jobId}/application/submitted`);
   }
+  const { candidateJobInterviews } = result;
+
+  // Find the current interview index and determine the next interview ID
+  const currentIndex = candidateJobInterviews.findIndex(
+    (interview) => interview.id === candidateInterviewId
+  );
+  const nextInterviewId =
+    currentIndex !== -1 && currentIndex < candidateJobInterviews.length - 1
+      ? candidateJobInterviews[currentIndex + 1].id
+      : null;
 
   return (
-    <LiveKitInterviewComponent
+    <InterviewComponent
       appConfig={APP_CONFIG_DEFAULTS}
-      interviewType="real-interview"
-      mockInterviewId={interviewId}
+      currentInterviewId={candidateInterviewId}
+      nextInterviewId={nextInterviewId}
       jobId={jobId}
       companyId={companyId}
     />

@@ -1,7 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { getServerOrigin } from "@/utils/server/common/utils";
 import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
@@ -13,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ShareButton } from "@/components/ui/share-button";
 import ShareApplicationLink from "./ShareApplicationLink";
 
 interface PageProps {
@@ -31,9 +29,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     function: "CompanyJobDetailPage",
     params: { companyId, jobId },
   });
-
-  // Get the origin from headers
-  const origin = await getServerOrigin();
 
   // Get translations
   const t = await getTranslations("apply.recruiting.jobDetail");
@@ -85,7 +80,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     .select(
       `
       *,
-      custom_job_questions (count),
+      job_interviews (count),
       company_job_candidates (count)
     `
     )
@@ -169,19 +164,19 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
         {/* Navigation Cards */}
         <div className="grid gap-4 md:grid-cols-2">
           <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}/questions`}
+            href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
           >
             <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <FileQuestion className="h-8 w-8 text-primary" />
                   <span className="text-2xl font-bold">
-                    {job.custom_job_questions?.[0]?.count || 0}
+                    {job.job_interviews?.[0]?.count || 0}
                   </span>
                 </div>
-                <CardTitle>{t("sections.interviewQuestions.title")}</CardTitle>
+                <CardTitle>{t("sections.interviewRounds.title")}</CardTitle>
                 <CardDescription>
-                  {t("sections.interviewQuestions.description")}
+                  {t("sections.interviewRounds.description")}
                 </CardDescription>
               </CardHeader>
             </Card>

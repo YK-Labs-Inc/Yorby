@@ -64,12 +64,15 @@ interface GroupedQuestionAnswer {
 }
 
 // Helper function to create base context for AI prompts
-function createBaseContext(interview: any, transcript: string): string {
+function createBaseContext(
+  data: { custom_jobs: any },
+  transcript: string
+): string {
   return `
 INTERVIEW CONTEXT:
-Job Title: ${interview.custom_jobs.job_title}
-Company: ${interview.custom_jobs.company_name || "N/A"}
-Job Description: ${interview.custom_jobs.job_description || "N/A"}
+Job Title: ${data.custom_jobs.job_title}
+Company: ${data.custom_jobs.company_name || "N/A"}
+Job Description: ${data.custom_jobs.job_description || "N/A"}
 
 INTERVIEW TRANSCRIPT:
 ${transcript}
@@ -331,13 +334,13 @@ ${transcript}`;
   return result.grouped_topics;
 }
 
-// Find matching question from custom_job_questions using semantic matching
+// Find matching question from company_question_bank using semantic matching
 async function findMatchingQuestion(
   extractedQuestion: string,
-  customJobQuestions: Tables<"custom_job_questions">[],
+  companyQuestions: Tables<"company_interview_question_bank">[],
   logger: Logger
-): Promise<Tables<"custom_job_questions"> | null> {
-  if (customJobQuestions.length === 0) {
+): Promise<Tables<"company_interview_question_bank"> | null> {
+  if (companyQuestions.length === 0) {
     return null;
   }
 
@@ -368,7 +371,7 @@ Return the ID of the best matching question, or null if no question addresses th
 "${extractedQuestion}"
 
 ## Predefined Questions
-${customJobQuestions
+${companyQuestions
   .map((q, index) => `${index + 1}. ID: ${q.id}\n   Question: "${q.question}"`)
   .join("\n\n")}`;
 
@@ -383,7 +386,7 @@ ${customJobQuestions
       loggingContext: { function: "findMatchingQuestion" },
     });
 
-    const matchedQuestion = customJobQuestions.find(
+    const matchedQuestion = companyQuestions.find(
       (q) => q.id === result.matched_question_id
     );
 
@@ -405,12 +408,7 @@ ${customJobQuestions
 async function gradeAnswer(
   groupedQA: GroupedQuestionAnswer,
   answerGuidelines: string | null,
-  jobContext: {
-    jobTitle: string;
-    jobDescription: string;
-    companyName?: string;
-    companyDescription?: string;
-  },
+  job: Tables<"custom_jobs">,
   logger: Logger
 ): Promise<{
   answer_quality_score: number;
@@ -445,9 +443,9 @@ Consider:
 - The relevance to the role requirements
 
 ## Job Context
-Job Title: ${jobContext.jobTitle}
-Job Description: ${jobContext.jobDescription}
-${jobContext.companyName ? `Company: ${jobContext.companyName}` : ""}
+Job Title: ${job.job_title}
+Job Description: ${job.job_description}
+${job.company_name ? `Company: ${job.company_name}` : ""}
 
 ## Question
 ${groupedQA.synthesized_question}
@@ -481,8 +479,8 @@ ${answerGuidelines ? `## Answer Guidelines\n${answerGuidelines}` : ""}`;
 async function generateRecruiterQuestionAnalysis(
   _interviewId: string,
   transcript: string,
-  customJobQuestions: any[],
-  jobContext: any,
+  companyQuestions: Tables<"company_interview_question_bank">[],
+  customJob: Tables<"custom_jobs">,
   logger: Logger
 ): Promise<QuestionAnalysis[]> {
   // Extract grouped Q&A pairs from transcript
@@ -494,23 +492,18 @@ async function generateRecruiterQuestionAnalysis(
   // Process each grouped Q&A
   const analyses = await Promise.all(
     groupedQuestionAnswers.map(async (groupedQA) => {
-      // Find matching question from custom_job_questions using synthesized question
+      // Find matching question from company_question_bank using synthesized question
       const matchedQuestion = await findMatchingQuestion(
         groupedQA.synthesized_question,
-        customJobQuestions,
+        companyQuestions,
         logger
       );
 
       // Grade the answer
       const grading = await gradeAnswer(
         groupedQA,
-        matchedQuestion?.answer_guidelines || null,
-        {
-          jobTitle: jobContext.job_title,
-          jobDescription: jobContext.job_description,
-          companyName: jobContext.company_name,
-          companyDescription: jobContext.company_description,
-        },
+        matchedQuestion?.answer || null,
+        customJob,
         logger
       );
 
@@ -560,7 +553,7 @@ export const GET = withAxiom(
       const { data: analysis, error } = await supabase
         .from("recruiter_interview_analysis_complete")
         .select("*")
-        .eq("mock_interview_id", interviewId)
+        .eq("candidate_interview_id", interviewId)
         .single();
 
       if (error?.code === "PGRST116") {
@@ -639,7 +632,7 @@ export const POST = withAxiom(
       const { data: existingAnalysis } = await supabase
         .from("recruiter_interview_analysis")
         .select("id")
-        .eq("mock_interview_id", interviewId)
+        .eq("candidate_interview_id", interviewId)
         .single();
 
       if (existingAnalysis) {
@@ -656,18 +649,18 @@ export const POST = withAxiom(
         );
       }
 
-      // First fetch the interview to get custom_job_id
+      // First fetch the company candidate interview
       const interviewResult = await supabase
-        .from("custom_job_mock_interviews")
+        .from("candidate_job_interviews")
         .select(
           `
           *,
-          custom_jobs (
+          job_interviews!inner (
             id,
-            job_title,
-            job_description,
-            company_name,
-            company_description
+            custom_job_id,
+            name,
+            interview_type,
+            custom_jobs!inner (*)
           )
         `
         )
@@ -686,30 +679,43 @@ export const POST = withAxiom(
       }
 
       const interview = interviewResult.data;
+      const jobInterviews = interview.job_interviews;
+      const customJob = jobInterviews.custom_jobs;
 
-      // Now fetch the rest of the data
-      const [messagesResult, questionsResult] = await Promise.all([
-        supabase
-          .from("mock_interview_messages")
-          .select("*")
-          .eq("mock_interview_id", interviewId)
-          .order("created_at", { ascending: true }),
+      // Fetch interview questions for this round
+      const { data: interviewQuestions } = await supabase
+        .from("job_interview_questions")
+        .select(
+          `
+          *,
+          company_interview_question_bank!inner (*)
+        `
+        )
+        .eq("interview_id", interview.interview_id)
+        .order("order_index", { ascending: true });
 
-        supabase
-          .from("custom_job_questions")
-          .select("*")
-          .eq("custom_job_id", interview.custom_job_id),
-      ]);
+      const companyQuestions =
+        interviewQuestions?.map((iq) => iq.company_interview_question_bank) ||
+        [];
+
+      // Now fetch the messages
+      const messagesResult = await supabase
+        .from("job_interview_messages")
+        .select("*")
+        .eq("candidate_interview_id", interviewId)
+        .order("created_at", { ascending: true });
 
       const messages = messagesResult.data || [];
-      const questionsList = questionsResult.data || [];
 
       // Create transcript
       const transcript = messages
         .map((msg: any) => `${msg.role.toUpperCase()}: ${msg.text}`)
         .join("\n\n");
 
-      const baseContext = createBaseContext(interview, transcript);
+      const baseContext = createBaseContext(
+        { custom_jobs: customJob },
+        transcript
+      );
 
       logger.info("Generating AI analysis", { interviewId });
 
@@ -722,8 +728,8 @@ export const POST = withAxiom(
           generateRecruiterQuestionAnalysis(
             interviewId,
             transcript,
-            questionsList,
-            interview.custom_jobs,
+            companyQuestions,
+            customJob,
             logger
           ),
         ]);
@@ -755,7 +761,7 @@ export const POST = withAxiom(
       const { data: savedAnalysis, error: saveError } = await supabase
         .from("recruiter_interview_analysis")
         .insert({
-          mock_interview_id: interviewId,
+          candidate_interview_id: interviewId,
           hiring_verdict: verdict.hiring_verdict,
           verdict_summary: verdict.verdict_summary,
           overall_match_score: verdict.overall_match_score,
@@ -843,8 +849,8 @@ export const POST = withAxiom(
 
       // Update the interview status to complete
       const { error: updateError } = await supabase
-        .from("custom_job_mock_interviews")
-        .update({ status: "complete" })
+        .from("candidate_job_interviews")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
         .eq("id", interviewId);
 
       if (updateError) {

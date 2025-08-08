@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { headers } from "next/headers";
+import { Tables } from "@/utils/supabase/database.types";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -369,33 +370,68 @@ export async function checkApplicationStatus(
   // Check if the user has completed an interview for this job
   let hasCompletedInterview = false;
   let interviewId: string | null = null;
+  let finalizedCandidateJobInterviews: Pick<
+    Tables<"candidate_job_interviews">,
+    "id" | "status"
+  >[] = [];
 
   if (existingCandidate) {
-    const { data: interviews, error: interviewError } = await supabase
-      .from("custom_job_mock_interviews")
-      .select("id, status")
-      .eq("candidate_id", existingCandidate.id)
-      .order("created_at", { ascending: false });
+    // Fetch the job interviews for the job
+    const { data: jobInterviews, error: jobInterviewsError } = await supabase
+      .from("job_interviews")
+      .select("id, order_index")
+      .eq("custom_job_id", jobId)
+      .order("order_index", { ascending: true });
 
-    if (interviewError) {
-      logger.error("Database error checking interview completion", {
-        error: interviewError,
-        candidateId: existingCandidate.id,
-        jobId,
-        userId,
+    if (jobInterviewsError) {
+      logger.error("Error fetching job interviews", {
+        error: jobInterviewsError,
       });
+      await logger.flush();
       throw new Error(t("checkInterviewStatus"));
     }
 
-    // Check if any interview is complete
-    const completedInterview = interviews?.find(
-      (interview) => interview.status === "complete"
-    );
-    hasCompletedInterview = !!completedInterview;
+    // Check if the current candidate has completed the job interviews or not
+    let { data: candidateJobInterviews, error: interviewsError } =
+      await supabase
+        .from("candidate_job_interviews")
+        .select("id, status")
+        .in(
+          "interview_id",
+          jobInterviews.map((interview) => interview.id)
+        )
+        .eq("candidate_id", existingCandidate.id);
+
+    if (interviewsError) {
+      logger.error("Error fetching interviews", {
+        error: interviewsError,
+      });
+      await logger.flush();
+      throw new Error(t("checkInterviewStatus"));
+    }
+
+    if (candidateJobInterviews && candidateJobInterviews.length > 0) {
+      candidateJobInterviews = candidateJobInterviews.sort(
+        (a, b) =>
+          (jobInterviews.find((interview) => interview.id === a.id)
+            ?.order_index || 0) -
+          (jobInterviews.find((interview) => interview.id === b.id)
+            ?.order_index || 0)
+      );
+      finalizedCandidateJobInterviews = candidateJobInterviews;
+
+      // Check if any interview is complete
+      hasCompletedInterview = candidateJobInterviews.every(
+        (interview) => interview.status === "completed"
+      );
+    }
 
     // Get the most recent interview ID (completed or in-progress)
-    if (interviews && interviews.length > 0) {
-      interviewId = interviews[0].id;
+    if (candidateJobInterviews && candidateJobInterviews.length > 0) {
+      interviewId =
+        candidateJobInterviews.find(
+          (interview) => interview.status !== "completed"
+        )?.id ?? null;
     }
   }
 
@@ -417,6 +453,7 @@ export async function checkApplicationStatus(
     hasCompletedInterview,
     application: existingCandidate || null,
     interviewId,
+    candidateJobInterviews: finalizedCandidateJobInterviews,
   };
 }
 
@@ -465,7 +502,7 @@ export async function handleApplyAction(
   // Otherwise check application status for existing user
   const result = await checkApplicationStatus(companyId, jobId, userId);
 
-  if (result.hasApplied) {
+  if (result.hasApplied && result.application) {
     if (result.hasCompletedInterview) {
       // User has already applied and completed interview, redirect to submitted page
       redirect(
@@ -479,14 +516,23 @@ export async function handleApplyAction(
       }
       // User has applied and has an interview ID, redirect to specific interview page
       redirect(
-        `/apply/company/${companyId}/job/${jobId}/interview/${result.interviewId}`
+        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${result.interviewId}`
+      );
+    } else {
+      const interviewId = await createInterviewsForJobAndReturnFirstInterviewId(
+        {
+          candidateId: result.application.id,
+          jobId,
+        }
+      );
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
       );
     }
   } else {
     // User hasn't applied yet, redirect to application page
     redirect(`/apply/company/${companyId}/job/${jobId}/application`);
   }
-  return { error: undefined };
 }
 
 export const submitApplication = async (
@@ -499,7 +545,9 @@ export const submitApplication = async (
   // Parse form data
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
-  const selectedFileIds = formData.getAll("selectedFileIds") as string[];
+  const selectedFileIds = (
+    formData.getAll("selectedFileIds") as string[]
+  ).filter((id) => id && id.trim() !== "");
   const email = formData.get("email") as string;
   const fullName = formData.get("fullName") as string;
   const phoneNumber = formData.get("phoneNumber") as string;
@@ -514,12 +562,7 @@ export const submitApplication = async (
   });
 
   try {
-    if (
-      !companyId ||
-      !jobId ||
-      !selectedFileIds ||
-      selectedFileIds.length === 0
-    ) {
+    if (!companyId || !jobId) {
       throw new Error(t("missingRequiredFields"));
     }
 
@@ -543,40 +586,43 @@ export const submitApplication = async (
     // Check if this is an anonymous user (no email)
     isAnonymous = user.is_anonymous || false;
 
-    // Fetch the files to check if they need Gemini upload
-    const { data: userFiles, error: filesError } = await supabase
-      .from("user_files")
-      .select("*")
-      .in("id", selectedFileIds);
+    // Only fetch and process files if there are selected files
+    if (selectedFileIds.length > 0) {
+      // Fetch the files to check if they need Gemini upload
+      const { data: userFiles, error: filesError } = await supabase
+        .from("user_files")
+        .select("*")
+        .in("id", selectedFileIds);
 
-    if (filesError || !userFiles) {
-      logger.error("Failed to fetch user files", { error: filesError });
-      throw new Error(t("fetchApplicationFiles"));
-    }
+      if (filesError || !userFiles) {
+        logger.error("Failed to fetch user files", { error: filesError });
+        throw new Error(t("fetchApplicationFiles"));
+      }
 
-    // Convert user files to FileEntry format and upload to Gemini if needed
-    const fileEntries: FileEntry[] = userFiles.map((file) => ({
-      id: file.id,
-      supabaseBucketName: file.bucket_name,
-      supabaseFilePath: file.file_path,
-      supabaseTableName: "user_files",
-      googleFileUri: file.google_file_uri,
-      googleFileName: file.google_file_name,
-      mimeType: file.mime_type,
-    }));
+      // Convert user files to FileEntry format and upload to Gemini if needed
+      const fileEntries: FileEntry[] = userFiles.map((file) => ({
+        id: file.id,
+        supabaseBucketName: file.bucket_name,
+        supabaseFilePath: file.file_path,
+        supabaseTableName: "user_files",
+        googleFileUri: file.google_file_uri,
+        googleFileName: file.google_file_name,
+        mimeType: file.mime_type,
+      }));
 
-    try {
-      const geminiFiles = await fetchFilesFromGemini({ files: fileEntries });
-      logger.info("Files processed for Gemini", {
-        filesCount: geminiFiles.length,
-        fileIds: fileEntries.map((f) => f.id),
-      });
-    } catch (error) {
-      logger.error("Failed to process files for Gemini", {
-        error,
-        fileIds: fileEntries.map((f) => f.id),
-      });
-      // Continue with application submission even if file upload fails
+      try {
+        const geminiFiles = await fetchFilesFromGemini({ files: fileEntries });
+        logger.info("Files processed for Gemini", {
+          filesCount: geminiFiles.length,
+          fileIds: fileEntries.map((f) => f.id),
+        });
+      } catch (error) {
+        logger.error("Failed to process files for Gemini", {
+          error,
+          fileIds: fileEntries.map((f) => f.id),
+        });
+        // Continue with application submission even if file upload fails
+      }
     }
 
     // Create candidate application
@@ -596,26 +642,28 @@ export const submitApplication = async (
       throw new Error(t("createCandidateApplication"));
     }
 
-    // Create candidate_application_files entries
-    const selectedFileEntries = selectedFileIds.map((fileId: string) => ({
-      candidate_id: candidate.id,
-      file_id: fileId,
-    }));
+    // Create candidate_application_files entries (only if there are files to link)
+    if (selectedFileIds.length > 0) {
+      const selectedFileEntries = selectedFileIds.map((fileId: string) => ({
+        candidate_id: candidate.id,
+        file_id: fileId,
+      }));
 
-    const { error: linkFilesError } = await supabase
-      .from("candidate_application_files")
-      .insert(selectedFileEntries);
+      const { error: linkFilesError } = await supabase
+        .from("candidate_application_files")
+        .insert(selectedFileEntries);
 
-    if (linkFilesError) {
-      logger.error("Failed to link files", { error: linkFilesError });
-      throw new Error(t("linkApplicationFiles"));
+      if (linkFilesError) {
+        logger.error("Failed to link files", { error: linkFilesError });
+        throw new Error(t("linkApplicationFiles"));
+      }
     }
 
     logger.info("Application submitted successfully", {
       candidateId: candidate.id,
       fileCount: selectedFileIds.length,
     });
-    interviewId = await createInterviewForCandidate({
+    interviewId = await createInterviewsForJobAndReturnFirstInterviewId({
       candidateId: candidate.id,
       jobId,
     });
@@ -648,7 +696,7 @@ export const submitApplication = async (
   } catch (error) {
     logger.error("Application submission error", { error });
     await logger.flush();
-    return { error: t("applicationForm.errors.submitApplication") };
+    return { error: t("submitApplication") };
   }
   if (!interviewId) {
     logger.error("Failed to create interview", {
@@ -669,4 +717,76 @@ export const submitApplication = async (
       `/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`
     );
   }
+};
+
+export const createInterviewsForJobAndReturnFirstInterviewId = async ({
+  candidateId,
+  jobId,
+}: {
+  candidateId: string;
+  jobId: string;
+}) => {
+  const supabase = await createSupabaseServerClient();
+  const logger = new Logger().with({
+    function: "createInterviewsForJob",
+    jobId,
+  });
+
+  const { data: jobInterviews, error: jobInterviewsError } = await supabase
+    .from("job_interviews")
+    .select("id, order_index")
+    .eq("custom_job_id", jobId)
+    .order("order_index", { ascending: true });
+
+  if (jobInterviewsError) {
+    logger.error("Error fetching job interviews", {
+      error: jobInterviewsError,
+    });
+    await logger.flush();
+    throw new Error("Error fetching job interviews");
+  }
+
+  if (!jobInterviews || jobInterviews.length === 0) {
+    logger.error("No job interviews found for job", { jobId });
+    await logger.flush();
+    throw new Error("No job interviews found for job");
+  }
+
+  const { data: candidateJobInterviews, error: createInterviewsError } =
+    await supabase
+      .from("candidate_job_interviews")
+      .insert(
+        jobInterviews.map((interview) => ({
+          candidate_id: candidateId,
+          interview_id: interview.id,
+        }))
+      )
+      .select("id");
+
+  if (createInterviewsError) {
+    logger.error("Error creating job interviews", {
+      error: createInterviewsError,
+    });
+    throw new Error("Error creating job interviews");
+  }
+
+  const firstInterviewId = candidateJobInterviews
+    .sort(
+      (a, b) =>
+        (jobInterviews.find((interview) => interview.id === a.id)
+          ?.order_index || 0) -
+        (jobInterviews.find((interview) => interview.id === b.id)
+          ?.order_index || 0)
+    )
+    .map((interview) => interview.id)
+    .at(0);
+
+  if (!firstInterviewId) {
+    logger.error("Failed to create interview", {
+      error: "firstInterviewId is null",
+    });
+    throw new Error("Failed to create interview");
+  }
+
+  return firstInterviewId;
 };
