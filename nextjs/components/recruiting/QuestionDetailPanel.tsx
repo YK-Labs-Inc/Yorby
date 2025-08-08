@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X, Trash2 } from "lucide-react";
+import { CodeEditor } from "@/components/ui/code-editor";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -15,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
@@ -45,7 +46,6 @@ export default function QuestionDetailPanel({
   jobId,
   companyId,
 }: QuestionDetailPanelProps) {
-  const { toast } = useToast();
   const { logInfo, logError } = useAxiomLogging();
   const t = useTranslations("apply.recruiting.questionsTable");
   const [formData, setFormData] = useState({
@@ -93,8 +93,7 @@ export default function QuestionDetailPanel({
   useEffect(() => {
     if (createState.success) {
       logInfo("Question created successfully");
-      toast({
-        title: "Question created",
+      toast.success("Question created", {
         description: "The new question has been successfully created.",
       });
       onClose();
@@ -102,20 +101,17 @@ export default function QuestionDetailPanel({
       logError("Failed to create question", {
         error: createState.error,
       });
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: createState.error || "Failed to create question",
-        variant: "destructive",
       });
     }
-  }, [createState, logInfo, logError, toast]);
+  }, [createState, logInfo, logError, onClose]);
 
   // Handle update state changes
   useEffect(() => {
     if (updateState.success) {
       logInfo("Question updated successfully");
-      toast({
-        title: "Question updated",
+      toast.success("Question updated", {
         description: "The question has been successfully updated.",
       });
       onClose();
@@ -123,20 +119,17 @@ export default function QuestionDetailPanel({
       logError("Failed to update question", {
         error: updateState.error,
       });
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: updateState.error || "Failed to update question",
-        variant: "destructive",
       });
     }
-  }, [updateState, logInfo, logError, toast]);
+  }, [updateState, logInfo, logError, onClose]);
 
   // Handle delete state changes
   useEffect(() => {
     if (deleteState.success) {
       logInfo("Question deleted successfully");
-      toast({
-        title: "Question deleted",
+      toast.success("Question deleted", {
         description: "The question has been successfully deleted.",
       });
       setShowDeleteDialog(false);
@@ -145,13 +138,11 @@ export default function QuestionDetailPanel({
       logError("Failed to delete question", {
         error: deleteState.error,
       });
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: deleteState.error || "Failed to delete question",
-        variant: "destructive",
       });
     }
-  }, [deleteState, logInfo, logError, toast]);
+  }, [deleteState, logInfo, logError, onClose]);
 
   const handleClose = () => {
     setFormData({ question: "", answer: "" });
@@ -230,26 +221,42 @@ export default function QuestionDetailPanel({
                   />
                 </div>
 
-                {/* Answer Guidelines Field */}
+                {/* Answer Guidelines Field / Code Editor */}
                 <div className="space-y-2">
                   <Label
                     htmlFor="panel-answer"
                     className="text-base font-medium"
                   >
-                    {t("editDialog.form.answerGuidelines.label")}
+                    {interview.interview_type === "coding"
+                      ? "Solution Code"
+                      : t("editDialog.form.answerGuidelines.label")}
                   </Label>
-                  <Textarea
-                    id="panel-answer"
-                    name="answer"
-                    value={formData.answer}
-                    onChange={(e) =>
-                      setFormData({ ...formData, answer: e.target.value })
-                    }
-                    placeholder={t(
-                      "editDialog.form.answerGuidelines.placeholder"
-                    )}
-                    className="min-h-[200px] resize-none text-base"
-                  />
+                  {interview.interview_type === "coding" ? (
+                    <CodeEditor
+                      id="panel-answer"
+                      name="answer"
+                      value={formData.answer}
+                      onChange={(value) =>
+                        setFormData({ ...formData, answer: value })
+                      }
+                      placeholder="// Write your solution code here..."
+                      minHeight="200px"
+                      className="text-base"
+                    />
+                  ) : (
+                    <Textarea
+                      id="panel-answer"
+                      name="answer"
+                      value={formData.answer}
+                      onChange={(e) =>
+                        setFormData({ ...formData, answer: e.target.value })
+                      }
+                      placeholder={t(
+                        "editDialog.form.answerGuidelines.placeholder"
+                      )}
+                      className="min-h-[200px] resize-none text-base"
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -259,6 +266,7 @@ export default function QuestionDetailPanel({
               <div className="flex items-center justify-between">
                 {mode === "edit" && (
                   <Button
+                    type="button"
                     variant="destructive"
                     onClick={() => setShowDeleteDialog(true)}
                     disabled={isDeleting}
@@ -270,6 +278,7 @@ export default function QuestionDetailPanel({
                 {mode === "create" && <div />}
                 <div className="flex gap-3">
                   <Button
+                    type="button"
                     variant="outline"
                     onClick={handleClose}
                     disabled={isSaving}

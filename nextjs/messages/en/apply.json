@@ -416,7 +416,7 @@
       "table": {
         "headers": {
           "question": "Question",
-          "answerGuidelines": "Answer Guidelines",
+          "answerGuidelines": "Answer",
           "status": "Status",
           "submissions": "Submissions",
           "actions": "Actions"
@@ -439,7 +439,7 @@
             "placeholder": "Enter your interview question..."
           },
           "answerGuidelines": {
-            "label": "Answer Guidelines (optional)",
+            "label": "Answer (optional)",
             "placeholder": "Provide guidelines for answering this question..."
           },
           "publishImmediately": "Publish immediately"
