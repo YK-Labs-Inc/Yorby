@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Plus, GripVertical, MoreVertical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import { CreateJobInterviewDialog } from "./CreateJobInterviewDialog";
+import { CreateJobInterviewPanel } from "./CreateJobInterviewPanel";
 import {
   DndContext,
   closestCenter,
@@ -72,7 +72,14 @@ function SortableRow({
   getCandidateCount,
   companyId,
   jobId,
-}: SortableRowProps) {
+  setPanelMode,
+  setSelectedInterview,
+  setShowCreatePanel,
+}: SortableRowProps & {
+  setPanelMode: (mode: "create" | "edit") => void;
+  setSelectedInterview: (interview: JobInterview) => void;
+  setShowCreatePanel: (show: boolean) => void;
+}) {
   const t = useTranslations("apply.recruiting.interviewRoundsManager");
   const {
     attributes,
@@ -127,15 +134,21 @@ function SortableRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                setPanelMode("edit");
+                setSelectedInterview(interview);
+                setShowCreatePanel(true);
+              }}
+            >
+              {t("actions.editRound")}
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <Link
                 href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interview.id}`}
               >
-                {t("actions.editRound")}
+                {t("actions.manageQuestions")}
               </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              {t("actions.deleteRound")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -149,13 +162,23 @@ export function InterviewRoundsManager({
   interviews,
   companyId,
 }: InterviewRoundsManagerProps) {
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showCreatePanel, setShowCreatePanel] = useState(false);
+  const [panelMode, setPanelMode] = useState<"create" | "edit">("create");
+  const [selectedInterview, setSelectedInterview] =
+    useState<JobInterview | null>(null);
   const [sortedInterviews, setSortedInterviews] = useState(() =>
     [...interviews].sort((a, b) => a.order_index - b.order_index)
   );
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const t = useTranslations("apply.recruiting.interviewRoundsManager");
+
+  // Update sortedInterviews when interviews prop changes
+  useEffect(() => {
+    setSortedInterviews(
+      [...interviews].sort((a, b) => a.order_index - b.order_index)
+    );
+  }, [interviews]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -230,7 +253,13 @@ export function InterviewRoundsManager({
             <h2 className="text-2xl font-semibold">{t("title")}</h2>
             <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}>
+          <Button
+            onClick={() => {
+              setPanelMode("create");
+              setSelectedInterview(null);
+              setShowCreatePanel(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" />
             {t("createInterviewRound")}
           </Button>
@@ -246,7 +275,13 @@ export function InterviewRoundsManager({
               <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
                 {t("noInterviews.description")}
               </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
+              <Button
+                onClick={() => {
+                  setPanelMode("create");
+                  setSelectedInterview(null);
+                  setShowCreatePanel(true);
+                }}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 {t("createInterviewRound")}
               </Button>
@@ -294,6 +329,9 @@ export function InterviewRoundsManager({
                           getCandidateCount={getCandidateCount}
                           companyId={companyId}
                           jobId={jobId}
+                          setPanelMode={setPanelMode}
+                          setSelectedInterview={setSelectedInterview}
+                          setShowCreatePanel={setShowCreatePanel}
                         />
                       ))}
                     </SortableContext>
@@ -353,11 +391,13 @@ export function InterviewRoundsManager({
         )}
       </div>
 
-      <CreateJobInterviewDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+      <CreateJobInterviewPanel
+        open={showCreatePanel}
+        onOpenChange={setShowCreatePanel}
         jobId={jobId}
         currentInterviewsCount={sortedInterviews.length}
+        mode={panelMode}
+        interview={selectedInterview}
       />
     </>
   );
