@@ -30,7 +30,7 @@ interface SessionViewProps {
   interviewType: Enums<"job_interview_type">;
   questionDetails: Pick<
     Tables<"company_interview_question_bank">,
-    "question"
+    "id" | "question"
   >[];
 }
 
@@ -156,13 +156,9 @@ export const SessionView = ({
       {/* Main session content */}
       {interviewType === "coding" ? (
         <CodingInterviewComponent
-          interviewId={interviewId}
-          appConfig={appConfig}
-          onProcessInterview={onProcessInterview ?? (async () => "")}
-          defaultShowTranscript
-          defaultShowAiPanel
           aiMessages={aiMessages}
           questionDetails={questionDetails}
+          candidateInterviewId={interviewId}
         />
       ) : (
         <VideoChatLayout aiMessages={aiMessages} />

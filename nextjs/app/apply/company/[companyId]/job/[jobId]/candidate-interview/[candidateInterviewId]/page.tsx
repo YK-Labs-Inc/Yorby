@@ -18,7 +18,7 @@ const fetchJobInterviewQuestions = async (interviewId: string) => {
 
   const { data: questionDetails, error: questionDetailsError } = await supabase
     .from("company_interview_question_bank")
-    .select("question")
+    .select("id, question")
     .in(
       "id",
       jobInterviewQuestions.map((question) => question.question_id)
@@ -75,8 +75,6 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
   const questionDetails = await fetchJobInterviewQuestions(
     currentInterview.interview_id
   );
-  console.log("hey questionDetails", questionDetails);
-
   // Find the current interview index and determine the next interview ID
   const currentIndex = candidateJobInterviews.findIndex(
     (interview) => interview.id === candidateInterviewId

@@ -618,6 +618,29 @@
       "completeApplication": "Complete Application"
     }
   },
+  "codingInterview": {
+    "problemStatement": "Problem Statement",
+    "writeSolution": "Write your solution below",
+    "submitCode": "Submit Code",
+    "submitting": "Submitting...",
+    "cameraOff": "Camera Off",
+    "you": "You",
+    "aiTranscript": "AI Transcript",
+    "startCoding": "// Start coding...",
+    "codeSubmission": "Code submission:",
+    "logging": {
+      "savingCodeSubmission": "Saving code submission",
+      "codeSubmissionSaved": "Code submission saved",
+      "failedToSaveSubmission": "Failed to save code submission",
+      "unexpectedError": "Unexpected error saving submission",
+      "codeSubmittedToAgent": "Code submitted to AI agent",
+      "errorSubmittingCode": "Error submitting code",
+      "databaseError": "Database error saving code submission",
+      "savedSuccessfully": "Code submission saved successfully",
+      "unexpectedServerError": "Unexpected error saving code submission",
+      "unknownError": "Unknown error"
+    }
+  },
   "createJobDialog": {
     "title": "Create New Job Listing",
     "description": "Create a job posting to start recruiting candidates.",

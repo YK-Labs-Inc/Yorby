@@ -35,7 +35,7 @@ interface AppProps {
   interviewType: Enums<"job_interview_type">;
   questionDetails: Pick<
     Tables<"company_interview_question_bank">,
-    "question"
+    "id" | "question"
   >[];
 }
 
