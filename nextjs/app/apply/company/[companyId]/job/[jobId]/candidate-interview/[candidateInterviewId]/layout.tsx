@@ -130,7 +130,7 @@ export default async function InterviewLayout({
     await logger.flush();
 
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="max-h-screen bg-white overflow-hidden">
         {/* Header */}
         <div className="border-b bg-white px-6 py-4">
           <div className="max-w-7xl mx-auto">
@@ -143,7 +143,7 @@ export default async function InterviewLayout({
 
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-80 bg-white border-r min-h-[calc(100vh-5rem)]">
+          <div className="w-80 bg-white border-r min-h-[calc(100vh-5rem)] h-full">
             <div className="p-6">
               <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
                 {t("sidebar.title")}
@@ -159,9 +159,7 @@ export default async function InterviewLayout({
                     <div key={interview.id}>
                       <div
                         className={`flex items-start gap-3 p-3 rounded-lg ${
-                          isActive
-                            ? "bg-blue-50 border border-blue-200"
-                            : ""
+                          isActive ? "bg-blue-50 border border-blue-200" : ""
                         }`}
                       >
                         <div className="mt-0.5">

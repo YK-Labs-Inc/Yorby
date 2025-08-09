@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  type AgentState,
-  useRoomContext,
-  useVoiceAssistant,
-} from "@livekit/components-react";
-import { toastAlert } from "./alert-toast";
+import { type AgentState } from "@livekit/components-react";
 import useChatAndTranscription from "./hooks/useChatAndTranscription";
 import { useDebugMode } from "./hooks/useDebug";
 import type { AppConfig } from "./types";
 import { VideoChatLayout } from "./video-chat-layout";
+import CodingInterviewComponent from "@/app/apply/company/[companyId]/job/[jobId]/candidate-interview/[candidateInterviewId]/CodingInterviewComponent";
 import { AgentControlBar } from "@/app/components/livekit/agent-control-bar/agent-control-bar";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
+import { Enums, Tables } from "@/utils/supabase/database.types";
 
 function isAgentAvailable(agentState: AgentState) {
   return (
@@ -30,6 +27,11 @@ interface SessionViewProps {
   sessionStarted: boolean;
   onProcessInterview?: () => Promise<string>;
   interviewId: string;
+  interviewType: Enums<"job_interview_type">;
+  questionDetails: Pick<
+    Tables<"company_interview_question_bank">,
+    "question"
+  >[];
 }
 
 export const SessionView = ({
@@ -39,10 +41,10 @@ export const SessionView = ({
   onProcessInterview,
   ref,
   interviewId,
+  interviewType,
+  questionDetails,
 }: React.ComponentProps<"div"> & SessionViewProps) => {
-  const { state: agentState } = useVoiceAssistant();
   const { messages } = useChatAndTranscription();
-  const room = useRoomContext();
   const { logInfo, logError } = useAxiomLogging();
 
   useDebugMode();
@@ -149,13 +151,25 @@ export const SessionView = ({
     <main
       ref={ref}
       inert={disabled}
-      className="relative h-screen overflow-hidden"
+      className="h-full overflow-hidden flex flex-col justify-between"
     >
-      {/* Video Chat Layout with AI messages */}
-      <VideoChatLayout aiMessages={aiMessages} />
+      {/* Main session content */}
+      {interviewType === "coding" ? (
+        <CodingInterviewComponent
+          interviewId={interviewId}
+          appConfig={appConfig}
+          onProcessInterview={onProcessInterview ?? (async () => "")}
+          defaultShowTranscript
+          defaultShowAiPanel
+          aiMessages={aiMessages}
+          questionDetails={questionDetails}
+        />
+      ) : (
+        <VideoChatLayout aiMessages={aiMessages} />
+      )}
 
       {/* Control Bar - Always visible at bottom */}
-      <div className="absolute right-0 bottom-0 left-0 z-50 px-4 pb-6">
+      <div className="px-4 pb-6">
         <AnimatePresence mode="wait">
           {sessionStarted && (
             <motion.div
