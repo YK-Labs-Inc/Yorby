@@ -2,20 +2,23 @@ import { useCallback, useEffect, useState } from "react";
 import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-interface UseConnectionDetailsProps {
-  mockInterviewId: string;
-}
+type UseConnectionDetailsProps =
+  | { kind: "mock"; id: string }
+  | { kind: "candidate"; id: string };
 
-export default function useConnectionDetails({
-  mockInterviewId,
-}: UseConnectionDetailsProps) {
+export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const { logError } = useAxiomLogging();
   const [connectionDetails, setConnectionDetails] =
     useState<ConnectionDetails | null>(null);
 
   const fetchConnectionDetails = useCallback(() => {
+    const queryParam =
+      props.kind === "mock"
+        ? `mockInterviewId=${encodeURIComponent(props.id)}`
+        : `candidateJobInterviewId=${encodeURIComponent(props.id)}`;
+
     setConnectionDetails(null);
-    fetch(`/api/livekit/connection-details?mockInterviewId=${mockInterviewId}`)
+    fetch(`/api/livekit/connection-details?${queryParam}`)
       .then((res) => res.json())
       .then((data) => {
         setConnectionDetails(data);
@@ -25,7 +28,7 @@ export default function useConnectionDetails({
           error,
         });
       });
-  }, [mockInterviewId, logError]);
+  }, [props, logError]);
 
   useEffect(() => {
     fetchConnectionDetails();

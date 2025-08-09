@@ -53,7 +53,8 @@ export function LiveKitInterviewComponent({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
-    mockInterviewId,
+    kind: "mock",
+    id: mockInterviewId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();

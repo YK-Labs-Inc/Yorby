@@ -7,7 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { headers } from "next/headers";
-import { Tables } from "@/utils/supabase/database.types";
+import { Enums, Tables } from "@/utils/supabase/database.types";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -370,16 +370,16 @@ export async function checkApplicationStatus(
   // Check if the user has completed an interview for this job
   let hasCompletedInterview = false;
   let interviewId: string | null = null;
-  let finalizedCandidateJobInterviews: Pick<
+  let finalizedCandidateJobInterviews: (Pick<
     Tables<"candidate_job_interviews">,
-    "id" | "status"
-  >[] = [];
+    "id" | "status" | "interview_id"
+  > & { interview_type: Enums<"job_interview_type"> })[] = [];
 
   if (existingCandidate) {
     // Fetch the job interviews for the job
     const { data: jobInterviews, error: jobInterviewsError } = await supabase
       .from("job_interviews")
-      .select("id, order_index")
+      .select("id, order_index, interview_type")
       .eq("custom_job_id", jobId)
       .order("order_index", { ascending: true });
 
@@ -395,7 +395,7 @@ export async function checkApplicationStatus(
     let { data: candidateJobInterviews, error: interviewsError } =
       await supabase
         .from("candidate_job_interviews")
-        .select("id, status")
+        .select("id, status, interview_id")
         .in(
           "interview_id",
           jobInterviews.map((interview) => interview.id)
@@ -418,7 +418,14 @@ export async function checkApplicationStatus(
           (jobInterviews.find((interview) => interview.id === b.id)
             ?.order_index || 0)
       );
-      finalizedCandidateJobInterviews = candidateJobInterviews;
+      finalizedCandidateJobInterviews = candidateJobInterviews.map(
+        (interview) => ({
+          ...interview,
+          interview_type: jobInterviews.find(
+            (jobInterview) => jobInterview.id === interview.interview_id
+          )?.interview_type as Enums<"job_interview_type">,
+        })
+      );
 
       // Check if any interview is complete
       hasCompletedInterview = candidateJobInterviews.every(
@@ -683,7 +690,7 @@ export const submitApplication = async (
           },
         },
         {
-          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`,
+          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`,
         }
       );
 

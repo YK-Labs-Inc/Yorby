@@ -22,6 +22,7 @@ import { RealInterviewPreJoin } from "@/app/dashboard/jobs/[jobId]/mockInterview
 import { SessionView } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/session-view";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { Button } from "@/components/ui/button";
+import { Enums, Tables } from "@/utils/supabase/database.types";
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -31,6 +32,11 @@ interface AppProps {
   nextInterviewId: string | null;
   jobId: string;
   companyId?: string;
+  interviewType: Enums<"job_interview_type">;
+  questionDetails: Pick<
+    Tables<"company_interview_question_bank">,
+    "question"
+  >[];
 }
 
 export function InterviewComponent({
@@ -39,13 +45,16 @@ export function InterviewComponent({
   nextInterviewId,
   jobId,
   companyId,
+  interviewType,
+  questionDetails,
 }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
-    mockInterviewId: currentInterviewId,
+    kind: "candidate",
+    id: currentInterviewId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();
@@ -304,6 +313,8 @@ export function InterviewComponent({
               ease: "linear",
             }}
             interviewId={currentInterviewId}
+            interviewType={interviewType}
+            questionDetails={questionDetails}
           />
         </RoomContext.Provider>
 
