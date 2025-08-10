@@ -3,9 +3,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
-import { Tables } from "@/utils/supabase/database.types";
 import { getTranslations } from "next-intl/server";
-import type { Question } from "./AIChatPanel";
 
 // Helper function to check if user is a company member
 async function checkCompanyMembership(
@@ -62,6 +60,7 @@ export async function createQuestion(
   const companyId = formData.get("company_id") as string;
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
+  const timeLimitMs = formData.get("time_limit_ms") as string;
 
   const logger = new Logger().with({
     function: "createQuestion",
@@ -136,10 +135,39 @@ export async function createQuestion(
       return { success: false, error: t("failedToCreate") };
     }
 
-    // Step 2: Get the next order index
+    // Step 2: If it's a coding question, create the metadata entry with time limit
+    if (interview.interview_type === "coding") {
+      let parsedTimeLimitMs = parseInt(timeLimitMs) || 1800000; // Default 30 minutes
+
+      // Enforce minimum of 1 minute and maximum of 45 minutes
+      parsedTimeLimitMs = Math.min(Math.max(parsedTimeLimitMs, 60000), 2700000); // 1 min to 45 min in ms
+
+      const { error: metadataError } = await supabase
+        .from("company_interview_coding_question_metadata")
+        .insert({
+          id: questionBankEntry.id,
+          time_limit_ms: parsedTimeLimitMs,
+        });
+
+      if (metadataError) {
+        // Rollback: delete the question from the bank
+        await supabase
+          .from("company_interview_question_bank")
+          .delete()
+          .eq("id", questionBankEntry.id);
+
+        logger.error("Failed to create coding question metadata", {
+          error: metadataError,
+        });
+        await logger.flush();
+        return { success: false, error: t("failedToCreate") };
+      }
+    }
+
+    // Step 3: Get the next order index
     const nextOrderIndex = await getNextOrderIndex(interviewId);
 
-    // Step 3: Link the question to the interview
+    // Step 4: Link the question to the interview
     const { error: linkError } = await supabase
       .from("job_interview_questions")
       .insert({
@@ -193,6 +221,7 @@ export async function updateQuestion(
   const jobId = formData.get("job_id") as string;
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
+  const timeLimitMs = formData.get("time_limit_ms") as string;
 
   const logger = new Logger().with({
     function: "updateQuestion",
@@ -242,6 +271,19 @@ export async function updateQuestion(
       };
     }
 
+    // Get interview type to determine if we need to handle metadata
+    const { data: interview, error: interviewError } = await supabase
+      .from("job_interviews")
+      .select("interview_type")
+      .eq("id", interviewId)
+      .single();
+
+    if (interviewError || !interview) {
+      logger.error("Interview not found", { error: interviewError });
+      await logger.flush();
+      return { success: false, error: "Interview not found" };
+    }
+
     // Update the question in the bank
     const { error } = await supabase
       .from("company_interview_question_bank")
@@ -255,6 +297,55 @@ export async function updateQuestion(
       logger.error("Failed to update question in question", { error });
       await logger.flush();
       return { success: false, error: t("failedToUpdate") };
+    }
+
+    // If it's a coding question, update or create the metadata entry
+    if (interview.interview_type === "coding") {
+      let parsedTimeLimitMs = parseInt(timeLimitMs) || 1800000; // Default 30 minutes
+
+      // Enforce minimum of 1 minute and maximum of 45 minutes
+      parsedTimeLimitMs = Math.min(Math.max(parsedTimeLimitMs, 60000), 2700000); // 1 min to 45 min in ms
+
+      // First, check if metadata exists
+      const { data: existingMetadata } = await supabase
+        .from("company_interview_coding_question_metadata")
+        .select("id")
+        .eq("id", questionId)
+        .single();
+
+      if (existingMetadata) {
+        // Update existing metadata
+        const { error: metadataError } = await supabase
+          .from("company_interview_coding_question_metadata")
+          .update({
+            time_limit_ms: parsedTimeLimitMs,
+          })
+          .eq("id", questionId);
+
+        if (metadataError) {
+          logger.error("Failed to update coding question metadata", {
+            error: metadataError,
+          });
+          await logger.flush();
+          return { success: false, error: t("failedToUpdate") };
+        }
+      } else {
+        // Create new metadata entry
+        const { error: metadataError } = await supabase
+          .from("company_interview_coding_question_metadata")
+          .insert({
+            id: questionId,
+            time_limit_ms: parsedTimeLimitMs,
+          });
+
+        if (metadataError) {
+          logger.error("Failed to create coding question metadata", {
+            error: metadataError,
+          });
+          await logger.flush();
+          return { success: false, error: t("failedToUpdate") };
+        }
+      }
     }
 
     logger.info("Question updated successfully", { questionId });
@@ -367,167 +458,5 @@ export async function deleteQuestion(
     });
     await logger.flush();
     return { success: false, error: t("unexpectedError") };
-  }
-}
-
-export type SaveQuestionsState = {
-  error?: string;
-  success?: boolean;
-};
-
-export async function saveQuestions(
-  prevState: SaveQuestionsState | null,
-  formData: FormData
-): Promise<SaveQuestionsState> {
-  const logger = new Logger().with({
-    function: "saveQuestions",
-  });
-
-  try {
-    const supabase = await createSupabaseServerClient();
-
-    // Get the current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      logger.error("Authentication error", { error: userError });
-      await logger.flush();
-      return { error: "You must be logged in to save questions" };
-    }
-
-    // Get questions and IDs from formData
-    const questionsJson = formData.get("questions");
-    const jobId = formData.get("jobId");
-    const companyId = formData.get("companyId");
-    const interviewId = formData.get("interviewId");
-
-    if (!questionsJson || !jobId || !companyId || !interviewId) {
-      return { error: "Missing required data" };
-    }
-
-    const questions: Question[] = JSON.parse(questionsJson as string);
-
-    // Check authorization
-    const { isAuthorized, error: authError } = await checkCompanyMembership(
-      user.id,
-      companyId as string
-    );
-
-    if (!isAuthorized) {
-      logger.error("User not authorized", { userId: user.id, authError });
-      await logger.flush();
-      return {
-        error: authError || "You don't have permission to manage questions",
-      };
-    }
-
-    // Get interview type
-    const { data: interview, error: interviewError } = await supabase
-      .from("job_interviews")
-      .select("interview_type")
-      .eq("id", interviewId as string)
-      .single();
-
-    if (interviewError || !interview) {
-      logger.error("Interview not found", { error: interviewError });
-      await logger.flush();
-      return { error: "Interview not found" };
-    }
-
-    // Filter out questions without required fields
-    const validQuestions = questions.filter(
-      (q): q is Question & { question: string; answer: string } =>
-        q.question !== null &&
-        q.question !== undefined &&
-        q.question.trim() !== "" &&
-        q.answer !== null &&
-        q.answer !== undefined &&
-        q.answer.trim() !== ""
-    );
-
-    if (validQuestions.length === 0) {
-      logger.warn("No valid questions to save", {
-        originalCount: questions.length,
-        userId: user.id,
-      });
-      await logger.flush();
-      return {
-        error:
-          "No valid questions to save. Please ensure all questions have content.",
-      };
-    }
-
-    // Get the starting order index
-    let currentOrderIndex = await getNextOrderIndex(interviewId as string);
-
-    // Insert questions in bulk to the bank
-    const questionsToInsert = validQuestions.map((q) => ({
-      company_id: companyId as string,
-      question: q.question.trim(),
-      answer: q.answer.trim(),
-      question_type: interview.interview_type,
-    }));
-
-    const { data: insertedQuestions, error: insertError } = await supabase
-      .from("company_interview_question_bank")
-      .insert(questionsToInsert)
-      .select();
-
-    if (insertError || !insertedQuestions) {
-      logger.error("Failed to insert questions to bank", {
-        error: insertError,
-        questionsCount: validQuestions.length,
-      });
-      await logger.flush();
-      return { error: "Failed to save questions. Please try again." };
-    }
-
-    // Link all questions to the interview
-    const linksToInsert = insertedQuestions.map((q, index) => ({
-      interview_id: interviewId as string,
-      question_id: q.id,
-      order_index: currentOrderIndex + index,
-    }));
-
-    const { error: linkError } = await supabase
-      .from("job_interview_questions")
-      .insert(linksToInsert);
-
-    if (linkError) {
-      // Rollback: delete the questions from the bank
-      const questionIds = insertedQuestions.map((q) => q.id);
-      await supabase
-        .from("company_interview_question_bank")
-        .delete()
-        .in("id", questionIds);
-
-      logger.error("Failed to link questions to interview", {
-        error: linkError,
-      });
-      await logger.flush();
-      return { error: "Failed to save questions. Please try again." };
-    }
-
-    logger.info("Questions saved successfully", {
-      interviewId,
-      questionsCount: insertedQuestions.length,
-      userId: user.id,
-    });
-    await logger.flush();
-
-    // Revalidate the questions page
-    revalidatePath(
-      `/recruiting/companies/${companyId}/jobs/${jobId}/interviews/${interviewId}`
-    );
-
-    return { success: true };
-  } catch (error) {
-    logger.error("Unexpected error saving questions", {
-      error: error instanceof Error ? error.message : String(error),
-    });
-    await logger.flush();
-    return { error: "An unexpected error occurred. Please try again." };
   }
 }

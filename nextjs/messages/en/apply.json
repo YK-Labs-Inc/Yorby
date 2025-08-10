@@ -450,7 +450,38 @@
         }
       },
       "detailPanel": {
-        "title": "Question Details"
+        "title": "Question Details",
+        "timeLimit": {
+          "label": "Time Limit (minutes)",
+          "placeholder": "30",
+          "errors": {
+            "required": "Time limit is required",
+            "minimum": "Minimum time limit is 1 minute",
+            "maximum": "Maximum time limit is 45 minutes"
+          },
+          "description": "Set the maximum time allowed for this coding question (1-45 minutes)"
+        },
+        "codingQuestion": {
+          "solutionLabel": "Solution Code",
+          "solutionPlaceholder": "// Write your solution code here...",
+          "solutionRequired": "Solution code is required for coding questions"
+        },
+        "buttons": {
+          "saving": "Saving...",
+          "deleting": "Deleting..."
+        },
+        "toast": {
+          "questionCreated": "Question created",
+          "questionCreatedDescription": "The new question has been successfully created.",
+          "questionUpdated": "Question updated",
+          "questionUpdatedDescription": "The question has been successfully updated.",
+          "questionDeleted": "Question deleted",
+          "questionDeletedDescription": "The question has been successfully deleted.",
+          "error": "Error",
+          "createError": "Failed to create question",
+          "updateError": "Failed to update question",
+          "deleteError": "Failed to delete question"
+        }
       },
       "editDialog": {
         "title": "Edit Question",
@@ -616,7 +647,8 @@
     "buttons": {
       "continueToNext": "Continue to Next Interview",
       "completeApplication": "Complete Application"
-    }
+    },
+    "interviewComplete": "Interview Complete!"
   },
   "codingInterview": {
     "problemStatement": "Problem Statement",
@@ -628,6 +660,7 @@
     "aiTranscript": "AI Transcript",
     "startCoding": "// Start coding...",
     "codeSubmission": "Code submission:",
+    "timeUp": "Time's Up",
     "logging": {
       "savingCodeSubmission": "Saving code submission",
       "codeSubmissionSaved": "Code submission saved",

@@ -33,10 +33,14 @@ interface AppProps {
   jobId: string;
   companyId?: string;
   interviewType: Enums<"job_interview_type">;
-  questionDetails: Pick<
+  questionDetails: (Pick<
     Tables<"company_interview_question_bank">,
     "id" | "question"
-  >[];
+  > & {
+    company_interview_coding_question_metadata?: {
+      time_limit_ms: number;
+    } | null;
+  })[];
 }
 
 export function InterviewComponent({
@@ -271,7 +275,7 @@ export function InterviewComponent({
                     </div>
                   </div>
                   <h2 className="text-xl font-semibold mb-2">
-                    Interview Complete!
+                    {tInterview("interviewComplete")}
                   </h2>
                   <p className="text-gray-600 mb-6">
                     {nextInterviewId

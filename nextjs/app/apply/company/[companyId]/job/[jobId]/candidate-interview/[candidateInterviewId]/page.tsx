@@ -18,7 +18,13 @@ const fetchJobInterviewQuestions = async (interviewId: string) => {
 
   const { data: questionDetails, error: questionDetailsError } = await supabase
     .from("company_interview_question_bank")
-    .select("id, question")
+    .select(`
+      id, 
+      question,
+      company_interview_coding_question_metadata (
+        time_limit_ms
+      )
+    `)
     .in(
       "id",
       jobInterviewQuestions.map((question) => question.question_id)

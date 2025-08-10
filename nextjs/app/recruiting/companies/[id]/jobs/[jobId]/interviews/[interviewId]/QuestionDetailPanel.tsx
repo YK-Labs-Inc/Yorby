@@ -26,6 +26,7 @@ import {
   updateQuestion,
   deleteQuestion,
 } from "@/app/recruiting/companies/[id]/jobs/[jobId]/interviews/[interviewId]/actions";
+import { Input } from "@/components/ui/input";
 
 interface QuestionDetailPanelProps {
   isOpen: boolean;
@@ -51,8 +52,13 @@ export default function QuestionDetailPanel({
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
+    timeLimitMs: 1800000, // Default 30 minutes in milliseconds
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [timeLimitError, setTimeLimitError] = useState<string | null>(null);
+  const [solutionCodeError, setSolutionCodeError] = useState<string | null>(
+    null
+  );
 
   // Server action states
   const [createState, createFormAction, isCreating] = useActionState(
@@ -76,15 +82,22 @@ export default function QuestionDetailPanel({
 
   // Update form data when question changes or mode changes
   useEffect(() => {
+    setTimeLimitError(null); // Clear any validation errors
+    setSolutionCodeError(null); // Clear solution code errors
     if (mode === "edit" && question) {
       setFormData({
         question: question.company_interview_question_bank.question,
         answer: question.company_interview_question_bank.answer,
+        timeLimitMs:
+          question.company_interview_question_bank
+            .company_interview_coding_question_metadata?.time_limit_ms ||
+          1800000,
       });
     } else if (mode === "create") {
       setFormData({
         question: "",
         answer: "",
+        timeLimitMs: 1800000, // Default 30 minutes
       });
     }
   }, [question, mode]);
@@ -93,16 +106,16 @@ export default function QuestionDetailPanel({
   useEffect(() => {
     if (createState.success) {
       logInfo("Question created successfully");
-      toast.success("Question created", {
-        description: "The new question has been successfully created.",
+      toast.success(t("detailPanel.toast.questionCreated"), {
+        description: t("detailPanel.toast.questionCreatedDescription"),
       });
       onClose();
     } else if (createState.error) {
       logError("Failed to create question", {
         error: createState.error,
       });
-      toast.error("Error", {
-        description: createState.error || "Failed to create question",
+      toast.error(t("detailPanel.toast.error"), {
+        description: createState.error || t("detailPanel.toast.createError"),
       });
     }
   }, [createState, logInfo, logError, onClose]);
@@ -111,16 +124,16 @@ export default function QuestionDetailPanel({
   useEffect(() => {
     if (updateState.success) {
       logInfo("Question updated successfully");
-      toast.success("Question updated", {
-        description: "The question has been successfully updated.",
+      toast.success(t("detailPanel.toast.questionUpdated"), {
+        description: t("detailPanel.toast.questionUpdatedDescription"),
       });
       onClose();
     } else if (updateState.error) {
       logError("Failed to update question", {
         error: updateState.error,
       });
-      toast.error("Error", {
-        description: updateState.error || "Failed to update question",
+      toast.error(t("detailPanel.toast.error"), {
+        description: updateState.error || t("detailPanel.toast.updateError"),
       });
     }
   }, [updateState, logInfo, logError, onClose]);
@@ -129,8 +142,8 @@ export default function QuestionDetailPanel({
   useEffect(() => {
     if (deleteState.success) {
       logInfo("Question deleted successfully");
-      toast.success("Question deleted", {
-        description: "The question has been successfully deleted.",
+      toast.success(t("detailPanel.toast.questionDeleted"), {
+        description: t("detailPanel.toast.questionDeletedDescription"),
       });
       setShowDeleteDialog(false);
       onClose();
@@ -138,14 +151,16 @@ export default function QuestionDetailPanel({
       logError("Failed to delete question", {
         error: deleteState.error,
       });
-      toast.error("Error", {
-        description: deleteState.error || "Failed to delete question",
+      toast.error(t("detailPanel.toast.error"), {
+        description: deleteState.error || t("detailPanel.toast.deleteError"),
       });
     }
   }, [deleteState, logInfo, logError, onClose]);
 
   const handleClose = () => {
-    setFormData({ question: "", answer: "" });
+    setFormData({ question: "", answer: "", timeLimitMs: 1800000 });
+    setTimeLimitError(null);
+    setSolutionCodeError(null);
     onClose();
   };
 
@@ -163,11 +178,11 @@ export default function QuestionDetailPanel({
       {/* Panel */}
       <div
         className={cn(
-          "fixed top-0 right-0 h-full w-full max-w-2xl bg-background border-l shadow-xl transition-transform duration-300 ease-in-out z-50",
+          "fixed top-0 right-0 h-full w-full max-w-2xl bg-background border-l shadow-xl transition-transform duration-300 ease-in-out z-50 overflow-hidden",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
             <h2 className="text-2xl font-semibold">
@@ -186,8 +201,12 @@ export default function QuestionDetailPanel({
           </div>
 
           {/* Content */}
-          <form id="question-form" action={formAction}>
-            <div className="flex-1 overflow-y-auto p-6">
+          <form
+            id="question-form"
+            action={formAction}
+            className="flex flex-col flex-1 min-h-0"
+          >
+            <div className="flex-1 overflow-y-auto p-6 min-h-0">
               {/* Hidden fields */}
               <input type="hidden" name="interview_id" value={interview.id} />
               <input type="hidden" name="job_id" value={jobId} />
@@ -228,21 +247,37 @@ export default function QuestionDetailPanel({
                     className="text-base font-medium"
                   >
                     {interview.interview_type === "coding"
-                      ? "Solution Code"
+                      ? t("detailPanel.codingQuestion.solutionLabel")
                       : t("editDialog.form.answerGuidelines.label")}
                   </Label>
                   {interview.interview_type === "coding" ? (
-                    <CodeEditor
-                      id="panel-answer"
-                      name="answer"
-                      value={formData.answer}
-                      onChange={(value) =>
-                        setFormData({ ...formData, answer: value })
-                      }
-                      placeholder="// Write your solution code here..."
-                      minHeight="200px"
-                      className="text-base"
-                    />
+                    <>
+                      <CodeEditor
+                        id="panel-answer"
+                        name="answer"
+                        value={formData.answer}
+                        onChange={(value) => {
+                          setFormData({ ...formData, answer: value });
+                          // Clear error when user starts typing
+                          if (value.trim() && solutionCodeError) {
+                            setSolutionCodeError(null);
+                          }
+                        }}
+                        placeholder={t(
+                          "detailPanel.codingQuestion.solutionPlaceholder"
+                        )}
+                        minHeight="200px"
+                        className={cn(
+                          "text-base",
+                          solutionCodeError && "border border-red-500 rounded"
+                        )}
+                      />
+                      {solutionCodeError && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {solutionCodeError}
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <Textarea
                       id="panel-answer"
@@ -258,11 +293,105 @@ export default function QuestionDetailPanel({
                     />
                   )}
                 </div>
+
+                {/* Time Limit Field - Only for coding questions */}
+                {interview.interview_type === "coding" && (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="panel-time-limit"
+                      className="text-base font-medium"
+                    >
+                      {t("detailPanel.timeLimit.label")}
+                    </Label>
+                    <Input
+                      id="panel-time-limit"
+                      name="time_limit_minutes"
+                      type="number"
+                      min="1"
+                      max="45"
+                      value={
+                        formData.timeLimitMs
+                          ? Math.floor(formData.timeLimitMs / 60000)
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const inputStr = e.target.value;
+
+                        // Allow empty input
+                        if (inputStr === "") {
+                          setTimeLimitError(
+                            t("detailPanel.timeLimit.errors.required")
+                          );
+                          setFormData({
+                            ...formData,
+                            timeLimitMs: 0, // Set to 0 to indicate empty
+                          });
+                          return;
+                        }
+
+                        const inputValue = parseInt(inputStr);
+
+                        // Validate the input
+                        if (!isNaN(inputValue)) {
+                          if (inputValue < 1) {
+                            setTimeLimitError(
+                              t("detailPanel.timeLimit.errors.minimum")
+                            );
+                          } else if (inputValue > 45) {
+                            setTimeLimitError(
+                              t("detailPanel.timeLimit.errors.maximum")
+                            );
+                          } else {
+                            setTimeLimitError(null);
+                          }
+
+                          // Always update the form data with the actual input value
+                          setFormData({
+                            ...formData,
+                            timeLimitMs: inputValue * 60000,
+                          });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // On blur, if the field is empty or invalid, set to default
+                        const inputStr = e.target.value;
+                        if (
+                          inputStr === "" ||
+                          parseInt(inputStr) < 1 ||
+                          parseInt(inputStr) > 45
+                        ) {
+                          setFormData({
+                            ...formData,
+                            timeLimitMs: 1800000, // Default 30 minutes
+                          });
+                          setTimeLimitError(null);
+                        }
+                      }}
+                      placeholder={t("detailPanel.timeLimit.placeholder")}
+                      className={cn(
+                        "text-base",
+                        timeLimitError && "border-red-500"
+                      )}
+                    />
+                    <input
+                      type="hidden"
+                      name="time_limit_ms"
+                      value={formData.timeLimitMs || 1800000} // Default to 30 minutes if empty
+                    />
+                    {timeLimitError ? (
+                      <p className="text-sm text-red-500">{timeLimitError}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {t("detailPanel.timeLimit.description")}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t">
+            <div className="p-6 border-t bg-background flex-shrink-0">
               <div className="flex items-center justify-between">
                 {mode === "edit" && (
                   <Button
@@ -287,10 +416,27 @@ export default function QuestionDetailPanel({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isSaving || !formData.question.trim()}
+                    disabled={
+                      isSaving ||
+                      !formData.question.trim() ||
+                      (interview.interview_type === "coding" &&
+                        (!!timeLimitError || !formData.answer.trim()))
+                    }
+                    onClick={(e) => {
+                      // Validate solution code for coding questions
+                      if (
+                        interview.interview_type === "coding" &&
+                        !formData.answer.trim()
+                      ) {
+                        e.preventDefault();
+                        setSolutionCodeError(
+                          t("detailPanel.codingQuestion.solutionRequired")
+                        );
+                      }
+                    }}
                   >
                     {isSaving
-                      ? "Saving..."
+                      ? t("detailPanel.buttons.saving")
                       : mode === "create"
                         ? t("createDialog.buttons.create")
                         : t("editDialog.buttons.save")}
@@ -325,7 +471,9 @@ export default function QuestionDetailPanel({
               <input type="hidden" name="job_id" value={jobId} />
               <input type="hidden" name="company_id" value={companyId} />
               <Button type="submit" disabled={isDeleting} variant="destructive">
-                {isDeleting ? "Deleting..." : t("deleteDialog.buttons.delete")}
+                {isDeleting
+                  ? t("detailPanel.buttons.deleting")
+                  : t("deleteDialog.buttons.delete")}
               </Button>
             </form>
           </AlertDialogFooter>

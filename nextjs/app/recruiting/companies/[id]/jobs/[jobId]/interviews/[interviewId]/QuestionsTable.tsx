@@ -13,10 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Plus, Sparkles } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import AIChatPanel from "./AIChatPanel";
 import { cn } from "@/lib/utils";
 import { InterviewQuestion } from "./page";
-import QuestionDetailPanel from "@/components/recruiting/QuestionDetailPanel";
+import QuestionDetailPanel from "@/app/recruiting/companies/[id]/jobs/[jobId]/interviews/[interviewId]/QuestionDetailPanel";
 
 interface QuestionsTableProps {
   interview: Tables<"job_interviews">;
@@ -38,7 +37,6 @@ export default function QuestionsTable({
     useState<InterviewQuestion | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<"create" | "edit">("edit");
-  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
 
   // Open question detail panel for editing
   const openQuestionDetail = (question: InterviewQuestion) => {
@@ -148,17 +146,6 @@ export default function QuestionsTable({
           companyId={companyId}
         />
       </div>
-
-      {/* AI Chat Panel */}
-      <AIChatPanel
-        isOpen={isAIPanelOpen}
-        onClose={() => setIsAIPanelOpen(false)}
-        interview={interview}
-        jobId={jobId}
-        jobTitle={jobTitle}
-        companyId={companyId}
-        existingQuestions={questions || []}
-      />
     </div>
   );
 }

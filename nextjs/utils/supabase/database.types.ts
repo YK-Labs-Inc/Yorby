@@ -207,6 +207,32 @@ export type Database = {
         }
         Relationships: []
       }
+      company_interview_coding_question_metadata: {
+        Row: {
+          created_at: string
+          id: string
+          time_limit_ms: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          time_limit_ms: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          time_limit_ms?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_interview_coding_question_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "company_interview_question_bank"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_interview_question_bank: {
         Row: {
           answer: string
