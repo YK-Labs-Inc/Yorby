@@ -159,6 +159,7 @@ export const SessionView = ({
           aiMessages={aiMessages}
           questionDetails={questionDetails}
           candidateInterviewId={interviewId}
+          onDisconnect={onDisconnect}
         />
       ) : (
         <VideoChatLayout aiMessages={aiMessages} />

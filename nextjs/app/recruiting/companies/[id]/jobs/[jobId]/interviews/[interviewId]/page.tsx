@@ -11,7 +11,9 @@ import QuestionsTableLoading from "./QuestionsTableLoading";
 import { getTranslations } from "next-intl/server";
 
 export type InterviewQuestion = Tables<"job_interview_questions"> & {
-  company_interview_question_bank: Tables<"company_interview_question_bank">;
+  company_interview_question_bank: Tables<"company_interview_question_bank"> & {
+    company_interview_coding_question_metadata?: Tables<"company_interview_coding_question_metadata"> | null;
+  };
 };
 
 async function fetchQuestions(
@@ -23,7 +25,10 @@ async function fetchQuestions(
     .select(
       `
       *,
-      company_interview_question_bank(*)
+      company_interview_question_bank(
+        *,
+        company_interview_coding_question_metadata(*)
+      )
     `
     )
     .eq("interview_id", interviewId)
