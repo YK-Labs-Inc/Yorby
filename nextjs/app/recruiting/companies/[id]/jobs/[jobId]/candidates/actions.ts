@@ -133,42 +133,68 @@ export const getInitialCandidates = cache(
     }
 
     // Fetch user data for each candidate
-    const candidatesWithUserData = await Promise.all(
-      data.map(async (candidate) => {
-        let candidateName: string | null = null;
-        let candidateEmail: string | null = null;
-        let candidatePhoneNumber: string | null = null;
+    const candidatesWithUserData = (
+      await Promise.all(
+        data.map(async (candidate) => {
+          // Fetch candidate's interviews
+          const { data: candidateInterviews, error: candidateInterviewsError } =
+            await supabase
+              .from("candidate_job_interviews")
+              .select("*")
+              .eq("candidate_id", candidate.id);
 
-        if (candidate.candidate_user_id) {
-          const { data: userData, error: userError } =
-            await supabaseAdmin.auth.admin.getUserById(
-              candidate.candidate_user_id
-            );
-
-          if (userError) {
-            log.error("Error fetching user data", {
-              userError,
-              candidateUserId: candidate.candidate_user_id,
+          if (candidateInterviewsError) {
+            log.error("Error fetching candidate interviews", {
+              error: candidateInterviewsError,
+              candidateId: candidate.id,
             });
-          } else if (userData && userData.user) {
-            candidateEmail = userData.user.email || null;
-            candidateName =
-              userData.user.user_metadata?.display_name ||
-              userData.user.user_metadata?.full_name ||
-              null;
-            candidatePhoneNumber =
-              userData.user.user_metadata?.phone_number || null;
           }
-        }
 
-        return {
-          ...candidate,
-          candidateName,
-          candidateEmail,
-          candidatePhoneNumber,
-        };
-      })
-    );
+          // Check if candidate has completed all interviews
+          const hasCompletedAllInterviews = candidateInterviews?.every(
+            (interview) => interview.status === "completed"
+          );
+          if (!hasCompletedAllInterviews) {
+            return null;
+          }
+
+          // Fetch user data
+          let candidateName: string | null = null;
+          let candidateEmail: string | null = null;
+          let candidatePhoneNumber: string | null = null;
+
+          if (candidate.candidate_user_id) {
+            const { data: userData, error: userError } =
+              await supabaseAdmin.auth.admin.getUserById(
+                candidate.candidate_user_id
+              );
+
+            if (userError) {
+              log.error("Error fetching user data", {
+                userError,
+                candidateUserId: candidate.candidate_user_id,
+              });
+            } else if (userData && userData.user) {
+              candidateEmail = userData.user.email || null;
+              candidateName =
+                userData.user.user_metadata?.display_name ||
+                userData.user.user_metadata?.full_name ||
+                null;
+              candidatePhoneNumber =
+                userData.user.user_metadata?.phone_number || null;
+            }
+          }
+
+          return {
+            ...candidate,
+            candidateName,
+            candidateEmail,
+            candidatePhoneNumber,
+            hasCompletedAllInterviews,
+          };
+        })
+      )
+    ).filter((candidate) => candidate !== null);
 
     await log.flush();
     return candidatesWithUserData;

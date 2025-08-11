@@ -490,34 +490,39 @@ async function generateRecruiterQuestionAnalysis(
   );
 
   // Process each grouped Q&A
-  const analyses = await Promise.all(
-    groupedQuestionAnswers.map(async (groupedQA) => {
-      // Find matching question from company_question_bank using synthesized question
-      const matchedQuestion = await findMatchingQuestion(
-        groupedQA.synthesized_question,
-        companyQuestions,
-        logger
-      );
+  const analyses = (
+    await Promise.all(
+      groupedQuestionAnswers.map(async (groupedQA) => {
+        // Find matching question from company_question_bank using synthesized question
+        const matchedQuestion = await findMatchingQuestion(
+          groupedQA.synthesized_question,
+          companyQuestions,
+          logger
+        );
+        if (!matchedQuestion) {
+          return;
+        }
 
-      // Grade the answer
-      const grading = await gradeAnswer(
-        groupedQA,
-        matchedQuestion?.answer || null,
-        customJob,
-        logger
-      );
+        // Grade the answer
+        const grading = await gradeAnswer(
+          groupedQA,
+          matchedQuestion?.answer || null,
+          customJob,
+          logger
+        );
 
-      return {
-        question_id: matchedQuestion?.id || "",
-        question_text: groupedQA.synthesized_question,
-        user_answer: groupedQA.synthesized_answer,
-        answer_quality_score: grading.answer_quality_score,
-        key_points: grading.key_points,
-        concerns: grading.concerns,
-        examples_provided: grading.examples_provided,
-      };
-    })
-  );
+        return {
+          question_id: matchedQuestion?.id || "",
+          question_text: groupedQA.synthesized_question,
+          user_answer: groupedQA.synthesized_answer,
+          answer_quality_score: grading.answer_quality_score,
+          key_points: grading.key_points,
+          concerns: grading.concerns,
+          examples_provided: grading.examples_provided,
+        };
+      })
+    )
+  ).filter((a) => a !== undefined);
 
   logger.info("Generated recruiter question analysis", {
     totalTopics: analyses.length,
