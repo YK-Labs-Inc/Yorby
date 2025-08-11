@@ -67,7 +67,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardTitle className="text-2xl">{t("recruitingTitle")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,7 +111,11 @@ export function LoginForm({
                   }}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !captchaToken}
+              >
                 {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>
@@ -131,7 +135,7 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-center text-sm text-muted-foreground">
+      {/* <div className="text-center text-sm text-muted-foreground">
         {t("candidateAccountPrompt")}{" "}
         <Link
           href="/auth/candidate-auth"
@@ -139,7 +143,7 @@ export function LoginForm({
         >
           {t("candidateAccountLink")}
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 }

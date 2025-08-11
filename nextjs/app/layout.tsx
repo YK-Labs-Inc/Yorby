@@ -29,8 +29,10 @@ const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Perfect Interview",
-  description: "Ace your next interview with AI-powered interview prep",
+  title: defaultUrl.includes("yorby") ? "Yorby" : "Perfect Interview",
+  description: defaultUrl.includes("yorby")
+    ? "The AI Recruiter"
+    : "Ace your next interview with AI-powered interview prep",
 };
 
 export interface StudentWithEmailAndName extends Tables<"user_coach_access"> {

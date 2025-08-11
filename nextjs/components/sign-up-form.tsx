@@ -72,7 +72,7 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardTitle className="text-2xl">{t("recruitingTitle")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -124,7 +124,11 @@ export function SignUpForm({
                   }}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading || !captchaToken}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !captchaToken}
+              >
                 {isLoading ? t("submitting") : t("submit")}
               </Button>
             </div>
