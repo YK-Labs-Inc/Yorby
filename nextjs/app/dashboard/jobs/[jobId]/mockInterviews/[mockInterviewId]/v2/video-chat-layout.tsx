@@ -40,8 +40,8 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
   const isAvatar = agentVideoTrack !== undefined;
 
   return (
-    <div className="absolute inset-0 bg-background">
-      <div className="flex flex-col h-full w-full p-4 pb-36 gap-4">
+    <div className="inset-0 bg-background">
+      <div className="flex flex-col h-full w-full p-2 gap-4">
         {/* Video Tiles Container */}
         <div className="flex gap-4" style={{ height: "60%" }}>
           {/* AI Agent Video - Left Side */}
@@ -126,7 +126,9 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
 
         {/* AI Messages Container */}
         <div className="flex-1 bg-muted/50 rounded-lg p-4 overflow-y-auto">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Interview Questions</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+            Interview Questions
+          </h3>
           <div className="space-y-3">
             <AnimatePresence mode="wait">
               {aiMessages.length > 0 ? (
@@ -145,7 +147,9 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
                   />
                 </motion.div>
               ) : (
-                <p className="text-muted-foreground text-sm">Waiting for interview questions...</p>
+                <p className="text-muted-foreground text-sm">
+                  Waiting for interview questions...
+                </p>
               )}
             </AnimatePresence>
           </div>
