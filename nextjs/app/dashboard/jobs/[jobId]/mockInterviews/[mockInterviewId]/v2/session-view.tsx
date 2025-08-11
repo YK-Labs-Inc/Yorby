@@ -13,22 +13,15 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 
-function isAgentAvailable(agentState: AgentState) {
-  return (
-    agentState == "listening" ||
-    agentState == "thinking" ||
-    agentState == "speaking"
-  );
-}
-
 interface SessionViewProps {
   appConfig: AppConfig;
   disabled: boolean;
   sessionStarted: boolean;
   onProcessInterview?: () => Promise<string>;
-  interviewId: string;
-  interviewType: Enums<"job_interview_type">;
-  questionDetails: Pick<
+  mockInterviewId?: string;
+  interviewId?: string;
+  interviewType?: Enums<"job_interview_type">;
+  questionDetails?: Pick<
     Tables<"company_interview_question_bank">,
     "id" | "question"
   >[];
@@ -42,6 +35,7 @@ export const SessionView = ({
   ref,
   interviewId,
   interviewType,
+  mockInterviewId,
   questionDetails,
 }: React.ComponentProps<"div"> & SessionViewProps) => {
   const { messages } = useChatAndTranscription();
@@ -50,13 +44,11 @@ export const SessionView = ({
   useDebugMode();
 
   const saveTranscript = useCallback(async () => {
-    const supabase = createSupabaseBrowserClient();
-
-    if (!interviewId) {
+    if (!interviewId && !mockInterviewId) {
       logError("transcript_write_skipped", {
-        reason: "mock_interview_id not found",
+        reason: "interview_id and mock_interview_id not found",
       });
-      return "Error: Interview ID not found";
+      return "Error: Interview ID and Mock Interview ID not found";
     }
 
     // Process messages in reverse order to save in reverse chronological order
@@ -83,7 +75,6 @@ export const SessionView = ({
       );
 
       const messageData = {
-        mock_interview_id: interviewId,
         role: dbRole as "user" | "model",
         text: text,
         created_at: messageTimestamp.toISOString(),
@@ -91,12 +82,37 @@ export const SessionView = ({
       messagesToInsert.push(messageData);
     }
 
-    // Insert all messages into database
     if (messagesToInsert.length > 0) {
+      if (mockInterviewId) {
+        return await saveMockInterviewTranscript(messagesToInsert);
+      } else if (interviewId) {
+        return await saveJobInterviewTranscript(messagesToInsert);
+      }
+    }
+  }, [messages, interviewId, logInfo, logError]);
+
+  const saveMockInterviewTranscript = useCallback(
+    async (
+      messagesToInsert: {
+        role: "user" | "model";
+        text: string;
+        created_at: string;
+      }[]
+    ) => {
+      const supabase = createSupabaseBrowserClient();
+      if (!mockInterviewId) {
+        logError("transcript_write_skipped", {
+          reason: "mock_interview_id not found",
+        });
+        return "Error: Mock Interview ID not found";
+      }
       try {
-        const { error } = await supabase
-          .from("mock_interview_messages")
-          .insert(messagesToInsert);
+        const { error } = await supabase.from("mock_interview_messages").insert(
+          messagesToInsert.map((message) => ({
+            ...message,
+            mock_interview_id: mockInterviewId,
+          }))
+        );
 
         if (error) {
           throw error;
@@ -115,8 +131,53 @@ export const SessionView = ({
           error: error instanceof Error ? error.message : String(error),
         });
       }
-    }
-  }, [messages, interviewId, logInfo, logError]);
+    },
+    [logInfo, logError, mockInterviewId]
+  );
+
+  const saveJobInterviewTranscript = useCallback(
+    async (
+      messagesToInsert: {
+        role: "user" | "model";
+        text: string;
+        created_at: string;
+      }[]
+    ) => {
+      const supabase = createSupabaseBrowserClient();
+      if (!interviewId) {
+        logError("transcript_write_skipped", {
+          reason: "interview_id not found",
+        });
+        return "Error: Interview ID not found";
+      }
+      try {
+        const { error } = await supabase.from("job_interview_messages").insert(
+          messagesToInsert.map((message) => ({
+            ...message,
+            candidate_interview_id: interviewId,
+          }))
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        // Log successful transcript write
+        logInfo("transcript_write_success", {
+          candidate_interview_id: interviewId,
+          message_count: messagesToInsert.length,
+        });
+        return "success";
+      } catch (error) {
+        // Log transcript write error
+        logError("transcript_write_error", {
+          candidate_interview_id: interviewId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    [logInfo, logError, interviewId]
+  );
 
   const onDisconnect = useCallback(async () => {
     const transcriptResult = await saveTranscript();
@@ -154,7 +215,7 @@ export const SessionView = ({
       className="h-full overflow-hidden flex flex-col justify-between"
     >
       {/* Main session content */}
-      {interviewType === "coding" ? (
+      {interviewType === "coding" && questionDetails && interviewId ? (
         <CodingInterviewComponent
           aiMessages={aiMessages}
           questionDetails={questionDetails}
