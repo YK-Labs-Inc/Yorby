@@ -77,13 +77,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
   // Fetch job details with counts
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
-    .select(
-      `
-      *,
-      job_interviews (count),
-      company_job_candidates (count)
-    `
-    )
+    .select("*")
     .eq("id", jobId)
     .eq("company_id", companyId)
     .single();
@@ -170,9 +164,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <FileQuestion className="h-8 w-8 text-primary" />
-                  <span className="text-2xl font-bold">
-                    {job.job_interviews?.[0]?.count || 0}
-                  </span>
                 </div>
                 <CardTitle>{t("sections.interviewRounds.title")}</CardTitle>
                 <CardDescription>
@@ -189,9 +180,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <Users className="h-8 w-8 text-primary" />
-                  <span className="text-2xl font-bold">
-                    {job.company_job_candidates?.[0]?.count || 0}
-                  </span>
                 </div>
                 <CardTitle>{t("sections.candidates.title")}</CardTitle>
                 <CardDescription>
