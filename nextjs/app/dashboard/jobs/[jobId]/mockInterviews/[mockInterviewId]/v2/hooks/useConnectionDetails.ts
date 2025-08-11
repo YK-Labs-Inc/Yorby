@@ -30,12 +30,9 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
       });
   }, [props, logError]);
 
-  useEffect(() => {
-    fetchConnectionDetails();
-  }, [fetchConnectionDetails]);
-
   return {
     connectionDetails,
     refreshConnectionDetails: fetchConnectionDetails,
+    fetchConnectionDetails,
   };
 }

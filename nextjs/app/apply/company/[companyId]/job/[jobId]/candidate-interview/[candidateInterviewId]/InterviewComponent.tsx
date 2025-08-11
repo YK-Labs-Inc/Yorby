@@ -56,7 +56,11 @@ export function InterviewComponent({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
+  const {
+    connectionDetails,
+    fetchConnectionDetails,
+    refreshConnectionDetails,
+  } = useConnectionDetails({
     kind: "candidate",
     id: currentInterviewId,
   });
@@ -225,6 +229,7 @@ export function InterviewComponent({
         onSubmit={(values) => {
           setSessionStarted(true);
           setLocalUserChoices(values);
+          fetchConnectionDetails();
         }}
       />
     );

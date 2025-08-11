@@ -5,7 +5,6 @@ import { Room, RoomEvent } from "livekit-client";
 import { motion } from "motion/react";
 import {
   LocalUserChoices,
-  PreJoin,
   RoomAudioRenderer,
   RoomContext,
   StartAudio,
@@ -52,7 +51,11 @@ export function LiveKitInterviewComponent({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const { connectionDetails, refreshConnectionDetails } = useConnectionDetails({
+  const {
+    connectionDetails,
+    refreshConnectionDetails,
+    fetchConnectionDetails,
+  } = useConnectionDetails({
     kind: "mock",
     id: mockInterviewId,
   });
@@ -224,6 +227,7 @@ export function LiveKitInterviewComponent({
             onSubmit={(values) => {
               setSessionStarted(true);
               setLocalUserChoices(values);
+              fetchConnectionDetails();
             }}
           />
         ) : (
@@ -231,6 +235,7 @@ export function LiveKitInterviewComponent({
             onSubmit={(values) => {
               setSessionStarted(true);
               setLocalUserChoices(values);
+              fetchConnectionDetails();
             }}
           />
         )}
