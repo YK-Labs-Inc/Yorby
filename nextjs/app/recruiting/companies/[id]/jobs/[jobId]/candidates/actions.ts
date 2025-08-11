@@ -26,7 +26,8 @@ export type ApplicationFile = Tables<"candidate_application_files"> & {
 export type CandidateJobInterview = Tables<"candidate_job_interviews">;
 export type JobInterviewMessage = Tables<"job_interview_messages">;
 export type InterviewAnalysis = TypedInterviewAnalysis;
-export type JobInterviewRecording = Tables<"job_interview_recordings">;
+export type CandidateJobInterviewRecording =
+  Tables<"candidate_job_interview_recordings">;
 
 export interface AccessValidation {
   company: Company;
@@ -39,7 +40,7 @@ export interface CandidateData {
   applicationFiles: ApplicationFile[];
   interviewResults: {
     candidateJobInterview: CandidateJobInterview | null;
-    jobInterviewRecording: JobInterviewRecording | null;
+    jobInterviewRecording: CandidateJobInterviewRecording | null;
     jobInterviewMessages: JobInterviewMessage[];
     interviewAnalysis: InterviewAnalysis | null;
   }[];
@@ -295,7 +296,7 @@ export const getCandidateData = cache(
       if (candidateJobInterview) {
         const { data: jobInterviewRecordingData, error: muxError } =
           await supabase
-            .from("job_interview_recordings")
+            .from("candidate_job_interview_recordings")
             .select("*")
             .eq("id", candidateJobInterview.id)
             .maybeSingle();
@@ -316,7 +317,7 @@ export const getCandidateData = cache(
           .from("job_interview_messages")
           .select("*")
           .eq("candidate_interview_id", candidateJobInterview.id)
-          .order("created_at", { ascending: true });
+          .order("created_at", { ascending: false });
 
         if (messagesError) {
           log.error("Error fetching job interview messages", {

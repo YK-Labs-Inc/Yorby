@@ -109,7 +109,8 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
             user_id: participantIdentity,
             candidate_name: participantName,
             interview_prompt: interviewPrompt,
-            mock_interview_id: mockInterviewId || candidateJobInterviewId,
+            mock_interview_id: mockInterviewId,
+            candidate_job_interview_id: candidateJobInterviewId,
           }),
         }
       );

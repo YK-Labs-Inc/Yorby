@@ -70,6 +70,47 @@ export type Database = {
           },
         ]
       }
+      candidate_job_interview_recordings: {
+        Row: {
+          asset_id: string | null
+          candidate_interview_id: string
+          created_at: string | null
+          id: string
+          playback_id: string | null
+          status: Database["public"]["Enums"]["mux_status"]
+          updated_at: string | null
+          upload_id: string | null
+        }
+        Insert: {
+          asset_id?: string | null
+          candidate_interview_id: string
+          created_at?: string | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          updated_at?: string | null
+          upload_id?: string | null
+        }
+        Update: {
+          asset_id?: string | null
+          candidate_interview_id?: string
+          created_at?: string | null
+          id?: string
+          playback_id?: string | null
+          status?: Database["public"]["Enums"]["mux_status"]
+          updated_at?: string | null
+          upload_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_job_interviews: {
         Row: {
           candidate_id: string
@@ -1521,47 +1562,6 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "company_interview_question_bank"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      job_interview_recordings: {
-        Row: {
-          asset_id: string | null
-          candidate_interview_id: string
-          created_at: string | null
-          id: string
-          playback_id: string | null
-          status: Database["public"]["Enums"]["mux_status"]
-          updated_at: string | null
-          upload_id: string | null
-        }
-        Insert: {
-          asset_id?: string | null
-          candidate_interview_id: string
-          created_at?: string | null
-          id?: string
-          playback_id?: string | null
-          status?: Database["public"]["Enums"]["mux_status"]
-          updated_at?: string | null
-          upload_id?: string | null
-        }
-        Update: {
-          asset_id?: string | null
-          candidate_interview_id?: string
-          created_at?: string | null
-          id?: string
-          playback_id?: string | null
-          status?: Database["public"]["Enums"]["mux_status"]
-          updated_at?: string | null
-          upload_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
-            columns: ["candidate_interview_id"]
-            isOneToOne: false
-            referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
         ]

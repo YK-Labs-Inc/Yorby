@@ -399,8 +399,7 @@
         "candidateResponse": "Candidate's Response",
         "answerAnalysis": "Answer Analysis",
         "roundOf": "Round {current} of {total}",
-        "previousRound": "Previous",
-        "nextRound": "Next"
+        "interviewRound": "Interview Round"
       }
     },
     "questionsTable": {

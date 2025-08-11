@@ -12,7 +12,8 @@ type muxSupportedTables =
   | "custom_job_question_submission_mux_metadata"
   | "mock_interview_message_mux_metadata"
   | "course_lesson_files_mux_metadata"
-  | "mock_interview_mux_metadata";
+  | "mock_interview_mux_metadata"
+  | "candidate_job_interview_recordings";
 
 async function getMessageId(asset: Asset, tableName: muxSupportedTables) {
   // Try external_id first
