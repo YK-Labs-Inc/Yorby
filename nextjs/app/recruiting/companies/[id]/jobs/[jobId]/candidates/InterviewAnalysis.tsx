@@ -256,9 +256,7 @@ export default function InterviewAnalysis({
                   <Button
                     key={index}
                     variant={
-                      index === selectedInterviewRound
-                        ? "default"
-                        : "outline"
+                      index === selectedInterviewRound ? "default" : "outline"
                     }
                     size="sm"
                     onClick={() => setSelectedInterviewRound(index)}
@@ -562,6 +560,31 @@ export default function InterviewAnalysis({
                   >
                     <Card className="p-6">
                       <div className="space-y-6">
+                        {/* Score */}
+                        {qa.answer_quality_score !== null && (
+                          <div>
+                            <h3 className="font-semibold mb-2 text-base">
+                              {t("qualityScore")}
+                            </h3>
+                            <div className="flex items-center gap-4">
+                              <Progress
+                                value={qa.answer_quality_score}
+                                className="flex-1"
+                              />
+                              <Badge
+                                variant={
+                                  qa.answer_quality_score >= 80
+                                    ? "default"
+                                    : qa.answer_quality_score >= 60
+                                      ? "secondary"
+                                      : "destructive"
+                                }
+                              >
+                                {qa.answer_quality_score}%
+                              </Badge>
+                            </div>
+                          </div>
+                        )}
                         {/* Question */}
                         <div>
                           <h3 className="font-semibold mb-2 text-base">
@@ -659,32 +682,6 @@ export default function InterviewAnalysis({
                                 <span className="text-orange-700 font-medium">
                                   {t("no")}
                                 </span>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Score */}
-                          {qa.answer_quality_score !== null && (
-                            <div>
-                              <h3 className="font-semibold mb-2 text-base">
-                                {t("qualityScore")}
-                              </h3>
-                              <div className="flex items-center gap-4">
-                                <Progress
-                                  value={qa.answer_quality_score}
-                                  className="flex-1"
-                                />
-                                <Badge
-                                  variant={
-                                    qa.answer_quality_score >= 80
-                                      ? "default"
-                                      : qa.answer_quality_score >= 60
-                                        ? "secondary"
-                                        : "destructive"
-                                  }
-                                >
-                                  {qa.answer_quality_score}%
-                                </Badge>
                               </div>
                             </div>
                           )}
