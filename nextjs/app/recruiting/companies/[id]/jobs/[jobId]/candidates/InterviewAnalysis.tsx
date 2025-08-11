@@ -231,6 +231,64 @@ export default function InterviewAnalysis({
             )}
           </Badge>
         </div>
+        {/* Interview Round Selector - Now always visible */}
+        {hasMultipleRounds && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">
+              {t("interviewRound")}:
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() =>
+                  setSelectedInterviewRound(
+                    Math.max(0, selectedInterviewRound - 1)
+                  )
+                }
+                disabled={selectedInterviewRound === 0}
+                className="h-8 w-8"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex gap-1">
+                {interviewResults.map((_, index) => (
+                  <Button
+                    key={index}
+                    variant={
+                      index === selectedInterviewRound
+                        ? "default"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => setSelectedInterviewRound(index)}
+                    className="h-8 w-8 p-0"
+                  >
+                    {index + 1}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() =>
+                  setSelectedInterviewRound(
+                    Math.min(
+                      interviewResults.length - 1,
+                      selectedInterviewRound + 1
+                    )
+                  )
+                }
+                disabled={
+                  selectedInterviewRound === interviewResults.length - 1
+                }
+                className="h-8 w-8"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       {/* Tabs for different sections */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -355,74 +413,20 @@ export default function InterviewAnalysis({
 
               {/* Interview Section */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    {tOverview("mockInterview")}
-                    {hasMultipleRounds && (
-                      <span className="text-xs font-normal">
-                        (
-                        {t("roundOf", {
-                          current: selectedInterviewRound + 1,
-                          total: interviewResults.length,
-                        })}
-                        )
-                      </span>
-                    )}
-                  </h3>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+                  <Clock className="h-4 w-4" />
+                  {tOverview("mockInterview")}
                   {hasMultipleRounds && (
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setSelectedInterviewRound(
-                            Math.max(0, selectedInterviewRound - 1)
-                          )
-                        }
-                        disabled={selectedInterviewRound === 0}
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        {t("previousRound")}
-                      </Button>
-                      <div className="flex gap-1">
-                        {interviewResults.map((_, index) => (
-                          <Button
-                            key={index}
-                            variant={
-                              index === selectedInterviewRound
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setSelectedInterviewRound(index)}
-                            className="w-8 h-8 p-0"
-                          >
-                            {index + 1}
-                          </Button>
-                        ))}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setSelectedInterviewRound(
-                            Math.min(
-                              interviewResults.length - 1,
-                              selectedInterviewRound + 1
-                            )
-                          )
-                        }
-                        disabled={
-                          selectedInterviewRound === interviewResults.length - 1
-                        }
-                      >
-                        {t("nextRound")}
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
+                    <span className="text-xs font-normal">
+                      (
+                      {t("roundOf", {
+                        current: selectedInterviewRound + 1,
+                        total: interviewResults.length,
+                      })}
+                      )
+                    </span>
                   )}
-                </div>
+                </h3>
                 {interviewResult ? (
                   <div className="space-y-4">
                     <div className="p-4 border rounded-lg">
