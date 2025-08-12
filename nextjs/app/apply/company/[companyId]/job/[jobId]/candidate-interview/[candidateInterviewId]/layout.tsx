@@ -143,12 +143,12 @@ export default async function InterviewLayout({
 
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-80 bg-white border-r min-h-[calc(100vh-5rem)] h-full">
-            <div className="p-6">
-              <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+          <div className="w-56 bg-white border-r min-h-[calc(100vh-5rem)] h-full">
+            <div className="p-4">
+              <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-3">
                 {t("sidebar.title")}
               </h2>
-              <nav className="space-y-3">
+              <nav className="space-y-2">
                 {interviewsWithStatus.map((interview, index) => {
                   const isActive =
                     interview.candidateInterviewId === candidateInterviewId;
@@ -158,40 +158,38 @@ export default async function InterviewLayout({
                   return (
                     <div key={interview.id}>
                       <div
-                        className={`flex items-start gap-3 p-3 rounded-lg ${
+                        className={`flex items-start gap-2 p-2 rounded-lg ${
                           isActive ? "bg-blue-50 border border-blue-200" : ""
                         }`}
                       >
-                        <div className="mt-0.5">
+                        <div className="mt-0.5 flex-shrink-0">
                           {isCompleted ? (
-                            <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
-                              <Check className="h-3 w-3 text-white" />
+                            <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                              <Check className="h-2.5 w-2.5 text-white" />
                             </div>
                           ) : isInProgress || isActive ? (
-                            <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center">
-                              <Clock className="h-3 w-3 text-white" />
+                            <div className="h-4 w-4 rounded-full bg-blue-500 flex items-center justify-center">
+                              <Clock className="h-2.5 w-2.5 text-white" />
                             </div>
                           ) : (
-                            <Circle className="h-5 w-5 text-gray-400" />
+                            <Circle className="h-4 w-4 text-gray-400" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p
-                              className={`text-sm font-medium truncate ${
-                                isActive
-                                  ? "text-blue-700"
-                                  : isCompleted
-                                    ? "text-green-700"
-                                    : "text-gray-900"
-                              }`}
-                            >
-                              {t("sidebar.round", {
-                                number: index + 1,
-                                name: interview.name,
-                              })}
-                            </p>
-                          </div>
+                          <p
+                            className={`text-xs font-medium truncate ${
+                              isActive
+                                ? "text-blue-700"
+                                : isCompleted
+                                  ? "text-green-700"
+                                  : "text-gray-900"
+                            }`}
+                          >
+                            {t("sidebar.round", {
+                              number: index + 1,
+                              name: interview.name,
+                            })}
+                          </p>
                         </div>
                       </div>
                     </div>

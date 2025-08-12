@@ -60,6 +60,8 @@ export function InterviewComponent({
     connectionDetails,
     fetchConnectionDetails,
     refreshConnectionDetails,
+    isConnecting: isConnectionDetailsLoading,
+    isConnected,
   } = useConnectionDetails({
     kind: "candidate",
     id: currentInterviewId,
@@ -296,6 +298,26 @@ export function InterviewComponent({
                   </Button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isConnectionDetailsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full px-4">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">
+                {t("connecting.title")}
+              </h2>
+              <p className="text-gray-600">{t("connecting.description")}</p>
             </div>
           </div>
         </div>

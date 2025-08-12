@@ -151,12 +151,14 @@ export const SessionView = ({
         return "Error: Interview ID not found";
       }
       try {
-        const { error } = await supabase.from("job_interview_messages").insert(
-          messagesToInsert.map((message) => ({
-            ...message,
-            candidate_interview_id: interviewId,
-          }))
-        );
+        const { error } = await supabase
+          .from("candidate_job_interview_messages")
+          .insert(
+            messagesToInsert.map((message) => ({
+              ...message,
+              candidate_interview_id: interviewId,
+            }))
+          );
 
         if (error) {
           throw error;

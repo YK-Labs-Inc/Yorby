@@ -705,7 +705,7 @@ export const POST = withAxiom(
 
       // Now fetch the messages
       const messagesResult = await supabase
-        .from("job_interview_messages")
+        .from("candidate_job_interview_messages")
         .select("*")
         .eq("candidate_interview_id", interviewId)
         .order("created_at", { ascending: true });
