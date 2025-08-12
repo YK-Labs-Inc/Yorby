@@ -721,7 +721,7 @@ export const submitApplication = async (
   } else {
     // Regular users go directly to interview
     redirect(
-      `/apply/company/${companyId}/job/${jobId}/interview/${interviewId}`
+      `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
     );
   }
 };

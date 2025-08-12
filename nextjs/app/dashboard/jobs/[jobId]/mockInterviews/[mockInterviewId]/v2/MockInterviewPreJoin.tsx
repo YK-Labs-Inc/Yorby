@@ -2,7 +2,10 @@
 
 import { LocalUserChoices } from "@livekit/components-react";
 import { useState } from "react";
-import { MediaDeviceProvider, useMediaDevice } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
+import {
+  MediaDeviceProvider,
+  useMediaDevice,
+} from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 import InterviewSetup from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/InterviewSetupComponent";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
@@ -43,7 +46,7 @@ function MockInterviewPreJoinContent({
     selectedVideo,
     selectedAudio,
     stream,
-    isRecording,
+    isRecordingTestAudio,
     setSelectedVideo,
     setSelectedAudio,
     startTestRecording,
@@ -64,7 +67,7 @@ function MockInterviewPreJoinContent({
       selectedVideo={selectedVideo}
       selectedAudio={selectedAudio}
       stream={stream}
-      isRecording={isRecording}
+      isRecording={isRecordingTestAudio}
       jobId=""
       selectedVoice={selectedVoice}
       setSelectedVoice={setSelectedVoice}

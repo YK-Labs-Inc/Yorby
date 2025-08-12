@@ -172,6 +172,10 @@
         "startAudio": "Start Audio",
         "microphone": "Microphone",
         "camera": "Camera"
+      },
+      "connecting": {
+        "title": "Connecting to interview...",
+        "description": "Please wait while we establish a connection"
       }
     },
     "mockInterview": {
@@ -407,9 +411,7 @@
       "subtitle": "Manage the interview questions that will be asked in this interview round",
       "addQuestion": "Add Question",
       "emptyState": {
-        "title": "Add Specific Question You Want Your AI Recruiter To Ask",
-        "subtitle": "Yorby will automatically perform interviews for you just based on the job description, but you can add specific questions to ensure every candidate addresses your unique requirements and company values.",
-        "badge": "This step is completely optional",
+        "title": "Add Questions You Want Your AI Recruiter To Ask In The Interview",
         "firstQuestionButton": "Add Questions"
       },
       "table": {

@@ -84,27 +84,6 @@ export default function QuestionsTable({
                 <h3 className="text-2xl font-semibold text-foreground mb-2">
                   {t("emptyState.title")}
                 </h3>
-                <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-                  {t("emptyState.subtitle")}
-                </p>
-              </div>
-
-              {/* Optional Badge and CTA Section */}
-              <div className="text-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 text-sm text-muted-foreground">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  {t("emptyState.badge")}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button onClick={openCreatePanel} size="lg">
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("emptyState.firstQuestionButton")}
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

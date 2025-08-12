@@ -112,7 +112,7 @@ export default function CodingInterviewComponent({
   const timerStatus = getTimerStatus();
 
   // Chat functionality to send messages to the agent
-  const { send: sendMessage } = useChat();
+  const { send: sendMessage, isSending } = useChat();
 
   // Handle time limit expiration
   const handleTimeExpired = async () => {
@@ -190,6 +190,9 @@ export default function CodingInterviewComponent({
               submissionNumber: newSubmissionNumber,
               error: error instanceof Error ? error.message : String(error),
             });
+          })
+          .finally(() => {
+            setIsSubmitting(false);
           });
       }
 
@@ -210,8 +213,6 @@ export default function CodingInterviewComponent({
         candidateInterviewId,
         error: error instanceof Error ? error.message : String(error),
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -278,6 +279,7 @@ export default function CodingInterviewComponent({
                     onClick={handleSubmitCode}
                     disabled={
                       isSubmitting ||
+                      isSending ||
                       !code.trim() ||
                       (timeRemaining !== null && timeRemaining === 0)
                     }
@@ -332,19 +334,16 @@ export default function CodingInterviewComponent({
                   {t("aiTranscript")}
                 </h4>
                 <div className="space-y-2">
-                  {aiMessages.map((m) => (
-                    <div
-                      key={m.id}
-                      className="bg-muted/10 rounded-md p-2 border"
-                    >
+                  {aiMessages.length > 0 && (
+                    <div className="bg-muted/10 rounded-md p-2 border">
                       <ChatEntry
                         hideName
                         hideTimestamp
-                        entry={m}
+                        entry={aiMessages[aiMessages.length - 1]}
                         className="[&>*]:!bg-transparent"
                       />
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </CardContent>

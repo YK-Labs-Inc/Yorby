@@ -70,6 +70,38 @@ export type Database = {
           },
         ]
       }
+      candidate_job_interview_messages: {
+        Row: {
+          candidate_interview_id: string
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Insert: {
+          candidate_interview_id: string
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["message_role"]
+          text: string
+        }
+        Update: {
+          candidate_interview_id?: string
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_interview_messages_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_job_interview_recordings: {
         Row: {
           asset_id: string | null
@@ -1491,38 +1523,6 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "company_interview_question_bank"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      job_interview_messages: {
-        Row: {
-          candidate_interview_id: string
-          created_at: string | null
-          id: string
-          role: Database["public"]["Enums"]["message_role"]
-          text: string
-        }
-        Insert: {
-          candidate_interview_id: string
-          created_at?: string | null
-          id?: string
-          role: Database["public"]["Enums"]["message_role"]
-          text: string
-        }
-        Update: {
-          candidate_interview_id?: string
-          created_at?: string | null
-          id?: string
-          role?: Database["public"]["Enums"]["message_role"]
-          text?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "job_interview_messages_candidate_interview_id_fkey"
-            columns: ["candidate_interview_id"]
-            isOneToOne: false
-            referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
         ]

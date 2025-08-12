@@ -24,7 +24,7 @@ export type ApplicationFile = Tables<"candidate_application_files"> & {
   };
 };
 export type CandidateJobInterview = Tables<"candidate_job_interviews">;
-export type JobInterviewMessage = Tables<"job_interview_messages">;
+export type JobInterviewMessage = Tables<"candidate_job_interview_messages">;
 export type InterviewAnalysis = TypedInterviewAnalysis;
 export type CandidateJobInterviewRecording =
   Tables<"candidate_job_interview_recordings">;
@@ -340,7 +340,7 @@ export const getCandidateData = cache(
       let jobInterviewMessages: JobInterviewMessage[] = [];
       if (candidateJobInterview) {
         const { data: messages, error: messagesError } = await supabase
-          .from("job_interview_messages")
+          .from("candidate_job_interview_messages")
           .select("*")
           .eq("candidate_interview_id", candidateJobInterview.id)
           .order("created_at", { ascending: false });
