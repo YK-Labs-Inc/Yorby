@@ -5,9 +5,12 @@ import {
   createAdminClient,
 } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { Tables } from "@/utils/supabase/database.types";
+import { Enums, Tables } from "@/utils/supabase/database.types";
 import { cache } from "react";
-import type { TypedInterviewAnalysis } from "./types";
+import type {
+  TypedCodingInterviewAnalysis,
+  TypedInterviewAnalysis,
+} from "./types";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 
@@ -28,6 +31,7 @@ export type JobInterviewMessage = Tables<"candidate_job_interview_messages">;
 export type InterviewAnalysis = TypedInterviewAnalysis;
 export type CandidateJobInterviewRecording =
   Tables<"candidate_job_interview_recordings">;
+export type CodingInterviewAnalysis = TypedCodingInterviewAnalysis;
 
 export interface AccessValidation {
   company: Company;
@@ -43,6 +47,8 @@ export interface CandidateData {
     jobInterviewRecording: CandidateJobInterviewRecording | null;
     jobInterviewMessages: JobInterviewMessage[];
     interviewAnalysis: InterviewAnalysis | null;
+    interviewType: Enums<"job_interview_type">;
+    codingInterviewAnalysis: CodingInterviewAnalysis | null;
   }[];
 }
 
@@ -297,7 +303,9 @@ export const getCandidateData = cache(
     const { data: candidateJobInterviews, error: interviewError } =
       await supabase
         .from("candidate_job_interviews")
-        .select("*")
+        .select(
+          `*, job_interviews(interview_type, job_interview_questions(company_interview_question_bank(question)))`
+        )
         .eq("candidate_id", candidateId);
 
     if (interviewError) {
@@ -317,6 +325,7 @@ export const getCandidateData = cache(
 
     let interviewResults: CandidateData["interviewResults"] = [];
     for (const candidateJobInterview of candidateJobInterviews) {
+      const interviewType = candidateJobInterview.job_interviews.interview_type;
       // Fetch job interview recording if job interview exists
       let jobInterviewRecording = null;
       if (candidateJobInterview) {
@@ -374,11 +383,33 @@ export const getCandidateData = cache(
         }
       }
 
+      let codingInterviewAnalysis: CodingInterviewAnalysis | null = null;
+      if (interviewType === "coding") {
+        const { data: codingAnalysisData, error: codingAnalysisError } =
+          await supabase
+            .from("coding_interview_analysis_view")
+            .select("*")
+            .eq("candidate_interview_id", candidateJobInterview.id)
+            .maybeSingle();
+
+        if (codingAnalysisError) {
+          log.error("Error fetching coding interview analysis", {
+            codingAnalysisError,
+            candidateInterviewId: candidateJobInterview.id,
+          });
+        } else if (codingAnalysisData) {
+          codingInterviewAnalysis =
+            codingAnalysisData as CodingInterviewAnalysis;
+        }
+      }
+
       interviewResults.push({
         candidateJobInterview,
         jobInterviewRecording,
         jobInterviewMessages,
         interviewAnalysis,
+        interviewType: candidateJobInterview.job_interviews.interview_type,
+        codingInterviewAnalysis,
       });
     }
 
