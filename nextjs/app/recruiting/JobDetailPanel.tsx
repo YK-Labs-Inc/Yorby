@@ -24,8 +24,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { toast } from "sonner";
 import { Loader2, X, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -253,12 +253,19 @@ export function JobDetailPanel({
                     <FormItem>
                       <FormLabel>{t("form.jobDescription.label")}</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder={t("form.jobDescription.placeholder")}
-                          rows={8}
-                          {...field}
-                          name="job_description"
-                        />
+                        <div>
+                          <RichTextEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder={t("form.jobDescription.placeholder")}
+                            minHeight="200px"
+                          />
+                          <input
+                            type="hidden"
+                            name="job_description"
+                            value={field.value}
+                          />
+                        </div>
                       </FormControl>
                       <FormDescription>
                         {t("form.jobDescription.description")}

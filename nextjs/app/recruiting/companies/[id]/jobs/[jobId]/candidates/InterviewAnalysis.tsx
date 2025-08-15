@@ -28,6 +28,7 @@ import {
   ChatTranscript,
   type ChatMessage,
 } from "@/components/ui/chat-transcript";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { CodeEditor } from "@/components/ui/code-editor";
 
 interface InterviewAnalysisProps {
@@ -1079,9 +1080,14 @@ export default function InterviewAnalysis({
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                     {tOverview("codingQuestion")}
                   </h3>
-                  <p className="text-sm text-muted-foreground break-words">
-                    {interviewResult.codingInterviewAnalysis.question_text}
-                  </p>
+                  <RichTextDisplay
+                    content={
+                      interviewResult.codingInterviewAnalysis.question_text ||
+                      ""
+                    }
+                    prose="prose-sm"
+                    className="max-h-[300px] overflow-y-auto"
+                  />
                 </div>
 
                 {/* Submission Section */}
@@ -1101,73 +1107,99 @@ export default function InterviewAnalysis({
                 </div>
 
                 {/* Strengths and Weaknesses Section */}
-                {((interviewResult.codingInterviewAnalysis.interview_strengths && 
-                   interviewResult.codingInterviewAnalysis.interview_strengths.length > 0) ||
-                  (interviewResult.codingInterviewAnalysis.interview_weaknesses && 
-                   interviewResult.codingInterviewAnalysis.interview_weaknesses.length > 0)) && (
+                {((interviewResult.codingInterviewAnalysis
+                  .interview_strengths &&
+                  interviewResult.codingInterviewAnalysis.interview_strengths
+                    .length > 0) ||
+                  (interviewResult.codingInterviewAnalysis
+                    .interview_weaknesses &&
+                    interviewResult.codingInterviewAnalysis.interview_weaknesses
+                      .length > 0)) && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                     {/* Strengths */}
-                    {interviewResult.codingInterviewAnalysis.interview_strengths && 
-                     interviewResult.codingInterviewAnalysis.interview_strengths.length > 0 && (
-                      <div className="space-y-3">
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          {t("codingInterview.strengths")}
-                        </h3>
+                    {interviewResult.codingInterviewAnalysis
+                      .interview_strengths &&
+                      interviewResult.codingInterviewAnalysis
+                        .interview_strengths.length > 0 && (
                         <div className="space-y-3">
-                          {interviewResult.codingInterviewAnalysis.interview_strengths.map((strength, index) => (
-                            <Card key={strength.id || index} className="p-4 border-l-4 border-l-green-600">
-                              <div className="space-y-2">
-                                <h4 className="font-medium text-sm">{strength.title}</h4>
-                                {strength.relevance && (
-                                  <p className="text-sm text-muted-foreground">
-                                    {strength.relevance}
-                                  </p>
-                                )}
-                              </div>
-                            </Card>
-                          ))}
+                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            {t("codingInterview.strengths")}
+                          </h3>
+                          <div className="space-y-3">
+                            {interviewResult.codingInterviewAnalysis.interview_strengths.map(
+                              (strength, index) => (
+                                <Card
+                                  key={strength.id || index}
+                                  className="p-4 border-l-4 border-l-green-600"
+                                >
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">
+                                      {strength.title}
+                                    </h4>
+                                    {strength.relevance && (
+                                      <p className="text-sm text-muted-foreground">
+                                        {strength.relevance}
+                                      </p>
+                                    )}
+                                  </div>
+                                </Card>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* Weaknesses/Concerns */}
-                    {interviewResult.codingInterviewAnalysis.interview_weaknesses && 
-                     interviewResult.codingInterviewAnalysis.interview_weaknesses.length > 0 && (
-                      <div className="space-y-3">
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                          <AlertCircle className="h-4 w-4 text-amber-600" />
-                          {t("codingInterview.areasForImprovement")}
-                        </h3>
+                    {interviewResult.codingInterviewAnalysis
+                      .interview_weaknesses &&
+                      interviewResult.codingInterviewAnalysis
+                        .interview_weaknesses.length > 0 && (
                         <div className="space-y-3">
-                          {interviewResult.codingInterviewAnalysis.interview_weaknesses.map((weakness, index) => (
-                            <Card key={weakness.id || index} className="p-4 border-l-4 border-l-amber-600">
-                              <div className="space-y-2">
-                                <h4 className="font-medium text-sm">{weakness.title}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {weakness.description}
-                                </p>
-                              </div>
-                            </Card>
-                          ))}
+                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-amber-600" />
+                            {t("codingInterview.areasForImprovement")}
+                          </h3>
+                          <div className="space-y-3">
+                            {interviewResult.codingInterviewAnalysis.interview_weaknesses.map(
+                              (weakness, index) => (
+                                <Card
+                                  key={weakness.id || index}
+                                  className="p-4 border-l-4 border-l-amber-600"
+                                >
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">
+                                      {weakness.title}
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      {weakness.description}
+                                    </p>
+                                  </div>
+                                </Card>
+                              )
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
 
                 {/* No Analysis Available */}
-                {(!interviewResult.codingInterviewAnalysis.interview_strengths || 
-                  interviewResult.codingInterviewAnalysis.interview_strengths.length === 0) && 
-                 (!interviewResult.codingInterviewAnalysis.interview_weaknesses || 
-                  interviewResult.codingInterviewAnalysis.interview_weaknesses.length === 0) && (
-                  <Alert className="mt-4">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      {t("codingInterview.noDetailedAnalysis")}
-                    </AlertDescription>
-                  </Alert>
-                )}
+                {(!interviewResult.codingInterviewAnalysis
+                  .interview_strengths ||
+                  interviewResult.codingInterviewAnalysis.interview_strengths
+                    .length === 0) &&
+                  (!interviewResult.codingInterviewAnalysis
+                    .interview_weaknesses ||
+                    interviewResult.codingInterviewAnalysis.interview_weaknesses
+                      .length === 0) && (
+                    <Alert className="mt-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        {t("codingInterview.noDetailedAnalysis")}
+                      </AlertDescription>
+                    </Alert>
+                  )}
               </div>
             )}
           </TabsContent>

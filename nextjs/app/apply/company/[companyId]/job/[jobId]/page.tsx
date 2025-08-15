@@ -12,7 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
-import { CollapsibleJobDescription } from "@/components/CollapsibleJobDescription";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { Logger } from "next-axiom";
 import ApplyButton from "./ApplyButton";
 
@@ -84,9 +84,11 @@ export default async function ApplyPage({
               <h3 className="text-lg font-semibold mb-4">
                 {t("jobPage.jobDescription.title")}
               </h3>
-              <div className="prose prose-gray max-w-none">
-                <CollapsibleJobDescription description={job.job_description} />
-              </div>
+              <RichTextDisplay
+                content={job.job_description}
+                prose="prose"
+                className="max-w-none max-h-[300px] overflow-y-auto"
+              />
             </div>
           )}
         </CardContent>

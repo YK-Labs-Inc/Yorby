@@ -73,13 +73,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   // Fetch interviews for this job
   const { data: interviews, error: interviewsError } = await supabase
     .from("job_interviews")
-    .select(
-      `
-      *,
-      job_interview_questions:job_interview_questions(count),
-      candidate_job_interviews:candidate_job_interviews(count)
-    `
-    )
+    .select("*")
     .eq("custom_job_id", jobId)
     .order("order_index", { ascending: true });
 

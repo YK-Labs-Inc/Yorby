@@ -102,13 +102,10 @@ export function CompanyJobsManager({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[35%]">
+                    <TableHead className="w-[45%]">
                       {t("table.jobTitle")}
                     </TableHead>
-                    <TableHead className="w-[30%]">
-                      {t("table.description")}
-                    </TableHead>
-                    <TableHead className="w-[15%]">
+                    <TableHead className="w-[45%]">
                       {t("table.candidates")}
                     </TableHead>
                     <TableHead className="w-[5%]"></TableHead>
@@ -124,13 +121,6 @@ export function CompanyJobsManager({
                         >
                           {job.job_title}
                         </Link>
-                      </TableCell>
-                      <TableCell>
-                        {job.job_description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {job.job_description}
-                          </p>
-                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">

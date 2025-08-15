@@ -257,14 +257,15 @@ export async function updateQuestion(
     }
 
     // Validate required fields
-    if (
-      !questionId ||
-      !question ||
-      !answer ||
-      !interviewId ||
-      !jobId ||
-      !companyId
-    ) {
+    if (!questionId || !question || !interviewId || !jobId || !companyId) {
+      logger.error("Missing required fields", {
+        questionId,
+        question,
+        answer,
+        interviewId,
+        jobId,
+        companyId,
+      });
       return {
         success: false,
         error: t("missingRequiredFields") || "Missing required fields",

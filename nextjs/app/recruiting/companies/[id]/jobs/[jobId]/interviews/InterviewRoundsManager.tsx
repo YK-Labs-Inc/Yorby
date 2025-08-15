@@ -59,8 +59,6 @@ interface InterviewRoundsManagerProps {
 interface SortableRowProps {
   interview: JobInterview;
   getInterviewTypeColor: (type: string) => string;
-  getQuestionCount: (interview: JobInterview) => number;
-  getCandidateCount: (interview: JobInterview) => number;
   companyId: string;
   jobId: string;
 }
@@ -68,8 +66,6 @@ interface SortableRowProps {
 function SortableRow({
   interview,
   getInterviewTypeColor,
-  getQuestionCount,
-  getCandidateCount,
   companyId,
   jobId,
   setPanelMode,
@@ -122,16 +118,6 @@ function SortableRow({
         >
           {t(`interviewType.${interview.interview_type}`)}
         </Badge>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">
-          {getQuestionCount(interview)}
-        </span>
-      </TableCell>
-      <TableCell>
-        <span className="text-sm text-muted-foreground">
-          {getCandidateCount(interview)}
-        </span>
       </TableCell>
       <TableCell>
         <DropdownMenu>
@@ -200,14 +186,6 @@ export function InterviewRoundsManager({
       default:
         return "bg-gray-100 text-gray-800";
     }
-  };
-
-  const getQuestionCount = (interview: JobInterview) => {
-    return interview.job_interview_questions?.[0]?.count || 0;
-  };
-
-  const getCandidateCount = (interview: JobInterview) => {
-    return interview.candidate_job_interviews?.[0]?.count || 0;
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -306,12 +284,6 @@ export function InterviewRoundsManager({
                       <TableHead className="w-[20%]">
                         {t("table.type")}
                       </TableHead>
-                      <TableHead className="w-[15%]">
-                        {t("table.questions")}
-                      </TableHead>
-                      <TableHead className="w-[15%]">
-                        {t("table.candidates")}
-                      </TableHead>
                       <TableHead className="w-[5%]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -325,8 +297,6 @@ export function InterviewRoundsManager({
                           key={interview.id}
                           interview={interview}
                           getInterviewTypeColor={getInterviewTypeColor}
-                          getQuestionCount={getQuestionCount}
-                          getCandidateCount={getCandidateCount}
                           companyId={companyId}
                           jobId={jobId}
                           setPanelMode={setPanelMode}
@@ -359,16 +329,6 @@ export function InterviewRoundsManager({
                                 `interviewType.${activeInterview.interview_type}`
                               )}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {getQuestionCount(activeInterview)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {getCandidateCount(activeInterview)}
-                            </span>
                           </TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon">
