@@ -326,7 +326,9 @@
         "videoProcessingFailed": "Video processing failed",
         "videoProcessingFailedDescription": "There was an error processing the interview recording",
         "videoReady": "Video ready but playback ID not available",
-        "unknownVideoStatus": "Unknown video status"
+        "unknownVideoStatus": "Unknown video status",
+        "codingSubmission": "User's Submission",
+        "codingQuestion": "Coding Question"
       },
       "emptyState": {
         "title": "Select a candidate",
@@ -370,7 +372,8 @@
           "strengths": "Strengths",
           "concerns": "Concerns",
           "alignment": "Job Alignment",
-          "questions": "Questions"
+          "questions": "Questions",
+          "question": "Question"
         },
         "keyHighlights": "Key Interview Highlights",
         "questionPerformance": "Question Performance",
@@ -403,7 +406,12 @@
         "candidateResponse": "Candidate's Response",
         "answerAnalysis": "Answer Analysis",
         "roundOf": "Round {current} of {total}",
-        "interviewRound": "Interview Round"
+        "interviewRound": "Interview Round",
+        "codingInterview": {
+          "strengths": "Strengths",
+          "areasForImprovement": "Areas for Improvement",
+          "noDetailedAnalysis": "No detailed analysis available for this coding interview yet."
+        }
       }
     },
     "questionsTable": {

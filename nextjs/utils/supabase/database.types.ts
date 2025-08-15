@@ -100,6 +100,13 @@ export type Database = {
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "job_interview_messages_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["candidate_interview_id"]
+          },
         ]
       }
       candidate_job_interview_recordings: {
@@ -140,6 +147,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["candidate_interview_id"]
           },
         ]
       }
@@ -297,6 +311,13 @@ export type Database = {
           time_limit_ms?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "company_interview_coding_question_metadata_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["question_id"]
+          },
           {
             foreignKeyName: "company_interview_coding_question_metadata_id_fkey"
             columns: ["id"]
@@ -1519,6 +1540,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "job_interview_coding_submissions_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["candidate_interview_id"]
+          },
+          {
+            foreignKeyName: "job_interview_coding_submissions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["question_id"]
+          },
+          {
             foreignKeyName: "job_interview_coding_submissions_question_id_fkey"
             columns: ["question_id"]
             isOneToOne: false
@@ -1556,6 +1591,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "job_interviews"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_interview_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["question_id"]
           },
           {
             foreignKeyName: "job_interview_questions_question_id_fkey"
@@ -1879,6 +1921,13 @@ export type Database = {
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "recruiter_interview_analysis_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: true
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["candidate_interview_id"]
+          },
         ]
       }
       recruiter_interview_concerns: {
@@ -1907,6 +1956,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_concerns_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
           {
             foreignKeyName: "recruiter_interview_concerns_analysis_id_fkey"
             columns: ["analysis_id"]
@@ -1955,6 +2011,13 @@ export type Database = {
           timestamp_seconds?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "recruiter_interview_highlights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
           {
             foreignKeyName: "recruiter_interview_highlights_analysis_id_fkey"
             columns: ["analysis_id"]
@@ -2010,6 +2073,13 @@ export type Database = {
             foreignKeyName: "recruiter_interview_insights_analysis_id_fkey"
             columns: ["analysis_id"]
             isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_insights_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
             referencedRelation: "recruiter_interview_analysis"
             referencedColumns: ["id"]
           },
@@ -2055,6 +2125,13 @@ export type Database = {
             foreignKeyName: "recruiter_interview_strengths_analysis_id_fkey"
             columns: ["analysis_id"]
             isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_strengths_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
             referencedRelation: "recruiter_interview_analysis"
             referencedColumns: ["id"]
           },
@@ -2093,6 +2170,13 @@ export type Database = {
           missing_requirements?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "recruiter_job_alignment_details_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: true
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
           {
             foreignKeyName: "recruiter_job_alignment_details_analysis_id_fkey"
             columns: ["analysis_id"]
@@ -2154,6 +2238,13 @@ export type Database = {
             foreignKeyName: "recruiter_question_analysis_analysis_id_fkey"
             columns: ["analysis_id"]
             isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["analysis_id"]
+          },
+          {
+            foreignKeyName: "recruiter_question_analysis_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
             referencedRelation: "recruiter_interview_analysis"
             referencedColumns: ["id"]
           },
@@ -2163,6 +2254,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "recruiter_interview_analysis_complete"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_question_analysis_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["question_id"]
           },
           {
             foreignKeyName: "recruiter_question_analysis_question_id_fkey"
@@ -2656,6 +2754,50 @@ export type Database = {
       }
     }
     Views: {
+      coding_interview_analysis_view: {
+        Row: {
+          analysis_created_at: string | null
+          analysis_id: string | null
+          candidate_id: string | null
+          candidate_interview_id: string | null
+          completed_at: string | null
+          hiring_verdict: Database["public"]["Enums"]["hiring_verdict"] | null
+          interview_id: string | null
+          interview_status:
+            | Database["public"]["Enums"]["job_interview_status"]
+            | null
+          interview_strengths: Json | null
+          interview_weaknesses: Json | null
+          model_used: string | null
+          overall_match_score: number | null
+          processing_duration_ms: number | null
+          question_answer: string | null
+          question_id: string | null
+          question_text: string | null
+          question_type:
+            | Database["public"]["Enums"]["job_interview_type"]
+            | null
+          started_at: string | null
+          user_last_submission: string | null
+          verdict_summary: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_job_interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "company_job_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_job_interviews_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "job_interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recruiter_interview_analysis_complete: {
         Row: {
           candidate_interview_id: string | null
@@ -2685,6 +2827,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recruiter_interview_analysis_candidate_interview_id_fkey"
+            columns: ["candidate_interview_id"]
+            isOneToOne: true
+            referencedRelation: "coding_interview_analysis_view"
+            referencedColumns: ["candidate_interview_id"]
           },
         ]
       }
