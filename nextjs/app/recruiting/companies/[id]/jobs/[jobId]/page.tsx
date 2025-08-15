@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ShareApplicationLink from "./ShareApplicationLink";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 
 interface PageProps {
   params: Promise<{
@@ -147,9 +148,11 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <div className="max-h-96 overflow-y-auto">
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                  {job.job_description}
-                </p>
+                <RichTextDisplay 
+                  content={job.job_description}
+                  prose="prose-sm"
+                  className="text-muted-foreground"
+                />
               </div>
             </CardContent>
           </Card>

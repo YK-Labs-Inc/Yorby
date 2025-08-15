@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { InterviewQuestion } from "./page";
 import QuestionDetailPanel from "@/app/recruiting/companies/[id]/jobs/[jobId]/interviews/[interviewId]/QuestionDetailPanel";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 
 interface QuestionsTableProps {
   interview: Tables<"job_interviews">;
@@ -103,9 +104,13 @@ export default function QuestionsTable({
                     onClick={() => openQuestionDetail(question)}
                   >
                     <TableCell className="max-w-md">
-                      <p className="line-clamp-2">
-                        {question.company_interview_question_bank.question}
-                      </p>
+                      <RichTextDisplay
+                        content={
+                          question.company_interview_question_bank.question
+                        }
+                        className="line-clamp-2 [&>*]:inline [&>*]:mr-1"
+                        prose="prose-sm"
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { X, Trash2 } from "lucide-react";
 import { CodeEditor } from "@/components/ui/code-editor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -245,15 +245,19 @@ export default function QuestionDetailPanel({
                   >
                     {t("editDialog.form.question.label")}
                   </Label>
-                  <Textarea
-                    id="panel-question"
-                    name="question"
+                  <RichTextEditor
                     value={formData.question}
-                    onChange={(e) =>
-                      setFormData({ ...formData, question: e.target.value })
+                    onChange={(value) =>
+                      setFormData({ ...formData, question: value })
                     }
                     placeholder={t("editDialog.form.question.placeholder")}
-                    className="min-h-[150px] resize-none text-base"
+                    minHeight="150px"
+                    className="text-base"
+                  />
+                  <input
+                    type="hidden"
+                    name="question"
+                    value={formData.question}
                   />
                 </div>
 
@@ -296,18 +300,24 @@ export default function QuestionDetailPanel({
                       )}
                     </>
                   ) : (
-                    <Textarea
-                      id="panel-answer"
-                      name="answer"
-                      value={formData.answer}
-                      onChange={(e) =>
-                        setFormData({ ...formData, answer: e.target.value })
-                      }
-                      placeholder={t(
-                        "editDialog.form.answerGuidelines.placeholder"
-                      )}
-                      className="min-h-[200px] resize-none text-base"
-                    />
+                    <>
+                      <RichTextEditor
+                        value={formData.answer}
+                        onChange={(value) =>
+                          setFormData({ ...formData, answer: value })
+                        }
+                        placeholder={t(
+                          "editDialog.form.answerGuidelines.placeholder"
+                        )}
+                        minHeight="200px"
+                        className="text-base"
+                      />
+                      <input
+                        type="hidden"
+                        name="answer"
+                        value={formData.answer}
+                      />
+                    </>
                   )}
                 </div>
 
