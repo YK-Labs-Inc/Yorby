@@ -131,7 +131,7 @@ export function CreateJobInterviewPanel({
         interview_type: "general",
       });
     }
-  }, [interview, mode, form]);
+  }, [interview, mode, form, open]);
 
   // Handle create state changes
   useEffect(() => {
@@ -174,6 +174,23 @@ export function CreateJobInterviewPanel({
       toast.error(deleteState.error || t("deleteError"));
     }
   }, [deleteState, t, onOpenChange, logError, jobId]);
+
+  // Handle Escape key press
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        handleClose();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [open]);
 
   const handleClose = () => {
     form.reset();

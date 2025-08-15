@@ -100,7 +100,7 @@ export default function QuestionDetailPanel({
         timeLimitMs: 1800000, // Default 30 minutes
       });
     }
-  }, [question, mode]);
+  }, [question, mode, isOpen]);
 
   // Handle create state changes
   useEffect(() => {
@@ -156,6 +156,23 @@ export default function QuestionDetailPanel({
       });
     }
   }, [deleteState, logInfo, logError, onClose]);
+
+  // Handle Escape key press
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isOpen]);
 
   const handleClose = () => {
     setFormData({ question: "", answer: "", timeLimitMs: 1800000 });
