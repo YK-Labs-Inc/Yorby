@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 
 export const linkAnonymousAccount = async (
   prevState: any,
-  formData: FormData,
+  formData: FormData
 ) => {
   const email = formData.get("email") as string;
   const redirectTo = formData.get("redirectTo") as string | undefined;
@@ -38,7 +38,7 @@ export const linkAnonymousAccount = async (
       emailRedirectTo: `${origin}${
         redirectTo ? redirectTo : "/dashboard/jobs"
       }`,
-    },
+    }
   );
 
   if (error) {
@@ -93,7 +93,7 @@ export async function signInWithOTP(formData: FormData) {
   return encodedRedirect(
     "authSuccess",
     redirectTo,
-    "Check your email for the magic link.",
+    "Check your email for the magic link."
   );
 }
 
@@ -102,4 +102,91 @@ export const handleSignOut = async (data: FormData) => {
   await supabase.auth.signOut();
   revalidatePath("/");
   redirect("/");
+};
+
+export const handleSignInWithPassword = async (
+  _prevState: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> => {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const captchaToken = formData.get("captchaToken") as string;
+  const redirectUrl = formData.get("redirectUrl") as string;
+  const t = await getTranslations("auth.login");
+
+  if (!captchaToken) {
+    return { error: t("errors.captchaRequired") };
+  }
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: {
+        captchaToken,
+      },
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : t("errors.loginFailed"),
+    };
+  }
+
+  // If successful, redirect using Next.js redirect
+  redirect(redirectUrl || "/auth-redirect");
+};
+
+export const handleSignUp = async (
+  _prevState: { error: string | null },
+  formData: FormData
+): Promise<{ error: string | null }> => {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const repeatPassword = formData.get("repeatPassword") as string;
+  const captchaToken = formData.get("captchaToken") as string;
+  const redirectUrl = formData.get("redirectUrl") as string;
+  const t = await getTranslations("auth.signUp");
+  const origin = (await headers()).get("origin");
+
+  if (!captchaToken) {
+    return { error: t("errors.captchaRequired") };
+  }
+
+  if (password !== repeatPassword) {
+    return { error: t("errors.passwordMismatch") };
+  }
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${origin}${redirectUrl || "/auth-redirect"}`,
+        captchaToken,
+      },
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : t("errors.signUpFailed"),
+    };
+  }
+
+  // If successful, redirect to success page
+  redirect("/auth/sign-up-success");
 };

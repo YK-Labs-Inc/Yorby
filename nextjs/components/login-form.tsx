@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,55 +12,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { handleSignInWithPassword } from "@/components/auth/actions";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("auth.login");
-
   const redirectUrl = searchParams.get("redirect");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    if (!captchaToken) {
-      setError("Please complete the captcha verification");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: {
-          captchaToken,
-        },
-      });
-      if (error) throw error;
-
-      router.push(redirectUrl || "/auth-redirect");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("errorMessage"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [state, formAction, isPending] = useActionState(
+    handleSignInWithPassword,
+    { error: null }
+  );
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -71,17 +40,16 @@ export function LoginForm({
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form action={formAction}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("email.label")}</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder={t("email.placeholder")}
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
@@ -96,13 +64,14 @@ export function LoginForm({
                 </div>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {state.error && <p className="text-sm text-red-500">{state.error}</p>}
+              <input type="hidden" name="captchaToken" value={captchaToken} />
+              <input type="hidden" name="redirectUrl" value={redirectUrl || ""} />
               <div className="flex justify-center">
                 <Turnstile
                   siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -114,9 +83,9 @@ export function LoginForm({
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || !captchaToken}
+                disabled={isPending || !captchaToken}
               >
-                {isLoading ? t("submitting") : t("submit")}
+                {isPending ? t("submitting") : t("submit")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
