@@ -116,7 +116,7 @@ export function JobDetailPanel({
         job_description: "",
       });
     }
-  }, [job, mode, form]);
+  }, [job, mode, form, open]);
 
   // Handle create state changes
   useEffect(() => {
@@ -165,6 +165,23 @@ export function JobDetailPanel({
     form.reset();
     onOpenChange(false);
   };
+
+  // Handle Escape key press
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        handleClose();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("keydown", handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [open]);
 
   return (
     <>
