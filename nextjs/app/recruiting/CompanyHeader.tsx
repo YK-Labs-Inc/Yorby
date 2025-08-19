@@ -1,9 +1,11 @@
 "use client";
 
-import { Building2, Globe, Users } from "lucide-react";
+import { Building2, Globe, Users, UsersRound } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 type Company = Tables<"companies">;
 
@@ -53,6 +55,16 @@ export function CompanyHeader({ company }: CompanyHeaderProps) {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <Link href={`/recruiting/companies/${company.id}/members`}>
+            <Button variant="outline">
+              <UsersRound className="mr-2 h-4 w-4" />
+              {t("manageMembers")}
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

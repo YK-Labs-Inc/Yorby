@@ -26,6 +26,7 @@ export function LoginForm({
   const searchParams = useSearchParams();
   const t = useTranslations("auth.login");
   const redirectUrl = searchParams.get("redirect");
+  const email = searchParams.get("email");
 
   const [state, formAction, isPending] = useActionState(
     handleSignInWithPassword,
@@ -50,6 +51,9 @@ export function LoginForm({
                   type="email"
                   placeholder={t("email.placeholder")}
                   required
+                  defaultValue={email || undefined}
+                  readOnly={!!email}
+                  className={email ? "cursor-not-allowed" : ""}
                 />
               </div>
               <div className="grid gap-2">
@@ -62,16 +66,17 @@ export function LoginForm({
                     {t("forgotPassword")}
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                />
+                <Input id="password" name="password" type="password" required />
               </div>
-              {state.error && <p className="text-sm text-red-500">{state.error}</p>}
+              {state.error && (
+                <p className="text-sm text-red-500">{state.error}</p>
+              )}
               <input type="hidden" name="captchaToken" value={captchaToken} />
-              <input type="hidden" name="redirectUrl" value={redirectUrl || ""} />
+              <input
+                type="hidden"
+                name="redirectUrl"
+                value={redirectUrl || ""}
+              />
               <div className="flex justify-center">
                 <Turnstile
                   siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
@@ -91,11 +96,7 @@ export function LoginForm({
             <div className="mt-4 text-center text-sm">
               {t("noAccount")}{" "}
               <Link
-                href={
-                  redirectUrl
-                    ? `/auth/sign-up?redirect=${redirectUrl}`
-                    : "/auth/sign-up"
-                }
+                href={`/auth/sign-up${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
                 className="underline underline-offset-4"
               >
                 {t("signUpLink")}

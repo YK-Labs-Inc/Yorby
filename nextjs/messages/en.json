@@ -2493,8 +2493,6 @@
   },
   "recruiting": {
     "dashboard": {
-      "title": "Company Recruiting Dashboard",
-      "description": "Manage your companies and recruitment processes",
       "loading": "Loading..."
     },
     "companyDashboard": {
@@ -2594,7 +2592,8 @@
     },
     "companyHeader": {
       "backToDashboard": "← Back to Dashboard",
-      "employees": "{size} employees"
+      "employees": "{size} employees",
+      "manageMembers": "Manage Members"
     },
     "questionsTable": {
       "title": "Manage Questions",
