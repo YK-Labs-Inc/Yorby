@@ -17,6 +17,7 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { handleSignInWithPassword } from "@/components/auth/actions";
+import { Lock } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -45,16 +46,21 @@ export function LoginForm({
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("email.label")}</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder={t("email.placeholder")}
-                  required
-                  defaultValue={email || undefined}
-                  readOnly={!!email}
-                  className={email ? "cursor-not-allowed" : ""}
-                />
+                <div className="relative">
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder={t("email.placeholder")}
+                    required
+                    defaultValue={email || undefined}
+                    readOnly={!!email}
+                    className={email ? "cursor-not-allowed pr-10" : ""}
+                  />
+                  {email && (
+                    <Lock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  )}
+                </div>
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
