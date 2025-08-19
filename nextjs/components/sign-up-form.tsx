@@ -45,7 +45,7 @@ export function SignUpForm({
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("email.label")}</Label>
-                <div className="relative">
+                <div className="flex flex-row items-center gap-3">
                   <Input
                     id="email"
                     name="email"
@@ -54,10 +54,10 @@ export function SignUpForm({
                     required
                     defaultValue={email || undefined}
                     readOnly={!!email}
-                    className={email ? "cursor-not-allowed pr-10" : ""}
+                    className={email ? "cursor-not-allowed flex-1" : "flex-1"}
                   />
                   {email && (
-                    <Lock className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Lock className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
               </div>
