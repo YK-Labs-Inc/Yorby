@@ -4,12 +4,10 @@ import { RecruitingDashboardSkeleton } from "@/app/recruiting/RecruitingDashboar
 import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
-import { getTranslations } from "next-intl/server";
 
 async function RecruitingDashboardContent() {
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({ path: "/recruiting/page" });
-  const t = await getTranslations("recruiting.dashboard");
 
   const {
     data: { user },
@@ -45,11 +43,6 @@ async function RecruitingDashboardContent() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
-        </div>
-
         <CompanyDashboard companies={companies} userId={user.id} />
       </div>
     </div>

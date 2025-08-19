@@ -1,0 +1,127 @@
+{
+  "members": {
+    "title": "Company Members",
+    "inviteButton": "Invite Member",
+    "tabs": {
+      "active": "Active Members",
+      "pending": "Pending Invitations"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "joinedDate": "Joined",
+      "invitedDate": "Invited",
+      "invitedBy": "Invited By",
+      "expires": "Expires",
+      "actions": "Actions"
+    },
+    "actions": {
+      "resend": "Resend",
+      "cancel": "Cancel",
+      "remove": "Remove"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "expired": "Expired"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "recruiter": "Recruiter",
+      "viewer": "Viewer"
+    }
+  },
+  "invitePanel": {
+    "title": "Invite Team Member",
+    "description": "Send an invitation to join your company. They'll receive an email with instructions to create an account and join your team.",
+    "form": {
+      "email": {
+        "label": "Email Address",
+        "placeholder": "colleague@example.com"
+      },
+      "role": {
+        "label": "Role",
+        "placeholder": "Select a role",
+        "description": "Choose the permissions level for this team member",
+        "options": {
+          "admin": "Admin",
+          "recruiter": "Recruiter",
+          "viewer": "Viewer"
+        }
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address",
+        "roleRequired": "Please select a role"
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "send": "Send Invitation",
+      "sending": "Sending..."
+    },
+    "success": "Invitation sent successfully",
+    "errors": {
+      "unauthorized": "You are not authorized to invite members",
+      "permissionDenied": "You don't have permission to invite members",
+      "alreadyMember": "This user is already a member of your company",
+      "alreadyInvited": "An invitation has already been sent to this email",
+      "sendFailed": "Failed to send invitation. Please try again.",
+      "unexpected": "An unexpected error occurred",
+      "companyNotFound": "Company not found"
+    }
+  },
+  "cancelInvitation": {
+    "success": "Invitation cancelled",
+    "error": "Failed to cancel invitation"
+  },
+  "resendInvitation": {
+    "success": "Invitation resent successfully",
+    "error": "Failed to resend invitation"
+  },
+  "acceptInvitation": {
+    "errors": {
+      "notAuthenticated": "You must be logged in to accept this invitation",
+      "invalidOrAccepted": "Invalid or already accepted invitation",
+      "expired": "This invitation has expired. Please request a new one.",
+      "alreadyMember": "You are already a member of this company",
+      "acceptFailed": "Failed to accept invitation. Please try again.",
+      "unexpected": "An unexpected error occurred"
+    },
+    "page": {
+      "invalidInvitation": {
+        "title": "Invalid Invitation",
+        "description": "This invitation link is invalid or has already been used.",
+        "button": "Go to Dashboard"
+      },
+      "emailMismatch": {
+        "title": "Hmm...",
+        "description": "Doesn't seem like this invite was meant for you",
+        "instruction": "Ask the person who invited you to send you a new invite to"
+      }
+    },
+    "client": {
+      "roleDescriptions": {
+        "admin": "Full access to manage company settings, members, and jobs",
+        "recruiter": "Can create and manage job postings and review candidates",
+        "viewer": "Can view job postings and candidate information"
+      },
+      "expired": {
+        "title": "Invitation Expired",
+        "description": "This invitation to join {companyName} has expired",
+        "alert": "This invitation expired on {date}. Please contact someone at {companyName} to send you a new invitation.",
+        "invitedAs": "You were invited to join as:",
+        "button": "Go to Dashboard"
+      },
+      "valid": {
+        "title": "Join {companyName}",
+        "successMessage": "Invitation accepted! Redirecting to your company dashboard...",
+        "acceptButton": "Accept Invitation",
+        "acceptingButton": "Accepting..."
+      }
+    }
+  }
+}

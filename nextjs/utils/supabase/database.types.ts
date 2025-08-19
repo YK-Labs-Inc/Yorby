@@ -419,30 +419,39 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          invitation_email: string | null
+          invitation_expires_at: string | null
+          invitation_token: string | null
           invited_at: string | null
           invited_by: string | null
           role: Database["public"]["Enums"]["company_member_role"]
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           accepted_at?: string | null
           company_id: string
           created_at?: string
           id?: string
+          invitation_email?: string | null
+          invitation_expires_at?: string | null
+          invitation_token?: string | null
           invited_at?: string | null
           invited_by?: string | null
           role: Database["public"]["Enums"]["company_member_role"]
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           accepted_at?: string | null
           company_id?: string
           created_at?: string
           id?: string
+          invitation_email?: string | null
+          invitation_expires_at?: string | null
+          invitation_token?: string | null
           invited_at?: string | null
           invited_by?: string | null
           role?: Database["public"]["Enums"]["company_member_role"]
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

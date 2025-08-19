@@ -26,6 +26,7 @@ export function SignUpForm({
   const t = useTranslations("auth.signUp");
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
+  const email = searchParams.get("email");
 
   const [state, formAction, isPending] = useActionState(handleSignUp, {
     error: null,
@@ -49,6 +50,9 @@ export function SignUpForm({
                   type="email"
                   placeholder={t("email.placeholder")}
                   required
+                  defaultValue={email || undefined}
+                  readOnly={!!email}
+                  className={email ? "cursor-not-allowed" : ""}
                 />
               </div>
               <div className="grid gap-2">
@@ -97,7 +101,10 @@ export function SignUpForm({
             </div>
             <div className="mt-4 text-center text-sm">
               {t("hasAccount")}{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link
+                href={`/auth/login${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
+                className="underline underline-offset-4"
+              >
                 {t("loginLink")}
               </Link>
             </div>

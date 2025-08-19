@@ -39,6 +39,14 @@ export default getRequestConfig(async () => {
     console.info(`Auth messages not found for ${locale}, using defaults`);
   }
 
+  let companyMessages = {};
+  try {
+    companyMessages = (await import(`../messages/${locale}/company.json`)).default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(`Company messages not found for ${locale}, using defaults`);
+  }
+
   // Merge all messages
   // Feature-specific messages override main messages if there are conflicts
   const messages = {
@@ -46,6 +54,7 @@ export default getRequestConfig(async () => {
     apply: applyMessages,
     common: commonMessages,
     auth: authMessages,
+    company: companyMessages,
   };
 
   return {
