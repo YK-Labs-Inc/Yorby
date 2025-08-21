@@ -308,7 +308,7 @@ export function JobDetailPanel({
                     ) as HTMLFormElement;
                     formElement?.requestSubmit();
                   }}
-                  disabled={pending}
+                  disabled={pending || !form.formState.isValid}
                 >
                   {pending ? (
                     <>

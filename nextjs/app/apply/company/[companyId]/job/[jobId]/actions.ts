@@ -369,6 +369,7 @@ export async function checkApplicationStatus(
 
   // Check if the user has completed an interview for this job
   let hasCompletedInterview = false;
+  let hasGeneratedAggregatedAnalysisForAllInterviews = false;
   let interviewId: string | null = null;
   let finalizedCandidateJobInterviews: (Pick<
     Tables<"candidate_job_interviews">,
@@ -413,9 +414,9 @@ export async function checkApplicationStatus(
     if (candidateJobInterviews && candidateJobInterviews.length > 0) {
       candidateJobInterviews = candidateJobInterviews.sort(
         (a, b) =>
-          (jobInterviews.find((interview) => interview.id === a.id)
+          (jobInterviews.find((interview) => interview.id === a.interview_id)
             ?.order_index || 0) -
-          (jobInterviews.find((interview) => interview.id === b.id)
+          (jobInterviews.find((interview) => interview.id === b.interview_id)
             ?.order_index || 0)
       );
       finalizedCandidateJobInterviews = candidateJobInterviews.map(
@@ -440,6 +441,25 @@ export async function checkApplicationStatus(
           (interview) => interview.status !== "completed"
         )?.id ?? null;
     }
+
+    const { data: aggregatedAnalysis, error: aggregatedAnalysisError } =
+      await supabase
+        .from("candidate_aggregated_interview_analysis")
+        .select("id")
+        .eq("candidate_id", existingCandidate.id)
+        .maybeSingle();
+
+    if (aggregatedAnalysisError) {
+      logger.error("Error fetching aggregated analysis", {
+        error: aggregatedAnalysisError,
+      });
+      await logger.flush();
+      throw new Error(t("fetchAggregatedAnalysis"));
+    }
+
+    if (aggregatedAnalysis) {
+      hasGeneratedAggregatedAnalysisForAllInterviews = true;
+    }
   }
 
   logger.info("Application and interview status checked", {
@@ -450,6 +470,7 @@ export async function checkApplicationStatus(
     hasCompletedInterview,
     applicationId: existingCandidate?.id,
     interviewId,
+    hasGeneratedAggregatedAnalysisForAllInterviews,
   });
 
   await logger.flush();
@@ -461,6 +482,7 @@ export async function checkApplicationStatus(
     application: existingCandidate || null,
     interviewId,
     candidateJobInterviews: finalizedCandidateJobInterviews,
+    hasGeneratedAggregatedAnalysisForAllInterviews,
   };
 }
 

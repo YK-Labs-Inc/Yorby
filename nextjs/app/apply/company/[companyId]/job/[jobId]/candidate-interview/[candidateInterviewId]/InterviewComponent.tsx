@@ -23,6 +23,8 @@ import { SessionView } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockIn
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { Button } from "@/components/ui/button";
 import { Enums, Tables } from "@/utils/supabase/database.types";
+import { useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -32,6 +34,7 @@ interface AppProps {
   nextInterviewId: string | null;
   jobId: string;
   companyId?: string;
+  candidateId?: string;
   interviewType: Enums<"job_interview_type">;
   questionDetails: (Pick<
     Tables<"company_interview_question_bank">,
@@ -49,6 +52,7 @@ export function InterviewComponent({
   nextInterviewId,
   jobId,
   companyId,
+  candidateId,
   interviewType,
   questionDetails,
 }: AppProps) {
@@ -67,9 +71,10 @@ export function InterviewComponent({
     id: currentInterviewId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
-  const { logError } = useAxiomLogging();
+  const { logError, logInfo } = useAxiomLogging();
   const t = useTranslations("apply.interviews.livekit");
   const tInterview = useTranslations("apply.candidateInterview");
+  const router = useRouter();
 
   // SWR mutation for processing interview
   const processInterviewFetcher = async (url: string) => {
@@ -111,6 +116,59 @@ export function InterviewComponent({
         },
       }
     );
+
+  // SWR mutation for generating aggregated analysis
+  const generateAggregatedAnalysisFetcher = async (url: string | null) => {
+    if (!candidateId || !url) {
+      throw new Error("Candidate ID is not available");
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.error ||
+          `Failed to generate aggregated analysis: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  };
+
+  const {
+    trigger: triggerAggregatedAnalysis,
+    isMutating: isGeneratingAggregatedAnalysis,
+  } = useSWRMutation(
+    candidateId
+      ? `/api/company-job-candidates/${candidateId}/aggregated-analysis`
+      : null,
+    generateAggregatedAnalysisFetcher,
+    {
+      onSuccess: (data) => {
+        logInfo("Aggregated analysis generated successfully", data);
+        router.push(nextUrl);
+      },
+      onError: (error) => {
+        logError("Error generating aggregated analysis", {
+          error: error.message,
+          candidateId,
+        });
+        toastAlert({
+          title: tInterview("errors.generatingAggregatedAnalysis"),
+          description:
+            error instanceof Error
+              ? error.message
+              : tInterview("errors.unknownError"),
+        });
+      },
+    }
+  );
 
   const processInterview = useCallback(async () => {
     try {
@@ -238,7 +296,7 @@ export function InterviewComponent({
   }
 
   // Show processing UI instead of the interview component when processing
-  if (isProcessing || isProcessingComplete) {
+  if (isProcessing || isProcessingComplete || isGeneratingAggregatedAnalysis) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full px-4">
@@ -284,18 +342,40 @@ export function InterviewComponent({
                   <h2 className="text-xl font-semibold mb-2">
                     {tInterview("interviewComplete")}
                   </h2>
+                  {isGeneratingAggregatedAnalysis && !nextInterviewId && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        {tInterview("generatingAnalysis")}
+                      </p>
+                    </div>
+                  )}
                   <p className="text-gray-600 mb-6">
                     {nextInterviewId
                       ? tInterview("interviewProcessed.nextRound")
                       : tInterview("interviewProcessed.complete")}
                   </p>
-                  <Button asChild>
-                    <Link href={nextUrl}>
-                      {nextInterviewId
-                        ? tInterview("buttons.continueToNext")
-                        : tInterview("buttons.completeApplication")}
-                    </Link>
-                  </Button>
+                  {nextInterviewId ? (
+                    <Button asChild>
+                      <Link href={nextUrl}>
+                        {nextInterviewId
+                          ? tInterview("buttons.continueToNext")
+                          : tInterview("buttons.completeApplication")}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <>
+                      {isGeneratingAggregatedAnalysis ? (
+                        <LoadingSpinner size="sm" className="mx-auto" />
+                      ) : (
+                        <Button
+                          onClick={() => triggerAggregatedAnalysis()}
+                          disabled={isGeneratingAggregatedAnalysis}
+                        >
+                          {tInterview("buttons.completeApplication")}
+                        </Button>
+                      )}
+                    </>
+                  )}
                 </>
               )}
             </div>

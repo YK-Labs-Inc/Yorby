@@ -361,12 +361,17 @@
           "noAnalysis": "Unable to generate analysis for this interview.",
           "contactSupport": "Please contact support at <emailLink>{email}</emailLink> for assistance."
         },
+        "showMore": "Show more",
+        "showLess": "Show less",
+        "interviewDetails": "Interview Analysis",
+        "technical": "Technical",
+        "behavioral": "Behavioral",
         "verdict": {
           "advance": "Advance to Next Round",
           "reject": "Do Not Proceed",
           "borderline": "Further Review Needed"
         },
-        "overallMatch": "Overall Job Match",
+        "overallMatch": "Interview Score",
         "tabs": {
           "overview": "Overview",
           "strengths": "Strengths",
@@ -411,6 +416,25 @@
           "strengths": "Strengths",
           "areasForImprovement": "Areas for Improvement",
           "noDetailedAnalysis": "No detailed analysis available for this coding interview yet."
+        },
+        "aggregatedVerdict": {
+          "title": "Final Hiring Decision",
+          "rationale": "Decision Rationale"
+        },
+        "jobAlignment": {
+          "title": "Job Requirement Match",
+          "matched": "Matched Requirements",
+          "missing": "Missing Requirements",
+          "exceeded": "Exceeded Requirements",
+          "scoreLabel": {
+            "success": "Strong Match",
+            "secondary": "Moderate Match",
+            "destructive": "Weak Match"
+          },
+          "noRequirementsData": "No detailed requirements alignment data available"
+        },
+        "individualRounds": {
+          "title": "Individual Interview Rounds"
         }
       }
     },
@@ -657,7 +681,12 @@
       "continueToNext": "Continue to Next Interview",
       "completeApplication": "Complete Application"
     },
-    "interviewComplete": "Interview Complete!"
+    "interviewComplete": "Interview Complete!",
+    "errors": {
+      "generatingAggregatedAnalysis": "Error generating final analysis",
+      "unknownError": "An unknown error occurred — please try again later or contact support at support@yorby.ai"
+    },
+    "generatingAnalysis": "Saving your interview — don't close this page"
   },
   "codingInterview": {
     "problemStatement": "Problem Statement",

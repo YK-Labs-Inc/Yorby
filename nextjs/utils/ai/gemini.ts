@@ -559,18 +559,18 @@ const processMissingFile = async ({ file }: { file: FileEntry }) => {
   return uploadResponse;
 };
 
+export type GeminiFile = {
+  fileData: {
+    fileUri: string;
+    mimeType: string;
+  };
+};
+
 export const fetchFilesFromGemini = async ({
   files,
 }: {
   files: FileEntry[];
-}): Promise<
-  {
-    fileData: {
-      fileUri: string;
-      mimeType: string;
-    };
-  }[]
-> => {
+}): Promise<GeminiFile[]> => {
   const fileStatuses = await Promise.all(files.map(checkFileExistsInGemini));
   return await Promise.all(
     fileStatuses.map(async ({ file, status }) => {
