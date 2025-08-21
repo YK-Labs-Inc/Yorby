@@ -484,7 +484,7 @@ const CandidateJobAlignmentSchema = z.object({
 
 type CandidateJobAlignment = z.infer<typeof CandidateJobAlignmentSchema>;
 
-export const generateAggregateCandidateJobAlignment = async (
+const generateAggregateCandidateJobAlignment = async (
   candidate: Tables<"company_job_candidates"> & {
     custom_jobs: Tables<"custom_jobs">;
   },
