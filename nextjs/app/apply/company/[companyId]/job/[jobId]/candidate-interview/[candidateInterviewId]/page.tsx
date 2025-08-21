@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
 import { InterviewComponent } from "./InterviewComponent";
+import { GenerateAnalysisClient } from "./GenerateAnalysisClient";
 
 const fetchJobInterviewQuestions = async (interviewId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -18,13 +19,15 @@ const fetchJobInterviewQuestions = async (interviewId: string) => {
 
   const { data: questionDetails, error: questionDetailsError } = await supabase
     .from("company_interview_question_bank")
-    .select(`
+    .select(
+      `
       id, 
       question,
       company_interview_coding_question_metadata (
         time_limit_ms
       )
-    `)
+    `
+    )
     .in(
       "id",
       jobInterviewQuestions.map((question) => question.question_id)
@@ -65,10 +68,33 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
 
   const result = await checkApplicationStatus(companyId, jobId, user.id);
 
-  if (result.hasCompletedInterview) {
+  const {
+    candidateJobInterviews,
+    application,
+    hasGeneratedAggregatedAnalysisForAllInterviews,
+    hasCompletedInterview,
+  } = result;
+
+  if (hasCompletedInterview && hasGeneratedAggregatedAnalysisForAllInterviews) {
     redirect(`/apply/company/${companyId}/job/${jobId}/application/submitted`);
   }
-  const { candidateJobInterviews } = result;
+
+  if (!application?.id) {
+    return notFound();
+  }
+
+  if (
+    hasCompletedInterview &&
+    !hasGeneratedAggregatedAnalysisForAllInterviews
+  ) {
+    return (
+      <GenerateAnalysisClient
+        candidateId={application.id}
+        companyId={companyId}
+        jobId={jobId}
+      />
+    );
+  }
 
   const currentInterview = candidateJobInterviews.find(
     (interview) => interview.id === candidateInterviewId
@@ -97,6 +123,7 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
       nextInterviewId={nextInterviewId}
       jobId={jobId}
       companyId={companyId}
+      candidateId={application?.id}
       interviewType={currentInterview.interview_type}
       questionDetails={questionDetails}
     />

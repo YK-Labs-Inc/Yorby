@@ -42,6 +42,8 @@ export interface AccessValidation {
 export interface CandidateData {
   candidate: Candidate;
   applicationFiles: ApplicationFile[];
+  aggregatedAnalysis: Tables<"candidate_aggregated_interview_analysis"> | null;
+  jobAlignmentDetails: Tables<"candidate_job_alignment_details"> | null;
   interviewResults: {
     candidateJobInterview: CandidateJobInterview | null;
     jobInterviewRecording: CandidateJobInterviewRecording | null;
@@ -49,6 +51,7 @@ export interface CandidateData {
     interviewAnalysis: InterviewAnalysis | null;
     interviewType: Enums<"job_interview_type">;
     codingInterviewAnalysis: CodingInterviewAnalysis | null;
+    interviewTitle: String;
   }[];
 }
 
@@ -161,6 +164,17 @@ export const getInitialCandidates = cache(
             (interview) => interview.status === "completed"
           );
           if (!hasCompletedAllInterviews) {
+            return null;
+          }
+
+          // Check if candidate has aggregated analysis
+          const { data: aggregatedAnalysis } = await supabase
+            .from("candidate_aggregated_interview_analysis")
+            .select("*")
+            .eq("candidate_id", candidate.id)
+            .maybeSingle();
+
+          if (!aggregatedAnalysis) {
             return null;
           }
 
@@ -403,6 +417,23 @@ export const getCandidateData = cache(
         }
       }
 
+      let interviewTitle = "";
+      const { data: interviewTitleData, error: interviewTitleError } =
+        await supabase
+          .from("job_interviews")
+          .select("name")
+          .eq("id", candidateJobInterview.interview_id)
+          .single();
+
+      if (interviewTitleError) {
+        log.error("Error fetching interview title", {
+          interviewTitleError,
+          candidateInterviewId: candidateJobInterview.id,
+        });
+      } else {
+        interviewTitle = interviewTitleData.name;
+      }
+
       interviewResults.push({
         candidateJobInterview,
         jobInterviewRecording,
@@ -410,8 +441,49 @@ export const getCandidateData = cache(
         interviewAnalysis,
         interviewType: candidateJobInterview.job_interviews.interview_type,
         codingInterviewAnalysis,
+        interviewTitle,
       });
     }
+
+    // Fetch aggregated analysis for the candidate
+    const { data: aggregatedAnalysis, error: aggregatedError } = await supabase
+      .from("candidate_aggregated_interview_analysis")
+      .select("*")
+      .eq("candidate_id", candidateId)
+      .maybeSingle();
+
+    if (aggregatedError && aggregatedError.code !== "PGRST116") {
+      log.error("Error fetching aggregated analysis", {
+        aggregatedError,
+        candidateId,
+      });
+    }
+
+    log.info("Fetched aggregated analysis", {
+      candidateId,
+      hasAggregatedAnalysis: !!aggregatedAnalysis,
+      verdict: aggregatedAnalysis?.hiring_verdict,
+    });
+
+    // Fetch job alignment details for the candidate
+    const { data: jobAlignmentDetails, error: alignmentError } = await supabase
+      .from("candidate_job_alignment_details")
+      .select("*")
+      .eq("candidate_id", candidateId)
+      .maybeSingle();
+
+    if (alignmentError) {
+      log.error("Error fetching job alignment details", {
+        alignmentError,
+        candidateId,
+      });
+    }
+
+    log.info("Fetched job alignment details", {
+      candidateId,
+      hasJobAlignmentDetails: !!jobAlignmentDetails,
+      alignmentScore: jobAlignmentDetails?.alignment_score,
+    });
 
     await log.flush();
     return {
@@ -422,6 +494,8 @@ export const getCandidateData = cache(
         candidatePhoneNumber,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
+      aggregatedAnalysis,
+      jobAlignmentDetails,
       interviewResults,
     };
   }
@@ -463,43 +537,83 @@ export async function fetchMoreCandidates(
     return [];
   }
 
-  // Fetch user data for each candidate
-  const candidatesWithUserData = await Promise.all(
-    data.map(async (candidate) => {
-      let candidateName: string | null = null;
-      let candidateEmail: string | null = null;
-      let candidatePhoneNumber: string | null = null;
+  // Fetch user data for each candidate and filter by those with aggregated analysis
+  const candidatesWithUserData = (
+    await Promise.all(
+      data.map(async (candidate) => {
+        // Fetch candidate's interviews
+        const { data: candidateInterviews, error: candidateInterviewsError } =
+          await supabase
+            .from("candidate_job_interviews")
+            .select("*")
+            .eq("candidate_id", candidate.id);
 
-      if (candidate.candidate_user_id) {
-        const { data: userData, error: userError } =
-          await supabaseAdmin.auth.admin.getUserById(
-            candidate.candidate_user_id
-          );
-
-        if (userError) {
-          log.error("Error fetching user data", {
-            userError,
-            candidateUserId: candidate.candidate_user_id,
+        if (candidateInterviewsError) {
+          log.error("Error fetching candidate interviews", {
+            error: candidateInterviewsError,
+            candidateId: candidate.id,
           });
-        } else if (userData && userData.user) {
-          candidateEmail = userData.user.email || null;
-          candidateName =
-            userData.user.user_metadata?.display_name ||
-            userData.user.user_metadata?.full_name ||
-            null;
-          candidatePhoneNumber =
-            userData.user.user_metadata?.phone_number || null;
         }
-      }
 
-      return {
-        ...candidate,
-        candidateName,
-        candidateEmail,
-        candidatePhoneNumber,
-      };
-    })
-  );
+        // Check if candidate has completed all interviews
+        const hasCompletedAllInterviews = candidateInterviews?.every(
+          (interview) => interview.status === "completed"
+        );
+        if (!hasCompletedAllInterviews) {
+          return null;
+        }
+
+        // Check if candidate has aggregated analysis
+        const { data: aggregatedAnalysis } = await supabase
+          .from("candidate_aggregated_interview_analysis")
+          .select("*")
+          .eq("candidate_id", candidate.id)
+          .maybeSingle();
+
+        if (!aggregatedAnalysis) {
+          return null;
+        }
+
+        let candidateName: string | null = null;
+        let candidateEmail: string | null = null;
+        let candidatePhoneNumber: string | null = null;
+
+        if (candidate.candidate_user_id) {
+          const { data: userData, error: userError } =
+            await supabaseAdmin.auth.admin.getUserById(
+              candidate.candidate_user_id
+            );
+
+          if (userError) {
+            log.error("Error fetching user data", {
+              userError,
+              candidateUserId: candidate.candidate_user_id,
+            });
+          } else if (userData && userData.user) {
+            candidateEmail = userData.user.email || null;
+            candidateName =
+              userData.user.user_metadata?.display_name ||
+              userData.user.user_metadata?.full_name ||
+              null;
+            candidatePhoneNumber =
+              userData.user.user_metadata?.phone_number || null;
+          }
+        }
+
+        return {
+          ...candidate,
+          candidateName,
+          candidateEmail,
+          candidatePhoneNumber,
+        };
+      })
+    )
+  ).filter((candidate) => candidate !== null);
+
+  log.info("Filtered candidates with aggregated analysis", {
+    totalCandidates: data.length,
+    filteredCandidates: candidatesWithUserData.length,
+  });
 
   await log.flush();
   return candidatesWithUserData;

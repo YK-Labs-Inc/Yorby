@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/chat-transcript";
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { CodeEditor } from "@/components/ui/code-editor";
+import JobAlignmentDetails from "./JobAlignmentDetails";
+import AggregatedHiringAnalysis from "./AggregatedHiringAnalysis";
 
 interface InterviewAnalysisProps {
   candidateData?: CandidateData;
@@ -54,6 +56,8 @@ export default function InterviewAnalysis({
   const interviewResult = interviewResults?.[selectedInterviewRound];
   const analysis = interviewResult?.interviewAnalysis;
   const hasMultipleRounds = interviewResults && interviewResults.length > 1;
+  const aggregatedAnalysis = candidateData?.aggregatedAnalysis;
+  const jobAlignmentDetails = candidateData?.jobAlignmentDetails;
 
   // Helper functions
   const formatDate = (dateString: string) => {
@@ -217,87 +221,142 @@ export default function InterviewAnalysis({
 
   return (
     <div className="space-y-6 px-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={
-              analysis.hiring_verdict === "ADVANCE"
-                ? "success"
-                : analysis.hiring_verdict === "REJECT"
-                  ? "destructive"
-                  : "secondary"
-            }
-          >
-            {t(
-              `verdict.${(analysis.hiring_verdict || "BORDERLINE").toLowerCase()}`
-            )}
-          </Badge>
+      {/* Summary Cards Section */}
+      {(aggregatedAnalysis || jobAlignmentDetails) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Hiring Decision Card */}
+          {aggregatedAnalysis && (
+            <AggregatedHiringAnalysis
+              aggregatedAnalysis={aggregatedAnalysis}
+              interviewResultsCount={interviewResults?.length || 0}
+            />
+          )}
+
+          {/* Job Alignment Card */}
+          {jobAlignmentDetails && (
+            <JobAlignmentDetails alignmentDetails={jobAlignmentDetails} />
+          )}
         </div>
-        {/* Interview Round Selector - Now always visible */}
-        {hasMultipleRounds && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              {t("interviewRound")}:
-            </span>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  setSelectedInterviewRound(
-                    Math.max(0, selectedInterviewRound - 1)
-                  )
-                }
-                disabled={selectedInterviewRound === 0}
-                className="h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="flex gap-1">
-                {interviewResults.map((_, index) => (
-                  <Button
+      )}
+
+      {/* Interview Rounds Section */}
+      {interviewResults && interviewResults.length > 0 && (
+        <div className="space-y-4">
+          {/* Section Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {aggregatedAnalysis
+                ? t("individualRounds.title")
+                : t("interviewDetails")}
+            </h2>
+          </div>
+
+          {/* Round Selector Tabs */}
+          {hasMultipleRounds && (
+            <div className="border-b border-gray-200">
+              <div className="flex space-x-1 overflow-x-auto pb-px">
+                {interviewResults.map((result, index) => (
+                  <button
                     key={index}
-                    variant={
-                      index === selectedInterviewRound ? "default" : "outline"
-                    }
-                    size="sm"
                     onClick={() => setSelectedInterviewRound(index)}
-                    className="h-8 w-8 p-0"
+                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                      index === selectedInterviewRound
+                        ? "border-blue-600 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                   >
-                    {index + 1}
-                  </Button>
+                    {result.interviewTitle}
+                  </button>
                 ))}
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  setSelectedInterviewRound(
-                    Math.min(
-                      interviewResults.length - 1,
-                      selectedInterviewRound + 1
-                    )
-                  )
-                }
-                disabled={
-                  selectedInterviewRound === interviewResults.length - 1
-                }
-                className="h-8 w-8"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Individual Round Badge and Selector for non-aggregated view */}
+      {!aggregatedAnalysis && analysis && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge
+              variant={
+                analysis.hiring_verdict === "ADVANCE"
+                  ? "success"
+                  : analysis.hiring_verdict === "REJECT"
+                    ? "destructive"
+                    : "secondary"
+              }
+            >
+              {t(
+                `verdict.${(analysis.hiring_verdict || "BORDERLINE").toLowerCase()}`
+              )}
+            </Badge>
           </div>
-        )}
-      </div>
+          {hasMultipleRounds && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                {t("interviewRound")}:
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setSelectedInterviewRound(
+                      Math.max(0, selectedInterviewRound - 1)
+                    )
+                  }
+                  disabled={selectedInterviewRound === 0}
+                  className="h-8 w-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex gap-1">
+                  {interviewResults.map((_, index) => (
+                    <Button
+                      key={index}
+                      variant={
+                        index === selectedInterviewRound ? "default" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => setSelectedInterviewRound(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      {index + 1}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setSelectedInterviewRound(
+                      Math.min(
+                        interviewResults.length - 1,
+                        selectedInterviewRound + 1
+                      )
+                    )
+                  }
+                  disabled={
+                    selectedInterviewRound === interviewResults.length - 1
+                  }
+                  className="h-8 w-8"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {interviewResult?.interviewType === "general" && (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 overflow-x-auto">
             <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
             <TabsTrigger value="questions">{t("tabs.questions")}</TabsTrigger>
             <TabsTrigger value="strengths">{t("tabs.strengths")}</TabsTrigger>
             <TabsTrigger value="concerns">{t("tabs.concerns")}</TabsTrigger>
-            <TabsTrigger value="alignment">{t("tabs.alignment")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 mt-4">
@@ -319,6 +378,7 @@ export default function InterviewAnalysis({
                         <Progress
                           value={analysis.overall_match_score || 0}
                           className="h-2"
+                          enableColor={true}
                         />
                       </div>
 
@@ -329,140 +389,14 @@ export default function InterviewAnalysis({
                       </Alert>
                     </div>
 
-                    {/* Processing info */}
-                    {analysis.created_at && (
-                      <div className="text-xs text-muted-foreground text-right">
-                        {t("processedAt", {
-                          date: new Date(analysis.created_at).toLocaleString(),
-                        })}
-                      </div>
-                    )}
-
-                    <Separator />
-                  </>
-                )}
-
-                {/* Application Files Section */}
-                {applicationFiles && applicationFiles.length > 0 && (
-                  <>
-                    <div>
-                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <FileCheck className="h-4 w-4" />
-                        {tOverview("applicationFiles", {
-                          count: applicationFiles.length,
-                        })}
-                      </h3>
-                      <div className="space-y-2">
-                        {applicationFiles.map(
-                          (file: (typeof applicationFiles)[0]) => (
-                            <div
-                              key={file.id}
-                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 gap-2"
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-2xl flex-shrink-0">
-                                  {getMimeTypeIcon(
-                                    file.user_file?.mime_type || ""
-                                  )}
-                                </span>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-medium break-words">
-                                    {file.user_file?.display_name ||
-                                      tOverview("unknownFile")}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {file.user_file?.mime_type ||
-                                      tOverview("unknownType")}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                {file.user_file?.signed_url && (
-                                  <>
-                                    <Button
-                                      size="icon"
-                                      variant="ghost"
-                                      onClick={() =>
-                                        window.open(
-                                          file.user_file.signed_url,
-                                          "_blank"
-                                        )
-                                      }
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Button>
-                                    <Button size="icon" variant="ghost" asChild>
-                                      <a
-                                        href={file.user_file.signed_url}
-                                        download={file.user_file.display_name}
-                                      >
-                                        <Download className="h-4 w-4" />
-                                      </a>
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
                     <Separator />
                   </>
                 )}
 
                 {/* Interview Section */}
                 <div>
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
-                    <Clock className="h-4 w-4" />
-                    {tOverview("mockInterview")}
-                    {hasMultipleRounds && (
-                      <span className="text-xs font-normal">
-                        (
-                        {t("roundOf", {
-                          current: selectedInterviewRound + 1,
-                          total: interviewResults.length,
-                        })}
-                        )
-                      </span>
-                    )}
-                  </h3>
                   {interviewResult ? (
                     <div className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">
-                              {tOverview("status")}
-                            </span>
-                            <span
-                              className={`text-sm px-2 py-1 rounded-full ${
-                                interviewResult.candidateJobInterview
-                                  ?.status === "completed"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
-                            >
-                              {interviewResult.candidateJobInterview?.status ===
-                              "completed"
-                                ? tOverview("complete")
-                                : interviewResult.candidateJobInterview?.status}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">
-                              {tOverview("created")}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {formatDate(
-                                interviewResult.candidateJobInterview
-                                  ?.created_at!
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Interview Video */}
                       {interviewResult.candidateJobInterview?.status ===
                         "completed" && (
@@ -573,6 +507,7 @@ export default function InterviewAnalysis({
                                 <Progress
                                   value={qa.answer_quality_score}
                                   className="flex-1"
+                                  enableColor={true}
                                 />
                                 <Badge
                                   variant={
@@ -789,73 +724,6 @@ export default function InterviewAnalysis({
               </p>
             )}
           </TabsContent>
-
-          <TabsContent value="alignment" className="space-y-4 mt-4">
-            <div className="space-y-4">
-              {/* Matched Requirements */}
-              {analysis.matched_requirements &&
-                analysis.matched_requirements.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-green-700">
-                      <CheckCircle2 className="h-4 w-4" />
-                      {t("matchedRequirements")}
-                    </h4>
-                    <ul className="space-y-2">
-                      {analysis.matched_requirements.map((req, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm border-l-4 border-l-green-500 pl-3 py-2"
-                        >
-                          <span className="break-words">{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-              {/* Exceeded Requirements */}
-              {analysis.exceeded_requirements &&
-                analysis.exceeded_requirements.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-blue-700">
-                      <TrendingUp className="h-4 w-4" />
-                      {t("exceededRequirements")}
-                    </h4>
-                    <ul className="space-y-2">
-                      {analysis.exceeded_requirements.map((req, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm border-l-4 border-l-blue-500 pl-3 py-2"
-                        >
-                          <span className="break-words">{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-              {/* Missing Requirements */}
-              {analysis.missing_requirements &&
-                analysis.missing_requirements.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-red-700">
-                      <XCircle className="h-4 w-4" />
-                      {t("missingRequirements")}
-                    </h4>
-                    <ul className="space-y-2">
-                      {analysis.missing_requirements.map((req, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm border-l-4 border-l-red-500 pl-3 py-2"
-                        >
-                          <span className="break-words">{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-            </div>
-          </TabsContent>
         </Tabs>
       )}
       {interviewResult?.interviewType === "coding" && (
@@ -883,6 +751,7 @@ export default function InterviewAnalysis({
                         <Progress
                           value={analysis.overall_match_score || 0}
                           className="h-2"
+                          enableColor={true}
                         />
                       </div>
 
