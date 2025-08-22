@@ -1838,6 +1838,9 @@
     }
   },
   "landingPageV6": {
+    "rebrandBanner": {
+      "message": "Perfect Interview is now Yorby.ai!"
+    },
     "hero": {
       "title": "Crush Your Interview. Get The Job Offer.",
       "subtitle": "Make the job search process 10x easier with our suite of tools designed to help you land and ace your interviews",
