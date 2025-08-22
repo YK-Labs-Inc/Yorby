@@ -4,16 +4,47 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import SignInForm from "@/app/interview-prep-landing/components/SignInForm";
 import { useState, useEffect, useRef } from "react";
-import { X, FileText, MessagesSquare, Sparkles, User } from "lucide-react";
+import {
+  X,
+  FileText,
+  MessagesSquare,
+  Sparkles,
+  User,
+  ExternalLink,
+} from "lucide-react";
 import { BottomCTA } from "@/app/components/landing/BottomCTA";
 import Footer from "@/app/components/landing/Footer";
 import OurFeatures from "@/app/components/landing/OurFeatures";
 import { InstagramEmbed, TikTokEmbed } from "react-social-media-embed";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
+const RebrandBanner = () => {
+  const t = useTranslations("landingPageV6.rebrandBanner");
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -50 }}
+      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 relative z-50"
+    >
+      <div className="max-w-[1080px] mx-auto flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 justify-center w-full">
+            <Sparkles className="h-5 w-5" />
+            <span className="font-semibold text-sm md:text-base">
+              {t("message")}
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function LandingPageV6() {
   return (
     <div className="min-h-screen bg-background pr-4">
+      <RebrandBanner />
       <LandingHero />
       <HowItWorksSection />
       <SocialMediaSection />
