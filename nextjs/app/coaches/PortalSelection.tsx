@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Users, GraduationCap } from "lucide-react";
-import SignInForm from "../(auth-pages)/sign-in/SignInForm";
+import SignInForm from "../(candidate-auth-pages)/sign-in/SignInForm";
 import { useTranslations } from "next-intl";
 
 export default function PortalSelection() {

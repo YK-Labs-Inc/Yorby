@@ -27,9 +27,6 @@ export default async function CoachesAuthPage() {
               <Button asChild>
                 <Link href="/sign-in">Sign In</Link>
               </Button>
-              <Button variant="outline" asChild>
-                <Link href="/sign-up">Sign Up</Link>
-              </Button>
             </div>
           </div>
         </div>

@@ -2,16 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import SignInForm from "@/app/interview-prep-landing/components/SignInForm";
 import { useState, useEffect, useRef } from "react";
-import {
-  X,
-  FileText,
-  MessagesSquare,
-  Sparkles,
-  User,
-  ExternalLink,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { X, FileText, MessagesSquare, Sparkles, User } from "lucide-react";
 import { BottomCTA } from "@/app/components/landing/BottomCTA";
 import Footer from "@/app/components/landing/Footer";
 import OurFeatures from "@/app/components/landing/OurFeatures";
@@ -92,7 +86,9 @@ export const LandingHero = () => {
         variants={fadeIn}
         transition={{ duration: 0.5, delay: 0.4 }}
       >
-        <SignInForm />
+        <Link href="/sign-in">
+          <Button size="lg">{t("getStarted")}</Button>
+        </Link>
       </motion.div>
 
       <motion.p

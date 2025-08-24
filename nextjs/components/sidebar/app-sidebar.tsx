@@ -124,18 +124,10 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const searchParams = useSearchParams();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
   const t = useTranslations("sidebar");
   const authError = searchParams?.get("authError");
   const authSuccess = searchParams?.get("authSuccess");
-  const {
-    isLoadingBranding,
-    isYorbyCoaching,
-    isYorbyRecruiting,
-    isCoachProgramsPage,
-    isCoachDashboardPage,
-    isRecruitingAuthPage,
-  } = useMultiTenant();
+  const { isYorbyCoaching } = useMultiTenant();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -144,39 +136,11 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  useEffect(() => {
-    if (isYorbyCoaching) {
-      if (
-        isCoachDashboardPage ||
-        isCoachProgramsPage ||
-        pathname === "/memories"
-      ) {
-        setShowSidebar(true);
-      } else {
-        setShowSidebar(false);
-      }
-    } else if (isYorbyRecruiting) {
-      if (isRecruitingAuthPage || pathname === "/company-onboarding") {
-        setShowSidebar(false);
-      } else {
-        setShowSidebar(true);
-      }
-    } else {
-      setShowSidebar(true);
-    }
-  }, [
-    isYorbyCoaching,
-    isCoachDashboardPage,
-    isCoachProgramsPage,
-    isRecruitingAuthPage,
-  ]);
+  const hideSidebar =
+    pathname.startsWith("/auth") || pathname.startsWith("/sign-in");
 
-  if (!showSidebar) {
+  if (hideSidebar) {
     return null;
-  }
-
-  if (isLoadingBranding) {
-    return <AppSidebarLoading />;
   }
 
   return (

@@ -7,37 +7,29 @@ import { redirect } from "next/navigation";
 
 export async function signInWithOTP(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
-  const redirectTo = formData.get("redirectTo") as string | null;
   const captchaToken = formData.get("captchaToken") as string;
   const supabase = await createSupabaseServerClient();
-  const origin = (await headers()).get("origin");
   const logger = new Logger().with({
     email,
-    redirectTo,
   });
-
-  let options: { captchaToken: string; emailRedirectTo?: string } = {
-    captchaToken,
-  };
-
-  if (redirectTo) {
-    options.emailRedirectTo = `${origin}${redirectTo}`;
-  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options,
+    options: {
+      captchaToken,
+      shouldCreateUser: true,
+    },
   });
 
   if (error) {
-    logger.error("Failed to send magic link", { error });
+    logger.error("Failed to send OTP", { error });
     await logger.flush();
-    return { error: error.message };
+    return { error: error.message, success: false, email: "" };
   }
 
   return {
-    success:
-      "We sent you a sign-in link to your email. Please click it to continue.",
+    email,
+    success: true,
   };
 }
 

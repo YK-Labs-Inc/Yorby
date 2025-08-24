@@ -37,7 +37,7 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader>
+        <CardHeader className="text-center lg:text-left">
           <CardTitle className="text-2xl">{t("recruitingTitle")}</CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
@@ -111,15 +111,6 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-      {/* <div className="text-center text-sm text-muted-foreground">
-        {t("candidateAccountPrompt")}{" "}
-        <Link
-          href="/auth/candidate-auth"
-          className="text-primary underline underline-offset-4 hover:text-primary/80"
-        >
-          {t("candidateAccountLink")}
-        </Link>
-      </div> */}
     </div>
   );
 }

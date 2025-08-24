@@ -3,7 +3,7 @@
 import { FormMessage, Message } from "@/components/form-message";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
-import { signInWithOTP } from "@/app/(auth-pages)/actions";
+import { signInWithOTP } from "@/app/(candidate-auth-pages)/actions";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { Label } from "@/components/ui/label";
