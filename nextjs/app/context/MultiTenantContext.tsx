@@ -65,10 +65,8 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const isYorbyRecruiting = useMemo(
-    () =>
-      hostname.includes("recruiting.yorby.ai") ||
-      process.env.NEXT_PUBLIC_IS_YORBY_RECRUITING === "true",
-    [hostname]
+    () => pathname.startsWith("/recruiting"),
+    [pathname]
   );
 
   const isRecruitingAuthPage = useMemo(
@@ -77,8 +75,8 @@ export const MultiTenantProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const isPerfectInterview = useMemo(
-    () => hostname.includes("perfectinterview.ai"),
-    [hostname]
+    () => pathname.includes("/dashboard"),
+    [pathname]
   );
 
   const isCoachHomePage = useMemo(

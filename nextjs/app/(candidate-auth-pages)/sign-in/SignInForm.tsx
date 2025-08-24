@@ -1,22 +1,24 @@
 "use client";
 
 import { FormMessage, Message } from "@/components/form-message";
+import { signInWithOTP, verifyOTP } from "../actions";
+import { useTranslations } from "next-intl";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/submit-button";
-import { signInWithOTP, verifyOTP } from "@/app/(candidate-auth-pages)/actions";
-import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
-import { Label } from "@/components/ui/label";
-import { Turnstile } from "@marsidev/react-turnstile";
 import { useActionState, useState, useEffect } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Button } from "@/components/ui/button";
+
+interface SignInFormProps {
+  redirectUrl?: string;
+}
 
 type AuthPhase = "email" | "otp";
 
-export default function SignUpForm() {
-  const t = useTranslations("purchase");
-  const authT = useTranslations("auth.candidateAuth");
-  const pathname = usePathname();
+export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
+  const signInT = useTranslations("auth.candidateAuth");
   const [phase, setPhase] = useState<AuthPhase>("email");
 
   // State for email submission
@@ -35,6 +37,7 @@ export default function SignUpForm() {
   });
 
   const [captchaToken, setCaptchaToken] = useState<string>("");
+  const { isYorbyCoaching } = useMultiTenant();
 
   // Determine which form message to show based on current phase
   let formMessage: Message | undefined;
@@ -56,70 +59,75 @@ export default function SignUpForm() {
   }, [emailState]);
 
   return (
-    <div className="space-y-6">
+    <div>
       {phase === "email" ? (
         // Email submission form
-        <>
+        <form action={emailAction} className="space-y-6" data-phase="email">
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">{t("unauthenticated.title")}</h1>
-            <p className="text-muted-foreground">
-              {t("unauthenticated.description")}
-            </p>
+            <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
+            <p className="text-muted-foreground">{signInT("description")}</p>
           </div>
 
-          <form action={emailAction} className="space-y-4" data-phase="email">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("unauthenticated.form.email.label")}</Label>
+              <Label htmlFor="email">{signInT("email.label")}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder={t("unauthenticated.form.email.placeholder")}
+                placeholder={signInT("email.placeholder")}
                 required
                 className="bg-background"
               />
             </div>
             <input type="hidden" name="captchaToken" value={captchaToken} />
-            {pathname && <input type="hidden" name="redirectTo" value={pathname} />}
+            <input
+              type="hidden"
+              name="redirectTo"
+              value={
+                redirectUrl ||
+                (isYorbyCoaching ? "/coaches/auth" : "/onboarding")
+              }
+            />
             <SubmitButton
-              pendingText={authT("sending")}
               disabled={!captchaToken || emailPending}
+              pendingText={signInT("sending")}
               type="submit"
               className="w-full"
             >
-              {authT("sendOtp")}
+              {signInT("sendOtp")}
             </SubmitButton>
             {formMessage && <FormMessage message={formMessage} />}
-            <div className="mt-4 flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) => {
-                  setCaptchaToken(token);
-                }}
-              />
-            </div>
-          </form>
-        </>
+          </div>
+          <div className="mt-4">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => {
+                setCaptchaToken(token);
+              }}
+            />
+          </div>
+        </form>
       ) : (
         // OTP verification form
-        <>
+        <form action={otpAction} className="space-y-6" data-phase="otp">
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">
-              {authT("otp.title", { defaultValue: "Enter verification code" })}
-            </h1>
+            <h2 className="text-2xl font-bold text-foreground">
+              Enter verification code
+            </h2>
             <p className="text-muted-foreground">
-              {authT("otp.description", { email: emailState.email })}
+              {signInT("otp.description", { email: emailState.email })}
             </p>
           </div>
 
-          <form action={otpAction} className="space-y-4" data-phase="otp">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="token">{authT("otp.label")}</Label>
+              <Label htmlFor="token">{signInT("otp.label")}</Label>
               <Input
                 id="token"
                 name="token"
                 type="text"
-                placeholder={authT("otp.placeholder")}
+                placeholder={signInT("otp.placeholder")}
                 required
                 className="bg-background text-center text-2xl tracking-wider"
                 maxLength={6}
@@ -129,14 +137,21 @@ export default function SignUpForm() {
               />
             </div>
             <input type="hidden" name="email" value={emailState.email} />
-            {pathname && <input type="hidden" name="redirectTo" value={pathname} />}
+            <input
+              type="hidden"
+              name="redirectTo"
+              value={
+                redirectUrl ||
+                (isYorbyCoaching ? "/coaches/auth" : "/onboarding")
+              }
+            />
             <SubmitButton
               disabled={otpPending}
-              pendingText={authT("verifying")}
+              pendingText={signInT("verifying")}
               type="submit"
               className="w-full bg-[hsl(var(--chart-2))] hover:bg-[hsl(var(--chart-2)/0.9)] text-white"
             >
-              {authT("verify")}
+              {signInT("verify")}
             </SubmitButton>
             {formMessage && <FormMessage message={formMessage} />}
             <Button
@@ -147,10 +162,10 @@ export default function SignUpForm() {
                 setPhase("email");
               }}
             >
-              {authT("backToEmail")}
+              {signInT("backToEmail")}
             </Button>
-          </form>
-        </>
+          </div>
+        </form>
       )}
     </div>
   );

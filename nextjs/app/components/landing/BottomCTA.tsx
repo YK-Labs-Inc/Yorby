@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import SignInForm from "@/app/interview-prep-landing/components/SignInForm";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const BottomCTA = () => {
   const t = useTranslations("LandingPageV5.bottomCTA");
+  const t2 = useTranslations("landingPageV6.hero");
 
   return (
     <motion.div
@@ -20,7 +22,9 @@ export const BottomCTA = () => {
       <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
         {t("description")}
       </p>
-      <SignInForm />
+      <Link href="/sign-in">
+        <Button size="lg">{t2("getStarted")}</Button>
+      </Link>
     </motion.div>
   );
 };
