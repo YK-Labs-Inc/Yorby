@@ -2,9 +2,6 @@ import { Building2, Users, TrendingUp, Zap, Briefcase } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { posthog } from "@/utils/tracking/serverUtils";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
   children,
@@ -12,24 +9,7 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   const t = await getTranslations("auth.layout");
-  
-  // Check if recruiter portal is enabled
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  
-  let isRecruiterPortalEnabled = false;
-  if (user) {
-    isRecruiterPortalEnabled = Boolean(
-      await posthog.isFeatureEnabled("enable-recruiter-portal", user.id)
-    );
-  }
-  
-  // Redirect if user doesn't have access to recruiter portal
-  if (!isRecruiterPortalEnabled) {
-    redirect("/sign-in");
-  }
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Left Panel - Branding */}
