@@ -7,18 +7,7 @@ const Header = () => {
 
   return (
     <Link href={baseUrl} className="flex items-center">
-      {isYorbyCoaching ? (
-        <H3>Yorby</H3>
-      ) : (
-        <>
-          <img
-            src="/assets/dark-logo.png"
-            alt="Perfect Interview"
-            className="w-8 h-8 mr-2"
-          />
-          <H3>{"Perfect Interview"}</H3>
-        </>
-      )}
+      {isYorbyCoaching ? <H3>Yorby</H3> : <H3>{"Yorby"}</H3>}
     </Link>
   );
 };
