@@ -136,8 +136,7 @@ export function AppSidebar({
     }
   }, [authError, authSuccess]);
 
-  const hideSidebar =
-    pathname.startsWith("/auth") || pathname.startsWith("/sign-in");
+  const hideSidebar = pathname === "/" || pathname.startsWith("/sign-in");
 
   if (hideSidebar) {
     return null;
