@@ -1,5 +1,16 @@
-import { LoginForm } from '@/components/login-form'
+import { LoginForm } from "@/components/login-form";
+import { getServerUser } from "@/utils/auth/server";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <LoginForm />
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const redirectUrl = (await searchParams).redirect;
+  const user = await getServerUser();
+  if (user) {
+    redirect(`${redirectUrl || "/auth-redirect"}`);
+  }
+  return <LoginForm />;
 }
