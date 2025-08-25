@@ -1,0 +1,302 @@
+---
+# Yorby Recruiter Feature Development Guidelines
+
+## Overview
+This document outlines the development patterns and best practices for the Yorby recruiter feature, based on the existing candidates page architecture. Follow these guidelines when building or modifying recruiter-facing features.
+
+## Architecture Patterns
+
+### 1. File Structure
+- Place recruiter pages under `/app/recruiting/companies/[id]/jobs/[jobId]/`
+- Use dynamic route segments for company and job IDs
+- Organize components in the same directory as the page they belong to
+
+### 2. React Server Components (RSC) Strategy
+- **Page components**: Always use async server components for pages
+- **Data fetching**: Perform all initial data fetching server-side
+- **Client components**: Use `"use client"` only for interactive features (search, infinite scroll, tabs)
+- **Suspense boundaries**: Wrap client components that may have delayed data
+
+### 3. Data Fetching Patterns
+
+#### Server-Side Data Fetching
+```typescript
+// Always use parallel fetching with Promise.all
+const [accessData, candidates, candidateDetails] = await Promise.all([
+  validateAccess(companyId, jobId),
+  getInitialCandidates(companyId, jobId, limit),
+  candidateId ? getCandidateData(candidateId) : Promise.resolve(null)
+]);
+```
+
+#### Caching Strategy
+```typescript
+// Cache server actions for deduplication
+export const getDataFunction = cache(
+  async (params): Promise<ReturnType> => {
+    // Implementation
+  }
+);
+```
+
+#### Access Control Pattern
+```typescript
+// Always validate access first
+const supabase = await createSupabaseServerClient();
+const { data: { user } } = await supabase.auth.getUser();
+if (!user) redirect("/sign-in");
+
+// Check company membership
+const { data: membership } = await supabase
+  .from("company_members")
+  .select("role")
+  .eq("company_id", companyId)
+  .eq("user_id", user.id)
+  .single();
+if (!membership) redirect("/recruiting");
+```
+
+### 4. Component Patterns
+
+#### Two-Panel Layout
+```typescript
+<div className="flex h-full w-full shadow-sm rounded-lg">
+  {/* Left Sidebar - List */}
+  <div className="w-1/4 max-w-[320px] min-w-[240px] flex-shrink-0">
+    <CandidatesList />
+  </div>
+  
+  {/* Right Content - Details */}
+  <div className="flex-1 min-w-0 overflow-hidden">
+    <CandidateOverview />
+  </div>
+</div>
+```
+
+#### Loading States
+```typescript
+<Suspense fallback={<ComponentSkeleton />}>
+  {data ? (
+    <Component data={data} />
+  ) : (
+    <EmptyState />
+  )}
+</Suspense>
+```
+
+### 5. Client Component Patterns
+
+#### URL-Based State Management
+```typescript
+const handleSelection = (id: string) => {
+  const params = new URLSearchParams(searchParams);
+  params.set("selectedId", id);
+  router.push(`?${params.toString()}`, { scroll: false });
+};
+```
+
+#### Infinite Scroll Implementation
+```typescript
+// Use IntersectionObserver for infinite scroll
+const observerRef = useRef<IntersectionObserver | null>(null);
+const lastItemRef = useRef<HTMLDivElement | null>(null);
+
+useEffect(() => {
+  observerRef.current = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMore && !isLoading) {
+        loadMore();
+      }
+    },
+    { threshold: 0.1 }
+  );
+  // ... setup and cleanup
+}, [loadMore, hasMore, isLoading]);
+```
+
+### 6. Data Filtering Rules
+
+#### Candidate Visibility
+Only show candidates who have:
+1. Completed all assigned interviews
+2. Generated aggregated analysis
+3. This filtering happens server-side in data fetching functions
+
+```typescript
+// Check completion status
+const hasCompletedAllInterviews = candidateInterviews?.every(
+  (interview) => interview.status === "completed"
+);
+if (!hasCompletedAllInterviews) return null;
+
+// Check for aggregated analysis
+const { data: aggregatedAnalysis } = await supabase
+  .from("candidate_aggregated_interview_analysis")
+  .select("*")
+  .eq("candidate_id", candidate.id)
+  .maybeSingle();
+if (!aggregatedAnalysis) return null;
+```
+
+### 7. UI Component Standards
+
+#### Use Shadcn UI Components
+- Card, Tabs, Badge, Progress, Button, Alert, Skeleton
+- Maintain consistent spacing: `space-y-6` for sections, `space-y-4` for subsections
+- Use semantic color variants: `success` (green), `destructive` (red), `secondary` (gray)
+
+#### Custom Components Required
+- `ChatTranscript`: For interview conversations
+- `RichTextDisplay`: For HTML content
+- `CodeEditor`: For syntax-highlighted code (coding interviews)
+
+### 8. External Service Integration
+
+#### Mux Video Player
+```typescript
+{playbackId && (
+  <MuxPlayer
+    playbackId={playbackId}
+    className="w-full rounded-lg"
+  />
+)}
+```
+
+#### Supabase Storage
+```typescript
+// Generate signed URLs with 1-hour expiry
+const { data: signedUrlData } = await supabase.storage
+  .from(bucketName)
+  .createSignedUrl(filePath, 3600);
+```
+
+### 9. Internationalization
+
+#### Always Use Translations
+```typescript
+const t = await getTranslations("apply.recruiting.section");
+// Use: t("key") or t("key", { param: value })
+```
+
+#### Translation Key Organization
+```
+apply.recruiting.candidates.page
+apply.recruiting.candidates.list
+apply.recruiting.candidates.analysis
+apply.recruiting.candidates.overview
+```
+
+### 10. Performance Requirements
+
+#### Pagination
+- Initial load: 10 items maximum
+- Lazy load additional items on scroll
+- Filter data server-side, not client-side
+
+#### Parallel Data Fetching
+- Always use Promise.all() for multiple queries
+- Don't await sequentially unless data dependencies exist
+
+#### Caching
+- Use React's cache() for server functions
+- Set appropriate cache duration (60 seconds default)
+
+### 11. Security Requirements
+
+#### Access Control
+1. Always validate user authentication
+2. Verify company membership
+3. Check resource ownership
+4. Use redirect() for unauthorized access
+
+#### Data Protection
+- Use admin Supabase client only for user metadata access
+- Generate time-limited signed URLs for files
+- Never expose direct file paths
+
+### 12. Error Handling
+
+#### Logging
+```typescript
+const log = new Logger().with({
+  functionName: "functionName",
+  ...contextData
+});
+// Always flush logs
+await log.flush();
+```
+
+#### User-Facing Errors
+- Provide meaningful error messages
+- Include support contact for critical errors
+- Use graceful fallbacks (empty states, error boundaries)
+
+### 13. Type Safety
+
+#### Database Types
+```typescript
+import { Tables, Enums } from "@/utils/supabase/database.types";
+
+type Candidate = Tables<"company_job_candidates">;
+type InterviewStatus = Enums<"interview_status">;
+```
+
+#### Custom Type Definitions
+Define types for complex JSON fields from database views:
+```typescript
+interface TypedInterviewAnalysis {
+  strengths: Strength[] | null;
+  concerns: Concern[] | null;
+  question_analysis: QuestionAnalysis[] | null;
+}
+```
+
+### 14. Testing Considerations
+
+#### Key Scenarios to Test
+1. Empty states (no candidates, no analysis)
+2. Loading states (skeletons, spinners)
+3. Error states (failed fetches, missing data)
+4. Permission denials (unauthorized access)
+5. Pagination edge cases
+6. Search functionality
+
+### 15. Accessibility
+
+#### Required Attributes
+- Proper heading hierarchy (h1 → h2 → h3)
+- ARIA labels for interactive elements
+- Keyboard navigation support
+- Focus management for modals/tabs
+
+## Common Gotchas
+
+1. **Auto-selection**: Always auto-select the first item in lists to avoid empty states
+2. **Signed URLs**: Remember they expire in 1 hour, handle gracefully
+3. **Video Processing**: Mux videos may not be immediately available, show processing state
+4. **Complex JSON**: Database views return complex JSON that needs type definitions
+5. **Filtering**: Candidate filtering (completed + analyzed) must happen server-side
+6. **Search params**: Use URLSearchParams for all client-side navigation
+
+## File Naming Conventions
+
+- Server actions: `actions.ts`
+- Type definitions: `types.ts`
+- Loading components: `*Skeleton.tsx`
+- Empty states: `EmptyState.tsx`
+- Section components: `*Section.tsx`
+
+## Development Workflow
+
+1. Start with server component and data fetching
+2. Add loading states (Suspense + Skeleton)
+3. Implement client interactivity where needed
+4. Add error handling and empty states
+5. Ensure proper TypeScript types
+6. Add internationalization
+7. Test access control and edge cases
+
+description:
+globs:
+alwaysApply: false
+---
