@@ -69,7 +69,7 @@ export default function OTPLoginForm({
           <CardDescription>
             {phase === "email"
               ? t("description")
-              : `We've sent a verification code to ${emailState.email}`}
+              : t("otp.verificationSent", { email: emailState.email })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -105,7 +105,7 @@ export default function OTPLoginForm({
                   className="w-full"
                   disabled={emailPending || !captchaToken}
                 >
-                  {emailPending ? "Sending code..." : "Send verification code"}
+                  {emailPending ? t("otp.sendingCode") : t("otp.sendCode")}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
@@ -123,12 +123,12 @@ export default function OTPLoginForm({
             <form action={otpAction}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="token">Verification code</Label>
+                  <Label htmlFor="token">{t("otp.verificationCodeLabel")}</Label>
                   <Input
                     id="token"
                     name="token"
                     type="text"
-                    placeholder="Enter 6-digit code"
+                    placeholder={t("otp.verificationCodePlaceholder")}
                     required
                     className="text-center text-2xl tracking-wider"
                     maxLength={6}
@@ -143,7 +143,7 @@ export default function OTPLoginForm({
                 <input type="hidden" name="email" value={emailState.email} />
                 <input type="hidden" name="redirectTo" value={redirectUrl} />
                 <Button type="submit" className="w-full" disabled={otpPending}>
-                  {otpPending ? "Verifying..." : "Verify code"}
+                  {otpPending ? t("otp.verifying") : t("otp.verifyCode")}
                 </Button>
                 <Button
                   type="button"
@@ -153,7 +153,7 @@ export default function OTPLoginForm({
                     setPhase("email");
                   }}
                 >
-                  Back to email
+                  {t("otp.backToEmail")}
                 </Button>
               </div>
             </form>
