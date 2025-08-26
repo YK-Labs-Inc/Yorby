@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/login-form";
+import OTPLoginForm from "./OTPLoginForm";
 import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 
@@ -12,5 +12,5 @@ export default async function Page({
   if (user) {
     redirect(`${redirectUrl || "/auth-redirect"}`);
   }
-  return <LoginForm />;
+  return <OTPLoginForm />;
 }
