@@ -36,7 +36,11 @@ export function RecruitingAppSidebar({ user }: RecruitingAppSidebarProps) {
   const posthog = usePostHog();
   const pathname = usePathname();
 
-  if (pathname.startsWith("/auth") || pathname.startsWith("/apply")) {
+  if (
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/apply") ||
+    pathname.startsWith("/recruiting-onboarding")
+  ) {
     return null;
   }
 

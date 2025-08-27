@@ -2356,6 +2356,24 @@ export type Database = {
           },
         ]
       }
+      recruiting_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          stripe_customer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          stripe_customer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string
+        }
+        Relationships: []
+      }
       referral_codes: {
         Row: {
           id: string
