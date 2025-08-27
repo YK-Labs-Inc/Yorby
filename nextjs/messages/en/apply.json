@@ -103,7 +103,9 @@
     "errors": {
       "noUserOrEmail": "No user or email found",
       "resendFailed": "Failed to resend confirmation email",
-      "captchaRequired": "Please complete the captcha verification"
+      "captchaRequired": "Please complete the captcha verification",
+      "genericError": "Something went wrong. Please try again.",
+      "missingParams": "Missing required parameters"
     },
     "resendForm": {
       "sendingButton": "Sending...",

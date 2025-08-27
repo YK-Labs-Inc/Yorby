@@ -2,19 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { resendConfirmationEmail } from "./actions";
 
-interface ResendEmailFormProps {
-  resendAction: (
-    prevState: any,
-    formData: FormData
-  ) => Promise<{ success?: boolean; error?: string }>;
-  resendButtonText: string;
-}
-
-function SubmitButton({ text }: { text: string }) {
+function SubmitButton({ disabled, text }: { disabled: boolean; text: string }) {
   const { pending } = useFormStatus();
   const t = useTranslations("apply.confirmEmail.resendForm");
 
@@ -23,7 +16,7 @@ function SubmitButton({ text }: { text: string }) {
       type="submit"
       variant="outline"
       className="w-full"
-      disabled={pending}
+      disabled={pending || disabled}
     >
       {pending ? t("sendingButton") : text}
     </Button>
@@ -31,16 +24,28 @@ function SubmitButton({ text }: { text: string }) {
 }
 
 export default function ResendEmailForm({
-  resendAction,
-  resendButtonText,
-}: ResendEmailFormProps) {
+  companyId,
+  jobId,
+  interviewId,
+}: {
+  companyId: string;
+  jobId: string;
+  interviewId: string;
+}) {
   const [captchaToken, setCaptchaToken] = useState<string>("");
-  const [state, formAction] = useFormState(resendAction, null);
-  const t = useTranslations("apply.confirmEmail.resendForm");
+  const [state, formAction] = useActionState(resendConfirmationEmail, {
+    error: null,
+    success: false,
+  });
+  const t = useTranslations("apply");
+  const resendButtonText = t("confirmEmail.resendButton");
 
   return (
     <form action={formAction} className="w-full space-y-4">
       <input type="hidden" name="captchaToken" value={captchaToken} />
+      <input type="hidden" name="companyId" value={companyId} />
+      <input type="hidden" name="jobId" value={jobId} />
+      <input type="hidden" name="interviewId" value={interviewId} />
 
       <div className="flex justify-center">
         <Turnstile
@@ -57,11 +62,11 @@ export default function ResendEmailForm({
 
       {state?.success && (
         <div className="text-sm text-green-600 text-center">
-          {t("successMessage")}
+          {t("confirmEmail.resendForm.successMessage")}
         </div>
       )}
 
-      <SubmitButton text={resendButtonText} />
+      <SubmitButton text={resendButtonText} disabled={!captchaToken} />
     </form>
   );
 }

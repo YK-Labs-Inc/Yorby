@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Mail } from "lucide-react";
 import Link from "next/link";
-import { headers } from "next/headers";
 import ResendEmailForm from "./ResendEmailForm";
+import { Separator } from "@/components/ui/separator";
+import EmailVerificationComponent from "./EmailVerificationComponent";
 
 interface PageProps {
   params: Promise<{
@@ -52,6 +53,12 @@ export default async function ConfirmEmailPage({
     redirect(`/apply/company/${companyId}/job/${jobId}`);
   }
 
+  if (!user.is_anonymous) {
+    redirect(
+      `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
+    );
+  }
+
   // Fetch company info
   const { data: company, error: companyError } = await supabase
     .from("companies")
@@ -78,65 +85,6 @@ export default async function ConfirmEmailPage({
   }
 
   await logger.flush();
-
-  // Server action to resend confirmation email
-  async function resendConfirmationEmail(prevState: any, formData: FormData) {
-    "use server";
-    const captchaToken = formData.get("captchaToken") as string;
-    const supabase = await createSupabaseServerClient();
-    const t = await getTranslations("apply.confirmEmail.errors");
-    const logger = new Logger().with({
-      function: "resendConfirmationEmail",
-    });
-
-    try {
-      if (!captchaToken) {
-        throw new Error(t("captchaRequired"));
-      }
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error(t("noUserOrEmail"));
-      }
-
-      // For anonymous users, use the email from user metadata
-      const userEmail = user.new_email;
-      if (!userEmail) {
-        throw new Error(t("noUserOrEmail"));
-      }
-
-      const origin = (await headers()).get("origin");
-      const { error } = await supabase.auth.updateUser(
-        {
-          email: userEmail,
-        },
-        {
-          emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`,
-        }
-      );
-
-      if (error) {
-        logger.error("Failed to resend confirmation email", { error });
-        throw error;
-      }
-
-      logger.info("Confirmation email resent successfully");
-      return { success: true };
-    } catch (error) {
-      logger.error("Error in resendConfirmationEmail", { error });
-      return {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to resend confirmation email",
-      };
-    } finally {
-      await logger.flush();
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -168,10 +116,16 @@ export default async function ConfirmEmailPage({
               </p>
             </div>
 
+            <EmailVerificationComponent
+              redirectUrl={`/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`}
+            />
+
+            <Separator />
             <div className="space-y-4">
               <ResendEmailForm
-                resendAction={resendConfirmationEmail}
-                resendButtonText={t("confirmEmail.resendButton")}
+                companyId={companyId}
+                jobId={jobId}
+                interviewId={interviewId}
               />
 
               <div className="text-center text-sm text-gray-500">
