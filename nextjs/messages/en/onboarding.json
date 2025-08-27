@@ -1,0 +1,244 @@
+{
+  "recruitingOnboarding": {
+    "steps": {
+      "problem": {
+        "title": "The Recruiting Challenge",
+        "subtitle": "Why 87% of great candidates never make it past the resume screen",
+        "headline": "You're missing your best hires",
+        "subheadline": "...and it's costing you more than you think",
+        "stats": {
+          "applicantsPerRole": {
+            "number": "250+",
+            "label": "Average applicants per role"
+          },
+          "screeningTime": {
+            "number": "23 seconds",
+            "label": "Time spent per resume"
+          },
+          "missedTalent": {
+            "number": "73%",
+            "label": "Qualified candidates rejected"
+          }
+        },
+        "painPoints": {
+          "point1": {
+            "title": "Time Crunch Reality",
+            "description": "With hundreds of applicants, you have minutes—not hours—to find the right fit"
+          },
+          "point2": {
+            "title": "Skills Gap Blindspot",
+            "description": "Recruiters can't accurately assess technical skills they weren't trained in"
+          },
+          "point3": {
+            "title": "Resume Roulette",
+            "description": "Great candidates with imperfect resumes get overlooked every single day"
+          }
+        },
+        "cta": "See How Yorby Solves This",
+        "assetPlaceholder": "Video or animation showing overwhelmed recruiter with pile of resumes"
+      },
+      "solution": {
+        "title": "Meet Yorby",
+        "subtitle": "Your AI-powered recruiting partner",
+        "headline": "Screen every candidate. Miss no one.",
+        "subheadline": "AI interviews that give every applicant a fair shot—and give you back your time",
+        "features": {
+          "feature1": {
+            "title": "Automated First-Round Interviews",
+            "description": "Every candidate gets a personalized AI interview based on your exact requirements"
+          },
+          "feature2": {
+            "title": "Beyond the Resume",
+            "description": "Candidates showcase their actual skills and experience through conversation"
+          },
+          "feature3": {
+            "title": "Smart Scoring & Insights",
+            "description": "AI analyzes responses and ranks candidates based on job fit—not just keywords"
+          }
+        },
+        "proofPoint": "Companies using Yorby discover 3x more qualified candidates hiding in their applicant pool",
+        "cta": "See It In Action",
+        "assetPlaceholder": "Interactive demo or product tour video"
+      },
+      "howItWorks": {
+        "title": "How Yorby Works",
+        "subtitle": "From job posting to perfect hire in 3 simple steps",
+        "step1": {
+          "number": "1",
+          "title": "Create Your Interview",
+          "description": "Post your job and add custom interview questions tailored to the role",
+          "detail": "Takes less than 5 minutes",
+          "assetPlaceholder": "Screenshot of interview creation interface"
+        },
+        "step2": {
+          "number": "2",
+          "title": "Candidates Self-Interview",
+          "description": "Applicants complete AI-powered interviews at their convenience",
+          "detail": "Available 24/7 in multiple languages",
+          "assetPlaceholder": "Mock interview interface or candidate experience video"
+        },
+        "step3": {
+          "number": "3",
+          "title": "Review Top Matches",
+          "description": "Access scored candidates with interview transcripts and insights",
+          "detail": "Focus only on pre-qualified talent",
+          "assetPlaceholder": "Dashboard showing candidate rankings and insights"
+        },
+        "cta": "Start Screening Smarter"
+      },
+      "benefits": {
+        "title": "The Yorby Advantage",
+        "subtitle": "Transform your recruiting process",
+        "headline": "Better hires, faster process, happier teams",
+        "metrics": {
+          "metric1": {
+            "value": "90%",
+            "label": "Reduction in screening time",
+            "description": "From days to hours"
+          },
+          "metric2": {
+            "value": "5x",
+            "label": "More qualified candidates",
+            "description": "Surface hidden gems"
+          },
+          "metric3": {
+            "value": "68%",
+            "label": "Improved candidate experience",
+            "description": "Fair chance for everyone"
+          }
+        },
+        "cta": "Join Leading Companies",
+        "assetPlaceholder": "Customer logos or success metrics visualization"
+      },
+      "comparison": {
+        "title": "Yorby vs Traditional Recruiting",
+        "subtitle": "See the difference",
+        "traditional": {
+          "title": "Traditional Recruiting",
+          "points": {
+            "point1": "❌ 23 seconds per resume review",
+            "point2": "❌ Bias toward keyword matches",
+            "point3": "❌ Great candidates slip through",
+            "point4": "❌ Inconsistent screening quality",
+            "point5": "❌ Limited to business hours",
+            "point6": "❌ No domain expertise for technical roles"
+          }
+        },
+        "yorby": {
+          "title": "With Yorby",
+          "points": {
+            "point1": "✅ Every candidate gets interviewed",
+            "point2": "✅ Skills-based assessment",
+            "point3": "✅ Discover hidden talent",
+            "point4": "✅ Consistent, fair evaluation",
+            "point5": "✅ 24/7 availability",
+            "point6": "✅ AI understands all domains"
+          }
+        },
+        "bottomLine": "Stop gambling on resumes. Start making data-driven hiring decisions.",
+        "cta": "Switch to Smart Recruiting",
+        "assetPlaceholder": "Side-by-side comparison infographic"
+      },
+      "socialProof": {
+        "title": "Trusted by Forward-Thinking Companies",
+        "subtitle": "Join 500+ companies revolutionizing their hiring",
+        "stats": {
+          "stat1": {
+            "number": "2M+",
+            "label": "Candidates Interviewed"
+          },
+          "stat2": {
+            "number": "50K+",
+            "label": "Successful Hires"
+          },
+          "stat3": {
+            "number": "4.9/5",
+            "label": "Recruiter Rating"
+          }
+        },
+        "companies": {
+          "title": "Companies achieving better hiring outcomes with Yorby"
+        },
+        "caseStudy": {
+          "title": "Case Study",
+          "company": "Global Finance Inc.",
+          "result": "Reduced time-to-hire by 65% while improving quality of hire scores by 40%",
+          "link": "Read Full Story"
+        },
+        "cta": "Start Your Success Story",
+        "assetPlaceholder": "Company logos carousel and success metrics"
+      },
+      "pricing": {
+        "title": "Choose Your Hiring Superpower",
+        "subtitle": "Start free and scale when you're ready. No hidden fees, no setup costs.",
+        "guarantee": "30-day money-back guarantee",
+        "loadingTitle": "Loading pricing options...",
+        "errorTitle": "Failed to load pricing",
+        "errorMessage": "Please try refreshing the page or contact support if the issue persists.",
+        "freeTier": {
+          "name": "Free Plan",
+          "price": "$0",
+          "period": "/month",
+          "description": "Perfect for small teams just getting started",
+          "cardDescription": "Perfect for small teams just getting started with AI recruiting",
+          "whatsIncluded": "What's included:",
+          "features": [
+            "Unlimited job listings",
+            "20 candidate interviews per month",
+            "Advanced AI scoring & insights",
+            "Email support"
+          ],
+          "cta": "Start Free Plan",
+          "noCreditCard": "No credit card required"
+        },
+        "professionalTier": {
+          "name": "Professional Plan",
+          "defaultPrice": "99",
+          "period": "month",
+          "description": "Scale your hiring with unlimited interviews",
+          "cardDescription": "Scale your hiring with unlimited AI-powered interviews",
+          "everythingInFree": "Everything in Free, plus:",
+          "features": [
+            "Unlimited candidate interviews",
+            "Priority support with the cofounders",
+            "Team collaboration features"
+          ],
+          "cta": "Start Professional Plan",
+          "cancelAnytime": "Cancel anytime • 30-day money back guarantee",
+          "mostPopular": "Most Popular"
+        },
+        "valueProposition": {
+          "title": "Why teams choose Yorby Professional",
+          "metrics": {
+            "speed": {
+              "value": "10x",
+              "label": "Faster screening process"
+            },
+            "timeReduction": {
+              "value": "87%",
+              "label": "Less time per hire"
+            },
+            "candidateIncrease": {
+              "value": "3x",
+              "label": "More qualified candidates"
+            }
+          }
+        },
+        "cta": "Get Started",
+        "assetPlaceholder": "Interactive pricing calculator or comparison table"
+      }
+    },
+    "navigation": {
+      "next": "Next",
+      "previous": "Back",
+      "skip": "Skip",
+      "close": "Close"
+    },
+    "errors": {
+      "subscriptionNotConfigured": "Recruiting subscription not configured",
+      "failedToFetchProducts": "Failed to fetch products",
+      "genericError": "Sorry, something went wrong. Please try again.",
+      "signInRequired": "Please sign in to continue"
+    }
+  }
+}

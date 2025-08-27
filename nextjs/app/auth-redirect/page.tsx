@@ -1,15 +1,23 @@
+import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
-
 export default async function ProtectedPage() {
-  const supabase = await createClient();
+  const user = await getServerUser();
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
+  if (!user) {
     redirect("/auth/login");
   }
 
-  // Redirect to recruiting dashboard
-  redirect("/recruiting");
+  const supabase = await createSupabaseServerClient();
+  const { data: authUser } = await supabase.auth.getUser();
+
+  const completedOnboarding =
+    authUser?.user?.user_metadata?.completed_onboarding_funnel;
+
+  if (completedOnboarding) {
+    redirect("/recruiting");
+  } else {
+    redirect("/recruiting-onboarding");
+  }
 }

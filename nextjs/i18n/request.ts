@@ -41,10 +41,21 @@ export default getRequestConfig(async () => {
 
   let companyMessages = {};
   try {
-    companyMessages = (await import(`../messages/${locale}/company.json`)).default;
+    companyMessages = (await import(`../messages/${locale}/company.json`))
+      .default;
   } catch (error) {
     // It's okay if the file doesn't exist yet
     console.info(`Company messages not found for ${locale}, using defaults`);
+  }
+
+  let onboardingMessages = {};
+
+  try {
+    onboardingMessages = (await import(`../messages/${locale}/onboarding.json`))
+      .default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(`Onboarding messages not found for ${locale}, using defaults`);
   }
 
   // Merge all messages
@@ -55,6 +66,7 @@ export default getRequestConfig(async () => {
     common: commonMessages,
     auth: authMessages,
     company: companyMessages,
+    onboarding: onboardingMessages,
   };
 
   return {
