@@ -108,7 +108,7 @@ export default function OTPLoginForm({
                   {emailPending ? t("otp.sendingCode") : t("otp.sendCode")}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+              {/* <div className="mt-4 text-center text-sm">
                 {t("noAccount")}{" "}
                 <Link
                   href={`/auth/sign-up${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
@@ -116,14 +116,16 @@ export default function OTPLoginForm({
                 >
                   {t("signUpLink")}
                 </Link>
-              </div>
+              </div> */}
             </form>
           ) : (
             // OTP verification form
             <form action={otpAction}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="token">{t("otp.verificationCodeLabel")}</Label>
+                  <Label htmlFor="token">
+                    {t("otp.verificationCodeLabel")}
+                  </Label>
                   <Input
                     id="token"
                     name="token"
