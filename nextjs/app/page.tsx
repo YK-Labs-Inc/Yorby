@@ -17,7 +17,11 @@ export default async function Home() {
   }
 
   if (user) {
-    redirect("/onboarding");
+    redirect(
+      user.app_metadata.completed_candidate_onboarding
+        ? "/dashboard/jobs?newJob=true"
+        : "/onboarding"
+    );
   }
 
   return <LandingPageV6 />;

@@ -150,48 +150,15 @@ export function AppSidebar({
     <Sidebar>
       <SidebarHeader>
         <Header />
-
         {user && (
-          <>
-            <DropdownMenu>
-              {/* Only show Create dropdown if not a coach path */}
-              {!isYorbyCoaching && (
-                <DropdownMenuTrigger asChild>
-                  <Button className="w-full justify-between">
-                    <span className="flex items-center gap-2">
-                      <PlusIcon className="h-4 w-4" />
-                      {t("create")}
-                    </span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-              )}
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/jobs?newJob=true">
-                    {t("addInterviewPrep")}
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/interview-copilots">
-                    {t("createInterviewCopilot")}
-                  </Link>
-                </DropdownMenuItem>
-                {isResumeBuilderEnabled && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/resumes">{t("createResume")}</Link>
-                  </DropdownMenuItem>
-                )}
-                {enableTransformResume && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/transform-resume">
-                      {t("transformResume")}
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
+          <Button className="w-full justify-between" asChild>
+            <Link href="/dashboard/jobs?newJob=true">
+              <span className="flex items-center gap-2">
+                <PlusIcon className="h-4 w-4" />
+                {t("addInterviewPrep")}
+              </span>
+            </Link>
+          </Button>
         )}
       </SidebarHeader>
       <SidebarContent>

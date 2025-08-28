@@ -349,7 +349,7 @@ export function ChatUI({
               <div
                 className={`max-w-[80%] rounded-2xl p-4 shadow-sm transition-all duration-300 ${
                   message.role === "user"
-                    ? "bg-gray-900 text-white dark:bg-gray-700 transform hover:scale-[1.02]"
+                    ? "bg-primary text-primary-foreground transform hover:scale-[1.02]"
                     : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transform hover:scale-[1.02]"
                 }`}
               >

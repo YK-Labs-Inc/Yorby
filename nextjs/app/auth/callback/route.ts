@@ -134,7 +134,7 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
   return NextResponse.redirect(`${origin}/onboarding`);
 });
 
-const getRedirectToOnboardingV2 = async (user: User) => {
+export const getRedirectToOnboardingV2 = async (user: User) => {
   const memoriesEnabled = Boolean(
     await posthog.isFeatureEnabled("enable-memories", user.id)
   );
@@ -153,7 +153,7 @@ const getRedirectToOnboardingV2 = async (user: User) => {
 const completedMemoriesOnboarding = async (user: User) =>
   Boolean(user.app_metadata["completed-memories-onboarding"]);
 
-const addUserToBrevo = async ({
+export const addUserToBrevo = async ({
   userId,
   email,
   logger,
@@ -165,6 +165,9 @@ const addUserToBrevo = async ({
   origin: string;
 }) => {
   try {
+    if (process.env.NODE_ENV === "development") {
+      return true;
+    }
     let apiInstance = new SibApiV3Sdk.ContactsApi();
     const brevoApiKey = process.env.BREVO_API_KEY;
     if (!brevoApiKey) {
