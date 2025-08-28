@@ -84,10 +84,7 @@ export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
             <input
               type="hidden"
               name="redirectTo"
-              value={
-                redirectUrl ||
-                (isYorbyCoaching ? "/coaches/auth" : "/onboarding")
-              }
+              value={redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "")}
             />
             <SubmitButton
               disabled={!captchaToken || emailPending}
@@ -140,10 +137,7 @@ export default function SignInForm({ redirectUrl }: SignInFormProps = {}) {
             <input
               type="hidden"
               name="redirectTo"
-              value={
-                redirectUrl ||
-                (isYorbyCoaching ? "/coaches/auth" : "/onboarding")
-              }
+              value={redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "")}
             />
             <SubmitButton
               disabled={otpPending}

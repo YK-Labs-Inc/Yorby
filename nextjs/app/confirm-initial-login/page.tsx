@@ -17,7 +17,11 @@ const ConfirmInitialLogin = () => {
       posthog.capture("CompleteRegistration_ph", {
         userId: user.id,
       });
-      router.push("/onboarding-v2");
+      router.push(
+        user.app_metadata.completed_candidate_onboarding
+          ? "/dashboard/jobs?newJob=true"
+          : "/onboarding"
+      );
     }
   }, [posthog, user]);
   return null;

@@ -1,4 +1,5 @@
 import JobCreationComponent from "@/app/JobCreationComponent";
+import { getServerUser } from "@/utils/auth/server";
 import { Tables } from "@/utils/supabase/database.types";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -38,7 +39,9 @@ export default async function JobsPage({
   if (jobs.length > 0) {
     redirect(`/dashboard/jobs/${jobs[0].id}?error=${errorMessage}`);
   }
-  const showOnboarding = jobs.length === 0;
+  const user = await getServerUser();
+  const showOnboarding =
+    !user?.app_metadata.completed_interview_prep_onboarding;
   return (
     <div className="w-full flex justify-center items-center p-8">
       <JobCreationComponent showOnboarding={showOnboarding} />

@@ -16,7 +16,7 @@ export default async function Login({
     process.env.NEXT_PUBLIC_IS_YORBY === "true";
   if (user) {
     redirect(
-      `${redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "/onboarding")}`
+      `${redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "/dashboard/jobs?newJob=true")}`
     );
   }
   return <SignInForm />;
