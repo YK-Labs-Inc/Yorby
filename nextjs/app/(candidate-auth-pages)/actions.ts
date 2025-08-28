@@ -5,7 +5,7 @@ import { Logger } from "next-axiom";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { addUserToBrevo } from "../auth/callback/route";
+import { addUserToBrevo } from "../auth/utils";
 
 export async function signInWithOTP(prevState: any, formData: FormData) {
   const email = formData.get("email") as string;
