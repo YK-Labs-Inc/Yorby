@@ -58,6 +58,15 @@ export default getRequestConfig(async () => {
     console.info(`Onboarding messages not found for ${locale}, using defaults`);
   }
 
+  let purchaseMessages = {};
+  try {
+    purchaseMessages = (await import(`../messages/${locale}/purchase.json`))
+      .default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(`Purchase messages not found for ${locale}, using defaults`);
+  }
+
   // Merge all messages
   // Feature-specific messages override main messages if there are conflicts
   const messages = {
@@ -67,6 +76,7 @@ export default getRequestConfig(async () => {
     auth: authMessages,
     company: companyMessages,
     onboarding: onboardingMessages,
+    purchase: purchaseMessages,
   };
 
   return {

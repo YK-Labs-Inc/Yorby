@@ -32,7 +32,7 @@ type Course = Database["public"]["Tables"]["courses"]["Row"] & {
   course_modules: CourseModule[];
 };
 
-const fetchJob = async (jobId: string, hasSubscription: boolean) => {
+const fetchJob = async (jobId: string) => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_jobs")
@@ -77,14 +77,6 @@ const fetchJob = async (jobId: string, hasSubscription: boolean) => {
         }));
     }
   }
-
-  if (data.status === "locked" && !hasSubscription) {
-    return {
-      ...data,
-      course: processedCourse,
-      course_modules: processedModules,
-    };
-  }
   return {
     ...data,
     custom_job_questions: data.custom_job_questions
@@ -108,19 +100,6 @@ const fetchUserCredits = async (userId: string) => {
   return data?.number_of_credits || 0;
 };
 
-const fetchHasSubscription = async (userId: string) => {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) {
-    throw error;
-  }
-  return data !== null;
-};
-
 export default async function CustomJob({
   jobId,
   searchParams,
@@ -138,8 +117,7 @@ export default async function CustomJob({
     redirect("/sign-in");
   }
   const isAnonymous = user?.is_anonymous;
-  const hasSubscription = await fetchHasSubscription(user?.id || "");
-  const job = await fetchJob(jobId, hasSubscription);
+  const job = await fetchJob(jobId);
   const userCredits = await fetchUserCredits(job.user_id);
   const view = ((await searchParams)?.view as string) || "practice";
   const currentPage = parseInt((await searchParams)?.page as string) || 1;
@@ -155,7 +133,6 @@ export default async function CustomJob({
     formMessage = { message: message };
   }
   const t = await getTranslations("accountLinking");
-  const isLocked = job.status === "locked" && !hasSubscription;
   const hasCourse =
     job.course && job.course_modules && job.course_modules.length > 0;
   const posthog = PostHogClient();
@@ -278,7 +255,6 @@ export default async function CustomJob({
             {!isMultiTenantExperience && (
               <>
                 {view === "practice" &&
-                  !isLocked &&
                   (userSubmittedQuestionsEnabled ? (
                     <QuestionGenerationDropdown jobId={jobId} job={job} />
                   ) : (
@@ -291,7 +267,7 @@ export default async function CustomJob({
             <PracticeQuestionsClientWrapper
               jobId={jobId}
               questions={job.custom_job_questions}
-              isLocked={isLocked}
+              isLocked={false}
               userCredits={userCredits}
               currentPage={currentPage}
               numFreeQuestions={3}
@@ -304,7 +280,7 @@ export default async function CustomJob({
               jobId={jobId}
               filter={filter}
               userCredits={userCredits}
-              isLocked={isLocked}
+              isLocked={false}
               isSubscriptionVariant={isSubscriptionVariant}
             />
           )}
@@ -313,7 +289,7 @@ export default async function CustomJob({
               course={job.course}
               modules={job.course_modules}
               jobId={jobId}
-              isLocked={isLocked}
+              isLocked={false}
             />
           )}
         </div>
