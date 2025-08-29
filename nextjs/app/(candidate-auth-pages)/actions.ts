@@ -76,19 +76,12 @@ export async function verifyOTP(prevState: any, formData: FormData) {
   }
 
   // If user is added to brevo successfully this means the user signed up for the first time
-  const userInitiallySignedUp = await addUserToBrevo({
+  await addUserToBrevo({
     userId: user.id,
     email: user.email,
     logger,
     origin,
   });
-
-  if (userInitiallySignedUp) {
-    logger.info(
-      "User initially signed up. Redirecting to confirm-initial-login"
-    );
-    redirect("/confirm-initial-login");
-  }
   logger.info("Redirecting to onboarding");
   redirect(
     user.app_metadata.completed_candidate_onboarding

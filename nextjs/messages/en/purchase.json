@@ -1,0 +1,24 @@
+{
+  "upgradeCard": {
+    "reachedLimit": "Uh oh, you've reached your free limit!",
+    "upgradeTitle": "Upgrade To Create Unlimited Interview Prep",
+    "choosePlan": "Choose your plan:",
+    "flashSaleEnds": "Flash sale ends in:",
+    "expired": "Expired",
+    "popular": "POPULAR",
+    "best": "BEST",
+    "monthly": "Monthly",
+    "months": "{count} Months",
+    "perMonth": "/mo",
+    "perMonthLabel": "/month",
+    "total": "total",
+    "continueCheckout": "Continue to Secure Checkout",
+    "redirectingCheckout": "Redirecting to secure checkout...",
+    "sslSecured": "SSL Secured",
+    "cancelAnytime": "Cancel anytime",
+    "guarantee": "30-day guarantee",
+    "backToDashboard": "Back to dashboard",
+    "testimonialPrefix": "Join 10,000+ professionals",
+    "testimonialSuffix": "who've upgraded to premium"
+  }
+}
