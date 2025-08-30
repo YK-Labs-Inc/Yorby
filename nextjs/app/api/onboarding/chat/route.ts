@@ -241,10 +241,10 @@ Conduct the conversation in the language of the user.
 
       if (markdownProfile) {
         const { error: saveError } = await supabase
-          .from("user_candidate_info")
+          .from("user_knowledge_base")
           .upsert({
-            id: userId,
-            candidate_info: markdownProfile,
+            user_id: userId,
+            knowledge_base: markdownProfile,
           });
 
         if (saveError) {

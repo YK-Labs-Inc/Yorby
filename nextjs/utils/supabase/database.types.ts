@@ -2722,24 +2722,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_candidate_info: {
-        Row: {
-          candidate_info: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          candidate_info: string
-          created_at?: string
-          id: string
-        }
-        Update: {
-          candidate_info?: string
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
-      }
       user_coach_access: {
         Row: {
           coach_id: string
