@@ -1,0 +1,1 @@
+export const FREE_JOB_LIMIT = 5;

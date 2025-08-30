@@ -67,6 +67,19 @@ export default getRequestConfig(async () => {
     console.info(`Purchase messages not found for ${locale}, using defaults`);
   }
 
+  let landingPageV7Messages = {};
+
+  try {
+    landingPageV7Messages = (
+      await import(`../messages/${locale}/landingPageV7.json`)
+    ).default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(
+      `Landing page v7 messages not found for ${locale}, using defaults`
+    );
+  }
+
   // Merge all messages
   // Feature-specific messages override main messages if there are conflicts
   const messages = {
@@ -77,6 +90,7 @@ export default getRequestConfig(async () => {
     company: companyMessages,
     onboarding: onboardingMessages,
     purchase: purchaseMessages,
+    landingPageV7: landingPageV7Messages,
   };
 
   return {

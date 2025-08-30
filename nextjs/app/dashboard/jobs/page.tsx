@@ -7,6 +7,7 @@ import { getProducts } from "@/app/purchase/actions";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { isWithin24Hours } from "@/app/purchase/utils";
 import UpgradeCard from "./UpgradeCard";
+import { FREE_JOB_LIMIT } from "@/app/purchase/constants";
 
 export const maxDuration = 300;
 
@@ -80,7 +81,6 @@ export default async function JobsPage({
   // Check subscription status and job count
   const hasSubscription = await fetchHasSubscription(user.id);
   const jobCount = await fetchJobCount(user.id);
-  const FREE_JOB_LIMIT = 5;
   const hasReachedFreeLimit = !hasSubscription && jobCount >= FREE_JOB_LIMIT;
 
   // If user has reached the free limit and doesn't have a subscription, show upgrade UI
