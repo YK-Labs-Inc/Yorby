@@ -112,6 +112,67 @@ export default function UpgradeCard({
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent mb-3">
             {t("upgradeTitle")}
           </h1>
+
+          {/* Upgrade Value Proposition - Redesigned */}
+          <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* Current Status */}
+              <div className="text-center">
+                <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                  {t("currentStatus")}
+                </div>
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {jobCount}
+                  </span>
+                  <span className="text-lg text-gray-600 dark:text-gray-400">
+                    / {jobLimit}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {t("jobs")}
+                </div>
+              </div>
+
+              {/* Visual Separator */}
+              <div className="hidden sm:flex items-center justify-center">
+                <div className="h-12 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+              </div>
+
+              {/* Upgrade Arrow for Mobile */}
+              <div className="sm:hidden">
+                <svg
+                  className="w-6 h-6 text-primary animate-bounce"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </div>
+
+              {/* Upgrade To */}
+              <div className="text-center">
+                <div className="text-xs uppercase tracking-wider text-primary/70 mb-1">
+                  {t("upgradeFor")}
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                  <span className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    {t("unlimited")}
+                  </span>
+                </div>
+                <div className="text-sm text-primary/80 font-medium mt-1">
+                  {t("interviewPrep")}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Card */}
@@ -126,14 +187,16 @@ export default function UpgradeCard({
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">
                   {t("choosePlan")}
                 </h3>
-                {showFlashPricingUI && timeLeft && timeLeft !== t("expired") && (
-                  <div className="flex items-center gap-1.5 text-sm">
-                    <Clock className="h-3.5 w-3.5 text-orange-500" />
-                    <span className="text-orange-600 dark:text-orange-400 font-medium">
-                      {t("flashSaleEnds")} {timeLeft}
-                    </span>
-                  </div>
-                )}
+                {showFlashPricingUI &&
+                  timeLeft &&
+                  timeLeft !== t("expired") && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Clock className="h-3.5 w-3.5 text-orange-500" />
+                      <span className="text-orange-600 dark:text-orange-400 font-medium">
+                        {t("flashSaleEnds")} {timeLeft}
+                      </span>
+                    </div>
+                  )}
               </div>
 
               <div className="grid gap-3">
@@ -262,7 +325,9 @@ export default function UpgradeCard({
                                   {formatPrice(displayPrice || 0)}
                                 </span>
                                 <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                                  {product.months === 1 ? t("perMonthLabel") : t("total")}
+                                  {product.months === 1
+                                    ? t("perMonthLabel")
+                                    : t("total")}
                                 </div>
                               </div>
                             )}

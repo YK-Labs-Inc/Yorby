@@ -1,4 +1,4 @@
-import LandingPageV6 from "./LandingPageV6";
+import LandingPageV7 from "./LandingPageV7";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -24,5 +24,5 @@ export default async function Home() {
     );
   }
 
-  return <LandingPageV6 />;
+  return <LandingPageV7 />;
 }

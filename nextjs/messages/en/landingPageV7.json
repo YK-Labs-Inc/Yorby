@@ -1,0 +1,84 @@
+{
+    "hero": {
+      "title": "Ace your next interview",
+      "subtitle": "Practice with AI-powered mock interviews and unlimited personalized questions. Land your dream job with confidence.",
+      "tagline": "Interview prep tailored to your dream job",
+      "getStarted": "Start Practicing",
+      "noCreditCard": "No credit card required • Unlimited practice questions"
+    },
+    "trustMetrics": {
+      "candidatesPrepared": "Candidates prepared",
+      "jobsAnalyzed": "Jobs analyzed",
+      "questionsGenerated": "Questions generated"
+    },
+    "howItWorks": {
+      "title": "Your interview prep journey",
+      "subtitle": "Four simple steps to interview success",
+      "steps": {
+        "1": {
+          "title": "Upload job description",
+          "description": "Paste the job listing you're applying for. We'll analyze requirements and create a personalized prep plan."
+        },
+        "2": {
+          "title": "Generate practice questions",
+          "description": "Get unlimited custom questions based on the job requirements and your background. No generic questions here!"
+        },
+        "3": {
+          "title": "Practice with AI interviewer",
+          "description": "Experience realistic mock interviews with our AI that adapts to your responses and provides real-time feedback."
+        },
+        "4": {
+          "title": "Improve and succeed",
+          "description": "Review detailed feedback, track your progress, and walk into your interview with confidence."
+        }
+      }
+    },
+    "features": {
+      "title": "Why candidates love us",
+      "subtitle": "Everything you need to nail your interview",
+      "personalizedToYou": {
+        "title": "Personalized to you",
+        "description": "Questions tailored to your resume, experience, and the specific job you're applying for."
+      },
+      "unlimitedPractice": {
+        "title": "Unlimited practice",
+        "description": "Generate as many questions as you need. Practice until you're perfectly prepared."
+      },
+      "naturalConversations": {
+        "title": "Natural conversations",
+        "description": "Our AI interviewer adapts to your responses, just like a real interview."
+      },
+      "detailedFeedback": {
+        "title": "Detailed feedback",
+        "description": "Get actionable insights on your answers to continuously improve."
+      },
+      "jobSpecificPrep": {
+        "title": "Job-specific prep",
+        "description": "No generic questions. Everything is customized to your target role."
+      },
+      "trackProgress": {
+        "title": "Track progress",
+        "description": "Monitor your improvement over time with detailed analytics."
+      }
+    },
+    "testimonials": {
+      "title": "Success stories",
+      "subtitle": "Join thousands who landed their dream jobs",
+      "joinThemToday": "Join them today",
+      "sarah": {
+        "name": "Sarah Chen",
+        "role": "Software Engineer at Google",
+        "content": "The personalized questions were spot-on. I felt so prepared walking into my interview!"
+      },
+      "michael": {
+        "name": "Michael Rodriguez",
+        "role": "Product Manager at Meta",
+        "content": "The AI mock interviews helped me practice my behavioral responses. Game-changer!"
+      },
+      "emily": {
+        "name": "Emily Johnson",
+        "role": "Data Scientist at Amazon",
+        "content": "I loved how it analyzed the job description and created questions specific to that role."
+      }
+    }
+}
