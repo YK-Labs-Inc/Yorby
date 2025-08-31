@@ -18,7 +18,7 @@ const CREDITS_MAP: { [key: string]: number } = {
 
 async function handleSuccessfulPayment(
   session: Stripe.Checkout.Session,
-  logger: Logger,
+  logger: Logger
 ) {
   const userId = session.metadata?.userId;
   let productId = "";
@@ -26,14 +26,44 @@ async function handleSuccessfulPayment(
   try {
     const supabase = await createAdminClient();
     const isSubscription = session.metadata?.isSubscription === "true";
+    const isRecruitingSubscription =
+      session.metadata?.priceId ===
+      process.env.STRIPE_RECRUITING_SUBSCRIPTION_PRICE_ID;
 
     if (!userId) {
       logger.error("No user ID in session metadata");
       return;
     }
 
-    if (isSubscription) {
-      // For subscriptions, we need to store both the user ID and the Stripe customer ID
+    if (isRecruitingSubscription) {
+      // Handle recruiting subscription
+      if (!session.customer) {
+        logger.error("No customer ID in session for recruiting subscription", {
+          sessionId: session.id,
+        });
+        return;
+      }
+
+      const companyId = session.metadata?.companyId;
+      if (!companyId) {
+        logger.error(
+          "No company ID in session metadata for recruiting subscription",
+          { sessionId: session.id }
+        );
+        return;
+      }
+
+      await supabase.from("recruiting_subscriptions").insert({
+        company_id: companyId,
+        stripe_customer_id: session.customer.toString(),
+      });
+      logger.info("Created recruiting subscription entry", {
+        userId,
+        companyId,
+        stripeCustomerId: session.customer.toString(),
+      });
+    } else if (isSubscription) {
+      // For regular subscriptions, we need to store both the user ID and the Stripe customer ID
       if (!session.customer) {
         logger.error("No customer ID in session", { sessionId: session.id });
         return;
@@ -50,7 +80,7 @@ async function handleSuccessfulPayment(
     } else {
       // Handle one-time credit purchase
       const lineItems = await stripe.checkout.sessions.listLineItems(
-        session.id,
+        session.id
       );
       productId = lineItems.data[0]?.price?.product as string;
       amountTotal = lineItems.data[0]?.amount_total;
@@ -117,7 +147,7 @@ async function handleSuccessfulPayment(
 
 async function handleSubscriptionEnded(
   subscription: Stripe.Subscription,
-  logger: Logger,
+  logger: Logger
 ) {
   try {
     const supabase = await createAdminClient();
@@ -128,38 +158,70 @@ async function handleSubscriptionEnded(
       return;
     }
 
-    // Find and delete subscription entry using the Stripe customer ID
-    const { data: subscriptionData, error: fetchError } = await supabase
-      .from("subscriptions")
-      .select("id")
-      .eq("stripe_customer_id", stripeCustomerId)
-      .single();
+    // Check if it's a recruiting subscription by looking at the price ID
+    const priceId = subscription.items.data[0]?.price?.id;
+    const isRecruitingSubscription =
+      priceId === process.env.STRIPE_RECRUITING_SUBSCRIPTION_PRICE_ID;
 
-    if (fetchError || !subscriptionData) {
-      logger.error("Error finding subscription", {
+    if (isRecruitingSubscription) {
+      const companyId = subscription.metadata.companyId;
+
+      if (!companyId) {
+        logger.error("No company ID in recruiting subscription metadata");
+        return;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("recruiting_subscriptions")
+        .delete()
+        .eq("company_id", companyId);
+
+      if (deleteError) {
+        logger.error("Error deleting recruiting subscription", {
+          stripeCustomerId,
+          error: deleteError,
+        });
+        return;
+      }
+
+      logger.info("Deleted recruiting subscription entry", {
+        companyId,
         stripeCustomerId,
-        error: fetchError,
       });
-      return;
-    }
+    } else {
+      // Handle regular subscription deletion
+      const { data: subscriptionData, error: fetchError } = await supabase
+        .from("subscriptions")
+        .select("id")
+        .eq("stripe_customer_id", stripeCustomerId)
+        .single();
 
-    const { error: deleteError } = await supabase
-      .from("subscriptions")
-      .delete()
-      .eq("stripe_customer_id", stripeCustomerId);
+      if (fetchError || !subscriptionData) {
+        logger.error("Error finding subscription", {
+          stripeCustomerId,
+          error: fetchError,
+        });
+        return;
+      }
 
-    if (deleteError) {
-      logger.error("Error deleting subscription", {
+      const { error: deleteError } = await supabase
+        .from("subscriptions")
+        .delete()
+        .eq("stripe_customer_id", stripeCustomerId);
+
+      if (deleteError) {
+        logger.error("Error deleting subscription", {
+          stripeCustomerId,
+          error: deleteError,
+        });
+        return;
+      }
+
+      logger.info("Deleted subscription entry", {
+        userId: subscriptionData.id,
         stripeCustomerId,
-        error: deleteError,
       });
-      return;
     }
-
-    logger.info("Deleted subscription entry", {
-      userId: subscriptionData.id,
-      stripeCustomerId,
-    });
   } catch (error) {
     logger.error("Error handling subscription ended", { error });
   } finally {
@@ -187,7 +249,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!,
+      process.env.STRIPE_WEBHOOK_SECRET!
     );
 
     logger.info("Received Stripe webhook", { type: event.type });
@@ -196,14 +258,14 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
       case "checkout.session.completed":
         await handleSuccessfulPayment(
           event.data.object as Stripe.Checkout.Session,
-          logger,
+          logger
         );
         break;
 
       case "customer.subscription.deleted":
         await handleSubscriptionEnded(
           event.data.object as Stripe.Subscription,
-          logger,
+          logger
         );
         break;
 

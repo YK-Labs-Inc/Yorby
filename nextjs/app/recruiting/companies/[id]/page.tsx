@@ -1,6 +1,8 @@
 import { redirect, notFound } from "next/navigation";
+import { Suspense } from "react";
 import { CompanyJobsManager } from "@/app/recruiting/CompanyJobsManager";
 import { CompanyHeader } from "@/app/recruiting/CompanyHeader";
+import { UpgradeSuccessBanner } from "./UpgradeSuccessBanner";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 
@@ -55,6 +57,15 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     redirect("/recruiting");
   }
 
+  // Check if company has a subscription
+  const { data: subscription } = await supabase
+    .from("recruiting_subscriptions")
+    .select("company_id")
+    .eq("company_id", company.id)
+    .single();
+
+  const isFreeTier = !subscription;
+
   // Fetch jobs for this company
   const { data: jobs, error: jobsError } = await supabase
     .from("custom_jobs")
@@ -75,7 +86,11 @@ export default async function CompanyDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <CompanyHeader company={company} />
+        <Suspense fallback={null}>
+          <UpgradeSuccessBanner companyId={id} />
+        </Suspense>
+        
+        <CompanyHeader company={company} isFreeTier={isFreeTier} />
 
         <div className="mt-8">
           <CompanyJobsManager companyId={id} jobs={jobs ?? []} />

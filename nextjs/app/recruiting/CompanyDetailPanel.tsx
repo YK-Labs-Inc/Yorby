@@ -112,7 +112,7 @@ export function CompanyDetailPanel({
     createCompany,
     {
       success: false,
-      error: null,
+      error: "",
     }
   );
 

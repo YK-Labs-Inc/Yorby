@@ -2358,21 +2358,29 @@ export type Database = {
       }
       recruiting_subscriptions: {
         Row: {
+          company_id: string
           created_at: string
-          id: string
           stripe_customer_id: string
         }
         Insert: {
+          company_id: string
           created_at?: string
-          id: string
           stripe_customer_id: string
         }
         Update: {
+          company_id?: string
           created_at?: string
-          id?: string
           stripe_customer_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "recruiting_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referral_codes: {
         Row: {

@@ -5,16 +5,19 @@ import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
+import { useState } from "react";
+import { CompanyUpgradeDialog } from "./CompanyUpgradeDialog";
 
 type Company = Tables<"companies">;
 
 interface CompanyHeaderProps {
   company: Company;
+  isFreeTier: boolean;
 }
 
-export function CompanyHeader({ company }: CompanyHeaderProps) {
+export function CompanyHeader({ company, isFreeTier }: CompanyHeaderProps) {
   const t = useTranslations("recruiting.companyHeader");
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -59,14 +62,30 @@ export function CompanyHeader({ company }: CompanyHeaderProps) {
 
         {/* Action buttons */}
         <div className="flex gap-2">
-          <Link href={`/recruiting/companies/${company.id}/members`}>
-            <Button variant="outline">
+          {isFreeTier ? (
+            <Button
+              variant="outline"
+              onClick={() => setShowUpgradeDialog(true)}
+            >
               <UsersRound className="mr-2 h-4 w-4" />
               {t("manageMembers")}
             </Button>
-          </Link>
+          ) : (
+            <Link href={`/recruiting/companies/${company.id}/members`}>
+              <Button variant="outline">
+                <UsersRound className="mr-2 h-4 w-4" />
+                {t("manageMembers")}
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
+
+      <CompanyUpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        companyId={company.id}
+      />
     </div>
   );
 }

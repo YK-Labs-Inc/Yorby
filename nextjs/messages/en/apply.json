@@ -300,7 +300,12 @@
         "noMatches": "No matches found",
         "noApplicants": "No applicants yet",
         "applied": "Applied {date}",
-        "loadingMore": "Loading more candidates..."
+        "loadingMore": "Loading more candidates...",
+        "freeTier": {
+          "limitReached": "Free tier limit reached ({limit} candidates)",
+          "moreCandidates": "{count} more candidates to review",
+          "upgradeToViewAll": "Upgrade to view all {count} candidates"
+        }
       },
       "info": {
         "contactInfo": "Contact Information",
@@ -712,6 +717,37 @@
       "savedSuccessfully": "Code submission saved successfully",
       "unexpectedServerError": "Unexpected error saving code submission",
       "unknownError": "Unknown error"
+    }
+  },
+  "freeTierBanner": {
+    "title": "Free Tier • {count} candidate interviews",
+    "description": "Your candidate interview limit is shared across all job listings. Upgrade for unlimited candidate interviews and team collaboration.",
+    "upgradeButton": "Upgrade"
+  },
+  "upgradeCompany": {
+    "errors": {
+      "userNotAuthenticated": "User not authenticated",
+      "notAuthorized": "Not authorized",
+      "onlyOwnersAndAdmins": "Only owners and admins can upgrade",
+      "failedToCreateCheckout": "Failed to create checkout session",
+      "genericError": "An error occurred while creating checkout session",
+      "unexpectedError": "An unexpected error occurred"
+    }
+  },
+  "upgradeSuccessBanner": {
+    "loading": {
+      "title": "Confirming Your Upgrade",
+      "description": "We're confirming your subscription upgrade. This should only take a moment...",
+      "attemptCount": "Attempt {current} of 4"
+    },
+    "error": {
+      "title": "Upgrade Error",
+      "message": "Something went wrong. Please contact customer support at support@yorby.ai"
+    },
+    "success": {
+      "title": "Congratulations! Your company has been upgraded.",
+      "description": "You now have access to screen an unlimited number of candidates for this company.",
+      "dismissButton": "Dismiss"
     }
   },
   "createJobDialog": {

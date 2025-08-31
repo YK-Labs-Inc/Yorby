@@ -1,0 +1,1 @@
+export const FREE_TIER_CANDIDATE_COUNT = 50;
