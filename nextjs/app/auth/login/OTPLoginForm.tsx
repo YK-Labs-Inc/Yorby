@@ -144,6 +144,7 @@ export default function OTPLoginForm({
                 )}
                 <input type="hidden" name="email" value={emailState.email} />
                 <input type="hidden" name="redirectTo" value={redirectUrl} />
+                <input type="hidden" name="otpType" value="email" />
                 <Button type="submit" className="w-full" disabled={otpPending}>
                   {otpPending ? t("otp.verifying") : t("otp.verifyCode")}
                 </Button>

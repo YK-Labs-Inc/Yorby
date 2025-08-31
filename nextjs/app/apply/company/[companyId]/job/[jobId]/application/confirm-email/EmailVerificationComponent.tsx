@@ -44,6 +44,7 @@ export default function EmailVerificationComponent({
         )}
         <input type="hidden" name="email" value={user?.new_email} />
         <input type="hidden" name="redirectTo" value={redirectUrl} />
+        <input type="hidden" name="otpType" value="email_change" />
         <Button type="submit" className="w-full" disabled={otpPending}>
           {otpPending ? t("otp.verifying") : t("otp.verifyCode")}
         </Button>
