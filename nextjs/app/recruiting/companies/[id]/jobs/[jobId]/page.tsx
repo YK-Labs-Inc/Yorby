@@ -4,7 +4,13 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
-import { ArrowLeft, Users, FileQuestion } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  ClipboardList,
+  Calendar,
+  Building,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,7 +19,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ShareApplicationLink from "./ShareApplicationLink";
-import { RichTextDisplay } from "@/components/ui/rich-text-display";
+import { Badge } from "@/components/ui/badge";
+import JobDescriptionToggle from "./JobDescriptionToggle";
 
 interface PageProps {
   params: Promise<{
@@ -75,7 +82,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     redirect(`/recruiting/companies/${companyId}`);
   }
 
-  // Fetch job details with counts
+  // Fetch job details
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
     .select("*")
@@ -109,6 +116,36 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     await logger.flush();
   }
 
+  // Fetch additional stats in parallel
+  const [candidatesResult, interviewsResult] = await Promise.all([
+    supabase
+      .from("company_job_candidates")
+      .select("id, status", { count: "exact" })
+      .eq("custom_job_id", jobId),
+    supabase
+      .from("job_interviews")
+      .select("id", { count: "exact" })
+      .eq("custom_job_id", jobId)
+  ]);
+
+  const totalCandidates = candidatesResult.count || 0;
+  const totalInterviewRounds = interviewsResult.count || 0;
+  
+  // Calculate candidate stats by status
+  const candidatesByStatus = candidatesResult.data?.reduce((acc, candidate) => {
+    acc[candidate.status] = (acc[candidate.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) || {};
+
+  const activeCandidates = candidatesByStatus.screening || 0;
+
+  // Format date
+  const postedDate = job.created_at ? new Date(job.created_at).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }) : null;
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -116,81 +153,120 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link
             href={`/recruiting/companies/${companyId}`}
-            className="hover:text-foreground flex items-center gap-1"
+            className="hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             {company?.name || t("breadcrumb.defaultCompany")}
           </Link>
           <span>/</span>
-          <span>{job.job_title}</span>
+          <span className="font-medium text-foreground">{job.job_title}</span>
         </div>
 
-        {/* Header */}
+        {/* Hero Section with Job Title and Quick Actions */}
         <div className="mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <H1 className="text-2xl sm:text-3xl mb-2">{job.job_title}</H1>
-              {job.company_name && (
-                <p className="text-muted-foreground mb-4">{job.company_name}</p>
-              )}
-              <div className="flex gap-2 items-center">
-                <ShareApplicationLink companyId={companyId} jobId={jobId} />
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <H1 className="text-3xl sm:text-4xl font-bold">{job.job_title}</H1>
+                <Badge variant={job.status === 'unlocked' ? 'default' : 'secondary'}>
+                  {job.status === 'unlocked' ? t("status.published") : t("status.draft")}
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                {job.company_name && (
+                  <div className="flex items-center gap-1.5">
+                    <Building className="h-4 w-4" />
+                    <span>{job.company_name}</span>
+                  </div>
+                )}
+                {postedDate && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4" />
+                    <span>{t("metadata.posted", { date: postedDate })}</span>
+                  </div>
+                )}
               </div>
             </div>
+            
+            <div className="flex gap-2">
+              <ShareApplicationLink companyId={companyId} jobId={jobId} />
+            </div>
           </div>
-        </div>
 
-        {/* Job Description */}
-        {job.job_description && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{t("sections.jobDescription.title")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-96 overflow-y-auto">
-                <RichTextDisplay 
-                  content={job.job_description}
-                  prose="prose-sm"
-                  className="text-muted-foreground"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Primary Action Cards */}
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            {/* Manage Candidates Card */}
+            <Link
+              href={`/recruiting/companies/${companyId}/jobs/${jobId}/candidates`}
+              className="group"
+            >
+              <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-primary/50 cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-900/30 transition-colors">
+                      <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    {t("actions.reviewCandidates.title")}
+                  </CardTitle>
+                  <CardDescription className="mt-2">
+                    {t("actions.reviewCandidates.description")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {activeCandidates > 0 && t("actions.reviewCandidates.awaitingReview", { count: activeCandidates })}
+                    </span>
+                    <span className="text-primary group-hover:translate-x-1 transition-transform">
+                      {t("actions.reviewCandidates.viewAll")}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-        {/* Navigation Cards */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
-          >
-            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <FileQuestion className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>{t("sections.interviewRounds.title")}</CardTitle>
-                <CardDescription>
-                  {t("sections.interviewRounds.description")}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            {/* Setup Interview Process Card */}
+            <Link
+              href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
+              className="group"
+            >
+              <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-primary/50 cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-900/30 transition-colors">
+                      <ClipboardList className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    {t("actions.configureInterview.title")}
+                  </CardTitle>
+                  <CardDescription className="mt-2">
+                    {t("actions.configureInterview.description")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {totalInterviewRounds === 0 
+                        ? t("actions.configureInterview.notConfigured") 
+                        : t("actions.configureInterview.configured", { count: totalInterviewRounds })}
+                    </span>
+                    <span className="text-primary group-hover:translate-x-1 transition-transform">
+                      {t("actions.configureInterview.configure")}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
 
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}/candidates`}
-          >
-            <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Users className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>{t("sections.candidates.title")}</CardTitle>
-                <CardDescription>
-                  {t("sections.candidates.description")}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+          {/* Job Description - Collapsible */}
+          {job.job_description && (
+            <JobDescriptionToggle jobDescription={job.job_description} />
+          )}
         </div>
       </div>
     </div>
