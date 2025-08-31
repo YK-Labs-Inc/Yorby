@@ -264,10 +264,6 @@
       "breadcrumb": {
         "defaultCompany": "Company"
       },
-      "status": {
-        "published": "Published",
-        "draft": "Draft"
-      },
       "metadata": {
         "posted": "Posted {date}"
       },

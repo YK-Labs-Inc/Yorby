@@ -19,7 +19,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ShareApplicationLink from "./ShareApplicationLink";
-import { Badge } from "@/components/ui/badge";
 import JobDescriptionToggle from "./JobDescriptionToggle";
 
 interface PageProps {
@@ -166,12 +165,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <H1 className="text-3xl sm:text-4xl font-bold">{job.job_title}</H1>
-                <Badge variant={job.status === 'unlocked' ? 'default' : 'secondary'}>
-                  {job.status === 'unlocked' ? t("status.published") : t("status.draft")}
-                </Badge>
-              </div>
+              <H1 className="text-3xl sm:text-4xl font-bold mb-3">{job.job_title}</H1>
               
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 {job.company_name && (
