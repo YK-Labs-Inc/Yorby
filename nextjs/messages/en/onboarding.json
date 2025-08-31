@@ -240,7 +240,13 @@
       "next": "Next",
       "previous": "Back",
       "skip": "Skip",
-      "close": "Close"
+      "skipTour": "Skip tour",
+      "close": "Close",
+      "step": "Step {current} of {total}",
+      "getStarted": "Get Started"
+    },
+    "branding": {
+      "title": "Yorby Recruiting"
     },
     "errors": {
       "subscriptionNotConfigured": "Recruiting subscription not configured",

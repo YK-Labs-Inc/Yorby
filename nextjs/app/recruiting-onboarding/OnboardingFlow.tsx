@@ -1,30 +1,19 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
   ChevronRight,
   ChevronLeft,
   Sparkles,
   Check,
-  Users,
-  Zap,
-  Crown,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import useSWR from "swr";
-import {
-  getRecruitingProducts,
-  createRecruitingCheckoutSession,
-  handleStartFreePlan,
-} from "./actions";
-import Link from "next/link";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 const STEPS = [
   "problem",
@@ -32,7 +21,6 @@ const STEPS = [
   "howItWorks",
   "benefits",
   "comparison",
-  "pricing",
 ] as const;
 
 export default function OnboardingFlow() {
@@ -53,41 +41,6 @@ export default function OnboardingFlow() {
   };
 
   const [currentStep, setCurrentStep] = useState(getInitialStep);
-  const formData = {
-    companyName: "",
-    teamSize: "",
-    hiringVolume: "",
-  };
-  const [selectedPlan, setSelectedPlan] = useState<"free" | "professional">(
-    "professional"
-  );
-
-  // Use SWR for fetching products with built-in caching and revalidation
-  const {
-    data: productsData,
-    error: productsError,
-    isLoading: loadingProducts,
-  } = useSWR("recruiting-products", async () => await getRecruitingProducts(), {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000, // Dedupe requests for 60 seconds
-  });
-
-  const products = productsData?.products || [];
-
-  const [
-    ,
-    // Unused state variable
-    createRecruitingCheckoutSessionAction,
-    createRecruitingCheckoutSessionPending,
-  ] = useActionState(createRecruitingCheckoutSession, { error: "" });
-
-  const [
-    ,
-    // Unused state variable
-    handleStartFreePlanAction,
-    handleStartFreePlanPending,
-  ] = useActionState(handleStartFreePlan, { error: "" });
 
   const currentStepKey = STEPS[currentStep];
 
@@ -110,6 +63,9 @@ export default function OnboardingFlow() {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (currentStep === TOTAL_STEPS - 1) {
+      // Navigate to recruiting page after the last step (comparison)
+      router.push("/recruiting");
     }
   };
 
@@ -505,296 +461,6 @@ export default function OnboardingFlow() {
           </div>
         );
 
-      case "pricing":
-        const freeProduct = products[0];
-        const paidProduct = products[1];
-
-        // Show loading state while fetching products
-        if (loadingProducts) {
-          return (
-            <div className="space-y-12 max-w-6xl mx-auto">
-              <div className="text-center space-y-6">
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
-                  {t("steps.pricing.loadingTitle")}
-                </h1>
-                <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        // Show error state if products failed to load
-        if (productsError) {
-          return (
-            <div className="space-y-12 max-w-6xl mx-auto">
-              <div className="text-center space-y-6">
-                <h1 className="text-5xl md:text-6xl font-bold text-red-600">
-                  {t("steps.pricing.errorTitle")}
-                </h1>
-                <p className="text-xl text-gray-600">
-                  {t("steps.pricing.errorMessage")}
-                </p>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div className="space-y-12 max-w-6xl mx-auto">
-            {/* Hero Section */}
-            <div className="text-center space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
-                  {t("steps.pricing.title")}
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-                  {t("steps.pricing.subtitle")}
-                </p>
-                <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
-                  <Check className="w-4 h-4" />
-                  <span>{t("steps.pricing.guarantee")}</span>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Pricing Cards */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {/* Free Tier Card */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Card
-                  className={`h-full relative transition-all duration-300 cursor-pointer ${
-                    selectedPlan === "free"
-                      ? "border-2 border-blue-500 shadow-xl shadow-blue-500/10"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow-lg"
-                  }`}
-                  onClick={() => setSelectedPlan("free")}
-                >
-                  <CardHeader className="pb-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-gray-100 rounded-lg">
-                        <Users className="w-5 h-5 text-gray-700" />
-                      </div>
-                      <h3 className="text-2xl font-semibold text-gray-900">
-                        {freeProduct?.name || t("steps.pricing.freeTier.name")}
-                      </h3>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-bold text-gray-900">
-                        {t("steps.pricing.freeTier.price")}
-                      </span>
-                      <span className="text-gray-600">
-                        {t("steps.pricing.freeTier.period")}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mt-3">
-                      {t("steps.pricing.freeTier.cardDescription")}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 mb-8">
-                      <div className="font-medium text-gray-900">
-                        {t("steps.pricing.freeTier.whatsIncluded")}
-                      </div>
-                      <ul className="space-y-3">
-                        {(freeProduct?.features).map((feature, idx) => (
-                          <motion.li
-                            key={idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + idx * 0.05 }}
-                            className="flex items-start gap-3"
-                          >
-                            <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-700">{feature}</span>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </div>
-                    <form action={handleStartFreePlanAction}>
-                      <Button
-                        type="submit"
-                        className={`w-full ${
-                          selectedPlan === "free"
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                        }`}
-                        size="lg"
-                        disabled={handleStartFreePlanPending}
-                      >
-                        {t("steps.pricing.freeTier.cta")}
-                      </Button>
-                    </form>
-                    <p className="text-xs text-gray-500 text-center mt-4">
-                      {t("steps.pricing.freeTier.noCreditCard")}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {/* Paid Tier Card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Card
-                  className={`h-full relative transition-all duration-300 cursor-pointer ${
-                    selectedPlan === "professional"
-                      ? "border-2 border-blue-500 shadow-xl shadow-blue-500/10"
-                      : "border-gray-200 hover:border-gray-300 hover:shadow-lg"
-                  }`}
-                  onClick={() => setSelectedPlan("professional")}
-                >
-                  {/* Popular Badge */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    {t("steps.pricing.professionalTier.mostPopular")}
-                  </div>
-
-                  <CardHeader className="pb-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-                        <Crown className="w-5 h-5 text-white" />
-                      </div>
-                      <h3 className="text-2xl font-semibold text-gray-900">
-                        {paidProduct?.name ||
-                          t("steps.pricing.professionalTier.name")}
-                      </h3>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        $
-                        {paidProduct?.price ||
-                          t("steps.pricing.professionalTier.defaultPrice")}
-                      </span>
-                      <span className="text-gray-600">
-                        /
-                        {paidProduct?.interval ||
-                          t("steps.pricing.professionalTier.period")}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 mt-3">
-                      {t("steps.pricing.professionalTier.cardDescription")}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 mb-8">
-                      <div className="font-medium text-gray-900">
-                        {t("steps.pricing.professionalTier.everythingInFree")}
-                      </div>
-                      <ul className="space-y-3">
-                        {(paidProduct?.features).map((feature, idx) => (
-                          <motion.li
-                            key={idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + idx * 0.05 }}
-                            className="flex items-start gap-3"
-                          >
-                            <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-gray-700">{feature}</span>
-                          </motion.li>
-                        ))}
-                      </ul>
-                    </div>
-                    <form action={createRecruitingCheckoutSessionAction}>
-                      <input
-                        type="hidden"
-                        name="priceId"
-                        value={paidProduct?.priceId || ""}
-                      />
-                      <input
-                        type="hidden"
-                        name="companyName"
-                        value={formData.companyName}
-                      />
-                      <input
-                        type="hidden"
-                        name="teamSize"
-                        value={formData.teamSize}
-                      />
-                      <input
-                        type="hidden"
-                        name="hiringVolume"
-                        value={formData.hiringVolume}
-                      />
-                      <Button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-600/20"
-                        size="lg"
-                        disabled={
-                          !paidProduct?.priceId ||
-                          createRecruitingCheckoutSessionPending
-                        }
-                      >
-                        {t("steps.pricing.professionalTier.cta")}
-                      </Button>
-                    </form>
-                    <p className="text-xs text-gray-500 text-center mt-4">
-                      {t("steps.pricing.professionalTier.cancelAnytime")}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-
-            {/* Value Proposition */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 text-center max-w-3xl mx-auto"
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                {t("steps.pricing.valueProposition.title")}
-              </h3>
-              <div className="grid md:grid-cols-3 gap-6 text-left">
-                <div>
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {t("steps.pricing.valueProposition.metrics.speed.value")}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {t("steps.pricing.valueProposition.metrics.speed.label")}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {t(
-                      "steps.pricing.valueProposition.metrics.timeReduction.value"
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {t(
-                      "steps.pricing.valueProposition.metrics.timeReduction.label"
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    {t(
-                      "steps.pricing.valueProposition.metrics.candidateIncrease.value"
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {t(
-                      "steps.pricing.valueProposition.metrics.candidateIncrease.label"
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        );
 
       default:
         return null;
@@ -811,13 +477,16 @@ export default function OnboardingFlow() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-blue-600" />
               <span className="font-semibold text-gray-900">
-                Yorby Recruiting
+                {t("branding.title")}
               </span>
             </div>
             <div className="hidden md:flex items-center gap-3">
               <Progress value={progressPercentage} className="w-24 h-1.5" />
               <span className="text-sm text-gray-500">
-                Step {currentStep + 1} of {TOTAL_STEPS}
+                {t("navigation.step", {
+                  current: currentStep + 1,
+                  total: TOTAL_STEPS,
+                })}
               </span>
             </div>
           </div>
@@ -826,7 +495,7 @@ export default function OnboardingFlow() {
             onClick={handleSkip}
             className="text-gray-500 hover:text-gray-700"
           >
-            Skip tour
+            {t("navigation.skipTour")}
           </Button>
         </div>
 
@@ -850,20 +519,22 @@ export default function OnboardingFlow() {
               onClick={handlePrevious}
               className="text-gray-600 hover:text-gray-900"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+              <ChevronLeft className="mr-2 h-4 w-4" />{" "}
+              {t("navigation.previous")}
             </Button>
           ) : (
             <div />
           )}
 
-          {currentStep < TOTAL_STEPS - 1 && (
+          {currentStep <= TOTAL_STEPS - 1 && (
             <Button
               onClick={handleNext}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-6 text-base font-medium shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 transition-all duration-300"
-              disabled={currentStep >= TOTAL_STEPS - 1}
             >
-              {t(`steps.${currentStepKey}.cta`)}
+              {currentStep === TOTAL_STEPS - 1 
+                ? t("navigation.getStarted") 
+                : t(`steps.${currentStepKey}.cta`)}
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
           )}

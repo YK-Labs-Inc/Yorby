@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { Logger } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 const log = new Logger().with({ module: "actions/companies" });
 
@@ -16,10 +17,11 @@ export async function createCompany(
   const website = formData.get("website") as string | null;
   const industry = formData.get("industry") as string | null;
   const company_size = formData.get("company_size") as string | null;
+  let companyId: string | null = null;
+  const t = await getTranslations("recruitingActions.errors");
 
   try {
     const supabase = await createClient();
-    const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
     const {
@@ -38,12 +40,16 @@ export async function createCompany(
 
     // Create the company
     // The database trigger will automatically create the company_members entry
-    const { error: companyError } = await supabase.from("companies").insert({
-      name,
-      website: website || null,
-      industry: industry || null,
-      company_size: company_size || null,
-    });
+    const { error: companyError, data: company } = await supabase
+      .from("companies")
+      .insert({
+        name,
+        website: website || null,
+        industry: industry || null,
+        company_size: company_size || null,
+      })
+      .select()
+      .single();
 
     if (companyError) {
       log.error("Error creating company", {
@@ -68,16 +74,18 @@ export async function createCompany(
     log.info("Company created successfully", {
       userId: user.id,
     });
-
-    // Revalidate the recruiting page to show the new company
-    revalidatePath("/recruiting");
-
-    return { success: true, error: null };
+    companyId = company.id;
   } catch (error) {
     log.error("Unexpected error creating company", { error });
     const t = await getTranslations("recruitingActions.errors");
     return { success: false, error: t("unexpectedError") };
   }
+
+  if (companyId) {
+    redirect(`/recruiting/companies/${companyId}`);
+  }
+
+  return { success: false, error: t("unexpectedError") };
 }
 
 export async function createJob(
@@ -161,18 +169,14 @@ export async function createJob(
     }
 
     // Create the job
-    const { error: jobError } = await supabase
-      .from("custom_jobs")
-      .insert({
-        job_title,
-        job_description,
-        status: "unlocked",
-        company_id,
-        company_name: company.name,
-        user_id: user.id,
-      })
-      .select()
-      .single();
+    const { error: jobError } = await supabase.from("custom_jobs").insert({
+      job_title,
+      job_description,
+      status: "unlocked",
+      company_id,
+      company_name: company.name,
+      user_id: user.id,
+    });
 
     if (jobError) {
       createJobLog.error("Error creating job", {

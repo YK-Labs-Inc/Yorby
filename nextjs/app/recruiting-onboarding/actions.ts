@@ -212,7 +212,7 @@ export async function createRecruitingCheckoutSession(
   const metadata: { [key: string]: string } = {
     userId,
     priceId,
-    isRecruiting: "true",
+    isRecruitingSubscription: "true",
     companyName: companyName || "",
     teamSize: teamSize || "",
     hiringVolume: hiringVolume || "",

@@ -9,6 +9,8 @@ import {
   validateAccess,
   getInitialCandidates,
   getCandidateData,
+  isCompanyPremium,
+  getCompanyCandidateCount,
 } from "./actions";
 import { getTranslations } from "next-intl/server";
 
@@ -31,14 +33,20 @@ export default async function CandidatesPage({
   // Await the params and searchParams
   const { id: companyId, jobId } = await params;
   const { candidateId } = await searchParams;
+  const isPremium = await isCompanyPremium(companyId);
 
   // Parallel fetch all required data
-  const [{ company, job }, initialCandidates, selectedCandidateData] =
-    await Promise.all([
-      validateAccess(companyId, jobId),
-      getInitialCandidates(companyId, jobId, 10),
-      candidateId ? getCandidateData(candidateId) : Promise.resolve(null),
-    ]);
+  const [
+    { company, job },
+    initialCandidates,
+    selectedCandidateData,
+    companyCandidateCount,
+  ] = await Promise.all([
+    validateAccess(companyId, jobId),
+    getInitialCandidates(companyId, jobId, 10),
+    candidateId ? getCandidateData(candidateId) : Promise.resolve(null),
+    isPremium ? getCompanyCandidateCount(companyId) : Promise.resolve(0),
+  ]);
 
   // Auto-select first candidate if none selected and candidates exist
   const effectiveCandidateId =
@@ -95,6 +103,8 @@ export default async function CandidatesPage({
             companyId={companyId}
             jobId={jobId}
             selectedCandidateId={effectiveCandidateId || undefined}
+            isPremium={isPremium}
+            companyCandidateCount={companyCandidateCount}
           />
 
           {/* Right Content - Candidate Overview */}

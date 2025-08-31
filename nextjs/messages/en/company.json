@@ -123,5 +123,58 @@
         "acceptingButton": "Accepting..."
       }
     }
+  },
+  "upgradeDialog": {
+    "title": "Upgrade to Premium",
+    "description": "Team management is a premium feature",
+    "features": {
+      "teamCollaboration": {
+        "title": "Team Collaboration",
+        "description": "Creating a team and inviting team members is a paid feature"
+      },
+      "unlimitedInterviews": {
+        "title": "Unlimited Interviews",
+        "description": "Unlimited candidate interviews and screening"
+      }
+    },
+    "cta": {
+      "emoji": "🚀",
+      "title": "Ready to scale your recruiting?",
+      "description": "Upgrade now to unlock all premium features and streamline your hiring process."
+    },
+    "buttons": {
+      "upgrade": "Upgrade to Premium",
+      "processing": "Processing...",
+      "maybeLater": "Maybe later"
+    }
+  },
+  "candidateLimitUpgradeDialog": {
+    "title": "Upgrade to Premium",
+    "description": "You've reached the free tier limit",
+    "features": {
+      "unlimitedCandidates": {
+        "title": "Unlimited Candidates",
+        "description": "Interview and evaluate unlimited candidates"
+      },
+      "advancedFiltering": {
+        "title": "Advanced Filtering",
+        "description": "Use advanced filters to find the perfect candidates"
+      },
+      "teamCollaboration": {
+        "title": "Team Collaboration",
+        "description": "Invite team members to review candidates together"
+      }
+    },
+    "cta": {
+      "emoji": "🚀",
+      "title": "Ready to scale your hiring?",
+      "description": "Upgrade now to unlock unlimited candidates and premium features."
+    },
+    "buttons": {
+      "upgrade": "Upgrade to Premium",
+      "processing": "Processing...",
+      "maybeLater": "Maybe later"
+    },
+    "limitMessage": "You've reached the limit of {limit} candidates on the free tier."
   }
 }

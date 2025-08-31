@@ -618,3 +618,43 @@ export async function fetchMoreCandidates(
   await log.flush();
   return candidatesWithUserData;
 }
+
+export const isCompanyPremium = async (companyId: string) => {
+  const log = new Logger().with({
+    functionName: "isCompanyPremium",
+    companyId,
+  });
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("recruiting_subscriptions")
+    .select("*")
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (error) {
+    log.error("Error fetching company premium status", { error });
+    await log.flush();
+    return false;
+  }
+
+  return !!data;
+};
+
+export const getCompanyCandidateCount = async (companyId: string) => {
+  const log = new Logger().with({
+    functionName: "getCompanyCandidateCount",
+    companyId,
+  });
+  const supabase = await createSupabaseServerClient();
+  const { count, error } = await supabase
+    .from("company_job_candidates")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", companyId);
+
+  if (error) {
+    log.error("Failed to get company candidate count", error);
+    throw error;
+  }
+
+  return count || 0;
+};

@@ -8,12 +8,16 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Candidate, fetchMoreCandidates } from "./actions";
 import { useTranslations } from "next-intl";
+import { FREE_TIER_CANDIDATE_COUNT } from "./constants";
+import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
 
 interface CandidatesListProps {
   initialCandidates: Candidate[];
   companyId: string;
   jobId: string;
   selectedCandidateId?: string;
+  isPremium: boolean;
+  companyCandidateCount: number;
 }
 
 export default function CandidatesList({
@@ -21,12 +25,15 @@ export default function CandidatesList({
   companyId,
   jobId,
   selectedCandidateId,
+  isPremium,
+  companyCandidateCount,
 }: CandidatesListProps) {
   const t = useTranslations("apply.recruiting.candidates.list");
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialCandidates.length === 10);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastCandidateRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
@@ -38,8 +45,18 @@ export default function CandidatesList({
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
+  const openUpgradeDialog = useCallback(() => {
+    setShowUpgradeDialog(true);
+  }, []);
+
   const loadMoreCandidates = useCallback(async () => {
     if (isLoading || !hasMore) return;
+
+    // Check free tier limit
+    if (!isPremium && candidates.length >= FREE_TIER_CANDIDATE_COUNT) {
+      openUpgradeDialog();
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -59,7 +76,15 @@ export default function CandidatesList({
     } finally {
       setIsLoading(false);
     }
-  }, [candidates.length, companyId, jobId, hasMore, isLoading]);
+  }, [
+    candidates.length,
+    companyId,
+    jobId,
+    hasMore,
+    isLoading,
+    isPremium,
+    openUpgradeDialog,
+  ]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -67,9 +92,18 @@ export default function CandidatesList({
       observerRef.current.disconnect();
     }
 
+    // Don't set up observer if free tier limit reached
+    const shouldObserve =
+      isPremium || candidates.length < FREE_TIER_CANDIDATE_COUNT;
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoading &&
+          shouldObserve
+        ) {
           loadMoreCandidates();
         }
       },
@@ -85,7 +119,7 @@ export default function CandidatesList({
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreCandidates, hasMore, isLoading]);
+  }, [loadMoreCandidates, hasMore, isLoading, isPremium, candidates.length]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString).toLocaleDateString("en-US", {
@@ -175,11 +209,45 @@ export default function CandidatesList({
                     {t("loadingMore")}
                   </div>
                 )}
+                {!isPremium &&
+                  candidates.length >= FREE_TIER_CANDIDATE_COUNT &&
+                  hasMore && (
+                    <div className="p-4 text-center border-t">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {t("list.freeTier.limitReached", {
+                          limit: FREE_TIER_CANDIDATE_COUNT,
+                        })}
+                      </p>
+                      {companyCandidateCount > FREE_TIER_CANDIDATE_COUNT && (
+                        <p className="text-xs font-medium text-foreground mb-2">
+                          {t("list.freeTier.moreCandidates", {
+                            count:
+                              companyCandidateCount - FREE_TIER_CANDIDATE_COUNT,
+                          })}
+                        </p>
+                      )}
+                      <button
+                        onClick={openUpgradeDialog}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        {t("list.freeTier.upgradeToViewAll", {
+                          count: companyCandidateCount,
+                        })}
+                      </button>
+                    </div>
+                  )}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+      <CandidateLimitUpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        companyId={companyId}
+        totalCandidates={companyCandidateCount}
+        viewedCandidates={candidates.length}
+      />
     </div>
   );
 }

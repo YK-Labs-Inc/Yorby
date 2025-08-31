@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -90,23 +90,19 @@ export function CreateCompanyPanel({
     createCompany,
     {
       success: false,
-      error: null,
+      error: "",
     }
   );
 
   // Handle create state changes
   useEffect(() => {
-    if (createState.success) {
-      toast.success(t("success"));
-      onOpenChange(false);
-      form.reset();
-    } else if (createState.error) {
+    if (createState.error) {
       logError("Error creating company:", {
         error: createState.error,
       });
       toast.error(createState.error || t("error"));
     }
-  }, [createState, onOpenChange, logError, t, form]);
+  }, [createState, onOpenChange, logError, t]);
 
   const handleClose = () => {
     form.reset();

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/form";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -223,7 +222,11 @@ export function JobDetailPanel({
               {mode === "create" ? t("description") : t("description")}
             </p>
             <Form {...form}>
-              <form action={formAction} className="space-y-6">
+              <form
+                id="job-detail-form"
+                action={formAction}
+                className="space-y-6"
+              >
                 <input type="hidden" name="company_id" value={companyId} />
                 {mode === "edit" && job && (
                   <input type="hidden" name="job_id" value={job.id} />
@@ -303,8 +306,8 @@ export function JobDetailPanel({
                 </Button>
                 <Button
                   onClick={() => {
-                    const formElement = document.querySelector(
-                      "form"
+                    const formElement = document.getElementById(
+                      "job-detail-form"
                     ) as HTMLFormElement;
                     formElement?.requestSubmit();
                   }}
