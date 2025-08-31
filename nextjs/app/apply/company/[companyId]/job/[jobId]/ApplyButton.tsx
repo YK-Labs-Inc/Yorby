@@ -26,21 +26,21 @@ export default function ApplyButton({ companyId, jobId }: ApplyButtonProps) {
   }, [state.error]);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="w-full">
       <input type="hidden" name="companyId" value={companyId} />
       <input type="hidden" name="jobId" value={jobId} />
       <input type="hidden" name="captchaToken" value={captchaToken} />
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <Button
           type="submit"
           size="lg"
-          className="w-full sm:w-auto"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
           disabled={!captchaToken || isPending}
         >
           {t("jobPage.buttons.applyNow")}
         </Button>
-
+        
         <div className="flex justify-center">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
