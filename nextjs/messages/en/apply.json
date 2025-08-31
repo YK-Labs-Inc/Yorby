@@ -16,6 +16,9 @@
       "checking": "Checking...",
       "applyNow": "Apply Now",
       "signInToApply": "Sign In to Apply"
+    },
+    "applySection": {
+      "readyToApply": "Ready to apply?"
     }
   },
   "applicationForm": {
