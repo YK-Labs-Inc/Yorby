@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -237,7 +236,11 @@ export function CreateJobInterviewPanel({
               {mode === "create" ? t("description") : t("editDescription")}
             </p>
             <Form {...form}>
-              <form action={formAction} className="space-y-6">
+              <form
+                action={formAction}
+                className="space-y-6"
+                id="job-interview-form"
+              >
                 <input type="hidden" name="custom_job_id" value={jobId} />
                 {mode === "create" && (
                   <input
@@ -341,8 +344,8 @@ export function CreateJobInterviewPanel({
                 </Button>
                 <Button
                   onClick={() => {
-                    const formElement = document.querySelector(
-                      "form"
+                    const formElement = document.getElementById(
+                      "job-interview-form"
                     ) as HTMLFormElement;
                     formElement?.requestSubmit();
                   }}
