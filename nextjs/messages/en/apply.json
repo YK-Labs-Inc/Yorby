@@ -264,9 +264,23 @@
       "breadcrumb": {
         "defaultCompany": "Company"
       },
-      "status": {
-        "published": "Published",
-        "draft": "Draft"
+      "metadata": {
+        "posted": "Posted {date}"
+      },
+      "actions": {
+        "reviewCandidates": {
+          "title": "Review Candidates",
+          "description": "View all applicants, review their profiles, watch interview recordings, and make hiring decisions",
+          "awaitingReview": "{count} awaiting review",
+          "viewAll": "View all →"
+        },
+        "configureInterview": {
+          "title": "Configure Interview Process",
+          "description": "Set up interview rounds, add screening questions, and customize the interview experience for candidates",
+          "notConfigured": "Not configured yet",
+          "configured": "{count} round{count, plural, =1 {} other {s}} configured",
+          "configure": "Configure →"
+        }
       },
       "sections": {
         "jobDescription": {
@@ -285,6 +299,10 @@
           "description": "Manage your interviews for this job listing"
         }
       }
+    },
+    "jobDescriptionToggle": {
+      "title": "Job Description",
+      "subtitle": "Full details about this position"
     },
     "candidates": {
       "page": {
