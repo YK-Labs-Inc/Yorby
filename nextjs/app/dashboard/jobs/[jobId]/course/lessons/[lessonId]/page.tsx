@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -132,12 +133,9 @@ export default async function LessonViewerPage({
   params: Promise<{ jobId: string; lessonId: string }>;
 }) {
   const { jobId, lessonId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
@@ -74,9 +75,7 @@ export async function createQuestion(
 
   try {
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not authenticated");
@@ -234,9 +233,7 @@ export async function updateQuestion(
 
   try {
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not authenticated");
@@ -386,9 +383,7 @@ export async function deleteQuestion(
 
   try {
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not authenticated");

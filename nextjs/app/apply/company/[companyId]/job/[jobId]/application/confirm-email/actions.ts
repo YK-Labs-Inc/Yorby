@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
@@ -33,9 +34,7 @@ export const resendConfirmationEmail = async (
       return { error: t("genericError"), success: false };
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("No user found");

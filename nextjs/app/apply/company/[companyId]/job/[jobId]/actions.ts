@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { fetchFilesFromGemini, FileEntry } from "@/utils/ai/gemini";
 import { getTranslations } from "next-intl/server";
@@ -507,9 +508,7 @@ export async function handleApplyAction(
     return { error: t("missingParameters") };
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const userId = user?.id;
 
@@ -602,13 +601,10 @@ export const submitApplication = async (
     });
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (userError || !user) {
-      logger.error("User not authenticated", { error: userError });
+    if (!user) {
+      logger.error("User not authenticated");
       throw new Error(t("userNotAuthenticated"));
     }
 

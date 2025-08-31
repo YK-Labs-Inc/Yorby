@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound, redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { Check, Clock, Circle } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -39,13 +40,10 @@ export default async function InterviewLayout({
 
   try {
     // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (userError || !user) {
-      logger.error(t("errors.userNotAuthenticated"), { error: userError });
+    if (!user) {
+      logger.error(t("errors.userNotAuthenticated"));
       redirect(`/apply/company/${companyId}/job/${jobId}`);
     }
 

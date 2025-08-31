@@ -1,5 +1,6 @@
 import PostHogClient from "@/app/posthog";
 import { createSupabaseServerClient } from "../supabase/server";
+import { getServerUser } from "../auth/server";
 
 export const posthog = PostHogClient();
 export const trackServerEvent = async ({
@@ -15,10 +16,7 @@ export const trackServerEvent = async ({
 }) => {
   let emailAddress = email;
   if (!emailAddress) {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (user) {
       emailAddress = user.email;
     }

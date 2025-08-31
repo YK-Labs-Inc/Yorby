@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 export async function markCandidateOnboardingComplete() {
   const log = new Logger().with({
@@ -12,15 +13,10 @@ export async function markCandidateOnboardingComplete() {
     const supabase = await createAdminClient();
 
     // Get the current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (userError || !user) {
-      log.error("Failed to get current user", {
-        error: userError?.message,
-      });
+    if (!user) {
+      log.error("Failed to get current user");
       return { success: false, error: "User not authenticated" };
     }
 

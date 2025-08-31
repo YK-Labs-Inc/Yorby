@@ -1,14 +1,12 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { fetchUserCredits } from "./actions";
 import { fetchHasSubscription } from "./actions";
 import ResumeBuilder from "./components/ResumeBuilder";
 import { posthog } from "@/utils/tracking/serverUtils";
 
 export default async function ResumesPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   let hasSubscription = false;
   let credits = 0;
   let isSubscriptionVariant = false;

@@ -2,6 +2,7 @@ import { InterviewCopilotCreationForm } from "./InterviewCopilotCreationForm";
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -22,15 +23,13 @@ const fetchUserCredits = async (userId: string) => {
 
 export default async function InterviewCopilotsPage() {
   const t = await getTranslations("interviewCopilots");
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");
   }
 
+  const supabase = await createSupabaseServerClient();
   const userCredits = await fetchUserCredits(user.id);
 
   return (

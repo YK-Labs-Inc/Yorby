@@ -19,6 +19,7 @@ import {
 import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { ShareLinkButton } from "./components/ShareLinkButton";
@@ -71,13 +72,10 @@ async function getCoachJobs(userId: string) {
 }
 
 export default async function ProgramsPage() {
-  const supabase = await createSupabaseServerClient();
   const t = await getTranslations("coachAdminPortal.programsPage");
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

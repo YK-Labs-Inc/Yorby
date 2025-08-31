@@ -12,6 +12,7 @@ import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { z } from "zod";
 import { headers } from "next/headers";
+import { getServerUser } from "@/utils/auth/server";
 
 export const startMockInterview = async (
   prevState: any,
@@ -45,9 +46,7 @@ export const startMockInterview = async (
   const supabase = await createSupabaseServerClient();
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (!user?.id) {
       throw new Error("User not found");
     }
@@ -337,11 +336,11 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       error.message,
     );
   }
-  const user = await supabase.auth.getUser();
-  if (user.data.user?.id) {
+  const user = await getServerUser();
+  if (user?.id) {
     await trackServerEvent({
       eventName: "anonymous_account_linked",
-      userId: user.data.user.id,
+      userId: user.id,
       email,
     });
   }
@@ -364,7 +363,7 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
     numberOfCredits,
   });
   const supabase = await createSupabaseServerClient();
-  const user = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     logger.error("User not found");
     await logger.flush();
@@ -372,7 +371,7 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
       error: translations("userNotFound"),
     };
   }
-  const userId = user.data.user?.id;
+  const userId = user.id;
   if (!userId) {
     logger.error("User ID not found");
     await logger.flush();

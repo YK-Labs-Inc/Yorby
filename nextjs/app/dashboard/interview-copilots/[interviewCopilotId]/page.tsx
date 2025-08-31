@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -68,13 +69,11 @@ export default async function Page({
   const { data: interviewCopilot } =
     await fetchInterviewCopilot(interviewCopilotId);
   const t = await getTranslations("interviewCopilots");
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");
   }
+  const supabase = await createSupabaseServerClient();
   const isAnonymous = user.is_anonymous ?? true;
 
   const successMessage = (await searchParams)?.success as string | undefined;

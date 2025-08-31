@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { InterviewRoundsManager } from "./InterviewRoundsManager";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -21,9 +22,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     params: { id, jobId },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

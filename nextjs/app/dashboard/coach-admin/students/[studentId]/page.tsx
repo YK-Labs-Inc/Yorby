@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 
 const AdminStudentPage = async ({
@@ -7,17 +8,15 @@ const AdminStudentPage = async ({
   params: Promise<{ studentId: string }>;
 }>) => {
   const { studentId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current coach's ID
-  const {
-    data: { user: coachUser },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
 
-  if (userError || !coachUser) {
+  if (!coachUser) {
     redirect("/sign-in");
   }
+
+  const supabase = await createSupabaseServerClient();
 
   const { data: coach, error: coachError } = await supabase
     .from("coaches")

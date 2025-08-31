@@ -2,6 +2,7 @@
 
 import { Logger } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import Stripe from "stripe";
@@ -30,9 +31,7 @@ export const upgradeCompany = async (
   try {
     // Get authenticated user
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       upgradeCompanyLog.error("User not authenticated");

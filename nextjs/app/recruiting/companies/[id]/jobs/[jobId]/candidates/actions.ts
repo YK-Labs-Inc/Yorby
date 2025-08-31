@@ -4,6 +4,7 @@ import {
   createSupabaseServerClient,
   createAdminClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 import { cache } from "react";
@@ -61,9 +62,7 @@ export const validateAccess = cache(
     const supabase = await createSupabaseServerClient();
 
     // Check authentication
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       redirect("/sign-in");

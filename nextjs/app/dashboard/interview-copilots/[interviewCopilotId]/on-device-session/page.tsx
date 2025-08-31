@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Session } from "./components/session";
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
@@ -31,10 +32,7 @@ export default async function OnDeviceSessionPage({
   params: Promise<{ interviewCopilotId: string }>;
 }) {
   const { interviewCopilotId } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");
   }

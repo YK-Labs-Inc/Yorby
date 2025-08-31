@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
@@ -21,9 +22,7 @@ export default async function ApplicationPage({ params }: PageProps) {
   });
 
   // Get user if logged in (may be anonymous)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   // Fetch company info
   const { data: company, error: companyError } = await supabase

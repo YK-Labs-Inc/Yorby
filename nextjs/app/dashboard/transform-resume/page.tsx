@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 import TransformResumeClient from "./components/TransformResumeClient";
 import { Logger } from "next-axiom";
@@ -63,10 +64,7 @@ const fetchResumes = async (userId: string) => {
 };
 
 export default async function TransformResumePage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

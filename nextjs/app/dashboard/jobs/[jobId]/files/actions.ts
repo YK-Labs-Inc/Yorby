@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { UploadResponse } from "@/utils/types";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
@@ -16,9 +17,7 @@ export const uploadAdditionalFiles = async ({
   files: File[];
 }) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return { error: "Not authenticated" };
@@ -145,9 +144,7 @@ const writeToDb = async (
 
 export const deleteFile = async (fileId: string) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return { error: "Not authenticated" };

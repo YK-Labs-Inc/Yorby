@@ -22,6 +22,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { MultiTenantProvider } from "./context/MultiTenantContext";
 import { ReferralProvider } from "./context/referral-context";
+import { getServerUser } from "@/utils/auth/server";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -209,10 +210,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
+  const user = await getServerUser();
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -4,6 +4,7 @@ import {
   createAdminClient,
   createSupabaseServerClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { redirect } from "next/navigation";
 import { isWithin24Hours } from "@/app/purchase/utils";
@@ -121,11 +122,7 @@ async function handleReferralCode(user: User, referralCode: string) {
 }
 
 export default async function OnboardingV2Page() {
-  const supabase = await createSupabaseServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

@@ -6,6 +6,7 @@ import { posthog } from "@/utils/tracking/serverUtils";
 import { isWithin24Hours } from "./utils";
 import UpgradeCard from "../dashboard/jobs/UpgradeCard";
 import { FREE_JOB_LIMIT } from "./constants";
+import { getServerUser } from "@/utils/auth/server";
 
 const fetchJobCount = async (userId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -24,10 +25,7 @@ export default async function PurchasePage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   // If no user is found, show the sign-up form
   if (!user) {

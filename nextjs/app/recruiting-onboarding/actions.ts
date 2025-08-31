@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -123,16 +124,15 @@ export async function markOnboardingComplete() {
   });
 
   try {
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not found");
       await logger.flush();
       return { error: "User not found" };
     }
+
+    const supabase = await createSupabaseServerClient();
 
     const { error } = await supabase.auth.updateUser({
       data: {
@@ -192,16 +192,15 @@ export async function createRecruitingCheckoutSession(
     return { error: tErrors("genericError") };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     logger.error("User not found");
     await logger.flush();
     return { error: tErrors("signInRequired") };
   }
+
+  const supabase = await createSupabaseServerClient();
 
   // Mark onboarding as complete when starting checkout
   await markOnboardingComplete();

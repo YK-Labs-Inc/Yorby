@@ -3,6 +3,7 @@ import PersonaMockInterviewClient from "./PersonaMockInterviewClient";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { PathHeader } from "@/components/marketing/PathHeader";
+import { getServerUser } from "@/utils/auth/server";
 
 export default async function MockInterviews({
   params,
@@ -18,10 +19,7 @@ export default async function MockInterviews({
     redirect("/mock-interviews/lbj");
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   return (
     <div className="min-h-screen">

@@ -12,19 +12,18 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserIcon, UsersIcon } from "lucide-react";
+import { getServerUser } from "@/utils/auth/server";
 
 export default async function ChooseRolePage() {
   // Authentication check
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");
   }
 
   // Check if user is actually a coach (for security)
+  const supabase = await createSupabaseServerClient();
   const { data: coachData, error: coachError } = await supabase
     .from("coaches")
     .select("id")

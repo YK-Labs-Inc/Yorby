@@ -2,12 +2,10 @@ import LandingPageV7 from "./LandingPageV7";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { getServerUser } from "@/utils/auth/server";
 
 export default async function Home() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const headersList = await headers();
   const hostname = headersList.get("host") || "";
