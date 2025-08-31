@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 interface RouteContext {
   params: Promise<{
@@ -83,13 +84,10 @@ export const PUT = withAxiom(
       const supabase = await createSupabaseServerClient();
 
       // Check if user is authenticated
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      const user = await getServerUser();
 
-      if (authError || !user) {
-        logger.error("Authentication failed", { authError });
+      if (!user) {
+        logger.error("Authentication failed");
         return NextResponse.json(
           { success: false, error: "Authentication required" },
           { status: 401 }
@@ -173,13 +171,10 @@ export const DELETE = withAxiom(
       const supabase = await createSupabaseServerClient();
 
       // Check if user is authenticated
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      const user = await getServerUser();
 
-      if (authError || !user) {
-        logger.error("Authentication failed", { authError });
+      if (!user) {
+        logger.error("Authentication failed");
         return NextResponse.json(
           { success: false, error: "Authentication required" },
           { status: 401 }

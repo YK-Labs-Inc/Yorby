@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import LessonContentEditor from "@/app/dashboard/coach-admin/programs/components/LessonContentEditor";
 
@@ -79,12 +80,9 @@ export default async function LessonEditorPage({
   params: Promise<{ programId: string; lessonId: string }>;
 }) {
   const { programId, lessonId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

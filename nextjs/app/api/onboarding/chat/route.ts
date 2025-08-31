@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { v4 as uuidv4 } from "uuid";
 import { CoreMessage } from "ai";
 import { z } from "zod";
+import { getServerUser } from "@/utils/auth/server";
 
 // Define the response schema
 const OnboardingResponseSchema = z.object({
@@ -39,9 +40,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {

@@ -11,6 +11,7 @@ import StudentActivitySidebar, {
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
 import StudentActivitySidebarV2 from "@/app/dashboard/coach-admin/components/StudentActivitySidebarV2";
 import { posthog } from "@/utils/tracking/serverUtils";
+import { getServerUser } from "@/utils/auth/server";
 
 // Fetch student info
 const fetchStudent = async (studentId: string) => {
@@ -22,11 +23,9 @@ const fetchStudent = async (studentId: string) => {
 
 // Fetch coach info
 const fetchCoach = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
   if (!coachUser) return null;
+  const supabase = await createSupabaseServerClient();
   const { data: coach } = await supabase
     .from("coaches")
     .select("id")

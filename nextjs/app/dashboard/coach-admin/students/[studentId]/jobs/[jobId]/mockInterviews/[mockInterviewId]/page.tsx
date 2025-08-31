@@ -2,6 +2,7 @@ import {
   createAdminClient,
   createSupabaseServerClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -21,11 +22,9 @@ const fetchStudent = async (studentId: string) => {
 };
 
 const fetchCoach = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
   if (!coachUser) return null;
+  const supabase = await createSupabaseServerClient();
   const { data: coach } = await supabase
     .from("coaches")
     .select("id")

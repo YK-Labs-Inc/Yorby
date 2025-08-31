@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import SampleAnswerForm from "@/app/dashboard/coach-admin/programs/components/SampleAnswerForm";
 
 // Helper function to get coach ID from user ID
@@ -88,12 +89,9 @@ export default async function EditSampleAnswerPage({
   params: Promise<{ programId: string; questionId: string; answerId: string }>;
 }) {
   const { programId, questionId, answerId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");
@@ -141,6 +139,7 @@ export default async function EditSampleAnswerPage({
   let initialAudioUrl: string | undefined = undefined;
   let initialAudioFilePath: string | undefined = undefined;
   if (sampleAnswer.file_path) {
+    const supabase = await createSupabaseServerClient();
     const { data: signedUrlData, error: signedUrlError } =
       await supabase.storage
         .from("coach_files")

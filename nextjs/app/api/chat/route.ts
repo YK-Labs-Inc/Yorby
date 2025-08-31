@@ -5,6 +5,7 @@ import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { CoreMessage } from "ai";
 import { getAllUserMemories } from "../memories/utils";
 import { Tables } from "@/utils/supabase/database.types";
+import { getServerUser } from "@/utils/auth/server";
 
 interface ChatRequestBody {
   message: string;
@@ -65,9 +66,7 @@ export async function POST(request: Request) {
       .eq("id", mockInterviewId)
       .single();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not found");

@@ -10,6 +10,7 @@ import {
   TablesUpdate,
 } from "@/utils/supabase/database.types";
 import { Logger } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 type QuestionInsert = TablesInsert<"custom_job_questions">;
 
@@ -83,9 +84,7 @@ export async function POST(req: Request) {
 
     // Verify authentication and authorization
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("Unauthorized request - no user");

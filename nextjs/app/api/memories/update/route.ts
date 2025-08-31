@@ -4,6 +4,7 @@ import { generateObjectWithFallback } from "@/utils/ai/gemini";
 import { CoreMessage } from "ai";
 import { getAllUserMemories } from "../utils";
 import { z } from "zod";
+import { getServerUser } from "@/utils/auth/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = new Logger().with({
@@ -15,9 +16,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   const supabase = await createSupabaseServerClient();
 
   // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,

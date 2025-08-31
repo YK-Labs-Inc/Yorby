@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { uploadFileToGemini } from "@/utils/ai/gemini";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
@@ -13,8 +14,8 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const supabase = await createSupabaseServerClient();
 
     // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    const user = await getServerUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

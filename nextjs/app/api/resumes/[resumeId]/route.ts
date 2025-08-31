@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 export const GET = withAxiom(
   async (
@@ -17,13 +18,10 @@ export const GET = withAxiom(
       const supabase = await createSupabaseServerClient();
 
       // Get the current user
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      const user = await getServerUser();
 
-      if (userError || !user) {
-        logger.error("User not found", { error: userError });
+      if (!user) {
+        logger.error("User not found");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 

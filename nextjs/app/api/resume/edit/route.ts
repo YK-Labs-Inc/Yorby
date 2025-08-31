@@ -10,6 +10,7 @@ import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { CoreMessage } from "ai";
 import { ResumeDataType } from "@/app/dashboard/resumes/components/ResumeBuilder";
 import { getAllUserMemories } from "../../memories/utils";
+import { getServerUser } from "@/utils/auth/server";
 
 const resumeItemDescriptionsSchema = z.object({
   created_at: z.string().nullable(),
@@ -269,9 +270,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   try {
     // Get user ID from Supabase
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (!user) {
       logger.error("User not found");
       return NextResponse.json({ error: "User not found" }, { status: 401 });
@@ -345,10 +344,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
 const checkIsRateLimited = async (req: AxiomRequest) => {
   const ip = ipAddress(req);
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const identifier = user?.id || ip;
   if (!identifier) {
     return true;
@@ -359,10 +355,7 @@ const checkIsRateLimited = async (req: AxiomRequest) => {
 
 const checkIsRateLimitedDemo = async (req: AxiomRequest) => {
   const ip = ipAddress(req);
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const identifier = user?.id || ip;
   if (!identifier) {
     return true;

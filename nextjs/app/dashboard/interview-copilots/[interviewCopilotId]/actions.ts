@@ -5,6 +5,7 @@ import {
   createSupabaseServerClient,
   downloadFile,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { UploadResponse } from "@/utils/types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { Logger } from "next-axiom";
@@ -159,9 +160,7 @@ export const uploadInterviewCopilotFile = async (
 
   try {
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not authenticated");
@@ -340,9 +339,7 @@ export const deleteInterviewCopilot = async (
     function: "deleteInterviewCopilot",
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     logger.error("User not authenticated");
@@ -402,9 +399,7 @@ export const unlockInterviewCopilot = async (
   });
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       return { error: t("generic") };

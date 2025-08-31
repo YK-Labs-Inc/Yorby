@@ -27,6 +27,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import type { Database } from "@/utils/supabase/database.types";
+import { getServerUser } from "@/utils/auth/server";
 
 // Helper function to get coach data from user ID
 async function getCoachData(userId: string) {
@@ -183,12 +184,9 @@ export default async function CourseOverviewPage({
   params: Promise<{ programId: string }>;
 }) {
   const { programId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

@@ -12,6 +12,7 @@ import {
 } from "@/utils/ai/gemini";
 import { z } from "zod";
 import { Tables } from "@/utils/supabase/database.types";
+import { getServerUser } from "@/utils/auth/server";
 
 // Zod schema for the aggregated verdict
 const AggregatedVerdictSchema = z.object({
@@ -176,9 +177,7 @@ export const GET = withAxiom(
       const supabase = await createSupabaseServerClient();
 
       // Check if user has access to this candidate
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getServerUser();
 
       if (!user) {
         logger.warn("Unauthorized request - no user", { candidateId });
@@ -247,9 +246,7 @@ export const POST = withAxiom(
       const supabaseAdmin = await createAdminClient();
 
       // Check if user has access
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getServerUser();
 
       if (!user) {
         logger.warn("Unauthorized request - no user", { candidateId });

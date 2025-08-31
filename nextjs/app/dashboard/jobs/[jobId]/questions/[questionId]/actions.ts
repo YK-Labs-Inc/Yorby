@@ -62,10 +62,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   }
   logger.info("Answer submitted");
   await logger.flush();
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (user?.id) {
     await trackServerEvent({
       eventName: "answer_submitted",
@@ -230,10 +227,7 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     null,
   );
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (user?.id) {
     await trackServerEvent({
       eventName: "answer_generated",
@@ -386,13 +380,11 @@ const writeAnswerToDatabase = async (
     audioRecordingDuration,
     function: "writeAnswerToDatabase",
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user?.id) {
     throw new Error("User not found");
   }
+  const supabase = await createSupabaseServerClient();
 
   // Convert duration to number if provided
   const durationInSeconds = audioRecordingDuration
@@ -1242,23 +1234,20 @@ const fetchCoachKnowledgeBaseFiles = async (jobId: string) => {
 };
 
 export async function markQuestionAnswerOnboardingViewed() {
-  const supabase = await createAdminClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const logger = new Logger().with({
     userId: user?.id,
     function: "markQuestionAnswerOnboardingViewed",
   });
 
-  if (userError || !user) {
-    logger.error("Error fetching user:", { error: userError?.message });
+  if (!user) {
+    logger.error("Error fetching user");
     await logger.flush();
     redirect("/login");
   }
 
+  const supabase = await createAdminClient();
   const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
     app_metadata: {
       ...user.app_metadata,
@@ -1284,23 +1273,20 @@ export async function markQuestionAnswerOnboardingViewed() {
 }
 
 export async function markMockInterviewOnboardingViewed() {
-  const supabase = await createAdminClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const logger = new Logger().with({
     userId: user?.id,
     function: "markMockInterviewOnboardingViewed",
   });
 
-  if (userError || !user) {
-    logger.error("Error fetching user:", { error: userError?.message });
+  if (!user) {
+    logger.error("Error fetching user");
     await logger.flush();
     redirect("/login");
   }
 
+  const supabase = await createAdminClient();
   const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
     app_metadata: {
       ...user.app_metadata,

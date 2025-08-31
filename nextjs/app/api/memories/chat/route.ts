@@ -6,6 +6,7 @@ import {
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { v4 as uuidv4 } from "uuid";
 import { CoreMessage } from "ai";
+import { getServerUser } from "@/utils/auth/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const formData = await req.formData();
@@ -25,9 +26,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const userId = user?.id || "anonymous";
 
   // If no conversationId is provided, create a new conversation

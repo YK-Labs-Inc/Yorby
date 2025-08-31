@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { UploadResponse } from "@/utils/types";
 import { Logger } from "next-axiom";
@@ -71,7 +72,7 @@ export const createJob = async ({
   let userId = "";
   let customJobId = "";
   try {
-    const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
+    const loggedInUserId = (await getServerUser())?.id;
     if (!loggedInUserId) {
       const { data, error } = await supabase.auth.signInAnonymously({
         options: {

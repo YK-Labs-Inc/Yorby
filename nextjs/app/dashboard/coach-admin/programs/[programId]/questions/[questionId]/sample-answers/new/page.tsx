@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import SampleAnswerForm from "@/app/dashboard/coach-admin/programs/components/SampleAnswerForm";
 
 // Helper function to get coach ID from user ID
@@ -46,12 +47,9 @@ export default async function NewSampleAnswerPage({
   params: Promise<{ programId: string; questionId: string }>;
 }) {
   const { programId, questionId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

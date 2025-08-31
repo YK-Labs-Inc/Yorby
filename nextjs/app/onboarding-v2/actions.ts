@@ -42,22 +42,20 @@ export async function completeOnboarding() {
 }
 
 export async function updateUserDisplayName(displayName: string) {
-  const supabase = await createAdminClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const logger = new Logger().with({
     userId: user?.id,
     function: "updateUserDisplayName",
   });
 
-  if (userError || !user) {
-    logger.error("Error fetching user:", { error: userError?.message });
+  if (!user) {
+    logger.error("Error fetching user");
     await logger.flush();
     return { error: "User not found or error fetching user." };
   }
+
+  const supabase = await createAdminClient();
 
   const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
     user_metadata: {

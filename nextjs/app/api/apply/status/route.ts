@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
 
@@ -12,13 +13,10 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const supabase = await createSupabaseServerClient();
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("Authentication failed", { authError });
+    if (!user) {
+      logger.error("Authentication failed");
       return NextResponse.json(
         { success: false, error: "Authentication required" },
         { status: 401 }

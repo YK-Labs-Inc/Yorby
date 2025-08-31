@@ -12,6 +12,7 @@ import { google } from "@ai-sdk/google";
 import { withTracing } from "@posthog/ai";
 import { posthog } from "../tracking/serverUtils";
 import { createSupabaseServerClient, downloadFile } from "../supabase/server";
+import { getServerUser } from "../auth/server";
 import { OpenAI } from "@posthog/ai";
 import { Speechify } from "@speechify/api-sdk";
 import { UploadResponse } from "../types";
@@ -72,10 +73,7 @@ export const generateObjectWithFallback = async <T extends z.ZodType>({
     ...loggingContext,
     ...modelConfig,
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   try {
     const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
@@ -151,10 +149,7 @@ export const generateTextWithFallback = async ({
     ...loggingContext,
     ...modelConfig,
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   try {
     const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
@@ -217,10 +212,7 @@ export const streamTextResponseWithFallback = async <T extends z.ZodType>({
     ...loggingContext,
     ...modelConfig,
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   try {
     const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
@@ -283,10 +275,7 @@ export const createTextStream = async ({
     ...loggingContext,
     ...modelConfig,
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   try {
     const model = withTracing(google(modelConfig.primaryModel!), posthog, {
       posthogDistinctId: user?.id,
@@ -415,10 +404,7 @@ export const streamObjectWithFallback = async <T extends z.ZodType>({
     ...loggingContext,
     ...modelConfig,
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   try {
     const model = withTracing(google(modelConfig.primaryModel!), posthog, {

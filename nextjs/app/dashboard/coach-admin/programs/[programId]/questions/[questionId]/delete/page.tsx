@@ -11,6 +11,7 @@ import {
 import { AlertTriangle, Trash2, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import Link from "next/link";
 import { deleteQuestion } from "./actions";
 import { getTranslations } from "next-intl/server";
@@ -89,12 +90,9 @@ export default async function DeleteQuestionPage({
   params: Promise<{ programId: string; questionId: string }>;
 }) {
   const { programId, questionId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

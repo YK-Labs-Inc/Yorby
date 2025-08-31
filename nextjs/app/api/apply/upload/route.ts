@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { uploadFileToGemini } from "@/utils/ai/gemini";
 import { Logger } from "next-axiom";
 import type { Database } from "@/utils/supabase/database.types";
+import { getServerUser } from "@/utils/auth/server";
 
 type UserFile = Database["public"]["Tables"]["user_files"]["Row"];
 
@@ -15,11 +16,8 @@ export async function POST(req: NextRequest) {
     const supabase = await createSupabaseServerClient();
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
+    const user = await getServerUser();
+    if (!user) {
       return NextResponse.json(
         { success: false, error: "User not authenticated" },
         { status: 401 }

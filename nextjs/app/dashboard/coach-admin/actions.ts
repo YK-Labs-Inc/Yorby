@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 
 export async function getCoachId(userId: string) {
@@ -28,10 +29,10 @@ export async function getCurrentUserCoachId() {
     const logger = new Logger().with({ function: "getCurrentUserCoachId" });
     const supabase = await createSupabaseServerClient();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const user = await getServerUser();
     
-    if (authError || !user) {
-        logger.error("Error fetching authenticated user:", { error: authError });
+    if (!user) {
+        logger.error("Error fetching authenticated user");
         await logger.flush();
         return null;
     }

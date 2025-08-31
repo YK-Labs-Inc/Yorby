@@ -2,6 +2,7 @@ import AnswerForm from "./AnswerForm";
 import { Tables } from "@/utils/supabase/database.types";
 import { OnboardingWrapper } from "./OnboardingWrapper";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import BackButton from "./BackButton";
 import { Logger } from "next-axiom";
 import { notFound, redirect } from "next/navigation";
@@ -57,12 +58,9 @@ const fetchQuestionSampleAnswers = async (sourceQuestionId: string) => {
 
 const checkOnboardingStatus = async () => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
-  if (error || !user) {
+  if (!user) {
     redirect("/login");
   }
 

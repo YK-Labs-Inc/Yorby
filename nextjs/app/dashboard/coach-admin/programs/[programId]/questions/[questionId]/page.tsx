@@ -25,6 +25,7 @@ import {
 import { Database } from "@/utils/supabase/database.types";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
+import { getServerUser } from "@/utils/auth/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
@@ -107,12 +108,9 @@ export default async function QuestionDetailPage({
 }) {
   const t = await getTranslations("coachAdminPortal.questionDetailPage");
   const { programId, questionId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

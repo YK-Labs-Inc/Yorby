@@ -6,6 +6,7 @@ import { CoreMessage } from "ai";
 import { getAllFiles } from "../utils";
 import { getAllUserMemories } from "../../memories/utils";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   let logger = req.log.with({
@@ -40,9 +41,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
 
     // Get user ID from Supabase
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       logger.error("User not found");

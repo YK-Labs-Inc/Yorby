@@ -11,6 +11,7 @@ import {
   QuestionWithSubmissions,
 } from "@/app/dashboard/coach-admin/components/StudentActivitySidebar";
 import { Tables } from "@/utils/supabase/database.types";
+import { getServerUser } from "@/utils/auth/server";
 
 const fetchStudent = async (studentId: string) => {
   const supabase = await createAdminClient();
@@ -27,11 +28,9 @@ const fetchStudent = async (studentId: string) => {
 };
 
 const fetchCoach = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
   if (!coachUser) return null;
+  const supabase = await createSupabaseServerClient();
   const { data: coach } = await supabase
     .from("coaches")
     .select("id")

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { getAllFiles } from "../utils";
 import { getAllUserMemories } from "../../memories/utils";
+import { getServerUser } from "@/utils/auth/server";
 
 export const POST = withAxiom(async (req: AxiomRequest) => {
   const logger = req.log.with({
@@ -31,9 +32,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
     }
     // Get user ID from Supabase
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (!user) {
       logger.error("User not found");
       return NextResponse.json({ error: "User not found" }, { status: 401 });
@@ -196,13 +195,7 @@ const saveResumeEducation = async (
   logger: Logger
 ) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) {
-    throw new Error(userError.message);
-  }
+  const user = await getServerUser();
   if (!user) {
     throw new Error("User not found");
   }
@@ -284,13 +277,7 @@ const saveResumeWorkExperience = async (
   logger: Logger
 ) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) {
-    throw new Error(userError.message);
-  }
+  const user = await getServerUser();
   if (!user) {
     throw new Error("User not found");
   }
@@ -361,13 +348,7 @@ const saveResumeSkills = async (
   logger: Logger
 ) => {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-  if (userError) {
-    throw new Error(userError.message);
-  }
+  const user = await getServerUser();
   if (!user) {
     throw new Error("User not found");
   }
@@ -812,11 +793,10 @@ const extractSkills = async (
 };
 
 const getCurrentUser = async () => {
-  const supabase = await createSupabaseServerClient();
-  const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
-  if (!loggedInUserId) {
+  const user = await getServerUser();
+  if (!user) {
     throw new Error("User not found");
   } else {
-    return loggedInUserId;
+    return user.id;
   }
 };

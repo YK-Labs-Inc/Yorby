@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { revalidatePath } from "next/cache";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
@@ -117,7 +118,7 @@ export async function createCoachFeedback(formData: FormData) {
     });
     try {
         // Get the current user and verify they are a coach
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = await getServerUser();
         if (!user) {
             logger.error("Not authenticated");
             await logger.flush();
@@ -190,7 +191,7 @@ export async function updateCoachFeedback(formData: FormData) {
     });
     try {
         // Verify coach access
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = await getServerUser();
         if (!user) {
             logger.error("Not authenticated");
             await logger.flush();
@@ -241,7 +242,7 @@ export async function deleteCoachFeedback(formData: FormData) {
     });
     try {
         // Verify coach access
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = await getServerUser();
         if (!user) {
             logger.error("Not authenticated");
             await logger.flush();

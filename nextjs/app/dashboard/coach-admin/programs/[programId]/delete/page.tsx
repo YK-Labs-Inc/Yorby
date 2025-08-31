@@ -18,6 +18,7 @@ import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import { getCoachId } from "../../../actions";
 import { FormMessage } from "@/components/form-message";
+import { getServerUser } from "@/utils/auth/server";
 
 async function getJobDetails(programId: string, coachId: string) {
   const logger = new Logger().with({ programId, coachId });
@@ -57,12 +58,9 @@ export default async function DeleteProgramPage({
   );
   const { programId } = await params;
   const { error_message } = await searchParams;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

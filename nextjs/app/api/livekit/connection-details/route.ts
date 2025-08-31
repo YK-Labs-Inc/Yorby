@@ -7,6 +7,7 @@ import {
 } from "livekit-server-sdk";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { withAxiom, AxiomRequest, Logger } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
 const API_KEY = process.env.LIVEKIT_API_KEY;
@@ -43,13 +44,10 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
 
     // Get the current user
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (userError || !user) {
-      log.error("Unauthorized access attempt", { error: userError });
+    if (!user) {
+      log.error("Unauthorized access attempt");
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
