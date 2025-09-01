@@ -5,13 +5,10 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  ChevronRight,
-  ChevronLeft,
-  Sparkles,
-  Check,
-} from "lucide-react";
+import { ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { markOnboardingComplete } from "./actions";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 const TOTAL_STEPS = 5;
 
@@ -27,6 +24,7 @@ export default function OnboardingFlow() {
   const t = useTranslations("onboarding.recruitingOnboarding");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { logError } = useAxiomLogging();
 
   // Initialize currentStep from search param if it exists
   const getInitialStep = () => {
@@ -41,6 +39,7 @@ export default function OnboardingFlow() {
   };
 
   const [currentStep, setCurrentStep] = useState(getInitialStep);
+  const [isLoading, setIsLoading] = useState(false);
 
   const currentStepKey = STEPS[currentStep];
 
@@ -59,13 +58,18 @@ export default function OnboardingFlow() {
     }
   }, [currentStep, router, searchParams]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (currentStep === TOTAL_STEPS - 1) {
-      // Navigate to recruiting page after the last step (comparison)
-      router.push("/recruiting");
+      // Mark onboarding as complete and navigate to recruiting page
+      setIsLoading(true);
+      try {
+        await markOnboardingComplete();
+      } catch (error) {
+        logError("Error completing onboarding:", { error });
+      }
     }
   };
 
@@ -74,10 +78,6 @@ export default function OnboardingFlow() {
       setCurrentStep(currentStep - 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  };
-
-  const handleSkip = () => {
-    router.push("/recruiting");
   };
 
   const progressPercentage = ((currentStep + 1) / TOTAL_STEPS) * 100;
@@ -461,7 +461,6 @@ export default function OnboardingFlow() {
           </div>
         );
 
-
       default:
         return null;
     }
@@ -490,13 +489,6 @@ export default function OnboardingFlow() {
               </span>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            onClick={handleSkip}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            {t("navigation.skipTour")}
-          </Button>
         </div>
 
         <AnimatePresence mode="wait">
@@ -530,12 +522,19 @@ export default function OnboardingFlow() {
             <Button
               onClick={handleNext}
               size="lg"
+              disabled={isLoading}
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-6 text-base font-medium shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 transition-all duration-300"
             >
-              {currentStep === TOTAL_STEPS - 1 
-                ? t("navigation.getStarted") 
-                : t(`steps.${currentStepKey}.cta`)}
-              <ChevronRight className="ml-2 h-5 w-5" />
+              {isLoading ? (
+                t("navigation.loading")
+              ) : (
+                <>
+                  {currentStep === TOTAL_STEPS - 1
+                    ? t("navigation.getStarted")
+                    : t(`steps.${currentStepKey}.cta`)}
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </>
+              )}
             </Button>
           )}
         </div>

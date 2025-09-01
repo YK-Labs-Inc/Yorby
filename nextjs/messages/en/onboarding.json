@@ -243,7 +243,8 @@
       "skipTour": "Skip tour",
       "close": "Close",
       "step": "Step {current} of {total}",
-      "getStarted": "Get Started"
+      "getStarted": "Get Started",
+      "loading": "Loading..."
     },
     "branding": {
       "title": "Yorby Recruiting"

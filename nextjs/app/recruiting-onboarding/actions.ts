@@ -1,6 +1,6 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { headers } from "next/headers";
@@ -132,10 +132,11 @@ export async function markOnboardingComplete() {
       return { error: "User not found" };
     }
 
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createAdminClient();
 
-    const { error } = await supabase.auth.updateUser({
-      data: {
+    const { error } = await supabase.auth.admin.updateUserById(user.id, {
+      user_metadata: {
+        ...user.user_metadata,
         completed_onboarding_funnel: true,
       },
     });
@@ -152,7 +153,6 @@ export async function markOnboardingComplete() {
       userId: user.id,
     });
     await logger.flush();
-    return { success: true };
   } catch (error) {
     logger.error("Error marking onboarding complete:", {
       error: error instanceof Error ? error.message : JSON.stringify(error),
@@ -160,6 +160,8 @@ export async function markOnboardingComplete() {
     await logger.flush();
     return { error: "Failed to update onboarding status" };
   }
+
+  redirect("/recruiting");
 }
 
 export async function createRecruitingCheckoutSession(
@@ -199,8 +201,6 @@ export async function createRecruitingCheckoutSession(
     await logger.flush();
     return { error: tErrors("signInRequired") };
   }
-
-  const supabase = await createSupabaseServerClient();
 
   // Mark onboarding as complete when starting checkout
   await markOnboardingComplete();
