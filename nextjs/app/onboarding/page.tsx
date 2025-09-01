@@ -4,14 +4,16 @@ import { ChatUI } from "@/app/components/chat/ChatUI";
 import { TtsProvider } from "@/app/context/TtsContext";
 import { Card } from "@/components/ui/card";
 import { CoreMessage } from "ai";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useActionState } from "react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { useUser } from "@/context/UserContext";
 import { MediaDeviceProvider } from "../dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/MediaDeviceContext";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { markCandidateOnboardingComplete } from "./actions";
+import { markCandidateOnboardingComplete, skipOnboarding } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const OnboardingChat = () => {
   const user = useUser();
@@ -19,6 +21,11 @@ const OnboardingChat = () => {
   const t = useTranslations("onboarding");
   const [countdown, setCountdown] = useState<number | null>(null);
   const { logError, logInfo } = useAxiomLogging();
+
+  const [skipState, skipFormAction, isSkipPending] = useActionState(
+    skipOnboarding,
+    { error: "" }
+  );
 
   const [messages, setMessages] = useState<CoreMessage[]>([
     {
@@ -88,7 +95,7 @@ const OnboardingChat = () => {
         logInfo("Onboarding completed, starting countdown to dashboard", {
           userId: user?.id,
         });
-        
+
         // Mark the candidate onboarding as complete in app_metadata
         markCandidateOnboardingComplete().then((result) => {
           if (!result.success) {
@@ -102,7 +109,7 @@ const OnboardingChat = () => {
             });
           }
         });
-        
+
         setCountdown(7);
       }
 
@@ -143,30 +150,66 @@ const OnboardingChat = () => {
     return () => clearTimeout(timer);
   }, [countdown, router]);
 
+  // Handle skip action errors
+  useEffect(() => {
+    if (skipState?.error) {
+      logError("Failed to skip onboarding", {
+        error: skipState.error,
+        userId: user?.id,
+      });
+    }
+  }, [skipState?.error, logError, user?.id]);
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative">
-      {/* Countdown Timer */}
-      {countdown !== null && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700"
-        >
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-              {t("countdownTimer.redirectingText")}
-            </p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {countdown}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              {t("countdownTimer.secondsText")}
-            </p>
+    <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {/* Header with Skip Button */}
+      <div className="flex justify-end p-4">
+        {countdown !== null ? (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg px-4 py-3 border border-gray-200 dark:border-gray-700"
+          >
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                {t("countdownTimer.redirectingText")}
+              </p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {countdown}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                {t("countdownTimer.secondsText")}
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="flex flex-col items-end">
+            <form action={skipFormAction}>
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={isSkipPending}
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              >
+                {isSkipPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t("skipButton.loading")}
+                  </>
+                ) : (
+                  t("skipButton.text")
+                )}
+              </Button>
+            </form>
+            {skipState?.error && (
+              <p className="text-sm text-red-500 mt-2">{skipState.error}</p>
+            )}
           </div>
-        </motion.div>
-      )}
+        )}
+      </div>
+
       {/* Chat Interface */}
-      <div className="flex-1 p-4 md:p-8 overflow-hidden">
+      <div className="flex-1 p-4 pt-0 md:p-8 md:pt-0 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -7,6 +7,14 @@
     "welcomeMessage": "Welcome to Yorby! 🎯 \n\nI'm here to help match you with your perfect job opportunity. \n\nTo get started quickly, do you have a resume you can upload? This will help me understand your background so we can focus on what really matters - what you're looking for in your next role.\n\nYou can drag and drop a file or click the paperclip icon below. Don't have one handy? No problem - we can start with a quick conversation instead!",
     "errorMessage": "Sorry, something went wrong. Please try again."
   },
+  "skipButton": {
+    "text": "Skip Onboarding",
+    "loading": "Skipping...",
+    "errors": {
+      "notAuthenticated": "User not authenticated",
+      "unexpected": "An unexpected error occurred, please try again."
+    }
+  },
   "recruitingOnboarding": {
     "steps": {
       "problem": {
@@ -243,7 +251,8 @@
       "skipTour": "Skip tour",
       "close": "Close",
       "step": "Step {current} of {total}",
-      "getStarted": "Get Started"
+      "getStarted": "Get Started",
+      "loading": "Loading..."
     },
     "branding": {
       "title": "Yorby Recruiting"

@@ -75,8 +75,8 @@ const fetchUserCoachInfo = async (userId: string) => {
 const fetchJobs = async (userId: string, userCoachId: string | null = null) => {
   const supabase = await createSupabaseServerClient();
 
-  // Start with base query to get user's jobs
-  let query = supabase.from("custom_jobs").select("*").eq("user_id", userId);
+  // Start with base query to get user's jobs (excluding company jobs)
+  let query = supabase.from("custom_jobs").select("*").eq("user_id", userId).is("company_id", null);
 
   // If user has a coach, exclude jobs created by that coach
   // This ensures student view doesn't show jobs where they're a student of the coach

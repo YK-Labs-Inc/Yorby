@@ -78,7 +78,7 @@ export function JobDetailPanel({
     createJob,
     {
       success: false,
-      error: null,
+      error: "",
     }
   );
 
@@ -119,10 +119,7 @@ export function JobDetailPanel({
 
   // Handle create state changes
   useEffect(() => {
-    if (createState.success) {
-      toast.success(t("createSuccess"));
-      onOpenChange(false);
-    } else if (createState.error) {
+    if (createState.error) {
       logError("Error creating job:", {
         error: createState.error,
         companyId,

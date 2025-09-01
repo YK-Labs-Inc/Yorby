@@ -93,6 +93,8 @@ export async function createJob(
   const job_title = formData.get("job_title") as string;
   const job_description = formData.get("job_description") as string;
   const company_id = formData.get("company_id") as string;
+  let jobId: string | null = null;
+  const t = await getTranslations("recruitingActions.errors");
 
   const createJobLog = new Logger().with({
     function: "createJob",
@@ -100,7 +102,6 @@ export async function createJob(
   });
   try {
     const supabase = await createSupabaseServerClient();
-    const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
     const user = await getServerUser();
@@ -164,14 +165,18 @@ export async function createJob(
     }
 
     // Create the job
-    const { error: jobError } = await supabase.from("custom_jobs").insert({
-      job_title,
-      job_description,
-      status: "unlocked",
-      company_id,
-      company_name: company.name,
-      user_id: user.id,
-    });
+    const { data: job, error: jobError } = await supabase
+      .from("custom_jobs")
+      .insert({
+        job_title,
+        job_description,
+        status: "unlocked",
+        company_id,
+        company_name: company.name,
+        user_id: user.id,
+      })
+      .select()
+      .single();
 
     if (jobError) {
       createJobLog.error("Error creating job", {
@@ -186,16 +191,19 @@ export async function createJob(
       userId: user.id,
       companyId: company_id,
     });
-
-    // Revalidate the company jobs page
-    revalidatePath(`/recruiting/companies/${company.id}/jobs`);
-
-    return { success: true, error: null };
+    jobId = job.id;
   } catch (error) {
     createJobLog.error("Unexpected error creating job", { error });
     const t = await getTranslations("recruitingActions.errors");
     return { success: false, error: t("unexpectedError") };
   }
+
+  if (jobId) {
+    // Revalidate the company jobs page
+    redirect(`/recruiting/companies/${company_id}/jobs/${jobId}`);
+  }
+
+  return { success: false, error: t("unexpectedError") };
 }
 
 export async function updateJob(
