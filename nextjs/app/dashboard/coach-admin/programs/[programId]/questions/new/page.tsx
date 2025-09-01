@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import QuestionForm from "../../../components/QuestionForm";
 import { Logger } from "next-axiom";
 
@@ -49,12 +50,9 @@ export default async function NewQuestionPage({
   params: Promise<{ programId: string }>;
 }) {
   const { programId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import InterviewCopilotDemoClientComponent from "./InterviewCopilotDemoClientComponent";
@@ -26,10 +27,7 @@ const fetchDemoVideo = async () => {
 };
 
 export default async function InterviewCopilotDemo() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const signedUrl = await fetchDemoVideo();
   if (!signedUrl) {
     const t = await getTranslations("interviewCopilotDemo.errors");

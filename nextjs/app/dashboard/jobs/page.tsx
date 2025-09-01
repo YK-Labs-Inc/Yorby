@@ -12,13 +12,11 @@ import { FREE_JOB_LIMIT } from "@/app/purchase/constants";
 export const maxDuration = 300;
 
 const fetchJobs = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");
   }
+  const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("custom_jobs")
     .select("*")

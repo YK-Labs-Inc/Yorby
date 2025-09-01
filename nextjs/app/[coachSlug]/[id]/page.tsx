@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import React from "react";
 import CoachSignInForm from "../CoachSignInForm";
@@ -105,11 +106,9 @@ export default async function ProgramRegistrationPage({
   }
 
   const { coach, program } = data;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const t = await getTranslations("coachPortal");
+  const supabase = await createSupabaseServerClient();
 
   // If the current user is the coach, redirect to admin
   if (user && user.id === coach.user_id) {

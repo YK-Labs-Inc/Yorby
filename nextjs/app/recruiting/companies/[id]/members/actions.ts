@@ -5,6 +5,7 @@ import {
   createSupabaseServerClient,
   createAdminClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
@@ -54,13 +55,10 @@ export async function inviteCompanyMember(
     const t = await getTranslations("company.invitePanel.errors");
 
     // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("User not authenticated", { error: authError });
+    if (!user) {
+      logger.error("User not authenticated");
       await logger.flush();
       return { error: t("unauthorized"), success: false };
     }
@@ -210,13 +208,10 @@ export async function cancelInvitation(
     const t = await getTranslations("company.cancelInvitation");
 
     // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("User not authenticated", { error: authError });
+    if (!user) {
+      logger.error("User not authenticated");
       await logger.flush();
       return { error: t("error"), success: false };
     }
@@ -275,13 +270,10 @@ export async function resendInvitation(
     const t = await getTranslations("company.resendInvitation");
 
     // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("User not authenticated", { error: authError });
+    if (!user) {
+      logger.error("User not authenticated");
       await logger.flush();
       return { error: t("error"), success: false };
     }

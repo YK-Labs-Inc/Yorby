@@ -1,4 +1,5 @@
 import { createSupabaseServerClient, createAdminClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { notFound, redirect } from "next/navigation";
 import { MembersTable } from "@/components/company/members-table";
 import { MembersPageClient } from "./members-page-client";
@@ -22,13 +23,10 @@ export default async function CompanyMembersPage({ params }: PageProps) {
   });
 
   // Get current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
-  if (authError || !user) {
-    logger.error("User not authenticated", { error: authError });
+  if (!user) {
+    logger.error("User not authenticated");
     await logger.flush();
     redirect("/auth/sign-in");
   }

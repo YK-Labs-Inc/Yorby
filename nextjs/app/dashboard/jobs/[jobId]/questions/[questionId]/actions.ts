@@ -20,6 +20,7 @@ import { createAdminClient } from "@/utils/supabase/server";
 import { Resend } from "resend";
 import { CoachLowScoreNotification } from "@/components/email/CoachLowScoreNotification";
 import { headers } from "next/headers";
+import { getServerUser } from "@/utils/auth/server";
 
 export const submitAnswer = async (prevState: any, formData: FormData) => {
   const jobId = formData.get("jobId") as string;
@@ -52,7 +53,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
       answer,
       bucketName,
       filePath,
-      audioRecordingDuration,
+      audioRecordingDuration
     );
   } catch (error: unknown) {
     logger.error("Error writing answer to database", { error });
@@ -62,10 +63,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
   }
   logger.info("Answer submitted");
   await logger.flush();
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (user?.id) {
     await trackServerEvent({
       eventName: "answer_submitted",
@@ -81,9 +79,7 @@ export const submitAnswer = async (prevState: any, formData: FormData) => {
     });
   }
   if (errorMessage) {
-    redirect(
-      `${questionPath}?error=${errorMessage}`,
-    );
+    redirect(`${questionPath}?error=${errorMessage}`);
   }
   return {
     submissionId,
@@ -227,13 +223,10 @@ export const generateAnswer = async (prevState: any, formData: FormData) => {
     },
     null,
     null,
-    null,
+    null
   );
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (user?.id) {
     await trackServerEvent({
       eventName: "answer_generated",
@@ -256,7 +249,7 @@ const processAnswer = async (
   answer: string,
   bucketName: string | null,
   filePath: string | null,
-  audioRecordingDuration: string | null,
+  audioRecordingDuration: string | null
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -276,21 +269,25 @@ const processAnswer = async (
     feedback,
     bucketName,
     filePath,
-    audioRecordingDuration,
+    audioRecordingDuration
   );
   logger.info("Wrote answer to database");
   return submission.id;
 };
 
-const sendCoachLowScoreNotification = async (
-  { job, questionId, feedback, submissionId, studentUserId }: {
-    job: any;
-    questionId: string;
-    feedback: { pros: string[]; cons: string[]; correctness_score: number };
-    submissionId: string;
-    studentUserId: string;
-  },
-) => {
+const sendCoachLowScoreNotification = async ({
+  job,
+  questionId,
+  feedback,
+  submissionId,
+  studentUserId,
+}: {
+  job: any;
+  questionId: string;
+  feedback: { pros: string[]; cons: string[]; correctness_score: number };
+  submissionId: string;
+  studentUserId: string;
+}) => {
   const logger = new Logger().with({
     function: "sendCoachLowScoreNotification",
   });
@@ -319,7 +316,7 @@ const sendCoachLowScoreNotification = async (
     }
     // Get coach email
     const { data: coachUser } = await adminClient.auth.admin.getUserById(
-      coachRow.user_id,
+      coachRow.user_id
     );
     const coachEmail = coachUser?.user?.email;
     if (!coachEmail) {
@@ -328,24 +325,23 @@ const sendCoachLowScoreNotification = async (
       return;
     }
     // Get student name
-    const { data: studentUser } = await adminClient.auth.admin.getUserById(
-      studentUserId,
-    );
-    const studentName = studentUser?.user?.user_metadata?.full_name ||
-      studentUser?.user?.email || "Student";
+    const { data: studentUser } =
+      await adminClient.auth.admin.getUserById(studentUserId);
+    const studentName =
+      studentUser?.user?.user_metadata?.full_name ||
+      studentUser?.user?.email ||
+      "Student";
     // Get question text
     const questionRow = await fetchQuestion(questionId);
     // Build review link - using new programs path with search params
     const baseUrl = (await headers()).get("origin");
-    const reviewLink =
-      `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/programs?job=${job.id}&tab=questions&item=${questionId}&submissionId=${submissionId}`;
+    const reviewLink = `${baseUrl}/dashboard/coach-admin/students/${job.user_id}/programs?job=${job.id}&tab=questions&item=${questionId}&submissionId=${submissionId}`;
     // Send email
     const resend = new Resend(process.env.RESEND_API_KEY!);
     await resend.emails.send({
       from: "Yorby <notifications@noreply.yorby.ai>",
       to: [coachEmail],
-      subject:
-        `Student ${studentName} received a low score (${feedback.correctness_score}%) on a question`,
+      subject: `Student ${studentName} received a low score (${feedback.correctness_score}%) on a question`,
       react: CoachLowScoreNotification({
         studentName,
         jobTitle: job.job_title,
@@ -375,7 +371,7 @@ const writeAnswerToDatabase = async (
   feedback: { pros: string[]; cons: string[]; correctness_score: number },
   bucketName: string | null,
   filePath: string | null,
-  audioRecordingDuration: string | null,
+  audioRecordingDuration: string | null
 ) => {
   const logger = new Logger().with({
     jobId: jobId,
@@ -386,13 +382,11 @@ const writeAnswerToDatabase = async (
     audioRecordingDuration,
     function: "writeAnswerToDatabase",
   });
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user?.id) {
     throw new Error("User not found");
   }
+  const supabase = await createSupabaseServerClient();
 
   // Convert duration to number if provided
   const durationInSeconds = audioRecordingDuration
@@ -487,7 +481,7 @@ const LOW_SCORE_THRESHOLD = 70;
 export const generateFeedback = async (
   jobId: string,
   questionId: string,
-  answer: string,
+  answer: string
 ) => {
   const trackingProperties = {
     questionId,
@@ -514,31 +508,32 @@ export const generateFeedback = async (
     answer,
     coreCriteria,
     [...files, ...knowledgeBaseFiles],
-    logger,
+    logger
   );
 
   // Step 4: Compare with sample answers (if any)
-  const sampleComparison = sampleAnswers.length > 0
-    ? await compareWithSampleAnswers(
-      job,
-      question,
-      answer,
-      sampleAnswers,
-      [...files, ...knowledgeBaseFiles],
-      logger,
-    )
-    : { strengths: [], weaknesses: [] };
+  const sampleComparison =
+    sampleAnswers.length > 0
+      ? await compareWithSampleAnswers(
+          job,
+          question,
+          answer,
+          sampleAnswers,
+          [...files, ...knowledgeBaseFiles],
+          logger
+        )
+      : { strengths: [], weaknesses: [] };
 
   // Step 5: Apply coach knowledge base (if available)
   const coachFeedback = coachKnowledgeBase
     ? await applyCoachKnowledgeBase(
-      job,
-      question,
-      answer,
-      coachKnowledgeBase,
-      [...files, ...knowledgeBaseFiles],
-      logger,
-    )
+        job,
+        question,
+        answer,
+        coachKnowledgeBase,
+        [...files, ...knowledgeBaseFiles],
+        logger
+      )
     : { coach_feedback: [] };
 
   // Step 6: Synthesize final feedback
@@ -546,7 +541,7 @@ export const generateFeedback = async (
     criteriaGrading,
     sampleComparison,
     coachFeedback,
-    logger,
+    logger
   );
 
   logger.info("Feedback generated", finalFeedback);
@@ -556,7 +551,7 @@ export const generateFeedback = async (
 // Step 1: Extract core criteria from answer guidelines
 const extractCoreCriteria = async (
   answerGuidelines: string,
-  logger: Logger,
+  logger: Logger
 ) => {
   const prompt = `
     You are an expert at analyzing interview question answer guidelines.
@@ -617,7 +612,7 @@ const gradeAgainstCriteria = async (
       mimeType: string;
     };
   }[],
-  logger: Logger,
+  logger: Logger
 ) => {
   const prompt = `
     You are an expert job interviewer grading a candidate's answer against specific criteria.
@@ -644,11 +639,9 @@ const gradeAgainstCriteria = async (
     ${question}
     
     ## Core Criteria
-    ${
-    coreCriteria.map((criterion, index) => `${index + 1}. ${criterion}`).join(
-      "\n",
-    )
-  }
+    ${coreCriteria
+      .map((criterion, index) => `${index + 1}. ${criterion}`)
+      .join("\n")}
     
     ## Candidate's Answer
     ${answer}
@@ -699,7 +692,7 @@ const compareWithSampleAnswers = async (
       mimeType: string;
     };
   }[],
-  logger: Logger,
+  logger: Logger
 ) => {
   const prompt = `
     You are an expert job interviewer comparing a candidate's answer to high-quality sample answers.
@@ -728,11 +721,9 @@ const compareWithSampleAnswers = async (
     ${question}
     
     ## Sample Answers
-    ${
-    sampleAnswers.map((sa, index) =>
-      `### Sample Answer ${index + 1}\n${sa.answer}`
-    ).join("\n\n")
-  }
+    ${sampleAnswers
+      .map((sa, index) => `### Sample Answer ${index + 1}\n${sa.answer}`)
+      .join("\n\n")}
     
     ## Candidate's Answer
     ${answer}
@@ -781,7 +772,7 @@ const applyCoachKnowledgeBase = async (
       mimeType: string;
     };
   }[],
-  logger: Logger,
+  logger: Logger
 ) => {
   const prompt = `
     You are evaluating a candidate's answer using program-specific knowledge and frameworks.
@@ -854,7 +845,7 @@ const synthesizeFinalFeedback = async (
   criteriaGrading: any,
   sampleComparison: any,
   coachFeedback: any,
-  logger: Logger,
+  logger: Logger
 ) => {
   const prompt = `
     You are synthesizing multiple evaluations of a candidate's interview answer into final feedback.
@@ -885,21 +876,21 @@ const synthesizeFinalFeedback = async (
     ## Criteria-Based Grading
     **Criteria Met:** ${criteriaGrading.criteria_met.join(", ") || "None"}
     **Criteria Partially Met:** ${
-    criteriaGrading.criteria_partially_met.join(", ") || "None"
-  }
+      criteriaGrading.criteria_partially_met.join(", ") || "None"
+    }
     **Criteria Missed:** ${criteriaGrading.criteria_missed.join(", ") || "None"}
     **Preliminary Score:** ${criteriaGrading.preliminary_score}
     
     ## Sample Answer Comparison
     **Strengths:** ${sampleComparison.strengths.join(", ") || "None identified"}
     **Weaknesses:** ${
-    sampleComparison.weaknesses.join(", ") || "None identified"
-  }
+      sampleComparison.weaknesses.join(", ") || "None identified"
+    }
     
     ## Coach Feedback
     **Additional Insights:** ${
-    coachFeedback.coach_feedback.join(", ") || "None provided"
-  }
+      coachFeedback.coach_feedback.join(", ") || "None provided"
+    }
   `;
 
   const result = await generateObjectWithFallback({
@@ -995,7 +986,7 @@ export const getCustomJobFiles = async (jobId: string) => {
           mimeType: file.mime_type,
         },
       };
-    }),
+    })
   );
 };
 
@@ -1097,7 +1088,7 @@ const fetchCoachKnowledgeBaseForJob = async (jobId: string) => {
     }
 
     const coachKnowledgeBase = await fetchCoachKnowledgeBase(
-      customJob.coach_id,
+      customJob.coach_id
     );
     logger.info("Using coach's general knowledge base", {
       jobId,
@@ -1224,7 +1215,7 @@ const fetchCoachKnowledgeBaseFiles = async (jobId: string) => {
             mimeType: file.mime_type,
           },
         };
-      }),
+      })
     );
 
     logger.info("Fetched knowledge base files", {
@@ -1242,27 +1233,24 @@ const fetchCoachKnowledgeBaseFiles = async (jobId: string) => {
 };
 
 export async function markQuestionAnswerOnboardingViewed() {
-  const supabase = await createAdminClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const logger = new Logger().with({
     userId: user?.id,
     function: "markQuestionAnswerOnboardingViewed",
   });
 
-  if (userError || !user) {
-    logger.error("Error fetching user:", { error: userError?.message });
+  if (!user) {
+    logger.error("Error fetching user");
     await logger.flush();
     redirect("/login");
   }
 
+  const supabase = await createAdminClient();
   const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
     app_metadata: {
       ...user.app_metadata,
-      "viewed_question_answer_onboarding": true,
+      viewed_question_answer_onboarding: true,
     },
   });
 
@@ -1277,34 +1265,31 @@ export async function markQuestionAnswerOnboardingViewed() {
     {
       userId: user.id,
       data,
-    },
+    }
   );
   await logger.flush();
   return { success: true };
 }
 
 export async function markMockInterviewOnboardingViewed() {
-  const supabase = await createAdminClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   const logger = new Logger().with({
     userId: user?.id,
     function: "markMockInterviewOnboardingViewed",
   });
 
-  if (userError || !user) {
-    logger.error("Error fetching user:", { error: userError?.message });
+  if (!user) {
+    logger.error("Error fetching user");
     await logger.flush();
     redirect("/login");
   }
 
+  const supabase = await createAdminClient();
   const { data, error } = await supabase.auth.admin.updateUserById(user.id, {
     app_metadata: {
       ...user.app_metadata,
-      "viewed_mock_interview_onboarding": true,
+      viewed_mock_interview_onboarding: true,
     },
   });
 
@@ -1318,7 +1303,7 @@ export async function markMockInterviewOnboardingViewed() {
     {
       userId: user.id,
       data,
-    },
+    }
   );
   await logger.flush();
 }

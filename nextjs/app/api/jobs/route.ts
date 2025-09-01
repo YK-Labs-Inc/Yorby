@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { AxiomRequest, withAxiom } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 // GET /api/jobs - List jobs
 export const GET = withAxiom(async (request: AxiomRequest) => {
@@ -17,13 +18,10 @@ export const GET = withAxiom(async (request: AxiomRequest) => {
     const companyId = searchParams.get("companyId");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("Authentication failed", { authError });
+    if (!user) {
+      logger.error("Authentication failed");
       return NextResponse.json(
         { success: false, error: "Authentication required" },
         { status: 401 }
@@ -82,13 +80,10 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
     const supabase = await createSupabaseServerClient();
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("Authentication failed", { authError });
+    if (!user) {
+      logger.error("Authentication failed");
       return NextResponse.json(
         { success: false, error: "Authentication required" },
         { status: 401 }

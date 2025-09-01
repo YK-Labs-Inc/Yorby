@@ -6,6 +6,7 @@ import { Logger } from "next-axiom";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { getServerUser } from "@/utils/auth/server";
 
 const log = new Logger().with({ module: "actions/companies" });
 
@@ -24,12 +25,9 @@ export async function createCompany(
     const supabase = await createClient();
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 
@@ -105,12 +103,9 @@ export async function createJob(
     const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 
@@ -222,12 +217,9 @@ export async function updateJob(
     const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 
@@ -323,12 +315,9 @@ export async function deleteJob(
     const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 
@@ -419,12 +408,9 @@ export async function updateCompany(
     const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 
@@ -518,12 +504,9 @@ export async function deleteCompany(
     const t = await getTranslations("recruitingActions.errors");
 
     // Check if user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
+    if (!user) {
       return { success: false, error: t("unauthorized") };
     }
 

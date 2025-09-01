@@ -2,6 +2,7 @@
 
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
 import { UploadResponse } from "@/utils/types";
@@ -17,8 +18,8 @@ export const createInterviewCopilot = async (
   const captchaToken = formData.get("captchaToken") as string;
   let userId = "";
 
-  const loggedInUserId = (await supabase.auth.getUser()).data.user?.id;
-  if (!loggedInUserId) {
+  const loggedInUser = await getServerUser();
+  if (!loggedInUser) {
     const { data, error } = await supabase.auth.signInAnonymously({
       options: {
         captchaToken,
@@ -32,7 +33,7 @@ export const createInterviewCopilot = async (
     }
     userId = data.user?.id;
   } else {
-    userId = loggedInUserId;
+    userId = loggedInUser.id;
   }
 
   if (!userId) {

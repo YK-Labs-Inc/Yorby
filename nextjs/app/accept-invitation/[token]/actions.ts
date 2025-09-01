@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -19,22 +20,19 @@ export async function acceptInvitation(
   });
 
   try {
-    const supabase = await createSupabaseServerClient();
-
     // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
-    if (authError || !user) {
-      logger.error("User not authenticated", { error: authError });
+    if (!user) {
+      logger.error("User not authenticated");
       await logger.flush();
       return {
         error: t("notAuthenticated"),
         success: false,
       };
     }
+
+    const supabase = await createSupabaseServerClient();
 
     // Find the invitation by token
     const { data: invitation, error: inviteError } = await supabase

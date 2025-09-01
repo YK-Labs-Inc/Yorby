@@ -1,5 +1,6 @@
 import { APP_CONFIG_DEFAULTS } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/app-config";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { notFound, redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
 import { InterviewComponent } from "./InterviewComponent";
@@ -52,9 +53,7 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
   const { companyId, jobId, candidateInterviewId } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect(`/apply/company/${companyId}/job/${jobId}`);

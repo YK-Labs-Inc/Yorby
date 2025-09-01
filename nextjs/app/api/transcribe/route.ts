@@ -5,6 +5,7 @@ import { AxiomRequest, withAxiom } from "next-axiom";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
+import { getServerUser } from "@/utils/auth/server";
 
 // Initialize Gemini
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
@@ -127,9 +128,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
     logger.info("Transcription complete");
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (user?.id) {
       await trackServerEvent({
         eventName: "transcription_generated",

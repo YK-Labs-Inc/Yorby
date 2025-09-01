@@ -2,15 +2,12 @@ import React from "react";
 import { redirect } from "next/navigation";
 import ProgramForm from "../components/ProgramForm";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { getCoachId } from "../../actions";
 
 export default async function NewJobPage() {
-  const supabase = await createSupabaseServerClient();
-
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

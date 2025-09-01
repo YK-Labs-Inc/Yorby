@@ -6,6 +6,7 @@ import {
 } from "@/utils/supabase/server";
 import StudentActivityHeader from "@/app/dashboard/coach-admin/components/StudentActivityHeader";
 import QueryProvider from "./providers/QueryProvider";
+import { getServerUser } from "@/utils/auth/server";
 
 // Fetch student info
 const fetchStudent = async (studentId: string) => {
@@ -17,11 +18,9 @@ const fetchStudent = async (studentId: string) => {
 
 // Fetch coach info
 const fetchCoach = async () => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
   if (!coachUser) return null;
+  const supabase = await createSupabaseServerClient();
   const { data: coach } = await supabase
     .from("coaches")
     .select("id")

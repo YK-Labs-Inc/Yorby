@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
@@ -44,9 +45,7 @@ export default async function ConfirmEmailPage({
   const t = await getTranslations("apply");
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     logger.error("No user found on confirm email page");

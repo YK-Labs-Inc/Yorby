@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { getInvitationDetails } from "./actions";
@@ -26,13 +27,10 @@ export default async function AcceptInvitationPage({
   });
 
   // Check if user is authenticated
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   // If not logged in, redirect to sign-up with this page as redirect URL
-  if (authError || !user) {
+  if (!user) {
     logger.info("User not authenticated, redirecting to sign-up", { token });
     await logger.flush();
 

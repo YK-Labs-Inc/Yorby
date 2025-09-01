@@ -4,6 +4,7 @@ import { CompanyJobsManager } from "@/app/recruiting/CompanyJobsManager";
 import { CompanyHeader } from "@/app/recruiting/CompanyHeader";
 import { UpgradeSuccessBanner } from "./UpgradeSuccessBanner";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 
 interface PageProps {
@@ -20,9 +21,7 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     params: { id },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

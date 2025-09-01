@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import ResumeBuilder from "../components/ResumeBuilder";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -19,10 +20,7 @@ export default async function ResumePage({
 }) {
   const t = await getTranslations("resumeBuilder");
   const resumeId = (await params).resumeId;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");
   }

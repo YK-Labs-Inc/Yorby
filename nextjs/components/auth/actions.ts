@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getServerUser } from "@/utils/auth/server";
 
 export const linkAnonymousAccount = async (
   prevState: any,
@@ -50,11 +51,11 @@ export const linkAnonymousAccount = async (
       error: error.message,
     };
   }
-  const user = await supabase.auth.getUser();
-  if (user.data.user?.id) {
+  const user = await getServerUser();
+  if (user?.id) {
     await trackServerEvent({
       eventName: "anonymous_account_linked",
-      userId: user.data.user.id,
+      userId: user.id,
       email,
     });
   }

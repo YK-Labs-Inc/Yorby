@@ -2,6 +2,7 @@ import {
   createAdminClient,
   createSupabaseServerClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { ReferralCodeSection } from "./referral-code-section";
 import { getTranslations } from "next-intl/server";
@@ -52,14 +53,13 @@ const fetchReferralCode = async (user: User) => {
 export default async function ReferralsPage() {
   const t = await getTranslations("referrals.page");
   let logger = new Logger().with({ page: "ReferralsPage" });
-  let supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");
   }
+
+  let supabase = await createSupabaseServerClient();
 
   const isMemoriesEnabled = Boolean(
     await posthog.isFeatureEnabled("enable-memories", user.id)

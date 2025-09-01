@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
+import { getServerUser } from "@/utils/auth/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
@@ -221,10 +222,7 @@ export async function createCheckoutSession(formData: FormData) {
     await logger.flush();
     redirect(`${origin}/purchase?error=${t("errors.generic")}`);
   }
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     logger.error("User not found", {
       message: "User not found",
@@ -232,6 +230,7 @@ export async function createCheckoutSession(formData: FormData) {
     await logger.flush();
     redirect(`${origin}/purchase?error=${t("errors.login")}`);
   }
+  const supabase = await createSupabaseServerClient();
   const userId = user.id;
   const email = user.email;
   const metadata: { [key: string]: string } = {
@@ -292,9 +291,7 @@ export const redirectToStripeCustomerPortal = async (returnUrl: string) => {
   const origin = (await headers()).get("origin");
   let sessionUrl = "";
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     const userId = user?.id;
     if (!userId) {
       throw new Error("User not found");

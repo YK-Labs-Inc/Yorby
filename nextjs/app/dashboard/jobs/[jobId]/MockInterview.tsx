@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { getTranslations } from "next-intl/server";
 import CreateMockInterviewButton from "./CreateMockInterviewButton";
 import InterviewFilter from "./InterviewFilter";
@@ -49,10 +50,7 @@ export default async function MockInterview({
     return true;
   });
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   const hasViewedOnboarding =
     user?.app_metadata?.viewed_mock_interview_onboarding === true;
   

@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
@@ -54,9 +55,7 @@ export default async function QuestionsPage({ params }: PageProps) {
     params: { companyId, jobId },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

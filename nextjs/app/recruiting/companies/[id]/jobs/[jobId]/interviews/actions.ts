@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { revalidatePath } from "next/cache";
 import { Logger } from "next-axiom";
 import { Database } from "@/utils/supabase/database.types";
@@ -28,9 +29,7 @@ export async function createJobInterview(
     const supabase = await createSupabaseServerClient();
 
     // Get the current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       throw new Error("Not authenticated");
@@ -116,9 +115,7 @@ export async function updateInterviewOrder(
     const supabase = await createSupabaseServerClient();
 
     // Get the current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       throw new Error("Not authenticated");
@@ -233,9 +230,7 @@ export async function updateJobInterview(
     const supabase = await createSupabaseServerClient();
 
     // Get the current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       throw new Error("Not authenticated");
@@ -322,9 +317,7 @@ export async function deleteJobInterview(
     const supabase = await createSupabaseServerClient();
 
     // Get the current user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
 
     if (!user) {
       throw new Error("Not authenticated");

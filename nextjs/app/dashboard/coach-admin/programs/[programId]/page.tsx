@@ -36,6 +36,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
 import QuestionStatusToggle from "../components/QuestionStatusToggle";
@@ -134,16 +135,15 @@ export default async function ProgramDetailPage({
   params: Promise<{ programId: string }>;
 }) {
   const { programId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");
   }
+
+  const supabase = await createSupabaseServerClient();
 
   // Verify the user is a coach
   const coachData = await getCoachData(user.id);

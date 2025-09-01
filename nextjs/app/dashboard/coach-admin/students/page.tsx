@@ -12,6 +12,7 @@ import {
   createAdminClient,
   createSupabaseServerClient,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import StudentListEntry from "./StudentListEntry";
@@ -27,21 +28,16 @@ const fetchStudentsForCoach = async () => {
   let logger = new Logger();
   const t = await getTranslations("coachAdminPortal.studentsPage");
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user: coachUser },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const coachUser = await getServerUser();
 
-  if (userError || !coachUser) {
-    logger.error(t("loggerMessages.errorFetchingAuthUser"), {
-      error: userError,
-    });
+  if (!coachUser) {
+    logger.error(t("loggerMessages.errorFetchingAuthUser"));
     return [];
   }
 
   logger = logger.with({ userId: coachUser.id });
 
+  const supabase = await createSupabaseServerClient();
   const { data: coach, error: coachError } = await supabase
     .from("coaches")
     .select("id")
@@ -145,14 +141,13 @@ const fetchStudentsForCoach = async () => {
 
 export default async function ListEnrolledStudentsPage() {
   const t = await getTranslations("coachAdminPortal.studentsPage");
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");
   }
+
+  const supabase = await createSupabaseServerClient();
 
   const students = await fetchStudentsForCoach();
 

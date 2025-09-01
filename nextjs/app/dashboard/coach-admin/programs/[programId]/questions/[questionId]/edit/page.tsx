@@ -4,6 +4,7 @@ import { Home, BookOpen, Briefcase, MessageSquare, Pencil } from "lucide-react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { updateQuestion } from "../../../../actions";
 import QuestionForm from "../../../../components/QuestionForm";
+import { getServerUser } from "@/utils/auth/server";
 
 // Helper function to get coach ID from user ID
 async function getCoachId(userId: string) {
@@ -67,12 +68,9 @@ export default async function EditQuestionPage({
   params: Promise<{ programId: string; questionId: string }>;
 }) {
   const { programId, questionId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

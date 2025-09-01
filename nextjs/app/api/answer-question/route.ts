@@ -4,6 +4,7 @@ import {
   createSupabaseServerClient,
   downloadFile,
 } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Tables } from "@/utils/supabase/database.types";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { UploadResponse } from "@/utils/types";
@@ -46,10 +47,7 @@ export const POST = withAxiom(async (req: AxiomRequest) => {
       await getInterviewCopilot(interviewCopilotId, logger);
 
     // Get the current user for tracking
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     const userId = user?.id || "anonymous";
 
     await trackServerEvent({

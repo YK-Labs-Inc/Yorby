@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { posthog } from "@/utils/tracking/serverUtils";
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 
 export default async function Layout({
   children,
@@ -17,10 +17,7 @@ export default async function Layout({
   const t = await getTranslations(namespace);
   
   // Check if recruiter portal is enabled
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   
   let isRecruiterPortalEnabled = false;
   if (user) {

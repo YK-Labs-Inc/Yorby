@@ -1,6 +1,7 @@
 import { H1 } from "@/components/typography";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MockInterview from "./MockInterview";
 import { Input } from "@/components/ui/input";
@@ -110,9 +111,7 @@ export default async function CustomJob({
   isMultiTenantExperience: boolean;
 }) {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");
   }

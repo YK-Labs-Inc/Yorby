@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { posthog } from "@/utils/tracking/serverUtils";
 import { fetchUserCredits } from "../dashboard/resumes/actions";
 import { fetchHasSubscription } from "../dashboard/resumes/actions";
@@ -6,10 +7,7 @@ import ResumeBuilder from "../dashboard/resumes/components/ResumeBuilder";
 import { PathHeader } from "@/components/marketing/PathHeader";
 
 export default async function ChatToResume() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   let hasSubscription = false;
   let credits = 0;
   let isSubscriptionVariant = false;

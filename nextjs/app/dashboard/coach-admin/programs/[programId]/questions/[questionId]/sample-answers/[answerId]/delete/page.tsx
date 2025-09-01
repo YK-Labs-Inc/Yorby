@@ -12,6 +12,7 @@ import {
 import { AlertTriangle, Trash2, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import Link from "next/link";
 import { deleteSampleAnswer } from "./actions";
 import { FormMessage } from "@/components/form-message";
@@ -63,12 +64,9 @@ export default async function DeleteSampleAnswerPage({
   const t = await getTranslations("coachAdminPortal.sampleAnswerDeletePage");
   const { programId, questionId, answerId } = await params;
   const { error_message } = await searchParams;
-  const supabase = await createSupabaseServerClient();
 
   // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return redirect("/sign-in");

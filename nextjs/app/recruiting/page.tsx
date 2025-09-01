@@ -4,14 +4,13 @@ import { RecruitingDashboardSkeleton } from "@/app/recruiting/RecruitingDashboar
 import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { Logger } from "next-axiom";
+import { getServerUser } from "@/utils/auth/server";
 
 async function RecruitingDashboardContent() {
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({ path: "/recruiting/page" });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

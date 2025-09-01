@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { H1 } from "@/components/typography";
 import Link from "next/link";
@@ -40,9 +41,7 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
   // Get translations
   const t = await getTranslations("apply.recruiting.jobDetail");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect("/sign-in");

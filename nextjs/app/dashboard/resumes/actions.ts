@@ -1,6 +1,7 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/utils/supabase/server";
+import { getServerUser } from "@/utils/auth/server";
 import { ResumeDataType } from "./components/ResumeBuilder";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
@@ -28,9 +29,7 @@ export const saveResume = async (resume: ResumeDataType, resumeId: string) => {
     const supabase = await createSupabaseServerClient();
 
     const { resume_sections, ...baseResumeInfo } = resume;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getServerUser();
     if (!user) {
       logger.error("User not authenticated");
       await logger.flush();
@@ -475,14 +474,13 @@ export async function uploadUserFile(
 }
 
 export async function deleteResumeFile(fileId: string) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     return { error: "Not authenticated" };
   }
+
+  const supabase = await createSupabaseServerClient();
 
   const logger = new Logger().with({
     fileId,
