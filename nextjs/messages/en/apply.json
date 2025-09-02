@@ -703,18 +703,18 @@
   "candidateInterview": {
     "interviewProcessed": {
       "nextRound": "Your interview has been processed. Click below to continue to the next interview round.",
-      "complete": "Your interview has been processed successfully. Click below to complete your application."
+      "allComplete": "Great job! You've completed all interview rounds.",
+      "prepareForMore": "Want to prepare for other job interviews?",
+      "practiceDescription": "Generate practice questions and try our AI mock interview tool to boost your confidence."
     },
     "buttons": {
       "continueToNext": "Continue to Next Interview",
-      "completeApplication": "Complete Application"
+      "practiceInterview": "Practice Interview Skills"
     },
     "interviewComplete": "Interview Complete!",
     "errors": {
-      "generatingAggregatedAnalysis": "Error generating final analysis",
       "unknownError": "An unknown error occurred — please try again later or contact support at support@yorby.ai"
-    },
-    "generatingAnalysis": "Saving your interview — don't close this page"
+    }
   },
   "codingInterview": {
     "problemStatement": "Problem Statement",
@@ -815,5 +815,8 @@
       "title": "Delete Job Listing?",
       "description": "This action cannot be undone. This will permanently delete the job listing and all associated data including candidates, interviews, and questions."
     }
+  },
+  "triggerProcessInterview": {
+    "error": "Failed to process interview. Please try again."
   }
 } 

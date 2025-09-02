@@ -122,7 +122,7 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
       nextInterviewId={nextInterviewId}
       jobId={jobId}
       companyId={companyId}
-      candidateId={application?.id}
+      candidateId={application.id}
       interviewType={currentInterview.interview_type}
       questionDetails={questionDetails}
     />
