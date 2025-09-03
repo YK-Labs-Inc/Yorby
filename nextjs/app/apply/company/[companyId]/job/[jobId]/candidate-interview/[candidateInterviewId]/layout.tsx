@@ -83,7 +83,7 @@ export default async function InterviewLayout({
     const { data: candidateInterviews, error: candidateInterviewsError } =
       await supabase
         .from("candidate_job_interviews")
-        .select("id, interview_id, status")
+        .select("id, interview_id")
         .eq("candidate_id", candidate.id);
 
     if (candidateInterviewsError) {
@@ -93,16 +93,20 @@ export default async function InterviewLayout({
       notFound();
     }
 
+    const currentInterviewIndex = candidateInterviews.findIndex(
+      (ci) => ci.id === candidateInterviewId
+    );
+
     // Combine job interviews with candidate interview status
     const interviewsWithStatus: InterviewWithStatus[] = jobInterviews.map(
-      (jobInterview) => {
+      (jobInterview, index) => {
         const candidateInterview = candidateInterviews?.find(
           (ci) => ci.interview_id === jobInterview.id
         );
         return {
           ...jobInterview,
           candidateInterviewId: candidateInterview?.id,
-          status: candidateInterview?.status,
+          status: currentInterviewIndex - 1 < index ? "pending" : "completed",
         };
       }
     );

@@ -2595,7 +2595,7 @@
       "editDescription": "Update the company information"
     },
     "companyHeader": {
-      "backToDashboard": "← Back to Dashboard",
+      "backToDashboard": "Dashboard",
       "employees": "{size} employees",
       "manageMembers": "Manage Members"
     },

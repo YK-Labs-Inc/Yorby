@@ -133,31 +133,14 @@ export default async function QuestionsPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link
-            href={`/recruiting/companies/${companyId}`}
-            className="hover:text-foreground flex items-center gap-1"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {company?.name || t("breadcrumb.defaultCompany")}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
-            className="hover:text-foreground flex items-center gap-1"
-          >
-            {job.job_title || t("breadcrumb.defaultJob")}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
-            className="hover:text-foreground flex items-center gap-1"
-          >
-            {t("sections.interviewRounds.title")}
-          </Link>
-          <span>/</span>
-          <span>{interview.name}</span>
-        </div>
+        {/* Back button */}
+        <Link
+          href={`/recruiting/companies/${companyId}/jobs/${jobId}/interviews`}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          <span>{t("back")}</span>
+        </Link>
 
         <Suspense fallback={<QuestionsTableLoading />}>
           <QuestionsTableWrapper

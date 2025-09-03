@@ -63,35 +63,14 @@ export default async function CandidatesPage({
   return (
     <div className="h-screen bg-white flex flex-col">
       <div className="container mx-auto px-4 pt-4 flex-shrink-0">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-          <Link
-            href={`/recruiting/companies/${companyId}`}
-            className="hover:text-foreground"
-          >
-            {company.name}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
-            className="hover:text-foreground"
-          >
-            {job.job_title}
-          </Link>
-          <span>/</span>
-          <span>{t("breadcrumb.candidates")}</span>
-        </div>
-
-        {/* Header */}
-        <div>
-          <Link
-            href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("backToJobDetails")}
-          </Link>
-        </div>
+        {/* Back button */}
+        <Link
+          href={`/recruiting/companies/${companyId}/jobs/${jobId}`}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-4"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          <span>{t("back")}</span>
+        </Link>
       </div>
 
       {/* Main Content Area - Takes remaining height */}
