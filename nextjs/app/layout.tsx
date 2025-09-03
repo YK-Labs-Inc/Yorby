@@ -30,10 +30,8 @@ const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: defaultUrl.includes("yorby") ? "Yorby" : "Perfect Interview",
-  description: defaultUrl.includes("yorby")
-    ? "The AI Recruiter"
-    : "Ace your next interview with AI-powered interview prep",
+  title: "Yorby",
+  description: "Crush your next interview with free AI-powered interview prep",
 };
 
 export interface StudentWithEmailAndName extends Tables<"user_coach_access"> {
@@ -76,7 +74,11 @@ const fetchJobs = async (userId: string, userCoachId: string | null = null) => {
   const supabase = await createSupabaseServerClient();
 
   // Start with base query to get user's jobs (excluding company jobs)
-  let query = supabase.from("custom_jobs").select("*").eq("user_id", userId).is("company_id", null);
+  let query = supabase
+    .from("custom_jobs")
+    .select("*")
+    .eq("user_id", userId)
+    .is("company_id", null);
 
   // If user has a coach, exclude jobs created by that coach
   // This ensures student view doesn't show jobs where they're a student of the coach

@@ -7,6 +7,68 @@ import { Calendar } from "lucide-react";
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { Logger } from "next-axiom";
 import ApplyButton from "./ApplyButton";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{
+    companyId: string;
+    jobId: string;
+  }>;
+}): Promise<Metadata> {
+  const { companyId, jobId } = await params;
+  const supabase = await createSupabaseServerClient();
+
+  // Fetch job data for metadata
+  const { data: job } = await supabase
+    .from("custom_jobs")
+    .select("job_title")
+    .eq("id", jobId)
+    .eq("company_id", companyId)
+    .single();
+
+  // Fetch company data for metadata
+  const { data: company } = await supabase
+    .from("companies")
+    .select("name")
+    .eq("id", companyId)
+    .single();
+
+  const jobTitle = job?.job_title || "Join Our Team";
+  const companyName = company?.name || "Company";
+  const title = `${jobTitle} - ${companyName}`;
+  const description = `Apply for ${jobTitle} role at ${companyName}. Start your application process today.`;
+
+  const ogImageUrl = new URL(
+    "/api/og/job",
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  );
+  ogImageUrl.searchParams.set("title", jobTitle);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: ogImageUrl.toString(),
+          width: 1200,
+          height: 630,
+          alt: `${jobTitle} at ${companyName}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl.toString()],
+    },
+  };
+}
 
 export default async function ApplyPage({
   params,
