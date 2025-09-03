@@ -23,6 +23,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { MultiTenantProvider } from "./context/MultiTenantContext";
 import { ReferralProvider } from "./context/referral-context";
 import { getServerUser } from "@/utils/auth/server";
+import { UnsupportedBrowser } from "@/components/unsupported-browser";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? `https://${process.env.NEXT_PUBLIC_SITE_URL}`
@@ -342,6 +343,7 @@ export default async function RootLayout({
                               <main className="w-full bg-background">
                                 {children}
                               </main>
+                              <UnsupportedBrowser />
                               <Toaster />
                               <SonnerToaster />
                             </KnowledgeBaseProvider>
