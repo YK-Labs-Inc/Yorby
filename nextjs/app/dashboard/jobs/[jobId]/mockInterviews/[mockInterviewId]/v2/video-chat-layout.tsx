@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
-import { Track } from "livekit-client";
+import { LocalParticipant, Track } from "livekit-client";
 import {
   type TrackReference,
   type ReceivedChatMessage,
   useLocalParticipant,
   useVoiceAssistant,
+  useTrackVolume,
+  useTracks,
 } from "@livekit/components-react";
 import { AnimatePresence, motion } from "motion/react";
 import { AgentTile } from "@/app/components/livekit/agent-tile";
@@ -26,6 +28,7 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
   } = useVoiceAssistant();
 
   const { localParticipant } = useLocalParticipant();
+  const tracks = useTracks();
   const cameraPublication = localParticipant.getTrackPublication(
     Track.Source.Camera
   );
@@ -38,6 +41,17 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
     : undefined;
 
   const isAvatar = agentVideoTrack !== undefined;
+
+  const localTracks = tracks.filter(
+    ({ participant }) => participant instanceof LocalParticipant
+  );
+  const localMicTrack = localTracks.find(
+    ({ source }) => source === Track.Source.Microphone
+  );
+
+  // Use the volume hook to detect speaking
+  const volume = useTrackVolume(localMicTrack);
+  const userIsSpeaking = volume > 0.5;
 
   return (
     <div className="inset-0 bg-background">
@@ -89,7 +103,11 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
           </div>
 
           {/* User Video - Right Side */}
-          <div className="flex-1 relative bg-muted rounded-lg overflow-hidden">
+          <div
+            className={`flex-1 relative bg-muted rounded-lg overflow-hidden ${
+              userIsSpeaking && "ring-4 ring-primary"
+            }`}
+          >
             {cameraTrack && (
               <VideoTile
                 trackRef={cameraTrack}
