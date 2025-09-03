@@ -1,0 +1,7 @@
+{
+  "title": "We work with Chrome and Edge",
+  "description": "You're currently using {browserName}. For the best experience, please switch to Chrome or Edge.",
+  "downloadChrome": "Download Chrome",
+  "downloadEdge": "Download Microsoft Edge",
+  "or": "or"
+}

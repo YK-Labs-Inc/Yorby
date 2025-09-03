@@ -80,6 +80,19 @@ export default getRequestConfig(async () => {
     );
   }
 
+  let unsupportedBrowserMessages = {};
+
+  try {
+    unsupportedBrowserMessages = (
+      await import(`../messages/${locale}/unsupported-browser.json`)
+    ).default;
+  } catch (error) {
+    // It's okay if the file doesn't exist yet
+    console.info(
+      `Unsupported browser messages not found for ${locale}, using defaults`
+    );
+  }
+
   // Merge all messages
   // Feature-specific messages override main messages if there are conflicts
   const messages = {
@@ -91,6 +104,7 @@ export default getRequestConfig(async () => {
     onboarding: onboardingMessages,
     purchase: purchaseMessages,
     landingPageV7: landingPageV7Messages,
+    unsupportedBrowser: unsupportedBrowserMessages,
   };
 
   return {
