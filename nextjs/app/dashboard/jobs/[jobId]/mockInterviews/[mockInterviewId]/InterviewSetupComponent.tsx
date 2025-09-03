@@ -87,7 +87,7 @@ export default function InterviewSetup({
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
+        <div className="flex flex-col justify-between">
           <Card>
             <CardContent className="p-6">
               <div className="space-y-4">
@@ -124,43 +124,15 @@ export default function InterviewSetup({
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <Label htmlFor="voice">{t("voice.label")}</Label>
-                <select
-                  id="voice"
-                  value={selectedVoice.voiceId}
-                  onChange={(e) => {
-                    const voice = VOICE_OPTIONS.find(
-                      (v) => v.voiceId === e.target.value
-                    );
-                    if (voice) {
-                      setSelectedVoice(voice);
-                    }
-                  }}
-                  className="w-full p-2 border rounded-md"
-                >
-                  {VOICE_OPTIONS.map((voice) => (
-                    <option key={voice.voiceId} value={voice.voiceId}>
-                      {voice.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex justify-end">
+            <form action={startInterviewAction}>
+              <input type="hidden" name="jobId" value={jobId} />
+              <Button size="lg" disabled={!stream}>
+                {t("startButton")}
+              </Button>
+            </form>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <form action={startInterviewAction}>
-          <input type="hidden" name="jobId" value={jobId} />
-          <Button size="lg" disabled={!stream}>
-            {t("startButton")}
-          </Button>
-        </form>
       </div>
     </div>
   );

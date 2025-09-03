@@ -240,6 +240,12 @@
   },
   "recruiting": {
     "shareApplicationLink": "Share Application Link",
+    "shareSection": {
+      "title": "Share Job with Candidates",
+      "description": "Get candidates to apply by sharing the application link",
+      "helpText": "Send this link to potential candidates so they can view the job details and submit their application:",
+      "buttonText": "Copy Application Link"
+    },
     "companyJobsManager": {
       "title": "Job Listings",
       "subtitle": "Manage your company's job postings",
@@ -301,7 +307,8 @@
           "title": "Interviews",
           "description": "Manage your interviews for this job listing"
         }
-      }
+      },
+      "back": "Back"
     },
     "jobDescriptionToggle": {
       "title": "Job Description",
@@ -312,7 +319,8 @@
         "breadcrumb": {
           "candidates": "Candidates"
         },
-        "backToJobDetails": "Back to Job Details"
+        "backToJobDetails": "Back to Job Details",
+        "back": "Back"
       },
       "list": {
         "title": "Candidates ({count})",

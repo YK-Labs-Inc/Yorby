@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ShareApplicationLink from "./ShareApplicationLink";
+import ShareApplicationSection from "./ShareApplicationSection";
 import JobDescriptionToggle from "./JobDescriptionToggle";
 
 interface PageProps {
@@ -123,49 +123,52 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     supabase
       .from("job_interviews")
       .select("id", { count: "exact" })
-      .eq("custom_job_id", jobId)
+      .eq("custom_job_id", jobId),
   ]);
 
-  const totalCandidates = candidatesResult.count || 0;
   const totalInterviewRounds = interviewsResult.count || 0;
-  
+
   // Calculate candidate stats by status
-  const candidatesByStatus = candidatesResult.data?.reduce((acc, candidate) => {
-    acc[candidate.status] = (acc[candidate.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>) || {};
+  const candidatesByStatus =
+    candidatesResult.data?.reduce(
+      (acc, candidate) => {
+        acc[candidate.status] = (acc[candidate.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    ) || {};
 
   const activeCandidates = candidatesByStatus.screening || 0;
 
   // Format date
-  const postedDate = job.created_at ? new Date(job.created_at).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }) : null;
+  const postedDate = job.created_at
+    ? new Date(job.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link
-            href={`/recruiting/companies/${companyId}`}
-            className="hover:text-foreground flex items-center gap-1 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {company?.name || t("breadcrumb.defaultCompany")}
-          </Link>
-          <span>/</span>
-          <span className="font-medium text-foreground">{job.job_title}</span>
-        </div>
+        {/* Back button */}
+        <Link
+          href={`/recruiting/companies/${companyId}`}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          <span>{t("back")}</span>
+        </Link>
 
         {/* Hero Section with Job Title and Quick Actions */}
         <div className="mb-8">
           <div className="flex items-start justify-between mb-6">
             <div className="flex-1">
-              <H1 className="text-3xl sm:text-4xl font-bold mb-3">{job.job_title}</H1>
-              
+              <H1 className="text-3xl sm:text-4xl font-bold mb-3">
+                {job.job_title}
+              </H1>
+
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 {job.company_name && (
                   <div className="flex items-center gap-1.5">
@@ -181,11 +184,11 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 )}
               </div>
             </div>
-            
-            <div className="flex gap-2">
-              <ShareApplicationLink companyId={companyId} jobId={jobId} />
-            </div>
+
           </div>
+
+          {/* Share Application Section */}
+          <ShareApplicationSection companyId={companyId} jobId={jobId} />
 
           {/* Primary Action Cards */}
           <div className="grid gap-6 md:grid-cols-2 mb-8">
@@ -211,7 +214,10 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 <CardContent>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {activeCandidates > 0 && t("actions.reviewCandidates.awaitingReview", { count: activeCandidates })}
+                      {activeCandidates > 0 &&
+                        t("actions.reviewCandidates.awaitingReview", {
+                          count: activeCandidates,
+                        })}
                     </span>
                     <span className="text-primary group-hover:translate-x-1 transition-transform">
                       {t("actions.reviewCandidates.viewAll")}
@@ -243,9 +249,11 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 <CardContent>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {totalInterviewRounds === 0 
-                        ? t("actions.configureInterview.notConfigured") 
-                        : t("actions.configureInterview.configured", { count: totalInterviewRounds })}
+                      {totalInterviewRounds === 0
+                        ? t("actions.configureInterview.notConfigured")
+                        : t("actions.configureInterview.configured", {
+                            count: totalInterviewRounds,
+                          })}
                     </span>
                     <span className="text-primary group-hover:translate-x-1 transition-transform">
                       {t("actions.configureInterview.configure")}

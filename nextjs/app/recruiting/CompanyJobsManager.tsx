@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Plus,
-  Briefcase,
-  Users,
-  MoreVertical,
-  Edit,
-  ExternalLink,
-} from "lucide-react";
+import { Plus, Briefcase, Users, MoreVertical, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -29,7 +22,6 @@ import Link from "next/link";
 import { JobDetailPanel } from "./JobDetailPanel";
 import { Tables } from "@/utils/supabase/database.types";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 
 type Job = Tables<"custom_jobs"> & {
   company_job_candidates?: { count: number }[];
@@ -48,7 +40,6 @@ export function CompanyJobsManager({
   const [panelMode, setPanelMode] = useState<"create" | "edit">("create");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const t = useTranslations("apply.recruiting.companyJobsManager");
-  const router = useRouter();
 
   const getCandidateCount = (job: Job) => {
     return job.company_job_candidates?.[0]?.count || 0;

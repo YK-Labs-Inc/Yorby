@@ -87,24 +87,14 @@ export default async function CompanyDetailPage({ params }: PageProps) {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link
-            href={`/recruiting/companies/${id}`}
-            className="hover:text-foreground flex items-center gap-1"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {company?.name || t("breadcrumb.defaultCompany")}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/recruiting/companies/${id}/jobs/${jobId}`}
-            className="hover:text-foreground flex items-center gap-1"
-          >
-            {job.job_title || t("breadcrumb.defaultJob")}
-          </Link>
-          <span>/</span>
-          <span>{t("sections.interviewRounds.title")}</span>
-        </div>
+        {/* Back button */}
+        <Link
+          href={`/recruiting/companies/${id}/jobs/${jobId}`}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-6"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          <span>{t("back")}</span>
+        </Link>
 
         <div className="mt-8">
           <InterviewRoundsManager

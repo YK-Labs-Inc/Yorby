@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Globe, Users, UsersRound } from "lucide-react";
+import { ArrowLeft, Building2, Globe, Users, UsersRound } from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,10 @@ export function CompanyHeader({ company, isFreeTier }: CompanyHeaderProps) {
       {/* Back to dashboard */}
       <Link
         href="/recruiting"
-        className="text-sm text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
       >
-        {t("backToDashboard")}
+        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        <span>{t("backToDashboard")}</span>
       </Link>
 
       {/* Company Info */}
