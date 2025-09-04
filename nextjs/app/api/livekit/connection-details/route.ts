@@ -55,7 +55,6 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const searchParams = req.nextUrl.searchParams;
     const mockInterviewId = searchParams.get("mockInterviewId");
     const candidateJobInterviewId = searchParams.get("candidateJobInterviewId");
-    const enableAiAvatar = searchParams.get("enableAiAvatar") === "true";
 
     if (!mockInterviewId && !candidateJobInterviewId) {
       log.warn(
@@ -110,7 +109,6 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
             interview_prompt: interviewPrompt,
             mock_interview_id: mockInterviewId,
             candidate_job_interview_id: candidateJobInterviewId,
-            enable_ai_avatar: enableAiAvatar,
           }),
         }
       );

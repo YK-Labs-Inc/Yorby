@@ -3,8 +3,8 @@ import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 type UseConnectionDetailsProps =
-  | { kind: "mock"; id: string; enableAiAvatar?: boolean }
-  | { kind: "candidate"; id: string; enableAiAvatar?: boolean };
+  | { kind: "mock"; id: string }
+  | { kind: "candidate"; id: string };
 
 export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const { logError } = useAxiomLogging();
@@ -14,16 +14,10 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   const fetchConnectionDetails = useCallback(() => {
-    const baseParam =
+    const queryParam =
       props.kind === "mock"
         ? `mockInterviewId=${encodeURIComponent(props.id)}`
         : `candidateJobInterviewId=${encodeURIComponent(props.id)}`;
-    
-    const avatarParam = props.enableAiAvatar !== undefined 
-      ? `&enableAiAvatar=${encodeURIComponent(props.enableAiAvatar.toString())}`
-      : '';
-    
-    const queryParam = `${baseParam}${avatarParam}`;
 
     setConnectionDetails(null);
     setIsConnecting(true);

@@ -51,7 +51,6 @@ export function LiveKitInterviewComponent({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [enableAiAvatar, setEnableAiAvatar] = useState(true);
   const {
     connectionDetails,
     refreshConnectionDetails,
@@ -238,8 +237,6 @@ export function LiveKitInterviewComponent({
               setLocalUserChoices(values);
               fetchConnectionDetails();
             }}
-            enableAiAvatar={enableAiAvatar}
-            setEnableAiAvatar={setEnableAiAvatar}
           />
         )}
       </>
