@@ -411,17 +411,16 @@ export function ApplicationForm({
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Welcome back!</DialogTitle>
+            <DialogTitle>{t("applicationForm.loginDialog.title")}</DialogTitle>
             <DialogDescription>
-              This email is already linked to a Yorby account. Please sign in to
-              continue with your application.
+              {t("applicationForm.loginDialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end mt-4">
             <Link
               href={`/sign-in?redirect=/apply/company/${companyId}/job/${jobId}/application`}
             >
-              <Button>Go to Sign In</Button>
+              <Button>{t("applicationForm.loginDialog.signInButton")}</Button>
             </Link>
           </div>
         </DialogContent>
