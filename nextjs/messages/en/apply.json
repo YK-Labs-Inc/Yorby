@@ -235,7 +235,8 @@
       "createCandidateApplication": "Failed to create candidate application",
       "linkApplicationFiles": "Failed to link application files",
       "updateUserInformation": "Failed to update user information",
-      "submitApplication": "Failed to submit application"
+      "appliedWithEmailOfExistingUser": "Applied with email of existing user",
+      "generic": "Sorry, something went wrong. Please try again."
     }
   },
   "recruiting": {

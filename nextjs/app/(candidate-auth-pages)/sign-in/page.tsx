@@ -8,7 +8,7 @@ export default async function Login({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const redirectUrl = (await searchParams).redirect;
+  const redirectUrl = (await searchParams).redirect as string;
   const user = await getServerUser();
   const origin = (await headers()).get("origin");
   const isYorbyCoaching =
@@ -19,5 +19,5 @@ export default async function Login({
       `${redirectUrl || (isYorbyCoaching ? "/coaches/auth" : "/dashboard/jobs?newJob=true")}`
     );
   }
-  return <SignInForm />;
+  return <SignInForm redirectUrl={redirectUrl} />;
 }

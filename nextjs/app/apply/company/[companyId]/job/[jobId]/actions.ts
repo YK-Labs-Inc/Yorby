@@ -1,6 +1,9 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/utils/supabase/server";
+import {
+  createAdminClient,
+  createSupabaseServerClient,
+} from "@/utils/supabase/server";
 import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { fetchFilesFromGemini, FileEntry } from "@/utils/ai/gemini";
@@ -16,7 +19,7 @@ async function generateCandidateContext({
 }: {
   candidateId: string;
 }): Promise<string> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createAdminClient();
   const logger = new Logger().with({
     function: "generateCandidateContext",
     candidateId,
@@ -133,7 +136,7 @@ export const createInterviewForCandidate = async ({
   candidateId: string;
   jobId: string;
 }) => {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createAdminClient();
   const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "createInterviewForCandidate",
@@ -338,7 +341,7 @@ export async function checkApplicationStatus(
   jobId: string,
   userId: string
 ) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createAdminClient();
   const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "checkApplicationStatus",
@@ -491,7 +494,7 @@ export async function handleApplyAction(
   prevState: { error?: string },
   formData: FormData
 ) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createAdminClient();
   const t = await getTranslations("apply.api.errors");
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
@@ -568,6 +571,7 @@ export const submitApplication = async (
   formData: FormData
 ) => {
   const supabase = await createSupabaseServerClient();
+  const supabaseAdmin = await createAdminClient();
   const t = await getTranslations("apply.api.errors");
 
   // Parse form data
@@ -579,6 +583,7 @@ export const submitApplication = async (
   const email = formData.get("email") as string;
   const fullName = formData.get("fullName") as string;
   const phoneNumber = formData.get("phoneNumber") as string;
+  const captchaToken = formData.get("captchaToken") as string;
   let interviewId: string | null = null;
   let isAnonymous = false;
 
@@ -600,12 +605,33 @@ export const submitApplication = async (
       fileCount: selectedFileIds.length,
     });
 
+    const { data, error } = await supabaseAdmin.rpc("get_user_id_by_email", {
+      p_email: email,
+    });
+
+    if (error) {
+      logger.error("Failed to get user ID by email", { error });
+      throw new Error(t("Failed to get user ID by email"));
+    }
+
+    if (data) {
+      return { error: t("appliedWithEmailOfExistingUser") };
+    }
+
     // Check if user is authenticated
-    const user = await getServerUser();
+    let user = await getServerUser();
 
     if (!user) {
-      logger.error("User not authenticated");
-      throw new Error(t("userNotAuthenticated"));
+      const { data, error } = await supabase.auth.signInAnonymously({
+        options: {
+          captchaToken,
+        },
+      });
+      if (error || !data.user) {
+        logger.error("Failed to sign in anonymously", { error });
+        throw new Error(t("Failed to sign in anonymously"));
+      }
+      user = data.user;
     }
 
     // Check if this is an anonymous user (no email)
@@ -721,7 +747,7 @@ export const submitApplication = async (
   } catch (error) {
     logger.error("Application submission error", { error });
     await logger.flush();
-    return { error: t("submitApplication") };
+    return { error: t("generic") };
   }
   if (!interviewId) {
     logger.error("Failed to create interview", {

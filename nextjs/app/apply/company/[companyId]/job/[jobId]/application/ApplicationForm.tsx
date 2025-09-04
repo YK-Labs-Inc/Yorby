@@ -12,6 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Link from "next/link";
 import { Upload, CheckCircle2, Loader2 } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { toast } from "sonner";
@@ -19,6 +27,7 @@ import { useTranslations } from "next-intl";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/utils/supabase/database.types";
 import { submitApplication } from "../actions";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 type UserFile = Database["public"]["Tables"]["user_files"]["Row"];
 type Company = Database["public"]["Tables"]["companies"]["Row"];
@@ -75,6 +84,8 @@ export function ApplicationForm({
   const [phoneNumber, setPhoneNumber] = useState(
     user?.user_metadata?.phone_number || ""
   );
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>("");
   const { logInfo, logError } = useAxiomLogging();
   const t = useTranslations("apply");
 
@@ -89,7 +100,11 @@ export function ApplicationForm({
 
   useEffect(() => {
     if (state.error) {
-      toast.error(state.error);
+      if (state.error == t("api.errors.appliedWithEmailOfExistingUser")) {
+        setShowLoginDialog(true);
+      } else {
+        toast.error(state.error);
+      }
     }
   }, [state.error]);
 
@@ -348,6 +363,7 @@ export function ApplicationForm({
                   name="selectedFileIds"
                   value={Array.from(selectedFiles)}
                 />
+                <input type="hidden" name="captchaToken" value={captchaToken} />
                 {!user?.email && (
                   <>
                     <input type="hidden" name="email" value={email} />
@@ -359,11 +375,19 @@ export function ApplicationForm({
                     />
                   </>
                 )}
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-between items-center pt-4">
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                    onSuccess={(token) => {
+                      setCaptchaToken(token);
+                    }}
+                  />
                   <Button
                     type="submit"
                     disabled={
-                      isPending || (!user?.email && (!email || !fullName))
+                      isPending ||
+                      (!user?.email && (!email || !fullName)) ||
+                      !captchaToken
                     }
                     size="lg"
                   >
@@ -382,6 +406,26 @@ export function ApplicationForm({
           </CardContent>
         </Card>
       </div>
+
+      {/* Login Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Welcome back!</DialogTitle>
+            <DialogDescription>
+              This email is already linked to a Yorby account. Please sign in to
+              continue with your application.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end mt-4">
+            <Link
+              href={`/sign-in?redirect=/apply/company/${companyId}/job/${jobId}/application`}
+            >
+              <Button>Go to Sign In</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
