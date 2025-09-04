@@ -2950,6 +2950,10 @@ export type Database = {
       }
     }
     Functions: {
+      get_user_id_by_email: {
+        Args: { p_email: string }
+        Returns: string
+      }
       is_company_member: {
         Args: { p_company_id: string; p_user_id: string }
         Returns: boolean

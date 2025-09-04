@@ -30,6 +30,11 @@
       "noFilesSelected": "Please select at least one file to submit",
       "fileUploadFailed": "File upload failed: {error}"
     },
+    "loginDialog": {
+      "title": "Welcome back!",
+      "description": "This email is already linked to a Yorby account. Please sign in to continue with your application.",
+      "signInButton": "Go to Sign In"
+    },
     "sections": {
       "uploadDocuments": {
         "title": "Upload Your Documents",
@@ -235,7 +240,8 @@
       "createCandidateApplication": "Failed to create candidate application",
       "linkApplicationFiles": "Failed to link application files",
       "updateUserInformation": "Failed to update user information",
-      "submitApplication": "Failed to submit application"
+      "appliedWithEmailOfExistingUser": "Applied with email of existing user",
+      "generic": "Sorry, something went wrong. Please try again."
     }
   },
   "recruiting": {

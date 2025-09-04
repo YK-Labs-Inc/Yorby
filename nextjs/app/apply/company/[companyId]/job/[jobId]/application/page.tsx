@@ -82,7 +82,7 @@ export default async function ApplicationPage({ params }: PageProps) {
       // Check if the current candidate has completed the job interviews or not
       let { data: interviews } = await supabase
         .from("candidate_job_interviews")
-        .select("id, status")
+        .select("id, interview_id, status")
         .in(
           "interview_id",
           jobInterviews.map((interview) => interview.id)
@@ -92,9 +92,9 @@ export default async function ApplicationPage({ params }: PageProps) {
       if (interviews) {
         interviews = interviews.sort(
           (a, b) =>
-            (jobInterviews.find((interview) => interview.id === a.id)
+            (jobInterviews.find((interview) => interview.id === a.interview_id)
               ?.order_index || 0) -
-            (jobInterviews.find((interview) => interview.id === b.id)
+            (jobInterviews.find((interview) => interview.id === b.interview_id)
               ?.order_index || 0)
         );
         if (interviews.every((interview) => interview.status === "completed")) {
@@ -108,7 +108,7 @@ export default async function ApplicationPage({ params }: PageProps) {
           );
           if (lastIncompleteInterview) {
             redirect(
-              `/apply/company/${companyId}/job/${jobId}/interview/${lastIncompleteInterview.id}`
+              `/apply/company/${companyId}/job/${jobId}/candidate-interview/${lastIncompleteInterview.id}`
             );
           }
           logger.error("No incomplete interview found for job application");
