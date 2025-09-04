@@ -19,7 +19,7 @@ async function generateCandidateContext({
 }: {
   candidateId: string;
 }): Promise<string> {
-  const supabase = await createAdminClient();
+  const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     function: "generateCandidateContext",
     candidateId,
@@ -136,7 +136,7 @@ export const createInterviewForCandidate = async ({
   candidateId: string;
   jobId: string;
 }) => {
-  const supabase = await createAdminClient();
+  const supabase = await createSupabaseServerClient();
   const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "createInterviewForCandidate",
@@ -341,7 +341,7 @@ export async function checkApplicationStatus(
   jobId: string,
   userId: string
 ) {
-  const supabase = await createAdminClient();
+  const supabase = await createSupabaseServerClient();
   const t = await getTranslations("apply.api.errors");
   const logger = new Logger().with({
     function: "checkApplicationStatus",
@@ -494,7 +494,7 @@ export async function handleApplyAction(
   prevState: { error?: string },
   formData: FormData
 ) {
-  const supabase = await createAdminClient();
+  const supabase = await createSupabaseServerClient();
   const t = await getTranslations("apply.api.errors");
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
