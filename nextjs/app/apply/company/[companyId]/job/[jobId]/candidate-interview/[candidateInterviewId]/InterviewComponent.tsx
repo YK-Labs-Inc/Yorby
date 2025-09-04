@@ -58,7 +58,6 @@ export function InterviewComponent({
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [showCompletionUI, setShowCompletionUI] = useState(false);
-  const [enableAiAvatar, setEnableAiAvatar] = useState(true);
   const {
     connectionDetails,
     fetchConnectionDetails,
@@ -67,7 +66,6 @@ export function InterviewComponent({
   } = useConnectionDetails({
     kind: "candidate",
     id: currentInterviewId,
-    enableAiAvatar,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();
@@ -201,8 +199,6 @@ export function InterviewComponent({
           setLocalUserChoices(values);
           fetchConnectionDetails();
         }}
-        enableAiAvatar={enableAiAvatar}
-        setEnableAiAvatar={setEnableAiAvatar}
       />
     );
   }

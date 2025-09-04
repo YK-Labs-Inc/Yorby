@@ -11,15 +11,9 @@ import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
 interface RealInterviewPreJoinProps {
   onSubmit: (values: LocalUserChoices) => void;
-  enableAiAvatar: boolean;
-  setEnableAiAvatar: (enabled: boolean) => void;
 }
 
-export function RealInterviewPreJoin({
-  onSubmit,
-  enableAiAvatar,
-  setEnableAiAvatar,
-}: RealInterviewPreJoinProps) {
+export function RealInterviewPreJoin({ onSubmit }: RealInterviewPreJoinProps) {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(
     VOICE_OPTIONS[0]
   );
@@ -30,8 +24,6 @@ export function RealInterviewPreJoin({
         onSubmit={onSubmit}
         selectedVoice={selectedVoice}
         setSelectedVoice={setSelectedVoice}
-        enableAiAvatar={enableAiAvatar}
-        setEnableAiAvatar={setEnableAiAvatar}
       />
     </MediaDeviceProvider>
   );
@@ -41,16 +33,12 @@ interface RealInterviewPreJoinContentProps {
   onSubmit: (values: LocalUserChoices) => void;
   selectedVoice: VoiceOption;
   setSelectedVoice: React.Dispatch<React.SetStateAction<VoiceOption>>;
-  enableAiAvatar: boolean;
-  setEnableAiAvatar: (enabled: boolean) => void;
 }
 
 function RealInterviewPreJoinContent({
   onSubmit,
   selectedVoice,
   setSelectedVoice,
-  enableAiAvatar,
-  setEnableAiAvatar,
 }: RealInterviewPreJoinContentProps) {
   const {
     videoDevices,
@@ -88,8 +76,6 @@ function RealInterviewPreJoinContent({
       onAudioChange={setSelectedAudio}
       onStartTestRecording={startTestRecording}
       onStopTestRecording={stopTestRecording}
-      enableAiAvatar={enableAiAvatar}
-      setEnableAiAvatar={setEnableAiAvatar}
     />
   );
 }

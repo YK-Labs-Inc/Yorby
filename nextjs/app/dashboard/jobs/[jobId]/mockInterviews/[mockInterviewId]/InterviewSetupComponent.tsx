@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
@@ -26,8 +25,6 @@ interface InterviewSetupProps {
   setSelectedVoice: Dispatch<SetStateAction<VoiceOption>>;
   onStartTestRecording: () => void;
   onStopTestRecording: () => void;
-  enableAiAvatar?: boolean;
-  setEnableAiAvatar?: (enabled: boolean) => void;
 }
 
 export default function InterviewSetup({
@@ -45,8 +42,6 @@ export default function InterviewSetup({
   onAudioChange,
   onStartTestRecording,
   onStopTestRecording,
-  enableAiAvatar,
-  setEnableAiAvatar,
 }: InterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -60,6 +55,7 @@ export default function InterviewSetup({
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardContent className="p-6">
@@ -128,19 +124,7 @@ export default function InterviewSetup({
               </div>
             </CardContent>
           </Card>
-          {enableAiAvatar !== undefined && setEnableAiAvatar && (
-            <div className="flex items-center justify-start space-x-3">
-              <Switch
-                id="ai-avatar"
-                checked={enableAiAvatar}
-                onCheckedChange={setEnableAiAvatar}
-              />
-              <Label htmlFor="ai-avatar" className="text-lg font-medium">
-                Enable AI Avatar
-              </Label>
-            </div>
-          )}
-          <div className="flex justify-start">
+          <div className="flex justify-end">
             <form action={startInterviewAction}>
               <input type="hidden" name="jobId" value={jobId} />
               <Button size="lg" disabled={!stream}>
