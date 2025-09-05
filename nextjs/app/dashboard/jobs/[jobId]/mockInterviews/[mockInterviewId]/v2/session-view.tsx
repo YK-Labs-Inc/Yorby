@@ -25,6 +25,7 @@ interface SessionViewProps {
     Tables<"company_interview_question_bank">,
     "id" | "question"
   >[];
+  realtimeMode?: boolean;
 }
 
 export const SessionView = ({
@@ -37,6 +38,7 @@ export const SessionView = ({
   interviewType,
   mockInterviewId,
   questionDetails,
+  realtimeMode = true,
 }: React.ComponentProps<"div"> & SessionViewProps) => {
   const { messages } = useChatAndTranscription();
   const { logInfo, logError } = useAxiomLogging();
@@ -245,7 +247,7 @@ export const SessionView = ({
               <div className="relative z-10 mx-auto w-fit">
                 <AgentControlBar
                   capabilities={capabilities}
-                  initialMicrophoneState={false}
+                  realtimeMode={realtimeMode}
                 />
               </div>
             </motion.div>

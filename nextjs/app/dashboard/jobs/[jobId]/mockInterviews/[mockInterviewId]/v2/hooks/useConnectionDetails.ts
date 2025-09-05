@@ -3,8 +3,20 @@ import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 type UseConnectionDetailsProps =
-  | { kind: "mock"; id: string; enableAiAvatar?: boolean }
-  | { kind: "candidate"; id: string; enableAiAvatar?: boolean };
+  | {
+      kind: "mock";
+      id: string;
+      enableAiAvatar?: boolean;
+      avatarProvider?: "bey" | "simli";
+      livekitMode?: "realtime" | "pipeline";
+    }
+  | {
+      kind: "candidate";
+      id: string;
+      enableAiAvatar?: boolean;
+      avatarProvider?: "bey" | "simli";
+      livekitMode?: "realtime" | "pipeline";
+    };
 
 export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const { logError } = useAxiomLogging();
@@ -18,12 +30,21 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
       props.kind === "mock"
         ? `mockInterviewId=${encodeURIComponent(props.id)}`
         : `candidateJobInterviewId=${encodeURIComponent(props.id)}`;
-    
-    const avatarParam = props.enableAiAvatar !== undefined 
-      ? `&enableAiAvatar=${encodeURIComponent(props.enableAiAvatar.toString())}`
-      : '';
-    
-    const queryParam = `${baseParam}${avatarParam}`;
+
+    const avatarParam =
+      props.enableAiAvatar !== undefined
+        ? `&enableAiAvatar=${encodeURIComponent(props.enableAiAvatar.toString())}`
+        : "";
+    const avatarProviderParam =
+      props.avatarProvider !== undefined
+        ? `&avatarProvider=${encodeURIComponent(props.avatarProvider)}`
+        : "";
+    const livekitModeParam =
+      props.livekitMode !== undefined
+        ? `&livekitMode=${encodeURIComponent(props.livekitMode)}`
+        : "";
+
+    const queryParam = `${baseParam}${avatarParam}${avatarProviderParam}${livekitModeParam}`;
 
     setConnectionDetails(null);
     setIsConnecting(true);

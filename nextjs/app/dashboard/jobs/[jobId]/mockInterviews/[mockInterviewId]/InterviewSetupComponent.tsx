@@ -3,6 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
@@ -28,6 +35,10 @@ interface InterviewSetupProps {
   onStopTestRecording: () => void;
   enableAiAvatar?: boolean;
   setEnableAiAvatar?: (enabled: boolean) => void;
+  avatarProvider?: "bey" | "simli";
+  setAvatarProvider?: (provider: "bey" | "simli") => void;
+  shouldUseRealtimeMode?: boolean;
+  setShouldUseRealtimeMode?: (mode: boolean) => void;
 }
 
 export default function InterviewSetup({
@@ -47,6 +58,10 @@ export default function InterviewSetup({
   onStopTestRecording,
   enableAiAvatar,
   setEnableAiAvatar,
+  avatarProvider,
+  setAvatarProvider,
+  shouldUseRealtimeMode,
+  setShouldUseRealtimeMode,
 }: InterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -129,14 +144,55 @@ export default function InterviewSetup({
             </CardContent>
           </Card>
           {enableAiAvatar !== undefined && setEnableAiAvatar && (
-            <div className="flex items-center justify-start space-x-3">
+            <div className="space-y-4 mt-2">
+              <div className="flex items-center justify-start space-x-3">
+                <Switch
+                  id="ai-avatar"
+                  checked={enableAiAvatar}
+                  onCheckedChange={setEnableAiAvatar}
+                />
+                <Label htmlFor="ai-avatar" className="text-lg font-medium">
+                  Enable AI Avatar
+                </Label>
+              </div>
+              {enableAiAvatar && setAvatarProvider && (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="avatar-provider"
+                    className="text-lg font-medium"
+                  >
+                    Avatar Provider
+                  </Label>
+                  <Select
+                    value={avatarProvider}
+                    onValueChange={(value: "bey" | "simli") =>
+                      setAvatarProvider?.(value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select avatar provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bey">Bey AI Avatar</SelectItem>
+                      <SelectItem value="simli">Simli AI Avatar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+          {shouldUseRealtimeMode !== undefined && setShouldUseRealtimeMode && (
+            <div className="flex items-center justify-start space-x-3 my-2">
               <Switch
-                id="ai-avatar"
-                checked={enableAiAvatar}
-                onCheckedChange={setEnableAiAvatar}
+                id="should-use-realtime-mode"
+                checked={shouldUseRealtimeMode}
+                onCheckedChange={setShouldUseRealtimeMode}
               />
-              <Label htmlFor="ai-avatar" className="text-lg font-medium">
-                Enable AI Avatar
+              <Label
+                htmlFor="should-use-realtime-mode"
+                className="text-lg font-medium"
+              >
+                Use Realtime Mode
               </Label>
             </div>
           )}
