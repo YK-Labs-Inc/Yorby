@@ -95,33 +95,6 @@ export function AgentControlBar({
     }
   };
 
-  const handlePushToTalkCancel = async () => {
-    setIsPushToTalkActive(false);
-
-    // Disable microphone
-    if (microphoneToggle.enabled) {
-      await microphoneToggle.toggle();
-    }
-
-    if (!agentParticipant) {
-      logError("No agent participant found");
-      Sentry.captureException(new Error("No agent participant found"));
-      return;
-    }
-
-    try {
-      await localParticipant?.performRpc({
-        destinationIdentity: agentParticipant.identity,
-        method: "cancel_turn",
-        payload: JSON.stringify({}),
-      });
-    } catch (error) {
-      logError("Failed to cancel turn:", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  };
-
   const handlePushToTalkFinish = async () => {
     setIsPushToTalkActive(false);
 
@@ -214,26 +187,15 @@ export function AgentControlBar({
               {t("pressToSpeak")}
             </Button>
           ) : (
-            <>
-              <Button
-                onClick={handlePushToTalkCancel}
-                size="lg"
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <X className="h-4 w-4" />
-                {t("cancel")}
-              </Button>
-              <Button
-                onClick={handlePushToTalkFinish}
-                size="lg"
-                variant="default"
-                className="flex items-center gap-2"
-              >
-                <Check className="h-4 w-4" />
-                {t("finishRecording")}
-              </Button>
-            </>
+            <Button
+              onClick={handlePushToTalkFinish}
+              size="lg"
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              {t("finishRecording")}
+            </Button>
           )}
         </div>
       </div>
