@@ -57,6 +57,7 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const enableAiAvatar = searchParams.get("enableAiAvatar") === "true";
     const avatarProvider = searchParams.get("avatarProvider");
     const livekitMode = searchParams.get("livekitMode");
+    const simliFaceId = searchParams.get("simliFaceId");
 
     if (!mockInterviewId && !candidateJobInterviewId) {
       log.warn(
@@ -114,6 +115,7 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
             enable_ai_avatar: enableAiAvatar,
             avatar_provider: avatarProvider,
             livekit_mode: livekitMode,
+            simli_face_id: simliFaceId,
           }),
         }
       );

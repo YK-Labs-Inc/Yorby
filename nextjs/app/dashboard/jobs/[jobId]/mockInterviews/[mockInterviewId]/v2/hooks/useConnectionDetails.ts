@@ -9,6 +9,7 @@ type UseConnectionDetailsProps =
       enableAiAvatar?: boolean;
       avatarProvider?: "bey" | "simli";
       livekitMode?: "realtime" | "pipeline";
+      simliFaceId?: string;
     }
   | {
       kind: "candidate";
@@ -16,6 +17,7 @@ type UseConnectionDetailsProps =
       enableAiAvatar?: boolean;
       avatarProvider?: "bey" | "simli";
       livekitMode?: "realtime" | "pipeline";
+      simliFaceId?: string;
     };
 
 export default function useConnectionDetails(props: UseConnectionDetailsProps) {
@@ -43,8 +45,11 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
       props.livekitMode !== undefined
         ? `&livekitMode=${encodeURIComponent(props.livekitMode)}`
         : "";
-
-    const queryParam = `${baseParam}${avatarParam}${avatarProviderParam}${livekitModeParam}`;
+    const simliFaceIdParam =
+      props.simliFaceId !== undefined
+        ? `&simliFaceId=${encodeURIComponent(props.simliFaceId)}`
+        : "";
+    const queryParam = `${baseParam}${avatarParam}${avatarProviderParam}${livekitModeParam}${simliFaceIdParam}`;
 
     setConnectionDetails(null);
     setIsConnecting(true);

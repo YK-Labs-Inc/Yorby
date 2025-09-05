@@ -17,6 +17,9 @@ interface RealInterviewPreJoinProps {
   setAvatarProvider?: (provider: "bey" | "simli") => void;
   shouldUseRealtimeMode?: boolean;
   setShouldUseRealtimeMode?: (mode: boolean) => void;
+  enableSimliAvatar?: boolean;
+  simliFaceId?: string;
+  setSimliFaceId?: (faceId: string) => void;
 }
 
 export function RealInterviewPreJoin({
@@ -27,6 +30,9 @@ export function RealInterviewPreJoin({
   setAvatarProvider,
   shouldUseRealtimeMode,
   setShouldUseRealtimeMode,
+  enableSimliAvatar = false,
+  simliFaceId,
+  setSimliFaceId,
 }: RealInterviewPreJoinProps) {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(
     VOICE_OPTIONS[0]
@@ -44,6 +50,9 @@ export function RealInterviewPreJoin({
         setAvatarProvider={setAvatarProvider}
         shouldUseRealtimeMode={shouldUseRealtimeMode}
         setShouldUseRealtimeMode={setShouldUseRealtimeMode}
+        enableSimliAvatar={enableSimliAvatar}
+        simliFaceId={simliFaceId}
+        setSimliFaceId={setSimliFaceId}
       />
     </MediaDeviceProvider>
   );
@@ -59,6 +68,9 @@ interface RealInterviewPreJoinContentProps {
   setAvatarProvider?: (provider: "bey" | "simli") => void;
   shouldUseRealtimeMode?: boolean;
   setShouldUseRealtimeMode?: (mode: boolean) => void;
+  enableSimliAvatar: boolean;
+  simliFaceId?: string;
+  setSimliFaceId?: (faceId: string) => void;
 }
 
 function RealInterviewPreJoinContent({
@@ -71,6 +83,9 @@ function RealInterviewPreJoinContent({
   setAvatarProvider,
   shouldUseRealtimeMode,
   setShouldUseRealtimeMode,
+  enableSimliAvatar,
+  simliFaceId,
+  setSimliFaceId,
 }: RealInterviewPreJoinContentProps) {
   const {
     videoDevices,
@@ -114,6 +129,9 @@ function RealInterviewPreJoinContent({
       setAvatarProvider={setAvatarProvider}
       shouldUseRealtimeMode={shouldUseRealtimeMode}
       setShouldUseRealtimeMode={setShouldUseRealtimeMode}
+      enableSimliAvatar={enableSimliAvatar}
+      simliFaceId={simliFaceId}
+      setSimliFaceId={setSimliFaceId}
     />
   );
 }

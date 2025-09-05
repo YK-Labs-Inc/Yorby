@@ -42,6 +42,7 @@ interface AppProps {
       time_limit_ms: number;
     } | null;
   })[];
+  enableSimliAvatar: boolean;
 }
 
 export function InterviewComponent({
@@ -53,14 +54,18 @@ export function InterviewComponent({
   candidateId,
   interviewType,
   questionDetails,
+  enableSimliAvatar,
 }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [showCompletionUI, setShowCompletionUI] = useState(false);
-  const [enableAiAvatar, setEnableAiAvatar] = useState(true);
+  const [enableAiAvatar, setEnableAiAvatar] = useState(false);
   const [avatarProvider, setAvatarProvider] = useState<"bey" | "simli">("bey");
-  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(false);
+  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(true);
+  const [simliFaceId, setSimliFaceId] = useState<string>(
+    "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
+  );
   const {
     connectionDetails,
     fetchConnectionDetails,
@@ -72,6 +77,7 @@ export function InterviewComponent({
     enableAiAvatar,
     avatarProvider,
     livekitMode: shouldUseRealtimeMode ? "realtime" : "pipeline",
+    simliFaceId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();
@@ -211,6 +217,9 @@ export function InterviewComponent({
         setAvatarProvider={setAvatarProvider}
         shouldUseRealtimeMode={shouldUseRealtimeMode}
         setShouldUseRealtimeMode={setShouldUseRealtimeMode}
+        enableSimliAvatar={enableSimliAvatar}
+        simliFaceId={simliFaceId}
+        setSimliFaceId={setSimliFaceId}
       />
     );
   }
