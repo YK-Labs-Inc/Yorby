@@ -60,7 +60,7 @@ export function VideoChatLayout({ aiMessages }: VideoChatLayoutProps) {
         <div className="flex gap-4" style={{ height: "60%" }}>
           {/* AI Agent Video - Left Side */}
           <div className="flex-1 relative bg-muted rounded-lg overflow-hidden">
-            <div className="flex h-full w-full gap-4 p-4">
+            <div className="flex h-full w-full gap-4 p-4 items-center justify-center">
               {!isAvatar && agentAudioTrack && (
                 <AgentTile
                   state={agentState}

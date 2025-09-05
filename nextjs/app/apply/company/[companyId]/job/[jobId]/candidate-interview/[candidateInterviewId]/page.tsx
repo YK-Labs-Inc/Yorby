@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
 import { InterviewComponent } from "./InterviewComponent";
 import { GenerateAnalysisClient } from "./GenerateAnalysisClient";
+import { posthog } from "@/utils/tracking/serverUtils";
 
 const fetchJobInterviewQuestions = async (interviewId: string) => {
   const supabase = await createSupabaseServerClient();
@@ -115,6 +116,9 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
       ? candidateJobInterviews[currentIndex + 1].id
       : null;
 
+  const enableSimliAvatar =
+    (await posthog.isFeatureEnabled("enable-simli-avatar", user.id)) ?? false;
+
   return (
     <InterviewComponent
       appConfig={APP_CONFIG_DEFAULTS}
@@ -125,6 +129,7 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
       candidateId={application.id}
       interviewType={currentInterview.interview_type}
       questionDetails={questionDetails}
+      enableSimliAvatar={enableSimliAvatar}
     />
   );
 }

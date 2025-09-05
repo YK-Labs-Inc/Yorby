@@ -337,7 +337,9 @@
         "test": "Test Speakers",
         "testing": "Playing..."
       },
-      "startButton": "Start Interview"
+      "startButton": "Start Interview",
+      "enableAiAvatar": "Enable AI Avatar",
+      "aiAvatarDisclaimer": "Requires fast internet for optimal performance"
     },
     "active": {
       "replayButton": "Replay Last Response",
