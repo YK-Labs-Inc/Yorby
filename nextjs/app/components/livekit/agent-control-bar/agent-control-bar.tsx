@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import {
   MediaDeviceMenu,
+  useIsSpeaking,
   useLocalParticipant,
   useRoomContext,
 } from "@livekit/components-react";
@@ -25,7 +26,7 @@ export interface AgentControlBarProps
     AppConfig,
     "supportsChatInput" | "supportsVideoInput" | "supportsScreenShare"
   >;
-  initialMicrophoneState: boolean;
+  realtimeMode: boolean;
 }
 
 /**
@@ -36,7 +37,7 @@ export function AgentControlBar({
   saveUserChoices = true,
   capabilities,
   className,
-  initialMicrophoneState,
+  realtimeMode,
 }: AgentControlBarProps) {
   const t = useTranslations("agentControlBar");
   const [isPushToTalkActive, setIsPushToTalkActive] = React.useState(false);
@@ -53,14 +54,17 @@ export function AgentControlBar({
   } = useAgentControlBar({
     controls,
     saveUserChoices,
-    initialMicrophoneState,
+    realtimeMode,
   });
 
   const participants = Array.from(room.remoteParticipants.values());
+  console.log("participants", participants);
 
   // TODO: Need to find better way to identify the correct agent participant
   const agentParticipant = participants.find(
-    (participant) => !participant.identity.includes("simli")
+    (participant) =>
+      !participant.identity.includes("simli") ||
+      !participant.identity.includes("bey")
   );
 
   const handlePushToTalkStart = async () => {
@@ -175,29 +179,31 @@ export function AgentControlBar({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {!isPushToTalkActive ? (
-            <Button
-              onClick={handlePushToTalkStart}
-              size="lg"
-              variant="default"
-              className="flex items-center gap-2"
-            >
-              <Mic className="h-4 w-4" />
-              {t("pressToSpeak")}
-            </Button>
-          ) : (
-            <Button
-              onClick={handlePushToTalkFinish}
-              size="lg"
-              variant="default"
-              className="flex items-center gap-2"
-            >
-              <Check className="h-4 w-4" />
-              {t("finishRecording")}
-            </Button>
-          )}
-        </div>
+        {!realtimeMode && (
+          <div className="flex items-center gap-2">
+            {!isPushToTalkActive ? (
+              <Button
+                onClick={handlePushToTalkStart}
+                size="lg"
+                variant="default"
+                className="flex items-center gap-2"
+              >
+                <Mic className="h-4 w-4" />
+                {t("pressToSpeak")}
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePushToTalkFinish}
+                size="lg"
+                variant="destructive"
+                className="flex items-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                {t("finishRecording")}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -59,6 +59,8 @@ export function InterviewComponent({
   const [isConnecting, setIsConnecting] = useState(false);
   const [showCompletionUI, setShowCompletionUI] = useState(false);
   const [enableAiAvatar, setEnableAiAvatar] = useState(true);
+  const [avatarProvider, setAvatarProvider] = useState<"bey" | "simli">("bey");
+  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(false);
   const {
     connectionDetails,
     fetchConnectionDetails,
@@ -68,6 +70,8 @@ export function InterviewComponent({
     kind: "candidate",
     id: currentInterviewId,
     enableAiAvatar,
+    avatarProvider,
+    livekitMode: shouldUseRealtimeMode ? "realtime" : "pipeline",
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
   const { logError } = useAxiomLogging();
@@ -203,6 +207,10 @@ export function InterviewComponent({
         }}
         enableAiAvatar={enableAiAvatar}
         setEnableAiAvatar={setEnableAiAvatar}
+        avatarProvider={avatarProvider}
+        setAvatarProvider={setAvatarProvider}
+        shouldUseRealtimeMode={shouldUseRealtimeMode}
+        setShouldUseRealtimeMode={setShouldUseRealtimeMode}
       />
     );
   }
@@ -312,6 +320,7 @@ export function InterviewComponent({
             interviewId={currentInterviewId}
             interviewType={interviewType}
             questionDetails={questionDetails}
+            realtimeMode={shouldUseRealtimeMode}
           />
         </RoomContext.Provider>
 

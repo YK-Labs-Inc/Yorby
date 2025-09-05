@@ -43,7 +43,6 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     }
 
     // Get the current user
-    const supabase = await createSupabaseServerClient();
     const user = await getServerUser();
 
     if (!user) {
@@ -56,6 +55,8 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const mockInterviewId = searchParams.get("mockInterviewId");
     const candidateJobInterviewId = searchParams.get("candidateJobInterviewId");
     const enableAiAvatar = searchParams.get("enableAiAvatar") === "true";
+    const avatarProvider = searchParams.get("avatarProvider");
+    const livekitMode = searchParams.get("livekitMode");
 
     if (!mockInterviewId && !candidateJobInterviewId) {
       log.warn(
@@ -111,6 +112,8 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
             mock_interview_id: mockInterviewId,
             candidate_job_interview_id: candidateJobInterviewId,
             enable_ai_avatar: enableAiAvatar,
+            avatar_provider: avatarProvider,
+            livekit_mode: livekitMode,
           }),
         }
       );

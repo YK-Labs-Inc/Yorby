@@ -11,14 +11,22 @@ import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
 
 interface RealInterviewPreJoinProps {
   onSubmit: (values: LocalUserChoices) => void;
-  enableAiAvatar: boolean;
-  setEnableAiAvatar: (enabled: boolean) => void;
+  enableAiAvatar?: boolean;
+  setEnableAiAvatar?: (enabled: boolean) => void;
+  avatarProvider?: "bey" | "simli";
+  setAvatarProvider?: (provider: "bey" | "simli") => void;
+  shouldUseRealtimeMode?: boolean;
+  setShouldUseRealtimeMode?: (mode: boolean) => void;
 }
 
 export function RealInterviewPreJoin({
   onSubmit,
   enableAiAvatar,
   setEnableAiAvatar,
+  avatarProvider,
+  setAvatarProvider,
+  shouldUseRealtimeMode,
+  setShouldUseRealtimeMode,
 }: RealInterviewPreJoinProps) {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(
     VOICE_OPTIONS[0]
@@ -32,6 +40,10 @@ export function RealInterviewPreJoin({
         setSelectedVoice={setSelectedVoice}
         enableAiAvatar={enableAiAvatar}
         setEnableAiAvatar={setEnableAiAvatar}
+        avatarProvider={avatarProvider}
+        setAvatarProvider={setAvatarProvider}
+        shouldUseRealtimeMode={shouldUseRealtimeMode}
+        setShouldUseRealtimeMode={setShouldUseRealtimeMode}
       />
     </MediaDeviceProvider>
   );
@@ -41,8 +53,12 @@ interface RealInterviewPreJoinContentProps {
   onSubmit: (values: LocalUserChoices) => void;
   selectedVoice: VoiceOption;
   setSelectedVoice: React.Dispatch<React.SetStateAction<VoiceOption>>;
-  enableAiAvatar: boolean;
-  setEnableAiAvatar: (enabled: boolean) => void;
+  enableAiAvatar?: boolean;
+  setEnableAiAvatar?: (enabled: boolean) => void;
+  avatarProvider?: "bey" | "simli";
+  setAvatarProvider?: (provider: "bey" | "simli") => void;
+  shouldUseRealtimeMode?: boolean;
+  setShouldUseRealtimeMode?: (mode: boolean) => void;
 }
 
 function RealInterviewPreJoinContent({
@@ -51,6 +67,10 @@ function RealInterviewPreJoinContent({
   setSelectedVoice,
   enableAiAvatar,
   setEnableAiAvatar,
+  avatarProvider,
+  setAvatarProvider,
+  shouldUseRealtimeMode,
+  setShouldUseRealtimeMode,
 }: RealInterviewPreJoinContentProps) {
   const {
     videoDevices,
@@ -90,6 +110,10 @@ function RealInterviewPreJoinContent({
       onStopTestRecording={stopTestRecording}
       enableAiAvatar={enableAiAvatar}
       setEnableAiAvatar={setEnableAiAvatar}
+      avatarProvider={avatarProvider}
+      setAvatarProvider={setAvatarProvider}
+      shouldUseRealtimeMode={shouldUseRealtimeMode}
+      setShouldUseRealtimeMode={setShouldUseRealtimeMode}
     />
   );
 }
