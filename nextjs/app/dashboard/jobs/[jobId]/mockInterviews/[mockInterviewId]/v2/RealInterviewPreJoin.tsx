@@ -17,7 +17,7 @@ interface RealInterviewPreJoinProps {
   setAvatarProvider?: (provider: "bey" | "simli") => void;
   shouldUseRealtimeMode?: boolean;
   setShouldUseRealtimeMode?: (mode: boolean) => void;
-  enableSimliAvatar: boolean;
+  enableSimliAvatar?: boolean;
   simliFaceId?: string;
   setSimliFaceId?: (faceId: string) => void;
 }
@@ -30,7 +30,7 @@ export function RealInterviewPreJoin({
   setAvatarProvider,
   shouldUseRealtimeMode,
   setShouldUseRealtimeMode,
-  enableSimliAvatar,
+  enableSimliAvatar = false,
   simliFaceId,
   setSimliFaceId,
 }: RealInterviewPreJoinProps) {
