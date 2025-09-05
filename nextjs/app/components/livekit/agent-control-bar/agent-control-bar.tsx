@@ -58,7 +58,6 @@ export function AgentControlBar({
   });
 
   const participants = Array.from(room.remoteParticipants.values());
-  console.log("participants", participants);
 
   // TODO: Need to find better way to identify the correct agent participant
   const agentParticipant = participants.find(
