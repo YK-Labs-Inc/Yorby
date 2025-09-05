@@ -21,6 +21,7 @@ export interface UseAgentControlBarProps {
   controls?: ControlBarControls;
   saveUserChoices?: boolean;
   onDeviceError?: (error: { source: Track.Source; error: Error }) => void;
+  initialMicrophoneState: boolean;
 }
 
 export interface UseAgentControlBarReturn {
@@ -37,7 +38,9 @@ export interface UseAgentControlBarReturn {
 }
 
 export function useAgentControlBar(
-  props: UseAgentControlBarProps = {}
+  props: UseAgentControlBarProps = {
+    initialMicrophoneState: true,
+  }
 ): UseAgentControlBarReturn {
   const { controls, saveUserChoices = true } = props;
   const visibleControls = {
@@ -52,6 +55,7 @@ export function useAgentControlBar(
     source: Track.Source.Microphone,
     onDeviceError: (error) =>
       props.onDeviceError?.({ source: Track.Source.Microphone, error }),
+    initialState: props.initialMicrophoneState,
   });
   const cameraToggle = useTrackToggle({
     source: Track.Source.Camera,
