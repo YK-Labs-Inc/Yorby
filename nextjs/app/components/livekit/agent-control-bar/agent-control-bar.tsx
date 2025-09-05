@@ -1,18 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Track } from "livekit-client";
-import { PhoneOff } from "lucide-react";
+import { Participant, Track } from "livekit-client";
+import { Mic, X, Check } from "lucide-react";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
 import { cn } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/utils";
-import { TrackToggle } from "@/app/components/livekit/track-toggle";
 import {
   UseAgentControlBarProps,
   useAgentControlBar,
 } from "./hooks/use-agent-control-bar";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import { MediaDeviceMenu } from "@livekit/components-react";
+import {
+  MediaDeviceMenu,
+  useLocalParticipant,
+  useRoomContext,
+} from "@livekit/components-react";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import * as Sentry from "@sentry/nextjs";
 export interface AgentControlBarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     UseAgentControlBarProps {
@@ -20,10 +25,7 @@ export interface AgentControlBarProps
     AppConfig,
     "supportsChatInput" | "supportsVideoInput" | "supportsScreenShare"
   >;
-  onChatOpenChange?: (open: boolean) => void;
-  onSendMessage?: (message: string) => Promise<void>;
-  onDisconnect?: () => void;
-  onDeviceError?: (error: { source: Track.Source; error: Error }) => void;
+  initialMicrophoneState: boolean;
 }
 
 /**
@@ -34,28 +36,117 @@ export function AgentControlBar({
   saveUserChoices = true,
   capabilities,
   className,
-  onSendMessage,
-  onChatOpenChange,
-  onDisconnect,
-  onDeviceError,
+  initialMicrophoneState,
 }: AgentControlBarProps) {
   const t = useTranslations("agentControlBar");
+  const [isPushToTalkActive, setIsPushToTalkActive] = React.useState(false);
+  const room = useRoomContext();
+  const { localParticipant } = useLocalParticipant();
+  const { logError } = useAxiomLogging();
+
   const {
     visibleControls,
     cameraToggle,
     microphoneToggle,
-    screenShareToggle,
-    handleDisconnect,
     handleAudioDeviceChange,
     handleVideoDeviceChange,
   } = useAgentControlBar({
     controls,
     saveUserChoices,
+    initialMicrophoneState,
   });
 
-  const onLeave = () => {
-    handleDisconnect();
-    onDisconnect?.();
+  const participants = Array.from(room.remoteParticipants.values());
+
+  // TODO: Need to find better way to identify the correct agent participant
+  const agentParticipant = participants.find(
+    (participant) => !participant.identity.includes("simli")
+  );
+
+  const handlePushToTalkStart = async () => {
+    if (!agentParticipant) {
+      logError("No agent participant found");
+      Sentry.captureException(new Error("No agent participant found"));
+      return;
+    }
+
+    setIsPushToTalkActive(true);
+
+    // Enable microphone if not already enabled
+    if (!microphoneToggle.enabled) {
+      await microphoneToggle.toggle();
+    }
+
+    try {
+      await localParticipant?.performRpc({
+        destinationIdentity: agentParticipant.identity,
+        method: "start_turn",
+        payload: JSON.stringify({}),
+      });
+    } catch (error) {
+      logError("Failed to start turn:", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      setIsPushToTalkActive(false);
+      // Disable microphone on error
+      if (microphoneToggle.enabled) {
+        await microphoneToggle.toggle();
+      }
+    }
+  };
+
+  const handlePushToTalkCancel = async () => {
+    setIsPushToTalkActive(false);
+
+    // Disable microphone
+    if (microphoneToggle.enabled) {
+      await microphoneToggle.toggle();
+    }
+
+    if (!agentParticipant) {
+      logError("No agent participant found");
+      Sentry.captureException(new Error("No agent participant found"));
+      return;
+    }
+
+    try {
+      await localParticipant?.performRpc({
+        destinationIdentity: agentParticipant.identity,
+        method: "cancel_turn",
+        payload: JSON.stringify({}),
+      });
+    } catch (error) {
+      logError("Failed to cancel turn:", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
+  const handlePushToTalkFinish = async () => {
+    setIsPushToTalkActive(false);
+
+    // Disable microphone after recording
+    if (microphoneToggle.enabled) {
+      await microphoneToggle.toggle();
+    }
+
+    if (!agentParticipant) {
+      logError("No agent participant found");
+      Sentry.captureException(new Error("No agent participant found"));
+      return;
+    }
+
+    try {
+      await localParticipant?.performRpc({
+        destinationIdentity: agentParticipant.identity,
+        method: "end_turn",
+        payload: JSON.stringify({}),
+      });
+    } catch (error) {
+      logError("Failed to end turn:", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   };
 
   return (
@@ -69,16 +160,17 @@ export function AgentControlBar({
       <div className="flex flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           {visibleControls.microphone && (
-            <div className="lk-button-group">
-              <TrackToggle
-                source={Track.Source.Microphone}
-                pressed={microphoneToggle.enabled}
-                disabled={microphoneToggle.pending}
-                onPressedChange={microphoneToggle.toggle}
-                size="lg"
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium",
+                  microphoneToggle.enabled
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                )}
               >
-                {t("microphone")}
-              </TrackToggle>
+                {t("microphone")}: {microphoneToggle.enabled ? "On" : "Off"}
+              </div>
               <MediaDeviceMenu
                 kind="audioinput"
                 onActiveDeviceChange={(_kind, deviceId) =>
@@ -89,17 +181,17 @@ export function AgentControlBar({
           )}
 
           {capabilities.supportsVideoInput && visibleControls.camera && (
-            <div className="lk-button-group">
-              <TrackToggle
-                source={Track.Source.Camera}
-                pressed={cameraToggle.enabled}
-                pending={cameraToggle.pending}
-                disabled={cameraToggle.pending}
-                onPressedChange={cameraToggle.toggle}
-                size="lg"
+            <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium",
+                  cameraToggle.enabled
+                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                )}
               >
-                {t("camera")}
-              </TrackToggle>
+                {t("camera")}: {cameraToggle.enabled ? "On" : "Off"}
+              </div>
               <MediaDeviceMenu
                 kind="videoinput"
                 onActiveDeviceChange={(_kind, deviceId) =>
@@ -108,23 +200,42 @@ export function AgentControlBar({
               />
             </div>
           )}
+        </div>
 
-          {capabilities.supportsScreenShare && visibleControls.screenShare && (
-            <TrackToggle
-              source={Track.Source.ScreenShare}
-              pressed={screenShareToggle.enabled}
-              disabled={screenShareToggle.pending}
-              onPressedChange={screenShareToggle.toggle}
+        <div className="flex items-center gap-2">
+          {!isPushToTalkActive ? (
+            <Button
+              onClick={handlePushToTalkStart}
               size="lg"
-            />
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <Mic className="h-4 w-4" />
+              {t("pressToSpeak")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                onClick={handlePushToTalkCancel}
+                size="lg"
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                {t("cancel")}
+              </Button>
+              <Button
+                onClick={handlePushToTalkFinish}
+                size="lg"
+                variant="default"
+                className="flex items-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                {t("finishRecording")}
+              </Button>
+            </>
           )}
         </div>
-        {visibleControls.leave && (
-          <Button variant="destructive" onClick={onLeave} size="lg">
-            <PhoneOff className="h-5 w-5 mr-2" />
-            <span>{t("endCall")}</span>
-          </Button>
-        )}
       </div>
     </div>
   );

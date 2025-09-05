@@ -2493,7 +2493,10 @@
     "ariaLabel": "Voice assistant controls",
     "microphone": "Microphone",
     "camera": "Camera",
-    "endCall": "End Call"
+    "endCall": "End Call",
+    "pressToSpeak": "Press to speak",
+    "cancel": "Cancel",
+    "finishRecording": "Finish recording"
   },
   "recruiting": {
     "dashboard": {

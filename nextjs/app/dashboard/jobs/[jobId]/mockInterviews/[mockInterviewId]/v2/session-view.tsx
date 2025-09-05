@@ -245,7 +245,7 @@ export const SessionView = ({
               <div className="relative z-10 mx-auto w-fit">
                 <AgentControlBar
                   capabilities={capabilities}
-                  onDisconnect={onDisconnect}
+                  initialMicrophoneState={false}
                 />
               </div>
             </motion.div>
