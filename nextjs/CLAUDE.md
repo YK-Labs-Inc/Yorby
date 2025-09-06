@@ -4,45 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains the source code for two applications:
+Yorby is a comprehensive AI-powered recruitment and interview preparation platform with two main products:
 
-### 1. Perfect Interview (B2C)
+### 1. AI Recruiter for Businesses (B2B)
 
-A comprehensive suite of AI-powered job preparation tools featuring:
+An AI-powered recruitment platform that helps businesses scan, assess, and interview candidates more efficiently and equitably:
 
-- **Resume Builder**: AI-powered resume creation through a conversational chat interface
-- **Job Prep Generator**: Upload job descriptions to generate practice interview questions, with AI mock interview capabilities for realistic practice sessions
-- **Interview Copilot**: Real-time interview assistance that joins meetings and helps answer questions during live interviews
+**Core Functionality:**
+- **Job Listing Creation**: Companies create job postings hosted on Yorby
+- **Custom Interview Questions**: Recruiters upload interview questions specific to each role
+- **AI-Powered Interviews**: Every candidate who applies goes through an AI interview instead of just submitting a resume
+- **Voice-to-Voice Interaction**: Uses LiveKit technology for real-time voice conversations between candidates and AI interviewer
+- **Automated Analysis**: AI analyzes interview performance and provides scores categorizing candidates as strong, median, or weak performers
+- **Equitable Screening**: Replaces resume-based screening with actual interview performance assessment
 
-### 2. Yorby (B2B)
-
-A white-labeled platform for career coaches to power their businesses:
-
-- Coaches can upload custom questions for their clients to practice
-- Students can practice with questions and perform mock interviews (both text and video)
-- Admin dashboard for coaches to monitor student performance and enrollments
-- Manual feedback capabilities for reviewing practice submissions and mock interviews
-- Enrollment-based access control system for student program access
-- Coach-only portals with dedicated authentication flow
-- Essentially a white-labeled version of Perfect Interview's job prep tool with coach-specific customization
-
-### 3. Company Interview Platform (B2B)
-
-A comprehensive recruiting platform for companies to screen and interview candidates:
-
-#### Core Features:
-- **Company Management**: Create organizations with team member roles (owner, admin, recruiter, viewer)
-- **Job Listings**: Post detailed job openings with descriptions and custom interview questions
-- **Candidate Applications**: Track applicants through various stages (applied → screening → interviewed → reviewing → offered/rejected)
-- **AI-Powered Interviews**: Automated mock interviews with candidates using existing infrastructure
-- **Interview Analysis**: AI-generated comprehensive analysis of candidate performance including:
+**Technical Implementation:**
+- **Company Management**: Organizations with team member roles (owner, admin, recruiter, viewer)
+- **Candidate Pipeline**: Track applicants through stages (applied → screening → interviewed → reviewing → offered/rejected)
+- **AI Interview Analysis**: Comprehensive performance analysis including:
   - Hiring verdict (Advance/Reject/Borderline) with match score
   - Question-by-question breakdown with quality scores
   - Identified strengths and concerns with evidence from responses
   - Job requirement alignment (matched/missing/exceeded)
   - Interview recordings with Mux video player integration
   - Full transcript with timestamps
-- **Application Files**: Support for resume and document uploads with preview/download capabilities
+- **Application Management**: Resume and document uploads with preview/download capabilities
+
+### 2. AI Interview Preparation (B2C)
+
+A candidate-facing platform for AI-powered interview preparation:
+
+**Core Features:**
+- **Job Description Upload**: Candidates upload job descriptions to generate relevant practice questions
+- **Resume & Work History Integration**: Upload resumes and work documents for personalized question generation
+- **Personalized Practice Questions**: AI generates tailored interview questions based on the specific job and candidate's background
+- **Individual Question Practice**: Practice questions one-by-one with AI feedback on answers
+- **Full Mock Interviews**: Complete AI-powered mock interview sessions using the same technology as the business recruiting platform
+- **Performance Feedback**: Detailed analysis and suggestions for improvement
 
 #### Technical Architecture:
 
@@ -103,10 +101,12 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Backend**: Supabase (Auth, Database, Storage)
 - **AI Services**: Google AI SDK, OpenAI, Deepgram (speech)
-- **Video**: Mux for video processing and storage (mock interviews & practice questions)
+- **Video & Voice**: 
+  - Mux for video processing and storage (mock interviews & practice questions)
+  - LiveKit for real-time voice-to-voice AI interviews
 - **Payments**: Stripe
 - **Monitoring**: Sentry, PostHog, Axiom
-- **Data Fetching**: SWR for real-time updates in coach portal
+- **Data Fetching**: SWR for real-time updates
 
 ### Key Directories
 
@@ -123,24 +123,29 @@ supabase gen types --local > utils/supabase/database.types.ts  # Generate Supaba
 
 The application uses a complex relational database with these main entities:
 
+**Core Platform:**
 - **Users & Auth**: Managed by Supabase Auth with subscription tracking
-- **Coaches**: Multi-tenant system with custom branding
-- **Jobs**: Custom job positions with descriptions (also used by companies via `company_id`)
+- **Jobs**: Job positions with descriptions (supports both company postings and candidate practice)
 - **Questions**: Interview questions with AI-generated guidelines (supports video recordings)
-- **Mock Interviews**: Full interview sessions with video recordings via Mux (supports both users and company candidates)
-- **Resumes**: Resume builder with sections and items
-- **Interview Copilot**: Real-time interview assistance
+- **Mock Interviews**: Full interview sessions with video/voice recordings via Mux and LiveKit
 - **Files**: User uploads with Google Cloud Storage
-- **Enrollments**: `custom_job_enrollments` table managing student access to coach programs
-- **Submissions**: Practice question submissions with text/video responses
+
+**Business Recruiting (B2B):**
 - **Companies**: Organizations that can post jobs and interview candidates
 - **Company Members**: Team members with role-based access (owner, admin, recruiter, viewer)
-- **Company Job Candidates**: Candidate applications and interview tracking
+- **Company Job Candidates**: Candidate applications and interview tracking through the pipeline
 - **Recruiter Interview Analysis**: AI-generated analysis with structured insights:
-  - Main analysis with verdict and match score
+  - Main analysis with verdict and match score (strong/median/weak performer)
   - Question-level breakdowns with quality scores
-  - Strengths and concerns with evidence
+  - Strengths and concerns with evidence from responses
   - Job requirement alignment tracking
+- **Candidate Application Files**: Resume and document uploads linked to applications
+
+**Interview Preparation (B2C):**
+- **Practice Sessions**: Individual question practice with AI feedback
+- **Personalized Questions**: AI-generated questions based on job descriptions and user resumes
+- **Mock Interview Sessions**: Full AI-powered interview practice using same technology as recruiting platform
+- **Performance Tracking**: Detailed feedback and improvement suggestions
 
 Key patterns:
 
@@ -153,45 +158,47 @@ Key patterns:
 ### Routing Architecture
 
 **Public Routes**:
-
-- `/` - Main landing page
-- `/[coachSlug]` - Coach-specific branded portals
-- `/coaches` - Coach portal landing page
-- `/coaches/auth` - Coach authentication with redirect handling
+- `/` - Main Yorby landing page
 - `/sign-in`, `/sign-up` - Authentication
+- `/apply/[companyId]/[jobId]` - Public application page for candidates to apply to company jobs
 
-**Protected Routes**:
+**Business Recruiting (B2B) Routes**:
+- `/recruiting` - Main dashboard for company recruiters
+- `/recruiting/companies/[id]/jobs/[jobId]` - Job detail page with navigation to questions and candidates
+- `/recruiting/companies/[id]/jobs/[jobId]/questions` - Manage interview questions with AI assistance
+- `/recruiting/companies/[id]/jobs/[jobId]/candidates` - View and analyze candidate applications
+- `/dashboard/company` - Company management and onboarding
 
-- `/dashboard/jobs` - Job management
-- `/dashboard/resumes` - Resume builder
-- `/dashboard/interview-copilots` - Real-time assistance
-- `/dashboard/coach-admin` - Coach administration
-- `/dashboard/coach-admin/students` - Student management and enrollment tracking
-- `/dashboard/coach-admin/students/[studentId]/programs` - View student's enrolled programs
-- `/dashboard/coach-admin/students/[studentId]/jobs/[jobId]/questions/[questionId]` - Review submissions
-- `/dashboard/coach-admin/students/[studentId]/jobs/[jobId]/mockInterviews/[mockInterviewId]` - Review mock interviews
+**Interview Preparation (B2C) Routes**:
+- `/dashboard/jobs` - Job-based interview preparation
+- `/dashboard/practice` - Individual question practice sessions
+- `/dashboard/mock-interviews` - Full mock interview sessions
+- `/dashboard/resumes` - Resume builder for preparation context
 
 **API Routes**:
+- `/api/chat` - AI chat functionality for question generation and feedback
+- `/api/transcribe` - Audio transcription for voice interviews
+- `/api/mockInterviews/*` - Interview processing and analysis
+- `/api/livekit/*` - LiveKit integration for real-time voice interviews
+- `/api/recruiting/*` - Company recruiting operations
+- `/api/webhooks/*` - External service integrations (Stripe, Mux, LiveKit)
 
-- `/api/chat` - AI chat functionality
-- `/api/transcribe` - Audio transcription
-- `/api/resume/*` - Resume operations
-- `/api/mockInterviews/*` - Interview processing
-- `/api/webhooks/*` - External service integrations (Stripe, Mux)
-- `/api/coach/[coachId]/register` - Student registration for coach programs
-- `/api/admin/migrate-enrollments` - Enrollment system migration
+### Interview Flow Architecture
 
-### Multi-Tenant Coach System
+**Business Recruiting Interview Flow:**
+1. Company creates job posting with custom interview questions
+2. Candidate applies via public application page
+3. Candidate completes AI-powered voice interview using LiveKit
+4. AI analyzes responses and generates comprehensive performance report
+5. Recruiters review analysis, recordings, and transcripts
+6. Hiring decision tracked through candidate pipeline (strong/median/weak performer)
 
-Coaches can create branded experiences:
-
-1. Custom domain/slug routing
-2. Program creation and student management
-3. Enrollment-based access control via `custom_job_enrollments` table
-4. Custom branding settings
-5. Coach-only authentication and access routes
-6. Student performance tracking and submission reviews
-7. Video/audio support for practice questions and mock interviews
+**Interview Preparation Flow:**
+1. User uploads job description and/or resume for context
+2. AI generates personalized practice interview questions
+3. User practices individual questions or full mock interviews
+4. AI provides detailed feedback and improvement suggestions
+5. Performance tracking helps users improve over time
 
 ### State Management
 
@@ -215,18 +222,23 @@ Key required variables:
 - `DEEPGRAM_API_KEY`
 - `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET`
 - `MUX_WEBHOOK_SECRET` - For verifying Mux webhook requests
+- `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` - For real-time voice interviews
+- `NEXT_PUBLIC_LIVEKIT_URL` - LiveKit server URL
 
 ### Development Considerations
 
 1. **Authentication**: All protected routes require Supabase authentication
 2. **File Uploads**: Use Supabase Storage or Google Cloud Storage
 3. **AI Features**: Monitor token usage for cost management
-4. **Video Processing**: Mux webhook handlers for async processing of mock interviews and practice questions
-5. **Internationalization**: Support for EN, ES, FR, JP, KO, ZH
-6. **Testing**: Limited test coverage - only typewriter component has tests
-7. **Enrollment System**: Students must be enrolled in programs to access coach content
+4. **Video/Voice Processing**: 
+   - Mux webhook handlers for async processing of recorded interviews
+   - LiveKit integration for real-time voice-to-voice AI interviews
+5. **Real-time Communication**: LiveKit handles voice streaming and processing
+6. **Candidate Experience**: Non-authenticated candidates can complete interviews via public application flow
+7. **Company Access**: Role-based permissions (owner, admin, recruiter, viewer) for business features
 8. **Performance**: Use composite indexes and SWR for optimized data fetching
-9. **Coach Access**: Separate authentication flow for coaches vs students
+9. **Interview Analysis**: AI-generated comprehensive reports with structured feedback
+10. **Testing**: Limited test coverage - only typewriter component has tests
 
 ### Next.js App Router
 
@@ -268,50 +280,50 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 3. Follow the established file structure
 4. Implement proper RLS policies for new tables
 5. Add appropriate error handling and loading states
-6. Consider enrollment-based access for coach features
+6. Consider role-based access for business features
 
 **Working with AI features**:
 
 1. Use streaming responses where appropriate
-2. Track token usage for billing
+2. Track token usage for cost management
 3. Implement proper error handling for API failures
 4. Consider rate limiting for expensive operations
+5. Ensure proper context passing for personalized responses
 
-**Coach/Multi-tenant features**:
+**Business Recruiting Features**:
 
-1. Always filter by coach context and enrollment status
-2. Implement enrollment-based RLS policies
-3. Use SWR for real-time data updates in coach portal
-4. Test with different coach/student enrollment scenarios
-5. Ensure proper video/audio handling for submissions
+1. Use role-based permissions (owner, admin, recruiter, viewer)
+2. Check company membership before granting access to candidate data
+3. Leverage existing interview infrastructure for candidate screening
+4. Support both authenticated and non-authenticated candidate flows
+5. Automatic AI analysis generation after interview completion
+6. File uploads handled through `candidate_application_files` table
+7. Real-time status tracking through candidate pipeline
+8. Interview analysis stored in structured database tables
 
-**Company Interview Features**:
+**Interview Preparation Features**:
 
-1. Reuse existing mock interview infrastructure for candidate interviews
-2. Add `candidate_id` to `custom_job_mock_interviews` for non-authenticated interviews
-3. Check company membership before granting access to candidate data
-4. Use role-based permissions (owner, admin, recruiter, viewer)
-5. Leverage existing AI feedback and video recording capabilities
-6. Interview analysis stored in `recruiter_interview_analysis_complete` view
-7. Support for both authenticated (user account) and non-authenticated candidates
-8. Automatic AI analysis generation after interview completion
-9. File uploads handled through `candidate_application_files` table
-10. Real-time status tracking through interview lifecycle
+1. Personalize questions based on job descriptions and user resumes
+2. Reuse existing mock interview infrastructure
+3. Provide detailed AI feedback and improvement suggestions
+4. Track user progress and performance over time
+5. Support both individual question practice and full mock interviews
 
-**Video/Audio Features**:
+**Voice Interview Features (LiveKit)**:
 
-1. Use Mux for all video processing and storage
+1. Use LiveKit for real-time voice-to-voice AI interactions
+2. Implement proper audio streaming and processing
+3. Handle connection states and error recovery
+4. Ensure low-latency voice processing
+5. Integrate with existing interview analysis pipeline
+
+**Video/Audio Features (Mux)**:
+
+1. Use Mux for recorded video processing and storage
 2. Implement proper webhook handlers for async processing
-3. Track upload progress and block UI during uploads
+3. Track upload progress and provide user feedback
 4. Support both video recordings and audio file uploads
 5. Ensure proper cleanup of Mux assets when deleted
-
-**Working with Enrollments**:
-
-1. Check enrollment status before granting access
-2. Use the `custom_job_enrollments` table for access control
-3. Implement proper cascade deletes for enrollment-related data
-4. Consider performance with composite indexes
 
 ### Data Fetching Guidelines
 
