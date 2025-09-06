@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yorby is a comprehensive AI-powered recruitment and interview preparation platform with two main products:
+Yorby is a comprehensive AI-powered recruitment and interview preparation platform following an open core model with two main products:
 
 ### 1. AI Recruiter for Businesses (B2B)
 
@@ -199,6 +199,34 @@ Key patterns:
 3. User practices individual questions or full mock interviews
 4. AI provides detailed feedback and improvement suggestions
 5. Performance tracking helps users improve over time
+
+## Open Core Licensing Model
+
+Yorby follows an open core business model where the core functionality is available as open source, with enterprise features requiring a commercial license:
+
+### Open Source Core (Free Tier)
+- **AI Recruiter for Businesses**: Up to 50 free candidate screenings/interviews per month
+- **AI Interview Preparation**: Up to 50 free practice interviews per month
+- All core interview functionality including:
+  - AI-powered voice interviews using LiveKit
+  - Interview analysis and scoring
+  - Question generation and management
+  - Basic application tracking
+  - Individual user accounts
+
+### Enterprise License (Paid Tier)  
+- **Unlimited Usage**: No restrictions on number of interviews or candidate screenings
+- **Team Management**: Multi-user company accounts with role-based access (owner, admin, recruiter, viewer)
+- **Advanced Pipeline Management**: Full candidate tracking through hiring pipeline
+- **Company Branding**: Custom company profiles and job posting pages
+- **Advanced Analytics**: Detailed reporting and performance insights
+- **Priority Support**: Dedicated customer support
+
+### Implementation Notes
+- Usage limits enforced at the API level with monthly reset counters
+- Team management features (company creation, member invitations, role assignment) gated behind enterprise license
+- Core interview technology (LiveKit integration, AI analysis) remains open source
+- Payment processing through Stripe for enterprise subscriptions
 
 ### State Management
 
