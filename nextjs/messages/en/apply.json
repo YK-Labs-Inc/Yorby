@@ -757,7 +757,7 @@
   "freeTierBanner": {
     "title": "Free Tier • {count} candidate interviews",
     "description": "Your candidate interview limit is shared across all job listings. Upgrade for unlimited candidate interviews and team collaboration.",
-    "upgradeButton": "Upgrade"
+    "upgradeButton": "Upgrade Now"
   },
   "upgradeCompany": {
     "errors": {
@@ -832,5 +832,17 @@
   },
   "triggerProcessInterview": {
     "error": "Failed to process interview. Please try again."
+  },
+  "upgradeNudge": {
+    "welcomeBadge": "🎉 Welcome to Yorby!",
+    "title": "Unlock Unlimited Interviews Now",
+    "description": "Your free tier gives you <strong>{count} candidate interviews</strong> across all job listings. Upgrade to Premium and remove all limits—conduct unlimited interviews and scale your hiring instantly.",
+    "benefits": {
+      "unlimitedInterviews": "Unlimited candidate interviews",
+      "teamCollaboration": "Team collaboration features"
+    },
+    "buttons": {
+      "maybeLater": "Maybe Later"
+    }
   }
 } 

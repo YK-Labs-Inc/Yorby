@@ -80,7 +80,7 @@ export async function createCompany(
   }
 
   if (companyId) {
-    redirect(`/recruiting/companies/${companyId}`);
+    redirect(`/recruiting/companies/${companyId}?showUpgrade=true`);
   }
 
   return { success: false, error: t("unexpectedError") };

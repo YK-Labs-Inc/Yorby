@@ -42,10 +42,7 @@ export default async function CompanyLayout({
                 {t("freeTierBanner.description")}
               </p>
             </div>
-            <UpgradeButton
-              companyId={companyId}
-              label={t("freeTierBanner.upgradeButton")}
-            />
+            <UpgradeButton companyId={companyId} />
           </div>
         </div>
       )}
