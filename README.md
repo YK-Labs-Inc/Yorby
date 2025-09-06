@@ -1,10 +1,6 @@
 # Yorby
 
 <p align="center">
-  <img src="https://yorby.ai/logo.png" width="120" alt="Yorby Logo">
-</p>
-
-<p align="center">
   <strong>The open-source AI-powered interview platform</strong>
 </p>
 
