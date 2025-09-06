@@ -59,7 +59,7 @@ export async function skipOnboarding(
   }
 
   // Redirect must happen outside of try-catch
-  redirect("/dashboard/jobs?newJob=true");
+  redirect("/onboarding/upgrade");
 }
 
 export async function markCandidateOnboardingComplete() {
