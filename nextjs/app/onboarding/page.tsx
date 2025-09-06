@@ -139,7 +139,7 @@ const OnboardingChat = () => {
     if (countdown === null) return;
 
     if (countdown === 0) {
-      router.push("/dashboard/jobs?newJob=true");
+      router.push("/onboarding/upgrade");
       return;
     }
 
