@@ -201,7 +201,7 @@ Yorby is open-source software licensed under the [AGPL-3.0 license](LICENSE).
 
 ### Commercial Use
 
-Yorby Technologies, Inc. offers Yorby under a commercial license for organizations that want to:
+YK Labs Inc offers Yorby under a commercial license for organizations that want to:
 - Remove usage limitations (unlimited interviews)
 - Access team management features
 - Get priority support
