@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { CompanyJobsManager } from "@/app/recruiting/CompanyJobsManager";
 import { CompanyHeader } from "@/app/recruiting/CompanyHeader";
 import { UpgradeSuccessBanner } from "./UpgradeSuccessBanner";
+import { UpgradeNudge } from "./UpgradeNudge";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
@@ -11,10 +12,15 @@ interface PageProps {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function CompanyDetailPage({ params }: PageProps) {
+export default async function CompanyDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { id } = await params;
+  const { showUpgrade } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     function: "CompanyDetailPage",
@@ -88,8 +94,12 @@ export default async function CompanyDetailPage({ params }: PageProps) {
         <Suspense fallback={null}>
           <UpgradeSuccessBanner companyId={id} />
         </Suspense>
-        
+
         <CompanyHeader company={company} isFreeTier={isFreeTier} />
+
+        {showUpgrade === "true" && isFreeTier && (
+          <UpgradeNudge companyId={id} />
+        )}
 
         <div className="mt-8">
           <CompanyJobsManager companyId={id} jobs={jobs ?? []} />
