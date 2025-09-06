@@ -61,6 +61,22 @@ export default async function CompanyMembersPage({ params }: PageProps) {
     redirect("/recruiting");
   }
 
+  // Check if company has enterprise subscription for members feature
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from("recruiting_subscriptions")
+    .select("company_id")
+    .eq("company_id", id)
+    .single();
+
+  if (subscriptionError || !subscription) {
+    logger.info("Members feature requires enterprise subscription", {
+      companyId: id,
+      error: subscriptionError,
+    });
+    await logger.flush();
+    redirect(`/recruiting/companies/${id}?upgrade=members`);
+  }
+
   // Fetch all company members (both active and pending invitations)
   const { data: members, error: membersError } = await supabase
     .from("company_members")

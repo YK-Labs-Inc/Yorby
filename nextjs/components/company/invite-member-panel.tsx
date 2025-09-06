@@ -25,9 +25,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { inviteCompanyMember } from "@/app/recruiting/companies/[id]/members/actions";
 import { cn } from "@/lib/utils";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { inviteCompanyMember } from "@/app/(ee)/recruiting/companies/[id]/members/actions";
 
 const createFormSchema = (t: (key: string) => string) =>
   z.object({

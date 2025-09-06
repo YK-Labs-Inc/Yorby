@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import {
   cancelInvitation,
   resendInvitation,
-} from "@/app/recruiting/companies/[id]/members/actions";
+} from "@/app/(ee)/recruiting/companies/[id]/members/actions";
 import { Tables } from "@/utils/supabase/database.types";
 
 type CompanyMember = Tables<"company_members"> & {
