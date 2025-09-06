@@ -1,1 +1,1 @@
-export const FREE_JOB_LIMIT = 5;
+export const FREE_JOB_LIMIT = 1;

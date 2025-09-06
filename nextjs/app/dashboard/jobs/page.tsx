@@ -106,6 +106,7 @@ export default async function JobsPage({
         showFlashPricingUI={showFlashPricingUI}
         userSignedUpWithin24Hours={userSignedUpWithin24Hours}
         userSignUpTimestamp={user.created_at}
+        hasReachedLimit={jobCount >= FREE_JOB_LIMIT}
       />
     );
   }
