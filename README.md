@@ -68,19 +68,89 @@ Yorby can be self-hosted for free with some limitations:
    cp .env.example .env.local
    ```
    
-   Configure the following required variables:
+   Configure the following environment variables:
+
+   #### Core Database & Authentication
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_OR_PUBLIC_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_OR_SECRET_KEY=your_service_role_key
+   ```
+
+   #### AI & Speech Services
+   ```env
    GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_key
+   NEXT_PUBLIC_GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_key
    OPENAI_API_KEY=your_openai_key
    DEEPGRAM_API_KEY=your_deepgram_key
+   DEEPGRAM_ENV=development
+   ASSEMBLY_AI_API_KEY=your_assembly_ai_key
+   ```
+
+   #### Video & Live Streaming
+   ```env
    MUX_TOKEN_ID=your_mux_token_id
    MUX_TOKEN_SECRET=your_mux_token_secret
+   MUX_WEBHOOK_SECRET=your_mux_webhook_secret
+   LIVEKIT_URL=your_livekit_url
    LIVEKIT_API_KEY=your_livekit_key
    LIVEKIT_API_SECRET=your_livekit_secret
-   NEXT_PUBLIC_LIVEKIT_URL=your_livekit_url
+   ```
+
+   #### Payment Processing
+   ```env
+   STRIPE_PUBLIC_KEY=your_stripe_public_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   STRIPE_SINGLE_CREDIT_PRICE_ID=your_price_id
+   STRIPE_FIVE_CREDITS_PRICE_ID=your_price_id
+   STRIPE_TEN_CREDITS_PRICE_ID=your_price_id
+   STRIPE_MONTHLY_PRICE_ID=your_price_id
+   STRIPE_INCREASED_MONTHLY_PRICE_ID=your_price_id
+   STRIPE_3_MONTH_PRICE_ID=your_price_id
+   STRIPE_INCREASED_3_MONTH_PRICE_ID=your_price_id
+   STRIPE_6_MONTH_PRICE_ID=your_price_id
+   STRIPE_INCREASED_6_MONTH_PRICE_ID=your_price_id
+   STRIPE_RECRUITING_SUBSCRIPTION_PRICE_ID=your_price_id
+   ```
+
+   #### Security & Analytics
+   ```env
+   NEXT_PUBLIC_HCAPTCHA_SITE_KEY=your_hcaptcha_site_key
+   NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
+   TURNSTILE_SECRET_KEY=your_turnstile_secret_key
+   NEXT_PUBLIC_POSTHOG_KEY=your_posthog_key
+   NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+   NEXT_PUBLIC_POSTHOG_API_HOST=your_posthog_api_host
+   ```
+
+   #### Email & Notifications
+   ```env
+   BREVO_API_KEY=your_brevo_api_key
+   RESEND_API_KEY=your_resend_api_key
+   ```
+
+   #### External Integrations
+   ```env
+   NOTION_API_KEY=your_notion_api_key
+   GOOGLE_APPLICATION_CREDENTIALS=your_google_service_account_json
+   ```
+
+   #### Redis & Queue Management
+   ```env
+   UPSTASH_REDIS_REST_URL=your_upstash_redis_url
+   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
+   UPSTASH_WORKFLOW_URL=your_workflow_url
+   QSTASH_URL=https://qstash.upstash.io
+   QSTASH_TOKEN=your_qstash_token
+   QSTASH_CURRENT_SIGNING_KEY=your_signing_key
+   QSTASH_NEXT_SIGNING_KEY=your_next_signing_key
+   ```
+
+   #### Application URLs
+   ```env
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
 4. Set up the database:
