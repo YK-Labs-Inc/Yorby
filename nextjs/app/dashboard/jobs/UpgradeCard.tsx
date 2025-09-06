@@ -25,6 +25,7 @@ interface UpgradeCardProps {
   showFlashPricingUI: boolean;
   userSignedUpWithin24Hours: boolean;
   userSignUpTimestamp: string;
+  hasReachedLimit: boolean;
 }
 
 const formatPrice = (price: number) => {
@@ -43,6 +44,7 @@ export default function UpgradeCard({
   showFlashPricingUI,
   userSignedUpWithin24Hours,
   userSignUpTimestamp,
+  hasReachedLimit,
 }: UpgradeCardProps) {
   const t = useTranslations("purchase.upgradeCard");
   const [isLoading, setIsLoading] = useState(false);
@@ -104,10 +106,12 @@ export default function UpgradeCard({
       <div className="w-full max-w-[1000px] mt-8">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-medium mb-4">
-            <span className="text-base">😅</span>
-            <span>{t("reachedLimit")}</span>
-          </div>
+          {hasReachedLimit && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm font-medium mb-4">
+              <span className="text-base">😅</span>
+              <span>{t("reachedLimit")}</span>
+            </div>
+          )}
 
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent mb-3">
             {t("upgradeTitle")}

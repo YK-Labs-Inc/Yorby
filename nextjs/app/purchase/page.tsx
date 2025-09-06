@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import { getProducts } from "./actions";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import SignUpForm from "./components/SignUpForm";
@@ -60,6 +59,7 @@ export default async function PurchasePage({
       showFlashPricingUI={showFlashPricingUI}
       userSignedUpWithin24Hours={userSignedUpWithin24Hours}
       userSignUpTimestamp={user.created_at}
+      hasReachedLimit={jobCount >= FREE_JOB_LIMIT}
     />
   );
 }
