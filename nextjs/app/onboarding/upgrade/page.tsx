@@ -12,7 +12,8 @@ const fetchJobCount = async (userId: string) => {
   const { count, error } = await supabase
     .from("custom_jobs")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .is("company_id", null);
   if (error) {
     throw error;
   }
