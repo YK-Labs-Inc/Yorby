@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatEntry } from "@/app/components/livekit/chat/chat-entry";
 import { VideoTile } from "@/app/components/livekit/video-tile";
-import { Track } from "livekit-client";
+import { LocalParticipant, Track } from "livekit-client";
 import {
   type ReceivedChatMessage,
   useLocalParticipant,
   useChat,
+  useTracks,
+  useTrackVolume,
 } from "@livekit/components-react";
 import { Tables } from "@/utils/supabase/database.types";
 import { saveCodingSubmission } from "./actions";
@@ -197,8 +199,9 @@ export default function CodingInterviewComponent({
           });
       }
 
-      const codeMessage = `${t("codeSubmission")}
-      \n${code}`;
+      const codeMessage = `<coding_submission>
+      ${code}
+      </coding_submission>`;
 
       // Send the code to the LiveKit agent via chat
       await sendMessage(codeMessage);
@@ -216,6 +219,18 @@ export default function CodingInterviewComponent({
       });
     }
   };
+
+  const tracks = useTracks();
+  const localTracks = tracks.filter(
+    ({ participant }) => participant instanceof LocalParticipant
+  );
+  const localMicTrack = localTracks.find(
+    ({ source }) => source === Track.Source.Microphone
+  );
+
+  // Use the volume hook to detect speaking
+  const volume = useTrackVolume(localMicTrack);
+  const userIsSpeaking = volume > 0.5;
 
   return (
     <div className="relative inset-0 bg-white h-full">
@@ -313,7 +328,11 @@ export default function CodingInterviewComponent({
             <CardContent className="pt-6 space-y-4 overflow-y-auto">
               {/* Video tile */}
               <div className="space-y-2">
-                <div className="relative h-32 rounded-md overflow-hidden bg-muted/10 border">
+                <div
+                  className={`relative h-32 rounded-md overflow-hidden bg-muted/10 border ${
+                    userIsSpeaking && "ring-4 ring-primary"
+                  }`}
+                >
                   {cameraTrack ? (
                     <VideoTile
                       trackRef={cameraTrack}
