@@ -188,7 +188,6 @@ export type Database = {
       candidate_job_interview_recordings: {
         Row: {
           asset_id: string | null
-          candidate_interview_id: string
           created_at: string | null
           id: string
           playback_id: string | null
@@ -198,9 +197,8 @@ export type Database = {
         }
         Insert: {
           asset_id?: string | null
-          candidate_interview_id: string
           created_at?: string | null
-          id?: string
+          id: string
           playback_id?: string | null
           status?: Database["public"]["Enums"]["mux_status"]
           updated_at?: string | null
@@ -208,7 +206,6 @@ export type Database = {
         }
         Update: {
           asset_id?: string | null
-          candidate_interview_id?: string
           created_at?: string | null
           id?: string
           playback_id?: string | null
@@ -219,14 +216,14 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
-            columns: ["candidate_interview_id"]
+            columns: ["id"]
             isOneToOne: false
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
-            columns: ["candidate_interview_id"]
+            columns: ["id"]
             isOneToOne: false
             referencedRelation: "coding_interview_analysis_view"
             referencedColumns: ["candidate_interview_id"]
