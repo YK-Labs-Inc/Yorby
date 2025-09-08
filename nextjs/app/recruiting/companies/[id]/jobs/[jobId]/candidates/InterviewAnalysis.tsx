@@ -223,18 +223,13 @@ export default function InterviewAnalysis({
     <div className="space-y-6 px-6">
       {/* Summary Cards Section */}
       {(aggregatedAnalysis || jobAlignmentDetails) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="w-full">
           {/* Hiring Decision Card */}
           {aggregatedAnalysis && (
             <AggregatedHiringAnalysis
               aggregatedAnalysis={aggregatedAnalysis}
               interviewResultsCount={interviewResults?.length || 0}
             />
-          )}
-
-          {/* Job Alignment Card */}
-          {jobAlignmentDetails && (
-            <JobAlignmentDetails alignmentDetails={jobAlignmentDetails} />
           )}
         </div>
       )}
