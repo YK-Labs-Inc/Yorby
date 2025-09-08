@@ -29,10 +29,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2, X, Trash2 } from "lucide-react";
+import { Loader2, X, Trash2, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import {
@@ -45,6 +50,7 @@ import { cn } from "@/lib/utils";
 import { Tables } from "@/utils/supabase/database.types";
 
 type InterviewType = Database["public"]["Enums"]["job_interview_type"];
+type InterviewWeight = Database["public"]["Enums"]["interview_weight"];
 type JobInterview = Tables<"job_interviews">;
 
 const createFormSchema = (t: (key: string) => string) =>
@@ -53,6 +59,11 @@ const createFormSchema = (t: (key: string) => string) =>
     interview_type: z.enum(["general", "coding"] as [
       InterviewType,
       InterviewType,
+    ]),
+    weight: z.enum(["low", "normal", "high"] as [
+      InterviewWeight,
+      InterviewWeight,
+      InterviewWeight,
     ]),
   });
 
@@ -78,6 +89,7 @@ export function CreateJobInterviewPanel({
   const { logError } = useAxiomLogging();
   const t = useTranslations("apply.recruiting.createJobInterviewDialog");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const formSchema = createFormSchema(t);
 
@@ -86,6 +98,7 @@ export function CreateJobInterviewPanel({
     defaultValues: {
       name: "",
       interview_type: "general",
+      weight: "normal",
     },
   });
 
@@ -123,11 +136,13 @@ export function CreateJobInterviewPanel({
       form.reset({
         name: interview.name,
         interview_type: interview.interview_type as InterviewType,
+        weight: interview.weight as InterviewWeight,
       });
     } else if (mode === "create") {
       form.reset({
         name: "",
         interview_type: "general",
+        weight: "normal",
       });
     }
   }, [interview, mode, form, open]);
@@ -193,6 +208,7 @@ export function CreateJobInterviewPanel({
 
   const handleClose = () => {
     form.reset();
+    setShowAdvanced(false);
     onOpenChange(false);
   };
 
@@ -315,6 +331,66 @@ export function CreateJobInterviewPanel({
                     </FormItem>
                   )}
                 />
+
+                {/* Advanced Section */}
+                <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                      type="button"
+                    >
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          showAdvanced ? "rotate-180" : ""
+                        }`}
+                      />
+                      Advanced Options
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-6 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("form.weight.label")}</FormLabel>
+                          <input
+                            type="hidden"
+                            name="weight"
+                            value={field.value}
+                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={t("form.weight.placeholder")} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="low">
+                                {t("form.weight.options.low")}
+                              </SelectItem>
+                              <SelectItem value="normal">
+                                {t("form.weight.options.normal")}
+                              </SelectItem>
+                              <SelectItem value="high">
+                                {t("form.weight.options.high")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            {t("form.weight.description")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
               </form>
             </Form>
           </div>
@@ -349,7 +425,7 @@ export function CreateJobInterviewPanel({
                     ) as HTMLFormElement;
                     formElement?.requestSubmit();
                   }}
-                  disabled={pending}
+                  disabled={pending || !form.formState.isValid}
                 >
                   {pending ? (
                     <>

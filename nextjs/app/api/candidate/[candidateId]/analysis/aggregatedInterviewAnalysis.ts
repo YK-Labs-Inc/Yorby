@@ -29,6 +29,7 @@ async function generateAggregatedHiringVerdict(
     interviewRounds: Array<{
       roundName: string;
       interviewType: "general" | "coding";
+      weight: string;
       analysis: Tables<"recruiter_interview_analysis">;
       strengths: Tables<"recruiter_interview_strengths">[];
       concerns: Tables<"recruiter_interview_concerns">[];
@@ -65,7 +66,8 @@ ${candidateData.jobAlignment.exceeded_requirements?.map((req) => `- ${req}`).joi
 ${candidateData.interviewRounds
   .map(
     (round, i) => `
-### Round ${i + 1}: ${round.roundName} (${round.interviewType})
+### Round ${i + 1}: ${round.roundName} (${round.interviewType}) - Weight: ${round.weight}
+- Interview Importance: ${round.weight === 'high' ? 'HIGH (Critical for decision)' : round.weight === 'low' ? 'LOW (Supporting round)' : 'NORMAL (Standard importance)'}
 - Verdict: ${round.analysis.hiring_verdict}
 - Score: ${round.analysis.overall_match_score}/100
 - Summary: ${round.analysis.verdict_summary}
@@ -104,9 +106,13 @@ Based on the job alignment analysis AND all interview rounds, provide a FINAL hi
    - Problem-solving approach and learning ability
    - Cultural fit and collaboration potential
 
-4. **Weighting Considerations**:
-   - Technical/coding rounds should generally carry more weight for technical roles
-   - Behavioral rounds are crucial for leadership/senior positions
+4. **Weighting Considerations** (CRITICAL - Follow These Rules):
+   - **HIGH weight rounds**: These are critical and should heavily influence the final decision
+     * Strong performance in HIGH weight rounds can compensate for weaker performance elsewhere
+     * Poor performance in HIGH weight rounds should significantly impact the overall assessment
+   - **NORMAL weight rounds**: Standard importance, factor into decision normally
+   - **LOW weight rounds**: Supporting evidence only, should not heavily influence decision
+   - When calculating overall score, mentally weight each round's score according to its importance
    - Job alignment score should heavily influence the decision
    - Consider the specific requirements of THIS job
 
@@ -135,11 +141,24 @@ Based on the job alignment analysis AND all interview rounds, provide a FINAL hi
 - Behavioral/cultural red flags
 - Score typically 0-50
 
+## CALCULATING THE WEIGHTED OVERALL SCORE
+When determining the overall_score, apply these weights:
+- HIGH weight rounds: Count these scores 2x in your mental calculation
+- NORMAL weight rounds: Count these scores 1x (standard)
+- LOW weight rounds: Count these scores 0.5x in your mental calculation
+
+For example, if you have:
+- Round 1 (HIGH, score 85): Effective contribution = 85 × 2 = 170
+- Round 2 (NORMAL, score 70): Effective contribution = 70 × 1 = 70  
+- Round 3 (LOW, score 60): Effective contribution = 60 × 0.5 = 30
+- Weighted average = (170 + 70 + 30) ÷ (2 + 1 + 0.5) = 270 ÷ 3.5 ≈ 77
+
 Provide:
-1. overall_score: Weighted average considering all rounds (0-100, must be an INTEGER)
+1. overall_score: Weighted average considering all rounds and their importance (0-100, must be an INTEGER)
 2. hiring_verdict: ADVANCE, REJECT, or BORDERLINE
 3. verdict_rationale: 2-3 paragraph explanation covering:
-   - Summary of performance across all rounds
+   - Summary of performance across all rounds, noting which were high/low weight
+   - How you weighted the rounds in your decision
    - Key strengths that support the decision
    - Any concerns and whether they're manageable
    - Final recommendation with confidence level`;
@@ -461,6 +480,7 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
             id,
             name,
             interview_type,
+            weight,
             order_index
           )
         `
@@ -521,6 +541,7 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
         return {
           roundName: interview.job_interviews.name,
           interviewType: interview.job_interviews.interview_type,
+          weight: interview.job_interviews.weight,
           analysis,
           strengths: strengths || [],
           concerns: concerns || [],

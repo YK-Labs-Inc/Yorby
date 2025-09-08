@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { Plus, GripVertical, MoreVertical, Users } from "lucide-react";
+import {
+  Plus,
+  GripVertical,
+  MoreVertical,
+  Users,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -231,16 +237,18 @@ export function InterviewRoundsManager({
             <h2 className="text-2xl font-semibold">{t("title")}</h2>
             <p className="text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <Button
-            onClick={() => {
-              setPanelMode("create");
-              setSelectedInterview(null);
-              setShowCreatePanel(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t("createInterviewRound")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => {
+                setPanelMode("create");
+                setSelectedInterview(null);
+                setShowCreatePanel(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {t("createInterviewRound")}
+            </Button>
+          </div>
         </div>
 
         {sortedInterviews.length === 0 ? (

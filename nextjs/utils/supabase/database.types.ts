@@ -1651,6 +1651,7 @@ export type Database = {
           interview_id: string
           order_index: number
           question_id: string
+          weight: Database["public"]["Enums"]["interview_weight"]
         }
         Insert: {
           created_at?: string | null
@@ -1658,6 +1659,7 @@ export type Database = {
           interview_id: string
           order_index: number
           question_id: string
+          weight?: Database["public"]["Enums"]["interview_weight"]
         }
         Update: {
           created_at?: string | null
@@ -1665,6 +1667,7 @@ export type Database = {
           interview_id?: string
           order_index?: number
           question_id?: string
+          weight?: Database["public"]["Enums"]["interview_weight"]
         }
         Relationships: [
           {
@@ -1699,6 +1702,7 @@ export type Database = {
           name: string
           order_index: number
           updated_at: string | null
+          weight: Database["public"]["Enums"]["interview_weight"]
         }
         Insert: {
           created_at?: string | null
@@ -1708,6 +1712,7 @@ export type Database = {
           name: string
           order_index: number
           updated_at?: string | null
+          weight?: Database["public"]["Enums"]["interview_weight"]
         }
         Update: {
           created_at?: string | null
@@ -1717,6 +1722,7 @@ export type Database = {
           name?: string
           order_index?: number
           updated_at?: string | null
+          weight?: Database["public"]["Enums"]["interview_weight"]
         }
         Relationships: [
           {
@@ -2996,6 +3002,7 @@ export type Database = {
       interview_copilot_access: "locked" | "unlocked"
       interview_copilot_status: "in_progress" | "complete"
       interview_status: "in_progress" | "complete"
+      interview_weight: "low" | "normal" | "high"
       job_interview_status: "pending" | "in_progress" | "completed"
       job_interview_type: "general" | "coding"
       locked_status: "locked" | "unlocked"
@@ -3142,6 +3149,7 @@ export const Constants = {
       interview_copilot_access: ["locked", "unlocked"],
       interview_copilot_status: ["in_progress", "complete"],
       interview_status: ["in_progress", "complete"],
+      interview_weight: ["low", "normal", "high"],
       job_interview_status: ["pending", "in_progress", "completed"],
       job_interview_type: ["general", "coding"],
       locked_status: ["locked", "unlocked"],

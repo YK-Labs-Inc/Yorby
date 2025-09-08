@@ -45,6 +45,7 @@ const QuestionAnalysisSchema = z.object({
   key_points: z.array(z.string()),
   concerns: z.array(z.string()),
   examples_provided: z.array(z.string()),
+  weight: z.string().optional(),
 });
 
 // Type exports for TypeScript
@@ -100,12 +101,19 @@ async function generateHiringVerdictForCodingInterview(
   strengths: Strength[],
   concerns: Concern[],
   customJob: Tables<"custom_jobs">,
+  interviewWeight: string,
   logger: Logger
 ): Promise<HiringVerdict> {
   const prompt = `
 ## CODING INTERVIEW CONTEXT
 Job Title: ${customJob.job_title}
 Job Description: ${customJob.job_description || "N/A"}
+
+## INTERVIEW WEIGHTING
+This coding interview round has a weight of "${interviewWeight}" - this indicates its importance:
+- High: Critical interview round, performance here should strongly influence the decision
+- Normal: Standard importance interview round
+- Low: Supporting interview round, less critical for overall decision
 
 ## CODING PROBLEM DETAILS
 Question Type: ${codingQuestionContext.questionType}
@@ -186,9 +194,16 @@ async function generateHiringVerdict(
   concerns: Concern[],
   jobAlignment: JobAlignment,
   questionAnalysis: QuestionAnalysis[],
+  interviewWeight: string,
   logger: Logger
 ): Promise<HiringVerdict> {
   const prompt = `${baseContext}
+
+## INTERVIEW WEIGHTING
+This interview round has a weight of "${interviewWeight}" - this indicates its importance in the overall evaluation process:
+- High: Critical interview round, performance here should strongly influence the decision
+- Normal: Standard importance interview round
+- Low: Supporting interview round, less critical for overall decision
 
 As an expert recruiter, analyze this interview and provide a comprehensive hiring verdict based on ALL of the following analysis:
 
@@ -224,6 +239,7 @@ ${questionAnalysis
   .map(
     (q, i) => `${i + 1}. ${q.question_text}
    - Quality Score: ${q.answer_quality_score}/100
+   - Question Weight: ${q.weight || "normal"} (${q.weight === "high" ? "High importance" : q.weight === "low" ? "Low importance" : "Standard importance"})
    - Summary: ${q.user_answer}
    - Key Points: ${q.key_points.join("; ")}
    - Concerns: ${q.concerns.join("; ") || "None"}`
@@ -236,6 +252,8 @@ Consider:
 - The overall pattern of strengths vs concerns
 - How well the candidate meets the job requirements
 - The quality and consistency of their answers across all questions
+- The weight of this interview round (${interviewWeight}) and how performance should be interpreted accordingly
+- Pay special attention to performance on high-weight questions, as these are more critical
 - Any critical red flags that would disqualify them
 - Their potential for success in this specific role
 
@@ -509,6 +527,7 @@ async function gradeAnswer(
   groupedQA: GroupedQuestionAnswer,
   answerGuidelines: string | null,
   job: Tables<"custom_jobs">,
+  questionWeight: string,
   logger: Logger
 ): Promise<{
   answer_quality_score: number;
@@ -519,10 +538,16 @@ async function gradeAnswer(
   const prompt = `
 You are an expert recruiter evaluating a candidate's interview answer.
 
+## QUESTION IMPORTANCE
+This question has a weight of "${questionWeight}" - this indicates its importance:
+- High: Critical question, performance here should strongly influence the evaluation
+- Normal: Standard importance question
+- Low: Supporting question, less critical for overall assessment
+
 ${
   answerGuidelines
-    ? `Grade the answer against the specific answer guidelines provided.`
-    : `Grade the answer based on how well it demonstrates qualifications for the job described.`
+    ? `Grade the answer against the specific answer guidelines provided, considering the ${questionWeight} importance of this question.`
+    : `Grade the answer based on how well it demonstrates qualifications for the job described, considering the ${questionWeight} importance of this question.`
 }
 
 Note: The question and answer have been synthesized from multiple exchanges to capture the complete discussion of this topic.
@@ -579,6 +604,9 @@ ${answerGuidelines ? `## Answer Guidelines\n${answerGuidelines}` : ""}`;
 async function generateRecruiterQuestionAnalysis(
   transcript: string,
   companyQuestions: Tables<"company_interview_question_bank">[],
+  interviewQuestions: (Tables<"job_interview_questions"> & {
+    company_interview_question_bank: Tables<"company_interview_question_bank">;
+  })[],
   customJob: Tables<"custom_jobs">,
   logger: Logger
 ): Promise<QuestionAnalysis[]> {
@@ -602,11 +630,18 @@ async function generateRecruiterQuestionAnalysis(
           return;
         }
 
+        // Find the weight for this question from the interview questions
+        const matchingInterviewQuestion = interviewQuestions?.find(
+          (iq) => iq.company_interview_question_bank.id === matchedQuestion.id
+        );
+        const questionWeight = matchingInterviewQuestion?.weight || "normal";
+
         // Grade the answer
         const grading = await gradeAnswer(
           groupedQA,
           matchedQuestion?.answer || null,
           customJob,
+          questionWeight,
           logger
         );
 
@@ -618,6 +653,7 @@ async function generateRecruiterQuestionAnalysis(
           key_points: grading.key_points,
           concerns: grading.concerns,
           examples_provided: grading.examples_provided,
+          weight: questionWeight,
         };
       })
     )
@@ -768,7 +804,7 @@ const generateGeneralInterviewAnalysis = async ({
 
   const jobInterviewId = jobInterview.interview_id;
   // Fetch interview questions for this round
-  const { data: interviewQuestions } = await supabase
+  const { data: interviewQuestions = [] } = await supabase
     .from("job_interview_questions")
     .select(
       `
@@ -809,6 +845,7 @@ const generateGeneralInterviewAnalysis = async ({
       generateRecruiterQuestionAnalysis(
         transcript,
         companyQuestions,
+        interviewQuestions || [],
         customJob,
         logger
       ),
@@ -825,12 +862,26 @@ const generateGeneralInterviewAnalysis = async ({
     }
   );
 
+  // Get the interview weight from the job interview
+  const { data: jobInterviewData } = await supabase
+    .from("candidate_job_interviews")
+    .select(
+      `
+      job_interviews!inner (weight)
+    `
+    )
+    .eq("id", candidateInterviewId)
+    .single();
+
+  const interviewWeight = jobInterviewData?.job_interviews?.weight || "normal";
+
   const verdict = await generateHiringVerdict(
     baseContext,
     strengths,
     concerns,
     jobAlignment,
     recruiterQuestionAnalysis,
+    interviewWeight,
     logger
   );
 
@@ -1078,12 +1129,26 @@ const generateCodingInterviewAnalysis = async ({
     totalConcerns: allConcerns.length,
   });
 
+  // Get the interview weight from the job interview
+  const { data: jobInterviewData } = await supabase
+    .from("candidate_job_interviews")
+    .select(
+      `
+      job_interviews!inner (weight)
+    `
+    )
+    .eq("id", candidateInterviewId)
+    .single();
+
+  const interviewWeight = jobInterviewData?.job_interviews?.weight || "normal";
+
   // Generate the hiring verdict based on all coding questions
   const verdict = await generateHiringVerdictForCodingInterview(
     primaryQuestionContext,
     allStrengths,
     allConcerns,
     customJob,
+    interviewWeight,
     logger
   );
 

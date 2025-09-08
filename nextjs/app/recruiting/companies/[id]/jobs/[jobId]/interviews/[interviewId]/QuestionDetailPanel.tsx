@@ -3,7 +3,12 @@
 import React, { useState, useEffect, useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, ChevronDown } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { CodeEditor } from "@/components/ui/code-editor";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { cn } from "@/lib/utils";
@@ -27,6 +32,16 @@ import {
   deleteQuestion,
 } from "@/app/recruiting/companies/[id]/jobs/[jobId]/interviews/[interviewId]/actions";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Database } from "@/utils/supabase/database.types";
+
+type InterviewWeight = Database["public"]["Enums"]["interview_weight"];
 
 interface QuestionDetailPanelProps {
   isOpen: boolean;
@@ -53,8 +68,10 @@ export default function QuestionDetailPanel({
     question: "",
     answer: "",
     timeLimitMs: 1800000, // Default 30 minutes in milliseconds
+    weight: "normal" as InterviewWeight,
   });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [timeLimitError, setTimeLimitError] = useState<string | null>(null);
   const [solutionCodeError, setSolutionCodeError] = useState<string | null>(
     null
@@ -92,12 +109,14 @@ export default function QuestionDetailPanel({
           question.company_interview_question_bank
             .company_interview_coding_question_metadata?.time_limit_ms ||
           1800000,
+        weight: (question.weight as InterviewWeight) || "normal",
       });
     } else if (mode === "create") {
       setFormData({
         question: "",
         answer: "",
         timeLimitMs: 1800000, // Default 30 minutes
+        weight: "normal",
       });
     }
   }, [question, mode, isOpen]);
@@ -175,9 +194,10 @@ export default function QuestionDetailPanel({
   }, [isOpen]);
 
   const handleClose = () => {
-    setFormData({ question: "", answer: "", timeLimitMs: 1800000 });
+    setFormData({ question: "", answer: "", timeLimitMs: 1800000, weight: "normal" });
     setTimeLimitError(null);
     setSolutionCodeError(null);
+    setShowAdvanced(false);
     onClose();
   };
 
@@ -414,6 +434,66 @@ export default function QuestionDetailPanel({
                     )}
                   </div>
                 )}
+
+                {/* Advanced Section */}
+                <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-2 p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                      type="button"
+                    >
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          showAdvanced ? "rotate-180" : ""
+                        }`}
+                      />
+                      Advanced Options
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-6 pt-4">
+                    {/* Weight Field */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="panel-weight"
+                        className="text-base font-medium"
+                      >
+                        {t("detailPanel.weight.label")}
+                      </Label>
+                      <Select
+                        name="weight"
+                        value={formData.weight}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, weight: value as InterviewWeight })
+                        }
+                      >
+                        <SelectTrigger className="text-base">
+                          <SelectValue placeholder={t("detailPanel.weight.placeholder")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">
+                            {t("detailPanel.weight.options.low")}
+                          </SelectItem>
+                          <SelectItem value="normal">
+                            {t("detailPanel.weight.options.normal")}
+                          </SelectItem>
+                          <SelectItem value="high">
+                            {t("detailPanel.weight.options.high")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <input
+                        type="hidden"
+                        name="weight"
+                        value={formData.weight}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        {t("detailPanel.weight.description")}
+                      </p>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             </div>
 
