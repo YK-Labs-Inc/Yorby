@@ -541,6 +541,16 @@
           "solutionPlaceholder": "// Write your solution code here...",
           "solutionRequired": "Solution code is required for coding questions"
         },
+        "weight": {
+          "label": "Question Weight",
+          "placeholder": "Select weight",
+          "description": "Set the importance level of this question for weighted scoring calculations.",
+          "options": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High"
+          }
+        },
         "buttons": {
           "saving": "Saving...",
           "deleting": "Deleting..."
@@ -674,6 +684,16 @@
           "options": {
             "general": "Behavioral Interview",
             "coding": "Technical/Coding Interview"
+          }
+        },
+        "weight": {
+          "label": "Interview Weight",
+          "placeholder": "Select weight",
+          "description": "Set the importance level of this interview round for weighted scoring calculations.",
+          "options": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High"
           }
         },
         "validation": {

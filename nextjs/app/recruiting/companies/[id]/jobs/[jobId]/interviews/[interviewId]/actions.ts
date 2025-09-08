@@ -5,6 +5,7 @@ import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
+import { Database } from "@/utils/supabase/database.types";
 
 // Helper function to check if user is a company member
 async function checkCompanyMembership(
@@ -62,6 +63,7 @@ export async function createQuestion(
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
   const timeLimitMs = formData.get("time_limit_ms") as string;
+  const weight = (formData.get("weight") as string) || "normal";
 
   const logger = new Logger().with({
     function: "createQuestion",
@@ -173,6 +175,7 @@ export async function createQuestion(
         interview_id: interviewId,
         question_id: questionBankEntry.id,
         order_index: nextOrderIndex,
+        weight: weight as Database["public"]["Enums"]["interview_weight"],
       });
 
     if (linkError) {
@@ -221,6 +224,7 @@ export async function updateQuestion(
   const question = formData.get("question") as string;
   const answer = formData.get("answer") as string;
   const timeLimitMs = formData.get("time_limit_ms") as string;
+  const weight = (formData.get("weight") as string) || "normal";
 
   const logger = new Logger().with({
     function: "updateQuestion",
@@ -344,6 +348,23 @@ export async function updateQuestion(
           return { success: false, error: t("failedToUpdate") };
         }
       }
+    }
+
+    // Update the weight in the job_interview_questions table
+    const { error: weightError } = await supabase
+      .from("job_interview_questions")
+      .update({
+        weight: weight as Database["public"]["Enums"]["interview_weight"],
+      })
+      .eq("interview_id", interviewId)
+      .eq("question_id", questionId);
+
+    if (weightError) {
+      logger.error("Failed to update question weight", {
+        error: weightError,
+      });
+      await logger.flush();
+      return { success: false, error: t("failedToUpdate") };
     }
 
     logger.info("Question updated successfully", { questionId });

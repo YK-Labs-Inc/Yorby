@@ -7,6 +7,7 @@ import { Logger } from "next-axiom";
 import { Database } from "@/utils/supabase/database.types";
 
 type InterviewType = Database["public"]["Enums"]["job_interview_type"];
+type InterviewWeight = Database["public"]["Enums"]["interview_weight"];
 
 export async function createJobInterview(
   prevState: { success?: boolean; error?: string },
@@ -14,6 +15,7 @@ export async function createJobInterview(
 ) {
   const name = formData.get("name") as string;
   const interview_type = formData.get("interview_type") as InterviewType;
+  const weight = formData.get("weight") as InterviewWeight;
   const custom_job_id = formData.get("custom_job_id") as string;
   const order_index = Number(formData.get("order_index"));
 
@@ -21,6 +23,7 @@ export async function createJobInterview(
     function: "createJobInterview",
     name,
     interview_type,
+    weight,
     custom_job_id,
     order_index,
   });
@@ -73,6 +76,7 @@ export async function createJobInterview(
       .insert({
         name,
         interview_type,
+        weight,
         custom_job_id,
         order_index,
       })
@@ -216,6 +220,7 @@ export async function updateJobInterview(
   const interviewId = formData.get("interview_id") as string;
   const name = formData.get("name") as string;
   const interview_type = formData.get("interview_type") as InterviewType;
+  const weight = formData.get("weight") as InterviewWeight;
   const custom_job_id = formData.get("custom_job_id") as string;
 
   const logger = new Logger().with({
@@ -223,6 +228,7 @@ export async function updateJobInterview(
     interviewId,
     name,
     interview_type,
+    weight,
     custom_job_id,
   });
 
@@ -274,6 +280,7 @@ export async function updateJobInterview(
       .update({
         name,
         interview_type,
+        weight,
       })
       .eq("id", interviewId)
       .eq("custom_job_id", custom_job_id);
