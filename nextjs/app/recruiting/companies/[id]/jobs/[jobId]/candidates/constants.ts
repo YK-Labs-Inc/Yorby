@@ -1,1 +1,2 @@
-export const FREE_TIER_CANDIDATE_COUNT = 50;
+export const FREE_TIER_INTERVIEW_COUNT = 50;
+export const PRO_TIER_INTERVIEW_COUNT = 200;

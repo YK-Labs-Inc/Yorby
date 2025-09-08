@@ -229,6 +229,61 @@ async function handleSubscriptionEnded(
   }
 }
 
+const handleInvoiceCreated = async (
+  invoice: Stripe.Invoice,
+  logger: Logger
+) => {
+  logger.info("Invoice created", { invoiceId: invoice.id });
+  const supabase = await createAdminClient();
+  const stripeCustomerId = invoice.customer as string;
+
+  if (!stripeCustomerId) {
+    logger.error("No customer ID in invoice");
+    return;
+  }
+
+  try {
+    // Look up the company_id from recruiting_subscriptions using the stripe_customer_id
+    const { data: subscriptionData, error: subscriptionError } = await supabase
+      .from("recruiting_subscriptions")
+      .select("company_id")
+      .eq("stripe_customer_id", stripeCustomerId)
+      .single();
+
+    if (subscriptionError) {
+      logger.error("Failed to find recruiting subscription", { 
+        stripeCustomerId, 
+        error: subscriptionError 
+      });
+      return;
+    }
+
+    const companyId = subscriptionData.company_id;
+
+    // Upsert metered usage: reset to 0 if exists, create with 0 if doesn't exist
+    const { error: upsertError } = await supabase
+      .from("recruiting_subscriptions_metered_usage")
+      .upsert({
+        company_id: companyId,
+        count: 0
+      }, {
+        onConflict: "company_id"
+      });
+
+    if (upsertError) {
+      logger.error("Failed to upsert metered usage", { 
+        companyId, 
+        error: upsertError 
+      });
+      return;
+    }
+
+    logger.info("Reset metered usage count to 0", { companyId });
+  } catch (error) {
+    logger.error("Error handling invoice created", { error });
+  }
+};
+
 export const POST = withAxiom(async (request: AxiomRequest) => {
   const logger = request.log.with({
     path: "/api/webhooks/stripe",
@@ -260,15 +315,15 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           event.data.object as Stripe.Checkout.Session,
           logger
         );
-        break;
 
       case "customer.subscription.deleted":
         await handleSubscriptionEnded(
           event.data.object as Stripe.Subscription,
           logger
         );
-        break;
 
+      case "invoice.created":
+        await handleInvoiceCreated(event.data.object as Stripe.Invoice, logger);
       default:
         logger.info("Unhandled event type", { type: event.type });
     }

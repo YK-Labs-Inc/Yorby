@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Candidate, fetchMoreCandidates } from "./actions";
 import { useTranslations } from "next-intl";
-import { FREE_TIER_CANDIDATE_COUNT } from "./constants";
+import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
 
 interface CandidatesListProps {
@@ -32,7 +32,9 @@ export default function CandidatesList({
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(initialCandidates.length === 10);
+  const [hasMore, setHasMore] = useState(
+    initialCandidates.length === FREE_TIER_INTERVIEW_COUNT
+  );
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastCandidateRef = useRef<HTMLDivElement | null>(null);
@@ -53,7 +55,7 @@ export default function CandidatesList({
     if (isLoading || !hasMore) return;
 
     // Check free tier limit
-    if (!isPremium && candidates.length >= FREE_TIER_CANDIDATE_COUNT) {
+    if (!isPremium && candidates.length >= FREE_TIER_INTERVIEW_COUNT) {
       openUpgradeDialog();
       return;
     }
@@ -94,7 +96,7 @@ export default function CandidatesList({
 
     // Don't set up observer if free tier limit reached
     const shouldObserve =
-      isPremium || candidates.length < FREE_TIER_CANDIDATE_COUNT;
+      isPremium || candidates.length < FREE_TIER_INTERVIEW_COUNT;
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -210,19 +212,19 @@ export default function CandidatesList({
                   </div>
                 )}
                 {!isPremium &&
-                  candidates.length >= FREE_TIER_CANDIDATE_COUNT &&
+                  candidates.length >= FREE_TIER_INTERVIEW_COUNT &&
                   hasMore && (
                     <div className="p-4 text-center border-t">
                       <p className="text-xs text-muted-foreground mb-2">
                         {t("list.freeTier.limitReached", {
-                          limit: FREE_TIER_CANDIDATE_COUNT,
+                          limit: FREE_TIER_INTERVIEW_COUNT,
                         })}
                       </p>
-                      {companyCandidateCount > FREE_TIER_CANDIDATE_COUNT && (
+                      {companyCandidateCount > FREE_TIER_INTERVIEW_COUNT && (
                         <p className="text-xs font-medium text-foreground mb-2">
                           {t("list.freeTier.moreCandidates", {
                             count:
-                              companyCandidateCount - FREE_TIER_CANDIDATE_COUNT,
+                              companyCandidateCount - FREE_TIER_INTERVIEW_COUNT,
                           })}
                         </p>
                       )}

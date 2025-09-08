@@ -10,7 +10,7 @@ import {
 } from "@/utils/ai/gemini";
 import { z } from "zod";
 import { Tables } from "@/utils/supabase/database.types";
-import { getServerUser } from "@/utils/auth/server";
+import Stripe from "stripe";
 
 // Zod schema for the aggregated verdict
 const AggregatedVerdictSchema = z.object({
@@ -589,9 +589,108 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
       candidateId,
       processingTimeMs: processingTime,
     });
+    await processInterviewWithStripe(candidateId);
     return;
   } catch (error) {
     logger.error("Error generating aggregated analysis", { error });
     return;
+  }
+};
+
+const processInterviewWithStripe = async (candidateId: string) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-02-24.acacia",
+  });
+  const logger = new Logger().with({
+    function: "processInterviewWithStripe",
+    candidateId,
+  });
+  const supabase = await createAdminClient();
+  
+  const { data: candidate, error: candidateError } = await supabase
+    .from("company_job_candidates")
+    .select("company_id")
+    .eq("id", candidateId)
+    .single();
+  if (candidateError || !candidate) {
+    logger.error("Candidate not found", { candidateId, error: candidateError });
+    throw new Error("Candidate not found");
+  }
+
+  const { data: company, error: companyError } = await supabase
+    .from("recruiting_subscriptions")
+    .select("stripe_customer_id")
+    .eq("company_id", candidate.company_id)
+    .single();
+  if (companyError || !company || !company.stripe_customer_id) {
+    logger.error("Company not found", {
+      companyId: candidate.company_id,
+      error: companyError,
+    });
+    throw new Error("Company not found");
+  }
+
+  // Get current metered usage count
+  const { data: meteredUsage, error: usageError } = await supabase
+    .from("recruiting_subscriptions_metered_usage")
+    .select("count")
+    .eq("company_id", candidate.company_id)
+    .maybeSingle();
+
+  if (usageError) {
+    logger.error("Failed to query metered usage", {
+      companyId: candidate.company_id,
+      error: usageError,
+    });
+    throw new Error("Failed to query metered usage");
+  }
+
+  const currentCount = meteredUsage?.count || 0;
+  const newCount = currentCount + 1;
+
+  // Update the metered usage count (increment by 1)
+  const { error: upsertError } = await supabase
+    .from("recruiting_subscriptions_metered_usage")
+    .upsert({
+      company_id: candidate.company_id,
+      count: newCount
+    }, {
+      onConflict: "company_id"
+    });
+
+  if (upsertError) {
+    logger.error("Failed to update metered usage count", {
+      companyId: candidate.company_id,
+      error: upsertError,
+    });
+    throw new Error("Failed to update metered usage count");
+  }
+
+  logger.info("Updated metered usage count", {
+    companyId: candidate.company_id,
+    previousCount: currentCount,
+    newCount: newCount,
+  });
+
+  // Only send Stripe metered event if count exceeds 200
+  if (newCount > 200) {
+    await stripe.billing.meterEvents.create({
+      event_name: "completed_candidate_interviews",
+      payload: {
+        stripe_customer_id: company.stripe_customer_id,
+      },
+    });
+
+    logger.info("Sent Stripe metered event", {
+      companyId: candidate.company_id,
+      stripeCustomerId: company.stripe_customer_id,
+      interviewCount: newCount,
+    });
+  } else {
+    logger.info("Interview within base plan limit", {
+      companyId: candidate.company_id,
+      interviewCount: newCount,
+      baseLimit: 200,
+    });
   }
 };

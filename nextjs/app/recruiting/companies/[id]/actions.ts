@@ -84,6 +84,9 @@ export const upgradeCompany = async (
           price: process.env.STRIPE_RECRUITING_SUBSCRIPTION_PRICE_ID!,
           quantity: 1,
         },
+        {
+          price: process.env.STRIPE_RECRUITING_SUBSCRIPTION_METERED_PRICE_ID!,
+        },
       ],
       success_url: `${origin}/recruiting/companies/${companyId}?upgraded=true`,
       cancel_url: `${origin}/recruiting/companies/${companyId}`,
