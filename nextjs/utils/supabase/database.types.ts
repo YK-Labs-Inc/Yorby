@@ -2382,6 +2382,32 @@ export type Database = {
           },
         ]
       }
+      recruiting_subscriptions_metered_usage: {
+        Row: {
+          company_id: string
+          count: number
+          created_at: string
+        }
+        Insert: {
+          company_id: string
+          count: number
+          created_at?: string
+        }
+        Update: {
+          company_id?: string
+          count?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruiting_subscriptions_metered_usage_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_codes: {
         Row: {
           id: string

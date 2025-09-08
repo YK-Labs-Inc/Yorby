@@ -602,10 +602,11 @@ const processInterviewWithStripe = async (candidateId: string) => {
     apiVersion: "2025-02-24.acacia",
   });
   const logger = new Logger().with({
-    function: "sendStripeMeteredEvent",
+    function: "processInterviewWithStripe",
     candidateId,
   });
   const supabase = await createAdminClient();
+  
   const { data: candidate, error: candidateError } = await supabase
     .from("company_job_candidates")
     .select("company_id")
@@ -629,10 +630,67 @@ const processInterviewWithStripe = async (candidateId: string) => {
     throw new Error("Company not found");
   }
 
-  await stripe.billing.meterEvents.create({
-    event_name: "completed_candidate_interviews",
-    payload: {
-      stripe_customer_id: company.stripe_customer_id,
-    },
+  // Get current metered usage count
+  const { data: meteredUsage, error: usageError } = await supabase
+    .from("recruiting_subscriptions_metered_usage")
+    .select("count")
+    .eq("company_id", candidate.company_id)
+    .maybeSingle();
+
+  if (usageError) {
+    logger.error("Failed to query metered usage", {
+      companyId: candidate.company_id,
+      error: usageError,
+    });
+    throw new Error("Failed to query metered usage");
+  }
+
+  const currentCount = meteredUsage?.count || 0;
+  const newCount = currentCount + 1;
+
+  // Update the metered usage count (increment by 1)
+  const { error: upsertError } = await supabase
+    .from("recruiting_subscriptions_metered_usage")
+    .upsert({
+      company_id: candidate.company_id,
+      count: newCount
+    }, {
+      onConflict: "company_id"
+    });
+
+  if (upsertError) {
+    logger.error("Failed to update metered usage count", {
+      companyId: candidate.company_id,
+      error: upsertError,
+    });
+    throw new Error("Failed to update metered usage count");
+  }
+
+  logger.info("Updated metered usage count", {
+    companyId: candidate.company_id,
+    previousCount: currentCount,
+    newCount: newCount,
   });
+
+  // Only send Stripe metered event if count exceeds 200
+  if (newCount > 200) {
+    await stripe.billing.meterEvents.create({
+      event_name: "completed_candidate_interviews",
+      payload: {
+        stripe_customer_id: company.stripe_customer_id,
+      },
+    });
+
+    logger.info("Sent Stripe metered event", {
+      companyId: candidate.company_id,
+      stripeCustomerId: company.stripe_customer_id,
+      interviewCount: newCount,
+    });
+  } else {
+    logger.info("Interview within base plan limit", {
+      companyId: candidate.company_id,
+      interviewCount: newCount,
+      baseLimit: 200,
+    });
+  }
 };

@@ -12,15 +12,10 @@ interface PageProps {
   params: Promise<{
     id: string;
   }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function CompanyDetailPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function CompanyDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const { showUpgrade } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     function: "CompanyDetailPage",
@@ -96,10 +91,6 @@ export default async function CompanyDetailPage({
         </Suspense>
 
         <CompanyHeader company={company} isFreeTier={isFreeTier} />
-
-        {showUpgrade === "true" && isFreeTier && (
-          <UpgradeNudge companyId={id} />
-        )}
 
         <div className="mt-8">
           <CompanyJobsManager companyId={id} jobs={jobs ?? []} />

@@ -8,7 +8,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { UpgradeButton } from "./UpgradeButton";
-import { FREE_TIER_CANDIDATE_COUNT } from "./jobs/[jobId]/candidates/constants";
+import {
+  FREE_TIER_INTERVIEW_COUNT,
+  PRO_TIER_INTERVIEW_COUNT,
+} from "./jobs/[jobId]/candidates/constants";
 
 interface UpgradeNudgeProps {
   companyId: string;
@@ -23,7 +26,7 @@ export function UpgradeNudge({ companyId }: UpgradeNudgeProps) {
     setDismissed(true);
     // Remove showUpgrade search param from URL
     const url = new URL(window.location.href);
-    url.searchParams.delete('showUpgrade');
+    url.searchParams.delete("showUpgrade");
     router.replace(url.pathname + url.search);
   };
 
@@ -58,27 +61,30 @@ export function UpgradeNudge({ companyId }: UpgradeNudgeProps) {
             </div>
 
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {t("title")}
+              Scale Your Hiring with Yorby Pro
             </h3>
 
             <p className="text-gray-600 mb-4 leading-relaxed">
-              {t.rich("description", { 
-                count: FREE_TIER_CANDIDATE_COUNT,
-                strong: (chunks) => <strong>{chunks}</strong>
-              })}
+              Your free tier gives you{" "}
+              <strong>{FREE_TIER_INTERVIEW_COUNT} candidate interviews</strong>{" "}
+              across all job listings. Upgrade to Pro for{" "}
+              <strong>$99/month</strong> and get {PRO_TIER_INTERVIEW_COUNT}{" "}
+              interviews included, plus pay-as-you-grow pricing at just{" "}
+              <strong>$0.50</strong> per additional interview.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="flex items-center gap-2 text-sm">
-                <Infinity className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                <Zap className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <span className="text-gray-700">
-                  {t("benefits.unlimitedInterviews")}
+                  {PRO_TIER_INTERVIEW_COUNT} interviews included + $0.50 each
+                  after
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Users className="w-4 h-4 text-blue-500 flex-shrink-0" />
                 <span className="text-gray-700">
-                  {t("benefits.teamCollaboration")}
+                  Unlimited candidate interviews
                 </span>
               </div>
             </div>

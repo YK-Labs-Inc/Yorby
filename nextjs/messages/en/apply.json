@@ -756,8 +756,8 @@
   },
   "freeTierBanner": {
     "title": "Free Tier • {count} candidate interviews",
-    "description": "Your candidate interview limit is shared across all job listings. Upgrade for unlimited candidate interviews and team collaboration.",
-    "upgradeButton": "Upgrade Now"
+    "description": "Your candidate interview limit is shared across all job listings. Upgrade to unlock unlimited candidate interviews and team collaboration.",
+    "viewPricing": "View Pricing"
   },
   "upgradeCompany": {
     "errors": {
@@ -843,6 +843,58 @@
     },
     "buttons": {
       "maybeLater": "Maybe Later"
+    }
+  },
+  "recruitingPurchasePage": {
+    "navigation": {
+      "backTo": "Back to {companyName}"
+    },
+    "header": {
+      "title": "Upgrade to Yorby Pro",
+      "subtitle": "Get unlimited candidate interviews with usage-based pricing"
+    },
+    "pricing": {
+      "planName": "Yorby Pro",
+      "monthlyPrice": "$99",
+      "perMonth": "/month",
+      "baseIncluded": "Includes 100 candidate interviews",
+      "usageBasedTitle": "Usage-Based Pricing",
+      "firstHundred": "First 100 interviews/month",
+      "included": "Included",
+      "additionalInterviews": "Additional interviews",
+      "additionalPrice": "$0.50 each"
+    },
+    "features": {
+      "title": "What's included:",
+      "candidateInterviews": "100 candidate interviews included monthly",
+      "additionalInterviews": "$0.50 per additional interview after 100",
+      "aiAnalysis": "AI-powered candidate analysis & scoring",
+      "teamTools": "Team collaboration tools",
+      "reporting": "Advanced reporting & analytics",
+      "customQuestions": "Custom interview question sets",
+      "pipelineManagement": "Candidate pipeline management",
+      "videoRecordings": "Video interview recordings"
+    },
+    "howItWorks": {
+      "title": "How usage billing works:",
+      "description1": "Your subscription includes <strong>100 candidate interviews</strong> per month.",
+      "description2": "If you need more, additional interviews are charged at <strong>$0.50 each</strong>.",
+      "description3": "Usage resets monthly on your billing date, so you get a fresh 100 interviews each month.",
+      "description4": "Perfect for scaling teams - pay only for what you use beyond the included quota."
+    },
+    "upgradeForm": {
+      "processingUpgrade": "Processing Upgrade...",
+      "upgradeButton": "Upgrade to Pro - $99/month",
+      "termsNotice": "By upgrading, you agree to our Terms of Service and Privacy Policy"
+    },
+    "trustIndicators": {
+      "sslSecured": "SSL Secured",
+      "cancelAnytime": "Cancel Anytime",
+      "moneyBackGuarantee": "30-day money-back guarantee"
+    },
+    "footer": {
+      "questionsText": "Questions about pricing?",
+      "contactTeam": "Contact our team"
     }
   }
 } 
