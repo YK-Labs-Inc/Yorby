@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAgentControlBar } from "@/app/components/livekit/agent-control-bar/hooks/use-agent-control-bar";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 
 interface CodingInterviewComponentProps {
   aiMessages: ReceivedChatMessage[];
@@ -251,9 +252,10 @@ export default function CodingInterviewComponent({
                 </div>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto">
-                <div className="text-sm whitespace-pre-wrap">
-                  {questionDetails[0].question}
-                </div>
+                <RichTextDisplay
+                  content={questionDetails[0].question}
+                  className="text-sm"
+                />
               </CardContent>
             </Card>
           </div>
