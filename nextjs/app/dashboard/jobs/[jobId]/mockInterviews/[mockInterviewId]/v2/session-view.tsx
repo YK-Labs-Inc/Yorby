@@ -2,7 +2,6 @@
 
 import React, { useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { type AgentState } from "@livekit/components-react";
 import useChatAndTranscription from "./hooks/useChatAndTranscription";
 import { useDebugMode } from "./hooks/useDebug";
 import type { AppConfig } from "./types";
@@ -247,7 +246,9 @@ export const SessionView = ({
               <div className="relative z-10 mx-auto w-fit">
                 <AgentControlBar
                   capabilities={capabilities}
-                  realtimeMode={realtimeMode}
+                  realtimeMode={
+                    interviewType === "coding" ? true : realtimeMode
+                  }
                 />
               </div>
             </motion.div>
