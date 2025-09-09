@@ -44,6 +44,7 @@ export default function OTPLoginForm({
   // State for OTP verification
   const [otpState, otpAction, otpPending] = useActionState(verifyOTP, {
     error: "",
+    success: false,
   });
 
   // Effect to handle successful email submission
