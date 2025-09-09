@@ -61,6 +61,22 @@ export default function CandidateInfoSection({
           </div>
         </div>
       </div>
+
+      {/* Additional Information Section */}
+      {candidateData.additionalInfo && candidateData.additionalInfo.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4">{t("additionalInfo")}</h3>
+          <div className="space-y-3">
+            {candidateData.additionalInfo.map((info, index) => (
+              <div key={index} className="p-4 bg-muted/50 rounded-lg">
+                <span className="text-sm">
+                  {info.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

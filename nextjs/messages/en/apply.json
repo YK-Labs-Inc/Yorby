@@ -353,7 +353,8 @@
         "contactInfo": "Contact Information",
         "applicationFiles": "Application Files",
         "filesCount": "{count} files uploaded",
-        "applied": "Applied on {date}"
+        "applied": "Applied on {date}",
+        "additionalInfo": "Additional Information"
       },
       "overview": {
         "appliedOn": "Applied on {date}",
