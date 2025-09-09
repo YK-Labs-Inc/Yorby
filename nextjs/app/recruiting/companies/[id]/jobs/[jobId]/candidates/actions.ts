@@ -162,20 +162,6 @@ export const getInitialCandidates = cache(
           const hasCompletedAllInterviews = candidateInterviews?.every(
             (interview) => interview.status === "completed"
           );
-          if (!hasCompletedAllInterviews) {
-            return null;
-          }
-
-          // Check if candidate has aggregated analysis
-          const { data: aggregatedAnalysis } = await supabase
-            .from("candidate_aggregated_interview_analysis")
-            .select("*")
-            .eq("candidate_id", candidate.id)
-            .maybeSingle();
-
-          if (!aggregatedAnalysis) {
-            return null;
-          }
 
           // Fetch user data
           let candidateName: string | null = null;
@@ -653,6 +639,25 @@ export const getCompanyCandidateCount = async (companyId: string) => {
   if (error) {
     log.error("Failed to get company candidate count", error);
     throw error;
+  }
+
+  return count || 0;
+};
+
+export const getJobInterviewCount = async (jobId: string) => {
+  const log = new Logger().with({
+    functionName: "getJobInterviewCount",
+    jobId,
+  });
+  const supabase = await createSupabaseServerClient();
+  const { count, error } = await supabase
+    .from("job_interviews")
+    .select("*", { count: "exact", head: true })
+    .eq("custom_job_id", jobId);
+
+  if (error) {
+    log.error("Failed to get job interview count", error);
+    return 0;
   }
 
   return count || 0;

@@ -6,11 +6,11 @@ import CandidatesList from "./CandidatesList";
 import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 import EmptyState from "./EmptyState";
 import {
-  validateAccess,
   getInitialCandidates,
   getCandidateData,
   isCompanyPremium,
   getCompanyCandidateCount,
+  getJobInterviewCount,
 } from "./actions";
 import { getTranslations } from "next-intl/server";
 
@@ -37,15 +37,15 @@ export default async function CandidatesPage({
 
   // Parallel fetch all required data
   const [
-    { company, job },
     initialCandidates,
     selectedCandidateData,
     companyCandidateCount,
+    jobInterviewCount,
   ] = await Promise.all([
-    validateAccess(companyId, jobId),
     getInitialCandidates(companyId, jobId, 10),
     candidateId ? getCandidateData(candidateId) : Promise.resolve(null),
     isPremium ? getCompanyCandidateCount(companyId) : Promise.resolve(0),
+    getJobInterviewCount(jobId),
   ]);
 
   // Auto-select first candidate if none selected and candidates exist
@@ -92,6 +92,7 @@ export default async function CandidatesPage({
               {effectiveSelectedCandidateData ? (
                 <CandidateOverview
                   candidateData={effectiveSelectedCandidateData}
+                  jobInterviewCount={jobInterviewCount}
                 />
               ) : (
                 <EmptyState />

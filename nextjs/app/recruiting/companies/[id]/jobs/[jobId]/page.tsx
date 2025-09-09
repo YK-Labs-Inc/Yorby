@@ -83,7 +83,12 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
   // Fetch job details
   const { data: job, error: jobError } = await supabase
     .from("custom_jobs")
-    .select("*")
+    .select(
+      `
+      *,
+      company_job_candidates (count)
+    `
+    )
     .eq("id", jobId)
     .eq("company_id", companyId)
     .single();
@@ -99,27 +104,8 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Get company details for breadcrumb
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .select("name")
-    .eq("id", companyId)
-    .single();
-
-  if (companyError) {
-    logger.error("Failed to fetch company details", {
-      error: companyError.message,
-      companyId,
-    });
-    await logger.flush();
-  }
-
   // Fetch additional stats in parallel
-  const [candidatesResult, interviewsResult] = await Promise.all([
-    supabase
-      .from("company_job_candidates")
-      .select("id, status", { count: "exact" })
-      .eq("custom_job_id", jobId),
+  const [interviewsResult] = await Promise.all([
     supabase
       .from("job_interviews")
       .select("id", { count: "exact" })
@@ -127,18 +113,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
   ]);
 
   const totalInterviewRounds = interviewsResult.count || 0;
-
-  // Calculate candidate stats by status
-  const candidatesByStatus =
-    candidatesResult.data?.reduce(
-      (acc, candidate) => {
-        acc[candidate.status] = (acc[candidate.status] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    ) || {};
-
-  const activeCandidates = candidatesByStatus.screening || 0;
 
   // Format date
   const postedDate = job.created_at
@@ -184,7 +158,6 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 )}
               </div>
             </div>
-
           </div>
 
           {/* Share Application Section */}
@@ -214,10 +187,9 @@ export default async function CompanyJobDetailPage({ params }: PageProps) {
                 <CardContent>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {activeCandidates > 0 &&
-                        t("actions.reviewCandidates.awaitingReview", {
-                          count: activeCandidates,
-                        })}
+                      {t("actions.reviewCandidates.candidateCount", {
+                        count: job.company_job_candidates?.[0]?.count || 0,
+                      })}
                     </span>
                     <span className="text-primary group-hover:translate-x-1 transition-transform">
                       {t("actions.reviewCandidates.viewAll")}

@@ -98,7 +98,7 @@ export default async function ApplicationPage({ params }: PageProps) {
               ?.order_index || 0)
         );
         if (interviews.every((interview) => interview.status === "completed")) {
-          // If there's a completed interview, redirect to submitted page
+          // If all interviews are completed, redirect to submitted page
           redirect(
             `/apply/company/${companyId}/job/${jobId}/application/submitted`
           );
@@ -108,7 +108,7 @@ export default async function ApplicationPage({ params }: PageProps) {
           );
           if (lastIncompleteInterview) {
             redirect(
-              `/apply/company/${companyId}/job/${jobId}/candidate-interview/${lastIncompleteInterview.id}`
+              `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${lastIncompleteInterview.id}`
             );
           }
           logger.error("No incomplete interview found for job application");
