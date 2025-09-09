@@ -23,6 +23,7 @@ import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInte
 import { Button } from "@/components/ui/button";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 import { triggerProcessInterview } from "./actions";
+import { InterviewCompletionMessage } from "./InterviewCompletionMessage";
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -270,24 +271,7 @@ export function InterviewComponent({
                   </Button>
                 </>
               ) : (
-                <>
-                  <p className="text-gray-600 mb-4">
-                    {tInterview("interviewProcessed.allComplete")}
-                  </p>
-                  <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                    <p className="text-sm text-blue-900 font-semibold mb-2">
-                      {tInterview("interviewProcessed.prepareForMore")}
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      {tInterview("interviewProcessed.practiceDescription")}
-                    </p>
-                  </div>
-                  <Button asChild>
-                    <Link href="/dashboard/jobs?newJob=true">
-                      {tInterview("buttons.practiceInterview")}
-                    </Link>
-                  </Button>
-                </>
+                <InterviewCompletionMessage />
               )}
             </div>
           </div>

@@ -52,7 +52,6 @@ interface PageProps {
 
 export default async function CandidateInterviewPage({ params }: PageProps) {
   const { companyId, jobId, candidateInterviewId } = await params;
-  const supabase = await createSupabaseServerClient();
 
   const user = await getServerUser();
 
@@ -62,7 +61,7 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
 
   if (user.is_anonymous) {
     redirect(
-      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?candidateInterviewId=${candidateInterviewId}`
+      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${candidateInterviewId}`
     );
   }
 

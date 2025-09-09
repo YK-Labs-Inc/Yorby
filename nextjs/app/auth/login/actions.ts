@@ -39,17 +39,17 @@ export async function signInWithOTP(prevState: any, formData: FormData) {
   };
 }
 
-export async function verifyOTP(prevState: any, formData: FormData) {
+export async function verifyOTP(
+  prevState: { error: string | null; success: boolean | null },
+  formData: FormData
+) {
   const email = formData.get("email") as string;
   const token = formData.get("token") as string;
-  const redirectTo = formData.get("redirectTo") as string;
   const otpType = formData.get("otpType") as EmailOtpType;
-  const origin = (await headers()).get("origin");
   const supabase = await createSupabaseServerClient();
   const logger = new Logger().with({
     function: "verifyOTP",
     email,
-    redirectTo,
   });
 
   const { error } = await supabase.auth.verifyOtp({
@@ -61,12 +61,10 @@ export async function verifyOTP(prevState: any, formData: FormData) {
   if (error) {
     logger.error("Failed to verify OTP", { error });
     await logger.flush();
-    return { error: error.message };
+    return { error: error.message, success: false };
   }
 
   logger.info("OTP verified successfully");
   await logger.flush();
-
-  // Successful verification - redirect directly
-  redirect(redirectTo.includes("http") ? redirectTo : `${origin}${redirectTo}`);
+  return { error: null, success: true };
 }

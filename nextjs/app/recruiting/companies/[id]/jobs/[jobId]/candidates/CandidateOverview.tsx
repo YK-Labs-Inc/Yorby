@@ -9,10 +9,12 @@ import CandidateApplicationFilesSection from "./CandidateApplicationFilesSection
 
 interface CandidateOverviewProps {
   candidateData: CandidateData;
+  jobInterviewCount: number;
 }
 
 export default function CandidateOverview({
   candidateData,
+  jobInterviewCount,
 }: CandidateOverviewProps) {
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
@@ -23,9 +25,10 @@ export default function CandidateOverview({
 
         <CandidateApplicationFilesSection candidateData={candidateData} />
 
-        <Separator className="my-6" />
-
-        <InterviewAnalysis candidateData={candidateData} />
+        <InterviewAnalysis
+          candidateData={candidateData}
+          jobInterviewCount={jobInterviewCount}
+        />
       </CardContent>
     </Card>
   );

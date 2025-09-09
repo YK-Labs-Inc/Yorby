@@ -54,7 +54,7 @@
       }
     },
     "documentSelection": {
-      "title": "Application Documents",
+      "title": "Resume, Cover Letter, and Other Documents",
       "description": "Choose up to 5 documents to include with your application. You can select from existing files or upload new ones. You can upload documents in PDF, TXT, PNG, or JPG.",
       "maxFilesError": "You can select up to 5 files",
       "noFilesError": "Please select at least one file",
@@ -101,10 +101,9 @@
     }
   },
   "confirmEmail": {
-    "title": "You Have Been Invited to Interview With Us",
-    "description": "But first, you must confirm your email address",
+    "title": "Application Successfully Submitted!",
+    "description": "Please confirm your email address to complete your application",
     "at": "at",
-    "redirectInfo": "After confirming your email address, you will be redirected to our interview portal where you will do a short video interview for us to learn about you.",
     "resendButton": "Resend Confirmation Email",
     "cannotFindEmail": "Can't find the email? Check your spam folder or",
     "returnToJobListing": "return to job listing",
@@ -122,24 +121,24 @@
   },
   "interview": {
     "header": {
-      "title": "AI Interview for {jobTitle}",
+      "title": "Optional Video Assessment for {jobTitle}",
       "subtitle": "at {companyName}",
       "defaultJobTitle": "Position"
     },
     "instructions": {
-      "title": "Before You Begin",
+      "title": "Stand Out From Other Candidates",
       "sections": {
         "technicalRequirements": {
           "title": "Technical Requirements",
           "description": "Ensure you have a working camera and microphone. The AI interviewer will interact with you in real-time."
         },
         "duration": {
-          "title": "Interview Duration",
-          "description": "The interview typically takes 15-30 minutes. Make sure you have enough time to complete it."
+          "title": "Assessment Duration",
+          "description": "This optional assessment typically takes 15-30 minutes. You can complete it now or come back later."
         },
         "expectations": {
           "title": "What to Expect",
-          "description": "The AI interviewer will ask you questions relevant to the position. Answer naturally as you would in a real interview."
+          "description": "The AI interviewer will ask you questions relevant to the position. This helps showcase your skills beyond your resume and gives you an edge over other candidates."
         }
       }
     },
@@ -149,12 +148,13 @@
         "Find a quiet, well-lit environment",
         "Test your audio and video before starting",
         "Speak clearly and maintain eye contact with the camera",
-        "Be yourself and answer honestly"
+        "Be yourself and answer honestly",
+        "Remember: This is optional but highly recommended to stand out"
       ]
     },
     "buttons": {
-      "startLater": "Start Later",
-      "startNow": "Start Interview",
+      "startLater": "Skip For Now",
+      "startNow": "Start Assessment",
       "processing": "Processing..."
     },
     "errors": {
@@ -189,14 +189,14 @@
       }
     },
     "mockInterview": {
-      "title": "Practice Interview Setup",
-      "description": "Prepare for your mock interview with our AI interviewer",
-      "button": "Start Practice Interview"
+      "title": "Practice Assessment Setup",
+      "description": "Practice with our AI interviewer before taking the optional assessment",
+      "button": "Start Practice Assessment"
     },
     "realInterview": {
-      "title": "Real Interview Preparation",
-      "description": "This is your official interview that will be submitted for evaluation",
-      "button": "Begin Interview"
+      "title": "Optional Video Assessment",
+      "description": "This assessment helps you stand out among other candidates. Completely optional but highly recommended.",
+      "button": "Begin Assessment"
     }
   },
   "api": {
@@ -286,7 +286,7 @@
         "reviewCandidates": {
           "title": "Review Candidates",
           "description": "View all applicants, review their profiles, watch interview recordings, and make hiring decisions",
-          "awaitingReview": "{count} awaiting review",
+          "candidateCount": "{count, plural, =0 {No candidates} =1 {1 candidate} other {# candidates}}",
           "viewAll": "View all →"
         },
         "configureInterview": {
@@ -477,6 +477,10 @@
         },
         "individualRounds": {
           "title": "Individual Interview Rounds"
+        },
+        "interviewNotCompleted": {
+          "title": "Interviews Not Completed",
+          "description": "This candidate has not completed the required interviews for this position."
         }
       }
     },
@@ -736,16 +740,16 @@
   },
   "candidateInterview": {
     "interviewProcessed": {
-      "nextRound": "Your interview has been processed. Click below to continue to the next interview round.",
-      "allComplete": "Great job! You've completed all interview rounds.",
+      "nextRound": "Excellent work! Your assessment has been submitted. Click below to continue to the next optional assessment round if available.",
+      "allComplete": "Congratulations! You've successfully completed all optional assessments. This will help you stand out among other candidates!",
       "prepareForMore": "Want to prepare for other job interviews?",
       "practiceDescription": "Generate practice questions and try our AI mock interview tool to boost your confidence."
     },
     "buttons": {
-      "continueToNext": "Continue to Next Interview",
+      "continueToNext": "Continue to Next Assessment",
       "practiceInterview": "Practice Interview Skills"
     },
-    "interviewComplete": "Interview Complete!",
+    "interviewComplete": "Assessment Complete!",
     "errors": {
       "unknownError": "An unknown error occurred — please try again later or contact support at support@yorby.ai"
     }
@@ -916,5 +920,28 @@
       "questionsText": "Questions about pricing?",
       "contactTeam": "Contact our team"
     }
+  },
+  "interviewInvitation": {
+    "title": "Tell Your Story Beyond Your Resume",
+    "description": "Most hiring stops at your resume. We believe you're more than a piece of paper. Take this optional assessment to showcase your experience, skills, and personality directly to the hiring team.",
+    "features": {
+      "shareExperience": {
+        "title": "Share Your Real Experience",
+        "description": "Discuss your work history, projects, and achievements in your own words"
+      },
+      "multipleQuestions": {
+        "title": "Multiple Question Types",
+        "description": "Mix of behavioral and technical questions designed for this role"
+      },
+      "quickConvenient": {
+        "title": "Quick & Convenient",
+        "description": "Complete in 15-20 minutes, anytime that works for you"
+      }
+    },
+    "buttons": {
+      "startAssessment": "Start Optional Assessment",
+      "skipForNow": "Skip For Now"
+    },
+    "footer": "You can always come back later to complete the assessment if you change your mind."
   }
 } 
