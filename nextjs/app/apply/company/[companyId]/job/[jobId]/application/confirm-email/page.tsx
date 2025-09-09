@@ -2,7 +2,6 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getServerUser } from "@/utils/auth/server";
 import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
-import { getTranslations } from "next-intl/server";
 import EmailVerificationComponent from "./EmailVerificationComponent";
 
 interface PageProps {
@@ -18,8 +17,8 @@ export default async function ConfirmEmailPage({
   searchParams,
 }: PageProps) {
   const { companyId, jobId } = await params;
-  const { interviewId } = (await searchParams) as { interviewId: string };
-  if (!companyId || !jobId || !interviewId) {
+  const { interviewId } = (await searchParams) as { interviewId?: string };
+  if (!companyId || !jobId) {
     return notFound();
   }
 

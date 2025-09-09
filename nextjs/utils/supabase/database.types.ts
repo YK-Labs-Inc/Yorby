@@ -72,6 +72,38 @@ export type Database = {
           },
         ]
       }
+      candidate_application_additional_info: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_application_additional_info_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "company_job_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_application_files: {
         Row: {
           candidate_id: string

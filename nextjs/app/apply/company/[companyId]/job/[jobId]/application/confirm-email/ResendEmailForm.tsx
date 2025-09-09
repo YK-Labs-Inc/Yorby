@@ -30,7 +30,7 @@ export default function ResendEmailForm({
 }: {
   companyId: string;
   jobId: string;
-  interviewId: string;
+  interviewId?: string;
 }) {
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const [state, formAction] = useActionState(resendConfirmationEmail, {

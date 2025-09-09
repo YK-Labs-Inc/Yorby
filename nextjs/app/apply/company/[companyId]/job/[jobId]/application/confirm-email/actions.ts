@@ -15,12 +15,15 @@ export const resendConfirmationEmail = async (
 ) => {
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
-  const interviewId = formData.get("interviewId") as string;
+  const interviewId = formData.get("interviewId") as string | undefined;
   const captchaToken = formData.get("captchaToken") as string;
   const supabase = await createSupabaseServerClient();
   const t = await getTranslations("apply.confirmEmail.errors");
   const logger = new Logger().with({
     function: "resendConfirmationEmail",
+    jobId,
+    companyId,
+    interviewId,
   });
 
   try {
@@ -29,8 +32,8 @@ export const resendConfirmationEmail = async (
       return { error: t("captchaRequired"), success: false };
     }
 
-    if (!jobId || !companyId || !interviewId) {
-      logger.error("Missing params", { jobId, companyId, interviewId });
+    if (!jobId || !companyId) {
+      logger.error("Missing params", { jobId, companyId });
       return { error: t("genericError"), success: false };
     }
 
@@ -54,7 +57,7 @@ export const resendConfirmationEmail = async (
         email: userEmail,
       },
       {
-        emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`,
+        emailRedirectTo: `${origin}/apply/company/${companyId}/job/${jobId}/${interviewId ? `candidate-interview/${interviewId}` : "application/submitted"}`,
       }
     );
 
