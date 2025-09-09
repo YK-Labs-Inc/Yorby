@@ -9,9 +9,6 @@ export function InterviewCompletionMessage() {
 
   return (
     <>
-      <p className="text-gray-600 mb-4">
-        {tInterview("interviewProcessed.allComplete")}
-      </p>
       <div className="bg-blue-50 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-900 font-semibold mb-2">
           {tInterview("interviewProcessed.prepareForMore")}
@@ -20,7 +17,7 @@ export function InterviewCompletionMessage() {
           {tInterview("interviewProcessed.practiceDescription")}
         </p>
       </div>
-      <Button asChild>
+      <Button className="w-full" asChild>
         <Link href="/dashboard/jobs?newJob=true">
           {tInterview("buttons.practiceInterview")}
         </Link>

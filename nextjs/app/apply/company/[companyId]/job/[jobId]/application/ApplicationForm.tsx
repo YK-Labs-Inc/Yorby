@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Upload, CheckCircle2, Loader2 } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, Plus, X } from "lucide-react";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -86,6 +86,7 @@ export function ApplicationForm({
   );
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>("");
+  const [additionalInfo, setAdditionalInfo] = useState<string[]>([]);
   const { logInfo, logError } = useAxiomLogging();
   const t = useTranslations("apply");
 
@@ -182,6 +183,20 @@ export function ApplicationForm({
     if (mimeType.includes("image")) return "🖼️";
     if (mimeType.includes("word") || mimeType.includes("document")) return "📝";
     return "📎";
+  };
+
+  const addAdditionalInfo = () => {
+    setAdditionalInfo([...additionalInfo, ""]);
+  };
+
+  const removeAdditionalInfo = (index: number) => {
+    setAdditionalInfo(additionalInfo.filter((_, i) => i !== index));
+  };
+
+  const updateAdditionalInfo = (index: number, value: string) => {
+    const newInfo = [...additionalInfo];
+    newInfo[index] = value;
+    setAdditionalInfo(newInfo);
   };
 
   return (
@@ -354,6 +369,53 @@ export function ApplicationForm({
                 </div>
               )}
 
+              {/* Additional Information Section */}
+              <div className="space-y-4 pt-6 border-t">
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">
+                    {t("applicationForm.additionalInfo.title")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("applicationForm.additionalInfo.description")}
+                  </p>
+                </div>
+
+                {/* Additional info items */}
+                <div className="space-y-3">
+                  {additionalInfo.map((info, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="text"
+                        placeholder={t("applicationForm.additionalInfo.placeholder")}
+                        value={info}
+                        onChange={(e) => updateAdditionalInfo(index, e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeAdditionalInfo(index)}
+                        className="px-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addAdditionalInfo}
+                    className="flex items-center space-x-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>{t("applicationForm.additionalInfo.addButton")}</span>
+                  </Button>
+                </div>
+              </div>
+
               {/* Submit form */}
               <form action={formAction}>
                 <input type="hidden" name="companyId" value={companyId} />
@@ -362,6 +424,11 @@ export function ApplicationForm({
                   type="hidden"
                   name="selectedFileIds"
                   value={Array.from(selectedFiles)}
+                />
+                <input
+                  type="hidden"
+                  name="additionalInfo"
+                  value={JSON.stringify(additionalInfo.filter(info => info.trim()))}
                 />
                 <input type="hidden" name="captchaToken" value={captchaToken} />
                 {!user?.email && (
@@ -387,7 +454,8 @@ export function ApplicationForm({
                     disabled={
                       isPending ||
                       (!user?.email && (!email || !fullName)) ||
-                      !captchaToken
+                      !captchaToken ||
+                      (selectedFiles.size === 0 && additionalInfo.filter(info => info.trim()).length === 0)
                     }
                     size="lg"
                   >

@@ -43,6 +43,7 @@ export interface AccessValidation {
 export interface CandidateData {
   candidate: Candidate;
   applicationFiles: ApplicationFile[];
+  additionalInfo: Tables<"candidate_application_additional_info">[];
   aggregatedAnalysis: Tables<"candidate_aggregated_interview_analysis"> | null;
   jobAlignmentDetails: Tables<"candidate_job_alignment_details"> | null;
   interviewResults: {
@@ -315,13 +316,6 @@ export const getCandidateData = cache(
       throw interviewError;
     }
 
-    if (candidateJobInterviews.length === 0) {
-      log.info("No job interviews found for candidate", {
-        candidateId,
-      });
-      throw new Error("No job interviews found for candidate");
-    }
-
     let interviewResults: CandidateData["interviewResults"] = [];
     for (const candidateJobInterview of candidateJobInterviews) {
       const interviewType = candidateJobInterview.job_interviews.interview_type;
@@ -470,6 +464,19 @@ export const getCandidateData = cache(
       alignmentScore: jobAlignmentDetails?.alignment_score,
     });
 
+    // Fetch additional info for the candidate
+    const { data: additionalInfo, error: additionalInfoError } = await supabase
+      .from("candidate_application_additional_info")
+      .select("*")
+      .eq("candidate_id", candidateId);
+
+    if (additionalInfoError) {
+      log.error("Error fetching additional info", {
+        additionalInfoError,
+        candidateId,
+      });
+    }
+
     await log.flush();
     return {
       candidate: {
@@ -479,6 +486,7 @@ export const getCandidateData = cache(
         candidatePhoneNumber,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
+      additionalInfo: additionalInfo || [],
       aggregatedAnalysis,
       jobAlignmentDetails,
       interviewResults,

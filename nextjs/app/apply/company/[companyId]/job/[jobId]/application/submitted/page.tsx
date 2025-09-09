@@ -12,6 +12,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
 import { Button } from "@/components/ui/button";
+import { InterviewCompletionMessage } from "../../candidate-interview/[candidateInterviewId]/InterviewCompletionMessage";
 
 interface PageProps {
   params: Promise<{
@@ -82,11 +83,15 @@ export default async function ApplicationSubmittedPage({ params }: PageProps) {
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <UserCircle className="h-5 w-5 text-gray-600" />
-                <p className="text-sm text-gray-600">{t("applicationSubmitted.appliedAs")}</p>
+                <p className="text-sm text-gray-600">
+                  {t("applicationSubmitted.appliedAs")}
+                </p>
               </div>
               <p className="font-semibold text-lg">{userEmail}</p>
             </div>
-            
+
+            <InterviewCompletionMessage />
+
             <div className="border-t pt-6">
               <p className="text-sm text-gray-600 mb-4">
                 {t("applicationSubmitted.notYou")}

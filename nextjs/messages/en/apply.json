@@ -61,6 +61,13 @@
       "noDocuments": "No documents uploaded yet. Upload your resume and other documents to apply.",
       "documentsSelected": "{count} document{count, plural, =1 {} other {s}} selected"
     },
+    "additionalInfo": {
+      "title": "Additional Information",
+      "description": "Add links to your portfolio, GitHub, LinkedIn, or any other relevant information that showcases your work.",
+      "placeholder": "e.g., https://github.com/yourusername, Portfolio link, LinkedIn profile...",
+      "addButton": "Add Information",
+      "removeButton": "Remove"
+    },
     "userInfo": {
       "title": "Your Information",
       "description": "Please provide your contact information to continue with your application",
@@ -346,7 +353,8 @@
         "contactInfo": "Contact Information",
         "applicationFiles": "Application Files",
         "filesCount": "{count} files uploaded",
-        "applied": "Applied on {date}"
+        "applied": "Applied on {date}",
+        "additionalInfo": "Additional Information"
       },
       "overview": {
         "appliedOn": "Applied on {date}",
@@ -741,7 +749,6 @@
   "candidateInterview": {
     "interviewProcessed": {
       "nextRound": "Excellent work! Your assessment has been submitted. Click below to continue to the next optional assessment round if available.",
-      "allComplete": "Congratulations! You've successfully completed all optional assessments. This will help you stand out among other candidates!",
       "prepareForMore": "Want to prepare for other job interviews?",
       "practiceDescription": "Generate practice questions and try our AI mock interview tool to boost your confidence."
     },

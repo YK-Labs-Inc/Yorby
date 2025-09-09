@@ -490,82 +490,6 @@ export async function checkApplicationStatus(
   };
 }
 
-export async function handleApplyAction(
-  prevState: { error?: string },
-  formData: FormData
-) {
-  const supabase = await createSupabaseServerClient();
-  const t = await getTranslations("apply.api.errors");
-  const companyId = formData.get("companyId") as string;
-  const jobId = formData.get("jobId") as string;
-  const captchaToken = formData.get("captchaToken") as string;
-  const logger = new Logger().with({
-    function: "handleApplyAction",
-    companyId,
-    jobId,
-  });
-
-  if (!companyId || !jobId) {
-    logger.error("Missing required parameters");
-    await logger.flush();
-    return { error: t("missingParameters") };
-  }
-
-  const user = await getServerUser();
-
-  const userId = user?.id;
-
-  // If no userId, create anonymous user
-  if (!userId) {
-    const { error } = await supabase.auth.signInAnonymously({
-      options: {
-        captchaToken,
-      },
-    });
-    if (error) {
-      logger.error("Failed to sign in anonymously", { error });
-      await logger.flush();
-      return { error: t("signInAnonymously") };
-    }
-    redirect(`/apply/company/${companyId}/job/${jobId}/application`);
-  }
-
-  // Otherwise check application status for existing user
-  const result = await checkApplicationStatus(companyId, jobId, userId);
-
-  if (result.hasApplied && result.application) {
-    if (result.hasCompletedInterview) {
-      // User has already applied and completed interview, redirect to submitted page
-      redirect(
-        `/apply/company/${companyId}/job/${jobId}/application/submitted`
-      );
-    } else if (!result.hasCompletedInterview && result.interviewId) {
-      if (user.is_anonymous) {
-        redirect(
-          `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${result.interviewId}`
-        );
-      }
-      // User has applied and has an interview ID, redirect to specific interview page
-      redirect(
-        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${result.interviewId}`
-      );
-    } else {
-      const interviewId = await createInterviewsForJobAndReturnFirstInterviewId(
-        {
-          candidateId: result.application.id,
-          jobId,
-        }
-      );
-      redirect(
-        `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
-      );
-    }
-  } else {
-    // User hasn't applied yet, redirect to application page
-    redirect(`/apply/company/${companyId}/job/${jobId}/application`);
-  }
-}
-
 export const submitApplication = async (
   _prevState: { error: string },
   formData: FormData
@@ -580,6 +504,10 @@ export const submitApplication = async (
   const selectedFileIds = (
     formData.getAll("selectedFileIds") as string[]
   ).filter((id) => id && id.trim() !== "");
+  const additionalInfoRaw = formData.get("additionalInfo") as string;
+  const additionalInfo: string[] = additionalInfoRaw
+    ? JSON.parse(additionalInfoRaw)
+    : [];
   const email = formData.get("email") as string;
   const fullName = formData.get("fullName") as string;
   const phoneNumber = formData.get("phoneNumber") as string;
@@ -710,9 +638,29 @@ export const submitApplication = async (
       }
     }
 
+    // Create candidate_application_additional_info entries (only if there is additional info)
+    if (additionalInfo.length > 0) {
+      const additionalInfoEntries = additionalInfo.map((info: string) => ({
+        candidate_id: candidate.id,
+        value: info,
+      }));
+
+      const { error: additionalInfoError } = await supabase
+        .from("candidate_application_additional_info")
+        .insert(additionalInfoEntries);
+
+      if (additionalInfoError) {
+        logger.error("Failed to save additional info", {
+          error: additionalInfoError,
+        });
+        throw new Error(t("saveAdditionalInfo"));
+      }
+    }
+
     logger.info("Application submitted successfully", {
       candidateId: candidate.id,
       fileCount: selectedFileIds.length,
+      additionalInfoCount: additionalInfo.length,
     });
     interviewId = await createInterviewsForJobAndReturnFirstInterviewId({
       candidateId: candidate.id,
@@ -750,11 +698,9 @@ export const submitApplication = async (
     return { error: t("generic") };
   }
   if (!interviewId) {
-    logger.error("Failed to create interview", {
-      error: "interviewId is null",
-    });
-    await logger.flush();
-    return { error: t("applicationForm.errors.submitApplication") };
+    redirect(
+      `/apply/company/${companyId}/job/${jobId}/application/confirm-email`
+    );
   }
   // Redirect based on whether user was anonymous
   if (isAnonymous) {
@@ -798,9 +744,9 @@ export const createInterviewsForJobAndReturnFirstInterviewId = async ({
   }
 
   if (!jobInterviews || jobInterviews.length === 0) {
-    logger.error("No job interviews found for job", { jobId });
+    logger.info("No job interviews found for job", { jobId });
     await logger.flush();
-    throw new Error("No job interviews found for job");
+    return null;
   }
 
   const { data: candidateJobInterviews, error: createInterviewsError } =

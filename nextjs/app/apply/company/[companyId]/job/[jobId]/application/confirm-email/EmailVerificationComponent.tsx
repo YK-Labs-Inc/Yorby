@@ -21,13 +21,14 @@ import ResendEmailForm from "./ResendEmailForm";
 import Link from "next/link";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface EmailVerificationComponentProps {
   companyName: string;
   companyId: string;
   jobId: string;
   jobTitle: string;
-  interviewId: string;
+  interviewId?: string;
   user: User;
 }
 
@@ -48,13 +49,20 @@ export default function EmailVerificationComponent({
   const [showInterviewInvitation, setShowInterviewInvitation] = useState(
     !user.is_anonymous
   );
+  const router = useRouter();
   useEffect(() => {
     if (otpState.success) {
-      setShowInterviewInvitation(true);
+      if (interviewId) {
+        setShowInterviewInvitation(true);
+      } else {
+        router.push(
+          `/apply/company/${companyId}/job/${jobId}/application/submitted`
+        );
+      }
     } else if (otpState.error) {
       toast.error(otpState.error);
     }
-  }, [otpState.success, otpState.error]);
+  }, [interviewId, otpState.success, otpState.error]);
 
   if (!user) {
     return null;
