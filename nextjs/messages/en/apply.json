@@ -80,18 +80,21 @@
     },
     "fileItem": {
       "uploadedOn": "Uploaded on {date}",
-      "uploaded": "Uploaded"
+      "uploaded": "Uploaded",
+      "selected": "Ready to upload"
     },
     "buttons": {
       "cancel": "Cancel",
       "submit": "Submit Application",
       "submitting": "Submitting...",
       "uploadFiles": "Upload files",
+      "selectFiles": "Select files",
       "uploading": "Uploading...",
       "submittingApplication": "Submitting Application..."
     },
     "success": {
       "filesUploaded": "Successfully uploaded {count} file(s)",
+      "filesSelected": "Successfully selected {count} file(s)",
       "filesUploadedWithErrors": "Uploaded {successCount} file(s) successfully. {errorCount} file(s) failed.",
       "applicationSubmitted": "Application submitted successfully!"
     }
@@ -663,7 +666,7 @@
       },
       "interviewType": {
         "general": "Behavioral",
-        "coding": "Technical"
+        "coding": "Coding"
       },
       "actions": {
         "editRound": "Edit Round",
@@ -695,7 +698,7 @@
           "description": "Choose the type of questions for this round",
           "options": {
             "general": "Behavioral Interview",
-            "coding": "Technical/Coding Interview"
+            "coding": "Coding Interview"
           }
         },
         "weight": {
