@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { headers } from "next/headers";
 import { Enums, Tables } from "@/utils/supabase/database.types";
+import { uploadFileToGemini } from "@/utils/ai/gemini";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -501,9 +502,11 @@ export const submitApplication = async (
   // Parse form data
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
-  const selectedFileIds = (
-    formData.getAll("selectedFileIds") as string[]
-  ).filter((id) => id && id.trim() !== "");
+  const selectedFileIdsRaw = formData.get("selectedFileIds") as string;
+  const selectedFileIds = selectedFileIdsRaw 
+    ? selectedFileIdsRaw.split(',').filter((id) => id && id.trim() !== "")
+    : [];
+  const localFileCount = parseInt(formData.get("localFileCount") as string) || 0;
   const additionalInfoRaw = formData.get("additionalInfo") as string;
   const additionalInfo: string[] = additionalInfoRaw
     ? JSON.parse(additionalInfoRaw)
@@ -515,11 +518,21 @@ export const submitApplication = async (
   let interviewId: string | null = null;
   let isAnonymous = false;
 
+  // Get local files from form data
+  const localFiles: File[] = [];
+  for (let i = 0; i < localFileCount; i++) {
+    const file = formData.get(`localFile_${i}`) as File | null;
+    if (file) {
+      localFiles.push(file);
+    }
+  }
+
   const logger = new Logger().with({
     function: "submitApplication",
     companyId,
     jobId,
-    fileCount: selectedFileIds.length,
+    selectedFileCount: selectedFileIds.length,
+    localFileCount: localFiles.length,
   });
 
   try {
@@ -530,7 +543,8 @@ export const submitApplication = async (
     logger.info("Processing application submission", {
       companyId,
       jobId,
-      fileCount: selectedFileIds.length,
+      selectedFileCount: selectedFileIds.length,
+      localFileCount: localFiles.length,
     });
 
     const { data, error } = await supabaseAdmin.rpc("get_user_id_by_email", {
@@ -565,13 +579,90 @@ export const submitApplication = async (
     // Check if this is an anonymous user (no email)
     isAnonymous = user.is_anonymous || false;
 
-    // Only fetch and process files if there are selected files
-    if (selectedFileIds.length > 0) {
+    // Upload local files to storage and create user_files records
+    const uploadedLocalFileIds: string[] = [];
+    if (localFiles.length > 0) {
+      logger.info("Uploading local files", { count: localFiles.length });
+      
+      for (const file of localFiles) {
+        try {
+          // Upload to Supabase Storage
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from("user-files")
+            .upload(fileName, file);
+
+          if (uploadError) {
+            logger.error("Supabase upload error", {
+              error: uploadError,
+              fileName: file.name,
+            });
+            throw new Error(t("uploadFailed"));
+          }
+
+          // Upload to Gemini
+          const geminiResponse = await uploadFileToGemini({
+            blob: file,
+            displayName: file.name,
+          });
+
+          if (!geminiResponse.file) {
+            logger.error("Gemini upload failed", { fileName: file.name });
+            throw new Error(t("uploadFailed"));
+          }
+
+          // Create user_files entry with Gemini info
+          const { data: fileRecord, error: dbError } = await supabase
+            .from("user_files")
+            .insert({
+              user_id: user.id,
+              display_name: file.name,
+              file_path: uploadData.path,
+              bucket_name: "user-files",
+              mime_type: file.type,
+              google_file_name: geminiResponse.file.name,
+              google_file_uri: geminiResponse.file.uri,
+              added_to_memory: false,
+            })
+            .select("id")
+            .single();
+
+          if (dbError) {
+            logger.error("Database insert error", {
+              error: dbError,
+              fileName: file.name,
+            });
+            throw new Error(t("createCandidateApplication"));
+          }
+
+          uploadedLocalFileIds.push(fileRecord.id);
+          logger.info("File uploaded successfully", {
+            fileId: fileRecord.id,
+            fileName: file.name,
+            geminiFileName: geminiResponse.file.name,
+          });
+        } catch (error) {
+          logger.error("File upload error", {
+            error,
+            fileName: file.name,
+          });
+          throw new Error(t("uploadFailed"));
+        }
+      }
+    }
+
+    // Combine selected file IDs and uploaded local file IDs
+    const allFileIds = [...selectedFileIds, ...uploadedLocalFileIds];
+
+    // Only fetch and process files if there are files to process
+    if (allFileIds.length > 0) {
       // Fetch the files to check if they need Gemini upload
       const { data: userFiles, error: filesError } = await supabase
         .from("user_files")
         .select("*")
-        .in("id", selectedFileIds);
+        .in("id", allFileIds);
 
       if (filesError || !userFiles) {
         logger.error("Failed to fetch user files", { error: filesError });
@@ -622,8 +713,8 @@ export const submitApplication = async (
     }
 
     // Create candidate_application_files entries (only if there are files to link)
-    if (selectedFileIds.length > 0) {
-      const selectedFileEntries = selectedFileIds.map((fileId: string) => ({
+    if (allFileIds.length > 0) {
+      const selectedFileEntries = allFileIds.map((fileId: string) => ({
         candidate_id: candidate.id,
         file_id: fileId,
       }));
@@ -659,7 +750,9 @@ export const submitApplication = async (
 
     logger.info("Application submitted successfully", {
       candidateId: candidate.id,
-      fileCount: selectedFileIds.length,
+      totalFileCount: allFileIds.length,
+      selectedFileCount: selectedFileIds.length,
+      localFileCount: uploadedLocalFileIds.length,
       additionalInfoCount: additionalInfo.length,
     });
     interviewId = await createInterviewsForJobAndReturnFirstInterviewId({
@@ -697,22 +790,24 @@ export const submitApplication = async (
     await logger.flush();
     return { error: t("generic") };
   }
-  if (!interviewId) {
-    redirect(
-      `/apply/company/${companyId}/job/${jobId}/application/confirm-email`
-    );
-  }
   // Redirect based on whether user was anonymous
   if (isAnonymous) {
-    // Redirect to email confirmation page
     redirect(
-      `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${interviewId}`
+      `/apply/company/${companyId}/job/${jobId}/application/confirm-email${
+        interviewId ? `?interviewId=${interviewId}` : ""
+      }`
     );
   } else {
-    // Regular users go directly to interview
-    redirect(
-      `/apply/company/${companyId}/job/${jobId}/candidate-interview/${interviewId}`
-    );
+    if (interviewId) {
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/application/confirm-email?interviewId=${interviewId}`
+      );
+    } else {
+      // Regular users go directly to interview
+      redirect(
+        `/apply/company/${companyId}/job/${jobId}/application/submitted`
+      );
+    }
   }
 };
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useActionState, useEffect } from "react";
-import useSWRMutation from "swr/mutation";
 import {
   Card,
   CardContent,
@@ -42,31 +41,6 @@ interface ApplicationFormProps {
   jobId: string;
 }
 
-// Fetcher function for file upload mutation
-async function uploadFiles(url: string, { arg }: { arg: File[] }) {
-  const formData = new FormData();
-  for (const file of arg) {
-    formData.append("files", file);
-  }
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to upload files");
-  }
-
-  const result = await response.json();
-  if (!result.success || !result.files || result.files.length === 0) {
-    throw new Error(result.error || "Failed to upload files");
-  }
-
-  return result;
-}
-
 export function ApplicationForm({
   company,
   job,
@@ -76,7 +50,7 @@ export function ApplicationForm({
   jobId,
 }: ApplicationFormProps) {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [uploadedFiles, setUploadedFiles] = useState<UserFile[]>([]);
+  const [localFiles, setLocalFiles] = useState<File[]>([]);
   const [email, setEmail] = useState(user?.email || "");
   const [fullName, setFullName] = useState(
     user?.user_metadata?.full_name || ""
@@ -87,12 +61,8 @@ export function ApplicationForm({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const [additionalInfo, setAdditionalInfo] = useState<string[]>([]);
-  const { logInfo, logError } = useAxiomLogging();
+  const { logInfo } = useAxiomLogging();
   const t = useTranslations("apply");
-
-  // Set up the file upload mutation
-  const { trigger: uploadFilesTrigger, isMutating: isUploading } =
-    useSWRMutation("/api/apply/upload", uploadFiles);
 
   // Set up the application submission with useActionState
   const [state, formAction, isPending] = useActionState(submitApplication, {
@@ -109,57 +79,24 @@ export function ApplicationForm({
     }
   }, [state.error]);
 
-  const allFiles = [...userFiles, ...uploadedFiles];
+  const allSelectedCount = selectedFiles.size + localFiles.length;
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    try {
-      const result = await uploadFilesTrigger(Array.from(files));
+    const newFiles = Array.from(files);
 
-      // Update state with all uploaded files
-      setUploadedFiles((prev) => [...prev, ...result.files]);
-
-      // Add all file IDs to selected files
-      const newFileIds = result.files.map((file: UserFile) => file.id);
-      setSelectedFiles((prev) => {
-        const newSet = new Set(prev);
-        newFileIds.forEach((id: string) => newSet.add(id));
-        return newSet;
-      });
-
-      // Show success message
-      if (result.errors && result.errors.length > 0) {
-        toast.warning(
-          t("applicationForm.success.filesUploadedWithErrors", {
-            successCount: result.files.length,
-            errorCount: result.errors.length,
-          })
-        );
-        logInfo("Files uploaded with errors", {
-          successCount: result.files.length,
-          errorCount: result.errors.length,
-          errors: result.errors,
-        });
-      } else {
-        toast.success(
-          t("applicationForm.success.filesUploaded", {
-            count: result.files.length,
-          })
-        );
-        logInfo("Files uploaded", { count: result.files.length });
-      }
-    } catch (error) {
-      logError("File upload error", { error });
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t("applicationForm.errors.uploadFiles")
-      );
+    // Check if adding these files would exceed the limit
+    if (allSelectedCount + newFiles.length > 5) {
+      toast.error(t("applicationForm.documentSelection.maxFilesError"));
+      return;
     }
+
+    // Add files to local state
+    setLocalFiles((prev) => [...prev, ...newFiles]);
+
+    logInfo("Files selected locally", { count: newFiles.length });
   };
 
   const toggleFileSelection = (fileId: string) => {
@@ -168,7 +105,7 @@ export function ApplicationForm({
       if (newSet.has(fileId)) {
         newSet.delete(fileId);
       } else {
-        if (newSet.size >= 5) {
+        if (allSelectedCount >= 5) {
           toast.error(t("applicationForm.documentSelection.maxFilesError"));
           return prev;
         }
@@ -176,6 +113,10 @@ export function ApplicationForm({
       }
       return newSet;
     });
+  };
+
+  const removeLocalFile = (index: number) => {
+    setLocalFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getFileIcon = (mimeType: string) => {
@@ -293,33 +234,30 @@ export function ApplicationForm({
                     multiple
                     accept=".pdf,.txt,.png,.jpg,.jpeg"
                     onChange={handleFileUpload}
-                    disabled={isUploading}
                   />
                   <label htmlFor="file-upload">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      disabled={isUploading}
                       className="cursor-pointer"
                       asChild
                     >
                       <span>
                         <Upload className="h-4 w-4 mr-2" />
-                        {isUploading
-                          ? t("applicationForm.buttons.uploading")
-                          : t("applicationForm.buttons.uploadFiles")}
+                        {t("applicationForm.buttons.selectFiles")}
                       </span>
                     </Button>
                   </label>
                 </div>
               </div>
 
-              {/* Existing files list */}
-              {allFiles.length > 0 && (
+              {/* Files list - both existing and local */}
+              {(userFiles.length > 0 || localFiles.length > 0) && (
                 <div className="space-y-2">
                   <div className="grid gap-2">
-                    {allFiles.map((file) => (
+                    {/* Previously uploaded files */}
+                    {userFiles.map((file) => (
                       <div
                         key={file.id}
                         onClick={() => toggleFileSelection(file.id)}
@@ -348,22 +286,56 @@ export function ApplicationForm({
                         )}
                       </div>
                     ))}
+
+                    {/* Locally selected files */}
+                    {localFiles.map((file, index) => (
+                      <div
+                        key={`local-${index}`}
+                        className="flex items-center justify-between p-3 border border-green-500 bg-green-50 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">
+                            {getFileIcon(file.type)}
+                          </span>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-green-600">
+                              {t("applicationForm.fileItem.selected")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeLocalFile(index)}
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {allFiles.length === 0 && !isUploading && (
+              {userFiles.length === 0 && localFiles.length === 0 && (
                 <p className="text-center text-sm text-gray-500 py-8">
                   {t("applicationForm.documentSelection.noDocuments")}
                 </p>
               )}
 
               {/* Selected files summary */}
-              {selectedFiles.size > 0 && (
+              {allSelectedCount > 0 && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-900">
                     {t("applicationForm.documentSelection.documentsSelected", {
-                      count: selectedFiles.size,
+                      count: allSelectedCount,
                     })}
                   </p>
                 </div>
@@ -386,9 +358,13 @@ export function ApplicationForm({
                     <div key={index} className="flex items-center space-x-2">
                       <Input
                         type="text"
-                        placeholder={t("applicationForm.additionalInfo.placeholder")}
+                        placeholder={t(
+                          "applicationForm.additionalInfo.placeholder"
+                        )}
                         value={info}
-                        onChange={(e) => updateAdditionalInfo(index, e.target.value)}
+                        onChange={(e) =>
+                          updateAdditionalInfo(index, e.target.value)
+                        }
                         className="flex-1"
                       />
                       <Button
@@ -402,7 +378,7 @@ export function ApplicationForm({
                       </Button>
                     </div>
                   ))}
-                  
+
                   <Button
                     type="button"
                     variant="outline"
@@ -417,18 +393,33 @@ export function ApplicationForm({
               </div>
 
               {/* Submit form */}
-              <form action={formAction}>
+              <form
+                action={(formData: FormData) => {
+                  // Add local files to form data
+                  localFiles.forEach((file, index) => {
+                    formData.append(`localFile_${index}`, file);
+                  });
+                  formAction(formData);
+                }}
+              >
                 <input type="hidden" name="companyId" value={companyId} />
                 <input type="hidden" name="jobId" value={jobId} />
                 <input
                   type="hidden"
                   name="selectedFileIds"
-                  value={Array.from(selectedFiles)}
+                  value={Array.from(selectedFiles).join(",")}
+                />
+                <input
+                  type="hidden"
+                  name="localFileCount"
+                  value={localFiles.length}
                 />
                 <input
                   type="hidden"
                   name="additionalInfo"
-                  value={JSON.stringify(additionalInfo.filter(info => info.trim()))}
+                  value={JSON.stringify(
+                    additionalInfo.filter((info) => info.trim())
+                  )}
                 />
                 <input type="hidden" name="captchaToken" value={captchaToken} />
                 {!user?.email && (
@@ -455,7 +446,9 @@ export function ApplicationForm({
                       isPending ||
                       (!user?.email && (!email || !fullName)) ||
                       !captchaToken ||
-                      (selectedFiles.size === 0 && additionalInfo.filter(info => info.trim()).length === 0)
+                      (allSelectedCount === 0 &&
+                        additionalInfo.filter((info) => info.trim()).length ===
+                          0)
                     }
                     size="lg"
                   >
