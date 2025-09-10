@@ -102,7 +102,7 @@ export const handleSignOut = async (data: FormData) => {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
   revalidatePath("/");
-  redirect("/");
+  redirect("https://www.yorby.ai");
 };
 
 export const handleSignInWithPassword = async (
@@ -134,10 +134,7 @@ export const handleSignInWithPassword = async (
     }
   } catch (error) {
     return {
-      error:
-        error instanceof Error
-          ? error.message
-          : t("errors.loginFailed"),
+      error: error instanceof Error ? error.message : t("errors.loginFailed"),
     };
   }
 
@@ -181,10 +178,7 @@ export const handleSignUp = async (
     }
   } catch (error) {
     return {
-      error:
-        error instanceof Error
-          ? error.message
-          : t("errors.signUpFailed"),
+      error: error instanceof Error ? error.message : t("errors.signUpFailed"),
     };
   }
 
