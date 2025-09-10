@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import SidebarMenuItemClient from "./SideBarMenuItemClient";
 import { Button } from "../ui/button";
-import { PlusIcon, ChevronDown } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AuthModal } from "../auth/auth-modal";
 import { UserMenu } from "../auth/user-menu";
@@ -20,12 +20,6 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Tables } from "@/utils/supabase/database.types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import Header from "./Header";
