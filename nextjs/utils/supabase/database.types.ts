@@ -249,14 +249,14 @@ export type Database = {
           {
             foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
             columns: ["id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "candidate_job_interviews"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "job_interview_recordings_candidate_interview_id_fkey"
             columns: ["id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "coding_interview_analysis_view"
             referencedColumns: ["candidate_interview_id"]
           },

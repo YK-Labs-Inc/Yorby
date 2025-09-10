@@ -123,65 +123,33 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           break;
         }
 
-        eventLogger.info("Fetching metadata row for idempotency check", {
+        eventLogger.info("Upserting metadata to preparing status", {
           table,
           messageId,
+          assetId: asset.id,
         });
 
-        // Fetch current row for idempotency check
-        const { data: row, error: fetchError } = await supabase
+        const { error } = await supabase
           .from(table)
-          .select("status")
-          .eq("id", messageId)
-          .maybeSingle();
-        if (fetchError) {
-          eventLogger.error("Failed to fetch metadata row", {
-            error: fetchError,
+          .upsert({
+            id: messageId,
+            asset_id: asset.id,
+            upload_id: asset.upload_id,
+            status: "preparing",
+          });
+
+        if (error) {
+          updateError = error;
+          eventLogger.error("Failed to upsert metadata to preparing", {
+            error: error.message,
             table,
             messageId,
           });
-          break;
-        }
-
-        eventLogger.info("Current metadata row status", {
-          currentStatus: row?.status,
-          rowExists: !!row,
-        });
-
-        if (row?.status !== "ready") {
-          eventLogger.info("Updating metadata to preparing status", {
+        } else {
+          eventLogger.info("Successfully upserted metadata to preparing", {
             table,
             messageId,
             assetId: asset.id,
-          });
-
-          const { error } = await supabase
-            .from(table)
-            .update({
-              asset_id: asset.id,
-              upload_id: asset.upload_id,
-              status: "preparing",
-            })
-            .eq("id", messageId);
-
-          if (error) {
-            updateError = error;
-            eventLogger.error("Failed to update metadata to preparing", {
-              error: error.message,
-              table,
-              messageId,
-            });
-          } else {
-            eventLogger.info("Successfully updated metadata to preparing", {
-              table,
-              messageId,
-              assetId: asset.id,
-            });
-          }
-        } else {
-          eventLogger.info("Skipping update - asset already ready", {
-            table,
-            messageId,
           });
         }
         break;
@@ -219,7 +187,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
         }
         const playbackId = asset.playback_ids?.[0]?.id || null;
 
-        eventLogger.info("Updating metadata to ready status", {
+        eventLogger.info("Upserting metadata to ready status", {
           table,
           messageId,
           assetId: asset.id,
@@ -228,24 +196,24 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
         const { error } = await supabase
           .from(table)
-          .update({
+          .upsert({
+            id: messageId,
             asset_id: asset.id,
             playback_id: playbackId,
             upload_id: asset.upload_id,
             status: "ready",
-          })
-          .eq("id", messageId);
+          });
 
         if (error) {
           updateError = error;
-          eventLogger.error("Failed to update metadata to ready", {
+          eventLogger.error("Failed to upsert metadata to ready", {
             error: error.message,
             table,
             messageId,
             assetId: asset.id,
           });
         } else {
-          eventLogger.info("Successfully updated metadata to ready", {
+          eventLogger.info("Successfully upserted metadata to ready", {
             table,
             messageId,
             assetId: asset.id,
@@ -284,7 +252,7 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
           break;
         }
 
-        eventLogger.info("Updating metadata to errored status", {
+        eventLogger.info("Upserting metadata to errored status", {
           table,
           messageId,
           assetId: asset.id,
@@ -292,23 +260,23 @@ export const POST = withAxiom(async (request: AxiomRequest) => {
 
         const { error } = await supabase
           .from(table)
-          .update({
+          .upsert({
+            id: messageId,
             asset_id: asset.id,
             upload_id: asset.upload_id,
             status: "errored",
-          })
-          .eq("id", messageId);
+          });
 
         if (error) {
           updateError = error;
-          eventLogger.error("Failed to update metadata to errored", {
+          eventLogger.error("Failed to upsert metadata to errored", {
             error: error.message,
             table,
             messageId,
             assetId: asset.id,
           });
         } else {
-          eventLogger.info("Successfully updated metadata to errored", {
+          eventLogger.info("Successfully upserted metadata to errored", {
             table,
             messageId,
             assetId: asset.id,

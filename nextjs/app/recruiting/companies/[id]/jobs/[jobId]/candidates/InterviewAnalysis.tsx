@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/chat-transcript";
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { CodeEditor } from "@/components/ui/code-editor";
-import JobAlignmentDetails from "./JobAlignmentDetails";
 import AggregatedHiringAnalysis from "./AggregatedHiringAnalysis";
 
 interface InterviewAnalysisProps {
