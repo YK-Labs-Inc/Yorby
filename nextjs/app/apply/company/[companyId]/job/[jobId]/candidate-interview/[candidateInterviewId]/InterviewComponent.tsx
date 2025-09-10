@@ -65,7 +65,7 @@ export function InterviewComponent({
   const [avatarProvider, setAvatarProvider] = useState<"bey" | "simli">(
     "simli"
   );
-  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(false);
+  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(true);
   const [simliFaceId, setSimliFaceId] = useState<string>(
     "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
   );

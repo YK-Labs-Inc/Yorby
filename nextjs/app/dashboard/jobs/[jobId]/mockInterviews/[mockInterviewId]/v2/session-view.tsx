@@ -246,9 +246,7 @@ export const SessionView = ({
               <div className="relative z-10 mx-auto w-fit">
                 <AgentControlBar
                   capabilities={capabilities}
-                  realtimeMode={
-                    interviewType === "coding" ? true : realtimeMode
-                  }
+                  realtimeMode={realtimeMode}
                 />
               </div>
             </motion.div>
