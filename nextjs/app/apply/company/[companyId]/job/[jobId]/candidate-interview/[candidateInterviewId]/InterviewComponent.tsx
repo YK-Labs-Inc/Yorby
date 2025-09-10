@@ -65,7 +65,9 @@ export function InterviewComponent({
   const [avatarProvider, setAvatarProvider] = useState<"bey" | "simli">(
     "simli"
   );
-  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(true);
+  const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(
+    interviewType === "coding"
+  );
   const [simliFaceId, setSimliFaceId] = useState<string>(
     "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
   );
@@ -79,7 +81,7 @@ export function InterviewComponent({
     id: currentInterviewId,
     enableAiAvatar,
     avatarProvider,
-    livekitMode: "realtime",
+    livekitMode: shouldUseRealtimeMode ? "realtime" : "pipeline",
     simliFaceId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();
