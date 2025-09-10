@@ -326,7 +326,7 @@ export const getCandidateData = cache(
           await supabase
             .from("candidate_job_interview_recordings")
             .select("*")
-            .eq("candidate_interview_id", candidateJobInterview.id)
+            .eq("id", candidateJobInterview.id)
             .maybeSingle();
 
         if (muxError) {
