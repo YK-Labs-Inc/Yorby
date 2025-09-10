@@ -79,12 +79,7 @@ export function InterviewComponent({
     id: currentInterviewId,
     enableAiAvatar,
     avatarProvider,
-    livekitMode:
-      interviewType === "coding"
-        ? "realtime"
-        : shouldUseRealtimeMode
-          ? "realtime"
-          : "pipeline",
+    livekitMode: "realtime",
     simliFaceId,
   });
   const [localUserChoices, setLocalUserChoices] = useState<LocalUserChoices>();

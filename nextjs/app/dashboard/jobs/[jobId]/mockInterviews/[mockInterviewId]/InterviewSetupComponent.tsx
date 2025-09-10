@@ -150,83 +150,85 @@ export default function InterviewSetup({
               </div>
             </CardContent>
           </Card>
-          {enableAiAvatar !== undefined && setEnableAiAvatar && (
-            <div className="space-y-4 mt-2">
-              <div className="space-y-2">
-                <div className="flex items-center justify-start space-x-3">
-                  <Switch
-                    id="ai-avatar"
-                    checked={enableAiAvatar}
-                    onCheckedChange={setEnableAiAvatar}
-                  />
-                  <Label htmlFor="ai-avatar" className="text-lg font-medium">
-                    {t("enableAiAvatar")}
-                  </Label>
-                </div>
-                {enableAiAvatar && (
-                  <p className="text-sm text-muted-foreground ml-11">
-                    {t("aiAvatarDisclaimer")}
-                  </p>
-                )}
-              </div>
-              {enableSimliAvatar && enableAiAvatar && setAvatarProvider && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="avatar-provider"
-                      className="text-lg font-medium"
-                    >
-                      Avatar Provider
+          {enableSimliAvatar &&
+            enableAiAvatar !== undefined &&
+            setEnableAiAvatar && (
+              <div className="space-y-4 mt-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-start space-x-3">
+                    <Switch
+                      id="ai-avatar"
+                      checked={enableAiAvatar}
+                      onCheckedChange={setEnableAiAvatar}
+                    />
+                    <Label htmlFor="ai-avatar" className="text-lg font-medium">
+                      {t("enableAiAvatar")}
                     </Label>
-                    <Select
-                      value={avatarProvider}
-                      onValueChange={(value: "bey" | "simli") =>
-                        setAvatarProvider?.(value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select avatar provider" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bey">Bey AI Avatar</SelectItem>
-                        <SelectItem value="simli">Simli AI Avatar</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
-                  {avatarProvider === "simli" && (
-                    <div className="space-y-2 mb-2">
-                      <Label
-                        htmlFor="simli-face-id"
-                        className="text-lg font-medium"
-                      >
-                        Simli Face ID
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="simli-face-id"
-                          value={simliFaceId || ""}
-                          onChange={(e) => setSimliFaceId?.(e.target.value)}
-                          placeholder="Enter Simli face ID"
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            setSimliFaceId?.(
-                              "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
-                            )
-                          }
-                        >
-                          Reset to Default
-                        </Button>
-                      </div>
-                    </div>
+                  {enableAiAvatar && (
+                    <p className="text-sm text-muted-foreground ml-11">
+                      {t("aiAvatarDisclaimer")}
+                    </p>
                   )}
                 </div>
-              )}
-            </div>
-          )}
+                {enableSimliAvatar && enableAiAvatar && setAvatarProvider && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="avatar-provider"
+                        className="text-lg font-medium"
+                      >
+                        Avatar Provider
+                      </Label>
+                      <Select
+                        value={avatarProvider}
+                        onValueChange={(value: "bey" | "simli") =>
+                          setAvatarProvider?.(value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select avatar provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bey">Bey AI Avatar</SelectItem>
+                          <SelectItem value="simli">Simli AI Avatar</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {avatarProvider === "simli" && (
+                      <div className="space-y-2 mb-2">
+                        <Label
+                          htmlFor="simli-face-id"
+                          className="text-lg font-medium"
+                        >
+                          Simli Face ID
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="simli-face-id"
+                            value={simliFaceId || ""}
+                            onChange={(e) => setSimliFaceId?.(e.target.value)}
+                            placeholder="Enter Simli face ID"
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              setSimliFaceId?.(
+                                "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
+                              )
+                            }
+                          >
+                            Reset to Default
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           <div className="flex justify-start">
             <form action={startInterviewAction}>
               <input type="hidden" name="jobId" value={jobId} />
