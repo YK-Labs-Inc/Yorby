@@ -642,7 +642,9 @@ export default function AnswerInputSection({
     // Store blobs
     currentAudioBlob.current = audioBlob;
     currentAudioDuration.current = duration;
-    if (videoBlob) currentVideoBlob.current = videoBlob;
+    if (videoBlob) {
+      currentVideoBlob.current = videoBlob;
+    }
 
     // Create form data with transcription (auto-submit)
     const formData = new FormData();

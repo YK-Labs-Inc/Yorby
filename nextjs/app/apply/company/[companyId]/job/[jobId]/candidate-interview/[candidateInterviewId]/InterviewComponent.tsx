@@ -20,22 +20,25 @@ import useConnectionDetails from "@/app/dashboard/jobs/[jobId]/mockInterviews/[m
 import { RealInterviewPreJoin } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/RealInterviewPreJoin";
 import { SessionView } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/session-view";
 import { AppConfig } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/types";
-import { Button } from "@/components/ui/button";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 import { triggerProcessInterview } from "./actions";
-import { InterviewCompletionMessage } from "./InterviewCompletionMessage";
+import { useRouter } from "next/navigation";
+import { useMultiTenant } from "@/app/context/MultiTenantContext";
+import { MockInterviewCompletionComponent } from "./MockInterviewCompletionComponent";
+import RealInterviewCompletionComponent from "./RealInterviewCompletionComponent";
 
 const MotionSessionView = motion.create(SessionView);
 
 interface AppProps {
   appConfig: AppConfig;
-  currentInterviewId: string;
-  nextInterviewId: string | null;
+  currentInterviewId?: string;
+  nextInterviewId?: string | null;
+  mockInterviewId?: string;
   jobId: string;
-  companyId: string;
-  candidateId: string;
-  interviewType: Enums<"job_interview_type">;
-  questionDetails: (Pick<
+  companyId?: string;
+  candidateId?: string;
+  jobInterviewType: Enums<"job_interview_type">;
+  questionDetails?: (Pick<
     Tables<"company_interview_question_bank">,
     "id" | "question"
   > & {
@@ -44,18 +47,21 @@ interface AppProps {
     } | null;
   })[];
   enableSimliAvatar: boolean;
+  interviewType: "mock" | "candidate";
 }
 
 export function InterviewComponent({
   appConfig,
   currentInterviewId,
   nextInterviewId,
+  mockInterviewId,
   jobId,
   companyId,
   candidateId,
-  interviewType,
+  jobInterviewType,
   questionDetails,
   enableSimliAvatar,
+  interviewType,
 }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
@@ -66,7 +72,7 @@ export function InterviewComponent({
     "simli"
   );
   const [shouldUseRealtimeMode, setShouldUseRealtimeMode] = useState(
-    interviewType === "coding"
+    jobInterviewType === "coding"
   );
   const [simliFaceId, setSimliFaceId] = useState<string>(
     "cace3ef7-a4c4-425d-a8cf-a5358eb0c427"
@@ -77,8 +83,8 @@ export function InterviewComponent({
     refreshConnectionDetails,
     isConnecting: isConnectionDetailsLoading,
   } = useConnectionDetails({
-    kind: "candidate",
-    id: currentInterviewId,
+    kind: interviewType,
+    id: currentInterviewId ?? mockInterviewId,
     enableAiAvatar,
     avatarProvider,
     livekitMode: shouldUseRealtimeMode ? "realtime" : "pipeline",
@@ -88,22 +94,67 @@ export function InterviewComponent({
   const { logError } = useAxiomLogging();
   const t = useTranslations("apply.interviews.livekit");
   const tInterview = useTranslations("apply.candidateInterview");
+  const router = useRouter();
+  const { baseUrl } = useMultiTenant();
 
   const processInterview = useCallback(async () => {
     try {
-      if (nextInterviewId) {
-        setShowCompletionUI(true);
-      } else {
-        triggerProcessInterview(candidateId).then(() => {
+      if (candidateId) {
+        if (nextInterviewId) {
           setShowCompletionUI(true);
-        });
+        } else {
+          triggerProcessInterview(candidateId).then(() => {
+            setShowCompletionUI(true);
+          });
+        }
+      } else if (mockInterviewId) {
+        processMockInterview(mockInterviewId);
       }
       return "Interview processed";
     } catch (error) {
       // Error handling is done in onError callback
       return "Interview processing failed";
     }
-  }, []);
+  }, [candidateId, nextInterviewId]);
+
+  const processMockInterview = useCallback(
+    async (mockInterviewId: string) => {
+      try {
+        setShowCompletionUI(true);
+        const response = await fetch("/api/mockInterviews/process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mockInterviewId,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to process interview: ${response.statusText}`
+          );
+        }
+
+        router.push(
+          `${baseUrl}/${jobId}/mockInterviews/${mockInterviewId}/review/v2`
+        );
+      } catch (error) {
+        logError("Error processing interview", {
+          error,
+        });
+        toastAlert({
+          title: t("errors.processingInterview"),
+          description:
+            error instanceof Error ? error.message : t("errors.unknownError"),
+        });
+      } finally {
+        return "Interview processed";
+      }
+    },
+    [mockInterviewId, router, baseUrl, jobId, logError, t]
+  );
 
   const nextUrl = useMemo(() => {
     if (!companyId) return "";
@@ -231,49 +282,14 @@ export function InterviewComponent({
 
   // Show completion UI when interview is complete
   if (showCompletionUI) {
+    if (interviewType === "mock") {
+      return <MockInterviewCompletionComponent />;
+    }
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full px-4">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-center">
-              <div className="mb-4">
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <svg
-                    className="h-6 w-6 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold mb-2">
-                {tInterview("interviewComplete")}
-              </h2>
-              {nextInterviewId ? (
-                <>
-                  <p className="text-gray-600 mb-6">
-                    {tInterview("interviewProcessed.nextRound")}
-                  </p>
-                  <Button asChild>
-                    <Link href={nextUrl}>
-                      {tInterview("buttons.continueToNext")}
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <InterviewCompletionMessage />
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <RealInterviewCompletionComponent
+        nextInterviewId={nextInterviewId}
+        nextUrl={nextUrl}
+      />
     );
   }
 
@@ -315,7 +331,7 @@ export function InterviewComponent({
               ease: "linear",
             }}
             interviewId={currentInterviewId}
-            interviewType={interviewType}
+            interviewType={jobInterviewType}
             questionDetails={questionDetails}
             realtimeMode={shouldUseRealtimeMode}
           />

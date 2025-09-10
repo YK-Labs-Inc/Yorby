@@ -110,7 +110,6 @@ export default async function CustomJob({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   isMultiTenantExperience: boolean;
 }) {
-  const supabase = await createSupabaseServerClient();
   const user = await getServerUser();
   if (!user) {
     redirect("/sign-in");

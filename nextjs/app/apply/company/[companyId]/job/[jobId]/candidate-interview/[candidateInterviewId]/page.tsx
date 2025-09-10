@@ -126,7 +126,8 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
       jobId={jobId}
       companyId={companyId}
       candidateId={application.id}
-      interviewType={currentInterview.interview_type}
+      jobInterviewType={currentInterview.interview_type}
+      interviewType="candidate"
       questionDetails={questionDetails}
       enableSimliAvatar={enableSimliAvatar}
     />

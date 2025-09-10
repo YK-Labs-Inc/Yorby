@@ -5,7 +5,8 @@
     "build": "next build",
     "start": "next start",
     "translate": "node scripts/translate.js",
-    "gen-types": "supabase gen types --local > utils/supabase/database.types.ts"
+    "gen-types": "supabase gen types --local > utils/supabase/database.types.ts",
+    "run-ngrok": "ngrok http --url=anemone-on-optionally.ngrok-free.app 3000"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.1.20",
