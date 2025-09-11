@@ -34,8 +34,8 @@ CREATE POLICY "Company members can manage application stages" ON company_applica
 -- Remove the old status field from company_job_candidates
 ALTER TABLE company_job_candidates DROP COLUMN IF EXISTS status;
 
--- Add the new current_stage_id field
-ALTER TABLE company_job_candidates ADD COLUMN current_stage_id uuid REFERENCES company_application_stages(id);
+-- Add the new current_stage_id field (nullable)
+ALTER TABLE company_job_candidates ADD COLUMN current_stage_id uuid NULL REFERENCES company_application_stages(id);
 
 -- Create indexes for performance
 CREATE INDEX idx_company_job_candidates_current_stage_id ON company_job_candidates(current_stage_id);
@@ -73,8 +73,7 @@ SET current_stage_id = (
 )
 WHERE current_stage_id IS NULL;
 
--- Add NOT NULL constraint after setting default values
-ALTER TABLE company_job_candidates ALTER COLUMN current_stage_id SET NOT NULL;
+-- Keep current_stage_id nullable to allow flexible tracking
 
 -- Create function to automatically add default stages for new companies
 CREATE OR REPLACE FUNCTION create_default_application_stages()

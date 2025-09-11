@@ -517,7 +517,7 @@ export type Database = {
           candidate_user_id: string
           company_id: string
           created_at: string
-          current_stage_id: string
+          current_stage_id: string | null
           custom_job_id: string
           id: string
           updated_at: string
@@ -527,7 +527,7 @@ export type Database = {
           candidate_user_id: string
           company_id: string
           created_at?: string
-          current_stage_id: string
+          current_stage_id?: string | null
           custom_job_id: string
           id?: string
           updated_at?: string
@@ -537,7 +537,7 @@ export type Database = {
           candidate_user_id?: string
           company_id?: string
           created_at?: string
-          current_stage_id?: string
+          current_stage_id?: string | null
           custom_job_id?: string
           id?: string
           updated_at?: string

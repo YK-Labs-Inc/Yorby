@@ -50,7 +50,7 @@ export default async function InterviewLayout({
     // Get candidate information
     const { data: candidate, error: candidateError } = await supabase
       .from("company_job_candidates")
-      .select("id, status")
+      .select("id")
       .eq("custom_job_id", jobId)
       .eq("company_id", companyId)
       .eq("candidate_user_id", user.id)
