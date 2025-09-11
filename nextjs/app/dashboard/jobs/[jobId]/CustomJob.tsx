@@ -82,7 +82,7 @@ const fetchJob = async (jobId: string) => {
     ...data,
     custom_job_questions: data.custom_job_questions
       .filter((q) => q.publication_status === "published")
-      .sort((a, b) => Number(a.created_at) - Number(b.created_at)),
+      .sort((a, b) => Number(b.created_at) - Number(a.created_at)),
     course: processedCourse,
     course_modules: processedModules,
   };

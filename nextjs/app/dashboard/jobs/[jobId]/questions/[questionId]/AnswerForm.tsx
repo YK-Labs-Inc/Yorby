@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { Tables } from "@/utils/supabase/database.types";
-import AnswerGuideline from "./AnswerGuideline";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
@@ -12,6 +11,7 @@ import QuestionFeedbackTab from "./QuestionFeedbackTab";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import AnswerInputSection from "./AnswerInputSection";
 import AnswerSubmission from "./AnswerSubmission";
+import { RichTextDisplay } from "@/components/ui/rich-text-display";
 
 const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -157,15 +157,13 @@ export default function AnswerForm({
           <CardContent className="flex-1 overflow-y-auto p-2">
             {activeTab === "question" && (
               <div className="h-full">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {question.question}
-                </p>
+                <RichTextDisplay content={question.question} />
               </div>
             )}
 
             {activeTab === "guidelines" && (
               <div className="h-full">
-                <AnswerGuideline question={question} />
+                <RichTextDisplay content={question.answer_guidelines} />
               </div>
             )}
 
