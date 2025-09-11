@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowLeft, Building2, Globe, Users, UsersRound } from "lucide-react";
+import {
+  ArrowLeft,
+  Building2,
+  Globe,
+  Users,
+  UsersRound,
+  Workflow,
+} from "lucide-react";
 import { Tables } from "@/utils/supabase/database.types";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,7 +23,7 @@ interface CompanyHeaderProps {
 }
 
 export function CompanyHeader({ company, isFreeTier }: CompanyHeaderProps) {
-  const t = useTranslations("recruiting.companyHeader");
+  const t = useTranslations("apply.recruiting.companyHeader");
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   return (
@@ -63,6 +70,12 @@ export function CompanyHeader({ company, isFreeTier }: CompanyHeaderProps) {
 
         {/* Action buttons */}
         <div className="flex gap-2">
+          <Link href={`/recruiting/companies/${company.id}/stages`}>
+            <Button variant="outline">
+              <Workflow className="mr-2 h-4 w-4" />
+              {t("manageStages")}
+            </Button>
+          </Link>
           {isFreeTier ? (
             <Button
               variant="outline"
