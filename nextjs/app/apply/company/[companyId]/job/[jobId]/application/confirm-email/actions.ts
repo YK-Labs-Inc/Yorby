@@ -5,6 +5,7 @@ import { getServerUser } from "@/utils/auth/server";
 import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { headers } from "next/headers";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 export const resendConfirmationEmail = async (
   prevState: {
@@ -67,6 +68,19 @@ export const resendConfirmationEmail = async (
     }
 
     logger.info("Confirmation email resent successfully");
+    
+    // Track email verification resent
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "email_verification_resent",
+      args: {
+        jobId,
+        companyId,
+        interviewId,
+        email: userEmail,
+      },
+    });
+    
     return { success: true, error: null };
   } catch (error) {
     logger.error("Error in resendConfirmationEmail", { error });

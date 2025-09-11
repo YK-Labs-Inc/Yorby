@@ -5,6 +5,7 @@ import { getServerUser } from "@/utils/auth/server";
 import { revalidatePath } from "next/cache";
 import { Logger } from "next-axiom";
 import { Database } from "@/utils/supabase/database.types";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 type InterviewType = Database["public"]["Enums"]["job_interview_type"];
 type InterviewWeight = Database["public"]["Enums"]["interview_weight"];
@@ -90,6 +91,21 @@ export async function createJobInterview(
     }
 
     logger.info("Interview round created successfully", { interview });
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_interview_created",
+      args: {
+        interviewId: interview.id,
+        interviewName: name,
+        interviewType: interview_type,
+        weight,
+        jobId: custom_job_id,
+        companyId: job.company_id,
+        orderIndex: order_index,
+      },
+    });
+
     await logger.flush();
 
     // Revalidate the page to show the new interview
@@ -292,6 +308,20 @@ export async function updateJobInterview(
     }
 
     logger.info("Interview round updated successfully");
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_interview_updated",
+      args: {
+        interviewId,
+        interviewName: name,
+        interviewType: interview_type,
+        weight,
+        jobId: custom_job_id,
+        companyId: job.company_id,
+      },
+    });
+
     await logger.flush();
 
     // Revalidate the page to show the updated interview
@@ -376,6 +406,17 @@ export async function deleteJobInterview(
     }
 
     logger.info("Interview round deleted successfully", { interviewId });
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_interview_deleted",
+      args: {
+        interviewId,
+        jobId,
+        companyId: job.company_id,
+      },
+    });
+
     await logger.flush();
 
     // Revalidate the page to show the updated list

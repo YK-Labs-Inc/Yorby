@@ -5,6 +5,8 @@ import { Logger } from "next-axiom";
 import { getTranslations } from "next-intl/server";
 import { Client } from "@upstash/workflow";
 import { getServerOrigin } from "@/utils/server/common/utils";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { getServerUser } from "@/utils/auth/server";
 
 export async function saveCodingSubmission(formData: FormData) {
   const logger = new Logger().with({
@@ -57,6 +59,21 @@ export async function saveCodingSubmission(formData: FormData) {
       questionId,
       submissionNumber,
     });
+
+    // Track coding submission
+    const user = await getServerUser();
+    if (user) {
+      await trackServerEvent({
+        userId: user.id,
+        eventName: "coding_submission_saved",
+        args: {
+          candidateInterviewId,
+          questionId,
+          submissionNumber,
+          codeLength: submissionText.length,
+        },
+      });
+    }
 
     await logger.flush();
     return { success: true };

@@ -13,6 +13,7 @@ import { notFound, redirect } from "next/navigation";
 import { checkApplicationStatus } from "../../actions";
 import { Button } from "@/components/ui/button";
 import { InterviewCompletionMessage } from "../../candidate-interview/[candidateInterviewId]/InterviewCompletionMessage";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 interface PageProps {
   params: Promise<{
@@ -65,6 +66,15 @@ export default async function ApplicationSubmittedPage({ params }: PageProps) {
     await supabase.auth.signOut();
     redirect(`/apply/company/${companyId}/job/${jobId}`);
   }
+
+  await trackServerEvent({
+    userId: user.id,
+    eventName: "application_submitted",
+    args: {
+      jobId,
+      companyId,
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

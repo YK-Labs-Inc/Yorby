@@ -22,6 +22,8 @@ import { Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAgentControlBar } from "@/app/components/livekit/agent-control-bar/hooks/use-agent-control-bar";
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
+import { usePostHog } from "posthog-js/react";
+import { useParams } from "next/navigation";
 
 interface CodingInterviewComponentProps {
   aiMessages: ReceivedChatMessage[];
@@ -49,6 +51,10 @@ export default function CodingInterviewComponent({
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [startTime, setStartTime] = useState<number | null>(null);
   const t = useTranslations("apply.codingInterview");
+  const posthog = usePostHog();
+  const params = useParams();
+  const jobId = params.jobId as string;
+  const companyId = params.companyId as string;
 
   const { handleDisconnect } = useAgentControlBar();
 
@@ -125,6 +131,19 @@ export default function CodingInterviewComponent({
       finalCodeLength: code.length,
       hasCode: !!code.trim(),
     });
+
+    // Track timer expiration
+    posthog.capture("coding_interview_timer_expired", {
+      candidateInterviewId,
+      questionId: questionDetails?.[0]?.id,
+      jobId,
+      companyId,
+      codeLength: code.length,
+      hasCode: !!code.trim(),
+      submissionCount,
+      timeLimitMs,
+    });
+
     await handleSubmitCode();
     handleDisconnect();
     onDisconnect();

@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { useMultiTenant } from "@/app/context/MultiTenantContext";
 import { MockInterviewCompletionComponent } from "./MockInterviewCompletionComponent";
 import RealInterviewCompletionComponent from "./RealInterviewCompletionComponent";
+import { usePostHog } from "posthog-js/react";
 
 const MotionSessionView = motion.create(SessionView);
 
@@ -96,10 +97,21 @@ export function InterviewComponent({
   const tInterview = useTranslations("apply.candidateInterview");
   const router = useRouter();
   const { baseUrl } = useMultiTenant();
+  const posthog = usePostHog();
 
   const processInterview = useCallback(async () => {
     try {
       if (candidateId) {
+        // Track interview ended
+        posthog.capture("candidate_interview_ended", {
+          candidateInterviewId: currentInterviewId,
+          candidateId,
+          jobId,
+          companyId,
+          interviewType: jobInterviewType,
+          hasNextInterview: !!nextInterviewId,
+        });
+
         if (nextInterviewId) {
           setShowCompletionUI(true);
         } else {
@@ -115,7 +127,15 @@ export function InterviewComponent({
       // Error handling is done in onError callback
       return "Interview processing failed";
     }
-  }, [candidateId, nextInterviewId]);
+  }, [
+    candidateId,
+    nextInterviewId,
+    currentInterviewId,
+    jobId,
+    companyId,
+    jobInterviewType,
+    posthog,
+  ]);
 
   const processMockInterview = useCallback(
     async (mockInterviewId: string) => {
@@ -224,6 +244,17 @@ export function InterviewComponent({
       ])
         .then(() => {
           setIsConnecting(false);
+
+          // Track interview connected
+          if (candidateId) {
+            posthog.capture("candidate_interview_connected", {
+              candidateInterviewId: currentInterviewId,
+              candidateId,
+              jobId,
+              companyId,
+              interviewType: jobInterviewType,
+            });
+          }
         })
         .catch((error) => {
           setIsConnecting(false);
@@ -266,6 +297,17 @@ export function InterviewComponent({
           setSessionStarted(true);
           setLocalUserChoices(values);
           fetchConnectionDetails();
+
+          // Track interview started and prejoin completed
+          if (candidateId) {
+            posthog.capture("candidate_interview_started", {
+              candidateInterviewId: currentInterviewId,
+              candidateId,
+              jobId,
+              companyId,
+              interviewType: jobInterviewType,
+            });
+          }
         }}
         enableAiAvatar={enableAiAvatar}
         setEnableAiAvatar={setEnableAiAvatar}
