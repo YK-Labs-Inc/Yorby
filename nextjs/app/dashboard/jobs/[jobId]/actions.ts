@@ -515,12 +515,24 @@ const generateMoreCustomJobQuestions = async ({
 
     For questions that have specific, correct answers (such as a calculation or technical question), make the answer guidelines be the correct answer.
 
+    Format the answerGuidelines as rich HTML text that can be displayed in a web browser. Use appropriate HTML tags like:
+    - <p> for paragraphs
+    - <strong> or <b> for bold text
+    - <em> or <i> for italic text
+    - <ul> and <li> for bullet points
+    - <ol> and <li> for numbered lists
+    - <code> for inline code
+    - <pre><code> for code blocks
+    - <h3>, <h4> for subheadings if needed
+
+    Keep the question as plain text without any HTML formatting.
+
     Return your response in JSON format with the following schema:
     {
       "questions": [
         {
-          "question": "string",
-          "answerGuidelines": "string"
+          "question": "string (plain text)",
+          "answerGuidelines": "string (rich HTML format)"
         }
       ]
     }
