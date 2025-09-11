@@ -262,6 +262,74 @@
       "helpText": "Send this link to potential candidates so they can view the job details and submit their application:",
       "buttonText": "Copy Application Link"
     },
+    "companyHeader": {
+      "backToDashboard": "Back to Dashboard",
+      "manageMembers": "Manage Members",
+      "manageStages": "Manage Stages",
+      "employees": "{size} employees"
+    },
+    "applicationStages": {
+      "backToCompany": "Back to Company",
+      "title": "Application Stages",
+      "subtitle": "Customize your hiring pipeline stages for {companyName}",
+      "manager": {
+        "title": "Application Stages",
+        "subtitle": "Customize the stages candidates move through in your hiring process",
+        "createStage": "Create Stage",
+        "saveOrder": "Save Order",
+        "saving": "Saving...",
+        "dragToReorder": "Drag to reorder",
+        "candidateCount": "{count, plural, =0 {0 candidates} =1 {1 candidate} other {# candidates}}",
+        "noStages": {
+          "title": "No Application Stages",
+          "description": "Create custom stages to organize your candidate pipeline and track applicants through your hiring process."
+        }
+      },
+      "dialogs": {
+        "create": {
+          "title": "Create New Stage",
+          "description": "Add a new stage to your application pipeline"
+        },
+        "edit": {
+          "title": "Edit Stage",
+          "description": "Modify stage details"
+        },
+        "delete": {
+          "title": "Delete Stage",
+          "description": "Are you sure you want to delete \"{stageName}\"? This action cannot be undone.",
+          "descriptionWithCandidates": "\"{stageName}\" has {count, plural, =1 {1 candidate} other {# candidates}} assigned to it. Choose where to move {count, plural, =1 {this candidate} other {these candidates}} before deleting the stage.",
+          "lastStage": "Are you sure you want to delete \"{stageName}\"? This is your last remaining stage. You can create new stages later.",
+          "lastStageWithCandidates": "Deleting \"{stageName}\" will remove your last application stage. {count, plural, =1 {The 1 candidate} other {All # candidates}} currently in this stage will be moved to \"unassigned\" status.",
+          "reassignTo": "Move candidates to:",
+          "selectStage": "Select a stage",
+          "noStage": "No stage (unassigned)",
+          "reassignHelpText": "{count, plural, =1 {This candidate} other {These # candidates}} will be moved to the selected stage.",
+          "confirm": "Delete Stage"
+        },
+        "form": {
+          "name": "Stage Name",
+          "namePlaceholder": "e.g., Initial Screening",
+          "description": "Description (Optional)",
+          "descriptionPlaceholder": "Describe what happens in this stage...",
+          "color": "Stage Color"
+        },
+        "validation": {
+          "nameRequired": "Stage name is required"
+        },
+        "cancel": "Cancel",
+        "update": "Update Stage"
+      },
+      "messages": {
+        "stageCreated": "Stage created successfully",
+        "stageUpdated": "Stage updated successfully",
+        "stageDeleted": "Stage deleted successfully",
+        "orderSaved": "Stage order saved successfully",
+        "createError": "Failed to create stage",
+        "updateError": "Failed to update stage",
+        "deleteError": "Failed to delete stage",
+        "orderError": "Failed to save stage order"
+      }
+    },
     "companyJobsManager": {
       "title": "Job Listings",
       "subtitle": "Manage your company's job postings",
