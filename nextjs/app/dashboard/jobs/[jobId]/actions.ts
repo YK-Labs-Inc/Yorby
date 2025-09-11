@@ -16,7 +16,7 @@ import { getServerUser } from "@/utils/auth/server";
 
 export const startMockInterview = async (
   prevState: any,
-  formData: FormData,
+  formData: FormData
 ) => {
   let logger = new Logger();
   let mockInterviewId = "";
@@ -61,12 +61,10 @@ export const startMockInterview = async (
         .maybeSingle();
 
       if (existingMockInterview) {
-        const basePath = livekitEnabled 
+        const basePath = livekitEnabled
           ? `${mockInterviewsPath}/${existingMockInterview.id}/v2`
           : `${mockInterviewsPath}/${existingMockInterview.id}`;
-        redirectPath = `${basePath}${
-          isOnboarding ? "?onboarding=true" : ""
-        }`;
+        redirectPath = `${basePath}${isOnboarding ? "?onboarding=true" : ""}`;
         shouldCreateNewInterview = false;
       }
     }
@@ -115,6 +113,7 @@ You are an experienced job interviewer conducting a structured behavioral interv
 INTERVIEWER PERSONA:
 - You are emotionally neutral and maintain professional boundaries throughout
 - You actively listen but do NOT offer excessive praise or validation
+- Do not reiterate the candidate's answers back to them
 - You ask clarifying follow-up questions when answers are vague, incomplete, or don't fully address the question
 - You probe for specific examples when candidates give generic responses
 - You maintain control of the interview pace and redirect if candidates go off-topic
@@ -123,9 +122,7 @@ INTERVIEWER PERSONA:
 INTERVIEW CONDUCT RULES:
 1. Start with a brief, professional introduction: state your name (use a common name like Michael, Jennifer, David, or Sarah) and your role as the hiring manager or team lead.
 
-2. Begin with "Tell me about yourself" - listen for a 2-3 minute response, then transition to your prepared questions.
-
-3. Ask interview questions based off of the list of questions provided to you in this prompt, but use it as a general guideline. Do not be afraid to ask follow up questions if the answer is not detailed enough
+2. Ask interview questions based off of the list of questions provided to you in this prompt, but use it as a general guideline. Do not be afraid to ask follow up questions if the answer is not detailed enough
 or ask different questions if the interview is going in a different direction.
 For each question:
    - Ask clearly and wait for the complete response
@@ -136,11 +133,11 @@ For each question:
      * "How did you handle any challenges that arose?"
    - Don't accept surface-level answers - dig deeper if necessary. 
 
-4. Maintain realistic interview dynamics:
+3. Maintain realistic interview dynamics:
    - If an answer is concerning or unclear, your tone should reflect mild concern: "I see. Can you elaborate on..."
    - Never say things like "Great answer!" or "Excellent!" - instead use neutral acknowledgments like "Thank you" or "Understood"
 
-5. Red flags to probe:
+4. Red flags to probe:
    - Answers that only use "we" instead of "I" - ask "What was YOUR specific contribution?"
    - Vague timelines or results - ask for specific dates, metrics, or outcomes
    - Avoiding direct answers - redirect back to the original question
@@ -154,37 +151,38 @@ Once you ask ${selectedQuestions.length} questions, end the interview.
 Thank the candidate for their time and tell them that the interview has ended. 
 
 ${
-        customJob.company_name &&
-        `<company-name>
+  customJob.company_name &&
+  `<company-name>
         You are an experienced interviewer for ${customJob.company_name}
   </company-name>`
-      }
+}
 
 ${
-        customJob.job_title &&
-        `
+  customJob.job_title &&
+  `
 <job-title>
 You are conducting a job interview for the position of ${customJob.job_title}
 </job-title>
 `
-      }     
+}     
 
 ${
-        customJob.company_description &&
-        `
+  customJob.company_description &&
+  `
 <company-description>
     ${customJob.company_description}
 </company-description>
 `
-      }
+}
 
 ${
-        customJob.job_description && `
+  customJob.job_description &&
+  `
 <job-description>
     ${customJob.job_description}
 </job-description>
 `
-      }
+}
 `;
 
       const { data: mockInterview, error: createError } = await supabase
@@ -227,7 +225,7 @@ ${
           error: questionsInsertError.message,
         });
         throw new Error(
-          `Failed to insert mock interview questions: ${questionsInsertError.message}`,
+          `Failed to insert mock interview questions: ${questionsInsertError.message}`
         );
       }
       await trackServerEvent({
@@ -237,12 +235,10 @@ ${
           jobId,
         },
       });
-      const basePath = livekitEnabled 
+      const basePath = livekitEnabled
         ? `${mockInterviewsPath}/${mockInterviewId}/v2`
         : `${mockInterviewsPath}/${mockInterviewId}`;
-      redirectPath = `${basePath}${
-        isOnboarding ? "?onboarding=true" : ""
-      }`;
+      redirectPath = `${basePath}${isOnboarding ? "?onboarding=true" : ""}`;
     }
   } catch (error) {
     logger.error("Error in startMockInterview:", {
@@ -262,9 +258,10 @@ ${
         });
       } catch (cleanupError) {
         logger.error("Error cleaning up mock interview:", {
-          cleanupError: cleanupError instanceof Error
-            ? cleanupError.message
-            : String(cleanupError),
+          cleanupError:
+            cleanupError instanceof Error
+              ? cleanupError.message
+              : String(cleanupError),
           mockInterviewId,
         });
       }
@@ -300,7 +297,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("emailRequiredError"),
+      t("emailRequiredError")
     );
   }
 
@@ -308,7 +305,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       `/dashboard/jobs/${jobId}`,
-      t("genericError"),
+      t("genericError")
     );
   }
 
@@ -320,7 +317,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       emailRedirectTo: jobId
         ? `${origin}/dashboard/jobs/${jobId}`
         : `${origin}/dashboard/interview-copilots/${interviewCopilotId}`,
-    },
+    }
   );
 
   if (error) {
@@ -333,7 +330,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
       jobId
         ? `/dashboard/jobs/${jobId}`
         : `/dashboard/interview-copilots/${interviewCopilotId}`,
-      error.message,
+      error.message
     );
   }
   const user = await getServerUser();
@@ -350,7 +347,7 @@ export const linkAnonymousAccount = async (formData: FormData) => {
     jobId
       ? `/dashboard/jobs/${jobId}`
       : `/dashboard/interview-copilots/${interviewCopilotId}`,
-    t("authSuccess"),
+    t("authSuccess")
   );
 };
 
@@ -426,7 +423,7 @@ export const unlockJob = async (prevState: any, formData: FormData) => {
 
 export const generateMoreQuestions = async (
   prevState: any,
-  formData: FormData,
+  formData: FormData
 ) => {
   const jobId = formData.get("jobId") as string;
   const logger = new Logger().with({
@@ -542,9 +539,9 @@ const generateMoreCustomJobQuestions = async ({
     ${companyDescription}
 
     ## Existing Questions
-    ${
-    existingQuestions.map((q) => `Question ${q.id}: ${q.question}`).join("\n")
-  }
+    ${existingQuestions
+      .map((q) => `Question ${q.id}: ${q.question}`)
+      .join("\n")}
     `;
   const result = await generateObjectWithFallback({
     systemPrompt: prompt,
@@ -569,7 +566,7 @@ const generateMoreCustomJobQuestions = async ({
         z.object({
           question: z.string(),
           answerGuidelines: z.string(),
-        }),
+        })
       ),
     }),
   });

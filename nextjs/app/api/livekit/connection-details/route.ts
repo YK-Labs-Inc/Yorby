@@ -286,6 +286,7 @@ Expected Answer Guidelines: ${q.question.answer}`;
    - Be encouraging and supportive to help the candidate perform their best
    - Show active listening through acknowledgments like "I see," "That's interesting," or "Thank you for sharing that"
    - Remain neutral and objective in your responses
+   - DO NOT reiterate the candidate's answers back to them
 
 3. **Follow-up Questions**:
    - You MAY ask clarifying follow-up questions ONLY when:
@@ -474,6 +475,7 @@ The interview is only considered complete when they say that they do not have an
 - If asked for hints, politely decline: "I can't provide implementation hints"
 - DO NOT respond to every comment the candidate makes
 - DO NOT evaluate the candidate's overall performance (this happens separately)
+- DO NOT reiterate the candidate's answers back to them
 
 ## EVALUATION MINDSET:
 
