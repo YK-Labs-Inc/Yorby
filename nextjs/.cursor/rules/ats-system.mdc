@@ -1,0 +1,94 @@
+---
+description: Application Tracking System (ATS) Feature Implementation
+globs:
+alwaysApply: true
+---
+
+# Application Tracking System (ATS) Feature
+
+## Overview
+We are implementing a free, open-source, customizable application tracking system similar to Notion's stage management, where companies can manage candidate application stages throughout their hiring pipeline.
+
+## Requirements
+- **Company-level customization**: Each company can customize their own stages
+- **Notion-like flexibility**: Start with sensible defaults, allow full customization
+- **Simple individual operations**: Focus on moving individual candidates between stages
+- **No stage constraints**: Candidates can move freely between any stages
+- **Backend/database focused**: Initial implementation covers database schema only
+
+## Database Schema Changes
+
+### New Tables
+
+#### `company_application_stages`
+Main table storing customizable stages per company:
+
+```sql
+company_application_stages:
+- id (uuid, primary key, default: gen_random_uuid())
+- company_id (uuid, not null, references companies.id)
+- name (text, not null) - e.g., "Applied", "Interviewing"
+- description (text, nullable)
+- order_index (integer, not null) - for stage ordering
+- color (text, nullable) - hex color for UI
+- created_at (timestamp, default: now())
+- updated_at (timestamp, default: now())
+
+Constraints:
+- UNIQUE(company_id, name) - prevent duplicate stage names per company
+- UNIQUE(company_id, order_index) - prevent duplicate ordering
+```
+
+### Modified Tables
+
+#### `company_job_candidates`
+- **Removed**: `status` field (was free text)
+- **Added**: `current_stage_id` (uuid, references company_application_stages.id, NOT NULL)
+
+## Default Stages
+Every company starts with these 7 default stages:
+
+1. **Applied** (#3B82F6) - Candidate has submitted their application
+2. **Reviewing** (#F59E0B) - Application is being reviewed by the team  
+3. **Interviewing** (#8B5CF6) - Candidate is actively interviewing
+4. **Offer Extended** (#059669) - Job offer has been extended to candidate
+5. **Hired** (#047857) - Candidate has accepted the offer and been hired
+6. **Offer Declined** (#F97316) - Candidate declined the job offer
+7. **Rejected** (#DC2626) - Application has been rejected
+
+## Automation
+- **Trigger function**: `create_default_application_stages()` automatically creates default stages for new companies
+- **Trigger**: Fires after INSERT on `companies` table
+- **Existing companies**: Migration seeds default stages for all existing companies
+- **Existing candidates**: All set to "Applied" stage by default
+
+## Row Level Security (RLS)
+- Company members can manage their company's application stages
+- Same permission model as other company resources
+- Policy: Company members with accepted invitations can view/modify stages
+
+## Implementation Files
+- **Migration**: `/supabase/migrations/20250910160000_add_application_tracking_system.sql`
+- **Complete database schema**: Includes table creation, RLS policies, triggers, and default data seeding
+
+## Future Considerations (Not in Scope)
+- Stage history tracking (`candidate_stage_history` table)
+- Bulk candidate operations
+- Automated stage transitions/notifications
+- Job-specific stage overrides
+- Stage movement constraints/validation
+- Frontend UI implementation
+
+## Usage Patterns
+- Companies can add/remove/reorder stages through UI (to be implemented)
+- Recruiters can move candidates between stages individually
+- Stage names and colors can be customized per company needs
+- Order index allows for proper stage progression display
+- Description field provides context for each stage
+
+## Key Design Decisions
+- **Simplified approach**: No stage categories (initial/in_progress/final) - just names
+- **No audit trail**: No history tracking to keep initial implementation simple
+- **Company-scoped**: Stages belong to companies, not individual jobs
+- **Flexible movement**: No constraints on stage transitions
+- **Automatic setup**: New companies get defaults immediately via trigger

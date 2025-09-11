@@ -354,7 +354,7 @@ export async function checkApplicationStatus(
   // Check if the user has already applied to this job
   const { data: existingCandidate, error: applicationError } = await supabase
     .from("company_job_candidates")
-    .select("id, status, applied_at")
+    .select("id, applied_at")
     .eq("custom_job_id", jobId)
     .eq("company_id", companyId)
     .eq("candidate_user_id", userId)
@@ -503,10 +503,11 @@ export const submitApplication = async (
   const companyId = formData.get("companyId") as string;
   const jobId = formData.get("jobId") as string;
   const selectedFileIdsRaw = formData.get("selectedFileIds") as string;
-  const selectedFileIds = selectedFileIdsRaw 
-    ? selectedFileIdsRaw.split(',').filter((id) => id && id.trim() !== "")
+  const selectedFileIds = selectedFileIdsRaw
+    ? selectedFileIdsRaw.split(",").filter((id) => id && id.trim() !== "")
     : [];
-  const localFileCount = parseInt(formData.get("localFileCount") as string) || 0;
+  const localFileCount =
+    parseInt(formData.get("localFileCount") as string) || 0;
   const additionalInfoRaw = formData.get("additionalInfo") as string;
   const additionalInfo: string[] = additionalInfoRaw
     ? JSON.parse(additionalInfoRaw)
@@ -583,16 +584,15 @@ export const submitApplication = async (
     const uploadedLocalFileIds: string[] = [];
     if (localFiles.length > 0) {
       logger.info("Uploading local files", { count: localFiles.length });
-      
+
       for (const file of localFiles) {
         try {
           // Upload to Supabase Storage
           const fileExt = file.name.split(".").pop();
           const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("user-files")
-            .upload(fileName, file);
+          const { data: uploadData, error: uploadError } =
+            await supabase.storage.from("user-files").upload(fileName, file);
 
           if (uploadError) {
             logger.error("Supabase upload error", {
@@ -702,7 +702,6 @@ export const submitApplication = async (
         company_id: companyId,
         custom_job_id: jobId,
         candidate_user_id: user.id,
-        status: "applied",
       })
       .select()
       .single();
