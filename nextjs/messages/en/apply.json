@@ -1021,5 +1021,32 @@
       "skipForNow": "Skip For Now"
     },
     "footer": "You can always come back later to complete the assessment if you change your mind."
+  },
+  "contact": {
+    "title": "Need Help? We're Here! 👋",
+    "description": "Look, we get it. Recruiting can be complicated, our platform might have quirks, or maybe you just want to chat about the weather. Whatever it is, we're all ears.",
+    "dropUsALine": {
+      "title": "Drop Us a Line",
+      "subtitle": "Seriously, about anything. We don't judge.",
+      "emailButton": "business@yklabs.io"
+    },
+    "helpCategories": {
+      "sales": {
+        "title": "Sales Questions",
+        "description": "Want to know pricing? Features? Let's chat."
+      },
+      "technical": {
+        "title": "Technical Help",
+        "description": "Something broken? Can't figure out how to do X? We'll help you troubleshoot."
+      },
+      "general": {
+        "title": "Random Chat",
+        "description": "Found a bug? Have a feature idea? Just want to say hi? All valid reasons to email us."
+      }
+    },
+    "responseTime": {
+      "main": "We usually respond within 24 hours",
+      "subtext": "(Sometimes faster if we're procrastinating on other work)"
+    }
   }
 } 

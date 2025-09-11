@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Button } from "../ui/button";
-import { Settings, Home } from "lucide-react";
+import { Settings, Home, Mail } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +60,14 @@ export function RecruitingAppSidebar({ user }: RecruitingAppSidebarProps) {
                   <Link href="/recruiting">
                     <Home className="h-4 w-4" />
                     <span>{recruitingSidebarT("home")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/recruiting/contact">
+                    <Mail className="h-4 w-4" />
+                    <span>{t("contactUs")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
