@@ -48,7 +48,7 @@ export default function AnswerForm({
   coachUserId: string | null;
 }) {
   const t = useTranslations("interviewQuestion");
-  const { isPerfectInterview } = useMultiTenant();
+  const { isYorbyCoaching } = useMultiTenant();
 
   const [activeTab, setActiveTab] = useState<
     "question" | "guidelines" | "samples" | "submissions" | "feedback"
@@ -118,7 +118,7 @@ export default function AnswerForm({
               >
                 📖 Guidelines
               </button>
-              {isPerfectInterview && (
+              {isYorbyCoaching && (
                 <button
                   onClick={() => setActiveTab("samples")}
                   className={`flex-1 px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
@@ -157,9 +157,6 @@ export default function AnswerForm({
           <CardContent className="flex-1 overflow-y-auto p-2">
             {activeTab === "question" && (
               <div className="h-full">
-                <h3 className="font-semibold text-lg mb-4">
-                  {t("questionLabel")}
-                </h3>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {question.question}
                 </p>

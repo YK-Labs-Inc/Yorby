@@ -5,7 +5,7 @@ import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 type UseConnectionDetailsProps =
   | {
       kind: "mock";
-      id: string;
+      id?: string;
       enableAiAvatar?: boolean;
       avatarProvider?: "bey" | "simli";
       livekitMode?: "realtime" | "pipeline";
@@ -13,7 +13,7 @@ type UseConnectionDetailsProps =
     }
   | {
       kind: "candidate";
-      id: string;
+      id?: string;
       enableAiAvatar?: boolean;
       avatarProvider?: "bey" | "simli";
       livekitMode?: "realtime" | "pipeline";
@@ -28,6 +28,9 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   const fetchConnectionDetails = useCallback(() => {
+    if (!props.id) {
+      return;
+    }
     const baseParam =
       props.kind === "mock"
         ? `mockInterviewId=${encodeURIComponent(props.id)}`

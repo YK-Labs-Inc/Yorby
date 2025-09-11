@@ -280,7 +280,7 @@ export default function PracticeQuestions({
                     {question.question}
                   </span>
                   {question.custom_job_question_submissions?.length > 0 && (
-                    <CheckCircle className="ml-auto h-5 w-5 text-green-500 dark:text-green-400" />
+                    <CheckCircle className="ml-auto h-6 w-6 text-green-500 dark:text-green-400 flex-shrink-0" />
                   )}
                 </Link>
               ))}
@@ -311,7 +311,7 @@ export default function PracticeQuestions({
                     {question.question}
                   </span>
                   {question.custom_job_question_submissions?.length > 0 && (
-                    <CheckCircle className="ml-auto h-5 w-5 text-green-500 dark:text-green-400" />
+                    <CheckCircle className="ml-auto h-6 w-6 text-green-500 dark:text-green-400 flex-shrink-0" />
                   )}
                 </Link>
               ))}
