@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 
 interface ApplyButtonProps {
   companyId: string;
@@ -11,13 +12,28 @@ interface ApplyButtonProps {
 
 export default function ApplyButton({ companyId, jobId }: ApplyButtonProps) {
   const t = useTranslations("apply");
+  const posthog = usePostHog();
+  const router = useRouter();
+
+  const handleApplyClick = () => {
+    // Track the event first
+    posthog.capture("apply_button_clicked", {
+      jobId,
+      companyId,
+    });
+    
+    // Then navigate
+    router.push(`/apply/company/${companyId}/job/${jobId}/application`);
+  };
 
   return (
-    <Link href={`/apply/company/${companyId}/job/${jobId}/application`}>
-      {" "}
-      <Button type="submit" size="lg" className="w-full ">
-        {t("jobPage.buttons.applyNow")}
-      </Button>
-    </Link>
+    <Button 
+      type="button" 
+      size="lg" 
+      className="w-full" 
+      onClick={handleApplyClick}
+    >
+      {t("jobPage.buttons.applyNow")}
+    </Button>
   );
 }

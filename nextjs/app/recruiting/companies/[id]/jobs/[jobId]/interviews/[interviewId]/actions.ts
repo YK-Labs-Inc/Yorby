@@ -6,6 +6,7 @@ import { Logger } from "next-axiom";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { Database } from "@/utils/supabase/database.types";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 // Helper function to check if user is a company member
 async function checkCompanyMembership(
@@ -196,6 +197,22 @@ export async function createQuestion(
       questionId: questionBankEntry.id,
       interviewId,
     });
+    
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "interview_question_created",
+      args: {
+        questionId: questionBankEntry.id,
+        interviewId,
+        jobId,
+        companyId,
+        questionType: interview.interview_type,
+        weight,
+        orderIndex: nextOrderIndex,
+        hasTimeLimit: interview.interview_type === "coding" ? !!timeLimitMs : null,
+      },
+    });
+    
     await logger.flush();
 
     // Revalidate the interview page
@@ -368,6 +385,21 @@ export async function updateQuestion(
     }
 
     logger.info("Question updated successfully", { questionId });
+    
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "interview_question_updated",
+      args: {
+        questionId,
+        interviewId,
+        jobId,
+        companyId,
+        questionType: interview.interview_type,
+        weight,
+        hasTimeLimit: interview.interview_type === "coding" ? !!timeLimitMs : null,
+      },
+    });
+    
     await logger.flush();
 
     revalidatePath(
@@ -461,6 +493,19 @@ export async function deleteQuestion(
       jobInterviewQuestionId,
       questionId: linkData.question_id,
     });
+    
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "interview_question_deleted",
+      args: {
+        questionId: linkData.question_id,
+        jobInterviewQuestionId,
+        interviewId,
+        jobId,
+        companyId,
+      },
+    });
+    
     await logger.flush();
 
     // Revalidate the interview page

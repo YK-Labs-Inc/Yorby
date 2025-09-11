@@ -8,6 +8,7 @@ import { getTranslations } from "next-intl/server";
 import Stripe from "stripe";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
@@ -113,6 +114,16 @@ export const upgradeCompany = async (
       sessionId: session.id,
       userId: user.id,
       companyId,
+    });
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "company_upgrade_initiated",
+      args: {
+        companyId,
+        sessionId: session.id,
+        userRole: memberData.role,
+      },
     });
 
     await upgradeCompanyLog.flush();
