@@ -399,6 +399,47 @@ export type Database = {
         }
         Relationships: []
       }
+      company_application_stages: {
+        Row: {
+          color: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_application_stages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_interview_coding_question_metadata: {
         Row: {
           created_at: string
@@ -476,9 +517,9 @@ export type Database = {
           candidate_user_id: string
           company_id: string
           created_at: string
+          current_stage_id: string
           custom_job_id: string
           id: string
-          status: string
           updated_at: string
         }
         Insert: {
@@ -486,9 +527,9 @@ export type Database = {
           candidate_user_id: string
           company_id: string
           created_at?: string
+          current_stage_id: string
           custom_job_id: string
           id?: string
-          status?: string
           updated_at?: string
         }
         Update: {
@@ -496,9 +537,9 @@ export type Database = {
           candidate_user_id?: string
           company_id?: string
           created_at?: string
+          current_stage_id?: string
           custom_job_id?: string
           id?: string
-          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -507,6 +548,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_job_candidates_current_stage_id_fkey"
+            columns: ["current_stage_id"]
+            isOneToOne: false
+            referencedRelation: "company_application_stages"
             referencedColumns: ["id"]
           },
           {
