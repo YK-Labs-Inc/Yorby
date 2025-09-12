@@ -4,11 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
-import useSWR, { mutate } from "swr";
-import useSWRMutation from "swr/mutation";
-import { getCompanyStages, updateCandidateStage } from "./actions";
+import useSWR from "swr";
+import { getCompanyStages } from "./actions";
 import { Tables } from "@/utils/supabase/database.types";
-import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { useCandidateStage } from "./CandidateStageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,18 +34,14 @@ export function CandidateStatus({
   stageIds,
 }: CandidateStatusProps) {
   const t = useTranslations("apply.status");
-  const { logError } = useAxiomLogging();
+  const { updateCandidateStage, getCandidateStage } = useCandidateStage();
+
+  // Get the optimistic stage value
+  const effectiveStage = getCandidateStage(candidateId, stage);
 
   // Fetch stages if interactive
   const { data: stages } = useSWR(["company-stages", companyId], () =>
     getCompanyStages(companyId!)
-  );
-
-  // Stage update mutation
-  const { trigger } = useSWRMutation(
-    ["candidate-stage", candidateId],
-    (_, { arg }: { arg: { stageId: string | null } }) =>
-      updateCandidateStage(candidateId, arg.stageId)
   );
 
   const handleStageChange = async (
@@ -55,11 +50,9 @@ export function CandidateStatus({
     if (!candidateId) return;
 
     try {
-      await trigger({ stageId: newStage?.id || null });
-      mutate(["candidates", companyId, jobId, stageIds]);
-      mutate(["candidate-data", candidateId]);
+      await updateCandidateStage(candidateId, newStage, companyId, jobId, stageIds);
     } catch (error) {
-      logError("Failed to update stage:", { error });
+      // Error is already logged in the context
     }
   };
 
@@ -107,7 +100,7 @@ export function CandidateStatus({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded">
-          {renderStageDisplay(stage, true)}
+          {renderStageDisplay(effectiveStage, true)}
         </button>
       </DropdownMenuTrigger>
       
