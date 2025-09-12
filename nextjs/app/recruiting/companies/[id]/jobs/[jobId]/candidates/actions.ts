@@ -21,6 +21,7 @@ export type Candidate = Tables<"company_job_candidates"> & {
   candidateEmail: string | null;
   candidatePhoneNumber: string | null;
   currentStage: Tables<"company_application_stages"> | null;
+  aiInterviewCompletionOrder?: number | null;
 };
 export type Company = Tables<"companies">;
 export type Job = Tables<"custom_jobs">;
@@ -443,6 +444,7 @@ export async function getCandidates(
         created_at,
         custom_job_id,
         updated_at,
+        ai_interview_completion_order,
         currentStage:company_application_stages(*)
       `
       )
@@ -518,6 +520,7 @@ export async function getCandidates(
           candidateEmail,
           candidatePhoneNumber: null, // Not used in UI
           currentStage: candidate.currentStage || null,
+          aiInterviewCompletionOrder: candidate.ai_interview_completion_order || null,
         } as Candidate;
       })
     );

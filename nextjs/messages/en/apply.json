@@ -421,7 +421,8 @@
         },
         "errorTitle": "Error loading candidates",
         "errorMessage": "We encountered an error while loading the candidates. Please try again.",
-        "retry": "Retry"
+        "retry": "Retry",
+        "aiResultsLocked": "AI results locked - upgrade to view"
       },
       "filters": {
         "allStages": "All stages",
@@ -578,6 +579,13 @@
         "interviewNotCompleted": {
           "title": "Interviews Not Completed",
           "description": "This candidate has not completed the required interviews for this position."
+        },
+        "locked": {
+          "title": "AI Analysis Locked",
+          "description": "Your free tier includes AI analysis for up to {limit} candidates. This candidate is beyond your current limit.",
+          "candidatePosition": "This candidate was number {position} to complete their interview (limit: {limit})",
+          "upgradeButton": "Upgrade to View Analysis",
+          "aiResultsLocked": "AI results locked - upgrade to view"
         }
       }
     },

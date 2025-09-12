@@ -18,6 +18,7 @@ import CandidatesList from "./CandidatesList";
 import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 import CandidateOverview from "./CandidateOverview";
 import EmptyState from "./EmptyState";
+import { CandidateStageProvider, useCandidateStage } from "./CandidateStageContext";
 
 const candidatesFetcher = async ([_, companyId, jobId, stageIds, offset]: [
   string,
@@ -41,7 +42,7 @@ const interviewCountFetcher = async ([_, jobId]: [string, string]) => {
   return await getJobInterviewCount(jobId);
 };
 
-export default function CandidateClientWrapper({
+function CandidateClientWrapperInner({
   isPremium,
   companyId,
   jobId,
@@ -55,7 +56,8 @@ export default function CandidateClientWrapper({
   stageIds?: string[];
 }) {
   const t = useTranslations("apply.recruiting.candidates.page");
-  
+  const { getCandidateStage } = useCandidateStage();
+
   // Use useSWRInfinite for proper pagination
   const {
     data: candidatesPages = [],
@@ -69,10 +71,10 @@ export default function CandidateClientWrapper({
     (pageIndex, previousPageData) => {
       // Stop fetching if we don't have the required params
       if (!companyId || !jobId) return null;
-      
+
       // Stop fetching if the previous page was empty (no more data)
       if (previousPageData && previousPageData.length === 0) return null;
-      
+
       // Generate key for this page
       return ["candidates", companyId, jobId, stageIds, pageIndex * 10];
     },
@@ -83,12 +85,18 @@ export default function CandidateClientWrapper({
     }
   );
 
-  // Flatten the pages into a single array of candidates
-  const candidates = candidatesPages.flat();
-  
+  // Flatten the pages into a single array of candidates and apply optimistic updates
+  const candidates = candidatesPages.flat().map(candidate => ({
+    ...candidate,
+    currentStage: getCandidateStage(candidate.id, candidate.currentStage)
+  }));
+
   // Check if we have more data to load
   const isEmpty = candidatesPages?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (candidatesPages && candidatesPages[candidatesPages.length - 1]?.length < 10);
+  const isReachingEnd =
+    isEmpty ||
+    (candidatesPages &&
+      candidatesPages[candidatesPages.length - 1]?.length < 10);
   const hasMore = !isReachingEnd;
 
   const effectiveCandidateId =
@@ -153,8 +161,6 @@ export default function CandidateClientWrapper({
             companyId={companyId}
             jobId={jobId}
             selectedCandidateId={effectiveCandidateId || undefined}
-            isPremium={isPremium}
-            companyCandidateCount={candidateCount}
             isLoading={candidatesLoading}
             loadingError={candidatesError}
             onRetry={handleRetry}
@@ -170,12 +176,22 @@ export default function CandidateClientWrapper({
             <Suspense fallback={<CandidateOverviewSkeleton />}>
               {candidateData ? (
                 <CandidateOverview
-                  candidateData={candidateData}
+                  candidateData={{
+                    ...candidateData,
+                    candidate: {
+                      ...candidateData.candidate,
+                      currentStage: getCandidateStage(
+                        candidateData.candidate.id,
+                        candidateData.candidate.currentStage
+                      )
+                    }
+                  }}
                   jobInterviewCount={interviewCount}
                   loadingCandidateData={candidateLoading}
                   hasError={candidateError}
                   onRetry={handleCandidateRetry}
                   stageIds={stageIds}
+                  isPremium={isPremium}
                 />
               ) : (
                 <EmptyState />
@@ -185,5 +201,19 @@ export default function CandidateClientWrapper({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CandidateClientWrapper(props: {
+  companyId: string;
+  jobId: string;
+  candidateId?: string;
+  isPremium: boolean;
+  stageIds?: string[];
+}) {
+  return (
+    <CandidateStageProvider>
+      <CandidateClientWrapperInner {...props} />
+    </CandidateStageProvider>
   );
 }
