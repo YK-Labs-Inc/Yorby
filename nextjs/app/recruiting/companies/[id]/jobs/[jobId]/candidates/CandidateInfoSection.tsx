@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Mail, Phone, Calendar } from "lucide-react";
 import type { CandidateData } from "./actions";
+import { CandidateStatus } from "./CandidateStatus";
+import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidateInfoSectionProps {
   candidateData: CandidateData;
@@ -12,6 +15,10 @@ export default function CandidateInfoSection({
   candidateData,
 }: CandidateInfoSectionProps) {
   const t = useTranslations("apply.recruiting.candidates.info");
+  const [currentStage, setCurrentStage] =
+    useState<Tables<"company_application_stages"> | null>(
+      candidateData.candidate.currentStage
+    );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -21,8 +28,26 @@ export default function CandidateInfoSection({
     });
   };
 
+  const handleStageChange = (
+    newStage: Tables<"company_application_stages"> | null
+  ) => {
+    setCurrentStage(newStage);
+  };
+
   return (
     <div className="space-y-6 px-6">
+      {/* Candidate Status */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Current Status</h3>
+        <CandidateStatus
+          stage={candidateData.candidate.currentStage}
+          candidateId={candidateData.candidate.id}
+          companyId={candidateData.candidate.company_id}
+          jobId={candidateData.candidate.custom_job_id}
+          onStageChange={handleStageChange}
+        />
+      </div>
+
       {/* Candidate Information Section */}
       <div>
         <h3 className="text-lg font-semibold mb-4">{t("contactInfo")}</h3>
@@ -63,20 +88,21 @@ export default function CandidateInfoSection({
       </div>
 
       {/* Additional Information Section */}
-      {candidateData.additionalInfo && candidateData.additionalInfo.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">{t("additionalInfo")}</h3>
-          <div className="space-y-3">
-            {candidateData.additionalInfo.map((info, index) => (
-              <div key={index} className="p-4 bg-muted/50 rounded-lg">
-                <span className="text-sm">
-                  {info.value}
-                </span>
-              </div>
-            ))}
+      {candidateData.additionalInfo &&
+        candidateData.additionalInfo.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("additionalInfo")}
+            </h3>
+            <div className="space-y-3">
+              {candidateData.additionalInfo.map((info, index) => (
+                <div key={index} className="p-4 bg-muted/50 rounded-lg">
+                  <span className="text-sm">{info.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

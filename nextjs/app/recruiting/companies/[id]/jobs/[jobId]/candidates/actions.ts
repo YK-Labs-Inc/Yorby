@@ -14,11 +14,13 @@ import type {
 } from "./types";
 import { getTranslations } from "next-intl/server";
 import { Logger } from "next-axiom";
+import { revalidatePath } from "next/cache";
 
 export type Candidate = Tables<"company_job_candidates"> & {
   candidateName: string | null;
   candidateEmail: string | null;
   candidatePhoneNumber: string | null;
+  currentStage: Tables<"company_application_stages"> | null;
 };
 export type Company = Tables<"companies">;
 export type Job = Tables<"custom_jobs">;
@@ -125,7 +127,12 @@ export const getInitialCandidates = cache(
 
     const { data, error } = await supabase
       .from("company_job_candidates")
-      .select("*")
+      .select(
+        `
+        *,
+        currentStage:company_application_stages(*)
+      `
+      )
       .eq("custom_job_id", jobId)
       .eq("company_id", companyId)
       .order("applied_at", { ascending: false })
@@ -197,6 +204,7 @@ export const getInitialCandidates = cache(
             candidateEmail,
             candidatePhoneNumber,
             hasCompletedAllInterviews,
+            currentStage: candidate.currentStage || null,
           };
         })
       )
@@ -220,7 +228,12 @@ export const getCandidateData = cache(
     // Fetch candidate data
     const { data: candidate, error: candidateError } = await supabase
       .from("company_job_candidates")
-      .select("*")
+      .select(
+        `
+        *,
+        currentStage:company_application_stages(*)
+      `
+      )
       .eq("id", candidateId)
       .single();
 
@@ -484,6 +497,7 @@ export const getCandidateData = cache(
         candidateName,
         candidateEmail,
         candidatePhoneNumber,
+        currentStage: candidate.currentStage || null,
       },
       applicationFiles: filesWithUrls as ApplicationFile[],
       additionalInfo: additionalInfo || [],
@@ -513,7 +527,12 @@ export async function fetchMoreCandidates(
 
   const { data, error } = await supabase
     .from("company_job_candidates")
-    .select("*")
+    .select(
+      `
+      *,
+      currentStage:company_application_stages(*)
+    `
+    )
     .eq("custom_job_id", jobId)
     .eq("company_id", companyId)
     .order("applied_at", { ascending: false })
@@ -598,6 +617,7 @@ export async function fetchMoreCandidates(
           candidateName,
           candidateEmail,
           candidatePhoneNumber,
+          currentStage: candidate.currentStage || null,
         };
       })
     )
@@ -669,4 +689,97 @@ export const getJobInterviewCount = async (jobId: string) => {
   }
 
   return count || 0;
+};
+
+export const getCompanyStages = cache(
+  async (
+    companyId: string
+  ): Promise<Tables<"company_application_stages">[]> => {
+    const log = new Logger().with({
+      functionName: "getCompanyStages",
+      companyId,
+    });
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from("company_application_stages")
+      .select("*")
+      .eq("company_id", companyId)
+      .order("order_index", { ascending: true });
+
+    if (error) {
+      log.error("Error fetching company stages", { error });
+      await log.flush();
+      return [];
+    }
+
+    await log.flush();
+    return data || [];
+  }
+);
+
+export const updateCandidateStage = async (
+  candidateId: string,
+  stageId: string | null
+): Promise<void> => {
+  const log = new Logger().with({
+    functionName: "updateCandidateStage",
+    candidateId,
+    stageId,
+  });
+  const supabase = await createSupabaseServerClient();
+
+  // Verify user has access to this candidate
+  const user = await getServerUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  // Get candidate details to verify company membership
+  const { data: candidate, error: candidateError } = await supabase
+    .from("company_job_candidates")
+    .select("company_id, custom_job_id")
+    .eq("id", candidateId)
+    .single();
+
+  if (candidateError || !candidate) {
+    log.error("Error fetching candidate", { candidateError, candidateId });
+    await log.flush();
+    throw new Error("Candidate not found");
+  }
+
+  // Check membership
+  const { data: membership, error: memberError } = await supabase
+    .from("company_members")
+    .select("role")
+    .eq("company_id", candidate.company_id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (memberError || !membership) {
+    log.error("Error verifying membership", { memberError });
+    await log.flush();
+    throw new Error("Access denied");
+  }
+
+  // Update candidate stage
+  const { error: updateError } = await supabase
+    .from("company_job_candidates")
+    .update({ current_stage_id: stageId })
+    .eq("id", candidateId);
+
+  if (updateError) {
+    log.error("Error updating candidate stage", { updateError });
+    await log.flush();
+    throw updateError;
+  }
+
+  log.info("Successfully updated candidate stage", {
+    candidateId,
+    newStageId: stageId,
+  });
+  await log.flush();
+  revalidatePath(
+    `/recruiting/companies/${candidate.company_id}/jobs/${candidate.custom_job_id}/candidates`
+  );
 };

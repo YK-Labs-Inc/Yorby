@@ -68,8 +68,82 @@ Every company starts with these 7 default stages:
 - Policy: Company members with accepted invitations can view/modify stages
 
 ## Implementation Files
+
+### Database
 - **Migration**: `/supabase/migrations/20250910160000_add_application_tracking_system.sql`
 - **Complete database schema**: Includes table creation, RLS policies, triggers, and default data seeding
+
+### Frontend Implementation
+- **Main Stage Management Page**: `app/recruiting/companies/[id]/stages/page.tsx`
+  - Server-side authentication and company membership verification
+  - Fetches existing stages with proper ordering (`order_index`)
+  - Renders stage header and manager components
+  
+- **Stage Manager Component**: `app/recruiting/companies/[id]/stages/CompanyApplicationStagesManager.tsx`
+  - Full CRUD operations for application stages
+  - Drag-and-drop reordering with visual feedback
+  - Real-time candidate count display using SWR
+  - Delete confirmation with candidate reassignment handling
+  - Form dialogs for creating/editing stages with color picker
+  - Handles edge cases (last stage deletion, candidate reassignment)
+
+- **Stage Header Component**: `app/recruiting/companies/[id]/stages/CompanyStageHeader.tsx`
+  - Navigation breadcrumb back to company dashboard
+  - Internationalized header with company context
+
+- **Server Actions**: `app/recruiting/companies/[id]/stages/actions.ts`
+  - `validateCompanyAccess()`: Company membership verification
+  - `getCompanyStages()`: Fetch stages for a company
+  - `createStage()`: Create new application stage
+  - `updateStage()`: Update existing stage details
+  - `deleteStage()`: Delete stage with optional candidate reassignment
+  - `getStageCandidateCount()`: Count candidates assigned to a stage
+  - `updateStageOrders()`: Batch update stage ordering
+
+### Candidate Management Integration
+- **Enhanced Candidate List**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidatesList.tsx`
+  - Updated to display candidate stages with color-coded badges
+  - Real-time stage tracking integration
+
+- **Client Wrapper Component**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateClientWrapper.tsx`
+  - SWR-based data fetching for candidates, stages, and counts
+  - Handles loading states and error recovery
+  - Provides candidate selection and stage update functionality
+
+- **Candidate Status Component**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateStatus.tsx`
+  - Interactive dropdown for changing candidate stages
+  - Real-time stage updates with optimistic UI
+  - Color-coded stage display with visual indicators
+  - SWR mutation for stage changes with error recovery
+
+- **Enhanced Candidate Info**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateInfoSection.tsx`
+  - Integrated candidate status component
+  - Real-time stage change handling
+
+- **Updated Server Actions**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/actions.ts`
+  - `updateCandidateStage()`: Update individual candidate stage assignments
+  - `getCompanyStages()`: Fetch stages for dropdown population
+  - Enhanced candidate data fetching with stage information
+
+### Features Implemented
+- **Visual Interface**: Clean card-based UI with color indicators and drag handles
+- **Real-time Updates**: SWR integration for live candidate counts and stage changes
+- **Drag & Drop**: Visual reordering with immediate feedback
+- **Smart Deletion**: Automatic candidate reassignment when deleting stages
+- **Interactive Stage Changes**: Dropdown interface for instant candidate stage updates
+- **Optimistic Updates**: Immediate UI feedback with error recovery for stage changes
+- **Form Validation**: Required field validation and error handling
+- **Internationalization**: Full i18n support via `next-intl`
+- **Error Handling**: Comprehensive error logging with Axiom
+- **Loading States**: Proper loading indicators and disabled states
+- **Responsive Design**: Mobile-friendly interface
+- **Color-coded Stages**: Visual stage identification throughout the candidate pipeline
+
+### Internationalization Updates
+- **Translation File**: `messages/en/apply.json`
+  - Added status-related translations for stage display
+  - Includes "noStage" fallback for candidates without assigned stages
+  - Consistent messaging across the candidate pipeline interface
 
 ## Future Considerations (Not in Scope)
 - Stage history tracking (`candidate_stage_history` table)
@@ -77,14 +151,15 @@ Every company starts with these 7 default stages:
 - Automated stage transitions/notifications
 - Job-specific stage overrides
 - Stage movement constraints/validation
-- Frontend UI implementation
 
 ## Usage Patterns
-- Companies can add/remove/reorder stages through UI (to be implemented)
-- Recruiters can move candidates between stages individually
-- Stage names and colors can be customized per company needs
-- Order index allows for proper stage progression display
-- Description field provides context for each stage
+- **Stage Management**: Companies can add/remove/reorder stages through visual drag-and-drop interface
+- **Individual Candidate Movement**: Recruiters can move candidates between stages via dropdown interface
+- **Real-time Updates**: Stage changes reflect immediately across the application with SWR
+- **Visual Customization**: Stage names and colors can be customized per company needs
+- **Ordered Pipeline**: Order index allows for proper stage progression display in candidate views
+- **Context Information**: Description field provides context for each stage
+- **Candidate Status Tracking**: Visual badges show current candidate stage throughout the recruiting interface
 
 ## Key Design Decisions
 - **Simplified approach**: No stage categories (initial/in_progress/final) - just names
@@ -92,3 +167,6 @@ Every company starts with these 7 default stages:
 - **Company-scoped**: Stages belong to companies, not individual jobs
 - **Flexible movement**: No constraints on stage transitions
 - **Automatic setup**: New companies get defaults immediately via trigger
+- **Client-side optimization**: SWR for real-time updates and optimistic UI
+- **Component separation**: Clear separation between stage management and candidate tracking
+- **Visual feedback**: Immediate UI response with error recovery patterns
