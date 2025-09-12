@@ -110,120 +110,6 @@ export const validateAccess = cache(
   }
 );
 
-export const getInitialCandidates = cache(
-  async (
-    companyId: string,
-    jobId: string,
-    limit: number = 10,
-    stageIds?: string[]
-  ): Promise<Candidate[]> => {
-    const log = new Logger().with({
-      functionName: "getInitialCandidates",
-      companyId,
-      jobId,
-      limit,
-      stageIds,
-    });
-    const supabase = await createSupabaseServerClient();
-    const supabaseAdmin = await createAdminClient();
-
-    let query = supabase
-      .from("company_job_candidates")
-      .select(
-        `
-        *,
-        currentStage:company_application_stages(*)
-      `
-      )
-      .eq("custom_job_id", jobId)
-      .eq("company_id", companyId);
-
-    // Apply stage filtering if stageIds are provided
-    if (stageIds && stageIds.length > 0) {
-      query = query.in("current_stage_id", stageIds);
-    }
-
-    const { data, error } = await query
-      .order("applied_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      log.error("Error fetching candidates", { error });
-      await log.flush();
-      return [];
-    }
-
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    // Fetch user data for each candidate
-    const candidatesWithUserData = (
-      await Promise.all(
-        data.map(async (candidate) => {
-          // Fetch candidate's interviews
-          const { data: candidateInterviews, error: candidateInterviewsError } =
-            await supabase
-              .from("candidate_job_interviews")
-              .select("*")
-              .eq("candidate_id", candidate.id);
-
-          if (candidateInterviewsError) {
-            log.error("Error fetching candidate interviews", {
-              error: candidateInterviewsError,
-              candidateId: candidate.id,
-            });
-          }
-
-          // Check if candidate has completed all interviews
-          const hasCompletedAllInterviews = candidateInterviews?.every(
-            (interview) => interview.status === "completed"
-          );
-
-          // Fetch user data
-          let candidateName: string | null = null;
-          let candidateEmail: string | null = null;
-          let candidatePhoneNumber: string | null = null;
-
-          if (candidate.candidate_user_id) {
-            const { data: userData, error: userError } =
-              await supabaseAdmin.auth.admin.getUserById(
-                candidate.candidate_user_id
-              );
-
-            if (userError) {
-              log.error("Error fetching user data", {
-                userError,
-                candidateUserId: candidate.candidate_user_id,
-              });
-            } else if (userData && userData.user) {
-              candidateEmail = userData.user.email || null;
-              candidateName =
-                userData.user.user_metadata?.display_name ||
-                userData.user.user_metadata?.full_name ||
-                null;
-              candidatePhoneNumber =
-                userData.user.user_metadata?.phone_number || null;
-            }
-          }
-
-          return {
-            ...candidate,
-            candidateName,
-            candidateEmail,
-            candidatePhoneNumber,
-            hasCompletedAllInterviews,
-            currentStage: candidate.currentStage || null,
-          };
-        })
-      )
-    ).filter((candidate) => candidate !== null);
-
-    await log.flush();
-    return candidatesWithUserData;
-  }
-);
-
 export const getCandidateData = cache(
   async (candidateId: string): Promise<CandidateData | null> => {
     const log = new Logger().with({
@@ -517,8 +403,8 @@ export const getCandidateData = cache(
   }
 );
 
-// For client component to fetch more candidates
-export async function fetchMoreCandidates(
+// Paginated function to fetch candidates - designed for useSWRInfinite
+export async function getCandidates(
   companyId: string,
   jobId: string,
   offset: number,
@@ -526,107 +412,103 @@ export async function fetchMoreCandidates(
   stageIds?: string[]
 ): Promise<Candidate[]> {
   const log = new Logger().with({
-    functionName: "fetchMoreCandidates",
+    functionName: "getCandidates",
     companyId,
     jobId,
     offset,
     limit,
     stageIds,
   });
+  
+  // Validate inputs
+  if (!companyId || !jobId) {
+    log.error("Invalid parameters", { companyId, jobId });
+    await log.flush();
+    return [];
+  }
+
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = await createAdminClient();
 
-  let query = supabase
-    .from("company_job_candidates")
-    .select(
+  try {
+    let query = supabase
+      .from("company_job_candidates")
+      .select(
+        `
+        id,
+        applied_at,
+        candidate_user_id,
+        current_stage_id,
+        company_id,
+        created_at,
+        custom_job_id,
+        updated_at,
+        currentStage:company_application_stages(*)
       `
-      *,
-      currentStage:company_application_stages(*)
-    `
-    )
-    .eq("custom_job_id", jobId)
-    .eq("company_id", companyId);
+      )
+      .eq("custom_job_id", jobId)
+      .eq("company_id", companyId);
 
-  // Apply stage filtering if stageIds are provided
-  if (stageIds && stageIds.length > 0) {
-    query = query.in("current_stage_id", stageIds);
-  }
+    // Apply stage filtering if stageIds are provided
+    if (stageIds && stageIds.length > 0) {
+      query = query.in("current_stage_id", stageIds);
+    }
 
-  const { data, error } = await query
-    .order("applied_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+    // Use range for pagination - this is the key for useSWRInfinite
+    const { data, error } = await query
+      .order("applied_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-  if (error) {
-    log.error("Error fetching more candidates", { error });
-    await log.flush();
-    return [];
-  }
+    if (error) {
+      log.error("Error fetching candidates", { error });
+      await log.flush();
+      throw error; // Throw error to trigger SWR error handling
+    }
 
-  if (!data || data.length === 0) {
-    await log.flush();
-    return [];
-  }
+    // Return empty array if no data - this signals end of pagination
+    if (!data || data.length === 0) {
+      log.info("No more candidates found", { offset, limit });
+      await log.flush();
+      return [];
+    }
 
-  // Fetch user data for each candidate and filter by those with aggregated analysis
-  const candidatesWithUserData = (
-    await Promise.all(
+    log.info("Fetched candidates page", { 
+      offset, 
+      limit, 
+      returned: data.length,
+      hasMore: data.length === limit 
+    });
+
+    // Fetch user data for each candidate (only name and email needed for UI)
+    const candidatesWithUserData = await Promise.all(
       data.map(async (candidate) => {
-        // Fetch candidate's interviews
-        const { data: candidateInterviews, error: candidateInterviewsError } =
-          await supabase
-            .from("candidate_job_interviews")
-            .select("*")
-            .eq("candidate_id", candidate.id);
-
-        if (candidateInterviewsError) {
-          log.error("Error fetching candidate interviews", {
-            error: candidateInterviewsError,
-            candidateId: candidate.id,
-          });
-        }
-
-        // Check if candidate has completed all interviews
-        const hasCompletedAllInterviews = candidateInterviews?.every(
-          (interview) => interview.status === "completed"
-        );
-        if (!hasCompletedAllInterviews) {
-          return null;
-        }
-
-        // Check if candidate has aggregated analysis
-        const { data: aggregatedAnalysis } = await supabase
-          .from("candidate_aggregated_interview_analysis")
-          .select("*")
-          .eq("candidate_id", candidate.id)
-          .maybeSingle();
-
-        if (!aggregatedAnalysis) {
-          return null;
-        }
-
         let candidateName: string | null = null;
         let candidateEmail: string | null = null;
-        let candidatePhoneNumber: string | null = null;
 
         if (candidate.candidate_user_id) {
-          const { data: userData, error: userError } =
-            await supabaseAdmin.auth.admin.getUserById(
-              candidate.candidate_user_id
-            );
+          try {
+            const { data: userData, error: userError } =
+              await supabaseAdmin.auth.admin.getUserById(
+                candidate.candidate_user_id
+              );
 
-          if (userError) {
-            log.error("Error fetching user data", {
-              userError,
+            if (userError) {
+              log.error("Error fetching user data", {
+                userError,
+                candidateUserId: candidate.candidate_user_id,
+              });
+            } else if (userData?.user) {
+              candidateEmail = userData.user.email || null;
+              candidateName =
+                userData.user.user_metadata?.display_name ||
+                userData.user.user_metadata?.full_name ||
+                null;
+            }
+          } catch (userFetchError) {
+            log.error("Exception fetching user data", {
+              error: userFetchError,
               candidateUserId: candidate.candidate_user_id,
             });
-          } else if (userData && userData.user) {
-            candidateEmail = userData.user.email || null;
-            candidateName =
-              userData.user.user_metadata?.display_name ||
-              userData.user.user_metadata?.full_name ||
-              null;
-            candidatePhoneNumber =
-              userData.user.user_metadata?.phone_number || null;
           }
         }
 
@@ -634,20 +516,19 @@ export async function fetchMoreCandidates(
           ...candidate,
           candidateName,
           candidateEmail,
-          candidatePhoneNumber,
+          candidatePhoneNumber: null, // Not used in UI
           currentStage: candidate.currentStage || null,
-        };
+        } as Candidate;
       })
-    )
-  ).filter((candidate) => candidate !== null);
+    );
 
-  log.info("Filtered candidates with aggregated analysis", {
-    totalCandidates: data.length,
-    filteredCandidates: candidatesWithUserData.length,
-  });
-
-  await log.flush();
-  return candidatesWithUserData;
+    await log.flush();
+    return candidatesWithUserData;
+  } catch (error) {
+    log.error("Exception in getCandidates", { error });
+    await log.flush();
+    throw error;
+  }
 }
 
 export const isCompanyPremium = async (companyId: string) => {

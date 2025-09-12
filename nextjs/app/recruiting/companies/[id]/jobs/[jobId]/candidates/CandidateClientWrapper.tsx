@@ -1,12 +1,12 @@
 "use client";
 
 import useSWR, { mutate } from "swr";
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
+import useSWRInfinite from "swr/infinite";
+import { Suspense } from "react";
 import {
   Candidate,
   CandidateData,
-  getInitialCandidates,
+  getCandidates,
   getCandidateData,
   getCompanyCandidateCount,
   getJobInterviewCount,
@@ -19,13 +19,14 @@ import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 import CandidateOverview from "./CandidateOverview";
 import EmptyState from "./EmptyState";
 
-const candidatesFetcher = async ([_, companyId, jobId, stageIds]: [
+const candidatesFetcher = async ([_, companyId, jobId, stageIds, offset]: [
   string,
   string,
   string,
   string[] | undefined,
+  number,
 ]) => {
-  return await getInitialCandidates(companyId, jobId, 10, stageIds);
+  return await getCandidates(companyId, jobId, offset, 10, stageIds);
 };
 
 const candidateDataFetcher = async ([_, candidateId]: [string, string]) => {
@@ -54,15 +55,41 @@ export default function CandidateClientWrapper({
   stageIds?: string[];
 }) {
   const t = useTranslations("apply.recruiting.candidates.page");
-  // Fetch candidates list when no specific candidate is selected
+  
+  // Use useSWRInfinite for proper pagination
   const {
-    data: candidates = [],
+    data: candidatesPages = [],
     error: candidatesError,
     isLoading: candidatesLoading,
-  } = useSWR<Candidate[]>(
-    companyId && jobId ? ["candidates", companyId, jobId, stageIds] : null,
-    candidatesFetcher
+    isValidating,
+    size,
+    setSize,
+    mutate: mutateCandidates,
+  } = useSWRInfinite<Candidate[]>(
+    (pageIndex, previousPageData) => {
+      // Stop fetching if we don't have the required params
+      if (!companyId || !jobId) return null;
+      
+      // Stop fetching if the previous page was empty (no more data)
+      if (previousPageData && previousPageData.length === 0) return null;
+      
+      // Generate key for this page
+      return ["candidates", companyId, jobId, stageIds, pageIndex * 10];
+    },
+    candidatesFetcher,
+    {
+      revalidateFirstPage: false, // Don't revalidate first page when adding new pages
+      persistSize: true, // Keep size when revalidating
+    }
   );
+
+  // Flatten the pages into a single array of candidates
+  const candidates = candidatesPages.flat();
+  
+  // Check if we have more data to load
+  const isEmpty = candidatesPages?.[0]?.length === 0;
+  const isReachingEnd = isEmpty || (candidatesPages && candidatesPages[candidatesPages.length - 1]?.length < 10);
+  const hasMore = !isReachingEnd;
 
   const effectiveCandidateId =
     candidateId ||
@@ -91,9 +118,7 @@ export default function CandidateClientWrapper({
   );
 
   const handleRetry = () => {
-    if (companyId && jobId) {
-      mutate(["candidates", companyId, jobId, stageIds]);
-    }
+    mutateCandidates();
   };
 
   const handleCandidateRetry = () => {
@@ -135,6 +160,9 @@ export default function CandidateClientWrapper({
             onRetry={handleRetry}
             selectCandidate={selectCandidate}
             stageIds={stageIds}
+            onLoadMore={() => setSize(size + 1)}
+            hasMore={hasMore}
+            isLoadingMore={isValidating && !candidatesLoading}
           />
 
           {/* Right Content - Candidate Overview */}

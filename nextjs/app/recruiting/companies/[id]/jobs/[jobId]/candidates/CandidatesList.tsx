@@ -6,7 +6,7 @@ import { Search, User, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Candidate, fetchMoreCandidates } from "./actions";
+import { Candidate } from "./actions";
 import { useTranslations } from "next-intl";
 import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
@@ -26,6 +26,9 @@ interface CandidatesListProps {
   onRetry?: () => void;
   selectCandidate?: (candidateId: string) => void;
   stageIds: string[];
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isLoadingMore: boolean;
 }
 
 export default function CandidatesList({
@@ -40,14 +43,13 @@ export default function CandidatesList({
   onRetry,
   selectCandidate,
   stageIds,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
 }: CandidatesListProps) {
   const t = useTranslations("apply.recruiting.candidates.list");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(
-    candidates.length === FREE_TIER_INTERVIEW_COUNT
-  );
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastCandidateRef = useRef<HTMLDivElement | null>(null);
@@ -89,7 +91,7 @@ export default function CandidatesList({
     [router, searchParams]
   );
 
-  const loadMoreCandidates = useCallback(async () => {
+  const loadMoreCandidates = useCallback(() => {
     if (isLoadingMore || !hasMore) return;
 
     // Check free tier limit
@@ -98,34 +100,8 @@ export default function CandidatesList({
       return;
     }
 
-    setIsLoadingMore(true);
-    try {
-      const moreCandidates = await fetchMoreCandidates(
-        companyId,
-        jobId,
-        candidates.length,
-        10,
-        selectedStageIds.length > 0 ? selectedStageIds : undefined
-      );
-
-      if (moreCandidates.length < 10) {
-        setHasMore(false);
-      }
-    } catch (error) {
-      // Error loading more candidates
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [
-    candidates.length,
-    companyId,
-    jobId,
-    hasMore,
-    isLoadingMore,
-    isPremium,
-    openUpgradeDialog,
-    selectedStageIds,
-  ]);
+    onLoadMore();
+  }, [isLoadingMore, hasMore, isPremium, candidates.length, onLoadMore, openUpgradeDialog]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
