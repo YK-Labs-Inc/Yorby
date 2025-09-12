@@ -45,7 +45,7 @@ export default function CandidateClientWrapper({
   companyId,
   jobId,
   candidateId,
-  stageIds,
+  stageIds = [],
 }: {
   companyId: string;
   jobId: string;
@@ -54,7 +54,6 @@ export default function CandidateClientWrapper({
   stageIds?: string[];
 }) {
   const t = useTranslations("apply.recruiting.candidates.page");
-  console.log("hey stageIds", stageIds);
   // Fetch candidates list when no specific candidate is selected
   const {
     data: candidates = [],
@@ -64,6 +63,7 @@ export default function CandidateClientWrapper({
     companyId && jobId ? ["candidates", companyId, jobId, stageIds] : null,
     candidatesFetcher
   );
+  console.log("hey candidates", candidates);
 
   const effectiveCandidateId =
     candidateId ||
@@ -125,7 +125,7 @@ export default function CandidateClientWrapper({
         <div className="flex h-full w-full shadow-sm rounded-lg">
           {/* Left Sidebar - Candidate List (Client Component) */}
           <CandidatesList
-            initialCandidates={candidates}
+            candidates={candidates}
             companyId={companyId}
             jobId={jobId}
             selectedCandidateId={effectiveCandidateId || undefined}
@@ -135,6 +135,7 @@ export default function CandidateClientWrapper({
             loadingError={candidatesError}
             onRetry={handleRetry}
             selectCandidate={selectCandidate}
+            stageIds={stageIds}
           />
 
           {/* Right Content - Candidate Overview */}
@@ -147,6 +148,7 @@ export default function CandidateClientWrapper({
                   loadingCandidateData={candidateLoading}
                   hasError={candidateError}
                   onRetry={handleCandidateRetry}
+                  stageIds={stageIds}
                 />
               ) : (
                 <EmptyState />

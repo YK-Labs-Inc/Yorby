@@ -9,16 +9,14 @@ import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidateInfoSectionProps {
   candidateData: CandidateData;
+  stageIds: string[];
 }
 
 export default function CandidateInfoSection({
   candidateData,
+  stageIds,
 }: CandidateInfoSectionProps) {
   const t = useTranslations("apply.recruiting.candidates.info");
-  const [currentStage, setCurrentStage] =
-    useState<Tables<"company_application_stages"> | null>(
-      candidateData.candidate.currentStage
-    );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -26,12 +24,6 @@ export default function CandidateInfoSection({
       month: "long",
       day: "numeric",
     });
-  };
-
-  const handleStageChange = (
-    newStage: Tables<"company_application_stages"> | null
-  ) => {
-    setCurrentStage(newStage);
   };
 
   return (
@@ -44,7 +36,7 @@ export default function CandidateInfoSection({
           candidateId={candidateData.candidate.id}
           companyId={candidateData.candidate.company_id}
           jobId={candidateData.candidate.custom_job_id}
-          onStageChange={handleStageChange}
+          stageIds={stageIds}
         />
       </div>
 

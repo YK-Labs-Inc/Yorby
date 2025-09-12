@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronDown, Filter, X, Check } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
@@ -28,9 +27,8 @@ export function CandidateStatusFilter({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch company stages
-  const { data: stages = [] } = useSWR(
-    ["company-stages", companyId],
-    () => getCompanyStages(companyId)
+  const { data: stages = [] } = useSWR(["company-stages", companyId], () =>
+    getCompanyStages(companyId)
   );
 
   // Close dropdown when clicking outside
@@ -53,7 +51,7 @@ export function CandidateStatusFilter({
       const newSelected = selectedStageIds.includes(stageId)
         ? selectedStageIds.filter((id) => id !== stageId)
         : [...selectedStageIds, stageId];
-      
+
       onFilterChange(newSelected);
     },
     [selectedStageIds, onFilterChange]
@@ -121,7 +119,9 @@ export function CandidateStatusFilter({
         <div className="absolute z-50 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-sm">
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-gray-50">
-            <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider">{t("filterByStage")}</h4>
+            <h4 className="text-xs font-medium text-gray-700 uppercase tracking-wider">
+              {t("filterByStage")}
+            </h4>
             {!isAllSelected && (
               <button
                 onClick={handleClearAll}
@@ -140,9 +140,7 @@ export function CandidateStatusFilter({
               className={cn(
                 "w-full flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md transition-colors",
                 "hover:bg-gray-50",
-                isAllSelected 
-                  ? "bg-gray-50 text-gray-900" 
-                  : "text-gray-700"
+                isAllSelected ? "bg-gray-50 text-gray-900" : "text-gray-700"
               )}
             >
               <div className="flex items-center justify-center w-3.5 h-3.5">
@@ -157,7 +155,7 @@ export function CandidateStatusFilter({
             {/* Individual stage options */}
             {stages.map((stage: Tables<"company_application_stages">) => {
               const isSelected = selectedStageIds.includes(stage.id);
-              
+
               return (
                 <button
                   key={stage.id}
@@ -165,9 +163,7 @@ export function CandidateStatusFilter({
                   className={cn(
                     "w-full flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md transition-colors",
                     "hover:bg-gray-50",
-                    isSelected 
-                      ? "bg-gray-50 text-gray-900" 
-                      : "text-gray-700"
+                    isSelected ? "bg-gray-50 text-gray-900" : "text-gray-700"
                   )}
                 >
                   <div className="flex items-center justify-center w-3.5 h-3.5">
@@ -184,19 +180,24 @@ export function CandidateStatusFilter({
           </div>
 
           {/* Footer */}
-          {stages.length > 0 && selectedStages.length > 0 && selectedStages.length < stages.length && (
-            <div className="flex items-center justify-between px-3 py-2 border-t border-gray-50">
-              <span className="text-xs text-gray-400">
-                {t("selectedCount", { selected: selectedStages.length, total: stages.length })}
-              </span>
-              <button
-                onClick={handleSelectAll}
-                className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                {t("selectAll")}
-              </button>
-            </div>
-          )}
+          {stages.length > 0 &&
+            selectedStages.length > 0 &&
+            selectedStages.length < stages.length && (
+              <div className="flex items-center justify-between px-3 py-2 border-t border-gray-50">
+                <span className="text-xs text-gray-400">
+                  {t("selectedCount", {
+                    selected: selectedStages.length,
+                    total: stages.length,
+                  })}
+                </span>
+                <button
+                  onClick={handleSelectAll}
+                  className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  {t("selectAll")}
+                </button>
+              </div>
+            )}
         </div>
       )}
     </div>

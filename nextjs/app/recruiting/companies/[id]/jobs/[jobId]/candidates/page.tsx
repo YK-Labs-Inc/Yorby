@@ -17,7 +17,7 @@ export default async function CandidatesPage({
   const resolvedSearchParams = await searchParams;
   const { candidateId, stageIds } = resolvedSearchParams as {
     candidateId?: string;
-    stageIds?: string[];
+    stageIds?: string;
   };
   const isPremium = await isCompanyPremium(companyId);
   return (
@@ -26,7 +26,7 @@ export default async function CandidatesPage({
       jobId={jobId}
       isPremium={isPremium}
       candidateId={candidateId}
-      stageIds={stageIds}
+      stageIds={stageIds?.split(",")}
     />
   );
 }
