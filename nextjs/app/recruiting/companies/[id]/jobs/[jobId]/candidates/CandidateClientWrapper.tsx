@@ -63,7 +63,6 @@ export default function CandidateClientWrapper({
     companyId && jobId ? ["candidates", companyId, jobId, stageIds] : null,
     candidatesFetcher
   );
-  console.log("hey candidates", candidates);
 
   const effectiveCandidateId =
     candidateId ||

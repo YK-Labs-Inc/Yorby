@@ -112,7 +112,7 @@ export default function CandidatesList({
         setHasMore(false);
       }
     } catch (error) {
-      console.error("Error loading more candidates:", error);
+      // Error loading more candidates
     } finally {
       setIsLoadingMore(false);
     }
