@@ -104,6 +104,7 @@ Every company starts with these 7 default stages:
 - **Enhanced Candidate List**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidatesList.tsx`
   - Updated to display candidate stages with color-coded badges
   - Real-time stage tracking integration
+  - Integrated candidate status filtering with URL state persistence
 
 - **Client Wrapper Component**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateClientWrapper.tsx`
   - SWR-based data fetching for candidates, stages, and counts
@@ -120,10 +121,17 @@ Every company starts with these 7 default stages:
   - Integrated candidate status component
   - Real-time stage change handling
 
+- **Candidate Status Filter Component**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateStatusFilter.tsx`
+  - Multi-select dropdown filter for viewing candidates by application stages
+  - Real-time stage data fetching with SWR integration
+  - URL state management for filter persistence
+  - Interactive UI with color-coded stage indicators and selection counts
+
 - **Updated Server Actions**: `app/recruiting/companies/[id]/jobs/[jobId]/candidates/actions.ts`
   - `updateCandidateStage()`: Update individual candidate stage assignments
   - `getCompanyStages()`: Fetch stages for dropdown population
   - Enhanced candidate data fetching with stage information
+  - Added `stageIds` filtering parameter for server-side candidate filtering
 
 ### Features Implemented
 - **Visual Interface**: Clean card-based UI with color indicators and drag handles
@@ -131,6 +139,7 @@ Every company starts with these 7 default stages:
 - **Drag & Drop**: Visual reordering with immediate feedback
 - **Smart Deletion**: Automatic candidate reassignment when deleting stages
 - **Interactive Stage Changes**: Dropdown interface for instant candidate stage updates
+- **Candidate Status Filtering**: Multi-select dropdown filter with "All stages" option, individual stage selection, and URL state persistence
 - **Optimistic Updates**: Immediate UI feedback with error recovery for stage changes
 - **Form Validation**: Required field validation and error handling
 - **Internationalization**: Full i18n support via `next-intl`
@@ -143,6 +152,9 @@ Every company starts with these 7 default stages:
 - **Translation File**: `messages/en/apply.json`
   - Added status-related translations for stage display
   - Includes "noStage" fallback for candidates without assigned stages
+  - New filter-specific translations section `filters`:
+    - `allStages`, `filterByStage`, `clear`, `selectAll`
+    - `stagesSelected`, `selectedCount` for multi-selection display
   - Consistent messaging across the candidate pipeline interface
 
 ## Future Considerations (Not in Scope)
@@ -155,11 +167,13 @@ Every company starts with these 7 default stages:
 ## Usage Patterns
 - **Stage Management**: Companies can add/remove/reorder stages through visual drag-and-drop interface
 - **Individual Candidate Movement**: Recruiters can move candidates between stages via dropdown interface
+- **Candidate Filtering**: Multi-select filter to view candidates by specific stages or view all candidates
 - **Real-time Updates**: Stage changes reflect immediately across the application with SWR
 - **Visual Customization**: Stage names and colors can be customized per company needs
 - **Ordered Pipeline**: Order index allows for proper stage progression display in candidate views
 - **Context Information**: Description field provides context for each stage
 - **Candidate Status Tracking**: Visual badges show current candidate stage throughout the recruiting interface
+- **Filter State Persistence**: Filter selections persist in URL parameters for shareable filtered views
 
 ## Key Design Decisions
 - **Simplified approach**: No stage categories (initial/in_progress/final) - just names

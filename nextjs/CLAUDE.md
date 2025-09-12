@@ -194,6 +194,7 @@ Key patterns:
 - `/api/mockInterviews/*` - Interview processing and analysis
 - `/api/livekit/*` - LiveKit integration for real-time voice interviews
 - `/api/recruiting/*` - Company recruiting operations
+- Enhanced candidate server actions with stage filtering support (`stageIds` parameter)
 - `/api/webhooks/*` - External service integrations (Stripe, Mux, LiveKit)
 
 ### Interview Flow Architecture
@@ -390,7 +391,8 @@ The ATS system provides companies with configurable candidate pipeline managemen
 - **Stage Manager Component**: `/app/recruiting/companies/[id]/stages/CompanyApplicationStagesManager.tsx`
 - **Server Actions**: `/app/recruiting/companies/[id]/stages/actions.ts`
 - **Candidate Status Component**: `/app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateStatus.tsx`
-- **Enhanced Candidate List**: Updated with real-time status tracking and dropdown selection
+- **Candidate Status Filter Component**: `/app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateStatusFilter.tsx`
+- **Enhanced Candidate List**: Updated with real-time status tracking, dropdown selection, and stage filtering
 
 **Core Features:**
 1. **Default Stage Creation**: New companies get 7 default stages (Applied, Screening, Interviewed, Reviewing, Offered, Rejected, Hired)
@@ -399,6 +401,7 @@ The ATS system provides companies with configurable candidate pipeline managemen
 4. **Smart Deletion**: When deleting stages with candidates, automatic reassignment to a safe stage
 5. **Color Coding**: Custom colors for visual pipeline differentiation
 6. **Candidate Status Tracking**: Dropdown interface in candidate views for instant status updates
+7. **Candidate Filtering**: Multi-select dropdown filter to view candidates by specific application stages with URL state persistence
 
 **Technical Patterns:**
 - **SWR Data Fetching**: Real-time candidate counts and stage data
