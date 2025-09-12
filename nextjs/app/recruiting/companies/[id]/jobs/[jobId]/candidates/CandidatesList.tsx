@@ -15,7 +15,7 @@ import { CandidateStatusFilter } from "./CandidateStatusFilter";
 import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidatesListProps {
-  initialCandidates: Candidate[];
+  candidates: Candidate[];
   companyId: string;
   jobId: string;
   selectedCandidateId?: string;
@@ -25,10 +25,11 @@ interface CandidatesListProps {
   loadingError?: any;
   onRetry?: () => void;
   selectCandidate?: (candidateId: string) => void;
+  stageIds: string[];
 }
 
 export default function CandidatesList({
-  initialCandidates,
+  candidates,
   companyId,
   jobId,
   selectedCandidateId,
@@ -38,14 +39,14 @@ export default function CandidatesList({
   loadingError,
   onRetry,
   selectCandidate,
+  stageIds,
 }: CandidatesListProps) {
   const t = useTranslations("apply.recruiting.candidates.list");
-  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(
-    initialCandidates.length === FREE_TIER_INTERVIEW_COUNT
+    candidates.length === FREE_TIER_INTERVIEW_COUNT
   );
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -88,22 +89,6 @@ export default function CandidatesList({
     [router, searchParams]
   );
 
-  const handleStageChange = useCallback(
-    (
-      candidateId: string,
-      newStage: Tables<"company_application_stages"> | null
-    ) => {
-      setCandidates((prev) =>
-        prev.map((candidate) =>
-          candidate.id === candidateId
-            ? { ...candidate, currentStage: newStage }
-            : candidate
-        )
-      );
-    },
-    []
-  );
-
   const loadMoreCandidates = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
 
@@ -126,10 +111,8 @@ export default function CandidatesList({
       if (moreCandidates.length < 10) {
         setHasMore(false);
       }
-
-      setCandidates((prev) => [...prev, ...moreCandidates]);
     } catch (error) {
-      console.error("Error loading more candidates:", error);
+      // Error loading more candidates
     } finally {
       setIsLoadingMore(false);
     }
@@ -143,10 +126,6 @@ export default function CandidatesList({
     openUpgradeDialog,
     selectedStageIds,
   ]);
-
-  useEffect(() => {
-    setCandidates(initialCandidates);
-  }, [initialCandidates]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -301,9 +280,7 @@ export default function CandidatesList({
                           candidateId={candidate.id}
                           companyId={companyId}
                           jobId={jobId}
-                          onStageChange={(newStage) =>
-                            handleStageChange(candidate.id, newStage)
-                          }
+                          stageIds={stageIds}
                         />
                       </div>
                     </div>

@@ -9,6 +9,7 @@ import useSWR, { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
 import { getCompanyStages, updateCandidateStage } from "./actions";
 import { Tables } from "@/utils/supabase/database.types";
+import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
 interface CandidateStatusProps {
   stage: Tables<"company_application_stages"> | null;
@@ -16,9 +17,7 @@ interface CandidateStatusProps {
   candidateId: string;
   companyId: string;
   jobId: string;
-  onStageChange?: (
-    newStage: Tables<"company_application_stages"> | null
-  ) => void;
+  stageIds: string[];
 }
 
 export function CandidateStatus({
@@ -26,12 +25,13 @@ export function CandidateStatus({
   className,
   candidateId,
   companyId,
-  onStageChange,
   jobId,
+  stageIds,
 }: CandidateStatusProps) {
   const t = useTranslations("apply.status");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { logError } = useAxiomLogging();
 
   // Fetch stages if interactive
   const { data: stages } = useSWR(["company-stages", companyId], () =>
@@ -67,17 +67,12 @@ export function CandidateStatus({
 
     setIsOpen(false);
 
-    // Optimistic update
-    onStageChange?.(newStage);
-
     try {
       await trigger({ stageId: newStage?.id || null });
-      mutate(["candidates", companyId, jobId]);
+      mutate(["candidates", companyId, jobId, stageIds]);
       mutate(["candidate-data", candidateId]);
     } catch (error) {
-      // Revert optimistic update on error
-      onStageChange?.(stage);
-      console.error("Failed to update stage:", error);
+      logError("Failed to update stage:", { error });
     }
   };
 

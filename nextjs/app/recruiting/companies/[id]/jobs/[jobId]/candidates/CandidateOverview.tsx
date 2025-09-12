@@ -15,6 +15,7 @@ interface CandidateOverviewProps {
   loadingCandidateData: boolean;
   hasError?: any;
   onRetry?: () => void;
+  stageIds: string[];
 }
 
 export default function CandidateOverview({
@@ -23,6 +24,7 @@ export default function CandidateOverview({
   loadingCandidateData,
   hasError,
   onRetry,
+  stageIds,
 }: CandidateOverviewProps) {
   const t = useTranslations("apply.recruiting.candidates.overview");
   if (hasError) {
@@ -65,7 +67,9 @@ export default function CandidateOverview({
       <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
         <CardContent className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">No candidate selected</p>
+            <p className="text-sm text-muted-foreground">
+              No candidate selected
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -75,7 +79,10 @@ export default function CandidateOverview({
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
       <CardContent className="flex-1 overflow-y-auto py-6 px-0">
-        <CandidateInfoSection candidateData={candidateData} />
+        <CandidateInfoSection
+          candidateData={candidateData}
+          stageIds={stageIds}
+        />
 
         <Separator className="my-6" />
 
