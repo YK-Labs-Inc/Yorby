@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, User } from "lucide-react";
+import { Search, User, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,8 @@ import { Candidate, fetchMoreCandidates } from "./actions";
 import { useTranslations } from "next-intl";
 import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
+import { CandidateStatus } from "./CandidateStatus";
+import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidatesListProps {
   initialCandidates: Candidate[];
@@ -18,6 +20,10 @@ interface CandidatesListProps {
   selectedCandidateId?: string;
   isPremium: boolean;
   companyCandidateCount: number;
+  isLoading: boolean;
+  loadingError?: any;
+  onRetry?: () => void;
+  selectCandidate?: (candidateId: string) => void;
 }
 
 export default function CandidatesList({
@@ -27,11 +33,15 @@ export default function CandidatesList({
   selectedCandidateId,
   isPremium,
   companyCandidateCount,
+  isLoading,
+  loadingError,
+  onRetry,
+  selectCandidate,
 }: CandidatesListProps) {
   const t = useTranslations("apply.recruiting.candidates.list");
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(
     initialCandidates.length === FREE_TIER_INTERVIEW_COUNT
   );
@@ -45,14 +55,31 @@ export default function CandidatesList({
     const params = new URLSearchParams(searchParams);
     params.set("candidateId", candidateId);
     router.push(`?${params.toString()}`, { scroll: false });
+    selectCandidate?.(candidateId);
   };
 
   const openUpgradeDialog = useCallback(() => {
     setShowUpgradeDialog(true);
   }, []);
 
+  const handleStageChange = useCallback(
+    (
+      candidateId: string,
+      newStage: Tables<"company_application_stages"> | null
+    ) => {
+      setCandidates((prev) =>
+        prev.map((candidate) =>
+          candidate.id === candidateId
+            ? { ...candidate, currentStage: newStage }
+            : candidate
+        )
+      );
+    },
+    []
+  );
+
   const loadMoreCandidates = useCallback(async () => {
-    if (isLoading || !hasMore) return;
+    if (isLoadingMore || !hasMore) return;
 
     // Check free tier limit
     if (!isPremium && candidates.length >= FREE_TIER_INTERVIEW_COUNT) {
@@ -60,7 +87,7 @@ export default function CandidatesList({
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingMore(true);
     try {
       const moreCandidates = await fetchMoreCandidates(
         companyId,
@@ -76,17 +103,21 @@ export default function CandidatesList({
     } catch (error) {
       console.error("Error loading more candidates:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingMore(false);
     }
   }, [
     candidates.length,
     companyId,
     jobId,
     hasMore,
-    isLoading,
+    isLoadingMore,
     isPremium,
     openUpgradeDialog,
   ]);
+
+  useEffect(() => {
+    setCandidates(initialCandidates);
+  }, [initialCandidates]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -103,7 +134,7 @@ export default function CandidatesList({
         if (
           entries[0].isIntersecting &&
           hasMore &&
-          !isLoading &&
+          !isLoadingMore &&
           shouldObserve
         ) {
           loadMoreCandidates();
@@ -121,7 +152,13 @@ export default function CandidatesList({
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreCandidates, hasMore, isLoading, isPremium, candidates.length]);
+  }, [
+    loadMoreCandidates,
+    hasMore,
+    isLoadingMore,
+    isPremium,
+    candidates.length,
+  ]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString).toLocaleDateString("en-US", {
@@ -163,7 +200,28 @@ export default function CandidatesList({
         </CardHeader>
         <CardContent className="p-0 flex-1 min-h-0">
           <div className="h-full overflow-y-auto">
-            {filteredCandidates.length === 0 ? (
+            {loadingError ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <AlertCircle className="h-8 w-8 text-red-500 mb-4" />
+                <h3 className="text-sm font-medium mb-2">{t("errorTitle")}</h3>
+                <p className="text-xs text-muted-foreground text-center mb-4">
+                  {t("errorMessage")}
+                </p>
+                {onRetry && (
+                  <button
+                    onClick={onRetry}
+                    className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    {t("retry")}
+                  </button>
+                )}
+              </div>
+            ) : isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+              </div>
+            ) : filteredCandidates.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
                 <User className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-sm font-medium mb-2">
@@ -200,13 +258,24 @@ export default function CandidatesList({
                       <p className="text-xs text-muted-foreground truncate">
                         {candidate.candidateEmail}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatDate(candidate.applied_at)}
-                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(candidate.applied_at)}
+                        </p>
+                        <CandidateStatus
+                          stage={candidate.currentStage}
+                          candidateId={candidate.id}
+                          companyId={companyId}
+                          jobId={jobId}
+                          onStageChange={(newStage) =>
+                            handleStageChange(candidate.id, newStage)
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
-                {isLoading && (
+                {isLoadingMore && (
                   <div className="p-3 text-center text-sm text-muted-foreground">
                     {t("loadingMore")}
                   </div>

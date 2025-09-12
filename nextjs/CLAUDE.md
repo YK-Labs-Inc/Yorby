@@ -20,7 +20,12 @@ An AI-powered recruitment platform that helps businesses scan, assess, and inter
 
 **Technical Implementation:**
 - **Company Management**: Organizations with team member roles (owner, admin, recruiter, viewer)
-- **Candidate Pipeline**: Track applicants through stages (applied → screening → interviewed → reviewing → offered/rejected)
+- **Application Tracking System (ATS)**: Configurable candidate pipeline stages with:
+  - **Custom Stage Management**: Companies can create, edit, delete, and reorder application stages
+  - **Default Stages**: Every company starts with 7 default stages (Applied, Screening, Interviewed, Reviewing, Offered, Rejected, Hired)
+  - **Drag-and-Drop Interface**: Visual stage reordering with real-time candidate count display
+  - **Candidate Status Tracking**: Real-time status updates with stage progression tracking
+  - **Smart Deletion**: Automatic candidate reassignment when deleting stages with existing candidates
 - **AI Interview Analysis**: Comprehensive performance analysis including:
   - Hiring verdict (Advance/Reject/Borderline) with match score
   - Question-by-question breakdown with quality scores
@@ -47,7 +52,8 @@ A candidate-facing platform for AI-powered interview preparation:
 **Database Schema**:
 - `companies`: Organization profiles with slugs
 - `company_members`: User-company relationships with role-based access
-- `company_job_candidates`: Candidate applications and status tracking
+- `company_application_stages`: Configurable pipeline stages for each company with ordering, colors, and candidate counts
+- `company_job_candidates`: Candidate applications and status tracking with stage assignments
 - `candidate_application_files`: Uploaded documents linked to applications
 - `custom_job_mock_interviews`: Extended with `candidate_id` for non-authenticated interviews
 - `recruiter_interview_analysis`: Comprehensive AI analysis results
@@ -57,7 +63,8 @@ A candidate-facing platform for AI-powered interview preparation:
 - `/recruiting`: Main dashboard for company recruiters
 - `/recruiting/companies/[id]/jobs/[jobId]`: Job detail page with navigation to questions and candidates
 - `/recruiting/companies/[id]/jobs/[jobId]/questions`: Manage interview questions with AI assistance
-- `/recruiting/companies/[id]/jobs/[jobId]/candidates`: View and analyze candidate applications
+- `/recruiting/companies/[id]/jobs/[jobId]/candidates`: Enhanced candidate management with real-time stage tracking and status updates
+- `/recruiting/companies/[id]/stages`: Application stage management interface with drag-and-drop reordering
 - `/apply/[companyId]/[jobId]`: Public application page for candidates
 
 **Interview Analysis Flow**:
@@ -133,7 +140,12 @@ The application uses a complex relational database with these main entities:
 **Business Recruiting (B2B):**
 - **Companies**: Organizations that can post jobs and interview candidates
 - **Company Members**: Team members with role-based access (owner, admin, recruiter, viewer)
-- **Company Job Candidates**: Candidate applications and interview tracking through the pipeline
+- **Application Tracking System**: Configurable candidate pipeline with custom stages:
+  - **Company Application Stages**: Customizable stages with colors, ordering, and candidate counts
+  - **Default Pipeline**: Applied → Screening → Interviewed → Reviewing → Offered/Rejected/Hired
+  - **Stage Management**: Full CRUD operations with drag-and-drop reordering
+  - **Candidate Status Tracking**: Real-time status updates with dropdown selection interface
+- **Company Job Candidates**: Candidate applications and interview tracking through the configurable pipeline
 - **Recruiter Interview Analysis**: AI-generated analysis with structured insights:
   - Main analysis with verdict and match score (strong/median/weak performer)
   - Question-level breakdowns with quality scores
@@ -166,7 +178,8 @@ Key patterns:
 - `/recruiting` - Main dashboard for company recruiters
 - `/recruiting/companies/[id]/jobs/[jobId]` - Job detail page with navigation to questions and candidates
 - `/recruiting/companies/[id]/jobs/[jobId]/questions` - Manage interview questions with AI assistance
-- `/recruiting/companies/[id]/jobs/[jobId]/candidates` - View and analyze candidate applications
+- `/recruiting/companies/[id]/jobs/[jobId]/candidates` - Enhanced candidate management with real-time stage tracking and status updates
+- `/recruiting/companies/[id]/stages` - Application stage management interface with drag-and-drop reordering
 - `/dashboard/company` - Company management and onboarding
 
 **Interview Preparation (B2C) Routes**:
@@ -326,8 +339,15 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 4. Support both authenticated and non-authenticated candidate flows
 5. Automatic AI analysis generation after interview completion
 6. File uploads handled through `candidate_application_files` table
-7. Real-time status tracking through candidate pipeline
-8. Interview analysis stored in structured database tables
+7. **Application Tracking System (ATS)**:
+   - Configurable pipeline stages with custom colors and ordering
+   - Drag-and-drop stage reordering with visual feedback
+   - Real-time candidate count display using SWR
+   - Smart deletion handling with candidate reassignment
+   - Stage management interface at `/recruiting/companies/[id]/stages`
+   - Candidate status dropdown with instant updates
+8. Real-time status tracking through customizable candidate pipeline
+9. Interview analysis stored in structured database tables
 
 **Interview Preparation Features**:
 
@@ -352,6 +372,46 @@ The application uses Axiom for structured logging via the `next-axiom` package:
 3. Track upload progress and provide user feedback
 4. Support both video recordings and audio file uploads
 5. Ensure proper cleanup of Mux assets when deleted
+
+### Application Tracking System (ATS) Implementation
+
+The ATS system provides companies with configurable candidate pipeline management:
+
+**Database Schema:**
+- **`company_application_stages`**: Custom pipeline stages with:
+  - `name`: Stage display name
+  - `color`: Hex color for visual identification
+  - `order_index`: Numeric ordering (0-based)
+  - `company_id`: Links stages to specific companies
+  - `created_at`/`updated_at`: Timestamp tracking
+
+**Key Implementation Files:**
+- **Stage Management Page**: `/app/recruiting/companies/[id]/stages/page.tsx`
+- **Stage Manager Component**: `/app/recruiting/companies/[id]/stages/CompanyApplicationStagesManager.tsx`
+- **Server Actions**: `/app/recruiting/companies/[id]/stages/actions.ts`
+- **Candidate Status Component**: `/app/recruiting/companies/[id]/jobs/[jobId]/candidates/CandidateStatus.tsx`
+- **Enhanced Candidate List**: Updated with real-time status tracking and dropdown selection
+
+**Core Features:**
+1. **Default Stage Creation**: New companies get 7 default stages (Applied, Screening, Interviewed, Reviewing, Offered, Rejected, Hired)
+2. **Visual Stage Management**: Drag-and-drop reordering with immediate visual feedback
+3. **Real-time Updates**: SWR integration for live candidate counts and status changes
+4. **Smart Deletion**: When deleting stages with candidates, automatic reassignment to a safe stage
+5. **Color Coding**: Custom colors for visual pipeline differentiation
+6. **Candidate Status Tracking**: Dropdown interface in candidate views for instant status updates
+
+**Technical Patterns:**
+- **SWR Data Fetching**: Real-time candidate counts and stage data
+- **Optimistic Updates**: Instant UI feedback with error recovery
+- **Role-based Access**: Company membership validation for all stage operations
+- **Form Validation**: Required field validation with shadcn/ui components
+- **Error Handling**: Comprehensive error logging with Axiom
+- **Internationalization**: Full i18n support via next-intl
+
+**Migration Integration:**
+- Database migration: `/supabase/migrations/20250910160000_add_application_tracking_system.sql`
+- Includes table creation, RLS policies, triggers, and default data seeding
+- Comprehensive schema with proper indexing and foreign key relationships
 
 ### Data Fetching Guidelines
 
