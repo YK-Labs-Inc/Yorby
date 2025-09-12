@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/utils/auth/server";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 const log = new Logger().with({ module: "actions/companies" });
 
@@ -72,6 +73,19 @@ export async function createCompany(
     log.info("Company created successfully", {
       userId: user.id,
     });
+    
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "company_created",
+      args: {
+        companyId: company.id,
+        companyName: name,
+        industry,
+        companySize: company_size,
+        website: website || null,
+      },
+    });
+    
     companyId = company.id;
   } catch (error) {
     log.error("Unexpected error creating company", { error });
@@ -191,6 +205,18 @@ export async function createJob(
       userId: user.id,
       companyId: company_id,
     });
+    
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_created",
+      args: {
+        jobId: job.id,
+        jobTitle: job_title,
+        companyId: company_id,
+        companyName: company.name,
+      },
+    });
+    
     jobId = job.id;
   } catch (error) {
     createJobLog.error("Unexpected error creating job", { error });
@@ -295,6 +321,16 @@ export async function updateJob(
       jobId,
     });
 
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_updated",
+      args: {
+        jobId,
+        jobTitle: job_title,
+        companyId: company_id,
+      },
+    });
+
     // Revalidate the company jobs page
     revalidatePath(`/recruiting/companies/${company_id}/jobs`);
 
@@ -383,6 +419,15 @@ export async function deleteJob(
       userId: user.id,
       companyId: company_id,
       jobId,
+    });
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_deleted",
+      args: {
+        jobId,
+        companyId: company_id,
+      },
     });
 
     // Revalidate the company jobs page
@@ -485,6 +530,18 @@ export async function updateCompany(
       companyId,
     });
 
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "company_updated",
+      args: {
+        companyId,
+        companyName: name,
+        industry,
+        companySize: company_size,
+        website: website || null,
+      },
+    });
+
     // Revalidate the recruiting page
     revalidatePath("/recruiting");
 
@@ -569,6 +626,14 @@ export async function deleteCompany(
     deleteCompanyLog.info("Company deleted successfully", {
       userId: user.id,
       companyId,
+    });
+
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "company_deleted",
+      args: {
+        companyId,
+      },
     });
 
     // Revalidate the recruiting page

@@ -8,6 +8,8 @@ import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { Logger } from "next-axiom";
 import ApplyButton from "./ApplyButton";
 import { Metadata } from "next";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { getServerUser } from "@/utils/auth/server";
 
 export async function generateMetadata({
   params,
@@ -86,6 +88,7 @@ export default async function ApplyPage({
     jobId,
   });
   const t = await getTranslations("apply");
+  const user = await getServerUser();
 
   // Fetch company data
   const { data: company, error: companyError } = await supabase
@@ -110,6 +113,20 @@ export default async function ApplyPage({
   if (jobError || !job) {
     logger.error("Job not found", { jobId, error: jobError });
     notFound();
+  }
+
+  // Track job view event
+  if (user) {
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "job_listing_viewed",
+      args: {
+        jobId,
+        jobTitle: job.job_title,
+        companyId,
+        companyName: company.name,
+      },
+    });
   }
 
   return (

@@ -13,6 +13,7 @@ import { generateTextWithFallback } from "@/utils/ai/gemini";
 import { headers } from "next/headers";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 import { uploadFileToGemini } from "@/utils/ai/gemini";
+import { trackServerEvent } from "@/utils/tracking/serverUtils";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -129,213 +130,6 @@ Provide a concise but comprehensive summary that an interviewer can use to condu
     await logger.flush();
   }
 }
-
-export const createInterviewForCandidate = async ({
-  candidateId,
-  jobId,
-}: {
-  candidateId: string;
-  jobId: string;
-}) => {
-  const supabase = await createSupabaseServerClient();
-  const t = await getTranslations("apply.api.errors");
-  const logger = new Logger().with({
-    function: "createInterviewForCandidate",
-    candidateId,
-    jobId,
-  });
-
-  try {
-    // First, fetch the candidate's user_id from company_job_candidates table
-    const { data: candidate, error: candidateError } = await supabase
-      .from("company_job_candidates")
-      .select("candidate_user_id")
-      .eq("id", candidateId)
-      .single();
-
-    if (candidateError || !candidate) {
-      logger.error("Failed to fetch candidate", { error: candidateError });
-      throw new Error(t("candidateNotFound"));
-    }
-
-    if (!candidate.candidate_user_id) {
-      logger.error("Candidate has no user_id", { candidateId });
-      throw new Error(t("candidateNoUser"));
-    }
-
-    // Fetch the job details for context
-    const { data: jobDetails, error: jobError } = await supabase
-      .from("custom_jobs")
-      .select("job_title, job_description, company_name, company_description")
-      .eq("id", jobId)
-      .single();
-
-    if (jobError || !jobDetails) {
-      logger.error("Failed to fetch job details", { error: jobError });
-      throw new Error(t("fetchJobDetails"));
-    }
-
-    // Fetch the custom job questions for this job (now optional)
-    const { data: jobQuestions, error: questionError } = await supabase
-      .from("custom_job_questions")
-      .select("question")
-      .eq("custom_job_id", jobId);
-
-    if (questionError) {
-      logger.error("Failed to fetch job questions", { error: questionError });
-      throw new Error(t("fetchJobQuestions"));
-    }
-
-    // Generate candidate context from their application files
-    const candidateContext = await generateCandidateContext({
-      candidateId,
-    });
-
-    // Create the questions prompt (if any questions exist)
-    const questionsPrompt =
-      jobQuestions && jobQuestions.length > 0
-        ? jobQuestions
-            .map((q, index) => `Question ${index + 1}: ${q.question}`)
-            .join("\n")
-        : null;
-
-    // Create the interview prompt with job context, optional questions, and candidate context
-    const interviewPrompt = `
-You are an experienced job interviewer conducting a structured behavioral interview for a ${jobDetails.job_title} position at ${jobDetails.company_name}. 
-Your goal is to accurately assess the candidate's qualifications, experience, and fit for this specific role through professional questioning and active listening.
-This interview should last NO MORE THAN 30 MINUTES. It is okay for it to be shorter. Do not force the interview to last the entire 30 minutes. The interview
-should only last as long as it takes to assess the candidate's qualifications for this specific role.
-
-JOB CONTEXT:
-Position: ${jobDetails.job_title}
-Company: ${jobDetails.company_name}
-${jobDetails.company_description ? `About the Company: ${jobDetails.company_description}` : ""}
-
-Job Description:
-${jobDetails.job_description}
-
-Use this job description to:
-- Assess the candidate's relevant skills and experience for THIS specific role
-- Ask targeted questions about required competencies mentioned in the job description
-- Evaluate cultural fit based on company values and work environment
-- Probe for evidence of success in similar responsibilities
-- Identify any skill gaps that need to be addressed
-
-${
-  candidateContext
-    ? `CANDIDATE BACKGROUND INFORMATION:
-Based on the candidate's application materials, here's what you should know:
-${candidateContext}
-
-Use this information to:
-- Ask more targeted follow-up questions
-- Probe deeper into specific experiences mentioned in their materials
-- Verify claims made in their resume/CV
-- Explore gaps or areas that need clarification
-- Compare their background against the job requirements
-
-`
-    : ""
-}INTERVIEWER PERSONA:
-- You are emotionally neutral and maintain professional boundaries throughout
-- You actively listen but do NOT offer excessive praise or validation
-- You ask clarifying follow-up questions when answers are vague, incomplete, or don't fully address the question
-- You probe for specific examples when candidates give generic responses
-- You maintain control of the interview pace and redirect if candidates go off-topic
-
-INTERVIEW CONDUCT RULES:
-1. Start with a brief, professional introduction: state your name (use a common name like Michael, Jennifer, David, or Sarah) and your role as the hiring manager or team lead.
-
-2. Begin with "Tell me about yourself" - listen for a 2-3 minute response, then transition to your prepared questions.${candidateContext ? " Compare their verbal introduction with what you know from their application materials." : ""}
-
-3. Conduct a comprehensive assessment:
-   - Use your expertise to design REALISTIC interview questions that would actually be asked for this type of position
-   - Base your questions on the job description, required competencies, and industry best practices
-   - Ask a mix of behavioral, technical, and situational questions as appropriate for the role
-   - Focus on questions that reveal past performance, problem-solving abilities, and future potential
-   - If specific questions have been provided below, incorporate them into your interview, but don't limit yourself to only those
-   - However, if specific questions have been provided below, you MUST ask ALL of them in your interview. This is MANDATORY.
-   - Remember: This is a 30-minute interview. Manage your time to cover all important areas. It is okay for it to be shorter. Do not force the interview to last the entire 30 minutes.
-   
-For each question (whether provided or generated):
-   - Ask clearly and wait for the complete response
-   - If the answer is vague or lacks specifics, ask follow-ups like:
-     * "Can you give me a specific example?"
-     * "What was your exact role in that situation?"
-     * "What was the measurable outcome?"
-     * "How did you handle any challenges that arose?"
-   - Don't accept surface-level answers - dig deeper if necessary. 
-
-4. Maintain realistic interview dynamics:
-   - If an answer is concerning or unclear, your tone should reflect mild concern: "I see. Can you elaborate on..."
-   - Never say things like "Great answer!" or "Excellent!" - instead use neutral acknowledgments like "Thank you" or "Understood"
-
-5. Red flags to probe:
-   - Answers that only use "we" instead of "I" - ask "What was YOUR specific contribution?"
-   - Vague timelines or results - ask for specific dates, metrics, or outcomes
-   - Avoiding direct answers - redirect back to the original question
-   - Over-polished or memorized-sounding responses - ask unexpected follow-ups
-
-INTERVIEW APPROACH:
-Your primary goal is to conduct a thorough assessment of the candidate's qualifications for this specific role.
-- Analyze the job description to identify key competencies and requirements
-- Design realistic interview questions that a real interviewer would ask for this position
-- Use behavioral, technical, and situational questions as appropriate
-- Aim for depth over breadth - better to explore fewer topics thoroughly than many superficially
-
-${
-  questionsPrompt
-    ? `SUGGESTED QUESTIONS TO INCORPORATE:
-${questionsPrompt}
-
-These questions should be woven naturally into your interview, but don't let them limit your assessment. Feel free to ask additional questions based on the job requirements and the candidate's responses.`
-    : ""
-}
-
-TIME MANAGEMENT:
-- This interview MUST NOT exceed 30 minutes
-- Pace your questions to allow thorough responses while staying within the time limit
-- If approaching 30 minutes, politely wrap up the current question and conclude
-
-CONCLUSION:
-When you have gathered enough information to assess the candidate's qualifications for this role, or when approaching the 30-minute mark, conclude the interview professionally. Thank the candidate for their time and inform them that the interview has ended.`;
-
-    // Create the mock interview entry
-    const { data: mockInterview, error: interviewError } = await supabase
-      .from("custom_job_mock_interviews")
-      .insert({
-        custom_job_id: jobId,
-        candidate_id: candidateId,
-        user_id: candidate.candidate_user_id,
-        interview_prompt: interviewPrompt,
-        status: "in_progress",
-      })
-      .select("id")
-      .single();
-
-    if (interviewError || !mockInterview) {
-      logger.error("Failed to create mock interview", {
-        error: interviewError,
-      });
-      throw new Error(t("createMockInterview"));
-    }
-
-    logger.info("Successfully created mock interview", {
-      interviewId: mockInterview.id,
-      candidateId,
-      jobId,
-      userId: candidate.candidate_user_id,
-      hasContext: !!candidateContext,
-      questionsCount: jobQuestions?.length || 0,
-      hasJobDescription: !!jobDetails.job_description,
-    });
-
-    return mockInterview.id;
-  } catch (error) {
-    logger.error("Error in createInterviewForCandidate", { error });
-    throw error;
-  }
-};
 
 export async function checkApplicationStatus(
   companyId: string,
@@ -558,6 +352,14 @@ export const submitApplication = async (
     }
 
     if (data) {
+      await trackServerEvent({
+        userId: data,
+        eventName: "existing_user_applied",
+        args: {
+          jobId,
+          companyId,
+        },
+      });
       return { error: t("appliedWithEmailOfExistingUser") };
     }
 
@@ -754,6 +556,23 @@ export const submitApplication = async (
       localFileCount: uploadedLocalFileIds.length,
       additionalInfoCount: additionalInfo.length,
     });
+
+    // Track application submission
+    await trackServerEvent({
+      userId: user.id,
+      eventName: "application_submitted",
+      args: {
+        jobId,
+        companyId,
+        candidateId: candidate.id,
+        filesCount: allFileIds.length,
+        additionalInfoCount: additionalInfo.filter((info) => info.trim())
+          .length,
+        isAnonymous,
+        hasEmail: !!email,
+      },
+    });
+
     interviewId = await createInterviewsForJobAndReturnFirstInterviewId({
       candidateId: candidate.id,
       jobId,
