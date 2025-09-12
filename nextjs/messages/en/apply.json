@@ -423,6 +423,16 @@
         "errorMessage": "We encountered an error while loading the candidates. Please try again.",
         "retry": "Retry"
       },
+      "filters": {
+        "allStages": "All stages",
+        "filterByStage": "Filter by stage",
+        "clear": "Clear",
+        "selectAll": "Select all",
+        "stagesSelected": "{count} stages",
+        "oneStage": "{name}",
+        "allSelected": "All {count} stages",
+        "selectedCount": "{selected} of {total} selected"
+      },
       "info": {
         "contactInfo": "Contact Information",
         "applicationFiles": "Application Files",
@@ -452,7 +462,12 @@
         "videoReady": "Video ready but playback ID not available",
         "unknownVideoStatus": "Unknown video status",
         "codingSubmission": "User's Submission",
-        "codingQuestion": "Coding Question"
+        "codingQuestion": "Coding Question",
+        "error": {
+          "title": "Error loading candidate",
+          "description": "Something went wrong while loading candidate data. Please try again.",
+          "retry": "Retry"
+        }
       },
       "emptyState": {
         "title": "Select a candidate",

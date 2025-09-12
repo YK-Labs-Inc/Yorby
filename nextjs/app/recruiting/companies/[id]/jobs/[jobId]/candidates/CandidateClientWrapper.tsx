@@ -1,6 +1,8 @@
 "use client";
 
 import useSWR, { mutate } from "swr";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import {
   Candidate,
   CandidateData,
@@ -13,17 +15,17 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import CandidatesList from "./CandidatesList";
-import { Suspense } from "react";
 import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 import CandidateOverview from "./CandidateOverview";
 import EmptyState from "./EmptyState";
 
-const candidatesFetcher = async ([_, companyId, jobId]: [
+const candidatesFetcher = async ([_, companyId, jobId, stageIds]: [
   string,
   string,
   string,
+  string[] | undefined,
 ]) => {
-  return await getInitialCandidates(companyId, jobId, 10);
+  return await getInitialCandidates(companyId, jobId, 10, stageIds);
 };
 
 const candidateDataFetcher = async ([_, candidateId]: [string, string]) => {
@@ -43,21 +45,23 @@ export default function CandidateClientWrapper({
   companyId,
   jobId,
   candidateId,
+  stageIds,
 }: {
   companyId: string;
   jobId: string;
   candidateId?: string;
   isPremium: boolean;
+  stageIds?: string[];
 }) {
   const t = useTranslations("apply.recruiting.candidates.page");
-
+  console.log("hey stageIds", stageIds);
   // Fetch candidates list when no specific candidate is selected
   const {
     data: candidates = [],
     error: candidatesError,
     isLoading: candidatesLoading,
   } = useSWR<Candidate[]>(
-    companyId && jobId ? ["candidates", companyId, jobId] : null,
+    companyId && jobId ? ["candidates", companyId, jobId, stageIds] : null,
     candidatesFetcher
   );
 
@@ -76,39 +80,26 @@ export default function CandidateClientWrapper({
   );
 
   // Fetch company candidate count
-  const {
-    data: candidateCount = 0,
-    error: candidateCountError,
-    isLoading: candidateCountLoading,
-  } = useSWR<number>(
+  const { data: candidateCount = 0 } = useSWR<number>(
     companyId ? ["candidate-count", companyId] : null,
     candidateCountFetcher
   );
 
   // Fetch job interview count
-  const {
-    data: interviewCount = 0,
-    error: interviewCountError,
-    isLoading: interviewCountLoading,
-  } = useSWR<number>(
+  const { data: interviewCount = 0 } = useSWR<number>(
     jobId ? ["interview-count", jobId] : null,
     interviewCountFetcher
   );
 
-  const error =
-    candidatesError ||
-    candidateError ||
-    candidateCountError ||
-    interviewCountError;
-  const isLoading =
-    candidatesLoading ||
-    candidateLoading ||
-    candidateCountLoading ||
-    interviewCountLoading;
-
   const handleRetry = () => {
     if (companyId && jobId) {
-      mutate(["candidates", companyId, jobId]);
+      mutate(["candidates", companyId, jobId, stageIds]);
+    }
+  };
+
+  const handleCandidateRetry = () => {
+    if (effectiveCandidateId) {
+      mutate(["candidate-data", effectiveCandidateId]);
     }
   };
 
@@ -154,6 +145,8 @@ export default function CandidateClientWrapper({
                   candidateData={candidateData}
                   jobInterviewCount={interviewCount}
                   loadingCandidateData={candidateLoading}
+                  hasError={candidateError}
+                  onRetry={handleCandidateRetry}
                 />
               ) : (
                 <EmptyState />
