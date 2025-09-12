@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
 import { CandidateStatus } from "./CandidateStatus";
+import { CandidateStatusFilter } from "./CandidateStatusFilter";
 import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidatesListProps {
@@ -41,6 +42,7 @@ export default function CandidatesList({
   const t = useTranslations("apply.recruiting.candidates.list");
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStageIds, setSelectedStageIds] = useState<string[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(
     initialCandidates.length === FREE_TIER_INTERVIEW_COUNT
@@ -50,6 +52,14 @@ export default function CandidatesList({
   const lastCandidateRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Initialize filter state from URL parameters
+  useEffect(() => {
+    const stageIdsFromUrl = searchParams.get("stageIds");
+    if (stageIdsFromUrl) {
+      setSelectedStageIds(stageIdsFromUrl.split(","));
+    }
+  }, [searchParams]);
 
   const handleCandidateSelect = (candidateId: string) => {
     const params = new URLSearchParams(searchParams);
@@ -61,6 +71,22 @@ export default function CandidatesList({
   const openUpgradeDialog = useCallback(() => {
     setShowUpgradeDialog(true);
   }, []);
+
+  const handleFilterChange = useCallback(
+    (stageIds: string[]) => {
+      setSelectedStageIds(stageIds);
+
+      // Update URL parameters
+      const params = new URLSearchParams(searchParams);
+      if (stageIds.length === 0) {
+        params.delete("stageIds");
+      } else {
+        params.set("stageIds", stageIds.join(","));
+      }
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   const handleStageChange = useCallback(
     (
@@ -92,7 +118,9 @@ export default function CandidatesList({
       const moreCandidates = await fetchMoreCandidates(
         companyId,
         jobId,
-        candidates.length
+        candidates.length,
+        10,
+        selectedStageIds.length > 0 ? selectedStageIds : undefined
       );
 
       if (moreCandidates.length < 10) {
@@ -113,6 +141,7 @@ export default function CandidatesList({
     isLoadingMore,
     isPremium,
     openUpgradeDialog,
+    selectedStageIds,
   ]);
 
   useEffect(() => {
@@ -186,7 +215,7 @@ export default function CandidatesList({
           <CardTitle className="text-lg">
             {t("title", { count: candidates.length })}
           </CardTitle>
-          <div className="mt-3">
+          <div className="mt-3 space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -196,6 +225,11 @@ export default function CandidatesList({
                 className="pl-10"
               />
             </div>
+            <CandidateStatusFilter
+              companyId={companyId}
+              selectedStageIds={selectedStageIds}
+              onFilterChange={handleFilterChange}
+            />
           </div>
         </CardHeader>
         <CardContent className="p-0 flex-1 min-h-0">

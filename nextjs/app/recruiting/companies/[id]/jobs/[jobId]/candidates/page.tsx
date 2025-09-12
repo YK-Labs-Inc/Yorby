@@ -14,7 +14,11 @@ export default async function CandidatesPage({
   searchParams,
 }: PageProps) {
   const { id: companyId, jobId } = await params;
-  const { candidateId } = (await searchParams) as { candidateId?: string };
+  const resolvedSearchParams = await searchParams;
+  const { candidateId, stageIds } = resolvedSearchParams as {
+    candidateId?: string;
+    stageIds?: string[];
+  };
   const isPremium = await isCompanyPremium(companyId);
   return (
     <CandidateClientWrapper
@@ -22,6 +26,7 @@ export default async function CandidatesPage({
       jobId={jobId}
       isPremium={isPremium}
       candidateId={candidateId}
+      stageIds={stageIds}
     />
   );
 }

@@ -114,18 +114,20 @@ export const getInitialCandidates = cache(
   async (
     companyId: string,
     jobId: string,
-    limit: number = 10
+    limit: number = 10,
+    stageIds?: string[]
   ): Promise<Candidate[]> => {
     const log = new Logger().with({
       functionName: "getInitialCandidates",
       companyId,
       jobId,
       limit,
+      stageIds,
     });
     const supabase = await createSupabaseServerClient();
     const supabaseAdmin = await createAdminClient();
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("company_job_candidates")
       .select(
         `
@@ -134,7 +136,14 @@ export const getInitialCandidates = cache(
       `
       )
       .eq("custom_job_id", jobId)
-      .eq("company_id", companyId)
+      .eq("company_id", companyId);
+
+    // Apply stage filtering if stageIds are provided
+    if (stageIds && stageIds.length > 0) {
+      query = query.in("current_stage_id", stageIds);
+    }
+
+    const { data, error } = await query
       .order("applied_at", { ascending: false })
       .limit(limit);
 
@@ -513,7 +522,8 @@ export async function fetchMoreCandidates(
   companyId: string,
   jobId: string,
   offset: number,
-  limit: number = 10
+  limit: number = 10,
+  stageIds?: string[]
 ): Promise<Candidate[]> {
   const log = new Logger().with({
     functionName: "fetchMoreCandidates",
@@ -521,11 +531,12 @@ export async function fetchMoreCandidates(
     jobId,
     offset,
     limit,
+    stageIds,
   });
   const supabase = await createSupabaseServerClient();
   const supabaseAdmin = await createAdminClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("company_job_candidates")
     .select(
       `
@@ -534,7 +545,14 @@ export async function fetchMoreCandidates(
     `
     )
     .eq("custom_job_id", jobId)
-    .eq("company_id", companyId)
+    .eq("company_id", companyId);
+
+  // Apply stage filtering if stageIds are provided
+  if (stageIds && stageIds.length > 0) {
+    query = query.in("current_stage_id", stageIds);
+  }
+
+  const { data, error } = await query
     .order("applied_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
