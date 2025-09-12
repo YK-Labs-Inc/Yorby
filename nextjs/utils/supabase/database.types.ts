@@ -513,6 +513,7 @@ export type Database = {
       }
       company_job_candidates: {
         Row: {
+          ai_interview_completion_order: number | null
           applied_at: string
           candidate_user_id: string
           company_id: string
@@ -523,6 +524,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_interview_completion_order?: number | null
           applied_at?: string
           candidate_user_id: string
           company_id: string
@@ -533,6 +535,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_interview_completion_order?: number | null
           applied_at?: string
           candidate_user_id?: string
           company_id?: string

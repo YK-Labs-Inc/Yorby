@@ -55,7 +55,7 @@ export default function CandidateClientWrapper({
   stageIds?: string[];
 }) {
   const t = useTranslations("apply.recruiting.candidates.page");
-  
+
   // Use useSWRInfinite for proper pagination
   const {
     data: candidatesPages = [],
@@ -69,10 +69,10 @@ export default function CandidateClientWrapper({
     (pageIndex, previousPageData) => {
       // Stop fetching if we don't have the required params
       if (!companyId || !jobId) return null;
-      
+
       // Stop fetching if the previous page was empty (no more data)
       if (previousPageData && previousPageData.length === 0) return null;
-      
+
       // Generate key for this page
       return ["candidates", companyId, jobId, stageIds, pageIndex * 10];
     },
@@ -85,10 +85,13 @@ export default function CandidateClientWrapper({
 
   // Flatten the pages into a single array of candidates
   const candidates = candidatesPages.flat();
-  
+
   // Check if we have more data to load
   const isEmpty = candidatesPages?.[0]?.length === 0;
-  const isReachingEnd = isEmpty || (candidatesPages && candidatesPages[candidatesPages.length - 1]?.length < 10);
+  const isReachingEnd =
+    isEmpty ||
+    (candidatesPages &&
+      candidatesPages[candidatesPages.length - 1]?.length < 10);
   const hasMore = !isReachingEnd;
 
   const effectiveCandidateId =
@@ -153,8 +156,6 @@ export default function CandidateClientWrapper({
             companyId={companyId}
             jobId={jobId}
             selectedCandidateId={effectiveCandidateId || undefined}
-            isPremium={isPremium}
-            companyCandidateCount={candidateCount}
             isLoading={candidatesLoading}
             loadingError={candidatesError}
             onRetry={handleRetry}
@@ -176,6 +177,7 @@ export default function CandidateClientWrapper({
                   hasError={candidateError}
                   onRetry={handleCandidateRetry}
                   stageIds={stageIds}
+                  isPremium={isPremium}
                 />
               ) : (
                 <EmptyState />

@@ -17,6 +17,7 @@ import {
   Clock,
   Download,
   Eye,
+  Lock,
 } from "lucide-react";
 import type { InterviewAnalysis, CandidateData } from "./actions";
 import { useState, useRef } from "react";
@@ -31,15 +32,19 @@ import {
 import { RichTextDisplay } from "@/components/ui/rich-text-display";
 import { CodeEditor } from "@/components/ui/code-editor";
 import AggregatedHiringAnalysis from "./AggregatedHiringAnalysis";
+import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
+import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 
 interface InterviewAnalysisProps {
   candidateData?: CandidateData;
   jobInterviewCount: number;
+  isPremium: boolean;
 }
 
 export default function InterviewAnalysis({
   candidateData,
   jobInterviewCount,
+  isPremium,
 }: InterviewAnalysisProps) {
   const t = useTranslations("apply.recruiting.candidates.analysis");
   const tOverview = useTranslations("apply.recruiting.candidates.overview");
@@ -49,6 +54,7 @@ export default function InterviewAnalysis({
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
   const [selectedInterviewRound, setSelectedInterviewRound] = useState(0);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   // Extract data from candidateData if provided
@@ -59,6 +65,13 @@ export default function InterviewAnalysis({
   const hasMultipleRounds = interviewResults && interviewResults.length > 1;
   const aggregatedAnalysis = candidateData?.aggregatedAnalysis;
   const jobAlignmentDetails = candidateData?.jobAlignmentDetails;
+
+  // Check if AI analysis should be locked for free tier
+  const isLocked =
+    !isPremium &&
+    candidateData?.candidate?.aiInterviewCompletionOrder &&
+    candidateData.candidate.aiInterviewCompletionOrder >
+      FREE_TIER_INTERVIEW_COUNT;
 
   // Helper functions
   const formatDate = (dateString: string) => {
@@ -213,6 +226,53 @@ export default function InterviewAnalysis({
           {t("interviewNotCompleted.description")}
         </p>
       </div>
+    );
+  }
+
+  // Show locked state for free tier users beyond 50 AI interviews
+  if (isLocked) {
+    return (
+      <>
+        <Separator className="my-6" />
+        <div className="px-6">
+          <Card className="p-8">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="p-4 bg-muted rounded-full">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold">{t("locked.title")}</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                {t("locked.description", { limit: FREE_TIER_INTERVIEW_COUNT })}
+              </p>
+              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                <p>
+                  {t("locked.candidatePosition", {
+                    position:
+                      candidateData?.candidate?.aiInterviewCompletionOrder ?? 0,
+                    limit: FREE_TIER_INTERVIEW_COUNT,
+                  })}
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowUpgradeDialog(true)}
+                className="mt-4"
+                variant="default"
+              >
+                {t("locked.upgradeButton")}
+              </Button>
+            </div>
+          </Card>
+        </div>
+        <CandidateLimitUpgradeDialog
+          open={showUpgradeDialog}
+          onOpenChange={setShowUpgradeDialog}
+          companyId={candidateData?.candidate?.company_id || ""}
+          totalCandidates={
+            candidateData?.candidate?.aiInterviewCompletionOrder || 0
+          }
+          viewedCandidates={FREE_TIER_INTERVIEW_COUNT}
+        />
+      </>
     );
   }
 

@@ -16,6 +16,7 @@ interface CandidateOverviewProps {
   hasError?: any;
   onRetry?: () => void;
   stageIds: string[];
+  isPremium: boolean;
 }
 
 export default function CandidateOverview({
@@ -25,6 +26,7 @@ export default function CandidateOverview({
   hasError,
   onRetry,
   stageIds,
+  isPremium,
 }: CandidateOverviewProps) {
   const t = useTranslations("apply.recruiting.candidates.overview");
   if (hasError) {
@@ -91,6 +93,7 @@ export default function CandidateOverview({
         <InterviewAnalysis
           candidateData={candidateData}
           jobInterviewCount={jobInterviewCount}
+          isPremium={isPremium}
         />
       </CardContent>
     </Card>

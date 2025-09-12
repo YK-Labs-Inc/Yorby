@@ -605,6 +605,51 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
       return;
     }
 
+    // Set the AI interview completion order for free tier tracking
+    logger.info("Setting AI interview completion order", { candidateId });
+    
+    // Get the company ID for this candidate
+    const { data: candidateData } = await supabase
+      .from("company_job_candidates")
+      .select("company_id")
+      .eq("id", candidateId)
+      .single();
+
+    if (candidateData) {
+      // Get the current max order for this company
+      const { data: maxOrderData } = await supabase
+        .from("company_job_candidates")
+        .select("ai_interview_completion_order")
+        .eq("company_id", candidateData.company_id)
+        .not("ai_interview_completion_order", "is", null)
+        .order("ai_interview_completion_order", { ascending: false })
+        .limit(1)
+        .single();
+
+      const nextOrder = (maxOrderData?.ai_interview_completion_order || 0) + 1;
+
+      // Update the candidate with their completion order
+      const { error: updateError } = await supabase
+        .from("company_job_candidates")
+        .update({ ai_interview_completion_order: nextOrder })
+        .eq("id", candidateId);
+
+      if (updateError) {
+        logger.error("Failed to set AI interview completion order", {
+          candidateId,
+          error: updateError,
+          order: nextOrder,
+          companyId: candidateData.company_id,
+        });
+      } else {
+        logger.info("AI interview completion order set successfully", {
+          candidateId,
+          order: nextOrder,
+          companyId: candidateData.company_id,
+        });
+      }
+    }
+
     const processingTime = Date.now() - startTime;
     logger.info("Aggregated analysis complete", {
       candidateId,
