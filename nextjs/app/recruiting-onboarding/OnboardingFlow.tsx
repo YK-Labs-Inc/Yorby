@@ -4,21 +4,14 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { markOnboardingComplete } from "./actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 3;
 
-const STEPS = [
-  "problem",
-  "solution",
-  "howItWorks",
-  "benefits",
-  "comparison",
-] as const;
+const STEPS = ["freeATS", "howItWorks", "comparison"] as const;
 
 export default function OnboardingFlow() {
   const t = useTranslations("onboarding.recruitingOnboarding");
@@ -80,87 +73,9 @@ export default function OnboardingFlow() {
     }
   };
 
-  const progressPercentage = ((currentStep + 1) / TOTAL_STEPS) * 100;
-
   const renderStepContent = () => {
     switch (currentStepKey) {
-      case "problem":
-        return (
-          <div className="space-y-12 max-w-5xl mx-auto">
-            {/* Hero Section with better visual hierarchy */}
-            <div className="text-center space-y-6">
-              <div className="space-y-4">
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
-                  {t("steps.problem.headline")}
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-                  {t("steps.problem.subheadline")}
-                </p>
-              </div>
-            </div>
-
-            {/* Stats with improved visual design */}
-            <div className="grid md:grid-cols-3 gap-8">
-              {["applicantsPerRole", "screeningTime", "missedTalent"].map(
-                (stat, index) => (
-                  <motion.div
-                    key={stat}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="relative group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-                    <div className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300">
-                      <div className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
-                        {t(`steps.problem.stats.${stat}.number`)}
-                      </div>
-                      <div className="text-gray-600 font-medium">
-                        {t(`steps.problem.stats.${stat}.label`)}
-                      </div>
-                    </div>
-                  </motion.div>
-                )
-              )}
-            </div>
-
-            {/* Pain Points with cleaner design */}
-            <div className="space-y-8">
-              <h2 className="text-3xl font-bold text-center text-gray-900">
-                {t("steps.problem.title")}
-              </h2>
-              <div className="space-y-4">
-                {[1, 2, 3].map((num, index) => (
-                  <motion.div
-                    key={num}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group"
-                  >
-                    <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-gray-200 transition-all duration-300 hover:shadow-md">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-2 h-2 rounded-full bg-red-500 mt-2" />
-                        <div className="flex-grow">
-                          <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                            {t(`steps.problem.painPoints.point${num}.title`)}
-                          </h3>
-                          <p className="text-gray-600 leading-relaxed">
-                            {t(
-                              `steps.problem.painPoints.point${num}.description`
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case "solution":
+      case "freeATS":
         return (
           <div className="space-y-12 max-w-5xl mx-auto">
             {/* Hero Section */}
@@ -170,69 +85,121 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
-                  {t("steps.solution.title")}
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+                  {t("steps.freeATS.title")}
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-                  {t("steps.solution.subtitle")}
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  {t("steps.freeATS.subtitle")}
                 </p>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="pt-8"
-              >
-                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {t("steps.solution.headline")}
-                </h2>
-                <p className="text-lg md:text-xl text-gray-600 mt-3 max-w-xl mx-auto">
-                  {t("steps.solution.subheadline")}
-                </p>
-              </motion.div>
+              {/* GitHub Link */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <motion.a
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  href="https://github.com/YK-Labs-LLC/Yorby"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors text-sm font-medium"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                  </svg>
+                  <span>{t("steps.freeATS.github.title")}</span>
+                </motion.a>
+              </div>
             </div>
 
-            {/* Feature Cards with modern design */}
+            {/* Core Benefits */}
             <div className="grid md:grid-cols-3 gap-8">
               {[1, 2, 3].map((num, index) => (
                 <motion.div
                   key={num}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
                   className="group"
                 >
-                  <div className="h-full bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-100">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl mb-6 flex items-center justify-center">
-                      <span className="text-white font-bold text-xl">
-                        {num}
-                      </span>
+                  <div className="h-full bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-100">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg mb-4 flex items-center justify-center">
+                      {num === 1 && (
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
+                          />
+                        </svg>
+                      )}
+                      {num === 2 && (
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                      )}
+                      {num === 3 && (
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      )}
                     </div>
-                    <h3 className="font-semibold text-xl mb-3 text-gray-900">
-                      {t(`steps.solution.features.feature${num}.title`)}
+                    <h3 className="font-semibold text-lg mb-2 text-gray-900">
+                      {t(`steps.freeATS.benefits.benefit${num}.title`)}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {t(`steps.solution.features.feature${num}.description`)}
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {t(`steps.freeATS.benefits.benefit${num}.description`)}
                     </p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Proof Point with gradient background */}
+            {/* What's the Catch? */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.7 }}
+              className="bg-gray-50 rounded-xl p-6 border border-gray-200 max-w-2xl mx-auto"
             >
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                <div className="relative bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-                  <p className="text-lg md:text-xl text-center font-medium text-gray-900">
-                    {t("steps.solution.proofPoint")}
-                  </p>
-                </div>
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center justify-center gap-2">
+                  <span>🤔</span>
+                  {t("steps.freeATS.whatsTheCatch.title")}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {t("steps.freeATS.whatsTheCatch.description")}
+                </p>
               </div>
             </motion.div>
           </div>
@@ -248,100 +215,57 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
                   {t("steps.howItWorks.title")}
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                   {t("steps.howItWorks.subtitle")}
                 </p>
               </motion.div>
             </div>
 
-            {/* Process Steps with timeline design */}
-            <div className="relative">
-              {/* Connecting line */}
-              <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-blue-200 via-purple-200 to-blue-200 hidden md:block" />
-
-              <div className="space-y-8">
-                {[1, 2, 3].map((num, index) => (
-                  <motion.div
-                    key={num}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.2 }}
-                    className="flex gap-6 items-start"
-                  >
-                    <div className="flex-shrink-0 relative">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-600/20">
-                        {t(`steps.howItWorks.step${num}.number`)}
-                      </div>
-                    </div>
-                    <div className="flex-grow group">
-                      <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-100">
-                        <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                          {t(`steps.howItWorks.step${num}.title`)}
-                        </h3>
-                        <p className="text-gray-600 leading-relaxed mb-3 text-lg">
-                          {t(`steps.howItWorks.step${num}.description`)}
-                        </p>
-                        <p className="text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-medium">
-                          {t(`steps.howItWorks.step${num}.detail`)}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case "benefits":
-        return (
-          <div className="space-y-12 max-w-5xl mx-auto">
-            {/* Hero Section */}
-            <div className="text-center space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
-              >
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
-                  {t("steps.benefits.title")}
-                </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-                  {t("steps.benefits.subtitle")}
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Metrics with gradient design */}
+            {/* 3-Step Process */}
             <div className="grid md:grid-cols-3 gap-8">
               {[1, 2, 3].map((num, index) => (
                 <motion.div
                   key={num}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="group"
+                  className="text-center"
                 >
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-                    <div className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 text-center">
-                      <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
-                        {t(`steps.benefits.metrics.metric${num}.value`)}
-                      </div>
-                      <div className="text-xl font-semibold text-gray-900 mb-2">
-                        {t(`steps.benefits.metrics.metric${num}.label`)}
-                      </div>
-                      <div className="text-gray-600">
-                        {t(`steps.benefits.metrics.metric${num}.description`)}
-                      </div>
-                    </div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                    {num}
                   </div>
+                  <h3 className="font-semibold text-lg mb-2 text-gray-900">
+                    {t(`steps.howItWorks.process.step${num}.title`)}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {t(`steps.howItWorks.process.step${num}.description`)}
+                  </p>
                 </motion.div>
               ))}
             </div>
+
+            {/* AI Enhancement Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
+            >
+              <div className="text-center">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                  {t("steps.howItWorks.aiEnhancement.title")}
+                </h3>
+                <p className="text-lg text-gray-700 font-medium">
+                  {t("steps.howItWorks.aiEnhancement.subtitle")}
+                </p>
+                <p className="text-gray-600 mt-2">
+                  {t("steps.howItWorks.aiEnhancement.description")}
+                </p>
+              </div>
+            </motion.div>
           </div>
         );
 
@@ -355,108 +279,162 @@ export default function OnboardingFlow() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
                   {t("steps.comparison.title")}
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 font-light max-w-2xl mx-auto">
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                   {t("steps.comparison.subtitle")}
                 </p>
               </motion.div>
             </div>
 
             {/* Comparison Cards */}
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Traditional Method Card */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Traditional ATS Card */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="relative group"
+                className="bg-gray-50 rounded-xl p-6 border border-gray-200"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                <div className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-red-100">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-                    {t("steps.comparison.traditional.title")}
-                  </h3>
-                  <ul className="space-y-4">
-                    {[1, 2, 3, 4, 5, 6].map((num, index) => (
-                      <motion.li
-                        key={num}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + index * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="flex-shrink-0 w-2 h-2 rounded-full bg-red-500 mt-2" />
-                        <span className="text-gray-600 leading-relaxed">
-                          {t(`steps.comparison.traditional.points.point${num}`)}
-                        </span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-red-500">✕</span>
+                  {t("steps.comparison.traditional.title")}
+                </h3>
+                <ul className="space-y-3">
+                  {[1, 2, 3, 4].map((num) => (
+                    <li key={num} className="text-gray-600 text-sm">
+                      {t(`steps.comparison.traditional.points.point${num}`)}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
 
-              {/* Yorby Method Card */}
+              {/* Yorby Card */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="relative group"
+                className="bg-blue-50 rounded-xl p-6 border border-blue-200"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                <div className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-blue-100">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-                    {t("steps.comparison.yorby.title")}
-                  </h3>
-                  <ul className="space-y-4">
-                    {[1, 2, 3, 4, 5, 6].map((num, index) => (
-                      <motion.li
-                        key={num}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + index * 0.05 }}
-                        className="flex items-start gap-3"
-                      >
-                        <div className="flex-shrink-0">
-                          <svg
-                            className="w-5 h-5 text-green-500 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-600 leading-relaxed">
-                          {t(`steps.comparison.yorby.points.point${num}`)}
-                        </span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  {t("steps.comparison.yorby.title")}
+                </h3>
+                <ul className="space-y-3">
+                  {[1, 2, 3, 4].map((num) => (
+                    <li key={num} className="text-gray-600 text-sm">
+                      {t(`steps.comparison.yorby.points.point${num}`)}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             </div>
 
-            {/* Bottom Line with gradient background */}
+            {/* AI Recruiter Pricing Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.4 }}
+              className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200"
             >
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                <div className="relative bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-                  <p className="text-lg md:text-xl text-center font-medium text-gray-900">
-                    {t("steps.comparison.bottomLine")}
-                  </p>
+              {/* Header */}
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                  {t("steps.comparison.pricingCard.title")}
+                </h3>
+                <p className="text-blue-600 font-medium text-lg">
+                  {t("steps.comparison.pricingCard.subtitle")}
+                </p>
+              </div>
+
+              {/* Pricing and Features Grid */}
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                {/* Left: Pricing */}
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <div className="text-center">
+                    <div className="flex items-baseline justify-center gap-1 mb-3">
+                      <span className="text-5xl font-bold text-gray-900">
+                        {t("steps.comparison.pricingCard.price")}
+                      </span>
+                      <span className="text-xl text-gray-600">
+                        {t("steps.comparison.pricingCard.period")}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-2 font-medium">
+                      {t("steps.comparison.pricingCard.includedInterviews")}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {t("steps.comparison.pricingCard.overagePrice")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Features */}
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                  <h4 className="font-semibold text-gray-900 mb-4 text-center">
+                    {t("steps.comparison.pricingCard.featuresTitle")}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <div key={num} className="flex items-center gap-3">
+                        <svg
+                          className="w-4 h-4 text-green-500 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-sm text-gray-700">
+                          {t(
+                            `steps.comparison.pricingCard.features.feature${num}`
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Bottom Note */}
+              <div className="text-center mt-6">
+                <p className="text-sm text-gray-600">
+                  {t("steps.comparison.pricingCard.availabilityNote")}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Value Props */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex justify-center gap-6 text-sm text-gray-600"
+            >
+              {[1, 2, 3].map((num) => (
+                <div key={num} className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span>{t(`steps.comparison.valueProps.prop${num}`)}</span>
+                </div>
+              ))}
             </motion.div>
           </div>
         );
@@ -479,15 +457,22 @@ export default function OnboardingFlow() {
                 {t("branding.title")}
               </span>
             </div>
-            <div className="hidden md:flex items-center gap-3">
-              <Progress value={progressPercentage} className="w-24 h-1.5" />
-              <span className="text-sm text-gray-500">
-                {t("navigation.step", {
-                  current: currentStep + 1,
-                  total: TOTAL_STEPS,
-                })}
-              </span>
-            </div>
+          </div>
+
+          {/* Step indicators (dots) */}
+          <div className="flex items-center gap-2">
+            {[...Array(TOTAL_STEPS)].map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentStep
+                    ? "bg-blue-600"
+                    : index < currentStep
+                      ? "bg-blue-300"
+                      : "bg-gray-300"
+                }`}
+              />
+            ))}
           </div>
         </div>
 
