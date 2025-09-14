@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import UpgradeForm from "./UpgradeForm";
 import { getTranslations } from "next-intl/server";
+import { PRO_TIER_INTERVIEW_COUNT } from "@/app/recruiting/companies/[id]/jobs/[jobId]/candidates/constants";
 
 interface RecruitingPurchasePageProps {
   params: Promise<{ companyId: string }>;
@@ -80,7 +81,9 @@ export default async function RecruitingPurchasePage({
                         </span>
                       </div>
                       <p className="text-lg text-gray-600 dark:text-gray-400">
-                        {t("pricing.baseIncluded")}
+                        {t("pricing.baseIncluded", {
+                          count: PRO_TIER_INTERVIEW_COUNT,
+                        })}
                       </p>
                     </div>
 
@@ -90,7 +93,11 @@ export default async function RecruitingPurchasePage({
                       </h3>
                       <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                         <div className="flex items-center justify-between">
-                          <span>{t("pricing.firstHundred")}</span>
+                          <span>
+                            {t("pricing.firstHundred", {
+                              count: PRO_TIER_INTERVIEW_COUNT,
+                            })}
+                          </span>
                           <span className="font-semibold">
                             {t("pricing.included")}
                           </span>
@@ -114,13 +121,17 @@ export default async function RecruitingPurchasePage({
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                         <span className="text-gray-700 dark:text-gray-300">
-                          {t("features.candidateInterviews")}
+                          {t("features.candidateInterviews", {
+                            count: PRO_TIER_INTERVIEW_COUNT,
+                          })}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                         <span className="text-gray-700 dark:text-gray-300">
-                          {t("features.additionalInterviews")}
+                          {t("features.additionalInterviews", {
+                            count: PRO_TIER_INTERVIEW_COUNT,
+                          })}
                         </span>
                       </div>
                       <div className="flex items-center gap-3">
@@ -172,15 +183,21 @@ export default async function RecruitingPurchasePage({
                     <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                       <p>
                         {t.rich("howItWorks.description1", {
+                          count: PRO_TIER_INTERVIEW_COUNT,
                           strong: (chunks) => <strong>{chunks}</strong>,
                         })}
                       </p>
                       <p>
                         {t.rich("howItWorks.description2", {
+                          count: PRO_TIER_INTERVIEW_COUNT,
                           strong: (chunks) => <strong>{chunks}</strong>,
                         })}
                       </p>
-                      <p>{t("howItWorks.description3")}</p>
+                      <p>
+                        {t("howItWorks.description3", {
+                          count: PRO_TIER_INTERVIEW_COUNT,
+                        })}
+                      </p>
                       <p>{t("howItWorks.description4")}</p>
                     </div>
                   </div>
