@@ -17,143 +17,101 @@
   },
   "recruitingOnboarding": {
     "steps": {
-      "problem": {
-        "title": "The Recruiting Challenge",
-        "subtitle": "Why 87% of great candidates never make it past the resume screen",
-        "headline": "You're missing your best hires",
-        "subheadline": "...and it's costing you more than you think",
-        "stats": {
-          "applicantsPerRole": {
-            "number": "250+",
-            "label": "Average applicants per role"
+      "freeATS": {
+        "title": "A Free, Open-Source ATS Built for Startups",
+        "subtitle": "Track candidates, manage your pipeline, collaborate with your team—no credit card required.",
+        "socialProof": "Used by 500+ startups",
+        "benefits": {
+          "benefit1": {
+            "title": "Customizable Pipeline",
+            "description": "Drag-and-drop stages that match your hiring process"
           },
-          "screeningTime": {
-            "number": "23 seconds",
-            "label": "Time spent per resume"
+          "benefit2": {
+            "title": "Team Collaboration",
+            "description": "Invite recruiters, hiring managers, and interviewers"
           },
-          "missedTalent": {
-            "number": "73%",
-            "label": "Qualified candidates rejected"
+          "benefit3": {
+            "title": "Forever Free Core",
+            "description": "Essential ATS features, always free. No limits on jobs or candidates"
           }
         },
-        "painPoints": {
-          "point1": {
-            "title": "Time Crunch Reality",
-            "description": "With hundreds of applicants, you have minutes—not hours—to find the right fit"
-          },
-          "point2": {
-            "title": "Skills Gap Blindspot",
-            "description": "Recruiters can't accurately assess technical skills they weren't trained in"
-          },
-          "point3": {
-            "title": "Resume Roulette",
-            "description": "Great candidates with imperfect resumes get overlooked every single day"
-          }
+        "cta": "See How It Works",
+        "whatsTheCatch": {
+          "title": "Wait, what's the catch?",
+          "description": "There isn't one. Our core ATS is completely free forever. We make money by offering optional AI features that help you hire candidates faster. Use them when you need them, skip them when you don't."
         },
-        "cta": "See How Yorby Solves This",
-        "assetPlaceholder": "Video or animation showing overwhelmed recruiter with pile of resumes"
-      },
-      "solution": {
-        "title": "Meet Yorby",
-        "subtitle": "Your AI-powered recruiting partner",
-        "headline": "Screen every candidate. Miss no one.",
-        "subheadline": "AI interviews that give every applicant a fair shot—and give you back your time",
-        "features": {
-          "feature1": {
-            "title": "Automated First-Round Interviews",
-            "description": "Every candidate gets a personalized AI interview based on your exact requirements"
-          },
-          "feature2": {
-            "title": "Beyond the Resume",
-            "description": "Candidates showcase their actual skills and experience through conversation"
-          },
-          "feature3": {
-            "title": "Smart Scoring & Insights",
-            "description": "AI analyzes responses and ranks candidates based on job fit—not just keywords"
-          }
-        },
-        "proofPoint": "Companies using Yorby discover 3x more qualified candidates hiding in their applicant pool",
-        "cta": "See It In Action",
-        "assetPlaceholder": "Interactive demo or product tour video"
+        "github": {
+          "title": "View on GitHub"
+        }
       },
       "howItWorks": {
-        "title": "How Yorby Works",
-        "subtitle": "From job posting to perfect hire in 3 simple steps",
-        "step1": {
-          "number": "1",
-          "title": "Create Your Interview",
-          "description": "Post your job and add custom interview questions tailored to the role",
-          "detail": "Takes less than 5 minutes",
-          "assetPlaceholder": "Screenshot of interview creation interface"
-        },
-        "step2": {
-          "number": "2",
-          "title": "Candidates Self-Interview",
-          "description": "Applicants complete AI-powered interviews at their convenience",
-          "detail": "Available 24/7 in multiple languages",
-          "assetPlaceholder": "Mock interview interface or candidate experience video"
-        },
-        "step3": {
-          "number": "3",
-          "title": "Review Top Matches",
-          "description": "Access scored candidates with interview transcripts and insights",
-          "detail": "Focus only on pre-qualified talent",
-          "assetPlaceholder": "Dashboard showing candidate rankings and insights"
-        },
-        "cta": "Start Screening Smarter"
-      },
-      "benefits": {
-        "title": "The Yorby Advantage",
-        "subtitle": "Transform your recruiting process",
-        "headline": "Better hires, faster process, happier teams",
-        "metrics": {
-          "metric1": {
-            "value": "90%",
-            "label": "Reduction in screening time",
-            "description": "From days to hours"
+        "title": "Simple to Start, Powerful When You Need It",
+        "subtitle": "Set up in 2 minutes, scale as you grow",
+        "process": {
+          "step1": {
+            "title": "Create Your Company",
+            "description": "Sign up and invite your team"
           },
-          "metric2": {
-            "value": "5x",
-            "label": "More qualified candidates",
-            "description": "Surface hidden gems"
+          "step2": {
+            "title": "Post Your Jobs",
+            "description": "Add job listings and customize your pipeline stages"
           },
-          "metric3": {
-            "value": "68%",
-            "label": "Improved candidate experience",
-            "description": "Fair chance for everyone"
+          "step3": {
+            "title": "Track Candidates",
+            "description": "Move applicants through stages with one click"
           }
         },
-        "cta": "Join Leading Companies",
-        "assetPlaceholder": "Customer logos or success metrics visualization"
+        "aiEnhancement": {
+          "title": "Want to go faster?",
+          "subtitle": "Use our AI recruiter to interview every candidate that applies",
+          "description": "Get deep insights about every candidate and move faster through your hiring process"
+        },
+        "cta": "Start Hiring Smarter"
       },
       "comparison": {
-        "title": "Yorby vs Traditional Recruiting",
-        "subtitle": "See the difference",
+        "title": "Built for How Startups Actually Hire",
+        "subtitle": "No enterprise complexity. Just what you need.",
         "traditional": {
-          "title": "Traditional Recruiting",
+          "title": "Traditional ATS",
           "points": {
-            "point1": "❌ 23 seconds per resume review",
-            "point2": "❌ Bias toward keyword matches",
-            "point3": "❌ Great candidates slip through",
-            "point4": "❌ Inconsistent screening quality",
-            "point5": "❌ Limited to business hours",
-            "point6": "❌ No domain expertise for technical roles"
+            "point1": "$200-500/month minimum",
+            "point2": "Complex setup and training",
+            "point3": "Features you'll never use",
+            "point4": "Locked into annual contracts"
           }
         },
         "yorby": {
-          "title": "With Yorby",
+          "title": "Yorby",
           "points": {
-            "point1": "✅ Every candidate gets interviewed",
-            "point2": "✅ Skills-based assessment",
-            "point3": "✅ Discover hidden talent",
-            "point4": "✅ Consistent, fair evaluation",
-            "point5": "✅ 24/7 availability",
-            "point6": "✅ AI understands all domains"
+            "point1": "Free core ATS forever",
+            "point2": "2-minute setup",
+            "point3": "AI features when you need them",
+            "point4": "Pay only for what you use"
           }
         },
-        "bottomLine": "Stop gambling on resumes. Start making data-driven hiring decisions.",
-        "cta": "Switch to Smart Recruiting",
-        "assetPlaceholder": "Side-by-side comparison infographic"
+        "pricingCard": {
+          "title": "When you're ready for AI-powered hiring",
+          "subtitle": "AI Recruiter Add-on",
+          "price": "$99",
+          "period": "/month",
+          "includedInterviews": "200 AI interviews included",
+          "overagePrice": "$0.50 per additional interview",
+          "features": {
+            "feature1": "AI interviews every candidate",
+            "feature2": "Deep candidate insights & analysis",
+            "feature3": "Automated screening & ranking",
+            "feature4": "Video recordings & transcripts",
+            "feature5": "Priority support"
+          },
+          "featuresTitle": "What you get:",
+          "availabilityNote": "Available after you create your company and set up your free ATS"
+        },
+        "valueProps": {
+          "prop1": "No bait-and-switch pricing",
+          "prop2": "Open-source and transparent",
+          "prop3": "Grow at your own pace"
+        },
+        "cta": "Join 500+ Startups"
       },
       "socialProof": {
         "title": "Trusted by Forward-Thinking Companies",
@@ -250,7 +208,7 @@
       "skip": "Skip",
       "skipTour": "Skip tour",
       "close": "Close",
-      "step": "Step {current} of {total}",
+      "step": "{current} of {total}",
       "getStarted": "Get Started",
       "loading": "Loading..."
     },
