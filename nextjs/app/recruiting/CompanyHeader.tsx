@@ -76,22 +76,12 @@ export function CompanyHeader({ company, isFreeTier }: CompanyHeaderProps) {
               {t("manageStages")}
             </Button>
           </Link>
-          {isFreeTier ? (
-            <Button
-              variant="outline"
-              onClick={() => setShowUpgradeDialog(true)}
-            >
+          <Link href={`/recruiting/companies/${company.id}/members`}>
+            <Button variant="outline">
               <UsersRound className="mr-2 h-4 w-4" />
               {t("manageMembers")}
             </Button>
-          ) : (
-            <Link href={`/recruiting/companies/${company.id}/members`}>
-              <Button variant="outline">
-                <UsersRound className="mr-2 h-4 w-4" />
-                {t("manageMembers")}
-              </Button>
-            </Link>
-          )}
+          </Link>
         </div>
       </div>
 
