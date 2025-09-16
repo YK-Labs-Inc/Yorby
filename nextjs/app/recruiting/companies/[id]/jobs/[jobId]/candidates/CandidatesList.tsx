@@ -2,13 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Search,
-  User,
-  Loader2,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Search, User, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -89,11 +83,7 @@ export default function CandidatesList({
     if (isLoadingMore || !hasMore) return;
 
     onLoadMore();
-  }, [
-    isLoadingMore,
-    hasMore,
-    onLoadMore,
-  ]);
+  }, [isLoadingMore, hasMore, onLoadMore]);
 
   // Set up intersection observer for infinite scroll
   useEffect(() => {
@@ -103,11 +93,7 @@ export default function CandidatesList({
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMore &&
-          !isLoadingMore
-        ) {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
           loadMoreCandidates();
         }
       },

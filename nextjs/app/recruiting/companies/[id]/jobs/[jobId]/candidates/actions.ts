@@ -420,7 +420,7 @@ export async function getCandidates(
     limit,
     stageIds,
   });
-  
+
   // Validate inputs
   if (!companyId || !jobId) {
     log.error("Invalid parameters", { companyId, jobId });
@@ -474,11 +474,11 @@ export async function getCandidates(
       return [];
     }
 
-    log.info("Fetched candidates page", { 
-      offset, 
-      limit, 
+    log.info("Fetched candidates page", {
+      offset,
+      limit,
       returned: data.length,
-      hasMore: data.length === limit 
+      hasMore: data.length === limit,
     });
 
     // Fetch user data for each candidate (only name and email needed for UI)
@@ -500,6 +500,9 @@ export async function getCandidates(
                 candidateUserId: candidate.candidate_user_id,
               });
             } else if (userData?.user) {
+              if (userData.user.is_anonymous) {
+                return null;
+              }
               candidateEmail = userData.user.email || null;
               candidateName =
                 userData.user.user_metadata?.display_name ||
@@ -520,13 +523,14 @@ export async function getCandidates(
           candidateEmail,
           candidatePhoneNumber: null, // Not used in UI
           currentStage: candidate.currentStage || null,
-          aiInterviewCompletionOrder: candidate.ai_interview_completion_order || null,
+          aiInterviewCompletionOrder:
+            candidate.ai_interview_completion_order || null,
         } as Candidate;
       })
     );
 
     await log.flush();
-    return candidatesWithUserData;
+    return candidatesWithUserData.filter((candidate) => candidate !== null);
   } catch (error) {
     log.error("Exception in getCandidates", { error });
     await log.flush();
