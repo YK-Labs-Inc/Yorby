@@ -251,6 +251,7 @@
       "linkApplicationFiles": "Failed to link application files",
       "updateUserInformation": "Failed to update user information",
       "appliedWithEmailOfExistingUser": "Applied with email of existing user",
+      "invalidEmailFormat": "Please enter a valid email address",
       "generic": "Sorry, something went wrong. Please try again."
     }
   },

@@ -335,6 +335,15 @@ export const submitApplication = async (
       throw new Error(t("missingRequiredFields"));
     }
 
+    // Validate email format if provided
+    if (email && email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        logger.info("Invalid email format provided", { email: email.substring(0, 3) + "..." });
+        return { error: t("invalidEmailFormat") };
+      }
+    }
+
     logger.info("Processing application submission", {
       companyId,
       jobId,
