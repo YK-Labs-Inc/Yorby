@@ -15,6 +15,21 @@
       "unexpected": "An unexpected error occurred, please try again."
     }
   },
+  "candidateOnboarding": {
+    "steps": {
+      "howDidYouHear": {
+        "title": "How did you hear about us?",
+        "subtitle": "We'd love to know where our awesome candidates are coming from!",
+        "cta": "Continue",
+        "validationMessage": "Please select an option to continue"
+      }
+    },
+    "navigation": {
+      "next": "Continue",
+      "previous": "Back",
+      "getStarted": "Start Chat"
+    }
+  },
   "recruitingOnboarding": {
     "steps": {
       "freeATS": {
