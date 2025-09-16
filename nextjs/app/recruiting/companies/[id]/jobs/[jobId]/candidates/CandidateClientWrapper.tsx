@@ -8,7 +8,6 @@ import {
   CandidateData,
   getCandidates,
   getCandidateData,
-  getCompanyCandidateCount,
   getJobInterviewCount,
 } from "./actions";
 import Link from "next/link";
@@ -18,7 +17,10 @@ import CandidatesList from "./CandidatesList";
 import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 import CandidateOverview from "./CandidateOverview";
 import EmptyState from "./EmptyState";
-import { CandidateStageProvider, useCandidateStage } from "./CandidateStageContext";
+import {
+  CandidateStageProvider,
+  useCandidateStage,
+} from "./CandidateStageContext";
 
 const candidatesFetcher = async ([_, companyId, jobId, stageIds, offset]: [
   string,
@@ -32,10 +34,6 @@ const candidatesFetcher = async ([_, companyId, jobId, stageIds, offset]: [
 
 const candidateDataFetcher = async ([_, candidateId]: [string, string]) => {
   return await getCandidateData(candidateId);
-};
-
-const candidateCountFetcher = async ([_, companyId]: [string, string]) => {
-  return await getCompanyCandidateCount(companyId);
 };
 
 const interviewCountFetcher = async ([_, jobId]: [string, string]) => {
@@ -63,7 +61,7 @@ function CandidateClientWrapperInner({
     data: candidatesPages = [],
     error: candidatesError,
     isLoading: candidatesLoading,
-    isValidating,
+    isValidating: candidatesIsValidating,
     size,
     setSize,
     mutate: mutateCandidates,
@@ -86,9 +84,9 @@ function CandidateClientWrapperInner({
   );
 
   // Flatten the pages into a single array of candidates and apply optimistic updates
-  const candidates = candidatesPages.flat().map(candidate => ({
+  const candidates = candidatesPages.flat().map((candidate) => ({
     ...candidate,
-    currentStage: getCandidateStage(candidate.id, candidate.currentStage)
+    currentStage: getCandidateStage(candidate.id, candidate.currentStage),
   }));
 
   // Check if we have more data to load
@@ -108,15 +106,10 @@ function CandidateClientWrapperInner({
     data: candidateData,
     error: candidateError,
     isLoading: candidateLoading,
+    isValidating: candidateIsValidating,
   } = useSWR<CandidateData | null>(
     effectiveCandidateId ? ["candidate-data", effectiveCandidateId] : null,
     candidateDataFetcher
-  );
-
-  // Fetch company candidate count
-  const { data: candidateCount = 0 } = useSWR<number>(
-    companyId ? ["candidate-count", companyId] : null,
-    candidateCountFetcher
   );
 
   // Fetch job interview count
@@ -168,7 +161,7 @@ function CandidateClientWrapperInner({
             stageIds={stageIds}
             onLoadMore={() => setSize(size + 1)}
             hasMore={hasMore}
-            isLoadingMore={isValidating && !candidatesLoading}
+            isLoadingMore={candidatesIsValidating && !candidatesLoading}
           />
 
           {/* Right Content - Candidate Overview */}
@@ -183,11 +176,13 @@ function CandidateClientWrapperInner({
                       currentStage: getCandidateStage(
                         candidateData.candidate.id,
                         candidateData.candidate.currentStage
-                      )
-                    }
+                      ),
+                    },
                   }}
                   jobInterviewCount={interviewCount}
-                  loadingCandidateData={candidateLoading}
+                  loadingCandidateData={
+                    candidateLoading || candidateIsValidating
+                  }
                   hasError={candidateError}
                   onRetry={handleCandidateRetry}
                   stageIds={stageIds}
