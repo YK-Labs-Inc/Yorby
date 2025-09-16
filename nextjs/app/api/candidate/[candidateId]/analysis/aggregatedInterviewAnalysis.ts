@@ -34,7 +34,6 @@ async function generateAggregatedHiringVerdict(
       strengths: Tables<"recruiter_interview_strengths">[];
       concerns: Tables<"recruiter_interview_concerns">[];
     }>;
-    jobAlignment: CandidateJobAlignment | null;
   },
   logger: Logger
 ): Promise<AggregatedVerdict> {
@@ -44,30 +43,12 @@ Job Title: ${candidateData.job.job_title}
 Company: ${candidateData.job.company_name || "N/A"}
 Job Description: ${candidateData.job.job_description || "N/A"}
 
-## JOB REQUIREMENT ALIGNMENT
-${
-  candidateData.jobAlignment
-    ? `
-Alignment Score: ${candidateData.jobAlignment.alignment_score}/100
-
-Matched Requirements (${candidateData.jobAlignment.matched_requirements?.length || 0}):
-${candidateData.jobAlignment.matched_requirements?.map((req) => `- ${req}`).join("\n") || "- None identified"}
-
-Missing Requirements (${candidateData.jobAlignment.missing_requirements?.length || 0}):
-${candidateData.jobAlignment.missing_requirements?.map((req) => `- ${req}`).join("\n") || "- None identified"}
-
-Exceeded Requirements (${candidateData.jobAlignment.exceeded_requirements?.length || 0}):
-${candidateData.jobAlignment.exceeded_requirements?.map((req) => `- ${req}`).join("\n") || "- None identified"}
-`
-    : "Job alignment analysis not available"
-}
-
 ## INTERVIEW ROUNDS COMPLETED (${candidateData.interviewRounds.length} total)
 ${candidateData.interviewRounds
   .map(
     (round, i) => `
 ### Round ${i + 1}: ${round.roundName} (${round.interviewType}) - Weight: ${round.weight}
-- Interview Importance: ${round.weight === 'high' ? 'HIGH (Critical for decision)' : round.weight === 'low' ? 'LOW (Supporting round)' : 'NORMAL (Standard importance)'}
+- Interview Importance: ${round.weight === "high" ? "HIGH (Critical for decision)" : round.weight === "low" ? "LOW (Supporting round)" : "NORMAL (Standard importance)"}
 - Verdict: ${round.analysis.hiring_verdict}
 - Score: ${round.analysis.overall_match_score}/100
 - Summary: ${round.analysis.verdict_summary}
@@ -580,7 +561,6 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
         candidate,
         job: candidate.custom_jobs,
         interviewRounds: validRounds,
-        jobAlignment,
       },
       logger
     );
@@ -607,7 +587,7 @@ export const generateAggregatedAnalysis = async (candidateId: string) => {
 
     // Set the AI interview completion order for free tier tracking
     logger.info("Setting AI interview completion order", { candidateId });
-    
+
     // Get the company ID for this candidate
     const { data: candidateData } = await supabase
       .from("company_job_candidates")
@@ -672,7 +652,7 @@ const processInterviewWithStripe = async (candidateId: string) => {
     candidateId,
   });
   const supabase = await createAdminClient();
-  
+
   const { data: candidate, error: candidateError } = await supabase
     .from("company_job_candidates")
     .select("company_id")
@@ -717,12 +697,15 @@ const processInterviewWithStripe = async (candidateId: string) => {
   // Update the metered usage count (increment by 1)
   const { error: upsertError } = await supabase
     .from("recruiting_subscriptions_metered_usage")
-    .upsert({
-      company_id: candidate.company_id,
-      count: newCount
-    }, {
-      onConflict: "company_id"
-    });
+    .upsert(
+      {
+        company_id: candidate.company_id,
+        count: newCount,
+      },
+      {
+        onConflict: "company_id",
+      }
+    );
 
   if (upsertError) {
     logger.error("Failed to update metered usage count", {
