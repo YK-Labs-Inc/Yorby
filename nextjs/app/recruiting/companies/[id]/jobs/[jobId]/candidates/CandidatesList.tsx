@@ -198,10 +198,10 @@ export default function CandidatesList({
                         : null
                     }
                     className={cn(
-                      "px-4 py-3 cursor-pointer transition-colors border-b",
+                      "px-4 py-3 cursor-pointer transition-all duration-150 border-b",
                       "hover:bg-gray-50",
                       selectedCandidateId === candidate.id
-                        ? "bg-gray-50"
+                        ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "bg-white",
                       index === filteredCandidates.length - 1 && "border-b-0"
                     )}

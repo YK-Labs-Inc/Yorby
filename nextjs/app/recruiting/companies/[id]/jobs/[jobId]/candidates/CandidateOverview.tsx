@@ -2,34 +2,65 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { CandidateData } from "./actions";
+import type {
+  CandidateBasicData,
+  CandidateImportantData,
+  CandidateInterviewData,
+} from "./actions";
 import InterviewAnalysis from "./InterviewAnalysis";
 import CandidateInfoSection from "./CandidateInfoSection";
 import CandidateApplicationFilesSection from "./CandidateApplicationFilesSection";
+import CandidateOverviewSkeleton from "./CandidateOverviewSkeleton";
 
 interface CandidateOverviewProps {
-  candidateData: CandidateData | null;
+  candidateBasicData?: CandidateBasicData | null;
   jobInterviewCount: number;
   loadingCandidateData: boolean;
-  hasError?: any;
-  onRetry?: () => void;
+  loadingImportantData?: boolean;
+  importantDataError?: any;
+  candidateImportantData?: CandidateImportantData | null;
+  interviewDataError?: any;
+  candidateInterviewData?: CandidateInterviewData | null;
+  loadingInterviewData?: boolean;
+  hasBasicDataError?: any;
+  onBasicDataRetry?: () => void;
+  hasImportantDataError?: any;
+  onImportantDataRetry?: () => void;
+  hasInterviewDataError?: any;
+  onInterviewDataRetry?: () => void;
   stageIds: string[];
   isPremium: boolean;
 }
 
 export default function CandidateOverview({
-  candidateData,
+  candidateBasicData,
   jobInterviewCount,
   loadingCandidateData,
-  hasError,
-  onRetry,
+  loadingImportantData,
+  importantDataError,
+  candidateImportantData,
+  interviewDataError,
+  candidateInterviewData,
+  loadingInterviewData,
+  hasBasicDataError,
+  onBasicDataRetry,
+  hasImportantDataError,
+  onImportantDataRetry,
+  hasInterviewDataError,
+  onInterviewDataRetry,
   stageIds,
   isPremium,
 }: CandidateOverviewProps) {
   const t = useTranslations("apply.recruiting.candidates.overview");
-  if (hasError) {
+  // Show loading spinner only for initial basic data load
+  if (loadingCandidateData) {
+    return <CandidateOverviewSkeleton />;
+  }
+
+  if (hasBasicDataError || !candidateBasicData) {
     return (
       <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
         <CardContent className="flex-1 flex items-center justify-center">
@@ -39,9 +70,9 @@ export default function CandidateOverview({
             <p className="text-xs text-muted-foreground text-center mb-4">
               {t("error.description")}
             </p>
-            {onRetry && (
+            {onBasicDataRetry && (
               <button
-                onClick={onRetry}
+                onClick={onBasicDataRetry}
                 className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
               >
                 <RefreshCw className="h-3 w-3" />
@@ -54,47 +85,98 @@ export default function CandidateOverview({
     );
   }
 
-  if (loadingCandidateData) {
-    return (
-      <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
-        <CardContent className="flex-1 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
+  const configureImportantDataSection = () => {
+    if (loadingImportantData) {
+      return (
+        <div className="space-y-6 px-6">
+          <Skeleton className="h-6 w-40 mb-2" />
+          <Skeleton className="h-4 w-24 mb-4" />
+        </div>
+      );
+    } else if (importantDataError) {
+      return (
+        <div className="space-y-6 px-6">
+          <p className="text-sm text-muted-foreground">
+            {t("error.importantData")}
+          </p>
+          {onImportantDataRetry && (
+            <button
+              onClick={onImportantDataRetry}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <RefreshCw className="h-3 w-3" />
+              {t("error.description")}
+            </button>
+          )}
+        </div>
+      );
+    } else if (!candidateImportantData) {
+      return null;
+    } else {
+      return (
+        <CandidateApplicationFilesSection
+          candidateImportantData={candidateImportantData}
+        />
+      );
+    }
+  };
 
-  if (!candidateData) {
-    return (
-      <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
-        <CardContent className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              No candidate selected
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const configureInterviewAnalysisSection = () => {
+    if (loadingInterviewData) {
+      return (
+        <div className="space-y-6 px-6 py-4">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      );
+    } else if (interviewDataError) {
+      return (
+        <div className="space-y-6 px-6">
+          <p className="text-sm text-muted-foreground">
+            {t("error.interviewData")}
+          </p>
+          {onInterviewDataRetry && (
+            <button
+              onClick={onInterviewDataRetry}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <RefreshCw className="h-3 w-3" />
+              {t("error.description")}
+            </button>
+          )}
+        </div>
+      );
+    } else if (!candidateInterviewData) {
+      return null;
+    } else {
+      return (
+        <InterviewAnalysis
+          candidateBasicData={candidateBasicData}
+          candidateImportantData={candidateImportantData}
+          candidateInterviewData={candidateInterviewData}
+          jobInterviewCount={jobInterviewCount}
+          isPremium={isPremium}
+        />
+      );
+    }
+  };
 
   return (
     <Card className="h-full flex flex-col bg-white border shadow-sm rounded-l-none border-l-0">
       <CardContent className="flex-1 overflow-y-auto py-6 px-0">
+        {/* Show basic info immediately */}
         <CandidateInfoSection
-          candidateData={candidateData}
+          candidateData={candidateBasicData}
           stageIds={stageIds}
         />
 
         <Separator className="my-6" />
 
-        <CandidateApplicationFilesSection candidateData={candidateData} />
+        {/* Show files section with loading state */}
+        {configureImportantDataSection()}
 
-        <InterviewAnalysis
-          candidateData={candidateData}
-          jobInterviewCount={jobInterviewCount}
-          isPremium={isPremium}
-        />
+        {/* Show interview analysis with loading state */}
+        {configureInterviewAnalysisSection()}
       </CardContent>
     </Card>
   );

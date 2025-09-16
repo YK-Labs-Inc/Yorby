@@ -3,18 +3,20 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
-import type { CandidateData } from "./actions";
+import type { CandidateImportantData } from "./actions";
 
 interface CandidateApplicationFilesSectionProps {
-  candidateData: CandidateData;
+  candidateImportantData: CandidateImportantData;
 }
 
 export default function CandidateApplicationFilesSection({
-  candidateData,
+  candidateImportantData,
 }: CandidateApplicationFilesSectionProps) {
   const t = useTranslations("apply.recruiting.candidates.info");
-  const tFiles = useTranslations("apply.recruiting.candidates.applicationFiles");
-  const { applicationFiles } = candidateData;
+  const tFiles = useTranslations(
+    "apply.recruiting.candidates.applicationFiles"
+  );
+  const { applicationFiles } = candidateImportantData;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -24,16 +26,18 @@ export default function CandidateApplicationFilesSection({
     });
   };
 
-
   // Group files by type
-  const resumeFiles = applicationFiles.filter(file => 
-    file.user_file.mime_type?.includes("pdf") || 
-    file.user_file.mime_type?.includes("document") ||
-    file.user_file.display_name.toLowerCase().includes("resume") ||
-    file.user_file.display_name.toLowerCase().includes("cv")
+  const resumeFiles = applicationFiles.filter(
+    (file) =>
+      file.user_file.mime_type?.includes("pdf") ||
+      file.user_file.mime_type?.includes("document") ||
+      file.user_file.display_name.toLowerCase().includes("resume") ||
+      file.user_file.display_name.toLowerCase().includes("cv")
   );
-  
-  const otherFiles = applicationFiles.filter(file => !resumeFiles.includes(file));
+
+  const otherFiles = applicationFiles.filter(
+    (file) => !resumeFiles.includes(file)
+  );
 
   if (applicationFiles.length === 0) {
     return null;
@@ -69,7 +73,8 @@ export default function CandidateApplicationFilesSection({
                           {file.user_file.display_name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {file.user_file.mime_type} • {formatDate(file.created_at)}
+                          {file.user_file.mime_type} •{" "}
+                          {formatDate(file.created_at)}
                         </p>
                       </div>
                     </div>
@@ -93,7 +98,9 @@ export default function CandidateApplicationFilesSection({
           {/* Other application files */}
           {otherFiles.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">{tFiles("otherDocuments")}</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                {tFiles("otherDocuments")}
+              </h4>
               <div className="space-y-2">
                 {otherFiles.map((file) => (
                   <div
@@ -107,7 +114,8 @@ export default function CandidateApplicationFilesSection({
                           {file.user_file.display_name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {file.user_file.mime_type} • {formatDate(file.created_at)}
+                          {file.user_file.mime_type} •{" "}
+                          {formatDate(file.created_at)}
                         </p>
                       </div>
                     </div>
