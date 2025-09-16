@@ -60,6 +60,21 @@ export interface CandidateData {
   }[];
 }
 
+export interface CandidateBasicData {
+  candidate: Candidate;
+  additionalInfo: Tables<"candidate_application_additional_info">[];
+}
+
+export interface CandidateImportantData {
+  applicationFiles: ApplicationFile[];
+  aggregatedAnalysis: Tables<"candidate_aggregated_interview_analysis"> | null;
+  jobAlignmentDetails: Tables<"candidate_job_alignment_details"> | null;
+}
+
+export interface CandidateInterviewData {
+  interviewResults: CandidateData["interviewResults"];
+}
+
 // Cache for 60 seconds to avoid repeated queries
 export const validateAccess = cache(
   async (companyId: string, jobId: string): Promise<AccessValidation> => {
@@ -558,6 +573,256 @@ export const isCompanyPremium = async (companyId: string) => {
 
   return !!data;
 };
+
+// Optimized function to get basic candidate data for immediate display
+export const getCandidateBasicData = cache(
+  async (candidateId: string): Promise<CandidateBasicData | null> => {
+    const log = new Logger().with({
+      functionName: "getCandidateBasicData",
+      candidateId,
+    });
+    const supabase = await createSupabaseServerClient();
+    const supabaseAdmin = await createAdminClient();
+    const t = await getTranslations("apply.api.errors");
+
+    // Fetch candidate with current stage in a single query
+    const { data: candidate, error: candidateError } = await supabase
+      .from("company_job_candidates")
+      .select(
+        `
+        *,
+        currentStage:company_application_stages(*)
+      `
+      )
+      .eq("id", candidateId)
+      .single();
+
+    if (candidateError || !candidate) {
+      log.error("Error fetching candidate", { candidateError, candidateId });
+      await log.flush();
+      return null;
+    }
+
+    // Fetch user data and additional info in parallel
+    const [userDataResult, additionalInfoResult] = await Promise.all([
+      // Fetch user data
+      candidate.candidate_user_id
+        ? supabaseAdmin.auth.admin.getUserById(candidate.candidate_user_id)
+        : Promise.resolve({ data: null, error: null }),
+      // Fetch additional info
+      supabase
+        .from("candidate_application_additional_info")
+        .select("*")
+        .eq("candidate_id", candidateId),
+    ]);
+
+    let candidateName: string | null = null;
+    let candidateEmail: string | null = null;
+    let candidatePhoneNumber: string | null = null;
+
+    if (userDataResult.data?.user) {
+      const user = userDataResult.data.user;
+      candidateEmail = user.email || null;
+      if (!candidateEmail) {
+        throw new Error(t("candidateEmailNotFound"));
+      }
+      candidateName =
+        user.user_metadata?.display_name ||
+        user.user_metadata?.full_name ||
+        null;
+      candidatePhoneNumber = user.user_metadata?.phone_number || null;
+    }
+
+    await log.flush();
+    return {
+      candidate: {
+        ...candidate,
+        candidateName,
+        candidateEmail,
+        candidatePhoneNumber,
+        currentStage: candidate.currentStage || null,
+      },
+      additionalInfo: additionalInfoResult.data || [],
+    };
+  }
+);
+
+// Function to get important data like files and aggregated analysis
+export const getCandidateImportantData = cache(
+  async (candidateId: string): Promise<CandidateImportantData | null> => {
+    const log = new Logger().with({
+      functionName: "getCandidateImportantData",
+      candidateId,
+    });
+    const supabase = await createSupabaseServerClient();
+
+    // Fetch all important data in parallel
+    const [filesResult, aggregatedResult, alignmentResult] = await Promise.all([
+      // Application files
+      supabase
+        .from("candidate_application_files")
+        .select(
+          `
+          *,
+          user_file:user_files(*)
+        `
+        )
+        .eq("candidate_id", candidateId),
+      // Aggregated analysis
+      supabase
+        .from("candidate_aggregated_interview_analysis")
+        .select("*")
+        .eq("candidate_id", candidateId)
+        .maybeSingle(),
+      // Job alignment details
+      supabase
+        .from("candidate_job_alignment_details")
+        .select("*")
+        .eq("candidate_id", candidateId)
+        .maybeSingle(),
+    ]);
+
+    if (filesResult.error) {
+      log.error("Error fetching application files", {
+        error: filesResult.error,
+        candidateId,
+      });
+    }
+
+    if (aggregatedResult.error && aggregatedResult.error.code !== "PGRST116") {
+      log.error("Error fetching aggregated analysis", {
+        error: aggregatedResult.error,
+        candidateId,
+      });
+    }
+
+    if (alignmentResult.error && alignmentResult.error.code !== "PGRST116") {
+      log.error("Error fetching alignment details", {
+        error: alignmentResult.error,
+        candidateId,
+      });
+    }
+
+    // Generate signed URLs for files in parallel
+    const filesWithUrls = await Promise.all(
+      (filesResult.data || []).map(async (appFile) => {
+        if (appFile.user_file) {
+          const { data: signedUrlData } = await supabase.storage
+            .from(appFile.user_file.bucket_name)
+            .createSignedUrl(appFile.user_file.file_path, 3600); // 1 hour expiry
+          return {
+            ...appFile,
+            user_file: {
+              ...appFile.user_file,
+              signed_url: signedUrlData?.signedUrl,
+            },
+          };
+        }
+        return appFile;
+      })
+    );
+
+    await log.flush();
+    return {
+      applicationFiles: filesWithUrls as ApplicationFile[],
+      aggregatedAnalysis: aggregatedResult.data,
+      jobAlignmentDetails: alignmentResult.data,
+    };
+  }
+);
+
+// Function to get interview data - called lazily when needed
+export const getCandidateInterviewData = cache(
+  async (candidateId: string): Promise<CandidateInterviewData | null> => {
+    const log = new Logger().with({
+      functionName: "getCandidateInterviewData",
+      candidateId,
+    });
+    const supabase = await createSupabaseServerClient();
+
+    // Fetch job interviews
+    const { data: candidateJobInterviews, error: interviewError } =
+      await supabase
+        .from("candidate_job_interviews")
+        .select(
+          `*, job_interviews(interview_type, job_interview_questions(company_interview_question_bank(question)))`
+        )
+        .eq("candidate_id", candidateId);
+
+    if (interviewError) {
+      log.error("Error fetching job interviews", {
+        interviewError,
+        candidateId,
+      });
+      return { interviewResults: [] };
+    }
+
+    // Process each interview in parallel
+    const interviewResults = await Promise.all(
+      (candidateJobInterviews || []).map(async (candidateJobInterview) => {
+        const interviewType =
+          candidateJobInterview.job_interviews.interview_type;
+
+        // Fetch all interview-related data in parallel
+        const [
+          recordingResult,
+          messagesResult,
+          analysisResult,
+          codingAnalysisResult,
+          titleResult,
+        ] = await Promise.all([
+          // Recording
+          supabase
+            .from("candidate_job_interview_recordings")
+            .select("*")
+            .eq("id", candidateJobInterview.id)
+            .maybeSingle(),
+          // Messages
+          supabase
+            .from("candidate_job_interview_messages")
+            .select("*")
+            .eq("candidate_interview_id", candidateJobInterview.id)
+            .order("created_at", { ascending: false }),
+          // Interview analysis
+          supabase
+            .from("recruiter_interview_analysis_complete")
+            .select("*")
+            .eq("candidate_interview_id", candidateJobInterview.id)
+            .maybeSingle(),
+          // Coding analysis (only if coding interview)
+          interviewType === "coding"
+            ? supabase
+                .from("coding_interview_analysis_view")
+                .select("*")
+                .eq("candidate_interview_id", candidateJobInterview.id)
+                .maybeSingle()
+            : Promise.resolve({ data: null, error: null }),
+          // Interview title
+          supabase
+            .from("job_interviews")
+            .select("name")
+            .eq("id", candidateJobInterview.interview_id)
+            .single(),
+        ]);
+
+        return {
+          candidateJobInterview,
+          jobInterviewRecording: recordingResult.data,
+          jobInterviewMessages: messagesResult.data || [],
+          interviewAnalysis: analysisResult.data as InterviewAnalysis | null,
+          interviewType,
+          codingInterviewAnalysis: codingAnalysisResult.data as
+            | CodingInterviewAnalysis
+            | null,
+          interviewTitle: titleResult.data?.name || "",
+        };
+      })
+    );
+
+    await log.flush();
+    return { interviewResults };
+  }
+);
 
 export const getCompanyCandidateCount = async (companyId: string) => {
   const log = new Logger().with({

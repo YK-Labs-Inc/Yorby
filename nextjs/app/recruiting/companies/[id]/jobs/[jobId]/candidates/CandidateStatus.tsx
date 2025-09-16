@@ -50,7 +50,13 @@ export function CandidateStatus({
     if (!candidateId) return;
 
     try {
-      await updateCandidateStage(candidateId, newStage, companyId, jobId, stageIds);
+      await updateCandidateStage(
+        candidateId,
+        newStage,
+        companyId,
+        jobId,
+        stageIds
+      );
     } catch (error) {
       // Error is already logged in the context
     }
@@ -103,10 +109,10 @@ export function CandidateStatus({
           {renderStageDisplay(effectiveStage, true)}
         </button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuPortal>
-        <DropdownMenuContent 
-          className="w-48 z-[100]" 
+        <DropdownMenuContent
+          className="w-48 z-[100]"
           align="start"
           sideOffset={5}
         >
@@ -121,11 +127,6 @@ export function CandidateStatus({
                 style={{ backgroundColor: stageOption.color || "#6B7280" }}
               />
               <span className="font-medium">{stageOption.name}</span>
-              {stageOption.description && (
-                <span className="text-muted-foreground ml-auto truncate">
-                  {stageOption.description}
-                </span>
-              )}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

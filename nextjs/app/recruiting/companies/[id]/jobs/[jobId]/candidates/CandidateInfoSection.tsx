@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Mail, Phone, Calendar } from "lucide-react";
-import type { CandidateData } from "./actions";
+import type { CandidateBasicData } from "./actions";
 import { CandidateStatus } from "./CandidateStatus";
-import { Tables } from "@/utils/supabase/database.types";
 
 interface CandidateInfoSectionProps {
-  candidateData: CandidateData;
+  candidateData: CandidateBasicData;
   stageIds: string[];
 }
 

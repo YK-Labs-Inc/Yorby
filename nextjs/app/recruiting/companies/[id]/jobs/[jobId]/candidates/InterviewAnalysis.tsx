@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   CheckCircle2,
   AlertCircle,
-  TrendingUp,
   XCircle,
   BarChart3,
   ChevronLeft,
@@ -19,7 +18,12 @@ import {
   Eye,
   Lock,
 } from "lucide-react";
-import type { InterviewAnalysis, CandidateData } from "./actions";
+import type {
+  InterviewAnalysis,
+  CandidateImportantData,
+  CandidateInterviewData,
+  CandidateBasicData,
+} from "./actions";
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -36,13 +40,17 @@ import { CandidateLimitUpgradeDialog } from "./CandidateLimitUpgradeDialog";
 import { FREE_TIER_INTERVIEW_COUNT } from "./constants";
 
 interface InterviewAnalysisProps {
-  candidateData?: CandidateData;
+  candidateBasicData: CandidateBasicData;
+  candidateImportantData?: CandidateImportantData | null;
+  candidateInterviewData?: CandidateInterviewData | null;
   jobInterviewCount: number;
   isPremium: boolean;
 }
 
 export default function InterviewAnalysis({
-  candidateData,
+  candidateBasicData,
+  candidateImportantData,
+  candidateInterviewData,
   jobInterviewCount,
   isPremium,
 }: InterviewAnalysisProps) {
@@ -57,20 +65,20 @@ export default function InterviewAnalysis({
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-  // Extract data from candidateData if provided
-  const applicationFiles = candidateData?.applicationFiles;
-  const interviewResults = candidateData?.interviewResults;
+  // Extract data from candidateInterviewData if provided
+  const applicationFiles = candidateImportantData?.applicationFiles;
+  const interviewResults = candidateInterviewData?.interviewResults;
   const interviewResult = interviewResults?.[selectedInterviewRound];
   const analysis = interviewResult?.interviewAnalysis;
   const hasMultipleRounds = interviewResults && interviewResults.length > 1;
-  const aggregatedAnalysis = candidateData?.aggregatedAnalysis;
-  const jobAlignmentDetails = candidateData?.jobAlignmentDetails;
+  const aggregatedAnalysis = candidateImportantData?.aggregatedAnalysis;
+  const jobAlignmentDetails = candidateImportantData?.jobAlignmentDetails;
 
   // Check if AI analysis should be locked for free tier
   const isLocked =
     !isPremium &&
-    candidateData?.candidate?.aiInterviewCompletionOrder &&
-    candidateData.candidate.aiInterviewCompletionOrder >
+    candidateBasicData?.candidate?.aiInterviewCompletionOrder &&
+    candidateBasicData.candidate.aiInterviewCompletionOrder >
       FREE_TIER_INTERVIEW_COUNT;
 
   // Helper functions
@@ -248,7 +256,8 @@ export default function InterviewAnalysis({
                 <p>
                   {t("locked.candidatePosition", {
                     position:
-                      candidateData?.candidate?.aiInterviewCompletionOrder ?? 0,
+                      candidateBasicData?.candidate
+                        ?.aiInterviewCompletionOrder ?? 0,
                     limit: FREE_TIER_INTERVIEW_COUNT,
                   })}
                 </p>
@@ -266,9 +275,9 @@ export default function InterviewAnalysis({
         <CandidateLimitUpgradeDialog
           open={showUpgradeDialog}
           onOpenChange={setShowUpgradeDialog}
-          companyId={candidateData?.candidate?.company_id || ""}
+          companyId={candidateBasicData?.candidate?.company_id || ""}
           totalCandidates={
-            candidateData?.candidate?.aiInterviewCompletionOrder || 0
+            candidateBasicData?.candidate?.aiInterviewCompletionOrder || 0
           }
           viewedCandidates={FREE_TIER_INTERVIEW_COUNT}
         />
@@ -416,7 +425,7 @@ export default function InterviewAnalysis({
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4 mt-4">
-              {candidateData ? (
+              {candidateInterviewData ? (
                 <>
                   {/* AI Interview Analysis Summary - Top of Overview */}
                   {analysis && (
@@ -792,7 +801,7 @@ export default function InterviewAnalysis({
               <TabsTrigger value="question">{t("tabs.question")}</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4 mt-4">
-              {candidateData ? (
+              {candidateInterviewData ? (
                 <>
                   {/* AI Interview Analysis Summary - Top of Overview */}
                   {analysis && (

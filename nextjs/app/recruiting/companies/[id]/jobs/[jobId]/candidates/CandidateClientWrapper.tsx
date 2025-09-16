@@ -6,8 +6,13 @@ import { Suspense } from "react";
 import {
   Candidate,
   CandidateData,
+  CandidateBasicData,
+  CandidateImportantData,
+  CandidateInterviewData,
   getCandidates,
-  getCandidateData,
+  getCandidateBasicData,
+  getCandidateImportantData,
+  getCandidateInterviewData,
   getJobInterviewCount,
 } from "./actions";
 import Link from "next/link";
@@ -32,8 +37,25 @@ const candidatesFetcher = async ([_, companyId, jobId, stageIds, offset]: [
   return await getCandidates(companyId, jobId, offset, 10, stageIds);
 };
 
-const candidateDataFetcher = async ([_, candidateId]: [string, string]) => {
-  return await getCandidateData(candidateId);
+const candidateBasicDataFetcher = async ([_, candidateId]: [
+  string,
+  string,
+]) => {
+  return await getCandidateBasicData(candidateId);
+};
+
+const candidateImportantDataFetcher = async ([_, candidateId]: [
+  string,
+  string,
+]) => {
+  return await getCandidateImportantData(candidateId);
+};
+
+const candidateInterviewDataFetcher = async ([_, candidateId]: [
+  string,
+  string,
+]) => {
+  return await getCandidateInterviewData(candidateId);
 };
 
 const interviewCountFetcher = async ([_, jobId]: [string, string]) => {
@@ -101,15 +123,53 @@ function CandidateClientWrapperInner({
     candidateId ||
     (candidates && candidates.length > 0 ? candidates[0].id : null);
 
-  // Fetch individual candidate data when candidateId is present
+  // Fetch tiered candidate data for progressive loading
   const {
-    data: candidateData,
-    error: candidateError,
-    isLoading: candidateLoading,
-    isValidating: candidateIsValidating,
-  } = useSWR<CandidateData | null>(
-    effectiveCandidateId ? ["candidate-data", effectiveCandidateId] : null,
-    candidateDataFetcher
+    data: candidateBasicData,
+    error: candidateBasicError,
+    isLoading: candidateBasicLoading,
+    isValidating: candidateBasicIsValidating,
+  } = useSWR<CandidateBasicData | null>(
+    effectiveCandidateId
+      ? ["candidate-basic-data", effectiveCandidateId]
+      : null,
+    candidateBasicDataFetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 5000,
+    }
+  );
+
+  const {
+    data: candidateImportantData,
+    error: candidateImportantError,
+    isLoading: candidateImportantLoading,
+    isValidating: candidateImportantIsValidating,
+  } = useSWR<CandidateImportantData | null>(
+    effectiveCandidateId
+      ? ["candidate-important-data", effectiveCandidateId]
+      : null,
+    candidateImportantDataFetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 5000,
+    }
+  );
+
+  const {
+    data: candidateInterviewData,
+    error: candidateInterviewError,
+    isLoading: candidateInterviewLoading,
+    isValidating: candidateInterviewIsValidating,
+  } = useSWR<CandidateInterviewData | null>(
+    effectiveCandidateId
+      ? ["candidate-interview-data", effectiveCandidateId]
+      : null,
+    candidateInterviewDataFetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10000,
+    }
   );
 
   // Fetch job interview count
@@ -122,14 +182,45 @@ function CandidateClientWrapperInner({
     mutateCandidates();
   };
 
-  const handleCandidateRetry = () => {
+  const handleBasicDataRetry = () => {
     if (effectiveCandidateId) {
-      mutate(["candidate-data", effectiveCandidateId]);
+      mutate(["candidate-basic-data", effectiveCandidateId]);
+    }
+  };
+
+  const handleImportantDataRetry = () => {
+    if (effectiveCandidateId) {
+      mutate(["candidate-important-data", effectiveCandidateId]);
+    }
+  };
+
+  const handleInterviewDataRetry = () => {
+    if (effectiveCandidateId) {
+      mutate(["candidate-interview-data", effectiveCandidateId]);
     }
   };
 
   const selectCandidate = (candidateId: string) => {
-    mutate(["candidate-data", candidateId]);
+    // Find the candidate from list for optimistic update
+    const selectedCandidate = candidates.find((c) => c.id === candidateId);
+
+    if (selectedCandidate) {
+      // Optimistic update with candidate list data
+      const optimisticBasicData: CandidateBasicData = {
+        candidate: selectedCandidate,
+        additionalInfo: [],
+      };
+
+      // Update cache immediately with optimistic data
+      mutate(["candidate-basic-data", candidateId], optimisticBasicData, {
+        revalidate: true,
+      });
+    }
+
+    // Trigger fresh data fetching
+    mutate(["candidate-basic-data", candidateId]);
+    mutate(["candidate-important-data", candidateId]);
+    mutate(["candidate-interview-data", candidateId]);
   };
 
   return (
@@ -166,32 +257,31 @@ function CandidateClientWrapperInner({
 
           {/* Right Content - Candidate Overview */}
           <div className="flex-1 min-w-0 overflow-hidden">
-            <Suspense fallback={<CandidateOverviewSkeleton />}>
-              {candidateData ? (
-                <CandidateOverview
-                  candidateData={{
-                    ...candidateData,
-                    candidate: {
-                      ...candidateData.candidate,
-                      currentStage: getCandidateStage(
-                        candidateData.candidate.id,
-                        candidateData.candidate.currentStage
-                      ),
-                    },
-                  }}
-                  jobInterviewCount={interviewCount}
-                  loadingCandidateData={
-                    candidateLoading || candidateIsValidating
-                  }
-                  hasError={candidateError}
-                  onRetry={handleCandidateRetry}
-                  stageIds={stageIds}
-                  isPremium={isPremium}
-                />
-              ) : (
-                <EmptyState />
-              )}
-            </Suspense>
+            <CandidateOverview
+              candidateBasicData={candidateBasicData}
+              loadingImportantData={
+                candidateImportantLoading || candidateImportantIsValidating
+              }
+              importantDataError={candidateImportantError}
+              candidateImportantData={candidateImportantData}
+              loadingInterviewData={
+                candidateInterviewLoading || candidateInterviewIsValidating
+              }
+              interviewDataError={candidateInterviewError}
+              candidateInterviewData={candidateInterviewData}
+              jobInterviewCount={interviewCount}
+              loadingCandidateData={
+                candidateBasicLoading || candidateBasicIsValidating
+              }
+              hasBasicDataError={candidateBasicError}
+              onBasicDataRetry={handleBasicDataRetry}
+              hasImportantDataError={candidateImportantError}
+              onImportantDataRetry={handleImportantDataRetry}
+              hasInterviewDataError={candidateInterviewError}
+              onInterviewDataRetry={handleInterviewDataRetry}
+              stageIds={stageIds}
+              isPremium={isPremium}
+            />
           </div>
         </div>
       </div>
