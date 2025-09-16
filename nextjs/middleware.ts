@@ -14,19 +14,21 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // Check if the current domain needs to be redirected
   const hostname = request.headers.get("host") || "";
 
+  // Landing page for yorby.ai domain
+  if (hostname === "yorby.ai" || hostname === "www.yorby.ai") {
+    const { pathname } = request.nextUrl;
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/b2b-landing", request.url));
+    }
+    // Redirect all other paths to main app domain
+    return NextResponse.redirect(`https://web.yorby.ai${pathname}${request.nextUrl.search}`);
+  }
+
   // Coaching software
   if (hostname.includes("app.yorby.ai")) {
     const { pathname } = request.nextUrl;
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/coaches", request.url));
-    }
-    return response;
-  }
-
-  if (hostname.includes("perfectinterview.ai")) {
-    const { pathname } = request.nextUrl;
-    if (pathname === "/") {
-      return NextResponse.rewrite(new URL("/auth/sign-up", request.url));
     }
     return response;
   }
