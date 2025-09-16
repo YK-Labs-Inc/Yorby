@@ -113,6 +113,12 @@
         },
         "cta": "Join 500+ Startups"
       },
+      "howDidYouHear": {
+        "title": "How did you hear about us?",
+        "subtitle": "We'd love to know where our awesome users are coming from!",
+        "cta": "Complete Setup",
+        "validationMessage": "Please select an option to continue"
+      },
       "socialProof": {
         "title": "Trusted by Forward-Thinking Companies",
         "subtitle": "Join 500+ companies revolutionizing their hiring",
