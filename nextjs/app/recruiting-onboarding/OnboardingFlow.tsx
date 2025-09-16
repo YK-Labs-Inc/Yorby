@@ -8,16 +8,18 @@ import { ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { markOnboardingComplete } from "./actions";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import { usePostHog } from "posthog-js/react";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
-const STEPS = ["freeATS", "howItWorks", "comparison"] as const;
+const STEPS = ["freeATS", "howItWorks", "comparison", "howDidYouHear"] as const;
 
 export default function OnboardingFlow() {
   const t = useTranslations("onboarding.recruitingOnboarding");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { logError } = useAxiomLogging();
+  const posthog = usePostHog();
 
   // Initialize currentStep from search param if it exists
   const getInitialStep = () => {
@@ -33,6 +35,8 @@ export default function OnboardingFlow() {
 
   const [currentStep, setCurrentStep] = useState(getInitialStep);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedReferralSource, setSelectedReferralSource] =
+    useState<string>("");
 
   const currentStepKey = STEPS[currentStep];
 
@@ -52,9 +56,23 @@ export default function OnboardingFlow() {
   }, [currentStep, router, searchParams]);
 
   const handleNext = async () => {
+    // If we're leaving the survey step, track the event
+    if (
+      currentStepKey === "howDidYouHear" &&
+      selectedReferralSource &&
+      posthog
+    ) {
+      posthog.capture("recruiting_referral_source", {
+        referral_source: selectedReferralSource,
+        step: "recruiting_onboarding",
+      });
+    }
+
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 200);
     } else if (currentStep === TOTAL_STEPS - 1) {
       // Mark onboarding as complete and navigate to recruiting page
       setIsLoading(true);
@@ -69,7 +87,9 @@ export default function OnboardingFlow() {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 200);
     }
   };
 
@@ -439,6 +459,103 @@ export default function OnboardingFlow() {
           </div>
         );
 
+      case "howDidYouHear":
+        const referralSources = [
+          { value: "tiktok", label: "TikTok" },
+          { value: "instagram", label: "Instagram" },
+          { value: "youtube", label: "YouTube" },
+          { value: "linkedin", label: "LinkedIn" },
+          { value: "twitter", label: "X/Twitter" },
+          { value: "word_of_mouth", label: "Word of mouth" },
+          { value: "email", label: "Email" },
+        ];
+
+        return (
+          <div className="space-y-8 max-w-2xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3"
+              >
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  {t("steps.howDidYouHear.title")}
+                </h1>
+                <p className="text-lg text-gray-600">
+                  {t("steps.howDidYouHear.subtitle")}
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Survey Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
+            >
+              <div className="space-y-3">
+                {referralSources.map((source, index) => (
+                  <motion.label
+                    key={source.value}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.05 }}
+                    className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:border-blue-200 hover:bg-blue-50/50 ${
+                      selectedReferralSource === source.value
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="referralSource"
+                      value={source.value}
+                      checked={selectedReferralSource === source.value}
+                      onChange={(e) =>
+                        setSelectedReferralSource(e.target.value)
+                      }
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
+                        selectedReferralSource === source.value
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {selectedReferralSource === source.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      )}
+                    </div>
+                    <span
+                      className={`font-medium text-sm ${
+                        selectedReferralSource === source.value
+                          ? "text-blue-900"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {source.label}
+                    </span>
+                  </motion.label>
+                ))}
+              </div>
+
+              {/* Validation message */}
+              {!selectedReferralSource && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-gray-500 mt-3 text-center"
+                >
+                  {t("steps.howDidYouHear.validationMessage")}
+                </motion.p>
+              )}
+            </motion.div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -507,7 +624,10 @@ export default function OnboardingFlow() {
             <Button
               onClick={handleNext}
               size="lg"
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                (currentStepKey === "howDidYouHear" && !selectedReferralSource)
+              }
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-6 text-base font-medium shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 transition-all duration-300"
             >
               {isLoading ? (
