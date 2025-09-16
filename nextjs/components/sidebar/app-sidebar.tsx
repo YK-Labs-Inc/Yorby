@@ -134,7 +134,8 @@ export function AppSidebar({
     pathname === "/" ||
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/auth") ||
-    pathname.startsWith("/apply");
+    pathname.startsWith("/apply") ||
+    pathname.startsWith("/b2b-landing");
 
   if (hideSidebar) {
     return null;
