@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { isSupportedBrowser, getBrowserName } from "@/utils/browser";
+import {
+  isSupportedBrowser,
+  getBrowserName,
+  isMobileDevice,
+} from "@/utils/browser";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -10,14 +14,17 @@ import Image from "next/image";
 export const UnsupportedBrowser = () => {
   const [isSupported, setIsSupported] = useState(true);
   const [browserName, setBrowserName] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const t = useTranslations("unsupportedBrowser");
 
   useEffect(() => {
     const supported = isSupportedBrowser();
     const name = getBrowserName();
+    const mobile = isMobileDevice();
     setIsSupported(supported);
     setBrowserName(name);
+    setIsMobile(mobile);
   }, []);
 
   const shouldShowWarning = () => {
@@ -40,9 +47,13 @@ export const UnsupportedBrowser = () => {
     <div className="fixed inset-0 bg-background z-50 flex items-center justify-center p-4">
       <div className="max-w-lg mx-auto text-center space-y-6">
         <div className="space-y-4">
-          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {isMobile ? t("mobileTitle") : t("title")}
+          </h1>
           <p className="text-muted-foreground text-lg">
-            {t("description", { browserName })}
+            {isMobile
+              ? t("mobileDescription")
+              : t("description", { browserName })}
           </p>
         </div>
 
@@ -67,28 +78,30 @@ export const UnsupportedBrowser = () => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <Button
-            onClick={() =>
-              window.open("https://www.google.com/chrome/", "_blank")
-            }
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
-          >
-            {t("downloadChrome")}
-          </Button>
-
-          <div className="text-sm text-muted-foreground">
-            {t("or")}{" "}
-            <button
+        {!isMobile && (
+          <div className="space-y-4">
+            <Button
               onClick={() =>
-                window.open("https://www.microsoft.com/edge", "_blank")
+                window.open("https://www.google.com/chrome/", "_blank")
               }
-              className="text-primary hover:underline"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg"
             >
-              {t("downloadEdge")}
-            </button>
+              {t("downloadChrome")}
+            </Button>
+
+            <div className="text-sm text-muted-foreground">
+              {t("or")}{" "}
+              <button
+                onClick={() =>
+                  window.open("https://www.microsoft.com/edge", "_blank")
+                }
+                className="text-primary hover:underline"
+              >
+                {t("downloadEdge")}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

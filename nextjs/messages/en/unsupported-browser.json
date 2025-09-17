@@ -1,6 +1,8 @@
 {
-  "title": "We work with Chrome and Edge",
-  "description": "You're currently using {browserName}. For the best experience, please switch to Chrome or Edge.",
+  "title": "We work with Chrome and Edge on desktop",
+  "description": "You're currently using {browserName}. For the best experience, please switch to Chrome or Edge on a desktop computer.",
+  "mobileTitle": "Desktop browser required",
+  "mobileDescription": "Our platform requires a desktop browser. Please visit this page on a desktop computer using Chrome or Edge.",
   "downloadChrome": "Download Chrome",
   "downloadEdge": "Download Microsoft Edge",
   "or": "or"

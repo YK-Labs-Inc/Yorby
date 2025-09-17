@@ -195,9 +195,12 @@ export default async function ApplyPage({
       </div>
 
       {/* Mobile Apply Button - Fixed at Bottom */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-20">
+      <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t shadow-lg p-4 z-20">
         <ApplyButton companyId={companyId} jobId={jobId} />
       </div>
+
+      {/* Mobile Bottom Spacer for Powered by Yorby Badge */}
+      <div className="lg:hidden h-32"></div>
     </div>
   );
 }
