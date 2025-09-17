@@ -1,12 +1,22 @@
+export const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) ||
+    (window.innerWidth <= 768 && 'ontouchstart' in window);
+};
+
 export const isSupportedBrowser = (): boolean => {
   if (typeof window === 'undefined') return true;
-  
+
   const userAgent = navigator.userAgent.toLowerCase();
-  
+
   const isChrome = userAgent.includes('chrome') && !userAgent.includes('edg');
   const isEdge = userAgent.includes('edg');
-  
-  return isChrome || isEdge;
+  const isMobile = isMobileDevice();
+
+  return (isChrome || isEdge) && !isMobile;
 };
 
 export const getBrowserName = (): string => {

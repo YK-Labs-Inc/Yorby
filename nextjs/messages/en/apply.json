@@ -97,6 +97,18 @@
       "filesSelected": "Successfully selected {count} file(s)",
       "filesUploadedWithErrors": "Uploaded {successCount} file(s) successfully. {errorCount} file(s) failed.",
       "applicationSubmitted": "Application submitted successfully!"
+    },
+    "mobileWarning": {
+      "title": "Desktop browser required for job applications",
+      "description": "For the best application experience, please visit this page on a desktop computer using Chrome or Edge.",
+      "copyUrlButton": "Copy URL to Share",
+      "copyUrlSuccess": "URL copied to clipboard!",
+      "browserRecommendations": {
+        "title": "Recommended browsers:",
+        "chrome": "Google Chrome",
+        "edge": "Microsoft Edge"
+      },
+      "instructions": "Visit this URL on your desktop to apply for this position."
     }
   },
   "applicationSubmitted": {
