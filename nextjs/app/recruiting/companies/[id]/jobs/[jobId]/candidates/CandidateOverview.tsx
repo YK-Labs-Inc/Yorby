@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type {
   CandidateBasicData,
@@ -27,9 +27,7 @@ interface CandidateOverviewProps {
   loadingInterviewData?: boolean;
   hasBasicDataError?: any;
   onBasicDataRetry?: () => void;
-  hasImportantDataError?: any;
   onImportantDataRetry?: () => void;
-  hasInterviewDataError?: any;
   onInterviewDataRetry?: () => void;
   stageIds: string[];
   isPremium: boolean;
@@ -47,9 +45,7 @@ export default function CandidateOverview({
   loadingInterviewData,
   hasBasicDataError,
   onBasicDataRetry,
-  hasImportantDataError,
   onImportantDataRetry,
-  hasInterviewDataError,
   onInterviewDataRetry,
   stageIds,
   isPremium,

@@ -275,9 +275,7 @@ function CandidateClientWrapperInner({
               }
               hasBasicDataError={candidateBasicError}
               onBasicDataRetry={handleBasicDataRetry}
-              hasImportantDataError={candidateImportantError}
               onImportantDataRetry={handleImportantDataRetry}
-              hasInterviewDataError={candidateInterviewError}
               onInterviewDataRetry={handleInterviewDataRetry}
               stageIds={stageIds}
               isPremium={isPremium}
