@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
+import * as Sentry from "@sentry/nextjs";
 
 type UseConnectionDetailsProps = {
   kind: "candidate" | "demo" | "mock";
@@ -56,7 +57,9 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
       .catch((error) => {
         logError("Error fetching connection details", {
           error,
+          function: "useConnectionDetails",
         });
+        Sentry.captureException(error);
         setIsConnecting(false);
         setIsConnected(false);
       });
