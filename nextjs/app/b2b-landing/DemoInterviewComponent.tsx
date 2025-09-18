@@ -21,7 +21,7 @@ import { SessionView } from "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockIn
 import { usePostHog } from "posthog-js/react";
 import { APP_CONFIG_DEFAULTS } from "../dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/app-config";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Star, Users, Zap, ArrowRight } from "lucide-react";
+import { CheckCircle, Star, Users, Zap, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { isSupportedBrowser } from "@/utils/browser";
@@ -31,6 +31,7 @@ const MotionSessionView = motion.create(SessionView);
 
 export function DemoInterviewComponent() {
   const [isSupported, setIsSupported] = useState(true);
+  const [connectionError, setConnectionError] = useState(true);
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -111,15 +112,13 @@ export function DemoInterviewComponent() {
         })
         .catch((error) => {
           setIsConnecting(false);
+          setConnectionError(true);
           logError("Failed to connect to LiveKit room", {
             error: error.message,
             errorName: error.name,
             serverUrl: connectionDetails.serverUrl,
           });
-          toastAlert({
-            title: t("errors.connectingToAgent"),
-            description: `${error.name}: ${error.message}`,
-          });
+          // Don't show toast alert, instead show the connection error UI
         });
     }
   }, [
@@ -142,6 +141,84 @@ export function DemoInterviewComponent() {
 
   if (!isSupported) {
     return <UnsupportedBrowser showBrowserOverride={true} />;
+  }
+
+  if (connectionError) {
+    return (
+      <div className="h-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="max-w-lg w-full">
+          <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="text-center space-y-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full">
+                  <Clock className="w-8 h-8 text-orange-600" />
+                </div>
+
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    Demo Currently Unavailable
+                  </h2>
+                  <p className="text-lg text-gray-600">
+                    We're experiencing high demand for our live demo. Our
+                    systems are currently at capacity to ensure the best
+                    experience for everyone.
+                  </p>
+                </div>
+
+                <div className="bg-blue-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    What you can do instead:
+                  </h3>
+                  <div className="space-y-3 text-left">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <span className="text-gray-700">
+                        Check back in a few minutes when capacity frees up
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <span className="text-gray-700">
+                        Sign up for our free ATS to get started immediately
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <a
+                        href="https://calendar.app.google/CfX9kBwXifdADN6G8"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline hover:text-blue-700 font-medium"
+                      >
+                        Schedule a personalized demo with our team →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/auth/login">
+                    <Button
+                      size="lg"
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700"
+                    >
+                      Start Free
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">
+                    No credit card required • Free ATS forever
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   if (!sessionStarted) {
