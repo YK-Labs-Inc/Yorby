@@ -14,6 +14,8 @@ import { headers } from "next/headers";
 import { Enums, Tables } from "@/utils/supabase/database.types";
 import { uploadFileToGemini } from "@/utils/ai/gemini";
 import { trackServerEvent } from "@/utils/tracking/serverUtils";
+import { Resend } from "resend";
+import InterviewInvitationEmail from "@/components/email/InterviewInvitationEmail";
 
 // Helper function to fetch candidate files and generate context
 async function generateCandidateContext({
@@ -339,7 +341,9 @@ export const submitApplication = async (
     if (email && email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email.trim())) {
-        logger.info("Invalid email format provided", { email: email.substring(0, 3) + "..." });
+        logger.info("Invalid email format provided", {
+          email: email.substring(0, 3) + "...",
+        });
         return { error: t("invalidEmailFormat") };
       }
     }
@@ -707,5 +711,102 @@ export const createInterviewsForJobAndReturnFirstInterviewId = async ({
     throw new Error("Failed to create interview");
   }
 
+  await sendInterviewInvitationEmail({
+    candidateId,
+    jobId,
+    interviewId: firstInterviewId,
+  });
   return firstInterviewId;
+};
+
+export const sendInterviewInvitationEmail = async ({
+  candidateId,
+  jobId,
+  interviewId,
+}: {
+  candidateId: string;
+  jobId: string;
+  interviewId: string;
+}) => {
+  const supabaseAdmin = await createAdminClient();
+  const logger = new Logger().with({
+    function: "sendInterviewInvitationEmail",
+    jobId,
+    candidateId,
+    interviewId,
+  });
+  try {
+    // Fetch candidate and user information
+    const { data: candidate, error: candidateError } = await supabaseAdmin
+      .from("company_job_candidates")
+      .select("candidate_user_id, company_id")
+      .eq("id", candidateId)
+      .single();
+    if (candidateError) {
+      logger.error("Error fetching candidate", { error: candidateError });
+      throw new Error("Error fetching candidate");
+    }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseAdmin.auth.admin.getUserById(candidate.candidate_user_id);
+    if (userError) {
+      logger.error("Error fetching user", { error: userError });
+      throw new Error("Error fetching user");
+    }
+    if (!user?.email) {
+      logger.error("No email found for user");
+      throw new Error("No email found for user");
+    }
+
+    // Fetch job and company information
+    const { data: job, error: jobError } = await supabaseAdmin
+      .from("custom_jobs")
+      .select("job_title, company_id")
+      .eq("id", jobId)
+      .single();
+    if (jobError) {
+      logger.error("Error fetching job", { error: jobError });
+      throw new Error("Error fetching job");
+    }
+
+    const { data: company, error: companyError } = await supabaseAdmin
+      .from("companies")
+      .select("name")
+      .eq("id", candidate.company_id)
+      .single();
+    if (companyError) {
+      logger.error("Error fetching company", { error: companyError });
+      throw new Error("Error fetching company");
+    }
+
+    // Get the origin from headers to build the full URL
+    const origin =
+      (await headers()).get("origin") ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      "https://web.yorby.ai";
+    const interviewLink = `${origin}/apply/company/${candidate.company_id}/job/${jobId}/candidate-interview/${interviewId}`;
+
+    // Get user's name if available
+    const candidateName =
+      user.user_metadata?.full_name || user.user_metadata?.name || undefined;
+
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    await resend.emails.send({
+      from: "Yorby <noreply@noreply-recruiting.yorby.ai>",
+      to: [user.email],
+      subject: `Interview Invitation - ${job.job_title} at ${company.name}`,
+      react: InterviewInvitationEmail({
+        candidateName,
+        companyName: company.name,
+        jobTitle: job.job_title,
+        interviewLink,
+      }),
+    });
+  } catch (error) {
+    logger.error("Error sending interview invitation email", { error });
+  } finally {
+    await logger.flush();
+  }
 };
