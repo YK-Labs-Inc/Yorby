@@ -46,7 +46,7 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
     setConnectionDetails(null);
     setIsConnecting(true);
     setIsConnected(false);
-    fetch(`/api/livekit/connection-details?${queryParam}`)
+    fetch(`https://web.yorby.ai/api/livekit/connection-details?${queryParam}`)
       .then((res) => res.json())
       .then((data) => {
         setConnectionDetails(data);

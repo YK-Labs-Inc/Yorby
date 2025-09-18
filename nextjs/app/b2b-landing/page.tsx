@@ -48,7 +48,7 @@ export default function B2BLandingPage() {
       <Navigation />
       <HeroSection />
       <FeatureShowcase />
-      {/* <InteractiveDemoSection /> */}
+      <InteractiveDemoSection />
       <ATSSection />
       <ProductDemo />
       <SimplePricing />
