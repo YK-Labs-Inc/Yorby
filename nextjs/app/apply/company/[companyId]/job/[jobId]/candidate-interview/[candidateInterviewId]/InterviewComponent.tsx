@@ -10,7 +10,6 @@ import {
   StartAudio,
 } from "@livekit/components-react";
 import { Toaster } from "@/components/ui/sonner";
-import Link from "next/link";
 import "@livekit/components-styles";
 import "@/app/dashboard/jobs/[jobId]/mockInterviews/[mockInterviewId]/v2/livekit-light-theme.css";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";

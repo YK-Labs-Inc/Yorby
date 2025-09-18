@@ -20,6 +20,7 @@ interface RealInterviewPreJoinProps {
   enableSimliAvatar?: boolean;
   simliFaceId?: string;
   setSimliFaceId?: (faceId: string) => void;
+  requiresTurnstile?: boolean;
 }
 
 export function RealInterviewPreJoin({
@@ -33,6 +34,7 @@ export function RealInterviewPreJoin({
   enableSimliAvatar = false,
   simliFaceId,
   setSimliFaceId,
+  requiresTurnstile = false,
 }: RealInterviewPreJoinProps) {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption>(
     VOICE_OPTIONS[0]
@@ -53,6 +55,7 @@ export function RealInterviewPreJoin({
         enableSimliAvatar={enableSimliAvatar}
         simliFaceId={simliFaceId}
         setSimliFaceId={setSimliFaceId}
+        requiresTurnstile={requiresTurnstile}
       />
     </MediaDeviceProvider>
   );
@@ -71,6 +74,7 @@ interface RealInterviewPreJoinContentProps {
   enableSimliAvatar: boolean;
   simliFaceId?: string;
   setSimliFaceId?: (faceId: string) => void;
+  requiresTurnstile?: boolean;
 }
 
 function RealInterviewPreJoinContent({
@@ -86,6 +90,7 @@ function RealInterviewPreJoinContent({
   enableSimliAvatar,
   simliFaceId,
   setSimliFaceId,
+  requiresTurnstile,
 }: RealInterviewPreJoinContentProps) {
   const {
     videoDevices,
@@ -132,6 +137,7 @@ function RealInterviewPreJoinContent({
       enableSimliAvatar={enableSimliAvatar}
       simliFaceId={simliFaceId}
       setSimliFaceId={setSimliFaceId}
+      requiresTurnstile={requiresTurnstile}
     />
   );
 }

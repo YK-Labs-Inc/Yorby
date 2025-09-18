@@ -2,23 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { ConnectionDetails } from "@/app/api/livekit/connection-details/route";
 import { useAxiomLogging } from "@/context/AxiomLoggingContext";
 
-type UseConnectionDetailsProps =
-  | {
-      kind: "mock";
-      id?: string;
-      enableAiAvatar?: boolean;
-      avatarProvider?: "bey" | "simli";
-      livekitMode?: "realtime" | "pipeline";
-      simliFaceId?: string;
-    }
-  | {
-      kind: "candidate";
-      id?: string;
-      enableAiAvatar?: boolean;
-      avatarProvider?: "bey" | "simli";
-      livekitMode?: "realtime" | "pipeline";
-      simliFaceId?: string;
-    };
+type UseConnectionDetailsProps = {
+  kind: "candidate" | "demo" | "mock";
+  id?: string;
+  enableAiAvatar?: boolean;
+  avatarProvider?: "bey" | "simli";
+  livekitMode?: "realtime" | "pipeline";
+  simliFaceId?: string;
+};
 
 export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const { logError } = useAxiomLogging();
@@ -28,31 +19,29 @@ export default function useConnectionDetails(props: UseConnectionDetailsProps) {
   const [isConnected, setIsConnected] = useState(false);
 
   const fetchConnectionDetails = useCallback(() => {
-    if (!props.id) {
-      return;
+    let queryParam = "";
+    if (props.kind === "mock" && props.id) {
+      queryParam += `mockInterviewId=${encodeURIComponent(props.id)}`;
+    } else if (props.kind === "candidate" && props.id) {
+      queryParam += `candidateJobInterviewId=${encodeURIComponent(props.id)}`;
+    } else if (props.kind === "demo") {
+      queryParam += `isDemo=true`;
+    } else {
+      throw new Error("Invalid kind or id");
     }
-    const baseParam =
-      props.kind === "mock"
-        ? `mockInterviewId=${encodeURIComponent(props.id)}`
-        : `candidateJobInterviewId=${encodeURIComponent(props.id)}`;
 
-    const avatarParam =
-      props.enableAiAvatar !== undefined
-        ? `&enableAiAvatar=${encodeURIComponent(props.enableAiAvatar.toString())}`
-        : "";
-    const avatarProviderParam =
-      props.avatarProvider !== undefined
-        ? `&avatarProvider=${encodeURIComponent(props.avatarProvider)}`
-        : "";
-    const livekitModeParam =
-      props.livekitMode !== undefined
-        ? `&livekitMode=${encodeURIComponent(props.livekitMode)}`
-        : "";
-    const simliFaceIdParam =
-      props.simliFaceId !== undefined
-        ? `&simliFaceId=${encodeURIComponent(props.simliFaceId)}`
-        : "";
-    const queryParam = `${baseParam}${avatarParam}${avatarProviderParam}${livekitModeParam}${simliFaceIdParam}`;
+    if (props.enableAiAvatar !== undefined) {
+      queryParam += `&enableAiAvatar=${encodeURIComponent(props.enableAiAvatar.toString())}`;
+    }
+    if (props.avatarProvider !== undefined) {
+      queryParam += `&avatarProvider=${encodeURIComponent(props.avatarProvider)}`;
+    }
+    if (props.livekitMode !== undefined) {
+      queryParam += `&livekitMode=${encodeURIComponent(props.livekitMode)}`;
+    }
+    if (props.simliFaceId !== undefined) {
+      queryParam += `&simliFaceId=${encodeURIComponent(props.simliFaceId)}`;
+    }
 
     setConnectionDetails(null);
     setIsConnecting(true);

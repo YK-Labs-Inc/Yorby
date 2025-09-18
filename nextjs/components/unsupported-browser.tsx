@@ -11,7 +11,11 @@ import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
-export const UnsupportedBrowser = () => {
+export const UnsupportedBrowser = ({
+  showBrowserOverride = false,
+}: {
+  showBrowserOverride?: boolean;
+}) => {
   const [isSupported, setIsSupported] = useState(true);
   const [browserName, setBrowserName] = useState("");
   const [isMobile, setIsMobile] = useState(false);
@@ -39,7 +43,7 @@ export const UnsupportedBrowser = () => {
     );
   };
 
-  if (!shouldShowWarning()) {
+  if (!shouldShowWarning() && !showBrowserOverride) {
     return null;
   }
 

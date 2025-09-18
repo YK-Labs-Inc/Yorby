@@ -11,8 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { VoiceOption, VOICE_OPTIONS } from "@/app/types/tts";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 interface MediaDevice {
   deviceId: string;
@@ -43,6 +44,7 @@ interface InterviewSetupProps {
   enableSimliAvatar?: boolean;
   simliFaceId?: string;
   setSimliFaceId?: (faceId: string) => void;
+  requiresTurnstile?: boolean;
 }
 
 export default function InterviewSetup({
@@ -69,9 +71,11 @@ export default function InterviewSetup({
   enableSimliAvatar = false,
   simliFaceId,
   setSimliFaceId,
+  requiresTurnstile = false,
 }: InterviewSetupProps) {
   const t = useTranslations("mockInterview.setup");
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -232,7 +236,17 @@ export default function InterviewSetup({
           <div className="flex justify-start">
             <form action={startInterviewAction}>
               <input type="hidden" name="jobId" value={jobId} />
-              <Button size="lg" disabled={!stream}>
+              {requiresTurnstile && (
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+              )}
+              <Button
+                size="lg"
+                disabled={!stream || (requiresTurnstile && !captchaToken)}
+              >
                 {t("startButton")}
               </Button>
             </form>
