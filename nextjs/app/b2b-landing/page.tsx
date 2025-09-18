@@ -11,8 +11,17 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import MuxPlayer from "@mux/mux-player-react";
-import { ArrowRight, Play, CheckCircle, ArrowDown } from "lucide-react";
+import {
+  ArrowRight,
+  Play,
+  CheckCircle,
+  ArrowDown,
+  Mic,
+  Sparkles,
+} from "lucide-react";
+import { DemoInterviewComponent } from "./DemoInterviewComponent";
 
 const GithubIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -39,6 +48,7 @@ export default function B2BLandingPage() {
       <Navigation />
       <HeroSection />
       <FeatureShowcase />
+      <InteractiveDemoSection />
       <ATSSection />
       <ProductDemo />
       <SimplePricing />
@@ -100,6 +110,175 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
+  );
+};
+
+const InteractiveDemoSection = () => {
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return null;
+  }
+
+  return (
+    <section className="py-20 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          className="text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+        >
+          <motion.div
+            variants={fadeInUp}
+            className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6"
+          >
+            <Sparkles className="w-4 h-4" />
+            Live Demo Available
+          </motion.div>
+
+          <motion.h2
+            variants={fadeInUp}
+            className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
+          >
+            Try the AI Interviewer
+            <br />
+            <span className="text-blue-600">Right Now</span>
+          </motion.h2>
+
+          <motion.p
+            variants={fadeInUp}
+            className="text-xl text-gray-600 max-w-2xl mx-auto mb-12"
+          >
+            Experience firsthand how our AI conducts natural voice interviews.
+            No sign-up required — just click and start talking.
+          </motion.p>
+
+          <motion.div variants={fadeInUp} className="flex justify-center">
+            <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="lg"
+                  className="group px-10 py-8 text-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-200"
+                >
+                  <Mic className="mr-3 w-6 h-6 animate-pulse" />
+                  Start Live Demo Interview
+                  <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full p-0 bg-transparent border-0">
+                <div className="w-full h-full bg-white rounded-lg overflow-hidden">
+                  <DemoInterviewComponent />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </motion.div>
+
+          <motion.div
+            variants={fadeInUp}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-gray-500"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span>No sign-up needed</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span>2-minute demo</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span>See instant AI analysis</span>
+            </div>
+          </motion.div>
+
+          {/* Visual Demo Preview */}
+          <motion.div
+            variants={fadeInUp}
+            className="mt-16 relative max-w-4xl mx-auto"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl blur-3xl opacity-20"></div>
+            <div className="relative bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <div className="text-sm text-gray-400">
+                  Live AI Interview Demo
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Mic className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          AI Interviewer
+                        </p>
+                        <p className="text-xs text-gray-500">Ready to start</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 italic">
+                      "Tell me about your experience with team leadership..."
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span className="text-lg">👤</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">You</p>
+                        <p className="text-xs text-gray-500">Speaking...</p>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-600 rounded-full animate-pulse"
+                        style={{ width: "60%" }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">
+                    Real-time Analysis
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Communication</span>
+                      <span className="text-green-600 font-medium">
+                        Excellent
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Technical Skills</span>
+                      <span className="text-blue-600 font-medium">Strong</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Culture Fit</span>
+                      <span className="text-purple-600 font-medium">
+                        Good Match
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-gray-500">AI confidence: 92%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 

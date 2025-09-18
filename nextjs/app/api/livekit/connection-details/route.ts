@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
   AccessToken,
   type AccessTokenOptions,
@@ -58,8 +58,9 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const avatarProvider = searchParams.get("avatarProvider");
     const livekitMode = searchParams.get("livekitMode");
     const simliFaceId = searchParams.get("simliFaceId");
+    const isDemo = searchParams.get("isDemo") === "true";
 
-    if (!mockInterviewId && !candidateJobInterviewId) {
+    if (!mockInterviewId && !candidateJobInterviewId && !isDemo) {
       log.warn(
         "Missing mockInterviewId and candidateJobInterviewId in request"
       );
@@ -83,7 +84,7 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     // Generate participant token
     const participantName =
       user.user_metadata?.full_name || user.email || "User";
-    const participantIdentity = user.id;
+    const participantIdentity = isDemo ? crypto.randomUUID() : user.id;
     const roomName = crypto.randomUUID();
     const participantToken = await createParticipantToken(
       {
@@ -94,29 +95,36 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     );
 
     // Create agent dispatch after room and participant are set up
-    const agentName = "interview_assistant";
+    const agentName = isDemo
+      ? "demo_interview_assistant"
+      : "interview_assistant";
     const agentDispatchClient = new AgentDispatchClient(
       LIVEKIT_URL,
       API_KEY,
       API_SECRET
     );
+    const agentMetadata = isDemo
+      ? {
+          livekit_mode: livekitMode,
+        }
+      : {
+          user_id: participantIdentity,
+          candidate_name: participantName,
+          interview_prompt: interviewPrompt,
+          mock_interview_id: mockInterviewId,
+          candidate_job_interview_id: candidateJobInterviewId,
+          enable_ai_avatar: enableAiAvatar,
+          avatar_provider: avatarProvider,
+          livekit_mode: livekitMode,
+          simli_face_id: simliFaceId,
+        };
 
     try {
       const dispatch = await agentDispatchClient.createDispatch(
         roomName,
         agentName,
         {
-          metadata: JSON.stringify({
-            user_id: participantIdentity,
-            candidate_name: participantName,
-            interview_prompt: interviewPrompt,
-            mock_interview_id: mockInterviewId,
-            candidate_job_interview_id: candidateJobInterviewId,
-            enable_ai_avatar: enableAiAvatar,
-            avatar_provider: avatarProvider,
-            livekit_mode: livekitMode,
-            simli_face_id: simliFaceId,
-          }),
+          metadata: JSON.stringify(agentMetadata),
         }
       );
       log.info("Created agent dispatch", {
