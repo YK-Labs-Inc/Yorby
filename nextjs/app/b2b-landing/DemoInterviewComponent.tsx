@@ -31,7 +31,7 @@ const MotionSessionView = motion.create(SessionView);
 
 export function DemoInterviewComponent() {
   const [isSupported, setIsSupported] = useState(true);
-  const [connectionError, setConnectionError] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
