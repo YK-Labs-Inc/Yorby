@@ -56,7 +56,9 @@ export default async function CandidateInterviewPage({ params }: PageProps) {
   const user = await getServerUser();
 
   if (!user) {
-    redirect(`/apply/company/${companyId}/job/${jobId}`);
+    redirect(
+      `/auth/sign-in?redirect=/apply/company/${companyId}/job/${jobId}/candidate-interview/${candidateInterviewId}`
+    );
   }
 
   if (user.is_anonymous) {
