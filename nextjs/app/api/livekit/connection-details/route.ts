@@ -42,14 +42,6 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
       throw new Error("LIVEKIT_API_SECRET is not defined");
     }
 
-    // Get the current user
-    const user = await getServerUser();
-
-    if (!user) {
-      log.error("Unauthorized access attempt");
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
     // Get mockInterviewId from query params
     const searchParams = req.nextUrl.searchParams;
     const mockInterviewId = searchParams.get("mockInterviewId");
@@ -59,6 +51,14 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     const livekitMode = searchParams.get("livekitMode");
     const simliFaceId = searchParams.get("simliFaceId");
     const isDemo = searchParams.get("isDemo") === "true";
+
+    // Get the current user
+    const user = await getServerUser();
+
+    if (!user && !isDemo) {
+      log.error("Unauthorized access attempt");
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
     if (!mockInterviewId && !candidateJobInterviewId && !isDemo) {
       log.warn(
@@ -83,8 +83,8 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     }
     // Generate participant token
     const participantName =
-      user.user_metadata?.full_name || user.email || "User";
-    const participantIdentity = isDemo ? crypto.randomUUID() : user.id;
+      user?.user_metadata?.full_name || user?.email || "User";
+    const participantIdentity = isDemo ? crypto.randomUUID() : user?.id;
     const roomName = crypto.randomUUID();
     const participantToken = await createParticipantToken(
       {
@@ -152,7 +152,7 @@ export const GET = withAxiom(async (req: AxiomRequest) => {
     log.info("Successfully created connection details", {
       roomName,
       participantName,
-      userId: user.id,
+      userId: user?.id,
     });
 
     const headers = new Headers({
