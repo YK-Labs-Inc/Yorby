@@ -20,6 +20,10 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     if (pathname === "/") {
       return NextResponse.rewrite(new URL("/b2b-landing", request.url));
     }
+    // Allow the demo interview API endpoint to pass through
+    if (pathname === "/api/livekit/connection-details") {
+      return NextResponse.next();
+    }
     // Redirect all other paths to main app domain
     return NextResponse.redirect(`https://web.yorby.ai${pathname}${request.nextUrl.search}`);
   }
