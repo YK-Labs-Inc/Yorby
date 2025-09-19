@@ -337,8 +337,8 @@ export default function TempStempadApplicationForm({
                   <div>
                     <h3 className="text-lg font-semibold mb-1">
                       Share a link to a video of you talking to the camera about
-                      a topic. If not, do the optional assessment in the next
-                      step.
+                      a topic. If not, do the optional assessment on the next
+                      page after you submit the application.
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       e.g. TikTok, Instagram, YouTube, Google Drive, etc.
