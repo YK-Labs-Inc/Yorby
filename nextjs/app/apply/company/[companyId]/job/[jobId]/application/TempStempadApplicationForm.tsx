@@ -51,8 +51,6 @@ export default function TempStempadApplicationForm({
   companyId,
   jobId,
 }: ApplicationFormProps) {
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [localFiles, setLocalFiles] = useState<File[]>([]);
   const [email, setEmail] = useState(user?.email || "");
   const [fullName, setFullName] = useState(
     user?.user_metadata?.full_name || ""
@@ -94,53 +92,6 @@ export default function TempStempadApplicationForm({
       toast.error("Failed to copy URL to clipboard");
       logInfo("Failed to copy URL to clipboard", { error });
     }
-  };
-
-  const allSelectedCount = selectedFiles.size + localFiles.length;
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const newFiles = Array.from(files);
-
-    // Check if adding these files would exceed the limit
-    if (allSelectedCount + newFiles.length > 5) {
-      toast.error(t("applicationForm.documentSelection.maxFilesError"));
-      return;
-    }
-
-    // Add files to local state
-    setLocalFiles((prev) => [...prev, ...newFiles]);
-
-    logInfo("Files selected locally", { count: newFiles.length });
-  };
-
-  const toggleFileSelection = (fileId: string) => {
-    setSelectedFiles((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(fileId)) {
-        newSet.delete(fileId);
-      } else {
-        if (allSelectedCount >= 5) {
-          toast.error(t("applicationForm.documentSelection.maxFilesError"));
-          return prev;
-        }
-        newSet.add(fileId);
-      }
-      return newSet;
-    });
-  };
-
-  const removeLocalFile = (index: number) => {
-    setLocalFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("image")) return "🖼️";
-    if (mimeType.includes("word") || mimeType.includes("document")) return "📝";
-    return "📎";
   };
 
   return (
@@ -277,135 +228,6 @@ export default function TempStempadApplicationForm({
 
               {/* Document Selection Section */}
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">
-                    {t("applicationForm.documentSelection.title")}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("applicationForm.documentSelection.description")}
-                  </p>
-                </div>
-
-                {/* Upload new files section */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <input
-                      type="file"
-                      id="file-upload"
-                      className="hidden"
-                      multiple
-                      accept=".pdf,.txt,.png,.jpg,.jpeg"
-                      onChange={handleFileUpload}
-                    />
-                    <label htmlFor="file-upload">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="cursor-pointer"
-                        asChild
-                      >
-                        <span>
-                          <Upload className="h-4 w-4 mr-2" />
-                          {t("applicationForm.buttons.selectFiles")}
-                        </span>
-                      </Button>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Files list - both existing and local */}
-                {(userFiles.length > 0 || localFiles.length > 0) && (
-                  <div className="space-y-2">
-                    <div className="grid gap-2">
-                      {/* Previously uploaded files */}
-                      {userFiles.map((file) => (
-                        <div
-                          key={file.id}
-                          onClick={() => toggleFileSelection(file.id)}
-                          className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
-                            selectedFiles.has(file.id)
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-2xl">
-                              {getFileIcon(file.mime_type)}
-                            </span>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {file.display_name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {t("applicationForm.fileItem.uploaded")}{" "}
-                                {new Date(file.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          {selectedFiles.has(file.id) && (
-                            <CheckCircle2 className="h-5 w-5 text-blue-500" />
-                          )}
-                        </div>
-                      ))}
-
-                      {/* Locally selected files */}
-                      {localFiles.map((file, index) => (
-                        <div
-                          key={`local-${index}`}
-                          className="flex items-center justify-between p-3 border border-green-500 bg-green-50 rounded-lg"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-2xl">
-                              {getFileIcon(file.type)}
-                            </span>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-green-600">
-                                {t("applicationForm.fileItem.selected")}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeLocalFile(index)}
-                              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {userFiles.length === 0 && localFiles.length === 0 && (
-                  <p className="text-center text-sm text-gray-500 py-8">
-                    {t("applicationForm.documentSelection.noDocuments")}
-                  </p>
-                )}
-
-                {/* Selected files summary */}
-                {allSelectedCount > 0 && (
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-900">
-                      {t(
-                        "applicationForm.documentSelection.documentsSelected",
-                        {
-                          count: allSelectedCount,
-                        }
-                      )}
-                    </p>
-                  </div>
-                )}
-
                 {/* Additional Information Section */}
                 <div className="space-y-4 pt-6 border-t">
                   <div>
@@ -560,27 +382,9 @@ export default function TempStempadApplicationForm({
                 </div>
 
                 {/* Submit form */}
-                <form
-                  action={(formData: FormData) => {
-                    // Add local files to form data
-                    localFiles.forEach((file, index) => {
-                      formData.append(`localFile_${index}`, file);
-                    });
-                    formAction(formData);
-                  }}
-                >
+                <form action={formAction}>
                   <input type="hidden" name="companyId" value={companyId} />
                   <input type="hidden" name="jobId" value={jobId} />
-                  <input
-                    type="hidden"
-                    name="selectedFileIds"
-                    value={Array.from(selectedFiles).join(",")}
-                  />
-                  <input
-                    type="hidden"
-                    name="localFileCount"
-                    value={localFiles.length}
-                  />
                   <input
                     type="hidden"
                     name="additionalInfo"
