@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { Logger } from "next-axiom";
 import { ApplicationForm } from "./ApplicationForm";
 import { Tables } from "@/utils/supabase/database.types";
+import TempStempadApplicationForm from "./TempStempadApplicationForm";
 
 interface PageProps {
   params: Promise<{
@@ -130,6 +131,21 @@ export default async function ApplicationPage({ params }: PageProps) {
     } else {
       userFiles = files || [];
     }
+  }
+  if (
+    jobId === "4f2d13c1-1162-49fc-bdbc-58be4638d128" ||
+    jobId === "483d2c60-b2a0-4873-a049-66f26168c931"
+  ) {
+    return (
+      <TempStempadApplicationForm
+        company={company}
+        job={job}
+        user={user}
+        userFiles={userFiles}
+        companyId={companyId}
+        jobId={jobId}
+      />
+    );
   }
 
   return (
